@@ -1,0 +1,24 @@
+<package>
+  <description brief="raw_generic_states">
+
+     raw_generic_states
+
+  </description>
+  <author>fred</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/raw_generic_states</url>
+
+  <depend package="move_base_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="rospy"/>
+  <depend package="smach"/>
+  <depend package="smach_ros"/>
+  <depend package="youbot_arm_navigation"/>
+  <depend package="tf"/>
+  <depend package="raw_srvs"/>
+  <depend package="std_srvs"/>
+  
+</package>
+
+
