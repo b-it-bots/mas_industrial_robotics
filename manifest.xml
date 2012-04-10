@@ -18,6 +18,7 @@
   <depend package="tf"/>
   <depend package="raw_srvs"/>
   <depend package="std_srvs"/>
+  <depend package="raw_simple_pick"/>
   
 </package>
 
