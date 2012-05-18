@@ -4,12 +4,9 @@ roslib.load_manifest('raw_generic_states')
 import rospy
 import smach
 import smach_ros
-import tf
-import arm_configuration
 import raw_srvs.srv
 import std_srvs.srv
 
-tf_listener = 0
 
 class enable_object_finder(smach.State):
 
@@ -44,13 +41,10 @@ class detect_object(smach.State):
         self.object_finder_srv = rospy.ServiceProxy('/raw_object_finder/get_objects', raw_srvs.srv.GetObjects)
         self.object_finder_srv_stop = rospy.ServiceProxy('/raw_object_finder/stop', std_srvs.srv.Empty)
 
-        global tf_listener
-        self.move_arm = arm_configuration.ArmConfiguration(tf_listener)
-
     def execute(self, userdata):     
         #get object pose list
         rospy.wait_for_service('/raw_object_finder/get_objects', 30)
-	rospy.sleep(3)
+        rospy.sleep(3)
         for i in range(20): 
             print "find object try: ", i
             resp = self.object_finder_srv()

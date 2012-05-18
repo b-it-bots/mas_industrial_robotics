@@ -7,48 +7,21 @@ import smach_ros
 import commands
 import os
 
-from arm_configuration import *
-
-tf_listener = 0
+from simple_script_server import *
+sss = simple_script_server()
 
 class init_robot(smach.State):
 
     def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded', 'failed'])
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
         
-        global tf_listener
-        self.move_arm = ArmConfiguration(tf_listener)
-
     def execute(self, userdata):
         # init arm
-        self.move_arm.moveToConfiguration("initposition")
+        sss.move("arm", "initposition")
         
         #init gripper
-        self.move_arm.moveGripperOpen()
+        sss.move("gripper", "open")
         
         rospy.loginfo("robot initialized")
-        
-        return 'succeeded'
-    
-    
-class announce_failure(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded'])
-
-    def execute(self, userdata):
-        
-        wav_path = commands.getoutput("rospack find raw_generic_states")
-        
-        filename = wav_path + "/files/beep-3.wav"
-        print 'file: ', filename
-        
-        while True:
-            os.system("aplay -q " + filename)
-            rospy.sleep(1)
         
         return 'succeeded'

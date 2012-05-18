@@ -4,26 +4,19 @@ roslib.load_manifest('raw_generic_states')
 import rospy
 import smach
 import smach_ros
-import tf
-import arm_configuration
 import math
 
-tf_listener = 0
+from simple_script_server import *
+sss = simple_script_server()
 
 class grasp_random_object(smach.State):
 
     def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded', 'failed'],
-            input_keys=['object_list'])
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['object_list'])
         
-        global tf_listener
-        self.move_arm = arm_configuration.ArmConfiguration(tf_listener)
-
     def execute(self, userdata):
-        self.move_arm.moveGripperOpen()
-        self.move_arm.moveToConfiguration("zeroposition")
+        ss.move("gripper", "open")
+        ss.move("arm", "zeroposition")
         
         for object in userdata.object_list:         
             # ToDo: need to be adjusted to correct stuff           
@@ -44,14 +37,14 @@ class grasp_random_object(smach.State):
 	    #object.y = object.y - 0.02
 
             #target_pose = self.move_arm._createPose(object.x - 0.06, object.y - 0.02, object.z + 0.02, 0, ((math.pi/2) + (math.pi/4)), 0)
-            target_pose = self.move_arm._createPose(object.x - 0.06, object.y, object.z + 0.06, 0, ((math.pi/2) + (math.pi/4)), 0)
+            #target_pose = self.move_arm._createPose(object.x - 0.06, object.y, object.z + 0.06, 0, ((math.pi/2) + (math.pi/4)), 0)
             
-            ik_result = self.move_arm.moveToPose(target_pose)
+            ik_result = sss.move("arm", [object.x - 0.06, object.y, object.z + 0.06, 0, ((math.pi/2) + (math.pi/4)), 0])
             
             if ik_result == True:
-                self.move_arm.moveGripperClose()
+                sss.move("gripper", "close")
                 rospy.sleep(4.0)
-                self.move_arm.moveToConfiguration("zeroposition")        
+                sss.move("arm", "zeroposition")        
                 return 'succeeded'    
             else:
                 print 'could not find IK for current object'
@@ -67,35 +60,28 @@ class grasp_random_object(smach.State):
 class place_obj_on_rear_platform(smach.State):
 
     def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded', 'failed'],
-            input_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'],
-            output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'])
-        
-        global tf_listener
-        self.move_arm = arm_configuration.ArmConfiguration(tf_listener)
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'], 
+								output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'])
 
     def execute(self, userdata):   
         
-        self.move_arm.moveToConfiguration("zeroposition")
-        self.move_arm.moveToConfiguration("pregrasp_back_init")
-        self.move_arm.moveToConfiguration("pregrasp_back")
+        sss.move("arm", "zeroposition")
+        sss.move("arm", "pregrasp_back_init")
+        sss.move("arm", "pregrasp_back")
         
-	if(userdata.rear_platform_free_poses > 0):
+        if(userdata.rear_platform_free_poses > 0):
             pltf_pose = userdata.rear_platform_free_poses.pop()
-	else:
-	    pltf_pose = [0.033 + 0.024 - 0.32, 0.0, 0.12, 0, -math.pi + 0.2, 0];
+        else:
+            pltf_pose = [0.033 + 0.024 - 0.32, 0.0, 0.12, 0, -math.pi + 0.2, 0];
         
-        target_pose = self.move_arm._createPose(pltf_pose[0], pltf_pose[1], pltf_pose[2], pltf_pose[3], pltf_pose[4], pltf_pose[5], "arm_link_0")
-        
-        self.move_arm.moveToPose(target_pose)
-        self.move_arm.moveGripperOpen()
+       
+        sss.move("arm", [pltf_pose[0], pltf_pose[1], pltf_pose[2], pltf_pose[3], pltf_pose[4], pltf_pose[5]])
+        sss.move("gripper", "open")
         rospy.sleep(2.0)
 
         userdata.rear_platform_occupied_poses.append(pltf_pose)
 
-	self.move_arm.moveToConfiguration("pregrasp_back")
+        sss.move("arm", "pregrasp_back")
         
         return 'succeeded'
     
@@ -103,19 +89,13 @@ class place_obj_on_rear_platform(smach.State):
 class move_arm_out_of_view(smach.State):
 
     def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded', 'failed'])
-        
-        global tf_listener
-        self.move_arm = arm_configuration.ArmConfiguration(tf_listener)
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
 
     def execute(self, userdata):   
-        self.move_arm.moveToConfiguration("zeroposition")  
-        self.move_arm.moveToConfiguration("pregrasp_back_init")
-        self.move_arm.moveToConfiguration("pregrasp_back")
-        #self.move_arm.moveToConfiguration("kinect_left_init") 
-        # self.move_arm.moveToConfiguration("kinect_left") 
+        sss.move("arm", "zeroposition")  
+        sss.move("arm", "pregrasp_back_init")
+        sss.move("arm", "pregrasp_back")
+
            
         return 'succeeded'
     
