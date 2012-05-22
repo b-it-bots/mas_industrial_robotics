@@ -49,11 +49,11 @@ class detect_object(smach.State):
             print "find object try: ", i
             resp = self.object_finder_srv()
               
-            if (len(resp.pointCloudCentroids) <= 0):
+            if (len(resp.objects) <= 0):
                 rospy.loginfo('found no objects')
                 rospy.sleep(1);
             else:    
-                rospy.loginfo('found {0} objects'.format(len(resp.pointCloudCentroids)))
+                rospy.loginfo('found {0} objects'.format(len(resp.objects)))
                 break
             
         #stop perception component
@@ -65,11 +65,11 @@ class detect_object(smach.State):
             rospy.logerr("calling <</raw_perception/object_segmentation/stop>> service not successfull, error: %s", error_message)
             return 'failed'       
     
-        if (len(resp.pointCloudCentroids) <= 0):
+        if (len(resp.objects) <= 0):
             rospy.logerr("no graspable objects found");
             userdata.object_list = []            
             return 'failed'
         
         else:
-            userdata.object_list = resp.pointCloudCentroids
+            userdata.object_list = resp.objects
             return 'succeeded'
