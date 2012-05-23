@@ -24,9 +24,7 @@ class grasp_random_object(smach.State):
             if object.pose.pose.position.z <= 0.05 and object.pose.pose.position.z >= 0.30:
                 continue
                         
-            handle_arm = sss.move("arm", [object.pose.pose.position.x - 0.05, object.pose.pose.position.y, object.pose.pose.position.z + 0.08, 0, ((math.pi/2) + (math.pi/4)), 0, "/base_link"])
-
-	    rospy.loginfo("arm status: %d", handle_arm.get_state())                   
+            handle_arm = sss.move("arm", [object.pose.pose.position.x - 0.02, object.pose.pose.position.y - 0.01, object.pose.pose.position.z + 0.07, 0, ((math.pi/2) + (math.pi/4)), 0, "/base_link"])
    
             if handle_arm.get_state() == 3:
                 sss.move("gripper", "close")
