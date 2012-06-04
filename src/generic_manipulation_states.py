@@ -17,17 +17,17 @@ class grasp_random_object(smach.State):
         
     def execute(self, userdata):
         sss.move("gripper", "open", blocking=False)
-        sss.move("arm", "zeroposition")
+       # sss.move("arm", "zeroposition")
         
         for object in userdata.object_list:         
             # ToDo: need to be adjusted to correct stuff           
             if object.pose.pose.position.z <= 0.05 and object.pose.pose.position.z >= 0.30:
                 continue
                         
-            handle_arm = sss.move("arm", [object.pose.pose.position.x - 0.02, object.pose.pose.position.y - 0.01, object.pose.pose.position.z + 0.07, 0, ((math.pi/2) + (math.pi/4)), 0, "/base_link"])
+            handle_arm = sss.move("arm", [object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, 0, ((math.pi/2) + (math.pi/4)), 0, "/base_link"])
    
             if handle_arm.get_state() == 3:
-                sss.move("gripper", "close")
+                sss.move("gripper", "close", blocking=False)
                 rospy.sleep(2.0)
                 sss.move("arm", "zeroposition")        
                 return 'succeeded'    
@@ -49,7 +49,7 @@ class place_obj_on_rear_platform(smach.State):
         sss.move("arm", "pregrasp_back_init")
         sss.move("arm", "pregrasp_back")
         
-        if(userdata.rear_platform_free_poses > 0):
+        if(len(userdata.rear_platform_free_poses) > 0):
             pltf_pose = userdata.rear_platform_free_poses.pop()
         else:
             pltf_pose = [0.033 + 0.024 - 0.32, 0.0, 0.12, 0, -math.pi + 0.2, 0, "/arm_link_0"];
@@ -57,7 +57,6 @@ class place_obj_on_rear_platform(smach.State):
        
         sss.move("arm", [pltf_pose[0], pltf_pose[1], pltf_pose[2], pltf_pose[3], pltf_pose[4], pltf_pose[5], pltf_pose[6]])
         sss.move("gripper", "open")
-        rospy.sleep(2.0)
 
         userdata.rear_platform_occupied_poses.append(pltf_pose)
 
@@ -72,9 +71,10 @@ class move_arm_out_of_view(smach.State):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
 
     def execute(self, userdata):   
-        sss.move("arm", "zeroposition")  
-        sss.move("arm", "pregrasp_back_init")
-        sss.move("arm", "pregrasp_back")
+        sss.move("arm", "zeroposition")
+        sss.move("arm", "flatposition")
+        #sss.move("arm", "pregrasp_back_init")
+        #sss.move("arm", "pregrasp_back")
 
            
         return 'succeeded'
