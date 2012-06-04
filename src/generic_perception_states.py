@@ -44,14 +44,14 @@ class detect_object(smach.State):
     def execute(self, userdata):     
         #get object pose list
         rospy.wait_for_service('/raw_perception/object_segmentation/get_segmented_objects', 30)
-        rospy.sleep(3)
-        for i in range(20): 
+
+        for i in range(40): 
             print "find object try: ", i
             resp = self.object_finder_srv()
               
             if (len(resp.objects) <= 0):
                 rospy.loginfo('found no objects')
-                rospy.sleep(1);
+                rospy.sleep(0.5);
             else:    
                 rospy.loginfo('found {0} objects'.format(len(resp.objects)))
                 break

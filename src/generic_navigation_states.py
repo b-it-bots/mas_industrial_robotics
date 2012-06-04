@@ -25,7 +25,7 @@ class approach_pose(smach.State):
         handle_base = sss.move("base", self.pose2)
 
         while True:                
-            rospy.sleep(1)
+            rospy.sleep(0.1)
             base_state = handle_base.get_state()
             if (base_state == actionlib.simple_action_client.GoalStatus.SUCCEEDED):
                 return "succeeded"
