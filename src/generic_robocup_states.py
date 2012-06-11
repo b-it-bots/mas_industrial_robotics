@@ -22,12 +22,12 @@ class get_basic_navigation_task(smach.State):
         smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
         
     def execute(self, userdata):
-        ip = "127.0.1.1"
+        ip = "10.20.121.62"
         port = "11111"
         team_name = "b-it-bots"
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'<<D1,N,6>,<S2,E,3>>' #
+        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'<(D1,N,6>,<S2,E,3)>' #
         rospy.loginfo("Task received: " + nav_task)
         
         # check if description has beginning '<' and ending '>
@@ -39,7 +39,7 @@ class get_basic_navigation_task(smach.State):
         nav_task = nav_task[1:len(nav_task)-1]
             
         #find single tasks
-        task_list = re.findall('<(?P<name>.*?)>', nav_task)
+        task_list = re.findall('\((?P<name>.*?)\)', nav_task)
         
         #put them into a struct like structure
         for item in task_list:
@@ -49,7 +49,6 @@ class get_basic_navigation_task(smach.State):
                 rospy.loginfo("task spec not in correct format")
                 return 'wront_task_format' 
             
-            print task_items
             task_struct = Bunch(location=task_items[0], orientation=task_items[1], duration=task_items[2])
             userdata.task_list.append(task_struct)
         
