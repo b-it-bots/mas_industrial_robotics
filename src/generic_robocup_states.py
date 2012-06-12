@@ -27,8 +27,17 @@ class get_basic_navigation_task(smach.State):
         team_name = "b-it-bots"
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'<(D1,N,6>,<S2,E,3)>' #
+        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
         rospy.loginfo("Task received: " + nav_task)
+        
+        # check if Task is a BNT task      
+        if(nav_task[0:3] != "BNT"):
+           rospy.logerr("Excepted <<BNT>> task, but received <<" + nav_task[0:2] + ">> received")
+           return 'wront_task_format' 
+
+        # remove leading start description        
+        nav_task = nav_task[3:len(nav_task)]
+        
         
         # check if description has beginning '<' and ending '>
         if(nav_task[0] != "<" or nav_task[(len(nav_task)-1)] != ">"):
@@ -37,7 +46,7 @@ class get_basic_navigation_task(smach.State):
         
         # remove beginning '<' and ending '>'
         nav_task = nav_task[1:len(nav_task)-1]
-            
+        
         #find single tasks
         task_list = re.findall('\((?P<name>.*?)\)', nav_task)
         
