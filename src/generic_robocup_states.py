@@ -12,6 +12,10 @@ import smach_ros
 import referee_box_communication
 import re
 
+ip = "127.0.1.1"
+port = "11111"
+team_name = "b-it-bots"
+
 class Bunch:
     def __init__(self, **kwds):
          self.__dict__.update(kwds)
@@ -22,9 +26,6 @@ class get_basic_navigation_task(smach.State):
         smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
         
     def execute(self, userdata):
-        ip = "10.20.121.62"
-        port = "11111"
-        team_name = "b-it-bots"
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
         nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
@@ -62,6 +63,55 @@ class get_basic_navigation_task(smach.State):
             userdata.task_list.append(task_struct)
         
         return 'task_received'  
+    
+    
+class get_basic_manipulation_task(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        
+    def execute(self, userdata):
+
+        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
+        man_task = "BMT<D1,D2,S3,zigzag(nut),O1>" #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
+        rospy.loginfo("Task received: " + man_task)
+        
+        # check if Task is a BNT task      
+        if(man_task[0:3] != "BMT"):
+           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:2] + ">> received")
+           return 'wront_task_format' 
+
+        # remove leading start description        
+        man_task = man_task[3:len(man_task)]
+        
+        # check if description has beginning '<' and ending '>
+        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
+            rospy.loginfo("task spec not in correct format")
+            return 'wront_task_format' 
+        
+        
+        # remove beginning '<' and ending '>'
+        man_task = man_task[1:len(man_task)-1]
+        
+        print man_task
+        
+        task_list = man_task.split(',')
+        
+        print task_list
+
+        #put them into a struct like structure
+        for item in task_list:
+            task_items = item.split(',')
+            
+            if len(task_items) != 3:
+                rospy.loginfo("task spec not in correct format")
+                return 'wront_task_format' 
+            
+            task_struct = Bunch(location=task_items[0], orientation=task_items[1], duration=task_items[2])
+            userdata.task_list.append(task_struct)
+        
+        return 'task_received'  
+
     
 class select_pose_to_approach(smach.State):
 
