@@ -73,7 +73,7 @@ class get_basic_manipulation_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        man_task = "BMT<D1,D2,S3,zigzag(nut),O1>" #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
+        man_task = "BMT<D1,D2,S3,zigzag(nut,screw,bolt),O1>" #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
         rospy.loginfo("Task received: " + man_task)
         
         # check if Task is a BNT task      
@@ -93,22 +93,43 @@ class get_basic_manipulation_task(smach.State):
         # remove beginning '<' and ending '>'
         man_task = man_task[1:len(man_task)-1]
         
-        print man_task
+        #print man_task
         
         task_list = man_task.split(',')
         
-        print task_list
+        #print task_list
 
-        #put them into a struct like structure
-        for item in task_list:
-            task_items = item.split(',')
-            
-            if len(task_items) != 3:
-                rospy.loginfo("task spec not in correct format")
-                return 'wront_task_format' 
-            
-            task_struct = Bunch(location=task_items[0], orientation=task_items[1], duration=task_items[2])
-            userdata.task_list.append(task_struct)
+        init_pose = task_list[0]
+        src_pose = task_list[1]
+        dest_pose = task_list[2]
+        
+        subtask_list = task_list[3].split('(')
+        obj_cfg = subtask_list[0]
+        
+        obj_names = []
+        obj_names.append(subtask_list[1])
+        
+        for i in range(4, (len(task_list)-1)):
+            if i == (len(task_list)-2):
+                task_list[i] = task_list[i][0:(len(task_list)-3)]
+                 
+            obj_names.append(task_list[i])
+               
+        
+        fnl_pose = task_list[len(task_list)-1]
+        
+        '''
+        print init_pose
+        print src_pose
+        print dest_pose
+        print obj_cfg
+        print obj_names
+        print fnl_pose
+        '''
+        
+        task_struct = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
+                            object_names=obj_names, final_pose=fnl_pose)
+        userdata.task_list.append(task_struct)
         
         return 'task_received'  
 
