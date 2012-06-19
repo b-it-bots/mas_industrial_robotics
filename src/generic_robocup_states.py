@@ -28,7 +28,7 @@ class get_basic_navigation_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
+        nav_task = "BNT<(D1,N,2),(D2,E,3),(T5,S,1),(S2,W,2),(T10,E,1),(S4,N,5)>" '#eferee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
         rospy.loginfo("Task received: " + nav_task)
         
         # check if Task is a BNT task      
