@@ -73,3 +73,48 @@ class detect_object(smach.State):
         else:
             userdata.object_list = resp.objects
             return 'succeeded'
+
+
+class recognize_objects(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=['succeeded', 'failed'],
+            output_keys=['recognized_objects'])
+        
+        self.object_finder_srv = rospy.ServiceProxy('/raw_perception/object_segmentation/get_segmented_objects', raw_srvs.srv.GetObjects)
+        self.object_finder_srv_stop = rospy.ServiceProxy('/raw_perception/object_segmentation/stop', std_srvs.srv.Empty)
+
+    def execute(self, userdata):     
+        #get object pose list
+        rospy.wait_for_service('/raw_perception/object_segmentation/get_segmented_objects', 30)
+
+        for i in range(40): 
+            print "find object try: ", i
+            resp = self.object_finder_srv()
+              
+            if (len(resp.objects) <= 0):
+                rospy.loginfo('found no objects')
+                rospy.sleep(0.5);
+            else:    
+                rospy.loginfo('found {0} objects'.format(len(resp.objects)))
+                break
+            
+        #stop perception component
+        rospy.wait_for_service('/raw_perception/object_segmentation/stop', 5)
+        try:
+            resp_stop = self.object_finder_srv_stop()
+        except rospy.ServiceException, e:
+            error_message = "%s"%e
+            rospy.logerr("calling <</raw_perception/object_segmentation/stop>> service not successfull, error: %s", error_message)
+            return 'failed'       
+    
+        if (len(resp.objects) <= 0):
+            rospy.logerr("no graspable objects found");
+            userdata.recognized_objects = []            
+            return 'failed'
+        
+        else:
+            userdata.recognized_objects = resp.objects
+            return 'succeeded'
