@@ -99,14 +99,13 @@ class grasp_obj_from_pltf(smach.State):
 class move_arm_out_of_view(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+        smach.State.__init__(self, outcomes=['succeeded'])
 
     def execute(self, userdata):   
         sss.move("arm", "zeroposition")
-        sss.move("arm", "flatposition")
-        #sss.move("arm", "pregrasp_back_init")
-        #sss.move("arm", "pregrasp_back")
-
+        sss.move("arm", "pregrasp_back_init")
+        sss.move("arm", "pregrasp_back")
+        sss.move("arm", "arm_out_of_view")
            
         return 'succeeded'
     
