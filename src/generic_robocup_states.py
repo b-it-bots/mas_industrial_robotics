@@ -12,7 +12,7 @@ import smach_ros
 import referee_box_communication
 import re
 
-ip = "127.0.1.1"
+ip = "192.168.88.145"
 port = "11111"
 team_name = "b-it-bots"
 
@@ -68,7 +68,7 @@ class get_basic_navigation_task(smach.State):
 class get_basic_manipulation_task(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
         
     def execute(self, userdata):
 
@@ -127,12 +127,46 @@ class get_basic_manipulation_task(smach.State):
         print fnl_pose
         '''
         
-        task_struct = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
+        userdata.task_spec = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
                             object_names=obj_names, final_pose=fnl_pose)
-        userdata.task_list.append(task_struct)
         
         return 'task_received'  
+    
+    
+class wait_for_desired_duration(smach.State):
 
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded'], 
+                                    input_keys=['task_list', 'current_task_index'])
+        
+    def execute(self, userdata):
+        
+        sleep_duration = userdata.task_list[userdata.current_task_index].duration
+        rospy.loginfo('wait desired duration of ' + sleep_duration + " seconds")
+        rospy.sleep(int(sleep_duration))
+        rospy.loginfo('wait done')
+        
+        return 'succeeded'
+    
+    
+class increment_task_index(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded', 'no_more_tasks'], 
+                                    input_keys=['task_list', 'current_task_index'],
+                                    output_keys=['current_task_index'])
+        
+    def execute(self, userdata):
+        
+        # inc index
+        userdata.current_task_index = userdata.current_task_index + 1
+        
+        # check if index is larger than items in task list
+        if userdata.current_task_index >= len(userdata.task_list):
+            rospy.loginfo("no more tasks in task list")
+            return 'no_more_tasks'
+        
+        return 'succeeded'
     
 class select_pose_to_approach(smach.State):
 
@@ -170,41 +204,4 @@ class select_pose_to_approach(smach.State):
         
         rospy.loginfo('selected pose: ' + userdata.base_pose_to_approach + " with orientation: " + userdata.task_list[userdata.current_task_index].orientation)
         return 'pose_selected'
-    
-class wait_for_desired_duration(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'], 
-                                    input_keys=['task_list', 'current_task_index'])
-        
-    def execute(self, userdata):
-        
-        sleep_duration = userdata.task_list[userdata.current_task_index].duration
-        rospy.loginfo('wait desired duration of ' + sleep_duration + " seconds")
-        rospy.sleep(int(sleep_duration))
-        rospy.loginfo('wait done')
-        
-        return 'succeeded'
-    
-    
-class increment_task_index(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'no_more_tasks'], 
-                                    input_keys=['task_list', 'current_task_index'],
-                                    output_keys=['current_task_index'])
-        
-    def execute(self, userdata):
-        
-        # inc index
-        userdata.current_task_index = userdata.current_task_index + 1
-        
-        # check if index is larger than items in task list
-        if userdata.current_task_index >= len(userdata.task_list):
-            rospy.loginfo("no more tasks in task list")
-            return 'no_more_tasks'
-        
-        return 'succeeded'
-    
-    
-    
+     
