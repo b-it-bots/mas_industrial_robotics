@@ -66,4 +66,17 @@ class adjust_pose_wrt_platform(smach.State):
             return 'failed'
         
                 
-    
+class adjust_pose_wrt_recognized_obj(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], 
+                             input_keys=['object_to_grasp'])
+
+    def execute(self, userdata):
+        
+        print userdata.object_to_grasp
+        
+        return 'succeeded'
+        
+                
+        
