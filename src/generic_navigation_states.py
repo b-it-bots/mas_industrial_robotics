@@ -48,11 +48,14 @@ class adjust_pose_wrt_platform(smach.State):
             
         rospy.loginfo("Waiting for action server <</scan_front_orientation>> to start ...");
         ac_base_adj.wait_for_server()
+        rospy.loginfo("action server <</scan_front_orientation>> is ready ...");
         action_goal = raw_base_placement_to_platform_in_front.msg.OrientToBaseActionGoal()
             
         action_goal.goal.distance = 0.3;
+        rospy.loginfo("send action");
         ac_base_adj.send_goal(action_goal.goal);
-    
+        
+        rospy.loginfo("wait for base to adjust");
         finished_before_timeout = ac_base_adj.wait_for_result()
     
         if finished_before_timeout:
