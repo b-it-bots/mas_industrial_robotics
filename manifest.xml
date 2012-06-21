@@ -21,6 +21,7 @@
   <depend package="raw_script_server"/>  
   <depend package="raw_base_placement_to_platform_in_front"/>
   <depend package="actionlib"/>  
+  <depend package="raw_arm_cmds"/> 
 
 </package>
 
