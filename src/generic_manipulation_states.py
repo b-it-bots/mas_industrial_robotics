@@ -77,9 +77,9 @@ class grasp_obj_with_visual_servering(smach.State):
         sss.move("arm","grasp_laying_mex")
 
     
-        print "do visual serv"
-        resp = self.visual_serv_srv()
-        print "done"
+        #print "do visual serv"
+        #resp = self.visual_serv_srv()
+        #print "done"
 
         sss.move("gripper", "close")
         rospy.sleep(3)
@@ -92,7 +92,7 @@ class grasp_obj_with_visual_servering(smach.State):
 class place_obj_on_rear_platform(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'], 
+        smach.State.__init__(self, outcomes=['succeeded', 'failed', 'no_more_free_poses'], input_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'], 
 								output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'])
 
     def execute(self, userdata):   
@@ -101,13 +101,13 @@ class place_obj_on_rear_platform(smach.State):
         sss.move("arm", "platform_intermediate")
 
         
-        if(len(userdata.rear_platform_free_poses) > 0):
-            pltf_pose = userdata.rear_platform_free_poses.pop()
-            sss.move("arm", pltf_pose)
-        else:
-            pltf_pose = [0.033 + 0.024 - 0.32, 0.0, 0.12, 0, -math.pi + 0.2, 0, "/arm_link_0"];
-            sss.move("arm", [pltf_pose[0], pltf_pose[1], pltf_pose[2], pltf_pose[3], pltf_pose[4], pltf_pose[5], pltf_pose[6]])
-       
+        if(len(userdata.rear_platform_free_poses) == 0):
+            rospy.logerr("NO more free poses on platform")
+            return 'no_more_free_poses'
+            
+        pltf_pose = userdata.rear_platform_free_poses.pop()
+        sss.move("arm", pltf_pose)
+        
         
         sss.move("gripper", "open")
         rospy.sleep(2)
