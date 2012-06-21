@@ -53,11 +53,16 @@ class grasp_obj_with_visual_servering(smach.State):
     
         print "wait for service: /raw_blob_detection/start "
         rospy.wait_for_service('/raw_blob_detection/start', 30)
-    
-        print "do visual serv"
-        resp = self.visual_serv_srv()
-        print "done"
-
+        
+        visual_done = False
+        while not visual_done:
+            try:
+                print "do visual serv"
+                resp = self.visual_serv_srv()
+                print "done"
+                visual_done = True
+            except:
+                visual_done = False
 
         '''
         print userdata.object_to_grasp
