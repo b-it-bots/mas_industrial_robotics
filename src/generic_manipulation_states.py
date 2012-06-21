@@ -159,8 +159,39 @@ class grasp_obj_from_pltf(smach.State):
 
     def execute(self, userdata):   
         
-        print userdata.rear_platform_occupied_poses.pop()
+        pltf_obj_pose = userdata.rear_platform_occupied_poses.pop()
         
+        sss.move("arm", pltf_obj_pose)
+        
+        sss.move("gripper", "close")
+        rospy.sleep(3)
+        
+        sss.move("arm", "initposition")
            
         return 'succeeded'
 
+
+class place_object_in_configuration(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+            outcomes=['succeeded', 'no_more_cfg_poses'],
+            input_keys=['obj_goal_configuration_poses'],
+            output_keys=['obj_goal_configuration_poses'])
+        
+    def execute(self, userdata):
+        
+        if len(userdata.obj_goal_configuration_poses.pop() == 0)
+            rospy.logerr("no more configuration poses")
+            return 'no_more_cfg_poses'
+        
+        cfg_goal_pose = userdata.obj_goal_configuration_poses.pop()
+        
+        sss.move("arm", cfg_goal_pose)
+        
+        sss.move("gripper","open")
+        rospy.sleep(2)
+                
+        return 'succeeded'
+    
+    
+    
