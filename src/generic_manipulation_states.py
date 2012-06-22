@@ -111,6 +111,9 @@ class place_obj_on_rear_platform(smach.State):
             return 'no_more_free_poses'
             
         pltf_pose = userdata.rear_platform_free_poses.pop()
+        # untested
+        sss.move("arm", pltf_pose+"_pre")
+        #
         sss.move("arm", pltf_pose)
         
         
@@ -118,8 +121,11 @@ class place_obj_on_rear_platform(smach.State):
         rospy.sleep(2)
 
         userdata.rear_platform_occupied_poses.append(pltf_pose)
-
-        sss.move("arm", "pregrasp_back")
+        #untested
+        sss.move("arm", pltf_pose+"_pre")
+        sss.move("arm", "platform_intermediate")
+        # this state doesn't exist anymore? how was it working?
+        #sss.move("arm", "pregrasp_back")
         
         return 'succeeded'
   
@@ -152,11 +158,17 @@ class grasp_obj_from_pltf(smach.State):
         pltf_obj_pose = userdata.rear_platform_occupied_poses.pop()
         
         sss.move("arm", "platform_intermediate")
+        # untested
+        sss.move("arm", pltf_obj_pose+"_pre")
+        #
         sss.move("arm", pltf_obj_pose)
         
         sss.move("gripper", "close")
         rospy.sleep(3)
         
+        # untested
+        sss.move("arm", pltf_obj_pose+"_pre")
+        #
         sss.move("arm", "platform_intermediate")
         sss.move("arm", "zeroposition")
            
