@@ -6,6 +6,7 @@ import smach
 import smach_ros
 import actionlib
 import raw_base_placement_to_platform_in_front.msg
+import raw_srvs.srv
 
 from simple_script_server import *
 sss = simple_script_server()
