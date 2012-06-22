@@ -73,7 +73,7 @@ class get_basic_manipulation_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        man_task = "BMT<D1,D2,S3,zigzag(nut,screw,bolt),O1>" #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
+        man_task = "BMT<S2,S2,S3,zigzag(nut,screw,bolt),S1>" #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
         rospy.loginfo("Task received: " + man_task)
         
         # check if Task is a BNT task      
