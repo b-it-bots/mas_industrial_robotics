@@ -131,8 +131,6 @@ class move_arm_out_of_view(smach.State):
 
     def execute(self, userdata):   
         sss.move("arm", "zeroposition")
-        sss.move("arm", "pregrasp_back_init")
-        sss.move("arm", "pregrasp_back")
         sss.move("arm", "arm_out_of_view")
            
         return 'succeeded'
