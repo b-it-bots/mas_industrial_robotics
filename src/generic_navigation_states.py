@@ -52,7 +52,7 @@ class adjust_pose_wrt_platform(smach.State):
         rospy.loginfo("action server <</scan_front_orientation>> is ready ...");
         action_goal = raw_base_placement_to_platform_in_front.msg.OrientToBaseActionGoal()
             
-        action_goal.goal.distance = 0.3;
+        action_goal.goal.distance = 0.02;
         rospy.loginfo("send action");
         ac_base_adj.send_goal(action_goal.goal);
         
@@ -71,31 +71,36 @@ class adjust_pose_wrt_recognized_obj(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'], 
-                             input_keys=['object_to_grasp'], 
+                             input_keys=['object_to_grasp','object_base_pose'], 
                              output_keys=['object_base_pose'])
         
         self.base_placement_srv = rospy.ServiceProxy('/raw_base_placement/calculateOptimalBasePose', raw_srvs.srv.GetPoseStamped) 
     
     def execute(self, userdata):
         
-        rospy.loginfo("wait for service: /raw_base_placement/calculateOptimalBasePose")   
-        rospy.wait_for_service('/raw_base_placement/calculateOptimalBasePose', 30)
+        #rospy.loginfo("wait for service: /raw_base_placement/calculateOptimalBasePose")   
+        #rospy.wait_for_service('/raw_base_placement/calculateOptimalBasePose', 30)
 
     
         print "OBJ POSE: ", userdata.object_to_grasp
         # call base placement service
 
-        try:
-            userdata.object_base_pose = self.base_placement_srv(userdata.object_to_grasp.pose)
-        except:
-            rospy.logerr("could not execute service <</raw_base_placement/calculateOptimalBasePose>>")
-            return 'failed'
+        #try:
+        #    userdata.object_base_pose = self.base_placement_srv(userdata.object_to_grasp)
+        #except:
+        #    rospy.logerr("could not execute service <</raw_base_placement/calculateOptimalBasePose>>")
+        #    return 'failed'
 
-        print "BASE_POSE", userdata.object_base_pose
+        #print "BASE_POSE", userdata.object_base_pose
 
-        x = userdata.object_base_pose.pose.pose.position.x
-        y = userdata.object_base_pose.pose.pose.position.y
-        (roll, pitch, yaw) = tf.transformations.euler_from_quaternions([userdata.object_base_pose.pose.pose.quaternions.x, userdata.object_base_pose.pose.pose.quaternions.y, userdata.object_base_pose.pose.pose.quaternions.z, userdata.object_base_pose.pose.pose.quaternions.w])        
+        #x = userdata.object_base_pose.base_pose.pose.position.x
+        #y = userdata.object_base_pose.base_pose.pose.position.y
+        #(roll, pitch, yaw) = tf.transformations.euler_from_quaternion([userdata.object_base_pose.base_pose.pose.orientation.x, userdata.object_base_pose.base_pose.pose.orientation.y, userdata.object_base_pose.base_pose.pose.orientation.z, userdata.object_base_pose.base_pose.pose.orientation.w])        
+	
+
+	x = (float(userdata.object_to_grasp.pose.position.x) - 0.45)
+	y = float(userdata.object_to_grasp.pose.position.y) 
+	yaw = float(0.0)
 
         sss.move("base", [x, y, yaw])
         
