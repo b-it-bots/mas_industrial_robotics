@@ -52,7 +52,7 @@ class adjust_pose_wrt_platform(smach.State):
         rospy.loginfo("action server <</scan_front_orientation>> is ready ...");
         action_goal = raw_base_placement_to_platform_in_front.msg.OrientToBaseActionGoal()
             
-        action_goal.goal.distance = 0.02;
+        action_goal.goal.distance = 0.04;
         rospy.loginfo("send action");
         ac_base_adj.send_goal(action_goal.goal);
         
@@ -65,6 +65,8 @@ class adjust_pose_wrt_platform(smach.State):
         else:
             rospy.logerr("Action did not finish before the time out!")
             return 'failed'
+
+
         
                 
 class adjust_pose_wrt_recognized_obj(smach.State):
@@ -74,8 +76,8 @@ class adjust_pose_wrt_recognized_obj(smach.State):
                              input_keys=['object_to_grasp','object_base_pose'], 
                              output_keys=['object_base_pose'])
         
-        self.base_placement_srv = rospy.ServiceProxy('/raw_base_placement/calculateOptimalBasePose', raw_srvs.srv.GetPoseStamped) 
-    
+        #self.base_placement_srv = rospy.ServiceProxy('/raw_base_placement/calculateOptimalBasePose', raw_srvs.srv.GetPoseStamped) 
+        self.shiftbase_srv = rospy.ServiceProxy('/raw_motion_controller/shiftbase', raw_srvs.srv.SetPoseStamped) 
     def execute(self, userdata):
         
         #rospy.loginfo("wait for service: /raw_base_placement/calculateOptimalBasePose")   
@@ -83,6 +85,29 @@ class adjust_pose_wrt_recognized_obj(smach.State):
 
     
         print "OBJ POSE: ", userdata.object_to_grasp
+        
+
+        
+        ##moveoptimalbase_srv = rospy.ServiceProxy('/raw_base_placement/moveoptimalbase', raw_srvs.srv.SetPoseStamped) 
+
+        print "wait for service: /raw_motion_controller/shiftbase"   
+        rospy.wait_for_service('/raw_motion_controller/shiftbase', 30)
+
+        goalpose = geometry_msgs.msg.PoseStamped()
+        goalpose.pose.position.x = 0.0
+        goalpose.pose.position.y = userdata.object_base_pose.base_pose.pose.position.y
+        goalpose.pose.position.z = 0.0
+        quat = tf.transformations.quaternion_from_euler(0,0,0)
+        goalpose.pose.orientation.x = quat[0]
+        goalpose.pose.orientation.y = quat[1]
+        goalpose.pose.orientation.z = quat[2]
+        goalpose.pose.orientation.w = quat[3]
+        
+
+        # call base placement service
+        self.shiftbase_srv(goalpose)  
+
+
         # call base placement service
 
         #try:
@@ -97,15 +122,43 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         #y = userdata.object_base_pose.base_pose.pose.position.y
         #(roll, pitch, yaw) = tf.transformations.euler_from_quaternion([userdata.object_base_pose.base_pose.pose.orientation.x, userdata.object_base_pose.base_pose.pose.orientation.y, userdata.object_base_pose.base_pose.pose.orientation.z, userdata.object_base_pose.base_pose.pose.orientation.w])        
 	
+        '''
+	    x = (float(userdata.object_to_grasp.pose.position.x) - 0.45)
+    	y = float(userdata.object_to_grasp.pose.position.y) 
+    	yaw = float(0.0)
+        '''
 
-	x = (float(userdata.object_to_grasp.pose.position.x) - 0.45)
-	y = float(userdata.object_to_grasp.pose.position.y) 
-	yaw = float(0.0)
 
-        sss.move("base", [x, y, yaw])
         
+        return 'succeeded'
+
+
+
+
+class move_base_rel(smach.State):
+
+    def __init__(self, y_distance):
+        smach.State.__init__(self, outcomes=['succeeded'])
         
+        self.y_distance = y_distance
+        self.shiftbase_srv = rospy.ServiceProxy('/raw_motion_controller/shiftbase', raw_srvs.srv.SetPoseStamped) 
 
+    def execute(self, userdata):
+        
+        print "wait for service: /raw_motion_controller/shiftbase"   
+        rospy.wait_for_service('/raw_motion_controller/shiftbase', 30)
 
+        goalpose = geometry_msgs.msg.PoseStamped()
+        goalpose.pose.position.x = 0.0
+        goalpose.pose.position.y = y_distance
+        goalpose.pose.position.z = 0.0
+        quat = tf.transformations.quaternion_from_euler(0,0,0)
+        goalpose.pose.orientation.x = quat[0]
+        goalpose.pose.orientation.y = quat[1]
+        goalpose.pose.orientation.z = quat[2]
+        goalpose.pose.orientation.w = quat[3]
+        
+        # call base placement service
+        self.shiftbase_srv(goalpose)  
         
         return 'succeeded'

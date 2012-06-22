@@ -110,7 +110,7 @@ class recognize_objects(smach.State):
             try:
                 print "frame_id:",resp.objects[0].pose.header.frame_id
                 print "cluster_id:",resp.objects[0].cluster.header.frame_id
-                tf_listener.waitForTransform(resp.objects[0].pose.header.frame_id, '/map', resp.objects[0].pose.header.stamp, rospy.Duration(2))
+                tf_listener.waitForTransform(resp.objects[0].pose.header.frame_id, '/base_link', resp.objects[0].pose.header.stamp, rospy.Duration(2))
                 tf_wait_worked = True
             except Exception, e:
                 print "tf exception in recognize person: wait for transform: ", e
@@ -122,7 +122,7 @@ class recognize_objects(smach.State):
             tf_worked = False
             while not tf_worked:
                 try:
-                    obj.pose = tf_listener.transformPose('/map', obj.pose)
+                    obj.pose = tf_listener.transformPose('/base_link', obj.pose)
                     transformed_poses.append(obj.pose)
                     tf_worked = True
                 except Exception, e:

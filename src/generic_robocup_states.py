@@ -33,7 +33,7 @@ class get_basic_navigation_task(smach.State):
         
         # check if Task is a BNT task      
         if(nav_task[0:3] != "BNT"):
-           rospy.logerr("Excepted <<BNT>> task, but received <<" + nav_task[0:2] + ">> received")
+           rospy.logerr("Excepted <<BNT>> task, but received <<" + nav_task[0:3] + ">> received")
            return 'wront_task_format' 
 
         # remove leading start description        
@@ -73,12 +73,15 @@ class get_basic_manipulation_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        man_task = "BMT<S2,S2,S3,zigzag(nut,screw,bolt),S1>" #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
+        
+        referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
+
+        man_task = "BMT<S2,S2,S3,zigzag(nut,screw,bolt),S2>"
         rospy.loginfo("Task received: " + man_task)
         
         # check if Task is a BNT task      
         if(man_task[0:3] != "BMT"):
-           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:2] + ">> received")
+           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
            return 'wront_task_format' 
 
         # remove leading start description        
