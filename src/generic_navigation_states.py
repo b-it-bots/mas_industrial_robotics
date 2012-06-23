@@ -120,7 +120,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         goalpose = geometry_msgs.msg.PoseStamped()
         goalpose.pose.position.x = 0.0
         goalpose.pose.position.y = obj_pose_transformed.pose.position.y
-        goalpose.pose.position.z = 0.02
+        goalpose.pose.position.z = 0.05
         quat = tf.transformations.quaternion_from_euler(0,0,0)
         goalpose.pose.orientation.x = quat[0]
         goalpose.pose.orientation.y = quat[1]
