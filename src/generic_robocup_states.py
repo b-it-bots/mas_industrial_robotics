@@ -12,6 +12,10 @@ import smach_ros
 import referee_box_communication
 import re
 
+ip = "192.168.88.145"
+port = "11111"
+team_name = "b-it-bots"
+
 class Bunch:
     def __init__(self, **kwds):
          self.__dict__.update(kwds)
@@ -22,9 +26,6 @@ class get_basic_navigation_task(smach.State):
         smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
         
     def execute(self, userdata):
-        ip = "10.20.121.62"
-        port = "11111"
-        team_name = "b-it-bots"
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
         nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
@@ -63,42 +64,74 @@ class get_basic_navigation_task(smach.State):
         
         return 'task_received'  
     
-class select_pose_to_approach(smach.State):
+    
+class get_basic_manipulation_task(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['pose_selected', 'location_not_known'], 
-                                    input_keys=['task_list', 'current_task_index', 'base_pose_to_approach'], 
-                                    output_keys=['base_pose_to_approach'])
+        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
         
     def execute(self, userdata):
-             
-        userdata.base_pose_to_approach = userdata.task_list[userdata.current_task_index].location        
+
+        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
+        man_task = "BMT<D1,D2,S3,zigzag(nut,screw,bolt),O1>" #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
+        rospy.loginfo("Task received: " + man_task)
         
-        #get location position
-        if (not rospy.has_param("script_server/base/" + userdata.base_pose_to_approach)):
-            rospy.logerr("location <<" + userdata.base_pose_to_approach + ">> is not on the parameter server")
-            return 'location_not_known'
+        # check if Task is a BNT task      
+        if(man_task[0:3] != "BMT"):
+           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:2] + ">> received")
+           return 'wront_task_format' 
+
+        # remove leading start description        
+        man_task = man_task[3:len(man_task)]
         
-        position = rospy.get_param("script_server/base/" + userdata.base_pose_to_approach)
+        # check if description has beginning '<' and ending '>
+        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
+            rospy.loginfo("task spec not in correct format")
+            return 'wront_task_format' 
         
-        #get orientation angle
-        if (not rospy.has_param("script_server/base_orientations/" + userdata.task_list[userdata.current_task_index].orientation)):
-            rospy.logerr("orientation <<" + userdata.task_list[userdata.current_task_index].orientation + ">> is not on the parameter server")
-            return 'location_not_known'
         
-        orientation = rospy.get_param("script_server/base_orientations/" + userdata.task_list[userdata.current_task_index].orientation)
+        # remove beginning '<' and ending '>'
+        man_task = man_task[1:len(man_task)-1]
         
-        #establish new pose
-        new_pose = [0]*3
-        new_pose[0] = position[0]
-        new_pose[1] = position[1]
-        new_pose[2] = orientation
+        #print man_task
+        
+        task_list = man_task.split(',')
+        
+        #print task_list
+
+        init_pose = task_list[0]
+        src_pose = task_list[1]
+        dest_pose = task_list[2]
+        
+        subtask_list = task_list[3].split('(')
+        obj_cfg = subtask_list[0]
+        
+        obj_names = []
+        obj_names.append(subtask_list[1])
+        
+        for i in range(4, (len(task_list)-1)):
+            if i == (len(task_list)-2):
+                task_list[i] = task_list[i][0:(len(task_list)-3)]
+                 
+            obj_names.append(task_list[i])
                
-        #set parameter
-        rospy.set_param("script_server/base/" + userdata.base_pose_to_approach, new_pose)
         
-        rospy.loginfo('selected pose: ' + userdata.base_pose_to_approach + " with orientation: " + userdata.task_list[userdata.current_task_index].orientation)
-        return 'pose_selected'
+        fnl_pose = task_list[len(task_list)-1]
+        
+        '''
+        print init_pose
+        print src_pose
+        print dest_pose
+        print obj_cfg
+        print obj_names
+        print fnl_pose
+        '''
+        
+        userdata.task_spec = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
+                            object_names=obj_names, final_pose=fnl_pose)
+        
+        return 'task_received'  
+    
     
 class wait_for_desired_duration(smach.State):
 
@@ -135,5 +168,40 @@ class increment_task_index(smach.State):
         
         return 'succeeded'
     
-    
-    
+class select_pose_to_approach(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['pose_selected', 'location_not_known'], 
+                                    input_keys=['task_list', 'current_task_index', 'base_pose_to_approach'], 
+                                    output_keys=['base_pose_to_approach'])
+        
+    def execute(self, userdata):
+             
+        userdata.base_pose_to_approach = userdata.task_list[userdata.current_task_index].location        
+        
+        #get location position
+        if (not rospy.has_param("script_server/base/" + userdata.base_pose_to_approach)):
+            rospy.logerr("location <<" + userdata.base_pose_to_approach + ">> is not on the parameter server")
+            return 'location_not_known'
+        
+        position = rospy.get_param("script_server/base/" + userdata.base_pose_to_approach)
+        
+        #get orientation angle
+        if (not rospy.has_param("script_server/base_orientations/" + userdata.task_list[userdata.current_task_index].orientation)):
+            rospy.logerr("orientation <<" + userdata.task_list[userdata.current_task_index].orientation + ">> is not on the parameter server")
+            return 'location_not_known'
+        
+        orientation = rospy.get_param("script_server/base_orientations/" + userdata.task_list[userdata.current_task_index].orientation)
+        
+        #establish new pose
+        new_pose = [0]*3
+        new_pose[0] = position[0]
+        new_pose[1] = position[1]
+        new_pose[2] = orientation
+               
+        #set parameter
+        rospy.set_param("script_server/base/" + userdata.base_pose_to_approach, new_pose)
+        
+        rospy.loginfo('selected pose: ' + userdata.base_pose_to_approach + " with orientation: " + userdata.task_list[userdata.current_task_index].orientation)
+        return 'pose_selected'
+     

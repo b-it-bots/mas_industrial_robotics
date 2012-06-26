@@ -6,7 +6,7 @@ import smach
 import smach_ros
 import raw_srvs.srv
 import std_srvs.srv
-
+import tf  
 
 class enable_object_finder(smach.State):
 
@@ -73,3 +73,62 @@ class detect_object(smach.State):
         else:
             userdata.object_list = resp.objects
             return 'succeeded'
+
+
+class recognize_objects(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=['succeeded', 'failed'],
+            output_keys=['recognized_objects'])
+        
+        self.object_finder_srv = rospy.ServiceProxy('/raw_object_perception/find_objects', raw_srvs.srv.GetObjects)
+
+    def execute(self, userdata):     
+        #get object pose list
+        rospy.wait_for_service('/raw_object_perception/find_objects', 30)
+
+        for i in range(10): 
+            print "find object try: ", i
+            resp = self.object_finder_srv()
+              
+            if (len(resp.objects) <= 0):
+                rospy.loginfo('found no objects')
+            else:    
+                rospy.loginfo('found {0} objects'.format(len(resp.objects)))
+                break
+
+        if len(resp.objects) == 0:
+            rospy.loginfo('NO objects in FOV')
+            return 'failed'
+
+        tf_listener = tf.TransformListener()
+
+        tf_wait_worked = False
+        while not tf_wait_worked:
+            try:
+                print "frame_id:",resp.objects[0].pose.header.frame_id
+                print "cluster_id:",resp.objects[0].cluster.header.frame_id
+                tf_listener.waitForTransform(resp.objects[0].pose.header.frame_id, '/base_link', resp.objects[0].pose.header.stamp, rospy.Duration(2))
+                tf_wait_worked = True
+            except Exception, e:
+                print "tf exception in recognize person: wait for transform: ", e
+                tf_wait_worked = False
+                rospy.sleep(0.5)
+                   
+        transformed_poses = []
+        for obj in resp.objects:
+            tf_worked = False
+            while not tf_worked:
+                try:
+                    obj.pose = tf_listener.transformPose('base_link', obj.pose)
+                    transformed_poses.append(obj.pose)
+                    tf_worked = True
+                except Exception, e:
+                    print "tf exception in recognize person: ", e
+                    tf_worked = False
+
+        userdata.recognized_objects = transformed_poses
+
+        return 'succeeded'
