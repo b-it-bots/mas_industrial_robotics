@@ -6,9 +6,6 @@ import smach
 import smach_ros
 import math
 import arm_navigation_msgs.msg
-import std_srvs.srv
-
-from grasp_object import *
 
 from simple_script_server import *
 sss = simple_script_server()
@@ -23,23 +20,29 @@ class grasp_random_object(smach.State):
        # sss.move("arm", "zeroposition")
         
         for object in userdata.object_list:         
+            
             # ToDo: need to be adjusted to correct stuff           
-            if object.pose.pose.position.z <= 0.05 and object.pose.pose.position.z >= 0.30:
+            if object.pose.pose.position.z <= 0.0 or object.pose.pose.position.z >= 0.20:
                 continue
-                        
-            handle_arm = sss.move("arm", [object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, 0, ((math.pi/2) + (math.pi/4)), 0, "/base_link"])
-   
+    
+            sss.move("arm", "zeroposition")                             
+
+            #object.pose.pose.position.z = object.pose.pose.position.z + 0.02
+            object.pose.pose.position.x = object.pose.pose.position.x + 0.01
+            object.pose.pose.position.y = object.pose.pose.position.y - 0.005
+
+            handle_arm = sss.move("arm", [object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, "/base_link"])
+
             if handle_arm.get_state() == 3:
                 sss.move("gripper", "close", blocking=False)
-                rospy.sleep(2.0)
+                rospy.sleep(3.0)
                 sss.move("arm", "zeroposition")        
                 return 'succeeded'    
             else:
                 rospy.logerr('could not find IK for current object')
 
         return 'failed'
-        
-
+ 
 class grasp_obj_with_visual_servering(smach.State):
 
     def __init__(self):
@@ -97,7 +100,7 @@ class grasp_obj_with_visual_servering(smach.State):
 class place_obj_on_rear_platform(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed', 'no_more_free_poses'], input_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'], 
+        smach.State.__init__(self, outcomes=['succeeded', 'no_more_free_poses'], input_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'], 
 								output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'])
 
     def execute(self, userdata):   
@@ -124,11 +127,9 @@ class place_obj_on_rear_platform(smach.State):
         #untested
         sss.move("arm", pltf_pose+"_pre")
         sss.move("arm", "platform_intermediate")
-        # this state doesn't exist anymore? how was it working?
-        #sss.move("arm", "pregrasp_back")
-        
+
         return 'succeeded'
-  
+    
     
 class move_arm_out_of_view(smach.State):
 
@@ -173,8 +174,8 @@ class grasp_obj_from_pltf(smach.State):
         sss.move("arm", "zeroposition")
            
         return 'succeeded'
-
-
+    
+    
 class place_object_in_configuration(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
@@ -198,8 +199,8 @@ class place_object_in_configuration(smach.State):
         rospy.sleep(2)
                 
         return 'succeeded'
-    
-    
+
+
 class move_arm(smach.State):
 
     def __init__(self, pose_name):
