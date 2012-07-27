@@ -48,14 +48,14 @@ class grasp_obj_with_visual_servering(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['object_to_grasp'])
         
-        self.visual_serv_srv = rospy.ServiceProxy('/raw_blob_detection/start', std_srvs.srv.Empty)
+        self.visual_serv_srv = rospy.ServiceProxy('/raw_visual_servoing/start', std_srvs.srv.Empty)
     def execute(self, userdata):
 
         sss.move("gripper", "open")
         sss.move("arm", "pregrasp_laying_mex")
     
-        print "wait for service: /raw_blob_detection/start "
-        rospy.wait_for_service('/raw_blob_detection/start', 30)
+        print "wait for service: /raw_visual_servoing/start "
+        rospy.wait_for_service('/raw_visual_servoing/start', 30)
         
         visual_done = False
         while not visual_done:
