@@ -27,16 +27,18 @@ class place_object_in_drawer(smach.State):
 class grasp_drawer(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['object_pose'])
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['drawer_pose'])
 
     def execute(self, userdata):   
 
-        self.userdata.object_pose
-
         # ToDo: sample range for gripper orientation
-        sss.move("arm", [self.userdata.object_pose.position.x, self.userdata.object_pose.position.y, self.userdata.object_pose.position.z,
-                        0, 3.14, 0, 
-                        "/base_link"])
+        #sss.move("arm", [userdata.drawer_pose.pose.position.x, userdata.drawer_pose.pose.position.y, userdata.drawer_pose.pose.position.z,
+        #                0, 3.14, 0, 
+        #                "/base_link"])
+
+        sss.move("gripper", "open")
+        sss.move("arm", [0.48, 0, -0.02, 0, 3.1, 1.57, "/base_link"])
+        sss.move("gripper", "close")
 
         return 'succeeded'
    
@@ -98,7 +100,7 @@ class grasp_obj_with_visual_servering(smach.State):
             except:
                 visual_done = False
 
-        '''
+        '''        
         print userdata.object_to_grasp
         sss.move("arm", [float(userdata.object_to_grasp.pose.position.x), float(userdata.object_to_grasp.pose.position.y), (float(userdata.object_to_grasp.pose.position.z) + 0.02),"/base_link"])
 
@@ -124,7 +126,7 @@ class grasp_obj_with_visual_servering(smach.State):
         rospy.sleep(3)
 
         sss.move("arm", "zeroposition")
-        
+
         return 'succeeded'
 
 
@@ -171,7 +173,7 @@ class move_arm(smach.State):
         self.position = position
 
     def execute(self, userdata):   
-        sss.move("arm", self.pose)
+        sss.move("arm", self.position)
                    
         return 'succeeded'
 

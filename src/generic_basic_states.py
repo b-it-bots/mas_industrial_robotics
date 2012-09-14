@@ -23,7 +23,7 @@ class init_robot(smach.State):
         arm_to_init = sss.move("arm", "initposition", blocking=False)
         
         #init gripper
-        gripper_open = sss.move("gripper", "open")
+        gripper_open = sss.move("gripper", "open", blocking=False)
                 
         arm_to_init.wait();
         gripper_open.wait();

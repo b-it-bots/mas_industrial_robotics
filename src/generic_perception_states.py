@@ -7,6 +7,7 @@ import smach_ros
 import raw_srvs.srv
 import std_srvs.srv
 import tf 
+import geometry_msgs.msg
 
 
 
@@ -21,7 +22,7 @@ class find_drawer(smach.State):
                
         # find drawer front edge position with sergeys perception component
                
-        self.userdata.drawer_pose = ""
+        userdata.drawer_pose = geometry_msgs.msg.PoseStamped()
         
         return 'succeeded'
  
