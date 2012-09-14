@@ -26,7 +26,7 @@ class init_robot(smach.State):
         gripper_open = sss.move("gripper", "open")
                 
         arm_to_init.wait();
-        gripper_opem.wait();
+        gripper_open.wait();
         
         rospy.loginfo("robot initialized")
         
