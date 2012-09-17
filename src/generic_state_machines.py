@@ -16,12 +16,8 @@ class sm_grasp_random_object(smach.StateMachine):
         
         with self:
             smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', move_arm_out_of_view(),
-                transitions={'succeeded':'ENABLE_PERCEPTION'})
-            
-            smach.StateMachine.add('ENABLE_PERCEPTION', enable_object_finder(),
-                transitions={'succeeded':'FIND_OBJECT',  
-                             'failed':'failed'})
-            
+                transitions={'succeeded':'FIND_OBJECT'})
+                      
             smach.StateMachine.add('FIND_OBJECT', detect_object(),
                 transitions={'succeeded':'GRASP_OBJECT',  
                              'failed':'failed'})
