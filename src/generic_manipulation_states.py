@@ -53,7 +53,7 @@ class grasp_random_object(smach.State):
         for object in userdata.object_list:         
             
             # ToDo: need to be adjusted to correct stuff           
-            if object.pose.pose.position.z <= 0.0 or object.pose.pose.position.z >= 0.20:
+            if object.pose.pose.position.z <= 0.0 or object.pose.pose.position.z >= 0.10:
                 continue
     
             sss.move("arm", "zeroposition")                             
