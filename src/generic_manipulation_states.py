@@ -11,6 +11,40 @@ from simple_script_server import *
 sss = simple_script_server()
 
 import std_srvs.srv
+import raw_srvs.srv
+
+
+
+
+class is_object_grasped(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['obj_grasped', 'obj_not_grasped', 'srv_call_failed'])
+
+        self.obj_grasped_srv_name = '/arm_1/gripper_controller/is_gripper_closed'
+
+        self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, raw_srvs.srv.ReturnBool)
+        
+    def execute(self, userdata):   
+                
+        try:
+            rospy.loginfo("wait for service:  %s", self.obj_grasped_srv_name)
+            rospy.wait_for_service(self.obj_grasped_srv_name, 5)
+        
+            sss.move("gripper", "close")
+            rospy.sleep(2.0)
+            
+            is_gripper_closed = self.obj_grasped_srv()
+        except:
+            rospy.logerr("could not call service  %s", self.obj_grasped_srv_name)
+            return "srv_call_failed"
+
+        print is_gripper_closed
+
+        if is_gripper_closed.value:
+            return 'obj_not_grasped'
+        else:
+            return 'obj_grasped'
 
 
 class place_object_in_drawer(smach.State):
@@ -19,7 +53,8 @@ class place_object_in_drawer(smach.State):
         smach.State.__init__(self, outcomes=['succeeded'])
 
     def execute(self, userdata):   
-
+        
+        
         
         return 'succeeded'
 
