@@ -72,11 +72,12 @@ class recognize_objects(smach.State):
             input_keys=['recognized_objects'],
             output_keys=['recognized_objects'])
         
-        self.object_finder_srv = rospy.ServiceProxy('/raw_object_perception/find_objects', raw_srvs.srv.GetObjects)
+        self.object_finder_srv_name = '/detect_objects'
+        self.object_finder_srv = rospy.ServiceProxy(self.object_finder_srv_name, raw_srvs.srv.GetObjects)
 
     def execute(self, userdata):     
         #get object pose list
-        rospy.wait_for_service('/raw_object_perception/find_objects', 30)
+        rospy.wait_for_service(self.object_finder_srv_name, 30)
 
         for i in range(10): 
             print "find object try: ", i
