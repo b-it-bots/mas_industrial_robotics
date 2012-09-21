@@ -7,6 +7,7 @@ import smach_ros
 import math
 import arm_navigation_msgs.msg
 
+from grasp_object import *
 from simple_script_server import *
 sss = simple_script_server()
 
@@ -202,25 +203,28 @@ class place_obj_on_rear_platform(smach.State):
 
 class move_arm(smach.State):
 
-    def __init__(self, position = "zeroposition"):
+    def __init__(self, position = "zeroposition", do_blocking = True):
         smach.State.__init__(self, outcomes=['succeeded'])
         
         self.position = position
+        self.do_blocking = do_blocking
 
     def execute(self, userdata):   
-        sss.move("arm", self.position)
+        sss.move("arm", self.position, blocking = self.do_blocking)
                    
         return 'succeeded'
 
   
 class move_arm_out_of_view(smach.State):
 
-    def __init__(self):
+    def __init__(self, do_blocking = True):
         smach.State.__init__(self, outcomes=['succeeded'])
 
+        self.do_blocking = do_blocking
+
     def execute(self, userdata):   
-        sss.move("arm", "zeroposition")
-        sss.move("arm", "arm_out_of_view")
+        sss.move("arm", "zeroposition", blocking = self.do_blocking)
+        sss.move("arm", "arm_out_of_view", blocking = self.do_blocking)
            
         return 'succeeded'
     

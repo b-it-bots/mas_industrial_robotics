@@ -69,9 +69,9 @@ class adjust_pose_wrt_platform(smach.State):
         rospy.loginfo("Waiting for action server <<%s>> to start ...", self.ac_base_adj_name);
         self.ac_base_adj.wait_for_server()
         rospy.loginfo("action server <<%s>> is ready ...", self.ac_base_adj_name);
-        self.action_goal = raw_base_placement.msg.OrientToBaseActionGoal()
+        action_goal = raw_base_placement.msg.OrientToBaseActionGoal()
             
-        action_goal.goal.distance = 0.02;
+        action_goal.goal.distance = 0.1;
         rospy.loginfo("send action");
         self.ac_base_adj.send_goal(action_goal.goal);
         
@@ -92,7 +92,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         
         #self.base_placement_srv = rospy.ServiceProxy('/raw_base_placement/calculateOptimalBasePose', raw_srvs.srv.GetPoseStamped) 
         
-        self.shiftbase_srv_name = '/raw_relative_movement/shiftbase'
+        self.shiftbase_srv_name = '/raw_relative_movements/shiftbase'
         self.shiftbase_srv = rospy.ServiceProxy(self.shiftbase_srv_name, raw_srvs.srv.SetPoseStamped) 
     def execute(self, userdata):
         
@@ -101,16 +101,19 @@ class adjust_pose_wrt_recognized_obj(smach.State):
 
         print "OBJ POSE: ", userdata.object_to_grasp
         
-        tf_listener = tf.TransformListener()
+        try:
+            tf_listener = tf.TransformListener()
+        except Exception, e:
+            print "tf exception in adjust_pose_wrt_recognized_obj: create transform listener: ", e
 
         tf_wait_worked = False
         while not tf_wait_worked:
             try:
-                #print "frame_id:",userdata.object_to_grasp.header.frame_id
+                print "frame_id:",userdata.object_to_grasp.header.frame_id
                 tf_listener.waitForTransform(userdata.object_to_grasp.header.frame_id, '/base_link', rospy.Time.now(), rospy.Duration(2))
                 tf_wait_worked = True
             except Exception, e:
-                print "tf exception: wait for transform: ", e
+                print "tf exception in adjust_pose_wrt_recognized_obj: wait for transform: ", e
                 tf_wait_worked = False
                 rospy.sleep(0.5)
                    
@@ -123,7 +126,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
                 obj_pose_transformed = tf_listener.transformPose('/base_link', userdata.object_to_grasp)
                 tf_worked = True
             except Exception, e:
-                print "tf exception in: ", e
+                print "tf exception in adjust_pose_wrt_recognized_obj: transform pose ", e
                 tf_worked = False
         ##moveoptimalbase_srv = rospy.ServiceProxy('/raw_base_placement/moveoptimalbase', raw_srvs.srv.SetPoseStamped) 
         
@@ -145,7 +148,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
             
             self.shiftbase_srv(goalpose)  
         except:
-            rospy.logerr("could not execute service <</raw_base_placement/calculateOptimalBasePose>>")
+            rospy.logerr("could not execute service <<%s>>", self.shiftbase_srv_name)
             return 'failed'
 
         # call base placement service

@@ -76,13 +76,18 @@ class recognize_objects(smach.State):
         self.object_finder_srv = rospy.ServiceProxy(self.object_finder_srv_name, hbrs_srvs.srv.GetObjects)
 
     def execute(self, userdata):     
-        #get object pose list
-        rospy.wait_for_service(self.object_finder_srv_name, 30)
+ 
 
         for i in range(10): 
             print "find object try: ", i
-            resp = self.object_finder_srv()
-              
+            
+            try:
+                rospy.wait_for_service(self.object_finder_srv_name, 15)
+                resp = self.object_finder_srv()
+            except Exception, e:  
+                rospy.logerr("service call %s failed", self.object_finder_srv_name)         
+        
+
             if (len(resp.objects) <= 0):
                 rospy.loginfo('found no objects')
             else:    
@@ -98,12 +103,16 @@ class recognize_objects(smach.State):
         tf_wait_worked = False
         while not tf_wait_worked:
             try:
+                # TODO: fix in perception and remove the lines below then
+                resp.objects[0].pose.header.frame_id = '/openni_rgb_optical_frame'
+
+
                 print "frame_id:",resp.objects[0].pose.header.frame_id
                 print "cluster_id:",resp.objects[0].cluster.header.frame_id
                 tf_listener.waitForTransform(resp.objects[0].pose.header.frame_id, '/odom', resp.objects[0].pose.header.stamp, rospy.Duration(2))
                 tf_wait_worked = True
             except Exception, e:
-                print "tf exception in recognize person: wait for transform: ", e
+                print "tf exception in recognize_objects: wait for transform: ", e
                 tf_wait_worked = False
                 rospy.sleep(0.5)
                    
@@ -119,11 +128,15 @@ class recognize_objects(smach.State):
 
             while not tf_worked:
                 try:
+                    # TODO: fix in perception and remove the lines below then
+                    obj.pose.header.frame_id = '/openni_rgb_optical_frame'
+
+
                     obj.pose = tf_listener.transformPose('/odom', obj.pose)
                     transformed_poses.append(obj.pose)
                     tf_worked = True
                 except Exception, e:
-                    print "tf exception in recognize person: ", e
+                    print "tf exception in recognize_objects: transform pose: ", e
                     tf_worked = False
 
         userdata.recognized_objects = transformed_poses
