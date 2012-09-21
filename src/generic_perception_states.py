@@ -4,7 +4,7 @@ roslib.load_manifest('raw_generic_states')
 import rospy
 import smach
 import smach_ros
-import raw_srvs.srv
+import hbrs_srvs.srv
 import std_srvs.srv
 import tf 
 import geometry_msgs.msg
@@ -36,7 +36,7 @@ class detect_object(smach.State):
             outcomes=['succeeded', 'failed'],
             output_keys=['object_list'])
         
-        self.object_finder_srv = rospy.ServiceProxy('/raw_perception/object_segmentation/get_segmented_objects', raw_srvs.srv.GetObjects)
+        self.object_finder_srv = rospy.ServiceProxy('/raw_perception/object_segmentation/get_segmented_objects', hbrs_srvs.srv.GetObjects)
 
     def execute(self, userdata):     
         #get object pose list
@@ -73,7 +73,7 @@ class recognize_objects(smach.State):
             output_keys=['recognized_objects'])
         
         self.object_finder_srv_name = '/detect_objects'
-        self.object_finder_srv = rospy.ServiceProxy(self.object_finder_srv_name, raw_srvs.srv.GetObjects)
+        self.object_finder_srv = rospy.ServiceProxy(self.object_finder_srv_name, hbrs_srvs.srv.GetObjects)
 
     def execute(self, userdata):     
         #get object pose list

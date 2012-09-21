@@ -23,6 +23,7 @@
   <depend package="raw_base_placement_fred"/>
   <depend package="actionlib"/>  
   <depend package="raw_arm_cmds"/> 
+  <depend package="hbrs_srvs"/> 
 
 </package>
 
