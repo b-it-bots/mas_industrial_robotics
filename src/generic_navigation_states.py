@@ -7,6 +7,7 @@ import smach_ros
 import actionlib 
 import raw_srvs.srv
 import std_srvs.srv
+import raw_base_placement.msg
 
 from simple_script_server import *
 sss = simple_script_server()
