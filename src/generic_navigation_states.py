@@ -53,55 +53,36 @@ class approach_pose(smach.State):
                 print 'last state: ',base_state
                 return "failed"
             
-'''
+
 class adjust_pose_wrt_platform(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
 
+        self.ac_base_adj_name = '/raw_base_placement/scan_front_orientation'
+        self.ac_base_adj = actionlib.SimpleActionClient(self.ac_base_adj_name, raw_base_placement.msg.OrientToBaseAction)
+
     def execute(self, userdata):
-        ac_base_adj = actionlib.SimpleActionClient('/scan_front_orientation', raw_base_placement_matthias_fueller.msg.OrientToBaseAction)
+        
             
-        rospy.loginfo("Waiting for action server <</scan_front_orientation>> to start ...");
-        ac_base_adj.wait_for_server()
-        rospy.loginfo("action server <</scan_front_orientation>> is ready ...");
-        action_goal = raw_base_placement_matthias_fueller.msg.OrientToBaseActionGoal()
+        rospy.loginfo("Waiting for action server <<%s>> to start ...", self.ac_base_adj_name);
+        self.ac_base_adj.wait_for_server()
+        rospy.loginfo("action server <<%s>> is ready ...", self.ac_base_adj_name);
+        self.action_goal = raw_base_placement.msg.OrientToBaseActionGoal()
             
         action_goal.goal.distance = 0.02;
         rospy.loginfo("send action");
-        ac_base_adj.send_goal(action_goal.goal);
+        self.ac_base_adj.send_goal(action_goal.goal);
         
         rospy.loginfo("wait for base to adjust");
-        finished_before_timeout = ac_base_adj.wait_for_result()
+        finished_before_timeout = self.ac_base_adj.wait_for_result()
     
         if finished_before_timeout:
-            rospy.loginfo("Action finished: %s", ac_base_adj.get_state())
+            rospy.loginfo("Action finished: %s", self.ac_base_adj.get_state())
             return 'succeeded'    
         else:
             rospy.logerr("Action did not finish before the time out!")
-            return 'failed'
-'''
-            
-class adjust_pose_wrt_platform(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
-        
-        self.srv_adj_pose = rospy.ServiceProxy('/raw_adjust_pose_wrt_nearest_obj/adjust_pose', std_srvs.srv.Empty) 
-
-    def execute(self, userdata):      
-            
-        print "wait for service: /raw_adjust_pose_wrt_nearest_obj/adjust_pose"   
-        rospy.wait_for_service('/raw_adjust_pose_wrt_nearest_obj/adjust_pose', 20)
-        
-        # call base placement service
-        try:
-            self.srv_adj_pose()
-        except:
-            print "could not execute <</raw_adjust_pose_wrt_nearest_obj/adjust_pose>> service"
-            return 'failed'
-            
-        return 'succeeded'          
+            return 'failed'         
 
 
 class move_base_rel(smach.State):
