@@ -73,7 +73,7 @@ class grasp_drawer(smach.State):
         #                "/base_link"])
 
         sss.move("gripper", "open")
-        sss.move("arm", [0.48, 0, -0.02, 0, 3.1, 1.57, "/base_link"])
+        sss.move("arm", [0.48, 0, -0.02, 0, 3.1, 1.57, "/base_link"], mode="planned")
         sss.move("gripper", "close")
 
         return 'succeeded'
@@ -94,18 +94,18 @@ class grasp_random_object(smach.State):
             if object.pose.pose.position.z <= 0.0 or object.pose.pose.position.z >= 0.10:
                 continue
     
-            sss.move("arm", "zeroposition")                             
+            sss.move("arm", "zeroposition", mode="planned")                             
 
             #object.pose.pose.position.z = object.pose.pose.position.z + 0.02
             object.pose.pose.position.x = object.pose.pose.position.x + 0.01
             object.pose.pose.position.y = object.pose.pose.position.y - 0.005
 
-            handle_arm = sss.move("arm", [object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, "/base_link"])
+            handle_arm = sss.move("arm", [object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, "/base_link"], mode="planned")
 
             if handle_arm.get_state() == 3:
                 sss.move("gripper", "close", blocking=False)
                 rospy.sleep(3.0)
-                sss.move("arm", "zeroposition")        
+                sss.move("arm", "zeroposition", mode="planned")        
                 return 'succeeded'    
             else:
                 rospy.logerr('could not find IK for current object')
@@ -121,7 +121,7 @@ class grasp_obj_with_visual_servering(smach.State):
     def execute(self, userdata):
 
         sss.move("gripper", "open")
-        sss.move("arm", "pregrasp_laying_mex")
+        sss.move("arm", "pregrasp_laying_mex", mode="planned")
     
         print "wait for service: /raw_visual_servoing/start "
         rospy.wait_for_service('/raw_visual_servoing/start', 30)
@@ -151,7 +151,7 @@ class grasp_obj_with_visual_servering(smach.State):
         grasper.simple_grasp("laying")
         print("did it work?")
 
-        sss.move("arm","grasp_laying_mex")
+        sss.move("arm","grasp_laying_mex", mode="planned")
 
     
         #print "do visual serv"
@@ -161,7 +161,7 @@ class grasp_obj_with_visual_servering(smach.State):
         sss.move("gripper", "close")
         rospy.sleep(3)
 
-        sss.move("arm", "zeroposition")
+        sss.move("arm", "zeroposition", mode="planned")
 
         return 'succeeded'
 
@@ -174,8 +174,8 @@ class place_obj_on_rear_platform(smach.State):
 
     def execute(self, userdata):   
         
-        sss.move("arm", "zeroposition")
-        sss.move("arm", "platform_intermediate")
+        #sss.move("arm", "zeroposition", mode="planned")
+        #sss.move("arm", "platform_intermediate", mode="planned")
 
         
         if(len(userdata.rear_platform_free_poses) == 0):
@@ -184,9 +184,9 @@ class place_obj_on_rear_platform(smach.State):
             
         pltf_pose = userdata.rear_platform_free_poses.pop()
         # untested
-        sss.move("arm", pltf_pose+"_pre")
+        #sss.move("arm", pltf_pose+"_pre")
         #
-        sss.move("arm", pltf_pose)
+        sss.move("arm", pltf_pose, mode="planned")
         
         
         sss.move("gripper", "open")
@@ -194,8 +194,8 @@ class place_obj_on_rear_platform(smach.State):
 
         userdata.rear_platform_occupied_poses.append(pltf_pose)
         #untested
-        sss.move("arm", pltf_pose+"_pre")
-        sss.move("arm", "platform_intermediate")
+        #sss.move("arm", pltf_pose+"_pre")
+        sss.move("arm", "platform_intermediate", mode="planned")
 
         return 'succeeded'
     
@@ -210,7 +210,7 @@ class move_arm(smach.State):
         self.do_blocking = do_blocking
 
     def execute(self, userdata):   
-        sss.move("arm", self.position, blocking = self.do_blocking)
+        sss.move("arm", self.position, mode="planned", blocking = self.do_blocking)
                    
         return 'succeeded'
 
@@ -223,8 +223,8 @@ class move_arm_out_of_view(smach.State):
         self.do_blocking = do_blocking
 
     def execute(self, userdata):   
-        sss.move("arm", "zeroposition", blocking = self.do_blocking)
-        sss.move("arm", "arm_out_of_view", blocking = self.do_blocking)
+        #sss.move("arm", "zeroposition", blocking = self.do_blocking)
+        sss.move("arm", "arm_out_of_view", mode="planned", blocking = self.do_blocking)
            
         return 'succeeded'
     
@@ -244,20 +244,20 @@ class grasp_obj_from_pltf(smach.State):
 
         pltf_obj_pose = userdata.rear_platform_occupied_poses.pop()
         
-        sss.move("arm", "platform_intermediate")
+        #sss.move("arm", "platform_intermediate")
         # untested
-        sss.move("arm", pltf_obj_pose+"_pre")
+        #sss.move("arm", pltf_obj_pose+"_pre")
         #
-        sss.move("arm", pltf_obj_pose)
+        sss.move("arm", pltf_obj_pose, mode="planned")
         
         sss.move("gripper", "close")
         rospy.sleep(3)
         
         # untested
-        sss.move("arm", pltf_obj_pose+"_pre")
+        #sss.move("arm", pltf_obj_pose+"_pre")
         #
-        sss.move("arm", "platform_intermediate")
-        sss.move("arm", "zeroposition")
+        #sss.move("arm", "platform_intermediate")
+        sss.move("arm", "zeroposition", mode="planned")
            
         return 'succeeded'
     
@@ -279,7 +279,7 @@ class place_object_in_configuration(smach.State):
         print "goal pose taken: ",cfg_goal_pose
         print "rest poses: ", userdata.obj_goal_configuration_poses
         
-        sss.move("arm", cfg_goal_pose)
+        sss.move("arm", cfg_goal_pose, mode="planned")
         
         sss.move("gripper","open")
         rospy.sleep(2)
