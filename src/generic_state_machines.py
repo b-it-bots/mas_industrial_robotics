@@ -33,15 +33,41 @@ class sm_grasp_drawer(smach.StateMachine):
             outcomes=['drawer_grasped', 'drawer_not_found', 'base_placement_failed'])
         
         with self:
+            smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', move_arm_out_of_view(),
+                transitions={'succeeded':'FIND_DRAWER_AT_SOURCE'})
+            
             smach.StateMachine.add('FIND_DRAWER_AT_SOURCE', find_drawer(),
-                transitions={'succeeded':'PLACE_BASE_IN_FRONT_OF_DRAWER',
-                            'failed':'drawer_not_found'})
+                transitions={'found_drawer':'SELECT_DRAWER',
+                            'no_drawer_found':'FIND_DRAWER_AT_SOURCE',
+                            'srv_call_failed':'FIND_DRAWER_AT_SOURCE'})
+            
+            smach.StateMachine.add('SELECT_DRAWER', select_drawer('drawer_1'),
+                transitions={'drawer_selected':'PLACE_BASE_IN_FRONT_OF_DRAWER',
+                            'drawer_not_selected':'FIND_DRAWER_AT_SOURCE'})
                     
             smach.StateMachine.add('PLACE_BASE_IN_FRONT_OF_DRAWER', place_base_in_front_of_object(),
-                transitions={'succeeded':'GRASP_DRAWER',
-                            'failed':'base_placement_failed'})
-            
+                transitions={'succeeded':'GRASP_DRAWER'},
+                remapping={'object_pose':'object_to_grasp'})
+                
             smach.StateMachine.add('GRASP_DRAWER', grasp_drawer(),
                 transitions={'succeeded':'drawer_grasped',
-                            'failed':'FIND_DRAWER_AT_SOURCE'})
+                            'failed':'FIND_DRAWER_AT_SOURCE'},
+                remapping={'drawer_pose':'object_to_grasp'})
 
+class select_drawer(smach.State):
+
+    def __init__(self, drawer_name):
+        smach.State.__init__(self, outcomes=['drawer_selected', 'drawer_not_selected'], 
+                                   input_keys=['drawer_pose_list'], 
+                                   output_keys=['object_to_grasp'])
+
+        self.drawer_name = drawer_name
+                
+    def execute(self, userdata):   
+                
+        for drawer in userdata.drawer_pose_list:
+            if drawer.name == self.drawer_name:
+                userdata.object_to_grasp = drawer.pose
+                return 'drawer_selected'
+            
+        return 'drawer_not_selected'

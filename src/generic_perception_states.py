@@ -16,16 +16,29 @@ class find_drawer(smach.State):
     def __init__(self):
         smach.State.__init__(
             self,
-            outcomes=['succeeded', 'failed'], output_keys=["drawer_pose"])
+            outcomes=['found_drawer', 'no_drawer_found', 'srv_call_failed'], output_keys=["drawer_pose_list"])
+        
+        self.drawer_finder_srv_name = '/hbrs_perception/detect_marker'
+        self.drawer_finder_srv = rospy.ServiceProxy(self.drawer_finder_srv_name, hbrs_srvs.srv.GetObjects)
         
     def execute(self, userdata): 
-               
-        # find drawer front edge position with sergeys perception component
-               
-        userdata.drawer_pose = geometry_msgs.msg.PoseStamped()
         
-        return 'succeeded'
- 
+        try:
+            rospy.wait_for_service(self.drawer_finder_srv_name, 15)
+            resp = self.drawer_finder_srv()
+        except Exception, e:
+            rospy.logerr("could not execute service <<%s>>: %e", self.drawer_finder_srv_name, e)
+            return 'srv_call_failed'
+            
+        
+        if (len(resp.objects) <= 0):
+            rospy.logerr('found no drawer')
+            return 'no_drawer_found'
+        
+        rospy.loginfo('found {0} drawers'.format(len(resp.objects)))
+        
+        userdata.drawer_pose_list = resp.objects
+        return 'found_drawer'
 
 
 class detect_object(smach.State):

@@ -16,13 +16,11 @@ sss = simple_script_server()
 class place_base_in_front_of_object(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['object_pose'])
+        smach.State.__init__(self, outcomes=['succeeded'], input_keys=['object_pose'])
 
     def execute(self, userdata):
         
-        # get optimal base pose with nirmals base placement component
-        
-        # move robot to the optimal pose with nirmals relative movements component
+        print "placement, obj pose:", userdata.object_pose
         
         return 'succeeded'
 
