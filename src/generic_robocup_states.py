@@ -145,9 +145,9 @@ class get_basic_transportation_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        #transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BTT<(D1,N,6),(S2,E,3)>'
-        transportation_task = 'BTT<initialsituation(<S0,(nut1,screw1)><S1,(nut2,screw2)><S2,(nut3,screw3)><S4,(screw4)>);goalsituation(<D1,line(screw1,nut2)><D2,line(nut2,screw3)><D3,line(nut1,nut3)>)>'
-        
+        transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BTT<(D1,N,6),(S2,E,3)>'
+        #transportation_task = 'BTT<initialsituation(<S0,(nut0,screw0)><S1,(nut1,screw1)><S2,(nut2,screw2)><S3,(screw3)>);goalsituation(<D0,line(screw1,screw0,screw3)><D1,line(screw2,nut0)><D2,line(nut1,nut2)>)>'
+
         rospy.loginfo("Task received: " + transportation_task)
         
         # check if Task is a BTT task      

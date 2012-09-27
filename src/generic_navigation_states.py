@@ -208,12 +208,11 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         #y = userdata.object_base_pose.base_pose.pose.position.y
         #(roll, pitch, yaw) = tf.transformations.euler_from_quaternion([userdata.object_base_pose.base_pose.pose.orientation.x, userdata.object_base_pose.base_pose.pose.orientation.y, userdata.object_base_pose.base_pose.pose.orientation.z, userdata.object_base_pose.base_pose.pose.orientation.w])        
     
-        '''
-        x = (float(userdata.object_to_grasp.pose.position.x) - 0.45)
-        y = float(userdata.object_to_grasp.pose.position.y) 
-        yaw = float(0.0)
-        '''
         
+        #x = (float(userdata.object_to_grasp.pose.position.x) - 0.45)
+        #y = float(userdata.object_to_grasp.pose.position.y) 
+        #yaw = float(0.0)
+                
         return 'succeeded'
 
 class move_base_rel(smach.State):

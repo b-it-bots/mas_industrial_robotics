@@ -22,7 +22,8 @@
   <depend package="raw_base_placement"/>
   <depend package="actionlib"/>  
   <depend package="raw_arm_cmds"/> 
-  <depend package="hbrs_srvs"/> 
+  <depend package="hbrs_srvs"/>
+  <depend package="hbrs_msgs"/>  
 
 </package>
 

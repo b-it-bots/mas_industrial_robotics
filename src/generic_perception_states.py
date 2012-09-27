@@ -8,6 +8,7 @@ import hbrs_srvs.srv
 import std_srvs.srv
 import tf 
 import geometry_msgs.msg
+import hbrs_msgs.msg
 
 
 
@@ -89,7 +90,7 @@ class recognize_objects(smach.State):
         self.object_finder_srv = rospy.ServiceProxy(self.object_finder_srv_name, hbrs_srvs.srv.GetObjects)
 
     def execute(self, userdata):     
- 
+        '''
 
         for i in range(10): 
             print "find object try: ", i
@@ -156,5 +157,18 @@ class recognize_objects(smach.State):
         userdata.recognized_objects = transformed_poses
 
         print "################ OBJECTS TAKEN: ", len(userdata.recognized_objects)
-
-        return 'succeeded'
+        '''
+        
+        #obj_names = ['screw1', 'nut1']
+        for i in range(2):
+            obj_name = raw_input("object_name: ")
+            
+            obj = hbrs_msgs.msg.Object()
+            obj.name = obj_name
+            
+            userdata.recognized_objects.append(obj)
+        
+        
+        
+        
+        return 'found_objects'
