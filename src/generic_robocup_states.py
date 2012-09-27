@@ -65,6 +65,78 @@ class get_basic_navigation_task(smach.State):
         return 'task_received'
 
 
+class get_basic_manipulation_task(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
+        
+    def execute(self, userdata):
+
+        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
+        
+        referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
+
+        man_task = "BMT<S2,S2,S3,line(nut,screw,bolt),S2>"
+        rospy.loginfo("Task received: " + man_task)
+        
+        # check if Task is a BNT task      
+        if(man_task[0:3] != "BMT"):
+           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
+           return 'wront_task_format' 
+
+        # remove leading start description        
+        man_task = man_task[3:len(man_task)]
+        
+        # check if description has beginning '<' and ending '>
+        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
+            rospy.loginfo("task spec not in correct format")
+            return 'wront_task_format' 
+        
+        
+        # remove beginning '<' and ending '>'
+        man_task = man_task[1:len(man_task)-1]
+        
+        #print man_task
+        
+        task_list = man_task.split(',')
+        
+        #print task_list
+
+        init_pose = task_list[0]
+        src_pose = task_list[1]
+        dest_pose = task_list[2]
+        
+        subtask_list = task_list[3].split('(')
+        obj_cfg = subtask_list[0]
+        
+        obj_names = []
+        obj_names.append(subtask_list[1])
+        
+        for i in range(4, (len(task_list)-1)):
+            if i == (len(task_list)-2):
+                task_list[i] = task_list[i][0:(len(task_list)-3)]
+                 
+            obj_names.append(task_list[i])
+               
+        
+        fnl_pose = task_list[len(task_list)-1]
+        
+        '''
+        print init_pose
+        print src_pose
+        print dest_pose
+        print obj_cfg
+        print obj_names
+        print fnl_pose
+        '''
+        
+        userdata.task_spec = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
+                            object_names=obj_names, final_pose=fnl_pose)
+        
+        return 'task_received'  
+
+
+
 class get_basic_transportation_task(smach.State):
 
     def __init__(self):
@@ -283,78 +355,7 @@ class get_basic_competitive_task(smach.State):
         
         return 'task_received'   
 
-    
-class get_basic_manipulation_task(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
         
-    def execute(self, userdata):
-
-        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        
-        referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
-
-        man_task = "BMT<S2,S2,S3,line(nut,screw,bolt),S2>"
-        rospy.loginfo("Task received: " + man_task)
-        
-        # check if Task is a BNT task      
-        if(man_task[0:3] != "BMT"):
-           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
-           return 'wront_task_format' 
-
-        # remove leading start description        
-        man_task = man_task[3:len(man_task)]
-        
-        # check if description has beginning '<' and ending '>
-        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wront_task_format' 
-        
-        
-        # remove beginning '<' and ending '>'
-        man_task = man_task[1:len(man_task)-1]
-        
-        #print man_task
-        
-        task_list = man_task.split(',')
-        
-        #print task_list
-
-        init_pose = task_list[0]
-        src_pose = task_list[1]
-        dest_pose = task_list[2]
-        
-        subtask_list = task_list[3].split('(')
-        obj_cfg = subtask_list[0]
-        
-        obj_names = []
-        obj_names.append(subtask_list[1])
-        
-        for i in range(4, (len(task_list)-1)):
-            if i == (len(task_list)-2):
-                task_list[i] = task_list[i][0:(len(task_list)-3)]
-                 
-            obj_names.append(task_list[i])
-               
-        
-        fnl_pose = task_list[len(task_list)-1]
-        
-        '''
-        print init_pose
-        print src_pose
-        print dest_pose
-        print obj_cfg
-        print obj_names
-        print fnl_pose
-        '''
-        
-        userdata.task_spec = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
-                            object_names=obj_names, final_pose=fnl_pose)
-        
-        return 'task_received'  
-    
-    
 class wait_for_desired_duration(smach.State):
 
     def __init__(self):
