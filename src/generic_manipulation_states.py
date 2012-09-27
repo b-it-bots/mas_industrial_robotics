@@ -19,6 +19,10 @@ planning_mode = ""            # no arm planning
 #planning_mode = "planned"    # using arm planning
 
 
+class Bunch:
+    def __init__(self, **kwds):
+         self.__dict__.update(kwds)
+
 class is_object_grasped(smach.State):
 
     def __init__(self):
@@ -77,7 +81,7 @@ class grasp_drawer(smach.State):
         sss.move("gripper", "open")
         
         
-        
+        '''
         # transform to base_link
         try:
             tf_listener = tf.TransformListener()
@@ -111,11 +115,23 @@ class grasp_drawer(smach.State):
         rospy.sleep(3)
         
         sss.move("arm", [float(obj_pose_transformed.pose.position.x), float(obj_pose_transformed.pose.position.y), float(obj_pose_transformed.pose.position.z), "/base_link"], mode=planning_mode)
+        '''
+        
+        #sss.move("arm", [0.4874590962250121, 0.0055892878817233524, -0.05027115597514983811, 0.2, 2.0, 1.57, "/base_link"])
+        sss.move("arm", "drawer_prepre_grasp")
+        rospy.sleep(0.5)
+        sss.move("arm", "drawer_pre_grasp")
+        rospy.sleep(0.5)
+        sss.move("arm", "drawer_grasp")
+        rospy.sleep(0.5)
         
         
         #global planning_mode
         #sss.move("arm", [0.48, 0, -0.02, 0, 3.1, 1.57, "/base_link"], mode=planning_mode)
-        sss.move("gripper", "close")
+        #sss.move("gripper", "close")
+        
+        
+        ##sss.move("arm", "initposition")
 
         return 'succeeded'
    
@@ -293,7 +309,7 @@ class grasp_obj_from_pltf(smach.State):
         # untested
         #sss.move("arm", pltf_obj_pose+"_pre")
         #
-        sss.move("arm", pltf_obj_pose, mode=planning_mode)
+        sss.move("arm", pltf_obj_pose.pose, mode=planning_mode)
         
         sss.move("gripper", "close")
         rospy.sleep(3)

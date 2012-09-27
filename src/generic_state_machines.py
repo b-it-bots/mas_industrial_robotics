@@ -46,7 +46,8 @@ class sm_grasp_drawer(smach.StateMachine):
                             'drawer_not_selected':'FIND_DRAWER_AT_SOURCE'})
                     
             smach.StateMachine.add('PLACE_BASE_IN_FRONT_OF_DRAWER', place_base_in_front_of_object(),
-                transitions={'succeeded':'GRASP_DRAWER'},
+                transitions={'succeeded':'GRASP_DRAWER',
+                             'srv_call_failed':'PLACE_BASE_IN_FRONT_OF_DRAWER'},
                 remapping={'object_pose':'object_to_grasp'})
                 
             smach.StateMachine.add('GRASP_DRAWER', grasp_drawer(),

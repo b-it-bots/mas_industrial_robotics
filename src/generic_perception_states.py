@@ -30,7 +30,6 @@ class find_drawer(smach.State):
             rospy.logerr("could not execute service <<%s>>: %e", self.drawer_finder_srv_name, e)
             return 'srv_call_failed'
             
-        
         if (len(resp.objects) <= 0):
             rospy.logerr('found no drawer')
             return 'no_drawer_found'
@@ -38,6 +37,7 @@ class find_drawer(smach.State):
         rospy.loginfo('found {0} drawers'.format(len(resp.objects)))
         
         userdata.drawer_pose_list = resp.objects
+        
         return 'found_drawer'
 
 
@@ -81,7 +81,7 @@ class recognize_objects(smach.State):
     def __init__(self):
         smach.State.__init__(
             self,
-            outcomes=['succeeded', 'failed'],
+            outcomes=['found_objects', 'no_objects_found', 'srv_call_failed'],
             input_keys=['recognized_objects'],
             output_keys=['recognized_objects'])
         
@@ -98,7 +98,8 @@ class recognize_objects(smach.State):
                 rospy.wait_for_service(self.object_finder_srv_name, 15)
                 resp = self.object_finder_srv()
             except Exception, e:  
-                rospy.logerr("service call %s failed", self.object_finder_srv_name)         
+                rospy.logerr("service call %s failed", self.object_finder_srv_name)     
+                return 'srv_called_failed'    
         
 
             if (len(resp.objects) <= 0):
@@ -109,7 +110,7 @@ class recognize_objects(smach.State):
 
         if len(resp.objects) == 0:
             rospy.loginfo('NO objects in FOV')
-            return 'failed'
+            return 'no_objects_found'
 
         tf_listener = tf.TransformListener()
 

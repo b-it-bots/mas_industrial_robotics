@@ -16,14 +16,59 @@ sss = simple_script_server()
 class place_base_in_front_of_object(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'], input_keys=['object_pose'])
+        smach.State.__init__(self, outcomes=['succeeded', 'srv_call_failed'], input_keys=['object_pose'])
+
+        self.shiftbase_srv_name = '/raw_relative_movements/shiftbase'
+        self.shiftbase_srv = rospy.ServiceProxy(self.shiftbase_srv_name, raw_srvs.srv.SetPoseStamped) 
+
+        self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
+                
+        # transform to base_link
         
-        print "placement, obj pose:", userdata.object_pose
+        tf_worked = False
+        while not tf_worked:
+            try:
+                print "HEADER: ", userdata.object_pose.header.frame_id
+                userdata.object_pose.header.stamp = rospy.Time.now()
+                self.tf_listener.waitForTransform('/base_link', userdata.object_pose.header.frame_id, rospy.Time(0), rospy.Duration(5))
+                obj_pose_transformed = self.tf_listener.transformPose('/base_link', userdata.object_pose)
+                tf_worked = True
+            except Exception, e:
+                rospy.logerr("tf exception in place_base_in_front_of_object: transform: %s", e)
+                rospy.sleep(0.2)
+                tf_worked = False
+        
+        
+        print obj_pose_transformed
+        
+        # call base placement service
+        try:
+            rospy.loginfo("wait for service: <<%s>>", self.shiftbase_srv_name)   
+            rospy.wait_for_service(self.shiftbase_srv_name, 15)
+
+
+            goalpose = geometry_msgs.msg.PoseStamped()
+            goalpose.pose.position.x = obj_pose_transformed.pose.position.x - 0.50
+            goalpose.pose.position.y = obj_pose_transformed.pose.position.y
+            goalpose.pose.position.z = 0.05 # speed
+            quat = tf.transformations.quaternion_from_euler(0,0,0)
+            goalpose.pose.orientation.x = quat[0]
+            goalpose.pose.orientation.y = quat[1]
+            goalpose.pose.orientation.z = quat[2]
+            goalpose.pose.orientation.w = quat[3]
+            
+            print goalpose
+            
+            raw_input("\npress ENTER to continue \n")
+            
+            self.shiftbase_srv(goalpose)
+        except Exception, e:
+            rospy.logerr("service call <<%s>> failed: %s", self.shiftbase_srv_name, e)  
+            return 'srv_call_failed'
         
         return 'succeeded'
-
 
 class approach_pose(smach.State):
 

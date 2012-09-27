@@ -145,7 +145,9 @@ class get_basic_transportation_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BTT<(D1,N,6),(S2,E,3)>'
+        #transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BTT<(D1,N,6),(S2,E,3)>'
+        transportation_task = 'BTT<initialsituation(<S0,(nut1,screw1)><S1,(nut2,screw2)><S2,(nut3,screw3)><S4,(screw4)>);goalsituation(<D1,line(screw1,nut2)><D2,line(nut2,screw3)><D3,line(nut1,nut3)>)>'
+        
         rospy.loginfo("Task received: " + transportation_task)
         
         # check if Task is a BTT task      
@@ -167,32 +169,27 @@ class get_basic_transportation_task(smach.State):
 
         # Task split
         task_situation = transportation_task.split(';')
-        rospy.loginfo(task_situation)  
+        rospy.loginfo("split1: %s",task_situation)  
         
 
         # Initial Situation
         initial_situation = task_situation[0]
-        rospy.loginfo(initial_situation)        
+        rospy.loginfo("init: %s", initial_situation)        
 
         if(initial_situation[0:16] != "initialsituation"):
            rospy.logerr("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
            return 'wront_task_format' 
 
         initial_situation = initial_situation[16:len(initial_situation)]
-        rospy.loginfo(initial_situation)
+        rospy.loginfo('removed <> and (): %s',initial_situation)
 
         init_tasks = re.findall('\<(?P<name>.*?)\>', initial_situation)
-        rospy.loginfo(init_tasks)
+        rospy.loginfo("split into poses: %s",init_tasks)
 
         # Update userdata with expcted initial situation information
         for item in init_tasks:            
             desired_loc = item[0:2]
 
-            if item[0] == "D":
-                base_orientation = "W"
-            elif item[0] == "S":
-                base_orientation = "E"
-
             obj_taskspec = item[3:len(item)]
 
             objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
@@ -201,49 +198,43 @@ class get_basic_transportation_task(smach.State):
             obj_conf = obj_taskspec.split('(')
             obj_conf = obj_conf[0]
 
+            rospy.loginfo("    %s %s", desired_loc, objs)
   
-            initial_tasklist = Bunch(location=desired_loc,orientation=base_orientation,task='fetch object workspace',object_names=objs,object_config=obj_conf) 
+            initial_tasklist = Bunch(type='source', location = desired_loc, object_names=objs) 
             userdata.task_list.append(initial_tasklist)
 
         
         # Goal Situation
         goal_situation = task_situation[1]
-        rospy.loginfo(goal_situation)    
+        rospy.loginfo('goal %s', goal_situation)    
 
         if(goal_situation[0:13] != "goalsituation"):
            rospy.logerr("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
            return 'wront_task_format' 
 
-        rospy.loginfo(goal_situation)
         goal_situation = goal_situation[13:len(goal_situation)]
-        rospy.loginfo(goal_situation)
+        rospy.loginfo('removed goal string: %s', goal_situation)
 
         goal_tasks = re.findall('\<(?P<name>.*?)\>', goal_situation)
-        rospy.loginfo(goal_tasks)
+        rospy.loginfo('split into locations: %s', goal_tasks)
 
         # Update userdata with expcted goal situation information
         for item in goal_tasks:
             desired_loc = item[0:2]
-            if item[0] == "D":
-                base_orientation = "W"
-            elif item[0] == "S":
-                base_orientation = "E"
             
             obj_taskspec = item[3:len(item)]
 
             objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
             objs = objs[0].split(',')
-            rospy.loginfo(objs)
 
             obj_conf = obj_taskspec.split('(')
             obj_conf = obj_conf[0]
-            rospy.loginfo(obj_conf)
+
+            rospy.loginfo("    %s %s %s", desired_loc, obj_conf, objs)
 
             
-            goal_tasklist = Bunch(location=desired_loc,orientation=base_orientation,task='place object in workspace',object_names = objs, object_config = obj_conf)
-            userdata.task_list.append(goal_tasklist)
-
-        
+            goal_tasklist = Bunch(type='destination', location = desired_loc, object_names = objs,  object_config = obj_conf)
+            userdata.task_list.append(goal_tasklist)        
         return 'task_received'   
     
 class get_basic_competitive_task(smach.State):
