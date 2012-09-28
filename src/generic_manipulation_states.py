@@ -231,8 +231,10 @@ class place_obj_on_rear_platform(smach.State):
 
     def execute(self, userdata):   
         global planning_mode
-        #sss.move("arm", "zeroposition", mode=planning_mode)
-        #sss.move("arm", "platform_intermediate", mode=planning_mode)
+        
+        if planning_mode != "planned":
+            sss.move("arm", "zeroposition", mode=planning_mode)
+            sss.move("arm", "platform_intermediate", mode=planning_mode)
 
         
         if(len(userdata.rear_platform_free_poses) == 0):
@@ -240,9 +242,10 @@ class place_obj_on_rear_platform(smach.State):
             return 'no_more_free_poses'
             
         pltf_pose = userdata.rear_platform_free_poses.pop()
-        # untested
-        #sss.move("arm", pltf_pose+"_pre")
-        #
+
+        if planning_mode != "planned":
+            sss.move("arm", pltf_pose+"_pre")
+
         sss.move("arm", pltf_pose, mode=planning_mode)
         
         
@@ -250,8 +253,10 @@ class place_obj_on_rear_platform(smach.State):
         rospy.sleep(2)
 
         userdata.rear_platform_occupied_poses.append(pltf_pose)
-        #untested
-        #sss.move("arm", pltf_pose+"_pre")
+
+        if planning_mode != "planned":
+            sss.move("arm", pltf_pose+"_pre")
+
         sss.move("arm", "platform_intermediate", mode=planning_mode)
 
         return 'succeeded'
@@ -282,7 +287,10 @@ class move_arm_out_of_view(smach.State):
 
     def execute(self, userdata):   
         global planning_mode
-        #sss.move("arm", "zeroposition", blocking = self.do_blocking)
+
+        if planning_mode != "planned":
+            sss.move("arm", "zeroposition", blocking = self.do_blocking)
+    
         sss.move("arm", "arm_out_of_view", mode=planning_mode, blocking = self.do_blocking)
            
         return 'succeeded'
@@ -304,19 +312,19 @@ class grasp_obj_from_pltf(smach.State):
 
         pltf_obj_pose = userdata.rear_platform_occupied_poses.pop()
         
-        #sss.move("arm", "platform_intermediate")
-        # untested
-        #sss.move("arm", pltf_obj_pose+"_pre")
-        #
-        sss.move("arm", pltf_obj_pose.pose, mode=planning_mode)
+        if planning_mode != "planned":
+            sss.move("arm", "platform_intermediate")
+            sss.move("arm", pltf_obj_pose.platform_pose+"_pre")
+        
+        sss.move("arm", pltf_obj_pose.platform_pose, mode=planning_mode)
         
         sss.move("gripper", "close")
         rospy.sleep(3)
+
+        if planning_mode != "planned":        
+            sss.move("arm", pltf_obj_pose.platform_pose+"_pre")
+            sss.move("arm", "platform_intermediate")
         
-        # untested
-        #sss.move("arm", pltf_obj_pose+"_pre")
-        #
-        #sss.move("arm", "platform_intermediate")
         sss.move("arm", "zeroposition", mode=planning_mode)
            
         return 'succeeded'
