@@ -145,7 +145,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         print "OBJ POSE: ", userdata.object_to_grasp
         
         try:
-            tf_listener = tf.TransformListener()
+            tf_listener = tf.TransformListener(10)
         except Exception, e:
             print "tf exception in adjust_pose_wrt_recognized_obj: create transform listener: ", e
 
@@ -166,6 +166,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         obj_pose_transformed = 0
         while not tf_worked:
             try:
+                userdata.object_to_grasp.header.stamp = rospy.Time.now()
                 obj_pose_transformed = tf_listener.transformPose('/base_link', userdata.object_to_grasp)
                 tf_worked = True
             except Exception, e:
