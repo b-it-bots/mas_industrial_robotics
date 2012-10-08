@@ -175,23 +175,24 @@ class get_basic_manipulation_task_modified(smach.State):
         subtask_list = task[3].split('(')
         obj_cfg = subtask_list[0]
         
-        obj_names = []
-        obj_names.append(subtask_list[1])
+        objs = []
+        objs.append(subtask_list[1])
         
-        for i in range(4, (len(task_list)-1)):
-            if i == (len(task_list)-2):
+        for i in range(4, (len(task)-1)):
+            if i == (len(task)-2):
                 task[i] = task[i][0:(len(task)-3)]
                  
-            obj_names.append(task[i])
+            objs.append(task[i])
                
         
-        fnl_pose = task[len(task_list)-1]
+        fnl_pose = task[len(task)-1]
         
+
         
         initial_tasklist = Bunch(type='source', location = task[1], object_names=objs) 
         userdata.task_list.append(initial_tasklist)
 
-        goal_tasklist = Bunch(type='destination', location = task[2], object_names = obj_names,  object_config = obj_cfg)
+        goal_tasklist = Bunch(type='destination', location = task[2], object_names = objs,  object_config = obj_cfg)
         userdata.task_list.append(goal_tasklist)
 
         userdata.final_pose = fnl_pose
