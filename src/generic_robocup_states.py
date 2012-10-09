@@ -75,10 +75,11 @@ class get_basic_manipulation_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        
-        #man_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
+       
+        #man_task = "BMT<D2,D2,D2,line(R20,M20_100,F20_20_B),T4>"
+        man_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
 
-        man_task = "BMT<D2,D2,D2,line(R20,M20_100,F20_20_B),T4>"
+        
 
         rospy.loginfo("Task received: " + man_task)
         
