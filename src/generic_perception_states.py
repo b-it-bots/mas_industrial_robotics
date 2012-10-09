@@ -135,8 +135,8 @@ class recognize_objects(smach.State):
         userdata.recognized_objects = resp.objects
 
         print "################ OBJECTS TAKEN: ", len(userdata.recognized_objects)
+
         '''
-        
         #obj_names = ['screw1', 'nut1']
         for i in range(2):
             obj_name = raw_input("object_name: ")
@@ -145,8 +145,8 @@ class recognize_objects(smach.State):
             obj.name = obj_name
             
             userdata.recognized_objects.append(obj)
-        
-        '''
+        ''' 
+
         
         
         return 'found_objects'
