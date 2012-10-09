@@ -78,7 +78,8 @@ class get_basic_manipulation_task(smach.State):
         
         #man_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
 
-        man_task = "BMT<S2,S2,S3,line(R20,M20_100,S40_40_B),S3>"
+        man_task = "BMT<D2,D2,D2,line(R20,M20_100,F20_20_B),T4>"
+
         rospy.loginfo("Task received: " + man_task)
         
         # check if Task is a BNT task      
@@ -131,6 +132,7 @@ class get_basic_manipulation_task(smach.State):
         print obj_names
         print fnl_pose
         '''
+        
         
         userdata.task_spec = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
                             object_names=obj_names, final_pose=fnl_pose)
