@@ -176,7 +176,7 @@ class grasp_obj_with_visual_servering(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed', 'vs_timeout'], input_keys=['object_to_grasp'])
         
-        self.visual_serv_srv = rospy.ServiceProxy('/raw_visual_servoing/start', std_srvs.srv.Empty)
+        self.visual_serv_srv = rospy.ServiceProxy('/raw_visual_servoing/start', raw_srvs.srv.ReturnBool)
     def execute(self, userdata):
         global planning_mode
         sss.move("gripper", "open")
@@ -194,13 +194,15 @@ class grasp_obj_with_visual_servering(smach.State):
         rospy.wait_for_service('/raw_visual_servoing/start', 30)
         
         visual_done = False
+        print "do visual serv"
         while not visual_done:
             try:
-                print "do visual serv"
+                
                 resp = self.visual_serv_srv()
 
-                if (!resp.value)
+                if not(resp.value):
                     rospy.logerr("visual servoing exited with timeout")
+                    visual_done = False
                     sss.move("arm", "zeroposition", mode=planning_mode)
                     return 'vs_timeout'
 
@@ -216,7 +218,7 @@ class grasp_obj_with_visual_servering(smach.State):
         #rospy.sleep(3)
         #sss.move("arm", "zeroposition")
         
-
+         
         grasper = Grasper()
         print("waiting 0.02 for arm joint values")
         rospy.sleep(0.05)
