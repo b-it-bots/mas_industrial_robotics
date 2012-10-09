@@ -29,7 +29,8 @@ class get_basic_navigation_task(smach.State):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
         nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
-        #nav_task = 'BNT<(S2,N,5),(S3,E,3)>'
+        #nav_task = 'BNT<(T2,E,1),(D2,N,1),(S3,E,3),(T3,S,3),(T7,N,3),(S1,W,3),(T2,S,1),(D1,W,1),(T1,N,1),(S1,E,1)>'
+        #nav_task = 'BNT<(T3,E,1),(S1,N,1),(T3,N,3)>'
         rospy.loginfo("Task received: " + nav_task)
         
         # check if Task is a BNT task      
@@ -75,9 +76,9 @@ class get_basic_manipulation_task(smach.State):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
         
-        #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
+        #man_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
 
-        man_task = "BMT<S1,S1,S2,line(nut,screw,bolt),S1>"
+        man_task = "BMT<D2,D2,D2,line(R20,M20_100,S40_40_B),D2>"
         rospy.loginfo("Task received: " + man_task)
         
         # check if Task is a BNT task      
