@@ -181,6 +181,7 @@ class grasp_obj_with_visual_servering(smach.State):
         global planning_mode
         sss.move("gripper", "open")
         
+        
         #sss.move("arm", "pregrasp_laying_mex", mode=planning_mode)
         #pt = userdata.object_to_grasp.pose.position
         #r = userdata.object_to_grasp.pose.orientation
