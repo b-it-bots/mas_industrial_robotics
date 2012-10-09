@@ -114,10 +114,15 @@ class get_basic_manipulation_task(smach.State):
         
         obj_names = []
         obj_names.append(subtask_list[1])
+   
+        print task_list
         
         for i in range(4, (len(task_list)-1)):
             if i == (len(task_list)-2):
-                task_list[i] = task_list[i][0:(len(task_list)-3)]
+                print task_list[i]
+                task_list[i] = task_list[i][0:(len(task_list[i])-1)]
+                print task_list[i]
+                
                  
             obj_names.append(task_list[i])
                
@@ -132,6 +137,12 @@ class get_basic_manipulation_task(smach.State):
         print obj_names
         print fnl_pose
         '''
+        for obj in range(len(obj_names)):
+            if obj_names[obj] == "V20":
+                obj_names[obj] = "R20"
+
+
+        print obj_names
         
         
         userdata.task_spec = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
