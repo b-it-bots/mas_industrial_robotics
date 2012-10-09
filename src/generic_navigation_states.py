@@ -30,9 +30,9 @@ class place_base_in_front_of_object(smach.State):
         tf_worked = False
         while not tf_worked:
             try:
-                print "HEADER: ", userdata.object_pose.header.frame_id
+            
                 userdata.object_pose.header.stamp = rospy.Time.now()
-                self.tf_listener.waitForTransform('/base_link', userdata.object_pose.header.frame_id, rospy.Time(0), rospy.Duration(5))
+                self.tf_listener.waitForTransform('/base_link', userdata.object_pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
                 obj_pose_transformed = self.tf_listener.transformPose('/base_link', userdata.object_pose)
                 tf_worked = True
             except Exception, e:
@@ -50,7 +50,7 @@ class place_base_in_front_of_object(smach.State):
 
 
             goalpose = geometry_msgs.msg.PoseStamped()
-            goalpose.pose.position.x = obj_pose_transformed.pose.position.x - 0.50
+            goalpose.pose.position.x = 0.0
             goalpose.pose.position.y = obj_pose_transformed.pose.position.y
             goalpose.pose.position.z = 0.05 # speed
             quat = tf.transformations.quaternion_from_euler(0,0,0)
@@ -114,7 +114,7 @@ class adjust_pose_wrt_platform(smach.State):
         rospy.loginfo("action server <<%s>> is ready ...", self.ac_base_adj_name);
         action_goal = raw_base_placement.msg.OrientToBaseActionGoal()
             
-        action_goal.goal.distance = 0.1;
+        action_goal.goal.distance = 0.08;
         rospy.loginfo("send action");
         self.ac_base_adj.send_goal(action_goal.goal);
         
@@ -153,7 +153,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         while not tf_wait_worked:
             try:
                 print "frame_id:",userdata.object_to_grasp.header.frame_id
-                tf_listener.waitForTransform(userdata.object_to_grasp.header.frame_id, '/base_link', rospy.Time.now(), rospy.Duration(2))
+                tf_listener.waitForTransform(userdata.object_to_grasp.header.frame_id, '/base_link', rospy.Time.now())
                 tf_wait_worked = True
             except Exception, e:
                 print "tf exception in adjust_pose_wrt_recognized_obj: wait for transform: ", e
@@ -213,7 +213,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         #x = (float(userdata.object_to_grasp.pose.position.x) - 0.45)
         #y = float(userdata.object_to_grasp.pose.position.y) 
         #yaw = float(0.0)
-                
+        print "succeeded"       
         return 'succeeded'
 
 class move_base_rel(smach.State):
