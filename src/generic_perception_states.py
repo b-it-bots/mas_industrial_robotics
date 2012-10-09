@@ -88,9 +88,10 @@ class recognize_objects(smach.State):
         
         self.object_finder_srv_name = '/detect_objects'
         self.object_finder_srv = rospy.ServiceProxy(self.object_finder_srv_name, hbrs_srvs.srv.GetObjects)
+        self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):     
-        '''
+        
 
         for i in range(10): 
             print "find object try: ", i
@@ -100,7 +101,7 @@ class recognize_objects(smach.State):
                 resp = self.object_finder_srv()
             except Exception, e:  
                 rospy.logerr("service call %s failed", self.object_finder_srv_name)     
-                return 'srv_called_failed'    
+                return 'srv_call_failed'    
         
 
             if (len(resp.objects) <= 0):
@@ -113,48 +114,25 @@ class recognize_objects(smach.State):
             rospy.loginfo('NO objects in FOV')
             return 'no_objects_found'
 
-        tf_listener = tf.TransformListener()
+        print resp.objects
 
-        tf_wait_worked = False
-        while not tf_wait_worked:
-            try:
-                # TODO: fix in perception and remove the lines below then
-                resp.objects[0].pose.header.frame_id = '/openni_rgb_optical_frame'
-
-
-                print "frame_id:",resp.objects[0].pose.header.frame_id
-                print "cluster_id:",resp.objects[0].cluster.header.frame_id
-                tf_listener.waitForTransform(resp.objects[0].pose.header.frame_id, '/odom', resp.objects[0].pose.header.stamp, rospy.Duration(2))
-                tf_wait_worked = True
-            except Exception, e:
-                print "tf exception in recognize_objects: wait for transform: ", e
-                tf_wait_worked = False
-                rospy.sleep(0.5)
-                   
-        transformed_poses = []
-        obj_count = 1
-        for obj in resp.objects:
+        #transform to odom
+        for i in range(len(resp.objects)):
             tf_worked = False
-            
-            if obj_count >= 4:
-                break
-
-            obj_count = obj_count + 1
-
             while not tf_worked:
                 try:
-                    # TODO: fix in perception and remove the lines below then
-                    obj.pose.header.frame_id = '/openni_rgb_optical_frame'
-
-
-                    obj.pose = tf_listener.transformPose('/odom', obj.pose)
-                    transformed_poses.append(obj.pose)
+                    print "frame_id: ", resp.objects[i].pose.header.frame_id
+                    resp.objects[i].pose.header.stamp = rospy.Time.now()
+                    self.tf_listener.waitForTransform('/odom', resp.objects[i].pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
+                    obj_pose_transformed = self.tf_listener.transformPose('/odom', resp.objects[i].pose)
+                    resp.objects[i].pose = obj_pose_transformed
                     tf_worked = True
                 except Exception, e:
-                    print "tf exception in recognize_objects: transform pose: ", e
+                    rospy.logerr("tf exception in recognize objects: transform: %s", e)
+                    rospy.sleep(0.2)
                     tf_worked = False
 
-        userdata.recognized_objects = transformed_poses
+        userdata.recognized_objects = resp.objects
 
         print "################ OBJECTS TAKEN: ", len(userdata.recognized_objects)
         '''
@@ -168,7 +146,7 @@ class recognize_objects(smach.State):
             
             userdata.recognized_objects.append(obj)
         
-        
+        '''
         
         
         return 'found_objects'
