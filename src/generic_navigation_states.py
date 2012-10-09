@@ -61,7 +61,7 @@ class place_base_in_front_of_object(smach.State):
             
             print goalpose
             
-            raw_input("\npress ENTER to continue \n")
+            #raw_input("\npress ENTER to continue \n")
             
             self.shiftbase_srv(goalpose)
         except Exception, e:
