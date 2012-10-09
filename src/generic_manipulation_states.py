@@ -180,17 +180,17 @@ class grasp_obj_with_visual_servering(smach.State):
     def execute(self, userdata):
         global planning_mode
         sss.move("gripper", "open")
-        '''
+        
         #sss.move("arm", "pregrasp_laying_mex", mode=planning_mode)
-        pt = userdata.object_to_grasp.pose.position
-        r = userdata.object_to_grasp.pose.orientation
-        [r, p, y] = euler_from_quaternion([r.w, r.x, r.y, r.z])
-        d = [pt.x, pt.y, pt.z, 0, 0, math.pi / 2, userdata.object_to_grasp.header.frame_id]
-        #sss.move("arm", "pregrasp_laying_mex", mode=planning_mode)
-        sss.move("arm", d)
+        #pt = userdata.object_to_grasp.pose.position
+        #r = userdata.object_to_grasp.pose.orientation
+        #[r, p, y] = euler_from_quaternion([r.w, r.x, r.y, r.z])
+        #d = [pt.x, pt.y, pt.z, 0, 0, math.pi / 2, userdata.object_to_grasp.header.frame_id]
+        sss.move("arm", "pregrasp_laying_mex", mode=planning_mode)
+        #sss.move("arm", d)
 
         #print "wait for service: /raw_visual_servoing/start "
-        #rospy.wait_for_service('/raw_visual_servoing/start', 30)
+        rospy.wait_for_service('/raw_visual_servoing/start', 30)
         
         visual_done = False
         while not visual_done:
@@ -202,7 +202,7 @@ class grasp_obj_with_visual_servering(smach.State):
             except:
                 visual_done = False
         
-        #print userdata.object_to_grasp
+        print userdata.object_to_grasp
         #sss.move("arm", [float(userdata.object_to_grasp.pose.position.x), float(userdata.object_to_grasp.pose.position.y), (float(userdata.object_to_grasp.pose.position.z) + 0.02),"/base_link"])
 
         #sss.move("gripper", "close")
@@ -215,7 +215,7 @@ class grasp_obj_with_visual_servering(smach.State):
         rospy.sleep(0.05)
         grasper.simple_grasp("laying")
         print("did it work?")
-        '''
+        
 
         sss.move("arm","grasp_laying_mex", mode=planning_mode)
 
