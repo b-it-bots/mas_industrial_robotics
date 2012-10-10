@@ -27,12 +27,12 @@ class get_basic_navigation_task(smach.State):
         
     def execute(self, userdata):
 
-        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
+        #rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
 
         #nav_task = 'BNT<(T2,E,1),(D2,N,1),(S3,E,3),(T3,S,3),(T7,N,3),(S1,W,3),(T2,S,1),(D1,W,1),(T1,N,1),(S1,E,1)>'
-        #nav_task = 'BNT<(T3,E,1),(S1,N,1),(T3,N,3)>'
+        nav_task = 'BNT<(S1,W,1),(D1,E,3),(S2,N,3),(D2,S,3),(T1,W,3),(T2,W,3),(D1,W,3),(S3,W,3),(T5,W,3),(T6,W,3),(S2,W,3),(T7,W,3),(S1,N,1),(D1,E,1)>'
         		        
-        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
+        #nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
         rospy.loginfo("Task received: " + nav_task)
         
         # check if Task is a BNT task      
@@ -226,7 +226,8 @@ class get_basic_transportation_task(smach.State):
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
 
 		#transportation_task = 'BTT<initialsituation(<S1,(screw,alu_silver_l)><S2,(alu_silver_s,alu_black_l,alu_black_s)>);goalsituation(<S3,line(alu_silver_l,alu_silver_s)><D1,zigzag(alu_black_s,alu_black_l,screw)>)>'
-        #transportation_task = 'BTT<initialsituation(<S2,(R20,V20,F20_20_B)>);goalsituation(<S3,line(R20)><S1,line(V20,F20_20_B)>)>'
+        #transportation_task = 'BTT<initialsituation(<S3,(F20_20_B,M20_100)>);goalsituation(<S2,zigzag(M20_100,F20_20_B)>)>'
+        
         transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
 
         rospy.loginfo("Task received: " + transportation_task)
@@ -276,6 +277,10 @@ class get_basic_transportation_task(smach.State):
             objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
             objs = objs[0].split(',')
 
+            for i in range(len(objs)):
+                if objs[i] == "V20":
+                    objs[i] = "R20"
+
             obj_conf = obj_taskspec.split('(')
             obj_conf = obj_conf[0]
 
@@ -307,6 +312,10 @@ class get_basic_transportation_task(smach.State):
 
             objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
             objs = objs[0].split(',')
+
+            for i in range(len(objs)):
+                if objs[i] == "V20":
+                    objs[i] = "R20"
 
             obj_conf = obj_taskspec.split('(')
             obj_conf = obj_conf[0]
