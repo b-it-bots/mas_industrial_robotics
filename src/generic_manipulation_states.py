@@ -371,5 +371,7 @@ class place_object_in_configuration(smach.State):
         
         sss.move("gripper","open")
         rospy.sleep(2)
+
+        sss.move("arm", "zeroposition", mode=planning_mode)
                 
         return 'succeeded'
