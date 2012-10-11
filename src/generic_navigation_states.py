@@ -59,11 +59,11 @@ class place_base_in_front_of_object(smach.State):
 
             print "YAW of MARKER: ", yaw
             
-            goalpose.pose.orientation = obj_pose_transformed.pose.orientation
-            #goalpose.pose.orientation.x = quat[0]
-            #goalpose.pose.orientation.y = quat[1]
-            #goalpose.pose.orientation.z = quat[2]
-            #goalpose.pose.orientation.w = quat[3]
+            #goalpose.pose.orientation = obj_pose_transformed.pose.orientation
+            goalpose.pose.orientation.x = quat[0]
+            goalpose.pose.orientation.y = quat[1]
+            goalpose.pose.orientation.z = quat[2]
+            goalpose.pose.orientation.w = quat[3]
             
             print goalpose
             
