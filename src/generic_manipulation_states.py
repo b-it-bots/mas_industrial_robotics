@@ -211,7 +211,7 @@ class grasp_obj_with_visual_servering(smach.State):
             except:
                 visual_done = False
         
-        print userdata.object_to_grasp
+        #print userdata.object_to_grasp
         #sss.move("arm", [float(userdata.object_to_grasp.pose.position.x), float(userdata.object_to_grasp.pose.position.y), (float(userdata.object_to_grasp.pose.position.z) + 0.02),"/base_link"])
 
         #sss.move("gripper", "close")
@@ -222,7 +222,7 @@ class grasp_obj_with_visual_servering(smach.State):
         grasper = Grasper()
         print("waiting 0.02 for arm joint values")
         rospy.sleep(0.05)
-        grasper.simple_grasp("laying")
+        grasper.bin_grasp("laying")
         print("did it work?")
         
 
@@ -290,7 +290,10 @@ class move_arm(smach.State):
         self.position = position
         self.do_blocking = do_blocking
 
-    def execute(self, userdata):   
+    def execute(self, userdata):
+        sss.move("gripper", "open")
+        rospy.sleep(2.0)
+   
         global planning_mode
         sss.move("arm", self.position, mode=planning_mode, blocking = self.do_blocking)
                    
