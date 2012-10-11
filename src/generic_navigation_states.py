@@ -50,14 +50,20 @@ class place_base_in_front_of_object(smach.State):
 
 
             goalpose = geometry_msgs.msg.PoseStamped()
-            goalpose.pose.position.x = 0.0
+            goalpose.pose.position.x = obj_pose_transformed.pose.position.x             # WILL ONLY WORK FOR IROS FINAL
             goalpose.pose.position.y = obj_pose_transformed.pose.position.y
             goalpose.pose.position.z = 0.05 # speed
             quat = tf.transformations.quaternion_from_euler(0,0,0)
-            goalpose.pose.orientation.x = quat[0]
-            goalpose.pose.orientation.y = quat[1]
-            goalpose.pose.orientation.z = quat[2]
-            goalpose.pose.orientation.w = quat[3]
+
+            (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([obj_pose_transformed.pose.orientation.x, obj_pose_transformed.pose.orientation.y, obj_pose_transformed.pose.orientation.z, obj_pose_transformed.pose.orientation.w])   
+
+            print "YAW of MARKER: ", yaw
+            
+            goalpose.pose.orientation = obj_pose_transformed.pose.orientation
+            #goalpose.pose.orientation.x = quat[0]
+            #goalpose.pose.orientation.y = quat[1]
+            #goalpose.pose.orientation.z = quat[2]
+            #goalpose.pose.orientation.w = quat[3]
             
             print goalpose
             
