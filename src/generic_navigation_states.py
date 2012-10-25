@@ -18,8 +18,8 @@ class place_base_in_front_of_object(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'srv_call_failed'], input_keys=['object_pose'])
 
-        self.shiftbase_srv_name = '/raw_relative_movements/shiftbase'
-        self.shiftbase_srv = rospy.ServiceProxy(self.shiftbase_srv_name, raw_srvs.srv.SetPoseStamped) 
+        self.move_base_relative_srv_name = '/raw_relative_movements/move_base_relative'
+        self.move_base_relative_srv = rospy.ServiceProxy(self.move_base_relative_srv_name, raw_srvs.srv.SetPoseStamped) 
 
         self.tf_listener = tf.TransformListener()
 
@@ -45,8 +45,8 @@ class place_base_in_front_of_object(smach.State):
         
         # call base placement service
         try:
-            rospy.loginfo("wait for service: <<%s>>", self.shiftbase_srv_name)   
-            rospy.wait_for_service(self.shiftbase_srv_name, 15)
+            rospy.loginfo("wait for service: <<%s>>", self.move_base_relative_srv_name)   
+            rospy.wait_for_service(self.move_base_relative_srv_name, 15)
 
 
             goalpose = geometry_msgs.msg.PoseStamped()
@@ -69,9 +69,9 @@ class place_base_in_front_of_object(smach.State):
             
             #raw_input("\npress ENTER to continue \n")
             
-            self.shiftbase_srv(goalpose)
+            self.move_base_relative_srv(goalpose)
         except Exception, e:
-            rospy.logerr("service call <<%s>> failed: %s", self.shiftbase_srv_name, e)  
+            rospy.logerr("service call <<%s>> failed: %s", self.move_base_relative_srv_name, e)  
             return 'srv_call_failed'
         
         return 'succeeded'
@@ -141,8 +141,8 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         
         #self.base_placement_srv = rospy.ServiceProxy('/raw_base_placement/calculateOptimalBasePose', raw_srvs.srv.GetPoseStamped) 
         
-        self.shiftbase_srv_name = '/raw_relative_movements/shiftbase'
-        self.shiftbase_srv = rospy.ServiceProxy(self.shiftbase_srv_name, raw_srvs.srv.SetPoseStamped) 
+        self.move_base_relative_srv_name = '/raw_relative_movements/move_base_relative'
+        self.move_base_relative_srv = rospy.ServiceProxy(self.move_base_relative_srv_name, raw_srvs.srv.SetPoseStamped) 
     def execute(self, userdata):
         
         #rospy.loginfo("wait for service: /raw_base_placement/calculateOptimalBasePose")   
@@ -193,12 +193,12 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         goalpose.pose.orientation.w = quat[3]
         
         try:
-            rospy.loginfo("wait for service: %s", self.shiftbase_srv_name)   
-            rospy.wait_for_service(self.shiftbase_srv_name, 30)
+            rospy.loginfo("wait for service: %s", self.move_base_relative_srv_name)   
+            rospy.wait_for_service(self.move_base_relative_srv_name, 30)
             
-            self.shiftbase_srv(goalpose)  
+            self.move_base_relative_srv(goalpose)  
         except:
-            rospy.logerr("could not execute service <<%s>>", self.shiftbase_srv_name)
+            rospy.logerr("could not execute service <<%s>>", self.move_base_relative_srv_name)
             return 'failed'
 
         # call base placement service
@@ -229,12 +229,12 @@ class move_base_rel(smach.State):
         
         self.x_distance = x_distance
         self.y_distance = y_distance
-        self.shiftbase_srv = rospy.ServiceProxy('/raw_relative_movements/shiftbase', raw_srvs.srv.SetPoseStamped) 
+        self.move_base_relative_srv = rospy.ServiceProxy('/raw_relative_movements/move_base_relative', raw_srvs.srv.SetPoseStamped) 
 
     def execute(self, userdata):
         
-        print "wait for service: /raw_relative_movements/shiftbase"   
-        rospy.wait_for_service('/raw_relative_movements/shiftbase', 30)
+        print "wait for service: /raw_relative_movements/move_base_relative"   
+        rospy.wait_for_service('/raw_relative_movements/move_base_relative', 30)
 
         goalpose = geometry_msgs.msg.PoseStamped()
         goalpose.pose.position.x = self.x_distance
@@ -248,9 +248,9 @@ class move_base_rel(smach.State):
         
         # call base placement service
         try:
-            self.shiftbase_srv(goalpose)
+            self.move_base_relative_srv(goalpose)
         except:
-            print "could not execute <</raw_relative_movements/shiftbase>> service"  
+            print "could not execute <</raw_relative_movements/move_base_relative>> service"  
         
         return 'succeeded'
             
