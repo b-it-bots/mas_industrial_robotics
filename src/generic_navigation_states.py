@@ -104,7 +104,7 @@ class approach_pose(smach.State):
                 return "failed"
             
 
-class adjust_pose_wrt_platform(smach.State):
+class adjust_pose_wrt_workspace(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
