@@ -109,7 +109,7 @@ class adjust_pose_wrt_workspace(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
 
-        self.ac_base_adj_name = '/raw_base_placement/scan_front_orientation'
+        self.ac_base_adj_name = '/raw_base_placement/adjust_to_workspace'
         self.ac_base_adj = actionlib.SimpleActionClient(self.ac_base_adj_name, raw_base_placement.msg.OrientToBaseAction)
 
     def execute(self, userdata):
