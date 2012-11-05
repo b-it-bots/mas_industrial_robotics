@@ -268,8 +268,8 @@ class switch_to_navigation_ctrl_in_orocos(smach.State):
 
     def execute(self, userdata):
         try:
-            rospy.wait_for_service('self.nav_ctrl_mode_srv_name', 15)
-            self.nav_ctrl_mode_srv_name()            
+            rospy.wait_for_service(self.nav_ctrl_mode_srv_name, 15)
+            self.nav_ctrl_mode_srv()            
         except Exception, e:
             rospy.logerr("could not execute service <<%s>>: %s", self.nav_ctrl_mode_srv_name, e)
             return 'srv_call_failed'
