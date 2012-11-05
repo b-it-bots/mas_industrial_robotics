@@ -134,6 +134,7 @@ class adjust_pose_wrt_workspace(smach.State):
             rospy.logerr("Action did not finish before the time out!")
             return 'failed'         
 
+
 class adjust_pose_wrt_recognized_obj(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'], 
@@ -254,3 +255,24 @@ class move_base_rel(smach.State):
         
         return 'succeeded'
             
+
+class switch_to_navigation_ctrl_in_orocos(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=['succeeded', 'srv_call_failed'])
+        
+        self.nav_ctrl_mode_srv_name = "/raw_arm_bridge_ros_orocos/enable_navigation_ctrl_mode";
+        self.nav_ctrl_mode_srv = rospy.ServiceProxy(self.nav_ctrl_mode_srv_name, std_srvs.srv.Empty)
+
+    def execute(self, userdata):
+        try:
+            rospy.wait_for_service('self.nav_ctrl_mode_srv_name', 15)
+            self.nav_ctrl_mode_srv_name()            
+        except Exception, e:
+            rospy.logerr("could not execute service <<%s>>: %s", self.nav_ctrl_mode_srv_name, e)
+            return 'srv_call_failed'
+
+        return "succeeded"
+      
