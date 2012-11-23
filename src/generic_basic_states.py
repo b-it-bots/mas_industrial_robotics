@@ -2,7 +2,7 @@
 import roslib
 roslib.load_manifest('raw_generic_states')
 
-import raw_srvs.srv
+import hbrs_srvs.srv
 import rospy
 import smach
 import smach_ros
@@ -39,7 +39,7 @@ class wait_for_open_door(smach.State):
 
     def execute(self, userdata):
 
-        door_client = rospy.ServiceProxy('/raw_door_status/door_status', raw_srvs.srv.ReturnBool)
+        door_client = rospy.ServiceProxy('/raw_door_status/door_status', hbrs_srvs.srv.ReturnBool)
         rospy.wait_for_service('/raw_door_status/door_status',20) # todo error handling
 
         # wait for open door

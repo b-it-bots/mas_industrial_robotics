@@ -14,14 +14,17 @@
   <depend package="rospy"/>
   <depend package="smach"/>
   <depend package="smach_ros"/>
-  <depend package="youbot_arm_navigation"/>
   <depend package="tf"/>
-  <depend package="raw_srvs"/>
   <depend package="std_srvs"/>
+  <depend package="actionlib"/>
+
+  <depend package="youbot_arm_navigation"/>  
+
+  <depend package="raw_srvs"/>
   <depend package="raw_script_server"/>  
   <depend package="raw_base_placement"/>
-  <depend package="actionlib"/>  
   <depend package="raw_arm_cmds"/> 
+
   <depend package="hbrs_srvs"/>
   <depend package="hbrs_msgs"/>  
 

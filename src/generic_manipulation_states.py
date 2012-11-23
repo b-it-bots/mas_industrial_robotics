@@ -13,7 +13,7 @@ sss = simple_script_server()
 
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
-import raw_srvs.srv
+import hbrs_srvs.srv
 
 
 planning_mode = ""            # no arm planning
@@ -31,7 +31,7 @@ class is_object_grasped(smach.State):
 
         self.obj_grasped_srv_name = '/arm_1/gripper_controller/is_gripper_closed'
 
-        self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, raw_srvs.srv.ReturnBool)
+        self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, hbrs_srvs.srv.ReturnBool)
         
     def execute(self, userdata):   
                 
@@ -177,7 +177,7 @@ class grasp_obj_with_visual_servering(smach.State):
         smach.State.__init__(self, outcomes=['succeeded', 'failed', 'vs_timeout'], input_keys=['object_to_grasp'])
         
         self.visual_serv_srv_name = "/raw_visual_servoing/do_visual_servoing"
-        self.visual_serv_srv = rospy.ServiceProxy(self.visual_serv_srv_name, raw_srvs.srv.ReturnBool)
+        self.visual_serv_srv = rospy.ServiceProxy(self.visual_serv_srv_name, hbrs_srvs.srv.ReturnBool)
     def execute(self, userdata):
         global planning_mode
         sss.move("gripper", "open")
