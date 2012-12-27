@@ -50,11 +50,11 @@ class detect_object(smach.State):
             outcomes=['succeeded', 'failed'],
             output_keys=['object_list'])
         
-        self.object_finder_srv = rospy.ServiceProxy('/raw_perception/object_segmentation/get_segmented_objects', hbrs_srvs.srv.GetObjects)
+        self.object_finder_srv = rospy.ServiceProxy('/hbrs_object_finder/get_segmented_objects', hbrs_srvs.srv.GetObjects)
 
     def execute(self, userdata):     
         #get object pose list
-        rospy.wait_for_service('/raw_perception/object_segmentation/get_segmented_objects', 30)
+        rospy.wait_for_service('/hbrs_object_finder/get_segmented_objects', 30)
 
         for i in range(10): 
             print "find object try: ", i
