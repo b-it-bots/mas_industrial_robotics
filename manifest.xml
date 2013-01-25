@@ -21,7 +21,7 @@
   <depend package="youbot_arm_navigation"/>  
 
   <depend package="raw_srvs"/>
-  <depend package="raw_script_server"/>  
+  <depend package="cob_script_server"/>  
   <depend package="raw_base_placement"/>
   <depend package="raw_arm_cmds"/> 
 
