@@ -20,7 +20,7 @@ class init_robot(smach.State):
     def execute(self, userdata):
         
         # init arm
-        arm_to_init = sss.move("arm", "initposition", blocking=False)
+        arm_to_init = sss.move("arm", "home", blocking=False)
         
         #init gripper
         gripper_open = sss.move("gripper", "open", blocking=False)

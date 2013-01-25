@@ -132,7 +132,7 @@ class grasp_drawer(smach.State):
         #sss.move("gripper", "close")
         
         
-        ##sss.move("arm", "initposition")
+        ##sss.move("arm", "home")
 
         return 'succeeded'
    
@@ -144,7 +144,7 @@ class grasp_random_object(smach.State):
         
     def execute(self, userdata):
         sss.move("gripper", "open", blocking=False)
-       # sss.move("arm", "zeroposition")
+       # sss.move("arm", "candle")
         
         for object in userdata.object_list:         
             
@@ -153,7 +153,7 @@ class grasp_random_object(smach.State):
                 continue
     
             global planning_mode
-            sss.move("arm", "zeroposition", mode=planning_mode)                             
+            sss.move("arm", "candle", mode=planning_mode)                             
 
             #object.pose.pose.position.z = object.pose.pose.position.z + 0.02
             object.pose.pose.position.x = object.pose.pose.position.x + 0.01
@@ -164,7 +164,7 @@ class grasp_random_object(smach.State):
             if handle_arm.get_state() == 3:
                 sss.move("gripper", "close", blocking=False)
                 rospy.sleep(3.0)
-                sss.move("arm", "zeroposition", mode=planning_mode)        
+                sss.move("arm", "candle", mode=planning_mode)        
                 return 'succeeded'    
             else:
                 rospy.logerr('could not find IK for current object')
@@ -183,12 +183,12 @@ class grasp_obj_with_visual_servering(smach.State):
         sss.move("gripper", "open")
         
         
-        #sss.move("arm", "pregrasp_laying_mex", mode=planning_mode)
+        #sss.move("arm", "pregrasp_laying", mode=planning_mode)
         #pt = userdata.object_to_grasp.pose.position
         #r = userdata.object_to_grasp.pose.orientation
         #[r, p, y] = euler_from_quaternion([r.w, r.x, r.y, r.z])
         #d = [pt.x, pt.y, pt.z, 0, 0, math.pi / 2, userdata.object_to_grasp.header.frame_id]
-        sss.move("arm", "pregrasp_laying_mex", mode=planning_mode)
+        sss.move("arm", "pregrasp_laying", mode=planning_mode)
         #sss.move("arm", d)
 
         #print "wait for service: ", self.visual_serv_srv_name
@@ -204,7 +204,7 @@ class grasp_obj_with_visual_servering(smach.State):
                 if not(resp.value):
                     rospy.logerr("visual servoing exited with timeout")
                     visual_done = False
-                    sss.move("arm", "zeroposition", mode=planning_mode)
+                    sss.move("arm", "candle", mode=planning_mode)
                     return 'vs_timeout'
 
                 print "done"
@@ -217,7 +217,7 @@ class grasp_obj_with_visual_servering(smach.State):
 
         #sss.move("gripper", "close")
         #rospy.sleep(3)
-        #sss.move("arm", "zeroposition")
+        #sss.move("arm", "candle")
         
          
         grasper = Grasper()
@@ -227,7 +227,7 @@ class grasp_obj_with_visual_servering(smach.State):
         print("did it work?")
         
 
-        sss.move("arm","grasp_laying_mex", mode=planning_mode)
+        sss.move("arm","grasp_laying", mode=planning_mode)
 
     
         #print "do visual serv"
@@ -237,7 +237,7 @@ class grasp_obj_with_visual_servering(smach.State):
         sss.move("gripper", "close")
         rospy.sleep(3)
 
-        sss.move("arm", "zeroposition", mode=planning_mode)
+        sss.move("arm", "candle", mode=planning_mode)
 
         return 'succeeded'
 
@@ -252,7 +252,7 @@ class place_obj_on_rear_platform(smach.State):
         global planning_mode
         
         if planning_mode != "planned":
-            sss.move("arm", "zeroposition", mode=planning_mode)
+            sss.move("arm", "candle", mode=planning_mode)
             sss.move("arm", "platform_intermediate", mode=planning_mode)
 
         
@@ -285,7 +285,7 @@ class place_obj_on_rear_platform(smach.State):
 
 class move_arm(smach.State):
 
-    def __init__(self, position = "zeroposition", do_blocking = True):
+    def __init__(self, position = "candle", do_blocking = True):
         smach.State.__init__(self, outcomes=['succeeded'])
         
         self.position = position
@@ -312,9 +312,9 @@ class move_arm_out_of_view(smach.State):
         global planning_mode
 
         if planning_mode != "planned":
-            sss.move("arm", "zeroposition", blocking = self.do_blocking)
+            sss.move("arm", "candle", blocking = self.do_blocking)
     
-        sss.move("arm", "arm_out_of_view", mode=planning_mode, blocking = self.do_blocking)
+        sss.move("arm", "out_of_view", mode=planning_mode, blocking = self.do_blocking)
            
         return 'succeeded'
     
@@ -348,7 +348,7 @@ class grasp_obj_from_pltf(smach.State):
             sss.move("arm", pltf_obj_pose+"_pre")
             sss.move("arm", "platform_intermediate")
         
-        sss.move("arm", "zeroposition", mode=planning_mode)
+        sss.move("arm", "candle", mode=planning_mode)
            
         return 'succeeded'
     
@@ -376,6 +376,6 @@ class place_object_in_configuration(smach.State):
         sss.move("gripper","open")
         rospy.sleep(2)
 
-        sss.move("arm", "zeroposition", mode=planning_mode)
+        sss.move("arm", "candle", mode=planning_mode)
                 
         return 'succeeded'
