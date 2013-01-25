@@ -29,7 +29,7 @@ class is_object_grasped(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['obj_grasped', 'obj_not_grasped', 'srv_call_failed'])
 
-        self.obj_grasped_srv_name = '/arm_1/gripper_controller/is_gripper_closed'
+        self.obj_grasped_srv_name = '/gripper_controller/is_gripper_closed'
 
         self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, hbrs_srvs.srv.ReturnBool)
         
