@@ -23,7 +23,6 @@
   <depend package="raw_srvs"/>
   <depend package="cob_script_server"/>  
   <depend package="raw_base_placement"/>
-  <depend package="raw_arm_cmds"/> 
 
   <depend package="hbrs_srvs"/>
   <depend package="hbrs_msgs"/>  
