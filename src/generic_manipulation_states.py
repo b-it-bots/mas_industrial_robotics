@@ -7,7 +7,6 @@ import smach_ros
 import math
 import arm_navigation_msgs.msg
 
-from grasp_object import *
 from simple_script_server import *
 sss = simple_script_server()
 
