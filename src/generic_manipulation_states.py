@@ -10,6 +10,9 @@ import arm_navigation_msgs.msg
 from simple_script_server import *
 sss = simple_script_server()
 
+from move_arm_cart_script_server import MoveArmCartScriptServer
+arm_cart = MoveArmCartScriptServer() 
+
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 import hbrs_srvs.srv
@@ -158,9 +161,9 @@ class grasp_random_object(smach.State):
             object.pose.pose.position.x = object.pose.pose.position.x + 0.01
             object.pose.pose.position.y = object.pose.pose.position.y - 0.005
 
-            handle_arm = sss.move("arm", [object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, "/base_link"], mode=planning_mode)
+            handle_arm = arm_cart.move([["/base_link", object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, 0.0, ((math.pi/2) + (math.pi/4)), 0.0, 0.0, 0.5, 0.0]])
 
-            if handle_arm.get_state() == 3:
+            if handle_arm.get_result().error_code.val == arm_navigation_msgs.msg.ArmNavigationErrorCodes.SUCCESS:
                 sss.move("gripper", "close", blocking=False)
                 rospy.sleep(3.0)
                 sss.move("arm", "candle", mode=planning_mode)        
