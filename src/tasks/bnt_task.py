@@ -20,8 +20,8 @@ class BNTTask(Task):
     def _parse(self, spec):
         self.subtasks = re.findall(r'\('
                                    '(?P<place>.+?),'
-                                   '(?P<orientation>[NESW],'
-                                   '(?P<break>[123]))'
+                                   '(?P<orientation>[NESW]),'
+                                   '(?P<break>[123])'
                                    '\)', spec)
 
     def __str__(self):
