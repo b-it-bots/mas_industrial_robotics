@@ -1,10 +1,5 @@
-#!/usr/bin/python
 import roslib
 roslib.load_manifest('raw_generic_states')
-pkg_dir = roslib.packages.get_pkg_dir('raw_generic_states')
-
-import sys
-sys.path.append(pkg_dir + '/include')
 
 import rospy
 import smach
