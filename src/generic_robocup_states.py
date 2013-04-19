@@ -6,6 +6,8 @@ import smach
 import referee_box_communication
 import re
 
+from tasks import *
+
 ip = "192.168.51.61"
 port = "11111"
 team_name = "b-it-bots"
@@ -24,46 +26,20 @@ class get_basic_navigation_task(smach.State):
     """
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        smach.State.__init__(self,
+                             outcomes=['task_received', 'wrong_task_format'],
+                             input_keys=['task'], output_keys=['task'])
 
     def execute(self, userdata):
-
         rospy.logdebug("Wait for task specification from server: %s:%s (team-name: %s)" % (ip, port, team_name))
-
-        #nav_task = 'BNT<(T2,E,1),(D2,N,1),(S3,E,3),(T3,S,3),(T7,N,3),(S1,W,3),(T2,S,1),(D1,W,1),(T1,N,1),(S1,E,1)>'
-        nav_task = 'BNT<(D1,W,1),(S1,E,3),(S2,E,3),(D2,S,3),(S3,W,3),(S2,W,3),(D2,W,3),(S1,W,3),(S2,W,3),(S3,W,3),(S2,W,3),(D1,W,3)>'
-
-        #nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
-        rospy.loginfo("Task received: " + nav_task)
-
-        # check if the taask is a BNT task
-        if not nav_task.startswith('BNT'):
-            rospy.logerr('Excepted <<BNT>> task, but <<%s>> received' % nav_task[0:3])
+        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
+        rospy.loginfo("Received task specification: %s" % nav_task)
+        try:
+            task = BNTTask(nav_task)
+        except TaskSpecFormatError:
             return 'wrong_task_format'
-
-        # remove leading start description
-        nav_task = nav_task[3:]
-
-        # check if description has beginning '<' and ending '>
-        if nav_task[0] != '<' or nav_task[-1] != '>':
-            rospy.logerr('Missing surrounding <> in task specification')
-            return 'wrong_task_format'
-
-        # remove beginning '<' and ending '>'
-        nav_task = nav_task[1:-1]
-
-        # find single tasks
-        task_list = re.findall('\((?P<name>.*?)\)', nav_task)
-
-        # put them into a struct like structure
-        for item in task_list:
-            task_items = item.split(',')
-            if len(task_items) != 3:
-                rospy.logerr("Expected three tokens in task item, got %i" % len(task_items))
-                return 'wrong_task_format'
-            task_struct = Bunch(location=task_items[0], orientation=task_items[1], duration=task_items[2])
-            userdata.task_list.append(task_struct)
-
+        rospy.loginfo('Parsed task:\n%s' % task)
+        userdata.task = task
         return 'task_received'
 
 
@@ -449,61 +425,50 @@ class wait_for_desired_duration(smach.State):
         rospy.loginfo('wait done')
         
         return 'succeeded'
-    
-    
+
+
 class increment_task_index(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'no_more_tasks'], 
-                                    input_keys=['task_list', 'current_task_index'],
-                                    output_keys=['current_task_index'])
-        
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'no_more_tasks'],
+                             input_keys=['task', 'current_task_index'],
+                             output_keys=['current_task_index'])
+
     def execute(self, userdata):
-        
-        # inc index
-        userdata.current_task_index = userdata.current_task_index + 1
-        
+        userdata.current_task_index += 1
         # check if index is larger than items in task list
-        if userdata.current_task_index >= len(userdata.task_list):
-            rospy.loginfo("no more tasks in task list")
+        if userdata.current_task_index >= len(userdata.task.subtasks):
+            rospy.loginfo("No more tasks in task list")
             return 'no_more_tasks'
-        
         return 'succeeded'
-    
+
+
 class select_pose_to_approach(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['pose_selected', 'location_not_known'], 
-                                    input_keys=['task_list', 'current_task_index', 'base_pose_to_approach'], 
-                                    output_keys=['base_pose_to_approach'])
-        
+        smach.State.__init__(self,
+                             outcomes=['pose_selected', 'location_not_known'],
+                             input_keys=['task', 'current_task_index', 'base_pose_to_approach'],
+                             output_keys=['base_pose_to_approach'])
+
     def execute(self, userdata):
-             
-        userdata.base_pose_to_approach = userdata.task_list[userdata.current_task_index].location        
-        
-        #get location position
-        if (not rospy.has_param("script_server/base/" + userdata.base_pose_to_approach)):
-            rospy.logerr("location <<" + userdata.base_pose_to_approach + ">> is not on the parameter server")
+        subtask = userdata.task.subtasks[userdata.current_task_index]
+        userdata.base_pose_to_approach = subtask[0]
+
+        if not rospy.has_param("script_server/base/" + subtask[0]):
+            rospy.logerr("Location <<%s>> is not on the parameter server" % subtask[0])
             return 'location_not_known'
-        
-        position = rospy.get_param("script_server/base/" + userdata.base_pose_to_approach)
-        
-        #get orientation angle
-        if (not rospy.has_param("script_server/base_orientations/" + userdata.task_list[userdata.current_task_index].orientation)):
-            rospy.logerr("orientation <<" + userdata.task_list[userdata.current_task_index].orientation + ">> is not on the parameter server")
+
+        position = rospy.get_param("script_server/base/" + subtask[0])
+
+        if not rospy.has_param("script_server/base_orientations/" + subtask[1]):
+            rospy.logerr("Orientation <<%s>> is not on the parameter server" % subtask[1])
             return 'location_not_known'
-        
-        orientation = rospy.get_param("script_server/base_orientations/" + userdata.task_list[userdata.current_task_index].orientation)
-        
-        #establish new pose
-        new_pose = [0]*3
-        new_pose[0] = position[0]
-        new_pose[1] = position[1]
-        new_pose[2] = orientation
-               
-        #set parameter
-        rospy.set_param("script_server/base/" + userdata.base_pose_to_approach, new_pose)
-        
-        rospy.loginfo('selected pose: ' + userdata.base_pose_to_approach + " with orientation: " + userdata.task_list[userdata.current_task_index].orientation)
+
+        orientation = rospy.get_param("script_server/base_orientations/" + subtask[1])
+
+        rospy.set_param("script_server/base/" + subtask[0], [position[0], position[1], orientation])
+        rospy.loginfo('Selected pose: %s' % subtask)
         return 'pose_selected'
-     
+
