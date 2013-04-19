@@ -348,20 +348,18 @@ class get_basic_competitive_task(smach.State):
         
         return 'task_received'   
 
-        
+
 class wait_for_desired_duration(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'], 
-                                    input_keys=['task_list', 'current_task_index'])
-        
+        smach.State.__init__(self,
+                             outcomes=['succeeded'],
+                             input_keys=['task', 'current_task_index'])
+
     def execute(self, userdata):
-        
-        sleep_duration = userdata.task_list[userdata.current_task_index].duration
-        rospy.loginfo('wait desired duration of ' + sleep_duration + " seconds")
-        rospy.sleep(int(sleep_duration))
-        rospy.loginfo('wait done')
-        
+        subtask = userdata.task.subtasks[userdata.current_task_index]
+        rospy.loginfo('Waiting for %s seconds...' % subtask[2])
+        rospy.sleep(int(subtask[2]))
         return 'succeeded'
 
 
