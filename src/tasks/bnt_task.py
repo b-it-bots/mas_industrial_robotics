@@ -17,6 +17,9 @@ class BNTTask(Task):
     def __init__(self, spec):
         Task.__init__(self, spec)
 
+    def pop(self):
+        return self.subtasks.pop(0)
+
     def _parse(self, spec):
         self.subtasks = re.findall(r'\('
                                    '(?P<place>.+?),'
