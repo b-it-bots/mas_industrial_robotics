@@ -45,6 +45,33 @@ class get_basic_navigation_task(smach.State):
 
 class get_basic_manipulation_task(smach.State):
 
+    """
+    Communicate with the RefereeBox and get the task description for basic
+    manipulation task.
+    """
+
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['task_received', 'wrong_task_format'],
+                             input_keys=['task'], output_keys=['task'])
+
+    def execute(self, userdata):
+        rospy.logdebug("Wait for task specification from server: %s:%s (team-name: %s)" % (ip, port, team_name))
+        #man_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
+        man_task = 'BMT<D2,D2,D2,line(R20,M20_100,F20_20_B),T4>'
+        rospy.loginfo("Received task specification: %s" % man_task)
+        try:
+            task = BMTTask(man_task)
+        except TaskSpecFormatError:
+            return 'wrong_task_format'
+        rospy.loginfo('Parsed task:\n%s' % task)
+        userdata.task = task
+        return 'task_received'
+
+
+'''
+class get_basic_manipulation_task(smach.State):
+
     def __init__(self):
         smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
         
@@ -106,14 +133,14 @@ class get_basic_manipulation_task(smach.State):
         
         fnl_pose = task_list[len(task_list)-1]
         
-        '''
-        print init_pose
-        print src_pose
-        print dest_pose
-        print obj_cfg
-        print obj_names
-        print fnl_pose
-        '''
+        
+        #print init_pose
+        #print src_pose
+        #print dest_pose
+        #print obj_cfg
+        #print obj_names
+        #print fnl_pose
+        
         for obj in range(len(obj_names)):
             if obj_names[obj] == "V20":
                 obj_names[obj] = "R20"
@@ -126,7 +153,7 @@ class get_basic_manipulation_task(smach.State):
                             object_names=obj_names, final_pose=fnl_pose)
         
         return 'task_received'  
-
+'''
 
 class get_basic_transportation_task(smach.State):
 
