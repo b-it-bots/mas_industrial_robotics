@@ -23,7 +23,7 @@ class Bunch:
 class get_basic_navigation_task(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
         
     def execute(self, userdata):
 
@@ -38,7 +38,7 @@ class get_basic_navigation_task(smach.State):
         # check if Task is a BNT task      
         if(nav_task[0:3] != "BNT"):
            rospy.logerr("Excepted <<BNT>> task, but received <<" + nav_task[0:3] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         # remove leading start description        
         nav_task = nav_task[3:len(nav_task)]
@@ -47,7 +47,7 @@ class get_basic_navigation_task(smach.State):
         # check if description has beginning '<' and ending '>
         if(nav_task[0] != "<" or nav_task[(len(nav_task)-1)] != ">"):
             rospy.loginfo("task spec not in correct format")
-            return 'wront_task_format' 
+            return 'wrong_task_format' 
         
         # remove beginning '<' and ending '>'
         nav_task = nav_task[1:len(nav_task)-1]
@@ -61,7 +61,7 @@ class get_basic_navigation_task(smach.State):
             
             if len(task_items) != 3:
                 rospy.loginfo("task spec not in correct format")
-                return 'wront_task_format' 
+                return 'wrong_task_format' 
             
             task_struct = Bunch(location=task_items[0], orientation=task_items[1], duration=task_items[2])
             userdata.task_list.append(task_struct)
@@ -72,7 +72,7 @@ class get_basic_navigation_task(smach.State):
 class get_basic_manipulation_task(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
+        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
         
     def execute(self, userdata):
 
@@ -88,7 +88,7 @@ class get_basic_manipulation_task(smach.State):
         # check if Task is a BNT task      
         if(man_task[0:3] != "BMT"):
            rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         # remove leading start description        
         man_task = man_task[3:len(man_task)]
@@ -96,7 +96,7 @@ class get_basic_manipulation_task(smach.State):
         # check if description has beginning '<' and ending '>
         if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
             rospy.loginfo("task spec not in correct format")
-            return 'wront_task_format' 
+            return 'wrong_task_format' 
         
         
         # remove beginning '<' and ending '>'
@@ -156,7 +156,7 @@ class get_basic_manipulation_task(smach.State):
 class get_basic_manipulation_task_modified(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'],  input_keys=['task_list'], output_keys=['task_list','final_pose'])
+        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'],  input_keys=['task_list'], output_keys=['task_list','final_pose'])
         
     def execute(self, userdata):
 
@@ -171,7 +171,7 @@ class get_basic_manipulation_task_modified(smach.State):
         # check if Task is a BNT task      
         if(man_task[0:3] != "BMT"):
            rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         # remove leading start description        
         man_task = man_task[3:len(man_task)]
@@ -179,7 +179,7 @@ class get_basic_manipulation_task_modified(smach.State):
         # check if description has beginning '<' and ending '>
         if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
             rospy.loginfo("task spec not in correct format")
-            return 'wront_task_format' 
+            return 'wrong_task_format' 
         
         
         # remove beginning '<' and ending '>'
@@ -219,7 +219,7 @@ class get_basic_manipulation_task_modified(smach.State):
 class get_basic_transportation_task(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
         
     def execute(self, userdata):
 
@@ -235,7 +235,7 @@ class get_basic_transportation_task(smach.State):
         # check if Task is a BTT task      
         if(transportation_task[0:3] != "BTT"):
            rospy.logerr("Excepted <<BTT>> task, but received <<" + transportation_task[0:3] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         # remove leading start description        
         transportation_task = transportation_task[3:len(transportation_task)]
@@ -244,7 +244,7 @@ class get_basic_transportation_task(smach.State):
         # check if description has beginning '<' and ending '>
         if(transportation_task[0] != "<" or transportation_task[(len(transportation_task)-1)] != ">"):
             rospy.loginfo("task spec not in correct format")
-            return 'wront_task_format' 
+            return 'wrong_task_format' 
         
         # remove beginning '<' and ending '>'
         transportation_task = transportation_task[1:len(transportation_task)-1]
@@ -260,7 +260,7 @@ class get_basic_transportation_task(smach.State):
 
         if(initial_situation[0:16] != "initialsituation"):
            rospy.logerr("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         initial_situation = initial_situation[16:len(initial_situation)]
         rospy.loginfo('removed <> and (): %s',initial_situation)
@@ -296,7 +296,7 @@ class get_basic_transportation_task(smach.State):
 
         if(goal_situation[0:13] != "goalsituation"):
            rospy.logerr("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         goal_situation = goal_situation[13:len(goal_situation)]
         rospy.loginfo('removed goal string: %s', goal_situation)
@@ -330,7 +330,7 @@ class get_basic_transportation_task(smach.State):
 class get_basic_competitive_task(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wront_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
         
     def execute(self, userdata):
 
@@ -341,7 +341,7 @@ class get_basic_competitive_task(smach.State):
         # check if Task is a CTT task      
         if(competitive_task[0:3] != "CTT"):
            rospy.logerr("Excepted <<BTT>> task, but received <<" + competitive_task[0:3] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         # remove leading start description        
         competitive_task = competitive_task[3:len(competitive_task)]
@@ -350,7 +350,7 @@ class get_basic_competitive_task(smach.State):
         # check if description has beginning '<' and ending '>
         if(competitive_task[0] != "<" or competitive_task[(len(competitive_task)-1)] != ">"):
             rospy.loginfo("task spec not in correct format")
-            return 'wront_task_format' 
+            return 'wrong_task_format' 
         
         # remove beginning '<' and ending '>'
         competitive_task = competitive_task[1:len(competitive_task)-1]
@@ -366,7 +366,7 @@ class get_basic_competitive_task(smach.State):
 
         if(initial_situation[0:16] != "initialsituation"):
            rospy.logerr("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         initial_situation = initial_situation[16:len(initial_situation)]
         rospy.loginfo(initial_situation)
@@ -402,7 +402,7 @@ class get_basic_competitive_task(smach.State):
 
         if(goal_situation[0:13] != "goalsituation"):
            rospy.logerr("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
-           return 'wront_task_format' 
+           return 'wrong_task_format' 
 
         rospy.loginfo(goal_situation)
         goal_situation = goal_situation[13:len(goal_situation)]
