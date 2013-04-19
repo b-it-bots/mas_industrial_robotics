@@ -3,7 +3,6 @@ roslib.load_manifest('raw_generic_states')
 
 import rospy
 import smach
-import smach_ros
 import referee_box_communication
 import re
 
@@ -11,56 +10,60 @@ ip = "192.168.51.61"
 port = "11111"
 team_name = "b-it-bots"
 
+
 class Bunch:
     def __init__(self, **kwds):
          self.__dict__.update(kwds)
 
+
 class get_basic_navigation_task(smach.State):
+
+    """
+    Communicate with the RefereeBox and get the task description for basic
+    navigation task.
+    """
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
-        
+
     def execute(self, userdata):
 
-        #rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
+        rospy.logdebug("Wait for task specification from server: %s:%s (team-name: %s)" % (ip, port, team_name))
 
         #nav_task = 'BNT<(T2,E,1),(D2,N,1),(S3,E,3),(T3,S,3),(T7,N,3),(S1,W,3),(T2,S,1),(D1,W,1),(T1,N,1),(S1,E,1)>'
         nav_task = 'BNT<(D1,W,1),(S1,E,3),(S2,E,3),(D2,S,3),(S3,W,3),(S2,W,3),(D2,W,3),(S1,W,3),(S2,W,3),(S3,W,3),(S2,W,3),(D1,W,3)>'
-        		        
-        #nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),(S2,E,3)>'
-        rospy.loginfo("Task received: " + nav_task)
-        
-        # check if Task is a BNT task      
-        if(nav_task[0:3] != "BNT"):
-           rospy.logerr("Excepted <<BNT>> task, but received <<" + nav_task[0:3] + ">> received")
-           return 'wrong_task_format' 
 
-        # remove leading start description        
-        nav_task = nav_task[3:len(nav_task)]
-        
-        
+        #nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
+        rospy.loginfo("Task received: " + nav_task)
+
+        # check if the taask is a BNT task
+        if not nav_task.startswith('BNT'):
+            rospy.logerr('Excepted <<BNT>> task, but <<%s>> received' % nav_task[0:3])
+            return 'wrong_task_format'
+
+        # remove leading start description
+        nav_task = nav_task[3:]
+
         # check if description has beginning '<' and ending '>
-        if(nav_task[0] != "<" or nav_task[(len(nav_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wrong_task_format' 
-        
+        if nav_task[0] != '<' or nav_task[-1] != '>':
+            rospy.logerr('Missing surrounding <> in task specification')
+            return 'wrong_task_format'
+
         # remove beginning '<' and ending '>'
-        nav_task = nav_task[1:len(nav_task)-1]
-        
-        #find single tasks
+        nav_task = nav_task[1:-1]
+
+        # find single tasks
         task_list = re.findall('\((?P<name>.*?)\)', nav_task)
-        
-        #put them into a struct like structure
+
+        # put them into a struct like structure
         for item in task_list:
             task_items = item.split(',')
-            
             if len(task_items) != 3:
-                rospy.loginfo("task spec not in correct format")
-                return 'wrong_task_format' 
-            
+                rospy.logerr("Expected three tokens in task item, got %i" % len(task_items))
+                return 'wrong_task_format'
             task_struct = Bunch(location=task_items[0], orientation=task_items[1], duration=task_items[2])
             userdata.task_list.append(task_struct)
-        
+
         return 'task_received'
 
 
