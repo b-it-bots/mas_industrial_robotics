@@ -6,7 +6,7 @@ import smach
 import referee_box_communication
 import re
 
-from tasks import *
+from tasks import parse_task, TaskSpecFormatError
 
 ip = "192.168.51.61"
 port = "11111"
@@ -15,145 +15,53 @@ team_name = "b-it-bots"
 
 class Bunch:
     def __init__(self, **kwds):
-         self.__dict__.update(kwds)
+        self.__dict__.update(kwds)
 
 
-class get_basic_navigation_task(smach.State):
+class get_task(smach.State):
 
     """
-    Communicate with the RefereeBox and get the task description for basic
-    navigation task.
+    Communicate with the RefereeBox and get a task description.
+
+    Input
+    -----
+    test: str
+        Type of test ('BNT', 'BTT', etc). The task specification will be parsed
+        according to this type.
+    simulation: bool
+        If this is set to True, then no communication with Referee box will
+        happen and rather a hard-coded task specification will be used.
+
+    Output
+    -----
+    task: Task
+        An appropriate subclass of Task with fields filled according to the
+        received specification.
     """
+
+    HARDCODED_SPECS = {'BNT': 'BNT<(D1,W,1),(S1,E,3),(S2,E,3),(D2,S,3),(S3,W,3),(S2,W,3),(D2,W,3),(S1,W,3),(S2,W,3),(S3,W,3),(S2,W,3),(D1,W,3)>',
+                       'PPT': 'PPT<S1,S2>'}
 
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['task_received', 'wrong_task_format'],
-                             input_keys=['task'], output_keys=['task'])
+                             input_keys=['task', 'test', 'simulation'],
+                             output_keys=['task'])
 
     def execute(self, userdata):
-        rospy.logdebug("Wait for task specification from server: %s:%s (team-name: %s)" % (ip, port, team_name))
-        nav_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
-        rospy.loginfo("Received task specification: %s" % nav_task)
+        if not userdata.simulation:
+            rospy.logdebug('Waiting for task specification (%s:%s)...' % (ip, port))
+            task_spec = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
+        else:
+            task_spec = self.HARDCODED_SPECS[userdata.test]
+        rospy.loginfo("Task specification: %s" % task_spec)
         try:
-            task = BNTTask(nav_task)
+            userdata.task = parse_task(userdata.test, task_spec)
+            rospy.loginfo('Parsed task:\n%s' % userdata.task)
+            return 'task_received'
         except TaskSpecFormatError:
             return 'wrong_task_format'
-        rospy.loginfo('Parsed task:\n%s' % task)
-        userdata.task = task
-        return 'task_received'
 
-
-class get_basic_manipulation_task(smach.State):
-
-    """
-    Communicate with the RefereeBox and get the task description for basic
-    manipulation task.
-    """
-
-    def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['task_received', 'wrong_task_format'],
-                             input_keys=['task'], output_keys=['task'])
-
-    def execute(self, userdata):
-        rospy.logdebug("Wait for task specification from server: %s:%s (team-name: %s)" % (ip, port, team_name))
-        #man_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
-        man_task = 'BMT<D2,D2,D2,line(R20,M20_100,F20_20_B),T4>'
-        rospy.loginfo("Received task specification: %s" % man_task)
-        try:
-            task = BMTTask(man_task)
-        except TaskSpecFormatError:
-            return 'wrong_task_format'
-        rospy.loginfo('Parsed task:\n%s' % task)
-        userdata.task = task
-        return 'task_received'
-
-
-'''
-class get_basic_manipulation_task(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_spec'], output_keys=['task_spec'])
-        
-    def execute(self, userdata):
-
-        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-       
-        #man_task = "BMT<D2,D2,D2,line(R20,M20_100,F20_20_B),T4>"
-        man_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
-
-        
-
-        rospy.loginfo("Task received: " + man_task)
-        
-        # check if Task is a BNT task      
-        if(man_task[0:3] != "BMT"):
-           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
-           return 'wrong_task_format' 
-
-        # remove leading start description        
-        man_task = man_task[3:len(man_task)]
-        
-        # check if description has beginning '<' and ending '>
-        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wrong_task_format' 
-        
-        
-        # remove beginning '<' and ending '>'
-        man_task = man_task[1:len(man_task)-1]
-        
-        #print man_task
-        
-        task_list = man_task.split(',')
-        
-        #print task_list
-
-        init_pose = task_list[0]
-        src_pose = task_list[1]
-        dest_pose = task_list[2]
-        
-        subtask_list = task_list[3].split('(')
-        obj_cfg = subtask_list[0]
-        
-        obj_names = []
-        obj_names.append(subtask_list[1])
-   
-        print task_list
-        
-        for i in range(4, (len(task_list)-1)):
-            if i == (len(task_list)-2):
-                print task_list[i]
-                task_list[i] = task_list[i][0:(len(task_list[i])-1)]
-                print task_list[i]
-                
-                 
-            obj_names.append(task_list[i])
-               
-        
-        fnl_pose = task_list[len(task_list)-1]
-        
-        
-        #print init_pose
-        #print src_pose
-        #print dest_pose
-        #print obj_cfg
-        #print obj_names
-        #print fnl_pose
-        
-        for obj in range(len(obj_names)):
-            if obj_names[obj] == "V20":
-                obj_names[obj] = "R20"
-
-
-        print obj_names
-        
-        
-        userdata.task_spec = Bunch(inital_pose=init_pose, source_pose=src_pose, destination_pose=dest_pose, object_config=obj_cfg, 
-                            object_names=obj_names, final_pose=fnl_pose)
-        
-        return 'task_received'  
-'''
 
 class get_basic_transportation_task(smach.State):
 
