@@ -127,68 +127,6 @@ class get_basic_manipulation_task(smach.State):
         
         return 'task_received'  
 
-class get_basic_manipulation_task_modified(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'],  input_keys=['task_list'], output_keys=['task_list','final_pose'])
-        
-    def execute(self, userdata):
-
-        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        
-        #referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #"BMT<S1,S1,S2,line(nut,screw,bolt),S1>"
-
-        man_task = "BMT<S1,S1,S2,line(nut,screw,bolt),S1>"
-
-        rospy.loginfo("Task received: " + man_task)
-        
-        # check if Task is a BNT task      
-        if(man_task[0:3] != "BMT"):
-           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
-           return 'wrong_task_format' 
-
-        # remove leading start description        
-        man_task = man_task[3:len(man_task)]
-        
-        # check if description has beginning '<' and ending '>
-        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wrong_task_format' 
-        
-        
-        # remove beginning '<' and ending '>'
-        man_task = man_task[1:len(man_task)-1]
-        
-        #print man_task
-        
-        task = man_task.split(',')
-        
-        subtask_list = task[3].split('(')
-        obj_cfg = subtask_list[0]
-        
-        objs = []
-        objs.append(subtask_list[1])
-        
-        for i in range(4, (len(task)-1)):
-            if i == (len(task)-2):
-                task[i] = task[i][0:(len(task)-3)]
-                 
-            objs.append(task[i])
-               
-        
-        fnl_pose = task[len(task)-1]
-        
-
-        
-        initial_tasklist = Bunch(type='source', location = task[1], object_names=objs) 
-        userdata.task_list.append(initial_tasklist)
-
-        goal_tasklist = Bunch(type='destination', location = task[2], object_names = objs,  object_config = obj_cfg)
-        userdata.task_list.append(goal_tasklist)
-
-        userdata.final_pose = fnl_pose
-        
-        return 'task_received'  
 
 class get_basic_transportation_task(smach.State):
 
