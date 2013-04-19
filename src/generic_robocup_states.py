@@ -432,6 +432,6 @@ class select_pose_to_approach(smach.State):
         orientation = rospy.get_param("script_server/base_orientations/" + subtask[1])
 
         rospy.set_param("script_server/base/" + subtask[0], [position[0], position[1], orientation])
-        rospy.loginfo('Selected pose: %s' % subtask)
+        rospy.loginfo('Selected position: %s, orientation: %s' % (subtask[0], subtask[1]))
         return 'pose_selected'
 
