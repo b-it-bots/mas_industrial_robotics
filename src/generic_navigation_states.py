@@ -80,15 +80,15 @@ class place_base_in_front_of_object(smach.State):
         return 'succeeded'
 
 
-class approach_pose(smach.State):
+class move_base(smach.State):
 
     """
-    Move the robot to the pose stored in the 'base_pose_to_approach' field of
-    userdata or the pose passed to the constructor.
+    Move the robot to the pose stored in the 'move_base_to' field of userdata
+    or the pose passed to the constructor.
 
     Input
     -----
-    base_pose_to_approach: str
+    move_base_to: str
         Name of the pose that the robot should approach. The name should exist
         on the parameter server. If a pose was supplied to the state
         constructor then it will override this input.
@@ -97,11 +97,11 @@ class approach_pose(smach.State):
     def __init__(self, pose=None):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
-                             input_keys=['base_pose_to_approach'])
-        self.pose_to_approach = pose
+                             input_keys=['move_base_to'])
+        self.move_base_to = pose
 
     def execute(self, userdata):
-        pose = self.pose_to_approach or userdata.base_pose_to_approach
+        pose = self.move_base_to or userdata.move_base_to
         handle_base = sss.move('base', pose, blocking=False)
         while True:
             rospy.sleep(0.1)
