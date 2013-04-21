@@ -6,10 +6,11 @@ import smach
 import smach_ros
 import hbrs_srvs.srv
 import std_srvs.srv
-import tf 
+import tf
 import geometry_msgs.msg
 import hbrs_msgs.msg
 
+from hbrs_srvs.srv import GetObjects
 
 
 class find_drawer(smach.State):
@@ -79,74 +80,53 @@ class detect_object(smach.State):
 
 class recognize_objects(smach.State):
 
-    def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['found_objects', 'no_objects_found', 'srv_call_failed'],
-            input_keys=['recognized_objects'],
-            output_keys=['recognized_objects'])
-        
-        self.object_finder_srv_name = '/detect_objects'
-        self.object_finder_srv = rospy.ServiceProxy(self.object_finder_srv_name, hbrs_srvs.srv.GetObjects)
+    #DETECT_SERVER = '/detect_objects'
+    DETECT_SERVER = '/hbrs_object_finder/get_segmented_objects'
+
+    def __init__(self, retries=5):
+        smach.State.__init__(self,
+                             outcomes=['objects_found',
+                                       'no_objects_found',
+                                       'srv_call_failed'],
+                             input_keys=['recognized_objects'],
+                             output_keys=['recognized_objects'])
+        self.detect_objects = rospy.ServiceProxy(self.DETECT_SERVER, GetObjects)
         self.tf_listener = tf.TransformListener()
+        self.retries = retries
 
-    def execute(self, userdata):     
-        
+    def execute(self, userdata):
 
-        for i in range(5): 
-            print "find object try: ", i
-            
+        for i in range(self.retries):
+            rospy.loginfo('Looking for objects (attempt %i/%i)' % (i + 1, self.retries))
             try:
-                rospy.wait_for_service(self.object_finder_srv_name, 15)
-                resp = self.object_finder_srv()
-            except Exception, e:  
-                rospy.logerr("service call %s failed", self.object_finder_srv_name)     
-                return 'srv_call_failed'    
-        
-
-            if (len(resp.objects) <= 0):
-                rospy.loginfo('found no objects')
-            else:    
-                rospy.loginfo('found {0} objects'.format(len(resp.objects)))
+                rospy.wait_for_service(self.DETECT_SERVER, 15)
+                resp = self.detect_objects()
+            except Exception as e:
+                rospy.logerr("Service call to <<%s>> failed", self.DETECT_SERVER)
+                return 'srv_call_failed'
+            if not resp.objects:
+                rospy.loginfo('Found no objects')
+            else:
+                rospy.loginfo('Found %i objects' % len(resp.objects))
                 break
 
-        if len(resp.objects) == 0:
-            rospy.loginfo('NO objects in FOV')
+        if not resp.objects:
+            rospy.loginfo('No objects in the field of view')
             return 'no_objects_found'
 
-        print resp.objects
-
         #transform to odom
-        for i in range(len(resp.objects)):
+        for obj in resp.objects:
             tf_worked = False
             while not tf_worked:
                 try:
-                    print "frame_id: ", resp.objects[i].pose.header.frame_id
-                    resp.objects[i].pose.header.stamp = rospy.Time.now()
-                    self.tf_listener.waitForTransform('/odom', resp.objects[i].pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
-                    obj_pose_transformed = self.tf_listener.transformPose('/odom', resp.objects[i].pose)
-                    resp.objects[i].pose = obj_pose_transformed
+                    obj.pose.header.stamp = rospy.Time.now()
+                    self.tf_listener.waitForTransform('/odom', obj.pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
+                    obj.pose = self.tf_listener.transformPose('/odom', obj.pose)
                     tf_worked = True
                 except Exception, e:
-                    rospy.logerr("tf exception in recognize objects: transform: %s", e)
+                    rospy.logerr("Tf exception in recognize objects: %s", e)
                     rospy.sleep(0.2)
-                    tf_worked = False
 
         userdata.recognized_objects = resp.objects
 
-        print "################ OBJECTS TAKEN: ", len(userdata.recognized_objects)
-
-        '''
-        #obj_names = ['screw1', 'nut1']
-        for i in range(2):
-            obj_name = raw_input("object_name: ")
-            
-            obj = hbrs_msgs.msg.Object()
-            obj.name = obj_name
-            
-            userdata.recognized_objects.append(obj)
-        ''' 
-
-        
-        
-        return 'found_objects'
+        return 'objects_found'
