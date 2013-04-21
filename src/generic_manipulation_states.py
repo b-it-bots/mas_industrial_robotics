@@ -21,6 +21,9 @@ import hbrs_srvs.srv
 planning_mode = ""            # no arm planning
 #planning_mode = "planned"    # using arm planning
 
+from arm import Arm
+arm = Arm(planning_mode='')
+
 
 class Bunch:
     def __init__(self, **kwds):
@@ -287,19 +290,30 @@ class place_obj_on_rear_platform(smach.State):
 
 class move_arm(smach.State):
 
-    def __init__(self, position = "candle", do_blocking = True):
-        smach.State.__init__(self, outcomes=['succeeded'])
-        
-        self.position = position
-        self.do_blocking = do_blocking
+    """
+    Move arm to a position. Position may be fixed at construction time or set
+    through userdata.
+
+    Input
+    -----
+    move_arm_to: str | tuple | list
+        Position where the arm should move. If it is a string, then it gives
+        position name (should be availabile on the parameter server). If it as
+        tuple or a list, then it is treated differently based on the length. If
+        there are 5 elements, then it is a list of joint values. If the length
+        is 3 or 4, then it is cartesian position and pitch angle.
+    """
+
+    def __init__(self, position=None, blocking=True):
+        smach.State.__init__(self,
+                             outcomes=['succeeded'],
+                             input_keys=['move_arm_to'])
+        self.move_arm_to = position
+        self.blocking = blocking
 
     def execute(self, userdata):
-        sss.move("gripper", "open")
-        rospy.sleep(2.0)
-   
-        global planning_mode
-        sss.move("arm", self.position, mode=planning_mode, blocking = self.do_blocking)
-                   
+        position = self.move_arm_to or userdata.move_arm_to
+        arm.move_to(position, blocking=self.blocking)
         return 'succeeded'
 
   
