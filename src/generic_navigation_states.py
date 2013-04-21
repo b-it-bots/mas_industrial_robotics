@@ -10,6 +10,8 @@ import std_srvs.srv
 import raw_base_placement.msg
 import tf
 
+from raw_base_placement.msg import OrientToBaseAction, OrientToBaseActionGoal
+from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
 sss = simple_script_server()
 
@@ -77,63 +79,65 @@ class place_base_in_front_of_object(smach.State):
         
         return 'succeeded'
 
+
 class approach_pose(smach.State):
 
-    def __init__(self, pose = ""):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
+    """
+    Move the robot to the pose stored in the 'base_pose_to_approach' field of
+    userdata or the pose passed to the constructor.
 
-        self.pose = pose;    
+    Input
+    -----
+    base_pose_to_approach: str
+        Name of the pose that the robot should approach. The name should exist
+        on the parameter server. If a pose was supplied to the state
+        constructor then it will override this input.
+    """
+
+    def __init__(self, pose=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed'],
+                             input_keys=['base_pose_to_approach'])
+        self.pose_to_approach = pose
 
     def execute(self, userdata):
-        
-        if(self.pose == ""):
-            self.pose2 = userdata.base_pose_to_approach
-        else:
-	    	self.pose2 = self.pose 
-        
-        handle_base = sss.move("base", self.pose2)
-
-        while True:                
+        pose = self.pose_to_approach or userdata.base_pose_to_approach
+        handle_base = sss.move('base', pose, blocking=False)
+        while True:
             rospy.sleep(0.1)
             base_state = handle_base.get_state()
-            if (base_state == actionlib.simple_action_client.GoalStatus.SUCCEEDED):
-                return "succeeded"
-            elif (base_state == actionlib.simple_action_client.GoalStatus.ACTIVE):
+            if base_state == GoalStatus.SUCCEEDED:
+                return 'succeeded'
+            elif base_state == GoalStatus.ACTIVE:
                 continue
             else:
-                print 'last state: ',base_state
-                return "failed"
-            
+                print 'Last state: ', base_state
+                return 'failed'
 
-class adjust_pose_wrt_workspace(smach.State):
+
+class adjust_to_workspace(smach.State):
+
+    ADJUST_SERVER = '/raw_base_placement/adjust_to_workspace'
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
-
-        self.ac_base_adj_name = '/raw_base_placement/adjust_to_workspace'
-        self.ac_base_adj = actionlib.SimpleActionClient(self.ac_base_adj_name, raw_base_placement.msg.OrientToBaseAction)
+        self.ac_base_adj = actionlib.SimpleActionClient(self.ADJUST_SERVER, OrientToBaseAction)
 
     def execute(self, userdata):
-        
-            
-        rospy.loginfo("Waiting for action server <<%s>> to start ...", self.ac_base_adj_name);
+        rospy.logdebug("Waiting for action server <<%s>>...", self.ADJUST_SERVER);
         self.ac_base_adj.wait_for_server()
-        rospy.loginfo("action server <<%s>> is ready ...", self.ac_base_adj_name);
-        action_goal = raw_base_placement.msg.OrientToBaseActionGoal()
-            
+        rospy.logdebug("Action server <<%s>> is ready...", self.ADJUST_SERVER);
+        action_goal = OrientToBaseActionGoal()
         action_goal.goal.distance = 0.08;
-        rospy.loginfo("send action");
+        rospy.logdebug("Sending action goal...");
         self.ac_base_adj.send_goal(action_goal.goal);
-        
-        rospy.loginfo("wait for base to adjust");
-        finished_before_timeout = self.ac_base_adj.wait_for_result()
-    
-        if finished_before_timeout:
+        rospy.loginfo("Waiting for base to adjust...");
+        if self.ac_base_adj.wait_for_result():
             rospy.loginfo("Action finished: %s", self.ac_base_adj.get_state())
-            return 'succeeded'    
+            return 'succeeded'
         else:
             rospy.logerr("Action did not finish before the time out!")
-            return 'failed'         
+            return 'failed'
 
 
 class adjust_pose_wrt_recognized_obj(smach.State):
