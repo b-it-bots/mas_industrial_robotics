@@ -78,24 +78,23 @@ class detect_object(smach.State):
             return 'succeeded'
 
 
-class recognize_objects(smach.State):
+class find_objects(smach.State):
 
-    #DETECT_SERVER = '/detect_objects'
-    DETECT_SERVER = '/hbrs_object_finder/get_segmented_objects'
+    DETECT_SERVER = '/detect_objects'
 
     def __init__(self, retries=5):
         smach.State.__init__(self,
                              outcomes=['objects_found',
                                        'no_objects_found',
                                        'srv_call_failed'],
-                             input_keys=['recognized_objects'],
-                             output_keys=['recognized_objects'])
+                             input_keys=['found_objects'],
+                             output_keys=['found_objects'])
         self.detect_objects = rospy.ServiceProxy(self.DETECT_SERVER, GetObjects)
         self.tf_listener = tf.TransformListener()
         self.retries = retries
 
     def execute(self, userdata):
-
+        userdata.found_objects = None
         for i in range(self.retries):
             rospy.loginfo('Looking for objects (attempt %i/%i)' % (i + 1, self.retries))
             try:
@@ -120,13 +119,12 @@ class recognize_objects(smach.State):
             while not tf_worked:
                 try:
                     obj.pose.header.stamp = rospy.Time.now()
-                    self.tf_listener.waitForTransform('/odom', obj.pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
-                    obj.pose = self.tf_listener.transformPose('/odom', obj.pose)
+                    self.tf_listener.waitForTransform('/base_link', obj.pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
+                    obj.pose = self.tf_listener.transformPose('/base_link', obj.pose)
                     tf_worked = True
                 except Exception, e:
                     rospy.logerr("Tf exception in recognize objects: %s", e)
                     rospy.sleep(0.2)
 
-        userdata.recognized_objects = resp.objects
-
+        userdata.found_objects = resp.objects
         return 'objects_found'
