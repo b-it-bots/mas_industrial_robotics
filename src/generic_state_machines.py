@@ -9,6 +9,32 @@ from generic_perception_states import *
 from generic_manipulation_states import *
 from generic_navigation_states import *
 
+
+class move_base_with_adjustment(smach.StateMachine):
+
+    def __init__(self):
+        smach.StateMachine.__init__(self,
+                                    outcomes=['succeeded', 'failed'],
+                                    input_keys=['move_base_to'],
+                                    output_keys=['base_pose'])
+        with self:
+            smach.StateMachine.add('MOVE_BASE', move_base(),
+                transitions={'succeeded': 'ADJUST_AND_MOVE_ARM'})
+
+            sm_con = smach.Concurrence(outcomes=['succeeded', 'failed'],
+                                       default_outcome='succeeded',
+                                       outcome_map={'succeeded': {'MOVE_ARM': 'succeeded',
+                                                                  'ADJUST_TO_WORKSPACE': 'succeeded'},
+                                                    'failed': {'ADJUST_TO_WORKSPACE': 'failed'}})
+
+            with sm_con:
+                smach.Concurrence.add('MOVE_ARM', move_arm('out_of_view'))
+                smach.Concurrence.add('ADJUST_TO_WORKSPACE', adjust_to_workspace())
+
+            smach.StateMachine.add('ADJUST_AND_MOVE_ARM', sm_con,
+                transitions={'failed': 'ADJUST_AND_MOVE_ARM'})
+
+
 class sm_grasp_random_object(smach.StateMachine):
     def __init__(self):    
         smach.StateMachine.__init__(self, 
