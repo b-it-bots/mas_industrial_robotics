@@ -39,7 +39,8 @@ class get_task(smach.State):
         received specification.
     """
 
-    HARDCODED_SPECS = {'BNT': 'BNT<(D1,W,1),(S1,E,3),(S2,E,3),(D2,S,3),(S3,W,3),(S2,W,3),(D2,W,3),(S1,W,3),(S2,W,3),(S3,W,3),(S2,W,3),(D1,W,3)>',
+    HARDCODED_SPECS = {'BNT': 'BNT<(S3,W,2),(S1,E,3),(S2,E,3),(D2,S,3)>',
+                       'BMT': 'BMT<S2,S2,S2,line(R20,M20_100,F20_20_B),S3>',
                        'PPT': 'PPT<S1,S2>'}
 
     def __init__(self):
