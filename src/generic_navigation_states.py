@@ -92,12 +92,20 @@ class move_base(smach.State):
         Name of the pose that the robot should approach. The name should exist
         on the parameter server. If a pose was supplied to the state
         constructor then it will override this input.
+
+    Output
+    ------
+    base_pose: str
+        Base position after the movement. If succeeded, then it will be set to
+        the commanded pose. If failed, will be set to None to indicate that the
+        pose is not known.
     """
 
     def __init__(self, pose=None):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
-                             input_keys=['move_base_to'])
+                             input_keys=['move_base_to'],
+                             output_keys=['base_pose'])
         self.move_base_to = pose
 
     def execute(self, userdata):
@@ -107,11 +115,13 @@ class move_base(smach.State):
             rospy.sleep(0.1)
             base_state = handle_base.get_state()
             if base_state == GoalStatus.SUCCEEDED:
+                userdata.base_pose = pose
                 return 'succeeded'
             elif base_state == GoalStatus.ACTIVE:
                 continue
             else:
                 print 'Last state: ', base_state
+                userdata.base_pose = None
                 return 'failed'
 
 
