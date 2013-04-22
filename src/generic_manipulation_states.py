@@ -316,6 +316,25 @@ class move_arm(smach.State):
         arm.move_to(position, blocking=self.blocking)
         return 'succeeded'
 
+
+class grasp_object(smach.State):
+
+    """
+    Grasp object.
+    """
+
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed'],
+                             input_keys=['grasp_object_pose'])
+
+    def execute(self, userdata):
+        arm.gripper('open')
+        arm.move_to(userdata.grasp_object_pose)
+        arm.gripper('close')
+        return 'succeeded'
+        return 'failed'
+
   
 class move_arm_out_of_view(smach.State):
 
