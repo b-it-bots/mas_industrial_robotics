@@ -82,7 +82,7 @@ class find_objects(smach.State):
 
     DETECT_SERVER = '/detect_objects'
 
-    def __init__(self, retries=5):
+    def __init__(self, retries=5, frame_id=None):
         smach.State.__init__(self,
                              outcomes=['objects_found',
                                        'no_objects_found',
@@ -92,6 +92,7 @@ class find_objects(smach.State):
         self.detect_objects = rospy.ServiceProxy(self.DETECT_SERVER, GetObjects)
         self.tf_listener = tf.TransformListener()
         self.retries = retries
+        self.frame_id = frame_id
 
     def execute(self, userdata):
         userdata.found_objects = None
@@ -113,18 +114,12 @@ class find_objects(smach.State):
             rospy.loginfo('No objects in the field of view')
             return 'no_objects_found'
 
-        #transform to odom
-        for obj in resp.objects:
-            tf_worked = False
-            while not tf_worked:
+        if self.frame_id:
+            for obj in resp.objects:
                 try:
-                    obj.pose.header.stamp = rospy.Time.now()
-                    self.tf_listener.waitForTransform('/base_link', obj.pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
-                    obj.pose = self.tf_listener.transformPose('/base_link', obj.pose)
-                    tf_worked = True
-                except Exception, e:
-                    rospy.logerr("Tf exception in recognize objects: %s", e)
-                    rospy.sleep(0.2)
+                    obj.pose = self.tf_listener.transformPose(self.frame_id, obj.pose)
+                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                    rospy.logerr('Unable to transform %s -> %s' % (obj.pose.header.frame_id, self.frame_id))
 
         userdata.found_objects = resp.objects
         return 'objects_found'
