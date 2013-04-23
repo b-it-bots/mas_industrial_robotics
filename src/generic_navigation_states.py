@@ -10,6 +10,8 @@ import std_srvs.srv
 import raw_base_placement.msg
 import tf
 
+from geometry_msgs.msg import PoseStamped
+from raw_srvs.srv import SetPoseStamped
 from raw_base_placement.msg import OrientToBaseAction, OrientToBaseActionGoal
 from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
@@ -238,56 +240,45 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         print "succeeded"       
         return 'succeeded'
 
-class move_base_rel(smach.State):
 
-    def __init__(self, x_distance, y_distance):
-        smach.State.__init__(self, outcomes=['succeeded'])
-        
-        self.x_distance = x_distance
-        self.y_distance = y_distance
-        self.move_base_relative_srv = rospy.ServiceProxy('/raw_relative_movements/move_base_relative', raw_srvs.srv.SetPoseStamped) 
+class move_base_relative(smach.State):
+
+    """
+    Shift the robot by the offset stored in 'move_base_by' field of userdata
+    or the offset passed to the constructor.
+
+    Input
+    -----
+    move_base_by: 3-tuple
+        x, y, and theta displacement the shift the robot by. If an offset was
+        supplied to the state constructor then it will override this input.
+    """
+
+    SRV = '/raw_relative_movements/move_base_relative'
+
+    def __init__(self, offset=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed'],
+                             input_keys=['move_base_by'])
+        self.offset = offset
+        self.move_base_relative = rospy.ServiceProxy(self.SRV, SetPoseStamped)
 
     def execute(self, userdata):
-        
-        print "wait for service: /raw_relative_movements/move_base_relative"   
-        rospy.wait_for_service('/raw_relative_movements/move_base_relative', 30)
-
-        goalpose = geometry_msgs.msg.PoseStamped()
-        goalpose.pose.position.x = self.x_distance
-        goalpose.pose.position.y = self.y_distance
-        goalpose.pose.position.z = 0.1 #speed
-        quat = tf.transformations.quaternion_from_euler(0,0,0)
-        goalpose.pose.orientation.x = quat[0]
-        goalpose.pose.orientation.y = quat[1]
-        goalpose.pose.orientation.z = quat[2]
-        goalpose.pose.orientation.w = quat[3]
-        
-        # call base placement service
+        rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
+        self.move_base_relative.wait_for_service()
+        offset = self.offset or userdata.move_base_by
+        pose = PoseStamped()
+        pose.pose.position.x = offset[0]
+        pose.pose.position.y = offset[1]
+        pose.pose.position.z = 0.1  # speed
+        quat = tf.transformations.quaternion_from_euler(0, 0, offset[2])
+        pose.pose.orientation.x = quat[0]
+        pose.pose.orientation.y = quat[1]
+        pose.pose.orientation.z = quat[2]
+        pose.pose.orientation.w = quat[3]
         try:
-            self.move_base_relative_srv(goalpose)
+            self.move_base_relative(pose)
         except:
-            print "could not execute <</raw_relative_movements/move_base_relative>> service"  
-        
+            rospy.logerr('Could no execute <<%s>>' % (self.SRV))
+            return 'failed'
         return 'succeeded'
-            
-
-class switch_to_navigation_ctrl_in_orocos(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded', 'srv_call_failed'])
-        
-        self.nav_ctrl_mode_srv_name = "/raw_arm_bridge_ros_orocos/enable_navigation_ctrl_mode";
-        self.nav_ctrl_mode_srv = rospy.ServiceProxy(self.nav_ctrl_mode_srv_name, std_srvs.srv.Empty)
-
-    def execute(self, userdata):
-        try:
-            rospy.wait_for_service(self.nav_ctrl_mode_srv_name, 15)
-            self.nav_ctrl_mode_srv()            
-        except Exception, e:
-            rospy.logerr("could not execute service <<%s>>: %s", self.nav_ctrl_mode_srv_name, e)
-            return 'srv_call_failed'
-
-        return "succeeded"
-      
