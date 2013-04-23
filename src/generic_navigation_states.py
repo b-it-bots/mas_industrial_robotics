@@ -131,19 +131,20 @@ class adjust_to_workspace(smach.State):
 
     ADJUST_SERVER = '/raw_base_placement/adjust_to_workspace'
 
-    def __init__(self):
+    def __init__(self, distance=0.2):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
         self.ac_base_adj = actionlib.SimpleActionClient(self.ADJUST_SERVER, OrientToBaseAction)
+        self.distance = distance
 
     def execute(self, userdata):
-        rospy.logdebug("Waiting for action server <<%s>>...", self.ADJUST_SERVER);
+        rospy.logdebug("Waiting for action server <<%s>>...", self.ADJUST_SERVER)
         self.ac_base_adj.wait_for_server()
-        rospy.logdebug("Action server <<%s>> is ready...", self.ADJUST_SERVER);
+        rospy.logdebug("Action server <<%s>> is ready...", self.ADJUST_SERVER)
         action_goal = OrientToBaseActionGoal()
-        action_goal.goal.distance = 0.08;
-        rospy.logdebug("Sending action goal...");
-        self.ac_base_adj.send_goal(action_goal.goal);
-        rospy.loginfo("Waiting for base to adjust...");
+        action_goal.goal.distance = self.distance
+        rospy.logdebug("Sending action goal...")
+        self.ac_base_adj.send_goal(action_goal.goal)
+        rospy.loginfo("Waiting for base to adjust...")
         if self.ac_base_adj.wait_for_result():
             rospy.loginfo("Action finished: %s", self.ac_base_adj.get_state())
             return 'succeeded'
