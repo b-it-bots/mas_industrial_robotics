@@ -40,14 +40,14 @@ class get_task(smach.State):
     """
 
     HARDCODED_SPECS = {'BNT': 'BNT<(S3,W,2),(S1,E,3),(S2,E,3),(D2,S,3)>',
-                       'BMT': 'BMT<S2,S2,S2,line(R20,M20_100,F20_20_B),S3>',
+                       'BMT': 'BMT<S2,S2,S2,line(F20_20_G,V20,R20),S3>',
                        'PPT': 'PPT<S1,S2>'}
 
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['task_received', 'wrong_task_format'],
-                             input_keys=['task', 'test', 'simulation'],
-                             output_keys=['task'])
+                             input_keys=['test', 'simulation'],
+                             io_keys=['task'])
 
     def execute(self, userdata):
         if not userdata.simulation:
