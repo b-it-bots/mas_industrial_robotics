@@ -61,88 +61,7 @@ class is_object_grasped(smach.State):
             return 'obj_grasped'
 
 
-class place_object_in_drawer(smach.State):
 
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'])
-
-    def execute(self, userdata):   
-        
-        
-        
-        return 'succeeded'
-
-
-class grasp_drawer(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['drawer_pose'])
-
-    def execute(self, userdata):   
-
-        # ToDo: sample range for gripper orientation
-        #sss.move("arm", [userdata.drawer_pose.pose.position.x, userdata.drawer_pose.pose.position.y, userdata.drawer_pose.pose.position.z,
-        #                0, 3.14, 0, 
-        #                "/base_link"])
-
-        sss.move("gripper", "open")
-        
-        
-        '''
-        # transform to base_link
-        try:
-            tf_listener = tf.TransformListener()
-        except Exception, e:
-            rospy.logerr("tf exception in grasp_drawer: create transform listener: %s", e)
-
-        tf_worked = False
-        while not tf_worked:
-            try:
-                print "HEADER: ", userdata.drawer_pose.header.frame_id
-                userdata.drawer_pose.header.stamp = rospy.Time.now()
-                tf_listener.waitForTransform('/base_link', userdata.drawer_pose.header.frame_id, rospy.Time(0), rospy.Duration(5))
-                obj_pose_transformed = tf_listener.transformPose('/base_link', userdata.drawer_pose)
-                tf_worked = True
-            except Exception, e:
-                rospy.logerr("tf exception in grasp_drawer: transform: %s", e)
-                rospy.sleep(0.2)
-                tf_worked = False
-        
-        
-        print "grasp drawer: ", obj_pose_transformed      
-        
-        # calculate a pregrasp pose
-        pre_grasp_x = obj_pose_transformed.pose.position.x - 0.02
-        pre_grasp_y = obj_pose_transformed.pose.position.y
-        pre_grasp_z = obj_pose_transformed.pose.position.z = obj_pose_transformed.pose.position.z + 0.05
-        
-        print "new grasp drawer: ", obj_pose_transformed      
-        
-        sss.move("arm", [float(pre_grasp_x), float(pre_grasp_y), float(pre_grasp_z), "/base_link"], mode=planning_mode)
-        rospy.sleep(3)
-        
-        sss.move("arm", [float(obj_pose_transformed.pose.position.x), float(obj_pose_transformed.pose.position.y), float(obj_pose_transformed.pose.position.z), "/base_link"], mode=planning_mode)
-        '''
-        
-        #sss.move("arm", [0.4874590962250121, 0.0055892878817233524, -0.05027115597514983811, 0.2, 2.0, 1.57, "/base_link"])
-        sss.move("arm", "drawer_prepre_grasp")
-        rospy.sleep(0.5)
-        sss.move("arm", "drawer_pre_grasp")
-        rospy.sleep(0.5)
-        sss.move("arm", "drawer_grasp")
-        rospy.sleep(0.5)
-        
-        
-        #global planning_mode
-        #sss.move("arm", [0.48, 0, -0.02, 0, 3.1, 1.57, "/base_link"], mode=planning_mode)
-        #sss.move("gripper", "close")
-        
-        
-        ##sss.move("arm", "home")
-
-        return 'succeeded'
-   
-   
 class grasp_random_object(smach.State):
 
     def __init__(self):
@@ -244,40 +163,22 @@ class move_arm(smach.State):
 class grasp_object(smach.State):
 
     """
-    Grasp object.
+    Should be called after visual servoing has aligned the gripper with the
+    object.
     """
 
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['succeeded', 'failed'],
-                             input_keys=['grasp_object_pose'])
+                             outcomes=['succeeded'])
 
     def execute(self, userdata):
         arm.gripper('open')
-        arm.move_to(userdata.grasp_object_pose)
+        rospy.sleep(2)
+        # TODO: move arm down
         arm.gripper('close')
         return 'succeeded'
-        return 'failed'
 
-  
-class move_arm_out_of_view(smach.State):
 
-    def __init__(self, do_blocking = True):
-        smach.State.__init__(self, outcomes=['succeeded'])
-
-        self.do_blocking = do_blocking
-
-    def execute(self, userdata):   
-        global planning_mode
-
-        if planning_mode != "planned":
-            sss.move("arm", "candle", blocking = self.do_blocking)
-    
-        sss.move("arm", "out_of_view", mode=planning_mode, blocking = self.do_blocking)
-           
-        return 'succeeded'
-    
-    
 class grasp_obj_from_pltf(smach.State):
 
     def __init__(self):
