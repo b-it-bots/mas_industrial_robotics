@@ -1,5 +1,3 @@
-import math
-
 PACKAGE = 'raw_generic_states'
 
 import roslib
@@ -51,10 +49,14 @@ class Arm(object):
         self.planning_mode = planning_mode
         self.blocking = True
 
-    def move_to(self, where, blocking=True):
+    def move_to(self, where, blocking=True, tolerance=None):
         """
         Move the arm to the pose specified in 'where'.
-        Supported formats:
+
+        Arguments
+        ---------
+        where: str | list | tuple
+            Position where the arm should be moved. Supported formats:
             * list/tuple with 5 numbers:
                 It is treated as a joint state.
             * string:
@@ -63,6 +65,12 @@ class Arm(object):
             * list/tuple with first element string and 6 numbers:
                 It is treated as a cartesian pose. First item is the frame of
                 reference, the remaining numbers are x, y, z, roll, pitch, yaw.
+        blocking: bool
+            Controls whether to block execution until the arm reaches the
+            target positon.
+        tolerance: tuple | list
+            Angular tolerance for position (three numbers: roll, pitch, and
+            yaw), in effect only for cartesian control.
         """
         self.blocking = blocking
         if isinstance(where, str):
@@ -73,7 +81,7 @@ class Arm(object):
         elif ((len(where) == 7) and
               isinstance(where[0], str) and
               all(isinstance(x, (float, int)) for x in where[1:])):
-            self._move_to_cartesian(where)
+            self._move_to_cartesian(where, tolerance)
         else:
             raise Exception('Unsupported arm target pose format (%s)' % where)
 
@@ -81,8 +89,10 @@ class Arm(object):
         self.script_server.move('arm', [joints], mode=self.planning_mode,
                                 blocking=self.blocking)
 
-    def _move_to_cartesian(self, coordinates):
+    def _move_to_cartesian(self, coordinates, tolerance):
         rospy.logdebug('Waiting for [%s] server...' % (self.CART_SERVER))
+        rospy.logdebug('Using cartesian control to move to position: %s'
+                       % (str(coordinates)))
         self.move_arm_cart_server.wait_for_server()
         position, orientation = self._construct_target_pose(coordinates[1:])
         g = MoveArmGoal()
@@ -95,6 +105,10 @@ class Arm(object):
         oc.header.frame_id = coordinates[0]
         oc.header.stamp = rospy.Time.now()
         oc.orientation = orientation
+        if tolerance and len(tolerance) == 3:
+            oc.absolute_roll_tolerance = tolerance[0]
+            oc.absolute_pitch_tolerance = tolerance[1]
+            oc.absolute_yaw_tolerance = tolerance[2]
         g.motion_plan_request.goal_constraints.orientation_constraints.append(oc)
         self.move_arm_cart_server.send_goal(g)
         rospy.loginfo('Sent move arm goal, waiting for result...')
@@ -116,8 +130,6 @@ class Arm(object):
         transformed = rotation.dot(self.ARM_LINK_5_TO_GRIPPER_OFFSET) + xyz
         position = Point(*transformed[0:3])
         orientation = Quaternion(*q)
-        rospy.loginfo('Requested position: %s' % (str(xyz)))
-        rospy.loginfo('Computed position: %s' % (str(position)))
         return position, orientation
 
     def gripper(self, state):

@@ -304,17 +304,18 @@ class move_arm(smach.State):
         is 3 or 4, then it is cartesian position and pitch angle.
     """
 
-    def __init__(self, position=None, blocking=True):
+    def __init__(self, position=None, blocking=True, tolerance=None):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_arm_to'])
         self.move_arm_to = position
         self.blocking = blocking
+        self.tolerance = tolerance
 
     def execute(self, userdata):
         position = self.move_arm_to or userdata.move_arm_to
         try:
-            arm.move_to(position, blocking=self.blocking)
+            arm.move_to(position, blocking=self.blocking, tolerance=self.tolerance)
         except ArmNavigationError as e:
             rospy.logerr('Move arm failed: %s' % (str(e)))
             return 'failed'
