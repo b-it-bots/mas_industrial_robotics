@@ -10,7 +10,7 @@ import tf
 import geometry_msgs.msg
 import hbrs_msgs.msg
 
-from hbrs_srvs.srv import GetObjects
+from hbrs_srvs.srv import GetObjects, ReturnBool
 
 
 class find_drawer(smach.State):
@@ -128,3 +128,28 @@ class find_objects(smach.State):
 
         userdata.found_objects = resp.objects
         return 'objects_found'
+
+
+class do_visual_servoing(smach.State):
+
+    SERVER = '/raw_visual_servoing/do_visual_servoing'
+
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed', 'timeout'],
+                             input_keys=['simulation'])
+        self.do_vs = rospy.ServiceProxy(self.SERVER, ReturnBool)
+
+    def execute(self, userdata):
+        if userdata.simulation:
+            return 'succeeded'
+        try:
+            rospy.logdebug("Calling service <<%s>>" % self.SERVER)
+            response = self.do_vs()
+        except rospy.ServiceException as e:
+            rospy.logerr("Exception when calling service <<%s>>: %s" % (self.SERVER, str(e)))
+            return 'aborted'
+        if response.value:
+            return 'succeeded'
+        else:
+            return 'timeout'
