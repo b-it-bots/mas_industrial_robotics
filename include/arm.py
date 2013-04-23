@@ -12,7 +12,31 @@ from geometry_msgs.msg import Point, Quaternion
 from actionlib import SimpleActionClient
 from simple_script_server import simple_script_server
 from arm_navigation_msgs.msg import MoveArmAction, MoveArmGoal, \
-                                    PositionConstraint, OrientationConstraint
+                                    PositionConstraint, OrientationConstraint, \
+                                    ArmNavigationErrorCodes
+
+
+class ArmNavigationError(Exception):
+    pass
+
+
+class KinematicsError(ArmNavigationError):
+    pass
+
+
+class TrajectoryMonitorError(ArmNavigationError):
+    pass
+
+
+def error_code_to_exception(code):
+    klass = ArmNavigationError
+    if (ArmNavigationErrorCodes.NO_IK_SOLUTION >= code and
+        ArmNavigationErrorCodes.KINEMATICS_STATE_IN_COLLISION <= code):
+        klass = KinematicsError
+    if (ArmNavigationErrorCodes.INVALID_TRAJECTORY >= code and
+        ArmNavigationErrorCodes.TRAJECTORY_CONTROLLER_FAILED <= code):
+        klass = TrajectoryMonitorError
+    return klass('Error code %i' % code)
 
 
 class Arm(object):
@@ -78,7 +102,8 @@ class Arm(object):
         self.move_arm_cart_server.wait_for_result()
         rv = self.move_arm_cart_server.get_result().error_code.val
         if not rv == 1:
-            raise Exception('Failed to move the arm to the given pose.')
+            rospy.logwarn('IK return value %i' % (rv))
+            raise error_code_to_exception(rv)
 
     def _move_to_pose(self, pose):
         self.script_server.move('arm', pose, mode=self.planning_mode,
