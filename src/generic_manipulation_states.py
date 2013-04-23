@@ -21,7 +21,7 @@ import hbrs_srvs.srv
 planning_mode = ""            # no arm planning
 #planning_mode = "planned"    # using arm planning
 
-from arm import Arm
+from arm import *
 arm = Arm(planning_mode='')
 
 
@@ -306,14 +306,18 @@ class move_arm(smach.State):
 
     def __init__(self, position=None, blocking=True):
         smach.State.__init__(self,
-                             outcomes=['succeeded'],
+                             outcomes=['succeeded', 'failed'],
                              input_keys=['move_arm_to'])
         self.move_arm_to = position
         self.blocking = blocking
 
     def execute(self, userdata):
         position = self.move_arm_to or userdata.move_arm_to
-        arm.move_to(position, blocking=self.blocking)
+        try:
+            arm.move_to(position, blocking=self.blocking)
+        except ArmNavigationError as e:
+            rospy.logerr('Move arm failed: %s' % (str(e)))
+            return 'failed'
         return 'succeeded'
 
 
