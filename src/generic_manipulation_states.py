@@ -22,6 +22,7 @@ planning_mode = ""            # no arm planning
 #planning_mode = "planned"    # using arm planning
 
 from arm import *
+from rear_platform import *
 arm = Arm(planning_mode='')
 
 
@@ -175,117 +176,35 @@ class grasp_random_object(smach.State):
                 rospy.logerr('could not find IK for current object')
 
         return 'failed'
- 
-class grasp_obj_with_visual_servering(smach.State):
+
+
+class put_object_on_rear_platform(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed', 'vs_timeout'], input_keys=['object_to_grasp'])
-        
-        self.visual_serv_srv_name = "/raw_visual_servoing/do_visual_servoing"
-        self.visual_serv_srv = rospy.ServiceProxy(self.visual_serv_srv_name, hbrs_srvs.srv.ReturnBool)
+        smach.State.__init__(self,
+                             outcomes=['succeeded',
+                                       'rear_platform_is_full',
+                                       'failed'],
+                             io_keys=['rear_platform'])
+
     def execute(self, userdata):
-        global planning_mode
-        sss.move("gripper", "open")
-        
-        
-        #sss.move("arm", "pregrasp_laying", mode=planning_mode)
-        #pt = userdata.object_to_grasp.pose.position
-        #r = userdata.object_to_grasp.pose.orientation
-        #[r, p, y] = euler_from_quaternion([r.w, r.x, r.y, r.z])
-        #d = [pt.x, pt.y, pt.z, 0, 0, math.pi / 2, userdata.object_to_grasp.header.frame_id]
-        sss.move("arm", "pregrasp_laying", mode=planning_mode)
-        #sss.move("arm", d)
-
-        #print "wait for service: ", self.visual_serv_srv_name
-        rospy.wait_for_service(self.visual_serv_srv_name, 30)
-        
-        visual_done = False
-        print "do visual serv"
-        while not visual_done:
-            try:
-                
-                resp = self.visual_serv_srv()
-
-                if not(resp.value):
-                    rospy.logerr("visual servoing exited with timeout")
-                    visual_done = False
-                    sss.move("arm", "candle", mode=planning_mode)
-                    return 'vs_timeout'
-
-                print "done"
-                visual_done = True
-            except:
-                visual_done = False
-        
-        #print userdata.object_to_grasp
-        #sss.move("arm", [float(userdata.object_to_grasp.pose.position.x), float(userdata.object_to_grasp.pose.position.y), (float(userdata.object_to_grasp.pose.position.z) + 0.02),"/base_link"])
-
-        #sss.move("gripper", "close")
-        #rospy.sleep(3)
-        #sss.move("arm", "candle")
-        
-         
-        grasper = Grasper()
-        print("waiting 0.02 for arm joint values")
-        rospy.sleep(0.05)
-        grasper.bin_grasp("laying")
-        print("did it work?")
-        
-
-        sss.move("arm","grasp_laying", mode=planning_mode)
-
-    
-        #print "do visual serv"
-        #resp = self.visual_serv_srv()
-        #print "done"
-        
-        sss.move("gripper", "close")
-        rospy.sleep(3)
-
-        sss.move("arm", "candle", mode=planning_mode)
-
-        return 'succeeded'
-
-
-class place_obj_on_rear_platform(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'no_more_free_poses'], input_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'], 
-								output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses'])
-
-    def execute(self, userdata):   
-        global planning_mode
-        
-        if planning_mode != "planned":
-            sss.move("arm", "candle", mode=planning_mode)
-            sss.move("arm", "platform_intermediate", mode=planning_mode)
-
-        
-        if(len(userdata.rear_platform_free_poses) == 0):
-            rospy.logerr("NO more free poses on platform")
-            return 'no_more_free_poses'
-            
-        pltf_pose = userdata.rear_platform_free_poses.pop()
-
-        if planning_mode != "planned":
-            sss.move("arm", pltf_pose+"_pre")
-
-        sss.move("arm", pltf_pose, mode=planning_mode)
-        
-        
-        sss.move("gripper", "open")
-        rospy.sleep(2)
-        
-        print "appending to platform occuoied poses"
-        userdata.rear_platform_occupied_poses.append(pltf_pose)
-
-        if planning_mode != "planned":
-            sss.move("arm", pltf_pose+"_pre")
-
-        sss.move("arm", "platform_intermediate", mode=planning_mode)
-
-        return 'succeeded'
-    
+        try:
+            location = userdata.rear_platform.get_free_location()
+            arm.move_to('candle')
+            arm.move_to('platform_intermediate')
+            arm.move_to('platform_%s_pre' % location)
+            arm.move_to('platform_%s' % location)
+            arm.gripper('open')
+            rospy.sleep(3)
+            userdata.rear_platform.store_object(location)
+            arm.move_to('platform_%s_pre' % location)
+            arm.move_to('platform_intermediate')
+            return 'succeeded'
+        except RearPlatformFullError as a:
+            return 'rear_platform_is_full'
+        except ArmNavigationError as e:
+            rospy.logerr('Move arm failed: %s' % (str(e)))
+            return 'failed'
 
 
 class move_arm(smach.State):
