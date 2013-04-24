@@ -107,7 +107,8 @@ class find_objects(smach.State):
             if not resp.objects:
                 rospy.loginfo('Found no objects')
             else:
-                rospy.loginfo('Found %i objects' % len(resp.objects))
+                n = str([obj.name for obj in resp.objects])
+                rospy.loginfo('Found %i objects: %s' % (len(resp.objects), n))
                 break
 
         if not resp.objects:

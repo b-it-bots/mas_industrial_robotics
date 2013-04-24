@@ -50,7 +50,7 @@ class compute_pregrasp_pose(smach.State):
         p = pose.pose.position
         o = pose.pose.orientation
         userdata.move_arm_to = [self.FRAME_ID,
-                                p.x - 0.04, p.y, p.z + 0.04,
+                                p.x - 0.04, p.y, p.z + 0.08,
                                 0, 3.14, 0]
         return 'succeeded'
 
@@ -96,6 +96,10 @@ class load_object(smach.StateMachine):
                                                 'rear_platform'],
                                     output_keys=['rear_platform'])
         with self:
+            smach.StateMachine.add('OPEN_GRIPPER',
+                                   gms.control_gripper('open'),
+                                   transitions={'succeeded': 'COMPUTE_PREGRASP_POSE'})
+
             smach.StateMachine.add('COMPUTE_PREGRASP_POSE',
                                    compute_pregrasp_pose(),
                                    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
