@@ -61,42 +61,6 @@ class is_object_grasped(smach.State):
             return 'obj_grasped'
 
 
-
-class grasp_random_object(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['object_list'])
-        
-    def execute(self, userdata):
-        sss.move("gripper", "open", blocking=False)
-       # sss.move("arm", "candle")
-        
-        for object in userdata.object_list:         
-            
-            # ToDo: need to be adjusted to correct stuff           
-            if object.pose.pose.position.z <= 0.0 or object.pose.pose.position.z >= 0.10:
-                continue
-    
-            global planning_mode
-            sss.move("arm", "candle", mode=planning_mode)                             
-
-            #object.pose.pose.position.z = object.pose.pose.position.z + 0.02
-            object.pose.pose.position.x = object.pose.pose.position.x + 0.01
-            object.pose.pose.position.y = object.pose.pose.position.y - 0.005
-
-            handle_arm = arm_cart.move([["/base_link", object.pose.pose.position.x, object.pose.pose.position.y, object.pose.pose.position.z, 0.0, ((math.pi/2) + (math.pi/4)), 0.0, 0.0, 0.5, 0.0]])
-
-            if handle_arm.get_result().error_code.val == arm_navigation_msgs.msg.ArmNavigationErrorCodes.SUCCESS:
-                sss.move("gripper", "close", blocking=False)
-                rospy.sleep(3.0)
-                sss.move("arm", "candle", mode=planning_mode)        
-                return 'succeeded'    
-            else:
-                rospy.logerr('could not find IK for current object')
-
-        return 'failed'
-
-
 class put_object_on_rear_platform(smach.State):
 
     def __init__(self):
@@ -121,6 +85,36 @@ class put_object_on_rear_platform(smach.State):
             return 'succeeded'
         except RearPlatformFullError as a:
             return 'rear_platform_is_full'
+        except ArmNavigationError as e:
+            rospy.logerr('Move arm failed: %s' % (str(e)))
+            return 'failed'
+
+
+class pick_object_from_rear_platform(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['succeeded',
+                                       'rear_platform_is_empty',
+                                       'failed'],
+                             io_keys=['rear_platform'])
+
+    def execute(self, userdata):
+        try:
+            location = userdata.rear_platform.get_occupied_location()
+            arm.gripper('open')
+            arm.move_to('platform_intermediate')
+            arm.move_to('platform_%s_pre' % location)
+            arm.move_to('platform_%s' % location)
+            rospy.sleep(3)
+            arm.gripper('close')
+            rospy.sleep(3)
+            arm.move_to('platform_%s_pre' % location)
+            arm.move_to('platform_intermediate')
+            userdata.rear_platform.retrieve_object(location)
+            return 'succeeded'
+        except RearPlatformEmptyError as a:
+            return 'rear_platform_is_empty'
         except ArmNavigationError as e:
             rospy.logerr('Move arm failed: %s' % (str(e)))
             return 'failed'
@@ -152,11 +146,27 @@ class move_arm(smach.State):
 
     def execute(self, userdata):
         position = self.move_arm_to or userdata.move_arm_to
+        rospy.loginfo('MOVING ARM TO')
         try:
             arm.move_to(position, blocking=self.blocking, tolerance=self.tolerance)
         except ArmNavigationError as e:
             rospy.logerr('Move arm failed: %s' % (str(e)))
             return 'failed'
+        return 'succeeded'
+
+
+class control_gripper(smach.State):
+
+    """
+    Open or close gripper (depending on the value passed to the constructor).
+    """
+
+    def __init__(self, action):
+        smach.State.__init__(self, outcomes=['succeeded'])
+        self.action = action
+
+    def execute(self, userdata):
+        arm.gripper(self.action)
         return 'succeeded'
 
 
@@ -167,14 +177,31 @@ class grasp_object(smach.State):
     object.
     """
 
+    FRAME_ID = '/base_link'
+
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['succeeded'])
+                             outcomes=['succeeded', 'tf_error'])
+        self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
+        try:
+            t = self.tf_listener.getLatestCommonTime('/base_link',
+                                                      'gripper_finger_link')
+            (p, q) = self.tf_listener.lookupTransform('/base_link',
+                                                      'gripper_finger_link',
+                                                      t)
+            rpy = tf.transformations.euler_from_quaternion(q)
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
         arm.gripper('open')
-        rospy.sleep(2)
-        # TODO: move arm down
+        rospy.sleep(1)
+        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.03, rpy[0], rpy[1],
+                     rpy[2]], tolerance=[0.1, 0.4, 0.1])
+        rospy.sleep(1)
         arm.gripper('close')
         return 'succeeded'
 
