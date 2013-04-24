@@ -50,8 +50,8 @@ class compute_pregrasp_pose(smach.State):
         p = pose.pose.position
         o = pose.pose.orientation
         userdata.move_arm_to = [self.FRAME_ID,
-                                p.x, p.y, p.z + 0.03,
-                                0, 3.14 * 3 / 4, 0]
+                                p.x - 0.04, p.y, p.z + 0.04,
+                                0, 3.14, 0]
         return 'succeeded'
 
 
@@ -78,7 +78,7 @@ class compute_base_shift_to_object(smach.State):
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
-        userdata.move_base_by = (0, relative.pose.position.y, 0)
+        userdata.move_base_by = (relative.pose.position.x - 0.65, relative.pose.position.y, 0)
         return 'succeeded'
 
 
@@ -92,26 +92,24 @@ class load_object(smach.StateMachine):
         smach.StateMachine.__init__(self,
                                     outcomes=['succeeded', 'failed'],
                                     input_keys=['simulation',
-                                                'object_to_load',
+                                                'object',
                                                 'rear_platform'],
                                     output_keys=['rear_platform'])
         with self:
             smach.StateMachine.add('COMPUTE_PREGRASP_POSE',
                                    compute_pregrasp_pose(),
                                    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
-                                                'tf_error': 'failed'},
-                                   remapping={'object': 'object_to_load'})
+                                                'tf_error': 'failed'})
 
             smach.StateMachine.add('MOVE_ARM_TO_PREGRASP',
-                                   gms.move_arm(tolerance=[0, 0.2, 0]),
+                                   gms.move_arm(tolerance=[0, 0.4, 0]),
                                    transitions={'succeeded': 'DO_VISUAL_SERVOING',
                                                 'failed': 'COMPUTE_BASE_SHIFT_TO_OBJECT'})
 
             smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT',
                                    compute_base_shift_to_object(),
                                    transitions={'succeeded': 'MOVE_BASE_RELATIVE',
-                                                'tf_error': 'failed'},
-                                   remapping={'object': 'object_to_load'})
+                                                'tf_error': 'failed'})
 
             smach.StateMachine.add('MOVE_BASE_RELATIVE',
                                    gns.move_base_relative(),
@@ -126,7 +124,8 @@ class load_object(smach.StateMachine):
 
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.grasp_object(),
-                                   transitions={'succeeded': 'PUT_OBJECT_ON_REAR_PLATFORM'})
+                                   transitions={'succeeded': 'PUT_OBJECT_ON_REAR_PLATFORM',
+                                                'tf_error': 'failed'})
 
             smach.StateMachine.add('PUT_OBJECT_ON_REAR_PLATFORM',
                                    gms.put_object_on_rear_platform(),
