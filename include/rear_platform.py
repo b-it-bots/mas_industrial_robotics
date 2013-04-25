@@ -36,6 +36,14 @@ class RearPlatform(object):
                 return k
         raise RearPlatformEmptyError('Rear platform is empty')
 
+    def get_free_locations(self):
+        return [l for l in self.locations.keys()
+                if self.locations[l] is None]
+
+    def get_occupied_locations(self):
+        return [l for l in self.locations.keys()
+                if self.locations[l] is not None]
+
     def store_object(self, location=None, object_name='unknown'):
         location = location or self.get_free_location()
         self.locations[location] = object_name

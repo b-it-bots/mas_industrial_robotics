@@ -97,11 +97,13 @@ class pick_object_from_rear_platform(smach.State):
                              outcomes=['succeeded',
                                        'rear_platform_is_empty',
                                        'failed'],
-                             io_keys=['rear_platform'])
+                             io_keys=['rear_platform'],
+                             input_keys=['location'])
 
     def execute(self, userdata):
+        location = (userdata.location or
+                    userdata.rear_platform.get_occupied_location())
         try:
-            location = userdata.rear_platform.get_occupied_location()
             arm.gripper('open')
             arm.move_to('platform_intermediate')
             arm.move_to('platform_%s_pre' % location)
@@ -111,7 +113,6 @@ class pick_object_from_rear_platform(smach.State):
             rospy.sleep(3)
             arm.move_to('platform_%s_pre' % location)
             arm.move_to('platform_intermediate')
-            userdata.rear_platform.retrieve_object(location)
             return 'succeeded'
         except RearPlatformEmptyError as a:
             return 'rear_platform_is_empty'
