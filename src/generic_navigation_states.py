@@ -103,19 +103,23 @@ class move_base(smach.State):
         pose is not known.
     """
 
-    def __init__(self, pose=None):
+    def __init__(self, pose=None, timeout=60):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_base_to'],
                              output_keys=['base_pose'])
         self.move_base_to = pose
+        self.timeout = rospy.Duration(timeout)
 
     def execute(self, userdata):
         pose = self.move_base_to or userdata.move_base_to
         handle_base = sss.move('base', pose, blocking=False)
+        started = rospy.Time.now()
         while True:
             rospy.sleep(0.1)
             base_state = handle_base.get_state()
+            if rospy.Time.now() - started > self.timeout:
+                return 'failed'
             if base_state == GoalStatus.SUCCEEDED:
                 userdata.base_pose = pose
                 return 'succeeded'
