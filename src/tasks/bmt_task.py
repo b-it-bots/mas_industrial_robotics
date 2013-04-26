@@ -32,7 +32,11 @@ class BMTTask(Task):
         self.dest = groups['dest']
         self.final = groups['final']
         self.cfg = groups['cfg']
-        self.objects = groups['objects'].split(',')
+        self.objects = list()
+        for t in groups['objects'].split(','):
+            if t == 'V20':
+                t = 'R20'
+            self.objects.append(t)
 
     def __str__(self):
         return ('Initial place: %s\n'
