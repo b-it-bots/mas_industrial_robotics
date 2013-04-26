@@ -8,7 +8,7 @@ import re
 
 from tasks import parse_task, TaskSpecFormatError
 
-ip = "192.168.51.61"
+ip = "192.168.51.117"
 port = "11111"
 team_name = "b-it-bots"
 
