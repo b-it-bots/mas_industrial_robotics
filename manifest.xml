@@ -28,6 +28,7 @@
 
   <export>
     <python path="${prefix}/include:${prefix}/src"/>
+    <python path="${prefix}/include:${prefix}/src/oldstates"/>
   </export>
 
 </package>
