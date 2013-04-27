@@ -11,6 +11,8 @@ import geometry_msgs.msg
 import hbrs_msgs.msg
 
 from hbrs_srvs.srv import GetObjects, ReturnBool
+from raw_srvs.srv import FindHoles
+from raw_msgs.msg import Hole
 
 
 class find_drawer(smach.State):
@@ -126,6 +128,69 @@ class find_objects(smach.State):
         return 'objects_found'
 
 
+class find_holes(smach.State):
+
+    SERVER = '/find_holes'
+
+    def __init__(self, retries=3, frame_id=None):
+        smach.State.__init__(self,
+                             outcomes=['holes_found',
+                                       'no_holes_found',
+                                       'srv_call_failed'],
+                             input_keys=['found_holes', 'simulation'],
+                             output_keys=['found_holes'])
+        self.find_holes = rospy.ServiceProxy(self.SERVER, FindHoles)
+        self.tf_listener = tf.TransformListener()
+        self.retries = retries
+        self.frame_id = frame_id
+
+    def execute(self, userdata):
+        if userdata.simulation:
+            return self.simulated_holes()
+        userdata.found_holes = None
+        for i in range(self.retries):
+            rospy.loginfo('Looking for holes (attempt %i/%i)' % (i + 1, self.retries))
+            try:
+                rospy.wait_for_service(self.SERVER, 15)
+                resp = self.find_holes()
+            except Exception as e:
+                rospy.logerr("Service call to <<%s>> failed", self.SERVER)
+                return 'srv_call_failed'
+            if not resp.holes:
+                rospy.loginfo('Found no holes')
+            else:
+                rospy.loginfo('Found %i holes' % len(resp.holes))
+                break
+
+        if not resp.holes:
+            rospy.loginfo('No holes in the field of view')
+            return 'no_holes_found'
+
+        if self.frame_id:
+            for hole in resp.holes:
+                try:
+                    hole.position = self.tf_listener.transformPoint(self.frame_id, hole.position)
+                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                    rospy.logerr('Unable to transform %s -> %s' % (hole.position.header.frame_id, self.frame_id))
+
+        userdata.found_holes = resp.holes
+        return 'holes_found'
+
+    def simulated_holes(self):
+        holes = list()
+        for p in [(0.0226904768497, 0.151216566563, 1.08289813995),
+                  (0.13507245481, 0.125635072589, 1.12861084938),
+                  (0.208152621984, 0.263396263123, 0.849790096283),
+                  (0.0932492688298, 0.279482185841, 0.823174893856)]:
+            h = Hole()
+            pp = h.position.position
+            pp.x, pp.y, pp.z = p
+            h.header.stamp = rospy.Time.now()
+            h.header.frame_id = '/tower_cam3d_rgb_optical_frame'
+            holes.append(h)
+        return holes
+
+
 class do_visual_servoing(smach.State):
 
     SERVER = '/raw_visual_servoing/do_visual_servoing'
@@ -144,7 +209,7 @@ class do_visual_servoing(smach.State):
             response = self.do_vs()
         except rospy.ServiceException as e:
             rospy.logerr("Exception when calling service <<%s>>: %s" % (self.SERVER, str(e)))
-            return 'aborted'
+            return 'failed'
         if response.value:
             return 'succeeded'
         else:

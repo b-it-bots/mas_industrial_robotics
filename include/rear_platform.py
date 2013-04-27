@@ -24,6 +24,14 @@ class RearPlatform(object):
     def empty(self):
         return not any(self.locations.values())
 
+    @property
+    def contains(self, object_name):
+        return object_name in self.locations.values()
+
+    @property
+    def where(self, object_name):
+        return (k for k, v in self.locations.items() if v == object_name)
+
     def get_free_location(self):
         for k in self.locations.keys():
             if self.locations[k] is None:
