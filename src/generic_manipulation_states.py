@@ -200,7 +200,7 @@ class grasp_object(smach.State):
             return 'tf_error'
         arm.gripper('open')
         rospy.sleep(1)
-        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.075, rpy[0], rpy[1],
+        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.055, rpy[0], rpy[1],
                      rpy[2]], tolerance=[0.1, 0.4, 0.1])
         rospy.sleep(1)
         arm.gripper('close')
