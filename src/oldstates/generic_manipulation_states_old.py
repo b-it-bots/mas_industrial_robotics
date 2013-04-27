@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import roslib
 roslib.load_manifest('raw_generic_states')
 import rospy
@@ -17,9 +16,10 @@ from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 import hbrs_srvs.srv
 
-
+from arm import *
 planning_mode = ""            # no arm planning
 #planning_mode = "planned"    # using arm planning
+arm = Arm(planning_mode='')
 
 
 class Bunch:
@@ -173,7 +173,7 @@ class grasp_random_object(smach.State):
 
         return 'failed'
  
-class grasp_obj_with_visual_servering(smach.State):
+class do_visual_servering(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed', 'vs_timeout'], input_keys=['object_to_grasp'])
@@ -183,19 +183,8 @@ class grasp_obj_with_visual_servering(smach.State):
     def execute(self, userdata):
         global planning_mode
         sss.move("gripper", "open")
-        
-        
-        #sss.move("arm", "pregrasp_laying", mode=planning_mode)
-        #pt = userdata.object_to_grasp.pose.position
-        #r = userdata.object_to_grasp.pose.orientation
-        #[r, p, y] = euler_from_quaternion([r.w, r.x, r.y, r.z])
-        #d = [pt.x, pt.y, pt.z, 0, 0, math.pi / 2, userdata.object_to_grasp.header.frame_id]
-        sss.move("arm", "pregrasp_laying", mode=planning_mode)
-        #sss.move("arm", d)
-
         #print "wait for service: ", self.visual_serv_srv_name
         rospy.wait_for_service(self.visual_serv_srv_name, 30)
-        
         visual_done = False
         print "do visual serv"
         while not visual_done:
@@ -213,29 +202,7 @@ class grasp_obj_with_visual_servering(smach.State):
                 visual_done = True
             except:
                 visual_done = False
-        
-        #print userdata.object_to_grasp
-        #sss.move("arm", [float(userdata.object_to_grasp.pose.position.x), float(userdata.object_to_grasp.pose.position.y), (float(userdata.object_to_grasp.pose.position.z) + 0.02),"/base_link"])
-
-        #sss.move("gripper", "close")
-        #rospy.sleep(3)
-        #sss.move("arm", "candle")
-        
-         
-        grasper = Grasper()
-        print("waiting 0.02 for arm joint values")
-        rospy.sleep(0.05)
-        grasper.bin_grasp("laying")
-        print("did it work?")
-        
-
-        sss.move("arm","grasp_laying", mode=planning_mode)
-
-    
-        #print "do visual serv"
-        #resp = self.visual_serv_srv()
-        #print "done"
-        
+                      
         sss.move("gripper", "close")
         rospy.sleep(3)
 
@@ -285,7 +252,7 @@ class place_obj_on_rear_platform(smach.State):
     
 
 
-class move_arm(smach.State):
+class move_arm_command(smach.State):
 
     def __init__(self, position = "candle", do_blocking = True):
         smach.State.__init__(self, outcomes=['succeeded'])
@@ -380,4 +347,75 @@ class place_object_in_configuration(smach.State):
 
         sss.move("arm", "candle", mode=planning_mode)
                 
+        return 'succeeded'
+
+class move_arm(smach.State):
+
+    """
+    Move arm to a position. Position may be fixed at construction time or set
+    through userdata.
+
+    Input
+    -----
+    move_arm_to: str | tuple | list
+        Position where the arm should move. If it is a string, then it gives
+        position name (should be availabile on the parameter server). If it as
+        tuple or a list, then it is treated differently based on the length. If
+        there are 5 elements, then it is a list of joint values. If the length
+        is 3 or 4, then it is cartesian position and pitch angle.
+    """
+
+    def __init__(self, position=None, blocking=True, tolerance=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed'],
+                             input_keys=['move_arm_to'])
+        self.move_arm_to = position
+        self.blocking = blocking
+        self.tolerance = tolerance
+
+    def execute(self, userdata):
+        position = self.move_arm_to or userdata.move_arm_to
+        rospy.loginfo('MOVING ARM TO')
+        try:
+            arm.move_to(position, blocking=self.blocking, tolerance=self.tolerance)
+        except ArmNavigationError as e:
+            rospy.logerr('Move arm failed: %s' % (str(e)))
+            return 'failed'
+        return 'succeeded'
+
+class grasp_object_btt(smach.State):
+
+    """
+    Should be called after visual servoing has aligned the gripper with the
+    object.
+    """
+
+    FRAME_ID = '/base_link'
+
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'tf_error'])
+        self.tf_listener = tf.TransformListener()
+
+    def execute(self, userdata):
+        try:
+            t = self.tf_listener.getLatestCommonTime('/base_link',
+                                                      'gripper_finger_link')
+            (p, q) = self.tf_listener.lookupTransform('/base_link',
+                                                      'gripper_finger_link',
+                                                      t)
+            rpy = tf.transformations.euler_from_quaternion(q)
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
+        arm.gripper('open')
+        rospy.sleep(1)
+        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.075, rpy[0], rpy[1],
+                     rpy[2]], tolerance=[0.1, 0.4, 0.1])
+        rospy.sleep(1)
+        arm.gripper('close')
+        rospy.sleep(2)
+        sss.move("arm", "candle", mode=planning_mode)
         return 'succeeded'

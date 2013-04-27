@@ -91,8 +91,8 @@ class recognize_objects(smach.State):
         self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):     
-        
-        ''' 
+         
+        '''
         for i in range(5): 
             print "find object try: ", i
             
