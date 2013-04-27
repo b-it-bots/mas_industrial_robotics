@@ -124,7 +124,7 @@ class load_object(smach.StateMachine):
                                    gps.do_visual_servoing(),
                                    transitions={'succeeded': 'GRASP_OBJECT',
                                                 'failed': 'failed',
-                                                'timeout': 'failed'})
+                                                'timeout': 'RECOVERY_STOW_ARM'})
 
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.grasp_object(),
@@ -136,3 +136,6 @@ class load_object(smach.StateMachine):
                                    transitions={'succeeded': 'succeeded',
                                                 'rear_platform_is_full': 'failed',
                                                 'failed': 'failed'})
+            smach.StateMachine.add('RECOVERY_STOW_ARM', gms.move_arm('home'),
+                                   transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT',
+                                                'failed': 'RECOVERY_STOW_ARM'})
