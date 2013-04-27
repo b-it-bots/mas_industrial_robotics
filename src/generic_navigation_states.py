@@ -135,7 +135,7 @@ class adjust_to_workspace(smach.State):
 
     ADJUST_SERVER = '/raw_base_placement/adjust_to_workspace'
 
-    def __init__(self, distance=0.1):
+    def __init__(self, distance=0.25):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
         self.ac_base_adj = actionlib.SimpleActionClient(self.ADJUST_SERVER, OrientToBaseAction)
         self.distance = distance
