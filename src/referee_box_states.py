@@ -41,7 +41,7 @@ class get_task(smach.State):
 
     HARDCODED_SPECS = {'BNT': 'BNT<(S3,W,2),(S1,E,3),(S2,E,3),(D2,S,3)>',
                        'BMT': 'BMT<S2,S2,S2,line(F20_20_G,R20,F20_20_B),S3>',
-                       'PPT': 'PPT<S2,S2>'}
+                       'PPT': 'PPT<S6,S5>'}
 
     def __init__(self):
         smach.State.__init__(self,
