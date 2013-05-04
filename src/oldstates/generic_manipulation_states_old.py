@@ -202,11 +202,8 @@ class do_visual_servering(smach.State):
                 visual_done = True
             except:
                 visual_done = False
-                      
-        sss.move("gripper", "close")
-        rospy.sleep(3)
 
-        sss.move("arm", "candle", mode=planning_mode)
+        rospy.sleep(3)
 
         return 'succeeded'
 
@@ -392,11 +389,11 @@ class grasp_object_btt(smach.State):
 
     FRAME_ID = '/base_link'
 
-    def __init__(self):
+    def __init__(self, offset=0.075):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'tf_error'])
         self.tf_listener = tf.TransformListener()
-
+        self.offset = offset
     def execute(self, userdata):
         try:
             t = self.tf_listener.getLatestCommonTime('/base_link',
@@ -412,7 +409,7 @@ class grasp_object_btt(smach.State):
             return 'tf_error'
         arm.gripper('open')
         rospy.sleep(1)
-        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.075, rpy[0], rpy[1],
+        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.095, rpy[0], rpy[1],
                      rpy[2]], tolerance=[0.1, 0.4, 0.1])
         rospy.sleep(1)
         arm.gripper('close')
