@@ -225,10 +225,9 @@ class get_basic_transportation_task(smach.State):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
 
-
-        transportation_task = 'BTT<initialsituation(<S1,(F20_20_B,M20_100)>);goalsituation(<S2,zigzag(M20_100,F20_20_B)>)>'
+        #transportation_task = 'BTT<initialsituation(<S5,(R20)>);goalsituation(<S6,zigzag(R20)>)>'
         
-        #transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
+        transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
 
         rospy.loginfo("Task received: " + transportation_task)
         

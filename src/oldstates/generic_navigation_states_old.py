@@ -107,12 +107,12 @@ class approach_pose(smach.State):
 
 class adjust_pose_wrt_workspace(smach.State):
 
-    def __init__(self):
+    def __init__(self,distance):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
 
         self.ac_base_adj_name = '/raw_base_placement/adjust_to_workspace'
         self.ac_base_adj = actionlib.SimpleActionClient(self.ac_base_adj_name, raw_base_placement.msg.OrientToBaseAction)
-
+        self.distance = distance
     def execute(self, userdata):
         
             
@@ -121,7 +121,7 @@ class adjust_pose_wrt_workspace(smach.State):
         rospy.loginfo("action server <<%s>> is ready ...", self.ac_base_adj_name);
         action_goal = raw_base_placement.msg.OrientToBaseActionGoal()
             
-        action_goal.goal.distance = 0.1;
+        action_goal.goal.distance = self.distance;
         rospy.loginfo("send action");
         self.ac_base_adj.send_goal(action_goal.goal);
         

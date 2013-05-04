@@ -92,7 +92,7 @@ class recognize_objects(smach.State):
 
     def execute(self, userdata):     
          
-        '''
+
         for i in range(5): 
             print "find object try: ", i
             
@@ -147,6 +147,6 @@ class recognize_objects(smach.State):
             userdata.recognized_objects.append(obj)
         
 
-        
+        '''
         
         return 'found_objects'
