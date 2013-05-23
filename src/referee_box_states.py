@@ -40,22 +40,27 @@ class get_task(smach.State):
     """
 
     HARDCODED_SPECS = {'BNT': 'BNT<(S3,W,2),(S1,E,3),(S2,E,3),(D2,S,3)>',
-                       'BMT': 'BMT<S2,S2,S2,line(F20_20_G,R20,F20_20_B),S3>',
+                       'BMT': 'BMT<S2,S2,S3,line(F20_20_G,R20,F20_20_B),S2>',
+                	   'BTT': 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>',
                        'PPT': 'PPT<S6,S5>'}
 
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['task_received', 'wrong_task_format'],
+                             outcomes=['task_received', 'wrong_task_format', 'test_not_set'],
                              input_keys=['test', 'simulation'],
                              io_keys=['task'])
 
     def execute(self, userdata):
+        if len(userdata.test) <= 0:
+            rospy.logerr("userdata.test NOT set. Please specifiy in the test state machine")
+            return 'test_not_set'
+
         if not userdata.simulation:
             rospy.logdebug('Waiting for task specification (%s:%s)...' % (ip, port))
             task_spec = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
         else:
             task_spec = self.HARDCODED_SPECS[userdata.test]
-        rospy.loginfo("Task specification: %s" % task_spec)
+            rospy.loginfo("Task specification: %s" % task_spec)
         try:
             userdata.task = parse_task(userdata.test, task_spec)
             rospy.loginfo('Parsed task:\n%s' % userdata.task)
@@ -73,7 +78,7 @@ class get_basic_transportation_task(smach.State):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
 
-		#transportation_task = 'BTT<initialsituation(<S1,(screw,alu_silver_l)><S2,(alu_silver_s,alu_black_l,alu_black_s)>);goalsituation(<S3,line(alu_silver_l,alu_silver_s)><D1,zigzag(alu_black_s,alu_black_l,screw)>)>'
+		#transportation_task = 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>'
         #transportation_task = 'BTT<initialsituation(<S3,(F20_20_B,M20_100)>);goalsituation(<S2,zigzag(M20_100,F20_20_B)>)>'
         
         transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
