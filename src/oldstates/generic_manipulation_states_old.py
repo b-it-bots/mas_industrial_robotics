@@ -41,7 +41,8 @@ class is_object_grasped(smach.State):
             rospy.loginfo("wait for service:  %s", self.obj_grasped_srv_name)
             rospy.wait_for_service(self.obj_grasped_srv_name, 5)
         
-            sss.move("gripper", "close")
+            sss.move("gripper", "close", blocking=False)
+            # Unify Sleep
             rospy.sleep(2.0)
             
             is_gripper_closed = self.obj_grasped_srv()
@@ -57,86 +58,6 @@ class is_object_grasped(smach.State):
             return 'obj_grasped'
 
 
-class place_object_in_drawer(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'])
-
-    def execute(self, userdata):   
-        
-        
-        
-        return 'succeeded'
-
-
-class grasp_drawer(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['drawer_pose'])
-
-    def execute(self, userdata):   
-
-        # ToDo: sample range for gripper orientation
-        #sss.move("arm", [userdata.drawer_pose.pose.position.x, userdata.drawer_pose.pose.position.y, userdata.drawer_pose.pose.position.z,
-        #                0, 3.14, 0, 
-        #                "/base_link"])
-
-        sss.move("gripper", "open")
-        
-        
-        '''
-        # transform to base_link
-        try:
-            tf_listener = tf.TransformListener()
-        except Exception, e:
-            rospy.logerr("tf exception in grasp_drawer: create transform listener: %s", e)
-
-        tf_worked = False
-        while not tf_worked:
-            try:
-                print "HEADER: ", userdata.drawer_pose.header.frame_id
-                userdata.drawer_pose.header.stamp = rospy.Time.now()
-                tf_listener.waitForTransform('/base_link', userdata.drawer_pose.header.frame_id, rospy.Time(0), rospy.Duration(5))
-                obj_pose_transformed = tf_listener.transformPose('/base_link', userdata.drawer_pose)
-                tf_worked = True
-            except Exception, e:
-                rospy.logerr("tf exception in grasp_drawer: transform: %s", e)
-                rospy.sleep(0.2)
-                tf_worked = False
-        
-        
-        print "grasp drawer: ", obj_pose_transformed      
-        
-        # calculate a pregrasp pose
-        pre_grasp_x = obj_pose_transformed.pose.position.x - 0.02
-        pre_grasp_y = obj_pose_transformed.pose.position.y
-        pre_grasp_z = obj_pose_transformed.pose.position.z = obj_pose_transformed.pose.position.z + 0.05
-        
-        print "new grasp drawer: ", obj_pose_transformed      
-        
-        sss.move("arm", [float(pre_grasp_x), float(pre_grasp_y), float(pre_grasp_z), "/base_link"], mode=planning_mode)
-        rospy.sleep(3)
-        
-        sss.move("arm", [float(obj_pose_transformed.pose.position.x), float(obj_pose_transformed.pose.position.y), float(obj_pose_transformed.pose.position.z), "/base_link"], mode=planning_mode)
-        '''
-        
-        #sss.move("arm", [0.4874590962250121, 0.0055892878817233524, -0.05027115597514983811, 0.2, 2.0, 1.57, "/base_link"])
-        sss.move("arm", "drawer_prepre_grasp")
-        rospy.sleep(0.5)
-        sss.move("arm", "drawer_pre_grasp")
-        rospy.sleep(0.5)
-        sss.move("arm", "drawer_grasp")
-        rospy.sleep(0.5)
-        
-        
-        #global planning_mode
-        #sss.move("arm", [0.48, 0, -0.02, 0, 3.1, 1.57, "/base_link"], mode=planning_mode)
-        #sss.move("gripper", "close")
-        
-        
-        ##sss.move("arm", "home")
-
-        return 'succeeded'
    
    
 class grasp_random_object(smach.State):
@@ -165,6 +86,7 @@ class grasp_random_object(smach.State):
 
             if handle_arm.get_result().error_code.val == arm_navigation_msgs.msg.ArmNavigationErrorCodes.SUCCESS:
                 sss.move("gripper", "close", blocking=False)
+                # Unify Sleep              
                 rospy.sleep(3.0)
                 sss.move("arm", "candle", mode=planning_mode)        
                 return 'succeeded'    
@@ -203,7 +125,7 @@ class do_visual_servering(smach.State):
             except:
                 visual_done = False
 
-        rospy.sleep(3)
+        #rospy.sleep(3)
 
         return 'succeeded'
 
@@ -411,7 +333,7 @@ class grasp_object_btt(smach.State):
         rospy.sleep(1)
         arm.move_to(['/base_link', p[0], p[1], p[2] - 0.095, rpy[0], rpy[1],
                      rpy[2]], tolerance=[0.1, 0.4, 0.1])
-        rospy.sleep(1)
+        #rospy.sleep(1)
         arm.gripper('close')
         rospy.sleep(2)
         sss.move("arm", "candle", mode=planning_mode)

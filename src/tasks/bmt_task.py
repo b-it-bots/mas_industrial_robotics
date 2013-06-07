@@ -33,6 +33,12 @@ class BMTTask(Task):
         self.final = groups['final']
         self.cfg = groups['cfg']
         self.objects = list()
+        
+        '''
+        A hack.
+        We are unable to differentiate between V20 and R20.
+        If we are given V20, look for R20 instead.
+        '''
         for t in groups['objects'].split(','):
             if t == 'V20':
                 t = 'R20'
