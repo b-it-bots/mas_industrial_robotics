@@ -12,7 +12,7 @@ import smach_ros
 import referee_box_communication
 import re
 
-ip = "192.168.51.117"
+ip = "192.168.51.167"
 port = "11111"
 team_name = "b-it-bots"
 
