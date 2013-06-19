@@ -25,6 +25,9 @@ from arm import *
 from rear_platform import *
 arm = Arm(planning_mode='')
 
+# Gripper Wait Time
+GRIPPER_WAIT_TIME = 1.0
+
 
 class Bunch:
     def __init__(self, **kwds):
@@ -46,7 +49,7 @@ class is_object_grasped(smach.State):
             rospy.wait_for_service(self.obj_grasped_srv_name, 5)
         
             sss.move("gripper", "close")
-            rospy.sleep(2.0)
+            rospy.sleep(GRIPPER_WAIT_TIME)
             
             is_gripper_closed = self.obj_grasped_srv()
         except:
@@ -78,7 +81,7 @@ class put_object_on_rear_platform(smach.State):
             arm.move_to('platform_%s_pre' % location)
             arm.move_to('platform_%s' % location)
             arm.gripper('open')
-            rospy.sleep(3)
+            rospy.sleep(GRIPPER_WAIT_TIME)
             userdata.rear_platform.store_object(location)
             arm.move_to('platform_%s_pre' % location)
             arm.move_to('platform_intermediate')
@@ -108,9 +111,9 @@ class pick_object_from_rear_platform(smach.State):
             arm.move_to('platform_intermediate')
             arm.move_to('platform_%s_pre' % location)
             arm.move_to('platform_%s' % location)
-            rospy.sleep(3)
+            #rospy.sleep(3)
             arm.gripper('close')
-            rospy.sleep(3)
+            rospy.sleep(GRIPPER_WAIT_TIME)
             arm.move_to('platform_%s_pre' % location)
             arm.move_to('platform_intermediate')
             return 'succeeded'
@@ -199,12 +202,12 @@ class grasp_object(smach.State):
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
         arm.gripper('open')
-        rospy.sleep(1)
+        rospy.sleep(GRIPPER_WAIT_TIME)
         arm.move_to(['/base_link', p[0], p[1], p[2] - 0.055, rpy[0], rpy[1],
                      rpy[2]], tolerance=[0.1, 0.4, 0.1])
-        rospy.sleep(1)
+        #rospy.sleep(1)
         arm.gripper('close')
-        rospy.sleep(2)
+        rospy.sleep(GRIPPER_WAIT_TIME)
         return 'succeeded'
 
 
@@ -231,7 +234,7 @@ class grasp_obj_from_pltf(smach.State):
         sss.move("arm", pltf_obj_pose, mode=planning_mode)
         
         sss.move("gripper", "close")
-        rospy.sleep(3)
+        rospy.sleep(GRIPPER_WAIT_TIME)
 
         if planning_mode != "planned":        
             sss.move("arm", pltf_obj_pose+"_pre")
@@ -263,7 +266,7 @@ class place_object_in_configuration(smach.State):
         sss.move("arm", cfg_goal_pose, mode=planning_mode)
         
         sss.move("gripper","open")
-        rospy.sleep(2)
+        rospy.sleep(GRIPPER_WAIT_TIME)
 
         sss.move("arm", "candle", mode=planning_mode)
                 

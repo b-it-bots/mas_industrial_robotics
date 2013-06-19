@@ -100,6 +100,21 @@ class load_object(smach.StateMachine):
                                    gms.control_gripper('open'),
                                    transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT'})
 
+            smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT',
+                                   compute_base_shift_to_object(),
+                                   transitions={'succeeded': 'MOVE_BASE_RELATIVE',
+                                                'tf_error': 'failed'})
+
+            smach.StateMachine.add('MOVE_BASE_RELATIVE',
+                                   gns.move_base_relative(),
+                                   transitions={'succeeded': 'AVOID_WALLS_TO_PREGRASP',
+                                                'failed': 'failed'})
+
+            smach.StateMachine.add('AVOID_WALLS_TO_PREGRASP',
+                                   gms.move_arm('candle'),
+                                   transitions={'succeeded': 'COMPUTE_PREGRASP_POSE',
+                                                'failed': 'failed'})
+
             smach.StateMachine.add('COMPUTE_PREGRASP_POSE',
                                    compute_pregrasp_pose(),
                                    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
@@ -110,15 +125,6 @@ class load_object(smach.StateMachine):
                                    transitions={'succeeded': 'DO_VISUAL_SERVOING',
                                                 'failed': 'COMPUTE_BASE_SHIFT_TO_OBJECT'})
 
-            smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT',
-                                   compute_base_shift_to_object(),
-                                   transitions={'succeeded': 'MOVE_BASE_RELATIVE',
-                                                'tf_error': 'failed'})
-
-            smach.StateMachine.add('MOVE_BASE_RELATIVE',
-                                   gns.move_base_relative(),
-                                   transitions={'succeeded': 'COMPUTE_PREGRASP_POSE',
-                                                'failed': 'failed'})
 
             smach.StateMachine.add('DO_VISUAL_SERVOING',
                                    gps.do_visual_servoing(),
@@ -128,14 +134,22 @@ class load_object(smach.StateMachine):
 
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.grasp_object(),
-                                   transitions={'succeeded': 'PUT_OBJECT_ON_REAR_PLATFORM',
+                                   transitions={'succeeded': 'AVOID_WALLS_TO_PLATFORM',
                                                 'tf_error': 'failed'})
+
+            smach.StateMachine.add('AVOID_WALLS_TO_PLATFORM',
+                                   gms.move_arm('pregrasp_laying'),
+                                   transitions={'succeeded': 'PUT_OBJECT_ON_REAR_PLATFORM',
+                                                'failed': 'failed'})
 
             smach.StateMachine.add('PUT_OBJECT_ON_REAR_PLATFORM',
                                    gms.put_object_on_rear_platform(),
                                    transitions={'succeeded': 'succeeded',
                                                 'rear_platform_is_full': 'failed',
                                                 'failed': 'failed'})
+
             smach.StateMachine.add('RECOVERY_STOW_ARM', gms.move_arm('home'),
                                    transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT',
                                                 'failed': 'RECOVERY_STOW_ARM'})
+
+
