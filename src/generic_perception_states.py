@@ -197,9 +197,9 @@ class do_visual_servoing(smach.State):
 
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['succeeded', 'failed', 'timeout'],
+                             outcomes=['succeeded', 'failed', 'timeout', 'lost_object'],
                              input_keys=['simulation'])
-        self.do_vs = rospy.ServiceProxy(self.SERVER, ReturnBool)
+        self.do_vs = rospy.ServiceProxy(self.SERVER, DoVisualServoing )
 
     def execute(self, userdata):
         if userdata.simulation:
@@ -210,7 +210,16 @@ class do_visual_servoing(smach.State):
         except rospy.ServiceException as e:
             rospy.logerr("Exception when calling service <<%s>>: %s" % (self.SERVER, str(e)))
             return 'failed'
-        if response.value:
-            return 'succeeded'
+        if response.return_value:
+            if response.return_value == 0
+                return 'succeeded'
+            if response.return_value == -1
+                return 'failed'
+            if repsonse.return_value == -2
+                return 'timeout' 
+            if response.return_value == -3
+                return 'lost_object'
+            else
+                return 'failed'
         else:
-            return 'timeout'
+            return 'failed'
