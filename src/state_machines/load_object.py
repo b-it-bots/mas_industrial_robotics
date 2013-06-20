@@ -50,7 +50,7 @@ class compute_pregrasp_pose(smach.State):
         p = pose.pose.position
         o = pose.pose.orientation
         userdata.move_arm_to = [self.FRAME_ID,
-                                p.x - 0.04, p.y, p.z + 0.05,
+                                p.x, p.y, p.z + 0.1,
                                 0, 3.14, 0]
         return 'succeeded'
 
@@ -78,7 +78,7 @@ class compute_base_shift_to_object(smach.State):
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
-        userdata.move_base_by = (relative.pose.position.x - 0.65, relative.pose.position.y, 0)
+        userdata.move_base_by = (relative.pose.position.x - 0.50, relative.pose.position.y, 0)
         return 'succeeded'
 
 
@@ -112,9 +112,9 @@ class load_object(smach.StateMachine):
 
             smach.StateMachine.add('AVOID_WALLS_TO_PREGRASP',
                                    gms.move_arm('candle'),
-                                   transitions={'succeeded': 'COMPUTE_PREGRASP_POSE',
+                                   transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
                                                 'failed': 'failed'})
-
+            '''
             smach.StateMachine.add('COMPUTE_PREGRASP_POSE',
                                    compute_pregrasp_pose(),
                                    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
@@ -124,7 +124,11 @@ class load_object(smach.StateMachine):
                                    gms.move_arm(tolerance=[0, 0.4, 0]),
                                    transitions={'succeeded': 'DO_VISUAL_SERVOING',
                                                 'failed': 'COMPUTE_BASE_SHIFT_TO_OBJECT'})
-
+            '''
+            smach.StateMachine.add('MOVE_ARM_TO_PREGRASP',
+                                   gms.move_arm('pregrasp_laying'),
+                                   transitions={'succeeded': 'DO_VISUAL_SERVOING',
+                                                'failed': 'failed'})
 
             smach.StateMachine.add('DO_VISUAL_SERVOING',
                                    gps.do_visual_servoing(),

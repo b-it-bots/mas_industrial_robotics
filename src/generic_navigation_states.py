@@ -103,7 +103,7 @@ class move_base(smach.State):
         pose is not known.
     """
 
-    def __init__(self, pose=None, timeout=60):
+    def __init__(self, pose=None, timeout=120):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_base_to'],
@@ -135,7 +135,7 @@ class adjust_to_workspace(smach.State):
 
     ADJUST_SERVER = '/raw_base_placement/adjust_to_workspace'
 
-    def __init__(self, distance=0.25):
+    def __init__(self, distance=0.20):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
         self.ac_base_adj = actionlib.SimpleActionClient(self.ADJUST_SERVER, OrientToBaseAction)
         self.distance = distance
