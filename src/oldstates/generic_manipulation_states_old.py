@@ -15,6 +15,7 @@ arm_cart = MoveArmCartScriptServer()
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 import hbrs_srvs.srv
+import raw_srvs.srv
 
 from arm import *
 planning_mode = ""            # no arm planning
@@ -101,31 +102,48 @@ class do_visual_servering(smach.State):
         smach.State.__init__(self, outcomes=['succeeded', 'failed', 'vs_timeout'], input_keys=['object_to_grasp'])
         
         self.visual_serv_srv_name = "/raw_visual_servoing/do_visual_servoing"
-        self.visual_serv_srv = rospy.ServiceProxy(self.visual_serv_srv_name, hbrs_srvs.srv.ReturnBool)
+        self.visual_serv_srv = rospy.ServiceProxy(self.visual_serv_srv_name, raw_srvs.srv.DoVisualServoing)
     def execute(self, userdata):
         global planning_mode
         sss.move("gripper", "open")
         #print "wait for service: ", self.visual_serv_srv_name
         rospy.wait_for_service(self.visual_serv_srv_name, 30)
-        visual_done = False
         print "do visual serv"
-        while not visual_done:
-            try:
-                
-                resp = self.visual_serv_srv()
+        try:
+            rospy.loginfo( "Calling service <<%s>>" % self.SERVER )
+            response = self.do_vs()
+        except rospy.ServiceException as e:
+            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.SERVER, str( e ) ) )
+            return 'failed'
+        if( response.return_value == 0 ):
+            return 'succeeded'
+        elif( response.return_value == -1 ):
+            return 'failed'
+        elif( response.return_value == -2 ):
+            sss.move("arm", "candle", mode=planning_mode)
+            return 'timeout' 
+        elif( response.return_value == -3 ):
+            return 'lost_object' 
 
-                if not(resp.value):
-                    rospy.logerr("visual servoing exited with timeout")
-                    visual_done = False
-                    sss.move("arm", "candle", mode=planning_mode)
-                    return 'vs_timeout'
 
-                print "done"
-                visual_done = True
-            except:
-                visual_done = False
 
-        return 'succeeded'
+    def execute( self, userdata ):
+        if( userdata.simulation ):
+            return 'succeeded'
+        try:
+            rospy.loginfo( "Calling service <<%s>>" % self.SERVER )
+            response = self.do_vs()
+        except rospy.ServiceException as e:
+            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.SERVER, str( e ) ) )
+            return 'failed'
+        if( response.return_value == 0 ):
+            return 'succeeded'
+        elif( response.return_value == -1 ):
+            return 'failed'
+        elif( response.return_value == -2 ):
+            return 'timeout' 
+        elif( response.return_value == -3 ):
+            return 'lost_object' 
 
 
 class place_obj_on_rear_platform(smach.State):
