@@ -126,26 +126,6 @@ class do_visual_servering(smach.State):
             return 'lost_object' 
 
 
-
-    def execute( self, userdata ):
-        if( userdata.simulation ):
-            return 'succeeded'
-        try:
-            rospy.loginfo( "Calling service <<%s>>" % self.SERVER )
-            response = self.do_vs()
-        except rospy.ServiceException as e:
-            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.SERVER, str( e ) ) )
-            return 'failed'
-        if( response.return_value == 0 ):
-            return 'succeeded'
-        elif( response.return_value == -1 ):
-            return 'failed'
-        elif( response.return_value == -2 ):
-            return 'timeout' 
-        elif( response.return_value == -3 ):
-            return 'lost_object' 
-
-
 class place_obj_on_rear_platform(smach.State):
 
     def __init__(self):
