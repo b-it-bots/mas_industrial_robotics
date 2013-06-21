@@ -13,6 +13,8 @@ import hbrs_msgs.msg
 from hbrs_srvs.srv import GetObjects, ReturnBool
 from raw_srvs.srv import FindHoles
 from raw_msgs.msg import Hole
+from raw_srvs.srv import DoVisualServoing
+from raw_msgs.msg import VisualServoing
 
 
 class find_drawer(smach.State):
@@ -195,22 +197,26 @@ class do_visual_servoing(smach.State):
 
     SERVER = '/raw_visual_servoing/do_visual_servoing'
 
-    def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['succeeded', 'failed', 'timeout'],
-                             input_keys=['simulation'])
-        self.do_vs = rospy.ServiceProxy(self.SERVER, ReturnBool)
+    def __init__( self ):
+        smach.State.__init__( self,
+                              outcomes=[ 'succeeded', 'failed', 'timeout', 'lost_object' ],
+                              input_keys=['simulation'] )
+        self.do_vs = rospy.ServiceProxy( self.SERVER, DoVisualServoing )
 
-    def execute(self, userdata):
-        if userdata.simulation:
+    def execute( self, userdata ):
+        if( userdata.simulation ):
             return 'succeeded'
         try:
-            rospy.logdebug("Calling service <<%s>>" % self.SERVER)
+            rospy.loginfo( "Calling service <<%s>>" % self.SERVER )
             response = self.do_vs()
         except rospy.ServiceException as e:
-            rospy.logerr("Exception when calling service <<%s>>: %s" % (self.SERVER, str(e)))
+            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.SERVER, str( e ) ) )
             return 'failed'
-        if response.value:
+        if( response.return_value == 0 ):
             return 'succeeded'
-        else:
-            return 'timeout'
+        elif( response.return_value == -1 ):
+            return 'failed'
+        elif( response.return_value == -2 ):
+            return 'timeout' 
+        elif( response.return_value == -3 ):
+            return 'lost_object' 
