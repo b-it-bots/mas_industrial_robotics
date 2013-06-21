@@ -212,11 +212,11 @@ class do_visual_servoing(smach.State):
         except rospy.ServiceException as e:
             rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.SERVER, str( e ) ) )
             return 'failed'
-        if( response.return_value == 0 ):
+        if( response.return_value.error_code == 0 ):
             return 'succeeded'
-        elif( response.return_value == -1 ):
+        elif( response.return_value.error_code == -1 ):
             return 'failed'
-        elif( response.return_value == -2 ):
+        elif( response.return_value.error_code == -2 ):
             return 'timeout' 
-        elif( response.return_value == -3 ):
+        elif( response.return_value.error_code == -3 ):
             return 'lost_object' 
