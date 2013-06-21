@@ -138,7 +138,7 @@ class load_object(smach.StateMachine):
                                                 'timeout': 'RECOVERY_STOW_ARM'})
             '''
             smach.StateMachine.add('GRASP_OBJECT',
-                                   gms.grasp_object(),
+                                   gms.move_arm('candle'),
                                    transitions={'succeeded': 'AVOID_WALLS_TO_PLATFORM',
                                                 'tf_error': 'failed'})
 
