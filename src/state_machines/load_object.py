@@ -78,7 +78,7 @@ class compute_base_shift_to_object(smach.State):
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
-        userdata.move_base_by = (relative.pose.position.x - 0.50, relative.pose.position.y, 0)
+        userdata.move_base_by = (relative.pose.position.x - 0.55, relative.pose.position.y, 0)
         return 'succeeded'
 
 
