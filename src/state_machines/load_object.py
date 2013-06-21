@@ -127,16 +127,17 @@ class load_object(smach.StateMachine):
             '''
             smach.StateMachine.add('MOVE_ARM_TO_PREGRASP',
                                    gms.move_arm('pregrasp_laying'),
-                                   transitions={'succeeded': 'GRASP_OBJECT',
+                                   transitions={'succeeded': 'DO_VISUAL_SERVOING',
                                                 'failed': 'failed'})
             
-            '''
+            
             smach.StateMachine.add('DO_VISUAL_SERVOING',
                                    gps.do_visual_servoing(),
                                    transitions={'succeeded': 'GRASP_OBJECT',
                                                 'failed': 'failed',
-                                                'timeout': 'RECOVERY_STOW_ARM'})
-            '''
+                                                'timeout': 'MOVE_ARM_TO_PREGRASP',
+                                                'lost_object': 'failed'})
+            
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.move_arm('candle'),
                                    transitions={'succeeded': 'AVOID_WALLS_TO_PLATFORM',
