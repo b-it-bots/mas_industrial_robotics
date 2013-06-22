@@ -26,7 +26,7 @@ from rear_platform import *
 arm = Arm(planning_mode='')
 
 # Gripper Wait Time
-GRIPPER_WAIT_TIME = 1.0
+GRIPPER_WAIT_TIME = 1.5
 
 
 class Bunch:
@@ -189,7 +189,9 @@ class grasp_object(smach.State):
             #arm.move_to('platform_%s_pre' % location)
             #arm.move_to('platform_%s' % location)
             arm.gripper('open')
-            arm.move_to(grasp_pose)
+            rospy.sleep(GRIPPER_WAIT_TIME)
+            #arm.move_to(grasp_pose)
+            rospy.logerr('GRASP POSE IS: %s' % grasp_pose)
             arm.gripper('close')            
             rospy.sleep(GRIPPER_WAIT_TIME)
             userdata.rear_platform.store_object(location)
