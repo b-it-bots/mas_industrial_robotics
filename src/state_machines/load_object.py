@@ -141,7 +141,7 @@ class load_object(smach.StateMachine):
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.grasp_object(),
                                    transitions={'succeeded': 'AVOID_WALLS_TO_PLATFORM',
-                                                'failed': 'failed'})
+                                                'tf_error': 'failed'})
 
             smach.StateMachine.add('AVOID_WALLS_TO_PLATFORM',
                                    gms.move_arm('pregrasp_laying'),

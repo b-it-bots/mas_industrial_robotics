@@ -28,7 +28,6 @@ arm = Arm(planning_mode='')
 # Gripper Wait Time
 GRIPPER_WAIT_TIME = 1.5
 
-
 class Bunch:
     def __init__(self, **kwds):
          self.__dict__.update(kwds)
@@ -172,71 +171,43 @@ class control_gripper(smach.State):
     def execute(self, userdata):
         arm.gripper(self.action)
         return 'succeeded'
+       
 
 class grasp_object(smach.State):
 
+    """
+    Should be called after visual servoing has aligned the gripper with the
+    object.
+    """
+
+    FRAME_ID = '/base_link'
+
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['succeeded',
-                                       'failed'])
+                             outcomes=['succeeded', 'tf_error'])
+        self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
         try:
-            grasp_param = rospy.search_param('grasp_laying')
-            grasp_pose = rospy.get_param(grasp_param)
-            arm.move_to('candle');
-            arm.move_to('pregrasp_laying')
-            #arm.move_to('platform_%s_pre' % location)
-            #arm.move_to('platform_%s' % location)
-            arm.gripper('open')
-            rospy.sleep(GRIPPER_WAIT_TIME)
-            #arm.move_to(grasp_pose)
-            rospy.logerr('GRASP POSE IS: %s' % grasp_pose)
-            arm.gripper('close')            
-            rospy.sleep(GRIPPER_WAIT_TIME)
-            arm.move_to('pregrasp_laying')
-            return 'succeeded'
-        
-        except ArmNavigationError as e:
-            rospy.logerr('Move arm failed: %s' % (str(e)))
-            return 'failed'
-        
-
-#class grasp_object(smach.State):
-#
-#    """
-#    Should be called after visual servoing has aligned the gripper with the
-#    object.
-#    """
-#
-#    FRAME_ID = '/base_link'
-#
-#    def __init__(self):
-#        smach.State.__init__(self,
-#                             outcomes=['succeeded', 'tf_error'])
-#        self.tf_listener = tf.TransformListener()
-#
-#    def execute(self, userdata):
-#        try:
-#            t = self.tf_listener.getLatestCommonTime('/base_link',
-#                                                      'gripper_finger_link')
-#            (p, q) = self.tf_listener.lookupTransform('/base_link',
-#                                                      'gripper_finger_link',
-#                                                      t)
-#            rpy = tf.transformations.euler_from_quaternion(q)
-#        except (tf.LookupException,
-#                tf.ConnectivityException,
-#                tf.ExtrapolationException) as e:
-#            rospy.logerr('Tf error: %s' % str(e))
-#            return 'tf_error'
-#        arm.gripper('open')
-#        rospy.sleep(GRIPPER_WAIT_TIME)
-#        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.055, rpy[0], rpy[1],
-#                     rpy[2]], tolerance=[0.1, 0.4, 0.1])
-#        #rospy.sleep(1)
-#        arm.gripper('close')
-#        rospy.sleep(GRIPPER_WAIT_TIME)
-#        return 'succeeded'
+            t = self.tf_listener.getLatestCommonTime('/base_link',
+                                                      'gripper_finger_link')
+            (p, q) = self.tf_listener.lookupTransform('/base_link',
+                                                      'gripper_finger_link',
+                                                      t)
+            rpy = tf.transformations.euler_from_quaternion(q)
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
+        arm.gripper('open')
+        rospy.sleep(GRIPPER_WAIT_TIME)
+        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.055, rpy[0], rpy[1],
+                     rpy[2]], tolerance=[0.1, 0.4, 0.1])
+        #rospy.sleep(1)
+        arm.gripper('close')
+        rospy.sleep(GRIPPER_WAIT_TIME)
+        return 'succeeded'
 
 
 class grasp_obj_from_pltf(smach.State):
