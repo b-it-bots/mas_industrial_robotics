@@ -46,21 +46,22 @@ class get_task(smach.State):
 
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['task_received', 'wrong_task_format', 'test_not_set'],
-                             input_keys=['test', 'simulation'],
-                             io_keys=['task'])
+            outcomes=['task_received', 'wrong_task_format'], 
+            input_keys=['test', 'simulation'],
+            io_keys=['task'])
+        #outcomes=['task_received', 'wrong_task_format', 'test_not_set'],
 
     def execute(self, userdata):
-        if len(userdata.test) <= 0:
-            rospy.logerr("userdata.test NOT set. Please specifiy in the test state machine")
-            return 'test_not_set'
+        #if len(userdata.test) <= 0:
+        #    rospy.logerr("userdata.test NOT set. Please specifiy in the test state machine")
+        #    return 'test_not_set'
 
         if not userdata.simulation:
             rospy.logdebug('Waiting for task specification (%s:%s)...' % (ip, port))
             task_spec = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
         else:
             task_spec = self.HARDCODED_SPECS[userdata.test]
-            rospy.loginfo("Task specification: %s" % task_spec)
+        rospy.loginfo("Task specification: %s" % task_spec)
         try:
             userdata.task = parse_task(userdata.test, task_spec)
             rospy.loginfo('Parsed task:\n%s' % userdata.task)
