@@ -194,7 +194,6 @@ class grasp_object(smach.State):
             rospy.logerr('GRASP POSE IS: %s' % grasp_pose)
             arm.gripper('close')            
             rospy.sleep(GRIPPER_WAIT_TIME)
-            userdata.rear_platform.store_object(location)
             arm.move_to('pregrasp_laying')
             return 'succeeded'
         
