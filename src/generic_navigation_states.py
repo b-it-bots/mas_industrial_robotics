@@ -12,6 +12,7 @@ import tf
 
 from geometry_msgs.msg import PoseStamped
 from raw_srvs.srv import SetPoseStamped
+from raw_srvs.srv import RelativeMovements
 from raw_base_placement.msg import OrientToBaseAction, OrientToBaseActionGoal
 from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
@@ -266,7 +267,7 @@ class move_base_relative(smach.State):
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_base_by'])
         self.offset = offset
-        self.move_base_relative = rospy.ServiceProxy(self.SRV, SetPoseStamped)
+        self.move_base_relative = rospy.ServiceProxy(self.SRV,RelativeMovements)
 
     def execute(self, userdata):
         rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
@@ -282,7 +283,10 @@ class move_base_relative(smach.State):
         pose.pose.orientation.z = quat[2]
         pose.pose.orientation.w = quat[3]
         try:
-            self.move_base_relative(pose)
+            response = self.move_base_relative(pose)
+            if response.status == 'failure_obtacle_front':
+                # return values required by the scenario. This situation arises when the base is close to the platform
+                return 'succeeded'
         except:
             rospy.logerr('Could no execute <<%s>>' % (self.SRV))
             return 'failed'
