@@ -8,7 +8,11 @@ import re
 
 from tasks import parse_task, TaskSpecFormatError
 
-ip = "192.168.51.167"
+try:
+    rospy.get_param('refbox_ip')
+except KeyError:
+    rospy.logerr("Using Hardcoded refbox_ip")
+    ip = "192.168.51.167"
 port = "11111"
 team_name = "b-it-bots"
 
