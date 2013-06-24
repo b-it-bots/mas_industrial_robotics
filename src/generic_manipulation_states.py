@@ -203,11 +203,14 @@ class grasp_object(smach.State):
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
         try:
-            d = rospy.get_param('script_server/arm/grasp_delta_xyz')
+            dx = rospy.get_param('script_server/arm/grasp_delta/x')
+            dy = rospy.get_param('script_server/arm/grasp_delta/y')
+            dz = rospy.get_param('script_server/arm/grasp_delta/z')
+            #rospy.logerr('read dxyz ' + dx + ',' + dy + ',' + dz)
         except KeyError:
             rospy.logerr('No Grasp Pose Change Set.')
-        arm.move_to(['/base_link', p[0] - d[0], p[1] - d[1], p[2] - d[1], rpy[0], rpy[1],
-                     rpy[2]], tolerance=[0.1, 0.4, 0.1])
+        arm.move_to(['/base_link', p[0] - dx, p[1] - dy, p[2] - dz, rpy[0], rpy[1],
+                rpy[2]], tolerance=[0.1, 0.4, 0.1])
         #Will need to check if above call uses blocking.
         #rospy.sleep(1)
         arm.gripper('close')

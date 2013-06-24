@@ -9,7 +9,7 @@ import re
 from tasks import parse_task, TaskSpecFormatError
 
 try:
-    rospy.get_param('refbox_ip')
+    ip = rospy.get_param('refbox_ip')
 except KeyError:
     rospy.logerr("Using Hardcoded refbox_ip")
     ip = "192.168.51.167"
