@@ -300,19 +300,16 @@ class move_arm(smach.State):
 
 class grasp_object_btt(smach.State):
 
-    """
-    Should be called after visual servoing has aligned the gripper with the
-    object.
-    """
-
     FRAME_ID = '/base_link'
 
-    def __init__(self, offset=0.075):
+    def __init__(self):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'tf_error'])
         self.tf_listener = tf.TransformListener()
-        self.offset = offset
+
     def execute(self, userdata):
+        arm.gripper('open')
+        rospy.sleep(GRIPPER_WAIT_TIME)
         try:
             t = self.tf_listener.getLatestCommonTime('/base_link',
                                                       'gripper_finger_link')
@@ -325,11 +322,13 @@ class grasp_object_btt(smach.State):
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
-        arm.gripper('open')
-        rospy.sleep(GRIPPER_WAIT_TIME)
-        # TODO CHECK THIS CODE!!        
-        arm.move_to(['/base_link', p[0], p[1], p[2] - 0.095, rpy[0], rpy[1],
+        try:
+            d = rospy.get_param('script_server/arm/grasp_delta_xyz')
+        except KeyError:
+            rospy.logerr('No Grasp Pose Change Set.')
+        arm.move_to(['/base_link', p[0] - d[0], p[1] - d[1], p[2] - d[1], rpy[0], rpy[1],
                      rpy[2]], tolerance=[0.1, 0.4, 0.1])
+        #Will need to check if above call uses blocking.
         #rospy.sleep(1)
         arm.gripper('close')
         rospy.sleep(GRIPPER_WAIT_TIME)
