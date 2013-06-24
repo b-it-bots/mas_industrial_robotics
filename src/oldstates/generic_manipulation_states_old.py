@@ -99,7 +99,7 @@ class grasp_random_object(smach.State):
 class do_visual_servering(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed', 'vs_timeout'], input_keys=['object_to_grasp'])
+        smach.State.__init__(self, outcomes=['succeeded', 'failed', 'timeout', 'lost_object'], input_keys=['object_to_grasp'])
         
         self.visual_serv_srv_name = "/raw_visual_servoing/do_visual_servoing"
         self.visual_serv_srv = rospy.ServiceProxy(self.visual_serv_srv_name, raw_srvs.srv.DoVisualServoing)
@@ -110,19 +110,18 @@ class do_visual_servering(smach.State):
         rospy.wait_for_service(self.visual_serv_srv_name, 30)
         print "do visual serv"
         try:
-            rospy.loginfo( "Calling service <<%s>>" % self.SERVER )
+            rospy.loginfo( "Calling service <<%s>>" % self.visual_serv_srv)
             response = self.do_vs()
         except rospy.ServiceException as e:
-            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.SERVER, str( e ) ) )
+            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.visual_serv_srv, str( e ) ) )
             return 'failed'
-        if( response.return_value == 0 ):
+        if( response.return_value.error_code == 0 ):
             return 'succeeded'
-        elif( response.return_value == -1 ):
+        elif( response.return_value.error_code == -1 ):
             return 'failed'
-        elif( response.return_value == -2 ):
-            sss.move("arm", "candle", mode=planning_mode)
+        elif( response.return_value.error_code == -2 ):
             return 'timeout' 
-        elif( response.return_value == -3 ):
+        elif( response.return_value.error_code == -3 ):
             return 'lost_object' 
 
 
