@@ -209,8 +209,12 @@ class grasp_object(smach.State):
             #rospy.logerr('read dxyz ' + dx + ',' + dy + ',' + dz)
         except KeyError:
             rospy.logerr('No Grasp Pose Change Set.')
-        arm.move_to(['/base_link', p[0] - dx, p[1] - dy, p[2] - dz, rpy[0], rpy[1],
+        arm.move_to(['/base_link', float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1],
                 rpy[2]], tolerance=[0.1, 0.4, 0.1])
+        rospy.sleep(3.0)
+        print p
+        print rpy
+        print p[2] - dz
         #Will need to check if above call uses blocking.
         #rospy.sleep(1)
         arm.gripper('close')
