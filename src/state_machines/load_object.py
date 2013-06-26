@@ -7,6 +7,7 @@ import tf
 import rospy
 import smach
 
+import generic_basic_states as gbs
 import generic_manipulation_states as gms
 import generic_navigation_states as gns
 import generic_perception_states as gps
@@ -136,7 +137,12 @@ class load_object(smach.StateMachine):
                                    transitions={'succeeded': 'GRASP_OBJECT',
                                                 'failed': 'failed',
                                                 'timeout': 'MOVE_ARM_TO_PREGRASP',
-                                                'lost_object': 'failed'})
+                                                'lost_object': 'VISUAL_SERVOING_LOST'})
+
+            smach.StateMachine.add('VISUAL_SERVOING_LOST',
+                                  gbs.loop_for(3),
+                                  transitions={'loop': 'MOVE_ARM_TO_PREGRASP',
+                                               'continue': 'failed'})
             
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.grasp_object(),
