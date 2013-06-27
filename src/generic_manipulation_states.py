@@ -26,7 +26,7 @@ from rear_platform import *
 arm = Arm(planning_mode='')
 
 # Gripper Wait Time
-GRIPPER_WAIT_TIME = 1.5
+GRIPPER_WAIT_TIME = 1.8
 
 class Bunch:
     def __init__(self, **kwds):
@@ -276,7 +276,7 @@ class place_object_in_configuration(smach.State):
         sss.move("arm", cfg_goal_pose, mode=planning_mode)
         
         sss.move("gripper","open")
-        rospy.sleep(GRIPPER_WAIT_TIME)
+        rospy.sleep(GRIPPER_WAIT_TIME+1.0)
 
         sss.move("arm", "candle", mode=planning_mode)
                 
