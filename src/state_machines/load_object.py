@@ -75,7 +75,7 @@ class load_object(smach.StateMachine):
                                    transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT'})
 
             smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT',
-                                   compute_base_shift_to_object(),
+                                   gns.compute_base_shift_to_object(),
                                    transitions={'succeeded': 'MOVE_BASE_RELATIVE',
                                                 'tf_error': 'failed'})
 
