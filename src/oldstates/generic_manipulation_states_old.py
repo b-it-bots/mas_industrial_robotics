@@ -23,7 +23,7 @@ planning_mode = ""            # no arm planning
 arm = Arm(planning_mode='')
 
 # Gripper Wait Time
-GRIPPER_WAIT_TIME = 1.0
+GRIPPER_WAIT_TIME = 1.5
 
 class Bunch:
     def __init__(self, **kwds):
@@ -111,9 +111,9 @@ class do_visual_servering(smach.State):
         print "do visual serv"
         try:
             rospy.loginfo( "Calling service <<%s>>" % self.visual_serv_srv)
-            response = self.do_vs()
+            response = self.visual_serv_srv()
         except rospy.ServiceException as e:
-            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.visual_serv_srv, str( e ) ) )
+            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.visual_serv_srv_name, str( e ) ) )
             return 'failed'
         if( response.return_value.error_code == 0 ):
             return 'succeeded'
@@ -322,14 +322,19 @@ class grasp_object_btt(smach.State):
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
         try:
-            d = rospy.get_param('script_server/arm/grasp_delta_xyz')
+            dx = rospy.get_param('script_server/arm/grasp_delta/x')
+            dy = rospy.get_param('script_server/arm/grasp_delta/y')
+            dz = rospy.get_param('script_server/arm/grasp_delta/z')
+            #rospy.logerr('read dxyz ' + dx + ',' + dy + ',' + dz)
         except KeyError:
             rospy.logerr('No Grasp Pose Change Set.')
-        arm.move_to(['/base_link', p[0] - d[0], p[1] - d[1], p[2] - d[1], rpy[0], rpy[1],
-                     rpy[2]], tolerance=[0.1, 0.4, 0.1])
+        arm_cart.move([['/base_link', float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]])
+        rospy.sleep(3.0)
+        #print p
+        #print rpy
+        #print p[2] - dz
         #Will need to check if above call uses blocking.
         #rospy.sleep(1)
         arm.gripper('close')
         rospy.sleep(GRIPPER_WAIT_TIME)
-        sss.move("arm", "candle", mode=planning_mode)
         return 'succeeded'
