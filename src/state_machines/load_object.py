@@ -56,33 +56,6 @@ class compute_pregrasp_pose(smach.State):
         return 'succeeded'
 
 
-class compute_base_shift_to_object(smach.State):
-
-    FRAME_ID = '/base_link'
-
-    def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['succeeded', 'tf_error'],
-                             input_keys=['object'],
-                             output_keys=['move_base_by'])
-        self.tf_listener = tf.TransformListener()
-
-    def execute(self, userdata):
-        pose = userdata.object.pose
-        try:
-            t = self.tf_listener.getLatestCommonTime(self.FRAME_ID,
-                                                     pose.header.frame_id)
-            pose.header.stamp = t
-            relative = self.tf_listener.transformPose(self.FRAME_ID, pose)
-        except (tf.LookupException,
-                tf.ConnectivityException,
-                tf.ExtrapolationException) as e:
-            rospy.logerr('Tf error: %s' % str(e))
-            return 'tf_error'
-        userdata.move_base_by = (relative.pose.position.x - 0.55, relative.pose.position.y, 0)
-        return 'succeeded'
-
-
 ###############################################################################
 #                               State machine                                 #
 ###############################################################################
