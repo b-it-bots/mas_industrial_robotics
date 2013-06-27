@@ -23,7 +23,7 @@ planning_mode = ""            # no arm planning
 arm = Arm(planning_mode='')
 
 # Gripper Wait Time
-GRIPPER_WAIT_TIME = 1.0
+GRIPPER_WAIT_TIME = 1.5
 
 class Bunch:
     def __init__(self, **kwds):
@@ -111,9 +111,9 @@ class do_visual_servering(smach.State):
         print "do visual serv"
         try:
             rospy.loginfo( "Calling service <<%s>>" % self.visual_serv_srv)
-            response = self.do_vs()
+            response = self.visual_serv_srv()
         except rospy.ServiceException as e:
-            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.visual_serv_srv, str( e ) ) )
+            rospy.logerr( "Exception when calling service <<%s>>: %s" % ( self.visual_serv_srv_name, str( e ) ) )
             return 'failed'
         if( response.return_value.error_code == 0 ):
             return 'succeeded'
