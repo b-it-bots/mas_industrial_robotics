@@ -30,15 +30,15 @@ class move_base_with_adjustment_and_arm(smach.StateMachine):
             smach.StateMachine.add('MOVE_BASE', gns.move_base(move_base_to),
                 transitions={'succeeded': 'ADJUST_AND_MOVE_ARM'})
 
-            sm_con = smach.Concurrence(outcomes=['succeeded', 'failed'],
+            sm_concurrent = smach.Concurrence(outcomes=['succeeded', 'failed'],
                                        default_outcome='succeeded',
                                        outcome_map={'succeeded': {'MOVE_ARM': 'succeeded',
                                                                   'ADJUST_TO_WORKSPACE': 'succeeded'},
                                                     'failed': {'ADJUST_TO_WORKSPACE': 'failed'}})
 
-            with sm_con:
+            with sm_concurrent:
                 smach.Concurrence.add('MOVE_ARM', gms.move_arm(move_arm_to))
                 smach.Concurrence.add('ADJUST_TO_WORKSPACE', gns.adjust_to_workspace())
 
-            smach.StateMachine.add('ADJUST_AND_MOVE_ARM', sm_con,
+            smach.StateMachine.add('ADJUST_AND_MOVE_ARM', sm_concurrent,
                 transitions={'failed': 'ADJUST_AND_MOVE_ARM'})

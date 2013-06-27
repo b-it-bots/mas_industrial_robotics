@@ -6,7 +6,9 @@ import smach
 import referee_box_communication
 import re
 
-from tasks import parse_task, TaskSpecFormatError
+import tasks
+
+#from tasks import parse_task, TaskSpecFormatError
 
 try:
     ip = rospy.get_param('refbox_ip')
@@ -67,10 +69,10 @@ class get_task(smach.State):
             task_spec = self.HARDCODED_SPECS[userdata.test]
         rospy.loginfo("Task specification: %s" % task_spec)
         try:
-            userdata.task = parse_task(userdata.test, task_spec)
+            userdata.task = tasks.parse_task(userdata.test, task_spec)
             rospy.loginfo('Parsed task:\n%s' % userdata.task)
             return 'task_received'
-        except TaskSpecFormatError:
+        except tasks.TaskSpecFormatError:
             return 'wrong_task_format'
 
 
