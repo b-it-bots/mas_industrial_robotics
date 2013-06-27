@@ -204,8 +204,8 @@ class do_visual_servoing(smach.State):
         self.do_vs = rospy.ServiceProxy( self.SERVER, DoVisualServoing )
 
     def execute( self, userdata ):
-        if( userdata.simulation ):
-            return 'succeeded'
+        #if( userdata.simulation = True ):
+        #   return 'succeeded'
         try:
             rospy.loginfo( "Calling service <<%s>>" % self.SERVER )
             response = self.do_vs()

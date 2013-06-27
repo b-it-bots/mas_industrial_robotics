@@ -294,8 +294,7 @@ class move_base_relative(smach.State):
 
 class compute_base_shift_to_object(smach.State):
     '''
-    MOVED OUT OF LOAD OBJECT 
-
+    MOVED OUT OF LOAD_OBJECT
     '''
 
     FRAME_ID = '/base_link'
@@ -319,6 +318,5 @@ class compute_base_shift_to_object(smach.State):
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
-        userdata.move_base_by = (relative.pose.position.x - 0.55, relative.pose.position.y, 0)
+        userdata.move_base_by = (relative.pose.position.x - 0.6, relative.pose.position.y-0.03, 0)
         return 'succeeded'
-

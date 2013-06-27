@@ -81,14 +81,14 @@ class load_object(smach.StateMachine):
 
             smach.StateMachine.add('MOVE_BASE_RELATIVE',
                                    gns.move_base_relative(),
-                                   transitions={'succeeded': 'AVOID_WALLS_TO_PREGRASP',
+                                   transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
                                                 'failed': 'failed'})
-
+            '''
             smach.StateMachine.add('AVOID_WALLS_TO_PREGRASP',
                                    gms.move_arm('candle'),
                                    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
                                                 'failed': 'failed'})
-            '''
+            
             smach.StateMachine.add('COMPUTE_PREGRASP_POSE',
                                    compute_pregrasp_pose(),
                                    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
@@ -119,14 +119,14 @@ class load_object(smach.StateMachine):
             
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.grasp_object(),
-                                   transitions={'succeeded': 'AVOID_WALLS_FROM_PLATFORM',
+                                   transitions={'succeeded': 'PUT_OBJECT_ON_REAR_PLATFORM',
                                                 'tf_error': 'failed'})
-
+            '''
             smach.StateMachine.add('AVOID_WALLS_FROM_PLATFORM',
                                    gms.move_arm('pregrasp_laying'),
                                    transitions={'succeeded': 'PUT_OBJECT_ON_REAR_PLATFORM',
                                                 'failed': 'failed'})
-
+            '''
             smach.StateMachine.add('PUT_OBJECT_ON_REAR_PLATFORM',
                                    gms.put_object_on_rear_platform(),
                                    transitions={'succeeded': 'succeeded',
