@@ -281,3 +281,41 @@ class place_object_in_configuration(smach.State):
         sss.move("arm", "candle", mode=planning_mode)
                 
         return 'succeeded'
+
+class compute_pregrasp_pose(smach.State):
+
+    """
+    Given an object pose compute a pregrasp position that is reachable and also
+    good for the visual servoing.
+
+    THIS DOESN'T work optimally with Visual Servoing. Moved from load_object.py 
+    to here for potential future use.
+    """
+
+    FRAME_ID = '/base_link'
+
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'tf_error'],
+                             input_keys=['object'],
+                             output_keys=['move_arm_to'])
+        self.tf_listener = tf.TransformListener()
+
+    def execute(self, userdata):
+        pose = userdata.object.pose
+        try:
+            t = self.tf_listener.getLatestCommonTime(self.FRAME_ID,
+                                                     pose.header.frame_id)
+            pose.header.stamp = t
+            pose = self.tf_listener.transformPose(self.FRAME_ID, pose)
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
+        p = pose.pose.position
+        o = pose.pose.orientation
+        userdata.move_arm_to = [self.FRAME_ID,
+                                p.x, p.y, p.z + 0.1,
+                                0, 3.14, 0]
+        return 'succeeded'
