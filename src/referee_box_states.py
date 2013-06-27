@@ -44,7 +44,7 @@ class get_task(smach.State):
     """
 
     HARDCODED_SPECS = {'BNT': 'BNT<(D,W,3),(S1,E,3),(T3,N,3),(S3,S,3),(T1,S,3),(D1,E,3),(S4,N,3),(S5,N,3),(T4,W,3),(T2,S,3),(S2,E,3),(EXIT,E,3)>',
-                       'BMT': 'BMT<S2,S2,S3,line(F20_20_B, F20_20_G),EXIT>',
+                       'BMT': 'BMT<D1,D1,D1,line(F20_20_B, F20_20_G),D1>',
                 	   'BTT': 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>',
                        'PPT': 'PPT<S6,S5>'}
 
