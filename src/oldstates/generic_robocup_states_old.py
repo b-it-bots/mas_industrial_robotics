@@ -16,7 +16,7 @@ try:
     ip = rospy.get_param('refbox_ip')
 except KeyError:
     rospy.logerr("Using Hardcoded refbox_ip")
-    ip = "192.168.51.167"
+    ip = "192.168.142.1"
 port = "11111"
 team_name = "b-it-bots"
 
@@ -229,9 +229,9 @@ class get_basic_transportation_task(smach.State):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
 
-        #transportation_task = 'BTT<initialsituation(<S5,line(R20)>);goalsituation(<S6,zigzag(R20)>)>'
+        transportation_task = 'BTT<initialsituation(<S5,line(R20,F20_20_B,F20_20_G)>);goalsituation(<S6,line(R20,F20_20_B,F20_20_G)>)>'
         
-        transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
+        #transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
 
         rospy.loginfo("Task received: " + transportation_task)
         
