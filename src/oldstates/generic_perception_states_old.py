@@ -123,8 +123,8 @@ class recognize_objects(smach.State):
                 try:
                     print "frame_id: ", resp.objects[i].pose.header.frame_id
                     resp.objects[i].pose.header.stamp = rospy.Time.now()
-                    self.tf_listener.waitForTransform('/odom', resp.objects[i].pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
-                    obj_pose_transformed = self.tf_listener.transformPose('/odom', resp.objects[i].pose)
+                    self.tf_listener.waitForTransform('/base_link', resp.objects[i].pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
+                    obj_pose_transformed = self.tf_listener.transformPose('/base_link', resp.objects[i].pose)
                     resp.objects[i].pose = obj_pose_transformed
                     tf_worked = True
                 except Exception, e:
