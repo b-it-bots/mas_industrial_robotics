@@ -46,7 +46,7 @@ class get_task(smach.State):
     """
 
     HARDCODED_SPECS = {'BNT': 'BNT<(D,W,3),(S1,E,3),(T3,N,3),(S3,S,3),(T1,S,3),(D1,E,3),(S4,N,3),(S5,N,3),(T4,W,3),(T2,S,3),(S2,E,3),(EXIT,E,3)>',
-                       'BMT': 'BMT<D2,D2,D2,line(F20_20_B,R20,M20_100),D2>',
+                       'BMT': 'BMT<D1,D1,D1,line(F20_20_B,R20,M20_100),D1>',
                 	   'BTT': 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>',
                        'PPT': 'PPT<S6,S5>'}
 
@@ -68,6 +68,28 @@ class get_task(smach.State):
         else:
             task_spec = self.HARDCODED_SPECS[userdata.test]
         rospy.loginfo("Task specification: %s" % task_spec)
+        userdata.task_spec_copy = task_spec
+        try:
+            userdata.task = tasks.parse_task(userdata.test, task_spec)
+            rospy.loginfo('Parsed task:\n%s' % userdata.task)
+            return 'task_received'
+        except tasks.TaskSpecFormatError:
+            return 'wrong_task_format'
+
+class re_get_task(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['task_received', 'wrong_task_format'], 
+            input_keys=['test', 'simulation'],
+            io_keys=['task','task_spec_copy'])
+        #outcomes=['task_received', 'wrong_task_format', 'test_not_set'],
+
+    def execute(self, userdata):
+        #if len(userdata.test) <= 0:
+        #    rospy.logerr("userdata.test NOT set. Please specifiy in the test state machine")
+        #    return 'test_not_set'
+        task_spec = userdata.task_spec_copy        
         try:
             userdata.task = tasks.parse_task(userdata.test, task_spec)
             rospy.loginfo('Parsed task:\n%s' % userdata.task)

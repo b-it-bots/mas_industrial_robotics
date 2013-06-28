@@ -20,7 +20,7 @@ class compute_base_shift_to_object(smach.State):
     MOVED OUT OF LOAD_OBJECT
     '''
 
-    FRAME_ID = '/odom'
+    FRAME_ID = '/base_link'
 
     def __init__(self):
         smach.State.__init__(self,
@@ -52,7 +52,7 @@ class load_object(smach.StateMachine):
 
     def __init__(self):
         smach.StateMachine.__init__(self,
-                                    outcomes=['succeeded', 'failed'],
+                                    outcomes=['succeeded', 'failed', 'vs_error'],
                                     input_keys=['simulation',
                                                 'object',
                                                 'rear_platform'],
@@ -101,9 +101,9 @@ class load_object(smach.StateMachine):
                                                 'lost_object': 'VISUAL_SERVOING_LOST'})
 
             smach.StateMachine.add('VISUAL_SERVOING_LOST',
-                                  gbs.loop_for(3),
+                                  gbs.loop_for(4),
                                   transitions={'loop': 'MOVE_ARM_TO_PREGRASP',
-                                               'continue': 'failed'})
+                                               'continue': 'vs_error'})
             
             smach.StateMachine.add('GRASP_OBJECT',
                                    gms.grasp_object(),
