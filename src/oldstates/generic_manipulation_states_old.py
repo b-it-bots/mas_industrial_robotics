@@ -6,6 +6,9 @@ import smach_ros
 import math
 import arm_navigation_msgs.msg
 
+from raw_srvs.srv import DoVisualServoing
+from raw_msgs.msg import VisualServoing
+
 from simple_script_server import *
 sss = simple_script_server()
 
