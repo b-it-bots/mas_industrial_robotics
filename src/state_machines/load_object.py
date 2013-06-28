@@ -15,6 +15,35 @@ import generic_perception_states as gps
 
 __all__ = ['load_object']
 
+class compute_base_shift_to_object(smach.State):
+    '''
+    MOVED OUT OF LOAD_OBJECT
+    '''
+
+    FRAME_ID = '/base_link'
+
+    def __init__(self):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'tf_error'],
+                             input_keys=['object'],
+                             output_keys=['move_base_by'])
+        self.tf_listener = tf.TransformListener()
+
+    def execute(self, userdata):
+        pose = userdata.object.pose
+        try:
+            t = self.tf_listener.getLatestCommonTime(self.FRAME_ID,
+                                                     pose.header.frame_id)
+            pose.header.stamp = t
+            relative = self.tf_listener.transformPose(self.FRAME_ID, pose)
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
+        userdata.move_base_by = (relative.pose.position.x - 0.6, relative.pose.position.y-0.03, 0)
+        return 'succeeded'
+
 ###############################################################################
 #                               State machine                                 #
 ###############################################################################
@@ -34,7 +63,7 @@ class load_object(smach.StateMachine):
                                    transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT'})
 
             smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT',
-                                   gns.compute_base_shift_to_object(),
+                                   compute_base_shift_to_object(),
                                    transitions={'succeeded': 'MOVE_BASE_RELATIVE',
                                                 'tf_error': 'failed'})
 
