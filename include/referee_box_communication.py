@@ -24,7 +24,7 @@ def obtainTaskSpecFromServer(ServerIP, ServerPort, TeamName,
         rospy.loginfo("connecting directly, not through an ssh tunnel")
         socket.connect(connection_address)
     else:
-        rospy.loginfo("connecting via ssh tunnel through: " + shh_server )
+        rospy.loginfo("connecting via ssh tunnel through: " + ssh_server )
         ssh.tunnel_connection(socket, connection_address,  ssh_server)
     rospy.loginfo( "Sending request for task specification" )
     socket.send(TeamName)
@@ -33,7 +33,7 @@ def obtainTaskSpecFromServer(ServerIP, ServerPort, TeamName,
     message = socket.recv()
     socket.send ("ACK")
     socket.close()
-    rospy.loginfo( "Received task specification: ", message )
+    rospy.loginfo( "Received task specification: " + message )
     return message
 
 
