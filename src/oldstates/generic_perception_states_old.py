@@ -114,7 +114,7 @@ class recognize_objects(smach.State):
             rospy.loginfo('NO objects in FOV')
             return 'no_objects_found'
 
-        print resp.objects
+        #print resp.objects
 
         #transform to odom
         for i in range(len(resp.objects)):
@@ -126,6 +126,8 @@ class recognize_objects(smach.State):
                     self.tf_listener.waitForTransform('/odom', resp.objects[i].pose.header.frame_id, rospy.Time.now(), rospy.Duration(5))
                     obj_pose_transformed = self.tf_listener.transformPose('/odom', resp.objects[i].pose)
                     resp.objects[i].pose = obj_pose_transformed
+                    print resp.objects[i].name
+                    print resp.objects[i].pose
                     tf_worked = True
                 except Exception, e:
                     rospy.logerr("tf exception in recognize objects: transform: %s", e)
