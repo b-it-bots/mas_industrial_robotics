@@ -9,17 +9,21 @@
 import zmq
 import sys
 
-def obtainTaskSpecFromServer(ServerIP, ServerPort, TeamName):
+def obtainTaskSpecFromServer(ServerIP, ServerPort, TeamName, 
+                             ssh=False, ssh_server="youbot-hbrs2-pc2"):
 	context = zmq.Context()
 	connection_address = "tcp://" + ServerIP + ":" + ServerPort
 	print "Start connection to " + connection_address
 	#  Socket to talk to server
 	print "Connecting to server..."
 	socket = context.socket(zmq.REQ)
-	socket.connect (connection_address)
-
+    
+    if not ssh:	
+        socket.connect(connection_address)
+    else:
+        zmq.ssh.tunnel_connection(socket, connection_address,  ssh_server)
 	print "Sending request ..."
-	socket.send (TeamName)
+	socket.send(TeamName)
 		
 	#  Get the reply.
 	message = socket.recv()
