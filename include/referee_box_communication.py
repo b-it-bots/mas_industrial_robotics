@@ -9,28 +9,31 @@
 import zmq
 import sys
 from zmq import ssh
+import rospy
 
 def obtainTaskSpecFromServer(ServerIP, ServerPort, TeamName, 
                              use_ssh=False, ssh_server="youbot-hbrs2-pc2"):
     context = zmq.Context()
     connection_address = "tcp://" + ServerIP + ":" + ServerPort
-    print "Start connection to " + connection_address
+    rospy.loginfo("Start connection to " + connection_address )
     #  Socket to talk to server
-    print "Connecting to server..."
+    rospy.logdebug( "Connecting to server..." )
     socket = context.socket(zmq.REQ)
     
-    if not use_ssh:	
+    if not use_ssh:
+        rospy.loginfo("connecting directly, not through an ssh tunnel")
         socket.connect(connection_address)
     else:
+        rospy.loginfo("connecting via ssh tunnel through: " + shh_server )
         ssh.tunnel_connection(socket, connection_address,  ssh_server)
-    print "Sending request ..."
+    rospy.loginfo( "Sending request for task specification" )
     socket.send(TeamName)
 	
     #  Get the reply.
     message = socket.recv()
     socket.send ("ACK")
     socket.close()
-    print "Received message: ", message
+    rospy.loginfo( "Received task specification: ", message )
     return message
 
 
