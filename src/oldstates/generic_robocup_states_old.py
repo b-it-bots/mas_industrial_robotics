@@ -11,6 +11,7 @@ import smach
 import smach_ros
 import referee_box_communication
 import re
+import task_converter
 
 try:
     ip = rospy.get_param('refbox_ip')
@@ -236,8 +237,10 @@ class get_basic_transportation_task(smach.State):
 
         rospy.loginfo("Task received: " + transportation_task)
         
-        # check if Task is a BTT task      
-        if(transportation_task[0:3] != "BTT"):
+        # check if Task is a BTT task 
+        if(transportation_task[0:3] == "PPT"):
+            transportation_task = task_converter.ppt2btt(transportation_task)    
+        elif(transportation_task[0:3] != "BTT"):
            rospy.logerr("Excepted <<BTT>> task, but received <<" + transportation_task[0:3] + ">> received")
            return 'wront_task_format' 
 
