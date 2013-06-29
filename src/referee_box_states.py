@@ -64,7 +64,7 @@ class get_task(smach.State):
 
         if not userdata.simulation:
             rospy.logdebug('Waiting for task specification (%s:%s)...' % (ip, port))
-            task_spec = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
+            task_spec = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name, True)
         else:
             task_spec = self.HARDCODED_SPECS[userdata.test]
         rospy.loginfo("Task specification: %s" % task_spec)
