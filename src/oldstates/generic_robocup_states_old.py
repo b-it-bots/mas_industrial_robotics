@@ -323,6 +323,8 @@ class get_basic_transportation_task(smach.State):
             for i in range(len(objs)):
                 if objs[i] == "V20":
                     objs[i] = "R20"
+                if objs[i] == "M20":
+                    objs[i] = "R20"
 
             obj_conf = obj_taskspec.split('(')
             obj_conf = obj_conf[0]
