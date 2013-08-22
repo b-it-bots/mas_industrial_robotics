@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>mas_industrial_robotics</name>
+  <version>0.0.1</version>
+  <description>ROS metapackages for industrial robots.</description>
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+  <maintainer email="matthias.fueller@h-brs.de">Matthias Füller</maintainer>
+  <maintainer email="sven.schneider@h-brs.de">Sven Schneider</maintainer>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>
