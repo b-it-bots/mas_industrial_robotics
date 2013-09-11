@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node pkg="mir_base_placement" type="base_placement_node" name="base_placement" ns="mir_navigation" respawn="false" output="screen" /> 
+
+</launch>
