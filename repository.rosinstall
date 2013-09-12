@@ -1,0 +1,38 @@
+- git:
+    local-name: mas_common_robotics
+    uri: git@github.com:b-it-bots/mas_common_robotics.git
+    version: groovy_catkin
+
+- git:
+    local-name: mas_third_party_software
+    uri: git@github.com:b-it-bots/mas_third_party_software.git
+    version: groovy_catkin
+
+#- git:
+#    local-name: youbot_driver
+#    uri: https://github.com/youbot/youbot_driver.git
+#    version: master
+
+#- git:
+#    local-name: youbot-ros-pkg
+#    uri: git@github.com:b-it-bots/youbot-ros-pkg.git
+#    version: master
+
+#- git:
+#    local-name: youbot-manipulation
+#    uri: git@github.com:b-it-bots/youbot-manipulation.git
+#    version: groovy
+
+#- svn:
+#    local-name: bosch_drivers
+#    uri: http://svn.code.sf.net/p/bosch-ros-pkg/code/trunk/stacks/bosch_drivers
+
+#- git:
+#    local-name: ar_kinect
+#    uri:  https://github.com/mikeferguson/ar_kinect.git
+#    version: groovy-devel
+
+#- git:
+#    local-name: ar_tools
+#    uri:  https://github.com/IHeartEngineering/ar_tools.git 
+#    version: master
