@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_teleop</name>
+  <version>0.0.1</version>
+  <description>teleoperation via joypad and keyboard</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+  <maintainer email="matthias.fueller@h-brs.de">Matthias Füller</maintainer>
+
+  <license>GPLv3</license>
+  
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>brics_actuator</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>joy</build_depend>
+  <build_depend>moveit_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
+
+  <run_depend>brics_actuator</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>moveit_msgs</run_depend>
+  <run_depend>pr2_teleop</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_srvs</run_depend>
+  
+</package>
