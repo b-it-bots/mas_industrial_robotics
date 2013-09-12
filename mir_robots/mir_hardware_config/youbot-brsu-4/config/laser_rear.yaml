@@ -1,0 +1,5 @@
+port: /dev/youbot/hokuyo_rear
+frame_id: /base_laser_rear_link
+min_ang: -1.57
+max_ang: 1.57
+

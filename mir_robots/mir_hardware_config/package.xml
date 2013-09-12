@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_hardware_config</name>
+  <version>0.0.1</version>
+  <description>urdf descriptions and yaml configuration files for different industrial robots</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>mir_calibration_data</run_depend>
+  <run_depend>mir_description</run_depend>
+  <run_depend>youbot_description</run_depend>
+
+</package>
