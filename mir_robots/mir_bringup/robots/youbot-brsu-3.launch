@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>	
+	
+    <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
+
+	<include file="$(find mir_bringup)/components/arm.launch" />	
+	<include file="$(find mir_bringup)/components/gripper.launch" />
+
+	<include file="$(find mir_bringup)/components/base_front_hokuyo_node.launch" />
+
+    <include file="$(find mcr_safe_cmd_vel)/ros/launch/safe_cmd_vel.launch" />	
+	<include file="$(find mir_teleop)/ros/launch/teleop_joypad.launch" />
+
+    <include file="$(find mcr_arm_cart_control)/ros/launch/arm_cartesian_control_youbot.launch" />	
+
+    <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />	
+    <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
+
+</launch>

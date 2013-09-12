@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_bringup</name>
+  <version>0.0.1</version>
+  <description>launch files to bring up a complete robot or only specific components</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>cob_command_gui</run_depend>
+  <run_depend>hokuyo_node</run_depend>
+  <run_depend>mcr_arm_cart_control</run_depend>
+  <run_depend>mcr_default_env_config</run_depend>
+  <run_depend>mir_default_robot_config</run_depend>
+  <run_depend>mir_gripper_services</run_depend>
+  <run_depend>mir_hardware_config</run_depend>
+  <run_depend>mir_teleop</run_depend>
+  <run_depend>openni_launch</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>youbot_dashboard</run_depend>
+  <run_depend>youbot_description</run_depend> 
+  <run_depend>youbot_diagnostic_aggregator</run_depend>
+  <run_depend>youbot_joint_trajectory_action</run_depend>
+  <run_depend>youbot_oodl</run_depend>
+
+</package>
