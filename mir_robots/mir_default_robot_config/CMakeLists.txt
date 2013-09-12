@@ -4,7 +4,7 @@ find_package(catkin REQUIRED)
 
 catkin_package()
 
-install(FILE upload_param.launch
+install(FILES upload_param.launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
