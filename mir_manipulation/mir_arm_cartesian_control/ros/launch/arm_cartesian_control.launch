@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="mcr_arm_cartesian_control" type="arm_cartesian_control" ns="mir_manipulation" name="mcr_arm_cartesian_control" output="screen" respawn="false">
+      <param name="root_name" value="arm_0_link"/>
+      <param name="tip_name" value="arm__link"/>
+      <remap from="~joint_velocity_command" to="/arm_controller/velocity_command"/>
+    </node>
+</launch>
