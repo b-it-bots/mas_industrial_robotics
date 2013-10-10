@@ -14,7 +14,7 @@
 
   <run_depend>cob_command_gui</run_depend>
   <run_depend>hokuyo_node</run_depend>
-  <run_depend>mcr_arm_cart_control</run_depend>
+  <run_depend>mcr_arm_cartesian_control</run_depend>
   <run_depend>mcr_default_env_config</run_depend>
   <run_depend>mir_default_robot_config</run_depend>
   <run_depend>mir_gripper_services</run_depend>
