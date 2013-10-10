@@ -6,7 +6,7 @@
   <param name="robot_description" command="$(find xacro)/xacro.py '$(find mir_hardware_config)/$(env ROBOT)/urdf/robot.urdf.xacro'" />
 
   <!-- start robot_state_publisher -->
-  <node pkg="robot_state_publisher" type="state_publisher" name="robot_state_publisher" output="screen" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen" />
 
   <!-- start robot-specific launch file -->
   <include file="$(find mir_bringup)/robots/$(env ROBOT).launch" />
