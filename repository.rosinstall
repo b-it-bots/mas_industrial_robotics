@@ -8,6 +8,16 @@
     uri: git@github.com:b-it-bots/mas_third_party_software.git
     version: groovy_catkin
 
+- git:
+    local-name: youbot_common
+    uri: https://github.com/mas-group/youbot_common.git
+    version: groovy_catkin
+
+- git:
+    local-name: youbot_diagnostics
+    uri: https://github.com/mas-group/youbot_diagnostics.git
+    version: groovy_catkin
+
 #- git:
 #    local-name: youbot_driver
 #    uri: https://github.com/youbot/youbot_driver.git
