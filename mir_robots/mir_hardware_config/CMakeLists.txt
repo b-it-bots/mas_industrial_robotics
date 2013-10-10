@@ -4,6 +4,7 @@ find_package(catkin REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS
+    mcr_description
     mir_calibration_data
     mir_description
     youbot_description

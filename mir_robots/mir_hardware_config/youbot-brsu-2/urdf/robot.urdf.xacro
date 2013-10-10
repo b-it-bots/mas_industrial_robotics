@@ -44,12 +44,13 @@
   </xacro:youbot_gripper>
 
   <!-- BRSU SPECIFIC STUFF -->
+  <include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <include filename="$(find mcr_description)/urdf/sensors/kinect_camera.urdf.xacro" />
+  <include filename="$(find mcr_description)/urdf/sensors/pmd_camboard_nano_camera.urdf.xacro" />
+
   <include filename="$(find mir_calibration_data)/youbot-brsu-2/calibration.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/materials.urdf.xacro" />
   <include filename="$(find mir_description)/urdf/misc/sensor_angle_shortend.urdf.xacro" />
   <include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/sensors/kinect_camera.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/sensors/pmd_camboard_nano_camera.urdf.xacro" />
   <include filename="$(find mir_description)/urdf/misc/laptop_case_frame.urdf.xacro" />
   <include filename="$(find mir_description)/urdf/misc/distance_screw.urdf.xacro" />
   <include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" /> 
