@@ -7,8 +7,8 @@ catkin_package(
   CATKIN_DEPENDS
     cob_command_gui
     hokuyo_node
-    mcr_arm_cartesian_control
     mcr_default_env_config
+    mir_arm_cartesian_control
     mir_default_robot_config
     mir_gripper_services
     mir_hardware_config
