@@ -10,12 +10,12 @@
 
 - git:
     local-name: youbot_common
-    uri: https://github.com/mas-group/youbot_common.git
+    uri: git@github.com:mas-group/youbot_common.git
     version: groovy_catkin
 
 - git:
     local-name: youbot_diagnostics
-    uri: https://github.com/mas-group/youbot_diagnostics.git
+    uri: git@github.com:mas-group/youbot_diagnostics.git
     version: groovy_catkin
 
 #- git:
