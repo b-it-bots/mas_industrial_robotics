@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+  <param name="/use_sim_time" value="true" />
+
+  <!-- upload robot params (joint configurations) -->
+  <include file="$(find mir_default_robot_config)/upload_param.launch" />
+
+  <!-- start gazebo and load environment -->
+  <include file="$(find mcr_gazebo_worlds)/ros/launch/$(env ROBOT_ENV).launch" />
+
+  <!-- load robot into gazebo -->
+  <include file="$(find mir_bringup_sim)/robots/$(env ROBOT).launch" />
+
+</launch>

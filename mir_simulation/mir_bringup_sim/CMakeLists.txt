@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(mir_bringup_sim)
+find_package(catkin REQUIRED)
+
+catkin_package(
+  CATKIN_DEPENDS 
+    gazebo
+    mcr_arm_cart_control
+    mcr_default_env_config
+    mcr_gazebo_worlds   
+    mir_arm_navigation  
+    mir_default_robot_config
+    mir_hardware_config
+    mir_teleop
+    pr2_controller_manager  
+    youbot_arm_navigation
+    youbot_description
+    youbot_joint_trajectory_action
+)
+
+
+install(DIRECTORY components/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/components
+)
+install(DIRECTORY robots/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/robots
+)
+install(FILES robot.launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+

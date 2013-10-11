@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find mir_hardware_config)/$(env ROBOT)/urdf/robot.urdf.xacro'"/>
+	<node name="gazebo_youbot_model" pkg="gazebo" type="spawn_model" args="-urdf -param robot_description -model youBot -wait world -x 0.0 -y 0.0 -z 0.1" respawn="false" output="screen" />
+	
+	<include file="$(find mir_bringup_sim)/components/youbot_gripper_control.launch" />
+	<include file="$(find mir_bringup_sim)/components/gripper.launch" />
+
+	<include file="$(find mir_bringup_sim)/components/youbot_arm_control.launch" />
+	<include file="$(find mir_bringup_sim)/components/arm.launch" />	
+
+  <include file="$(find youbot_description)/launch/control/youbot_base_control.launch" />
+
+  <include file="$(find mcr_arm_cartesian_control)/ros/launch/arm_cartesian_control.launch" />	
+		
+</launch>
+	

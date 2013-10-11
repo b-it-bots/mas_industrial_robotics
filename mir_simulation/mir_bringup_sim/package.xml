@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_bringup_sim</name>
+  <version>0.0.1</version>
+  <description>bringup launch files to start a desired industrial robot in simulation</description>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>gazebo</run_depend>
+  <run_depend>mcr_arm_cart_control</run_depend>
+  <run_depend>mcr_default_env_config</run_depend>
+  <run_depend>mcr_gazebo_worlds</run_depend>   
+  <run_depend>mir_arm_navigation</run_depend>  
+  <run_depend>mir_default_robot_config</run_depend>
+  <run_depend>mir_hardware_config</run_depend>
+  <run_depend>mir_teleop</run_depend>
+  <run_depend>pr2_controller_manager</run_depend>  
+  <run_depend>youbot_arm_navigation</run_depend>
+  <run_depend>youbot_description</run_depend>
+  <run_depend>youbot_joint_trajectory_action</run_depend>
+ 
+</package>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+	<rosparam command="load" file="$(find mir_hardware_config)/$(env ROBOT)/config/arm.yaml"/>
+	<rosparam command="load" file="$(find youbot_joint_trajectory_action)/ros/config/arm_joint_trajectory_action.yaml" />
+
+	<group ns="arm_controller">
+		<node pkg="youbot_joint_trajectory_action" type="joint_trajectory_action.py" name="arm_joint_trajectory_action" output="screen">
+			<remap from="joint_states" to="/joint_states"/>
+			<remap from="joint_trajectory_action" to="follow_joint_trajectory"/>
+		</node>
+	</group>
+
+    <group ns="arm_controller">
+		<node pkg="youbot_joint_trajectory_action" type="joint_trajectory_action.py" name="arm_real_joint_trajectory_action" output="screen">
+			<remap from="joint_states" to="/joint_states"/>
+			<remap from="joint_trajectory_action" to="follow_real_joint_trajectory"/>
+		</node>
+	</group>
+
+
+
+</launch>
+
+
+
