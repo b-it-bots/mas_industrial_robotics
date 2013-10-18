@@ -5,9 +5,9 @@ find_package(catkin REQUIRED)
 catkin_package(
   CATKIN_DEPENDS 
     gazebo
-    mcr_arm_cart_control
     mcr_default_env_config
     mcr_gazebo_worlds   
+    mir_arm_cartesian_control
     mir_arm_navigation  
     mir_default_robot_config
     mir_hardware_config

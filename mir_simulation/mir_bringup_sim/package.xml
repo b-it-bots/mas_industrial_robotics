@@ -13,9 +13,9 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>gazebo</run_depend>
-  <run_depend>mcr_arm_cart_control</run_depend>
   <run_depend>mcr_default_env_config</run_depend>
   <run_depend>mcr_gazebo_worlds</run_depend>   
+  <run_depend>mir_arm_cartesian_control</run_depend>
   <run_depend>mir_arm_navigation</run_depend>  
   <run_depend>mir_default_robot_config</run_depend>
   <run_depend>mir_hardware_config</run_depend>
