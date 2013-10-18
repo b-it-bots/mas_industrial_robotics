@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_2dslam</name>
+  <version>0.0.1</version>
+  <description>The mir_2dslam package</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+  <maintainer email="praveen.ramanujam@smail.inf.h-brs.de">Praveen Ramanujam</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>gmapping</run_depend>
+
+</package>

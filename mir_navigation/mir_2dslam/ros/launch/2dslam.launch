@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- launch gmapping -->
+	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+		<remap from="scan" to="scan_front"/>
+		<param name="base_frame" value="base_footprint"/>
+		<param name="map_frame" value="map"/>
+		<param name="odom_frame" value="odom"/>
+		<param name="map_update_interval" value="5.0"/>			<!-- How long (in seconds) between updates to the map. Lowering this number updates the occupancy grid more often, at the expense of greater computational load -->
+		<param name="maxUrange" value="4.5"/>					<!-- The maximum usable range of the laser. A beam is cropped to this value -->
+		<param name="sigma" value="0.05"/>						<!-- The sigma used by the greedy endpoint matching -->
+		<param name="kernelSize" value="1"/>					<!-- The kernel in which to look for a correspondence -->
+		<param name="lstep" value="0.05"/>						<!-- The optimization step in translation -->
+		<param name="astep" value="0.05"/>						<!-- The optimization step in rotation -->
+		<param name="iterations" value="5"/>					<!-- The number of iterations of the scanmatcher -->
+		<param name="lsigma" value="0.075"/>					<!-- The sigma of a beam used for likelihood computation -->
+		<param name="ogain" value="3.0"/>						<!-- Gain to be used while evaluating the likelihood, for smoothing the resampling effects -->
+		<param name="lskip" value="0"/>							<!-- Number of beams to skip in each scan.  -->
+		<param name="srr" value="0.1"/>						<!-- Odometry error in translation as a function of translation (rho/rho) -->
+		<param name="srt" value="0.2"/>						<!-- Odometry error in translation as a function of rotation (rho/theta) -->
+		<param name="str" value="0.1"/>						<!-- Odometry error in rotation as a function of translation (theta/rho) -->
+		<param name="stt" value="0.2"/>						<!-- Odometry error in rotation as a function of rotation (theta/theta) -->
+		<param name="linearUpdate" value="1.0"/>				<!-- Process a scan each time the robot translates this far -->
+		<param name="angularUpdate" value="0.5"/>		<!-- Process a scan each time the robot rotates this far -->
+		<param name="temporalUpdate" value="-1.0"/>				<!-- Process a scan if the last scan proccessed is older than the update time in seconds. A value less than zero will turn time based updates off -->
+		<param name="resampleThreshold" value="0.5"/>			<!-- The neff based resampling threshold -->
+		<param name="particles" value="30"/>					<!-- Number of particles in the filter -->
+		<param name="xmin" value="-5.0"/>						<!-- Initial map size -->
+		<param name="ymin" value="-5.0"/>						<!-- Initial map size -->
+		<param name="xmax" value="5.0"/>						<!-- Initial map size -->
+		<param name="ymax" value="5.0"/>						<!-- Initial map size -->
+		<param name="delta" value="0.02"/>						<!-- Processing parameters (resolution of the map) -->
+		<param name="llsamplerange" value="0.01"/>				<!-- Translational sampling range for the likelihood -->
+		<param name="llsamplestep" value="0.01"/>				<!-- Translational sampling step for the likelihood -->
+		<param name="lasamplerange" value="0.005"/>				<!-- Angular sampling range for the likelihood -->
+		<param name="lasamplestep" value="0.005"/>				<!-- Angular sampling step for the likelihood -->
+		<param name="transform_publish_period" value="0.05"/>	<!-- How long (in seconds) between transform publications -->
+		<param name="occ_thresh" value="0.25"/>					<!-- Threshold on gmapping's occupancy values. Cells with greater occupancy are considered occupied (i.e., set to 100 in the resulting sensor_msgs/LaserScan). New in 1.1.0.  -->
+		<param name="maxRange" value="5.0"/>					<!-- The maximum range of the sensor. If regions with no obstacles within the range of the sensor should appear as free space in the map, set maxUrange < maximum range of the real sensor <= maxRange -->
+	</node>
+
+	<!-- launch nav view-->
+<!--	<node pkg="nav_view" type="nav_view" name="nav_view" args="/static_map:=/dynamic_map" respawn="false" />-->
+</launch>
