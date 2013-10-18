@@ -1,0 +1,163 @@
+#!/usr/bin/env python
+"""This script will move the arm to several pre-defined positions in sequence.
+In each position it will record the pose of the gripper tip with respect to the
+/tower_link frame (according to the youBot model). The user has to find and
+mark the gripper tip using the keyboard and RViz. After gathering the data it
+will compute the rigid transformation that relates the two point sets and
+output it to the user so that they could be inserted in the model.  """
+
+PACKAGE = 'kinect_calibration'
+NODE = 'calibrate_kinect'
+
+
+REFERENCE_FRAME = '/tower_link'
+TARGET_FRAME = '/tower_cam3d_frame'
+GRIPPER_FRAME = '/gripper_palm_link'
+GRIPPER_OFFSET = [-0.0175, 0.000, 0.065]
+POSES = [[2.35724, 2.5844, -1.48809, 0.81208, 2.92343],
+         [2.65724, 2.5844, -1.48809, 0.81208, 2.92343],
+         [2.95724, 2.5844, -1.48809, 0.81208, 2.92343],
+         [3.25724, 2.5844, -1.48809, 0.81208, 2.92343],
+         [3.55724, 2.5844, -1.48809, 0.81208, 2.92343]]
+
+import sys
+import textwrap
+from os.path import join
+from ctypes import cdll, c_float, byref
+
+import roslib
+roslib.load_manifest(PACKAGE)
+
+import tf
+import rospy
+from tf.msg import tfMessage
+from geometry_msgs.msg import TransformStamped
+
+from arm import Arm
+from get_char import get_char
+
+tf_listener = None
+tf_publisher = None
+arm = None
+marker_offset = [0, 0, 0]
+
+
+def abort(reason):
+    rospy.logerr(reason)
+    rospy.logerr('Moving the arm to home position and aborting calibration...')
+    arm.move_home()
+    sys.exit()
+
+
+def publish_tf(frame, offset):
+    ts = TransformStamped()
+    ts.header.stamp = rospy.Time.now()
+    ts.header.frame_id = GRIPPER_FRAME
+    ts.child_frame_id = frame
+    ts.transform.translation.x = offset[0]
+    ts.transform.translation.y = offset[1]
+    ts.transform.translation.z = offset[2]
+    ts.transform.rotation.w = 1.0
+    msg = tfMessage()
+    msg.transforms.append(ts)
+    tf_publisher.publish(msg)
+
+
+def get_gripper_position():
+    try:
+        (t, r) = tf_listener.lookupTransform(REFERENCE_FRAME,
+                                             '/gripper',
+                                             rospy.Time(0))
+        return t
+    except (tf.LookupException,
+            tf.ConnectivityException,
+            tf.ExtrapolationException) as e:
+        abort('Unable to determine the transform between the reference frame '
+              ' and the marker on the gripper: %s.' % str(e))
+
+
+def get_marker_position():
+    print 'Press <,> and <.> to adjust the marker pose along the current axis.'
+    print 'Press <Space> to cycle through axes'
+    print 'Press <f> when finished'
+    dim = 0
+    while True:
+        ch = get_char()
+        if ch == ',':
+            marker_offset[dim] -= 0.005
+        elif ch == '.':
+            marker_offset[dim] += 0.005
+        elif ch == ' ':
+            dim = (dim + 1) % 3
+        elif ch == 'f':
+            break
+    try:
+        (t, r) = tf_listener.lookupTransform(TARGET_FRAME,
+                                             '/marker',
+                                             rospy.Time(0))
+        return t
+    except (tf.LookupException,
+            tf.ConnectivityException,
+            tf.ExtrapolationException) as e:
+        abort('Unable to determine the transform between the reference frame '
+              ' and the marker on the gripper: %s.' % str(e))
+
+
+def estimate_transformation(p1, p2):
+    if not len(p1) == len(p2):
+        return None
+    point_count = len(p1)
+    pkg_dir = roslib.packages.get_pkg_dir(PACKAGE)
+    lib = cdll.LoadLibrary(join(pkg_dir, 'lib/libtransform_estimation.so'))
+    a = c_float * (3 * point_count)
+    A = a()
+    b = c_float * (3 * point_count)
+    B = b()
+    t = c_float * 6
+    T = t()
+    for i in xrange(point_count):
+        for j in xrange(3):
+            A[i * 3 + j] = p1[i][j]
+            B[i * 3 + j] = p2[i][j]
+    lib.estimateTransformation(byref(A), byref(B), point_count, byref(T))
+    return tuple(T)
+
+
+def print_xacro_properties(xyzrpy, prefix='cal_tower_cam3d'):
+    fmt = '<property name="%s_{k}" value="{v:.5f}"/>' % prefix
+    pairs = zip(['x', 'y', 'z', 'roll', 'pitch', 'yaw'], xyzrpy)
+    print '\n'.join([fmt.format(k=k, v=v) for k, v in pairs])
+
+
+if __name__ == '__main__':
+    rospy.init_node(NODE)
+    tf_listener = tf.TransformListener()
+    tf_publisher = rospy.Publisher('tf', tfMessage)
+    t1 = rospy.Timer(rospy.Duration(0.1), lambda e: publish_tf('/gripper',
+                                                               GRIPPER_OFFSET))
+    t2 = rospy.Timer(rospy.Duration(0.1), lambda e: publish_tf('/marker',
+                                                               marker_offset))
+    arm = Arm()
+
+    print ':: Kinect extrinsic calibration ::'
+    print '\n\n%s\n\n' % textwrap.fill(__doc__)
+
+    rospy.sleep(2)
+    G = list()
+    M = list()
+    for i, pose in enumerate(POSES):
+        print 'Moving the arm to position #%i' % (i + 1)
+        arm.move_to(pose)
+        M.append(get_marker_position())
+        print 'Gripper position (seleted by user): %.2f %.2f %.2f' % M[-1]
+        G.append(get_gripper_position())
+        print 'Gripper position (according to model): %.2f %.2f %.2f' % G[-1]
+    t = estimate_transformation(M, G)
+    print 'Estimated position of the Kinect relative to %s:' % REFERENCE_FRAME
+    print '  XYZ: %.5f %.5f %.5f' % t[0:3]
+    print '  RPY: %.5f %.5f %.5f' % t[3:6]
+    print 'Copy-paste the following lines to tower_cam3d.urdf.xacro:'
+    print_xacro_properties(t)
+    arm.move_to('home')
+    t1.shutdown()
+    t2.shutdown()

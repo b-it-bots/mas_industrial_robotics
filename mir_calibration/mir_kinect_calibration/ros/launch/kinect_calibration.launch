@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  <include file="$(find mir_bringup)/robot.launch"/>
+  <include file="$(find mir_bringup)/components/cam3d.launch"/>
+  <include file="$(find mir_arm_navigation)/ros/launch/simple_manipulation.launch"/>
+
+  <!-- RViz node -->
+  <node pkg="rviz" type="rviz" name="rviz"
+        args="--display-config $(find mir_kinect_calibration)/ros/config/kinect-calibration-rviz.vcg"
+        required="false"
+        ns="mir_calibration"/>
+
+</launch>
