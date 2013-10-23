@@ -11,7 +11,7 @@ catkin_package(
 )
 
 install(PROGRAMS
-  ros/scripts/gripper_service_server.py
+  ros/scripts/gripper_service_server
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
