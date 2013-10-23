@@ -13,10 +13,10 @@
     uri: git@github.com:mas-group/youbot_common.git
     version: groovy_catkin
 
-- git:
-    local-name: youbot_diagnostics
-    uri: git@github.com:mas-group/youbot_diagnostics.git
-    version: groovy_catkin
+#- git:
+#    local-name: youbot_diagnostics
+#    uri: git@github.com:mas-group/youbot_diagnostics.git
+#    version: groovy_catkin
 
 #- git:
 #    local-name: youbot_driver
