@@ -1,7 +1,7 @@
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
-- ROS Groovy: Ubuntu 12.04
+- ROS Hydro: Ubuntu 12.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -34,7 +34,7 @@ If you have never worked with git before, we recommend to go through the followi
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
 
 
-- ROS Groovy - http://www.ros.org/wiki/Groovy/Installation/Ubuntu
+- ROS Hydro - http://www.ros.org/wiki/Hydro/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
   
@@ -95,7 +95,7 @@ The ROBOT_ENV variable can be used to switch between different environments. The
 
 ## Bring up the robot and it's basic components
 ### In Simulation
-     roslaunch mir_bringup_sim robot.launch (NOT YET WORKING WITH CATKIN AND GROOVY)
+     roslaunch mir_bringup_sim robot.launch (NOT YET WORKING WITH CATKIN AND Hydro)
      
 In a new terminal you can open the Gazebo GUI to see the environment and the robot
 
@@ -106,7 +106,7 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 
 
 ## Test the arm and gripper
-     roslaunch mir_bringup dashboard.launch (NOT YET WORKING WITH CATKIN AND GROOVY)
+     roslaunch mir_bringup dashboard.launch (NOT YET WORKING WITH CATKIN AND HYDRO)
 
 ## Test the base
      roslaunch mir_teleop teleop_keyboard.launch
