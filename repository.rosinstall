@@ -1,17 +1,17 @@
 - git:
     local-name: mas_common_robotics
-    uri: git@github.com:b-it-bots/mas_common_robotics.git
-    version: groovy_catkin
+    uri: git@github.com:mas-group/mas_common_robotics.git
+    version: hydro
 
 - git:
     local-name: mas_third_party_software
-    uri: git@github.com:b-it-bots/mas_third_party_software.git
-    version: groovy_catkin
+    uri: git@github.com:mas-group/mas_third_party_software.git
+    version: hydro
 
-- git:
-    local-name: youbot_common
-    uri: git@github.com:mas-group/youbot_common.git
-    version: groovy_catkin
+#- git:
+#    local-name: youbot_common
+#    uri: git@github.com:mas-group/youbot_common.git
+#    version: groovy_catkin
 
 #- git:
 #    local-name: youbot_diagnostics
