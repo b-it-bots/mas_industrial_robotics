@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-  <param name="publish_frequency" type="double" value="50.0" />	
-  <rosparam file="$(find youbot_description)/controller/arm_joint_universal_control.yaml" command="load"/>
- 
-  <node name="arm_controller_spawner" pkg="pr2_controller_manager" type="spawner" args="arm_controller"/>
-
-</launch>
