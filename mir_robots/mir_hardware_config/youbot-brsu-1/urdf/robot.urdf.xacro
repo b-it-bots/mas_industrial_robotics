@@ -7,25 +7,25 @@
   
   <!-- The following included files set up definitions of parts of the robot body -->
   <!-- misc common stuff? -->
-  <include filename="$(find youbot_description)/urdf/common.xacro" />
+  <xacro:include filename="$(find youbot_description)/urdf/common.xacro" />
 
   <!-- youbot base -->
-  <include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
 
   <!-- youbot plate -->
-  <include filename="$(find youbot_description)/urdf/youbot_plate/plate.urdf.xacro" /> 
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_plate/plate.urdf.xacro" /> 
 
   <!-- youbot arm -->
-  <include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
 
   <!-- youbot gripper -->
-  <include filename="$(find youbot_description)/urdf/youbot_gripper/gripper.urdf.xacro" />
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_gripper/gripper.urdf.xacro" />
  
-  <!-- generic simulator_gazebo plugins for starting mechanism control, ros time, ros battery -->
-  <include filename="$(find youbot_description)/gazebo/gazebo.urdf.xacro" />
+  <!-- controller manager -->
+  <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
   
   <!-- materials for visualization -->
-  <include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />				     
+  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />				     
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
 
@@ -48,18 +48,18 @@
 
 
   <!-- BRSU SPECIFIC STUFF -->
-  <include filename="$(find mir_calibration_data)/youbot-brsu-1/calibration.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/materials.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/misc/sensor_angle_shortend.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/sensors/kinect_camera.urdf.xacro" />
-  <!--<include filename="$(find mir_description)/urdf/sensors/pmd_camboard_nano_camera.urdf.xacro" />-->
-  <include filename="$(find mir_description)/urdf/misc/laptop_case_frame.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/misc/distance_screw.urdf.xacro" />
+  <xacro:include filename="$(find mir_calibration_data)/youbot-brsu-1/calibration.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/sensor_angle_shortend.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/sensors/kinect_camera.urdf.xacro" />
+  <!--<xacro:include filename="$(find mir_description)/urdf/sensors/pmd_camboard_nano_camera.urdf.xacro" />-->
+  <xacro:include filename="$(find mir_description)/urdf/misc/laptop_case_frame.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/distance_screw.urdf.xacro" />
  
 
- <include filename="$(find mir_description)/urdf/misc/brsu_front_plate.urdf.xacro" />
-  <include filename="$(find mir_description)/urdf/misc/brsu_rear_plate.urdf.xacro" /> 
+ <xacro:include filename="$(find mir_description)/urdf/misc/brsu_front_plate.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/brsu_rear_plate.urdf.xacro" /> 
 
 
   <!-- brsu specific platforms -->
