@@ -28,6 +28,17 @@ include_directories(
   ros/include
 )
 
+add_executable(teleop_keyboard_node 
+  ros/src/teleop_keyboard_node.cpp
+)
+add_dependencies(teleop_keyboard_node
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(teleop_keyboard_node
+  ${catkin_LIBRARIES}
+)
+
+
 add_executable(teleop_joypad_node 
   ros/src/teleop_joypad_node.cpp
   ros/src/teleop_joypad.cpp
