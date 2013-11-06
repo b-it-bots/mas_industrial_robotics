@@ -8,25 +8,30 @@
     uri: git@github.com:mas-group/mas_third_party_software.git
     version: hydro
 
-#- git:
-#    local-name: youbot_common
-#    uri: git@github.com:mas-group/youbot_common.git
-#    version: groovy_catkin
+- git:
+    local-name: youbot_driver
+    uri: git@github.com:mas-group/youbot_driver.git
+    version: catkin
 
-#- git:
-#    local-name: youbot_diagnostics
-#    uri: git@github.com:mas-group/youbot_diagnostics.git
-#    version: groovy_catkin
+- git:
+    local-name: youbot_driver_ros_interface
+    uri: git@github.com:mas-group/youbot_driver_ros_interface.git
+    version: hydro-devel
 
-#- git:
-#    local-name: youbot_driver
-#    uri: https://github.com/youbot/youbot_driver.git
-#    version: master
+- git:
+    local-name: youbot_description
+    uri: git@github.com:mas-group/youbot_description.git
+    version: hydro-devel
 
-#- git:
-#    local-name: youbot-ros-pkg
-#    uri: git@github.com:b-it-bots/youbot-ros-pkg.git
-#    version: master
+- git:
+    local-name: youbot_simulation
+    uri: git@github.com:mas-group/youbot_simulation.git
+    version: hydro-devel
+
+- git:
+    local-name: youbot_diagnostics
+    uri: git@github.com:mas-group/youbot_diagnostics.git
+    version: hydro-devel
 
 #- git:
 #    local-name: youbot-manipulation
