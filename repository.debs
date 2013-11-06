@@ -1,7 +1,16 @@
 # /bin/bash
 
-### install debian packages
-sudo apt-get install -y ros-hydro-ros python-setuptools ros-hydro-moveit-msgs ros-hydro-joy
+# create list of packages to install
+packagelist=(
+    ros-hydro-ros
+    python-setuptools
+    ros-hydro-moveit-msgs
+    ros-hydro-joy
+    ros-hydro-pr2-msgs
+)
+
+### install debian packages listed in array above
+sudo apt-get install -y ${packagelist[@]}
 
 ### install further repositories
 rosinstall --delete-changed-uris .. /opt/ros/hydro repository.rosinstall
