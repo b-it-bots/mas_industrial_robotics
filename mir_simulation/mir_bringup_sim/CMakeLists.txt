@@ -4,7 +4,7 @@ find_package(catkin REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS 
-    gazebo
+    gazebo_ros
     mcr_default_env_config
     mcr_gazebo_worlds   
     mir_arm_cartesian_control
@@ -13,15 +13,10 @@ catkin_package(
     mir_hardware_config
     mir_teleop
     pr2_controller_manager  
-    youbot_arm_navigation
+    youbot_gazebo_robots
     youbot_description
-    youbot_joint_trajectory_action
 )
 
-
-install(DIRECTORY components/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/components
-)
 install(DIRECTORY robots/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/robots
 )
