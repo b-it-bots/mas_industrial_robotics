@@ -18,6 +18,7 @@ catkin_package(
   CATKIN_DEPENDS
     brics_actuator
     geometry_msgs
+    mcr_teleop
     moveit_msgs
     pr2_teleop
     sensor_msgs
