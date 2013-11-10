@@ -2,11 +2,10 @@
 <launch>
 
   <!-- start dashboard -->
-  <include file="$(find youbot_dashboard)/launch/youbot_dashboard.launch" />
+  <include file="$(find youbot_dashboard)/launch/dashboard.launch" />
 	
-  <!-- start command_gui -->
+  <!-- launch command GUI -->
   <node ns="command_gui" pkg="cob_command_gui" type="knoeppkes.py" name="command_gui" cwd="node" respawn="false" output="screen" >
-    <!-- upload button parameters, but delete the old ones before -->
     <rosparam command="load" ns="control_buttons" file="$(find mir_default_robot_config)/$(env ROBOT)/command_gui_buttons.yaml"/>
     <rosparam command="load" ns="nav_buttons" file="$(find mcr_default_env_config)/$(env ROBOT_ENV)/command_gui_buttons.yaml"/>
   </node>

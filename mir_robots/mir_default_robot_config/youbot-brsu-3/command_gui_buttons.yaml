@@ -11,7 +11,7 @@ group1:
 
 group2:
   group_name: arm
-  component_name: arm
+  component_name: arm_1
   buttons: [[home, move, home],
             [candle, move, candle],
             [out of view, move, out_of_view],
@@ -25,7 +25,7 @@ group2:
             [platform centre, move, platform_centre]]
 
 group3:
-  group_name: gripper
+  group_name: gripper_1
   component_name: gripper
   buttons: [[open, move, open],
             [close, move, close]]
