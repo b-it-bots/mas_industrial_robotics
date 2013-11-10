@@ -3,9 +3,6 @@
 	
   <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
 
-  <include file="$(find mir_bringup)/components/arm.launch" />	
-  <include file="$(find mir_bringup)/components/gripper.launch" />
-
   <include file="$(find mir_bringup)/components/base_front_hokuyo_node.launch" />
   <include file="$(find mir_bringup)/components/base_rear_hokuyo_node.launch" />
 
