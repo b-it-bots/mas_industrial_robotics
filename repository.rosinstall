@@ -38,6 +38,16 @@
 #    uri: git@github.com:b-it-bots/youbot-manipulation.git
 #    version: groovy
 
+- git:
+    local-name: cob_command_tools
+    uri: git@github.com:mas-group/cob_command_tools.git
+    version: hydro_dev
+
+- git:
+    local-name: cob_driver
+    uri: git@github.com:mas-group/cob_driver.git
+    version: minimal_version_for_atwork
+
 #- svn:
 #    local-name: bosch_drivers
 #    uri: http://svn.code.sf.net/p/bosch-ros-pkg/code/trunk/stacks/bosch_drivers
