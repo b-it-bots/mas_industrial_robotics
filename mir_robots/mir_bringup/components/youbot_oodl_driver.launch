@@ -12,44 +12,45 @@ or enable the USE_SETCAP flag in the cmake file and recompile again.
 
 <launch>
 
-	<!-- Set relevant parameters. -->
-	<param name="youBotHasBase" type="bool" value="true"/>
-	<param name="youBotHasArms" type="bool" value="true"/> 
-	<param name="youBotDriverCycleFrequencyInHz" type="double" value="50.0"/>
-	<param name="trajectoryActionServerEnable" type="bool" value="true"/>
-    <param name="trajectoryPositionGain" type="double" value="5.0"/>
-    <param name="trajectoryVelocityGain" type="double" value="0.0"/>
+  <!-- Set relevant parameters. -->
+  <param name="youBotHasBase" type="bool" value="true"/>
+  <param name="youBotHasArms" type="bool" value="true"/> 
+  <param name="youBotDriverCycleFrequencyInHz" type="double" value="50.0"/>
+  <param name="trajectoryActionServerEnable" type="bool" value="true"/>
+  <param name="trajectoryPositionGain" type="double" value="5.0"/>
+  <param name="trajectoryVelocityGain" type="double" value="0.0"/>
+  <param name="youBotConfigurationFilePath" type="string" value="$(find youbot_driver)/config"/>
 
-	<!-- 
-	  Initialize youBot arms by name. Each named arm must have a matching config
-	  file. For example, the entry:	 
-		  <param name="youBotArmName1" type="str" value="MyArm"/>
-	  will attempt to initialize an arm using the config file "MyArm.cfg" in your
-	  default configuration path.
+  <!-- 
+    Initialize youBot arms by name. Each named arm must have a matching config
+    file. For example, the entry:   
+      <param name="youBotArmName1" type="str" value="MyArm"/>
+    will attempt to initialize an arm using the config file "MyArm.cfg" in your
+    default configuration path.
 
-	  To initialize multiple arms, simply define parameters naming each of them,
-	  beginning with the parameter "youBotArmName1", then "youBotArmName2", etc.
-	-->
-	
-	<!-- Default name values --> 
-	<param name="youBotBaseName" type="str" value="youbot-base"/>
-	<param name="youBotArmName1" type="str" value="youbot-manipulator"/>
-	
+    To initialize multiple arms, simply define parameters naming each of them,
+    beginning with the parameter "youBotArmName1", then "youBotArmName2", etc.
+  -->
+  
+  <!-- Default name values --> 
+  <param name="youBotBaseName" type="str" value="youbot-base"/>
+  <param name="youBotArmName1" type="str" value="youbot-manipulator"/>
+  
 
-	<!-- Start the driver. NOTE: Every joint topic is mapped to armName/joint_states -->
-			<remap from="base/joint_states" to="joint_states"/> 
-			<remap from="arm_1/joint_states" to="joint_states" /> 
-   			<remap from="arm_1/arm_controller/position_command" to="arm_controller/position_command" /> 
-   			<remap from="arm_1/arm_controller/velocity_command" to="arm_controller/velocity_command" /> 
-   			<remap from="arm_1/arm_controller/follow_joint_trajectory/cancel" to="arm_controller/follow_real_joint_trajectory/cancel" /> 
-   			<remap from="arm_1/arm_controller/follow_joint_trajectory/feedback" to="arm_controller/follow_real_joint_trajectory/feedback" /> 
-   			<remap from="arm_1/arm_controller/follow_joint_trajectory/goal" to="arm_controller/follow_real_joint_trajectory/goal" /> 
-   			<remap from="arm_1/arm_controller/follow_joint_trajectory/result" to="arm_controller/follow_real_joint_trajectory/result" /> 
-   			<remap from="arm_1/arm_controller/follow_joint_trajectory/status" to="arm_controller/follow_real_joint_trajectory/status" /> 
-   			<remap from="arm_1/gripper_controller/position_command" to="gripper_controller/position_command" /> 
-			<!--<remap from="arm_2/joint_states" to="joint_states" />-->
-	</node>
-		  
+  <!-- Start the driver. NOTE: Every joint topic is mapped to armName/joint_states -->
   <node pkg="youbot_driver_ros_interface" type="youbot_driver_ros_interface" name="youbot_driver_ros_interface" output="screen">
-</launch>
+    <remap from="base/joint_states" to="joint_states"/> 
+    <remap from="arm_1/joint_states" to="joint_states" /> 
 
+    <remap from="arm_1/arm_controller/position_command" to="arm_controller/position_command" /> 
+    <remap from="arm_1/arm_controller/velocity_command" to="arm_controller/velocity_command" /> 
+    <remap from="arm_1/arm_controller/follow_joint_trajectory/cancel" to="arm_controller/follow_real_joint_trajectory/cancel" /> 
+    <remap from="arm_1/arm_controller/follow_joint_trajectory/feedback" to="arm_controller/follow_real_joint_trajectory/feedback" /> 
+    <remap from="arm_1/arm_controller/follow_joint_trajectory/goal" to="arm_controller/follow_real_joint_trajectory/goal" /> 
+    <remap from="arm_1/arm_controller/follow_joint_trajectory/result" to="arm_controller/follow_real_joint_trajectory/result" /> 
+    <remap from="arm_1/arm_controller/follow_joint_trajectory/status" to="arm_controller/follow_real_joint_trajectory/status" /> 
+    <remap from="arm_1/gripper_controller/position_command" to="gripper_controller/position_command" /> 
+
+  </node>
+      
+</launch>
