@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_visual_servoing</name>
+  <version>0.1.0</version>
+  <description>visual servoing based on (biggest) blob detection</description>
+
+  <maintainer email="matthew.stephen.roscoe@gmail.com">Matthew Roscoe</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="matthew.stephen.roscoe@gmail.com">Matthew Roscoe</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>brics_actuator</build_depend>
+  <build_depend>cvblobs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>geometry_msgs</build_depend>  
+  <build_depend>image_transport</build_depend>
+  <build_depend>kdl_parser</build_depend>
+  <build_depend>mir_controller_msgs</build_depend>
+  <build_depend>moveit_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+
+  <run_depend>brics_actuator</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>geometry_msgs</run_depend>  
+  <run_depend>mir_controller_msgs</run_depend>
+  <run_depend>moveit_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+
+</package>
