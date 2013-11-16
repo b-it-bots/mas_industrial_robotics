@@ -17,6 +17,7 @@ find_package(catkin REQUIRED
 )
 
 find_package(OpenCV REQUIRED)
+find_package(Boost REQUIRED)
 
 generate_dynamic_reconfigure_options(
   ros/config/VisualServoing.cfg
@@ -50,6 +51,7 @@ add_dependencies(visual_servoing_node
 target_link_libraries(visual_servoing_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 
