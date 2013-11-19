@@ -1,0 +1,38 @@
+# Robot Configuration Parameters
+acc_lim_x: 0.7
+acc_lim_y: 0.7
+acc_lim_theta: 0.9
+
+max_vel_x: 0.3
+min_vel_x: 0.05
+
+max_vel_theta: 0.7
+min_vel_theta: 0.1
+
+min_in_place_vel_theta: 0.5
+
+escape_vel: -0.1
+holonomic_robot: true
+
+# Goal Tolerance Parameters
+xy_goal_tolerance: 0.1
+yaw_goal_tolerance: 1.0
+
+# Forward Simulation Parameters
+sim_time: 1.7
+sim_granularity: 0.025
+vx_samples: 20
+vtheta_samples: 20
+
+# Trajectory Scoring Parameters
+meter_scoring: true
+goal_distance_bias: 0.8
+path_distance_bias: 1.5
+occdist_scale: 0.01
+heading_lookahead: 0.325
+dwa: true
+
+# Oscillation Prevention Parameters
+oscillation_reset_dist: 0.01
+
+
