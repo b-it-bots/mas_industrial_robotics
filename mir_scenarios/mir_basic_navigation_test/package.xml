@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_basic_navigation_test</name>
+  <version>0.0.1</version>
+  <description>state machine for the RoboCup@Work basic navigation test (BNT)</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>cob_script_server</run_depend>
+  <run_depend>mcr_default_env_config</run_depend>
+  <run_depend>mir_bringup</run_depend>
+  <run_depend>mir_bringup_sim</run_depend>
+  <run_depend>mir_2dnav</run_depend>
+  <run_depend>mir_common_states</run_depend>
+  <run_depend>smach</run_depend>
+  <run_depend>smach_ros</run_depend>
+
+</package>
