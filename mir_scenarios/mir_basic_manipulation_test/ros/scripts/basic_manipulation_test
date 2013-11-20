@@ -1,0 +1,148 @@
+#!/usr/bin/python
+
+PACKAGE = 'raw_basic_manipulation_test'
+
+import roslib
+roslib.load_manifest(PACKAGE)
+
+import sys
+import rospy
+import smach
+import smach_ros
+
+# generic states
+import referee_box_states as rbs
+#import generic_basic_states as gbs
+import generic_navigation_states as gns
+import generic_manipulation_states as gms
+import generic_perception_states as gps
+import basic_manipulation_test_states as bmts
+
+import state_machines as sm
+
+from rear_platform import RearPlatform
+
+def main(simulation=False):
+
+    rospy.init_node('basic_manipulation_test')
+
+    SM = smach.StateMachine(outcomes=['overall_succeeded', 'overall_failed'])
+
+    SM.userdata.test = 'BMT'
+    #SM.userdata.task = 'BMT'
+    SM.userdata.simulation = simulation
+    SM.userdata.task_spec_copy = ''
+    SM.userdata.base_pose = None
+    SM.userdata.found_objects = None
+    SM.userdata.rear_platform = RearPlatform()
+
+    with SM:
+
+        '''
+        get_task:
+        requires SM.userdata.test to be set (Three letter RoboCup@Work Test string) 
+
+        sets SM.userdata.task
+        '''
+        smach.StateMachine.add('GET_TASK', rbs.get_task(),
+            transitions={'task_received': 'SETUP_MOVE_TO_SOURCE',
+                         'wrong_task_format': 'GET_TASK'})
+            #'tast_not_set'
+        
+        smach.StateMachine.add('RE_GET_TASK', rbs.re_get_task(),
+            transitions={'task_received': 'SETUP_MOVE_TO_SOURCE',
+                         'wrong_task_format': 'RE_GET_TASK'})
+
+        '''
+        bmts.setup_move_to_base_to(param)
+
+        requires param to be an attribute of the task
+        sets SM.userdata.move_base_to
+        '''
+        smach.StateMachine.add('SETUP_MOVE_TO_SOURCE', bmts.setup_move_base_to('src'),
+            transitions={'succeeded': 'MOVE_TO_SOURCE'})
+
+        '''
+        sm.move_base_with_adjustment_and_arm(keys)
+        keys: move_arm_to, move_base_to
+
+        returns
+        '''
+        smach.StateMachine.add('MOVE_TO_SOURCE', sm.move_base_with_adjustment_and_arm(move_arm_to='out_of_view'),
+            transitions={'succeeded': 'FIND_OBJECTS',
+                         'failed': 'MOVE_TO_SOURCE'})
+
+        smach.StateMachine.add('FIND_OBJECTS', gps.find_objects(frame_id='/base_link'),
+            transitions={'objects_found': 'LOAD_OBJECTS',
+                         'no_objects_found': 'FIND_OBJECTS',
+                         'srv_call_failed': 'STOW_ARM_FAILED'})
+
+        smach.StateMachine.add('LOAD_OBJECTS', bmts.load_objects(),
+            transitions={'succeeded': 'SETUP_MOVE_TO_DESTINATION',
+                         'load_object': 'LOAD_OBJECT',
+                         'find_objects': 'FIND_OBJECTS',
+                         'failed': 'STOW_ARM_FAILED'})
+
+        smach.StateMachine.add('LOAD_OBJECT', sm.load_object(),
+            transitions={'succeeded': 'LOAD_OBJECTS',
+                         'vs_error': 'STOW_AND_REGET',
+                         'failed': 'STOW_ARM_FAILED'})
+
+        smach.StateMachine.add('SETUP_MOVE_TO_DESTINATION', bmts.setup_move_base_to('dest'),
+            transitions={'succeeded': 'MOVE_TO_DESTINATION'})
+
+        smach.StateMachine.add('MOVE_TO_DESTINATION', sm.move_base_with_adjustment_and_arm(move_arm_to='platform_intermediate'),
+            transitions={'succeeded': 'UNLOAD_OBJECTS',
+                         'failed': 'MOVE_TO_DESTINATION'})
+
+        smach.StateMachine.add('UNLOAD_OBJECTS', bmts.unload_objects(),
+            transitions={'succeeded': 'STOW_AND_REGET',
+                         'unload_object': 'UNLOAD_OBJECT',
+                         'failed': 'STOW_ARM_FAILED'})
+
+        smach.StateMachine.add('STOW_AND_REGET', gms.move_arm('platform_intermediate'),
+            transitions={'succeeded': 'RE_GET_TASK',
+                         'failed': 'MOVE_TO_EXIT_FAILED'})
+
+        smach.StateMachine.add('UNLOAD_OBJECT', sm.unload_object(),
+            transitions={'succeeded': 'UNLOAD_OBJECTS',
+                         'failed': 'STOW_ARM_FAILED'})
+
+        smach.StateMachine.add('STOW_ARM_FAILED', gms.move_arm('platform_intermediate'),
+            transitions={'succeeded': 'MOVE_TO_EXIT_FAILED',
+                         'failed': 'MOVE_TO_EXIT_FAILED'})
+        
+        smach.StateMachine.add('STOW_ARM_PASSED', gms.move_arm('platform_intermediate'),
+            transitions={'succeeded': 'MOVE_TO_EXIT_PASSED',
+                         'failed': 'MOVE_TO_EXIT_FAILED'})
+
+        smach.StateMachine.add('MOVE_TO_EXIT_PASSED', gns.move_base('EXIT'),
+            transitions={'succeeded': 'overall_succeeded',
+                         'failed': 'MOVE_TO_EXIT_FAILED'})
+
+        smach.StateMachine.add('MOVE_TO_EXIT_FAILED', gns.move_base('EXIT'),
+            transitions={'succeeded': 'overall_failed',
+                         'failed': 'overall_failed'})
+
+    # Start SMACH viewer
+    smach_viewer = smach_ros.IntrospectionServer('DEMO_MANIPULATION_TEST', SM, 'DEMO_MANIPULATION_TEST')
+    smach_viewer.start()
+
+    try:
+        result = SM.execute()
+    except smach.exceptions.InvalidUserCodeError:
+        rospy.logerr('Smach Exception thrown. invalid state machine or required userdata not set.')
+        result = 'overall_failed'
+
+    # stop SMACH viewer
+    while ( result is None ):
+        rospy.spin()
+
+    # smach_thread.stop()
+    smach_viewer.stop()
+
+    rospy.loginfo('exiting basic_manipulation_test with result: %s' % result)
+    exit()
+
+if __name__ == '__main__':
+    main(sys.argv[-1] == '--simulation')
