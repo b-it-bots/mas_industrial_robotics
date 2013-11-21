@@ -3,6 +3,7 @@
 # create list of packages to install
 packagelist=(
     python-setuptools
+    ros-hydro-cob-srvs
     ros-hydro-gazebo-ros-control
     ros-hydro-joy
     ros-hydro-moveit-msgs
