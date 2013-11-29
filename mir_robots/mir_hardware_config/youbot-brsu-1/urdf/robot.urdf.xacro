@@ -49,7 +49,6 @@
 
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find mir_calibration_data)/youbot-brsu-1/calibration.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/materials.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/sensor_angle_shortend.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/sensors/kinect_camera.urdf.xacro" />
@@ -58,17 +57,18 @@
   <xacro:include filename="$(find mir_description)/urdf/misc/distance_screw.urdf.xacro" />
  
 
- <xacro:include filename="$(find mir_description)/urdf/misc/brsu_front_plate.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/brsu_front_plate.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/brsu_rear_plate.urdf.xacro" /> 
 
 
   <!-- brsu specific platforms -->
+  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
 
- <xacro:brsu_rear_plate name="plate" parent="base_link">
+  <xacro:brsu_rear_plate name="plate" parent="base_link">
     <origin xyz="-0.009 -0.175 0.100" rpy="0 0 0" />
   </xacro:brsu_rear_plate>
 
-<xacro:brsu_front_plate name="plate_front" parent="base_link">
+  <xacro:brsu_front_plate name="plate_front" parent="base_link">
     <origin xyz="0.340 -0.175 0.049" rpy="0 0 0" />
   </xacro:brsu_front_plate> 
 

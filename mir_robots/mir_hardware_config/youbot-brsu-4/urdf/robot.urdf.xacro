@@ -51,7 +51,7 @@
 
 
   <!-- BRSU SPECIFIC STUFF -->
-  <xacro:include filename="$(find mir_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
 
   <!-- base laser rear 
   <xacro:hokuyo_urg04_laser name="base_laser_rear" parent="base" ros_topic="scan_rear" update_rate="10" min_angle="-1.57" max_angle="1.57" >
