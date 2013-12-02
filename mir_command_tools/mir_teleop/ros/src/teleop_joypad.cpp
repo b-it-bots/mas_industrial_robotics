@@ -31,15 +31,15 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
 		ROS_INFO("Arm joint limit parameters available. Joint space control: ACTIVE");
 
 		sub_joint_states_ = nh_->subscribe < sensor_msgs::JointState > ("/joint_states", 1, &TeleOpJoypad::cbJointStates, this);
-		pub_arm_joint_vel_ = nh_->advertise < brics_actuator::JointVelocities > ("/arm_controller/velocity_command", 1);
+		pub_arm_joint_vel_ = nh_->advertise < brics_actuator::JointVelocities > ("/arm_1/arm_controller/velocity_command", 1);
 	}
 	else
 		ROS_ERROR("No arm joint limit parameters available. Joint space control: DEACTIVATED.");
 
 	sub_joypad_ = nh_->subscribe < sensor_msgs::Joy > ("/joy", 1, &TeleOpJoypad::cbJoypad, this);
 	pub_base_cart_vel_ = nh_->advertise < geometry_msgs::Twist > ("/cmd_vel", 1);
-	pub_arm_cart_vel_ = nh_->advertise < geometry_msgs::TwistStamped > ("/arm_controller/cartesian_velocity_command", 1);
-	pub_gripper_position_ = nh_->advertise < brics_actuator::JointPositions > ("/gripper_controller/position_command", 1);
+	pub_arm_cart_vel_ = nh_->advertise < geometry_msgs::TwistStamped > ("/arm_1/arm_controller/cartesian_velocity_command", 1);
+	pub_gripper_position_ = nh_->advertise < brics_actuator::JointPositions > ("/arm_1/gripper_controller/position_command", 1);
 
 	srv_base_motors_on_ = nh_->serviceClient < std_srvs::Empty > ("/base/switchOnMotors");
 	srv_base_motors_off_ = nh_->serviceClient < std_srvs::Empty > ("/base/switchOffMotors");
@@ -147,7 +147,7 @@ bool TeleOpJoypad::getArmParameter()
 
 	// read joint names
 	XmlRpc::XmlRpcValue param_list;
-	if (nh_->getParam("/arm_controller/joints", param_list))
+	if (nh_->getParam("/arm_1/arm_controller/joints", param_list))
 	{
 		ROS_ASSERT(param_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
 
@@ -162,8 +162,8 @@ bool TeleOpJoypad::getArmParameter()
 		{
 			moveit_msgs::JointLimits limit;
 			limit.joint_name = arm_joint_names_[i];
-			nh_->getParam("/arm_controller/limits/" + arm_joint_names_[i] + "/min", limit.min_position);
-			nh_->getParam("/arm_controller/limits/" + arm_joint_names_[i] + "/max", limit.max_position);
+			nh_->getParam("/arm_1/arm_controller/limits/" + arm_joint_names_[i] + "/min", limit.min_position);
+			nh_->getParam("/arm_1/arm_controller/limits/" + arm_joint_names_[i] + "/max", limit.max_position);
 			arm_joint_limits_.push_back(limit);
 		}
 
@@ -192,7 +192,7 @@ bool TeleOpJoypad::moveGripper(std::string joint_position_name)
 {
 	brics_actuator::JointPositions pos;
 	XmlRpc::XmlRpcValue position_list;
-	std::string param_name = "/script_server/gripper/" + joint_position_name;
+	std::string param_name = "/script_server/gripper_1/" + joint_position_name;
 
 	// get gripper values
 	if (!nh_->getParam(param_name, position_list))

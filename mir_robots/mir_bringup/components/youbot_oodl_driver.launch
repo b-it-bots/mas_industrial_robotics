@@ -41,16 +41,6 @@ or enable the USE_SETCAP flag in the cmake file and recompile again.
   <node pkg="youbot_driver_ros_interface" type="youbot_driver_ros_interface" name="youbot_driver_ros_interface" output="screen">
     <remap from="base/joint_states" to="joint_states"/> 
     <remap from="arm_1/joint_states" to="joint_states" /> 
-
-    <remap from="arm_1/arm_controller/position_command" to="arm_controller/position_command" /> 
-    <remap from="arm_1/arm_controller/velocity_command" to="arm_controller/velocity_command" /> 
-    <remap from="arm_1/arm_controller/follow_joint_trajectory/cancel" to="arm_controller/follow_real_joint_trajectory/cancel" /> 
-    <remap from="arm_1/arm_controller/follow_joint_trajectory/feedback" to="arm_controller/follow_real_joint_trajectory/feedback" /> 
-    <remap from="arm_1/arm_controller/follow_joint_trajectory/goal" to="arm_controller/follow_real_joint_trajectory/goal" /> 
-    <remap from="arm_1/arm_controller/follow_joint_trajectory/result" to="arm_controller/follow_real_joint_trajectory/result" /> 
-    <remap from="arm_1/arm_controller/follow_joint_trajectory/status" to="arm_controller/follow_real_joint_trajectory/status" /> 
-    <remap from="arm_1/gripper_controller/position_command" to="gripper_controller/position_command" /> 
-
   </node>
       
 </launch>
