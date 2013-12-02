@@ -27,6 +27,9 @@
   <!-- materials for visualization -->
   <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />				     
 
+  <!-- sensors -->
+  <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
+
   <!-- Now we can start using the macros included above to define the actual youbot -->
 
   <!-- The first use of a macro.  This one was defined in base.urdf.xacro above.
@@ -52,6 +55,11 @@
 
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+
+  <!-- base laser front -->
+  <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
+    <origin xyz="0.3 0 -0.03" rpy="0 0 0"/>
+  </xacro:hokuyo_urg04_laser>
 
   <!-- base laser rear 
   <xacro:hokuyo_urg04_laser name="base_laser_rear" parent="base" ros_topic="scan_rear" update_rate="10" min_angle="-1.57" max_angle="1.57" >
