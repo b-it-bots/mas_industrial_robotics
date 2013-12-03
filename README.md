@@ -125,6 +125,12 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ## Visualize the robot state and sensor data
 
      rosrun rviz rviz
+
+
+## Build a map for base navigation
+
+     roslaunch mir_2dslam 2dslam.launch
+
      
 
 Click on the menu bar "File -> Open Config", navigate to "~/catkin_ws/src/mas_industrial_robotics" and select the "youbot.rviz" file.
