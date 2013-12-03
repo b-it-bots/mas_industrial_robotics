@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<launch>
+  <group>
+
+    <arg name="sim" default="false">
+
+
+    <!-- real robot related launches  -->
+    <group unless="$(arg sim)">
+      <include file="$(find mir_bringup)/robot.launch" />   <!-- base components -->
+    </group>
+
+
+    <!-- simulation related launches -->
+    <group if="$(arg sim)">
+      <include file="$(find mir_bringup_sim)/robot.launch" />   <!-- base components -->
+      <include file="$(find hbrs_gazebo_objects)/ros/launch/spawn_objects.launch"/>   <!-- spawn objects -->
+    </group>
+
+    <!-- navigation -->
+    <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
+
+    <!-- manipulation -->
+    <!-- TBD -->
+
+    <!-- base placement -->
+    <include file="$(find mir_base_placement)/ros/launch/base_placement.launch" />
+
+    <!-- relative base controller -->
+    <include file="$(find mcr_relative_movements)/ros/launch/relative_movements.launch" />
+
+    <!-- perception pipeline -->
+    <include file="$(find mcr_object_detection)/ros/launch/object_detection.launch" />
+      
+    <!-- Visual Servoing -->
+    <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing.launch"/>
+
+</launch>

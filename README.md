@@ -66,8 +66,7 @@ Then go on with installing further external dependencies:
     ./repository.debs
     
     source ~/catkin_ws/devel/setup.bash
-    export ROS_PACKAGE_PATH=~/catkin_ws/devel:$ROS_PACKAGE_PATH
-    
+
 The last two commands, should be added to the ~/.bashrc file, so that they do not need to be executed everytime you open a new terminal.
 
 
@@ -126,6 +125,12 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ## Visualize the robot state and sensor data
 
      rosrun rviz rviz
+
+
+## Build a map for base navigation
+
+     roslaunch mir_2dslam 2dslam.launch
+
      
 
 Click on the menu bar "File -> Open Config", navigate to "~/catkin_ws/src/mas_industrial_robotics" and select the "youbot.rviz" file.

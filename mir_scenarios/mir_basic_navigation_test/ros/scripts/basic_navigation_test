@@ -1,0 +1,59 @@
+#!/usr/bin/python
+
+PACKAGE = 'raw_basic_navigation_test'
+
+import roslib
+roslib.load_manifest(PACKAGE)
+
+import sys
+import rospy
+import smach
+import smach_ros
+
+from referee_box_states import *
+from generic_navigation_states import *
+from basic_navigation_test_states import *
+
+
+def main(simulation=False):
+
+    rospy.init_node('basic_navigation_test')
+
+    SM = smach.StateMachine(outcomes=['overall_succeeded', 'overall_failed'])
+
+    SM.userdata.test = 'BNT'
+    SM.userdata.simulation = simulation
+    SM.userdata.task = None
+
+    with SM:
+
+        smach.StateMachine.add('GET_TASK', get_task(),
+            transitions={'task_received': 'SELECT_TARGET_POSE',
+                         'wrong_task_format': 'GET_TASK'})
+
+        smach.StateMachine.add('SELECT_TARGET_POSE', select_target_pose(),
+            transitions={'pose_selected': 'MOVE_BASE',
+                         'unknown_pose': 'SELECT_TARGET_POSE',
+                         'no_more_targets': 'MOVE_BASE_TO_EXIT'})
+
+        smach.StateMachine.add('MOVE_BASE', move_base(),
+            transitions={'succeeded': 'WAIT_DESIRED_DURATION',
+                         'failed': 'SELECT_TARGET_POSE'})
+
+        smach.StateMachine.add('WAIT_DESIRED_DURATION', wait_for_desired_duration(),
+            transitions={'succeeded': 'SELECT_TARGET_POSE'})
+
+        smach.StateMachine.add('MOVE_BASE_TO_EXIT', move_base('EXIT'),
+            transitions={'succeeded': 'overall_succeeded',
+                         'failed': 'MOVE_BASE_TO_EXIT'})
+
+    # Start SMACH viewer
+    smach_viewer = smach_ros.IntrospectionServer('BASIC_NAVIGATION_TEST', SM, 'BASIC_NAVIGATION_TEST')
+    smach_viewer.start()
+
+    SM.execute()
+
+    smach_viewer.stop()
+
+if __name__ == '__main__':
+    main(sys.argv[-1] == '--simulation')
