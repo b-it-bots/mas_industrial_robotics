@@ -17,16 +17,11 @@
         <joint name="arm_joint_4" />
         <joint name="arm_joint_5" />
     </group>
-    <group name="gripper_1">
-        <joint name="gripper_palm_joint" />
-        <joint name="gripper_finger_joint_l" />
-        <joint name="gripper_finger_joint_r" />
-    </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="home" group="arm_1">
         <joint name="arm_joint_1" value="3.0821" />
         <joint name="arm_joint_2" value="1.2311" />
-        <joint name="arm_joint_3" value="0" />
+        <joint name="arm_joint_3" value="-2.5918" />
         <joint name="arm_joint_4" value="1.7684" />
         <joint name="arm_joint_5" value="0" />
     </group_state>
@@ -44,8 +39,20 @@
         <joint name="arm_joint_4" value="3.4563" />
         <joint name="arm_joint_5" value="0" />
     </group_state>
-    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="eef" parent_link="gripper_palm_link" group="gripper_1" />
+    <group_state name="left" group="arm_1">
+        <joint name="arm_joint_1" value="0.7961" />
+        <joint name="arm_joint_2" value="2.4612" />
+        <joint name="arm_joint_3" value="-1.8932" />
+        <joint name="arm_joint_4" value="3.0946" />
+        <joint name="arm_joint_5" value="0" />
+    </group_state>
+    <group_state name="right" group="arm_1">
+        <joint name="arm_joint_1" value="4.838" />
+        <joint name="arm_joint_2" value="2.446" />
+        <joint name="arm_joint_3" value="-1.6312" />
+        <joint name="arm_joint_4" value="3.1549" />
+        <joint name="arm_joint_5" value="0" />
+    </group_state>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="arm_link_0" link2="arm_link_1" reason="Adjacent" />
     <disable_collisions link1="arm_link_0" link2="arm_link_2" reason="Never" />
