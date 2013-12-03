@@ -130,6 +130,17 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ## Build a map for base navigation
 
      roslaunch mir_2dslam 2dslam.launch
+     
+
+## Use autonomous navigation
+### Omni-directional navigation
+
+     roslaunch mir_2dnav 2dnav.launch nav_mode:=omni
+     
+
+### Differential navigation
+
+     roslaunch mir_2dnav 2dnav.launch nav_mode:=diff
 
      
 
