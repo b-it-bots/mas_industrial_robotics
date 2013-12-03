@@ -24,15 +24,15 @@ include_directories(
   ros/include
 )
 
-add_executable(move_base_adapted
-  ros/src/move_base_adapted.cpp
-  ros/src/orient_goal.cpp
-)
-target_link_libraries(move_base_adapted 
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${PCL_LIBRARIES}
-)
+#add_executable(move_base_adapted
+#  ros/src/move_base_adapted.cpp
+#  ros/src/orient_goal.cpp
+#)
+#target_link_libraries(move_base_adapted 
+#  ${catkin_LIBRARIES}
+#  ${Boost_LIBRARIES}
+#  ${PCL_LIBRARIES}
+#)
 
 
 #############
