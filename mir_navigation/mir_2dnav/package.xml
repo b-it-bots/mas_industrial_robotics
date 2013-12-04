@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_2dnav</name>
+  <version>0.0.1</version>
+  <description>2d base navigation</description>
+
+  <maintainer email="praveen.ramanujam@smail.inf.h-brs.de">Praveen Ramanajum</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="praveen.ramanujam@smail.inf.h-brs.de">Praveen Ramanajum</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+ 
+</package>

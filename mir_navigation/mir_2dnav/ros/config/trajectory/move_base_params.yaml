@@ -1,0 +1,20 @@
+#Footprint without rear laser
+#footprint: [[0.26, 0.18],
+#            [0.26, 0.014],
+#            [0.31, 0.014],
+#            [0.31, -0.014],
+#            [0.26, -0.014],
+#            [0.26, -0.18],
+#            [-0.27, -0.18],
+#            [-0.27, 0.18]]
+
+#Footprint with rear laser
+footprint: [[0.26, 0.18],[0.26, 0.014],[0.31, 0.014],[0.31, -0.014],[0.26, -0.014],[0.26, -0.18],[-0.27, -0.18],[-0.27,-0.014],[-0.32,-0.014],[-0.32,0.014],[-0.27,0.014],[-0.27, 0.18]]
+controller_frequency: 10.0
+planner_frequency: 1.0
+controller_patience: 15.0
+clearing_radius: 0.25
+footprint_padding: 0.03
+clearing_rotation_allowed: false
+oscillation_distance: 2.0
+shutdown_costmaps: true
