@@ -10,7 +10,6 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="arm_1">
-        <joint name="arm_joint_0" />
         <joint name="arm_joint_1" />
         <joint name="arm_joint_2" />
         <joint name="arm_joint_3" />
@@ -18,7 +17,6 @@
         <joint name="arm_joint_5" />
     </group>
     <group name="arm_1_gripper">
-        <joint name="gripper_palm_joint" />
         <joint name="gripper_finger_joint_l" />
         <joint name="gripper_finger_joint_r" />
     </group>
