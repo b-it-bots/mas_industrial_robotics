@@ -5,8 +5,10 @@ packagelist=(
     python-setuptools
     ros-hydro-cob-srvs
     ros-hydro-gazebo-ros-control
+    ros-hydro-gmapping
     ros-hydro-hokuyo-node
     ros-hydro-joy
+    ros-hydro-map-server
     ros-hydro-moveit-msgs
     ros-hydro-pr2-dashboard-aggregator
     ros-hydro-pr2-description
