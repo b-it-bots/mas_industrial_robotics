@@ -12,6 +12,7 @@ packagelist=(
     ros-hydro-joy
     ros-hydro-map-server
     ros-hydro-move-base
+    ros-hydro-moveit-core
     ros-hydro-moveit-msgs
     ros-hydro-moveit-planners
     ros-hydro-moveit-ros-move-group
