@@ -45,6 +45,7 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
 	srv_base_motors_off_ = nh_->serviceClient < std_srvs::Empty > ("/base/switchOffMotors");
 	srv_arm_motors_on_ = nh_->serviceClient < std_srvs::Empty > ("/arm_1/switchOnMotors");
 	srv_arm_motors_off_ = nh_->serviceClient < std_srvs::Empty > ("/arm_1/switchOffMotors");
+	srv_reconnect = nh_->serviceClient < std_srvs::Empty > ("/reconnect");
 
 }
 
@@ -262,6 +263,27 @@ bool TeleOpJoypad::switchMotorsOnOff(std::string component_name, std::string sta
 	return true;
 }
 
+bool TeleOpJoypad::reconnect()
+{
+	std_srvs::Empty empty;
+	ros::ServiceClient* srv_client;
+
+	srv_client = &srv_arm_reconnect;
+	
+	if (srv_client->call(empty))
+	{
+		ROS_INFO_STREAM("Reconnected");
+		return true;
+	}
+	else
+	{
+		ROS_ERROR_STREAM("Could not reconnect");
+		return false;
+	}
+
+	return true;
+}
+
 void TeleOpJoypad::setSingleArmJointVel(double motor_vel, std::string joint_name)
 {
 	for (unsigned int i = 0; i < arm_vel_.velocities.size(); ++i)
@@ -452,7 +474,12 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
 
 			pub_base_cart_vel_.publish(base_cart_zero_vel_);
 		}
+		else if ((bool) command->buttons[button_index_arm_joint_3_4_] && (bool) command->buttons[button_index_arm_joint_1_2_]))
+		{
+			this->reconnect()
+		}
 	}
+
 
 	//check if arm is in joint mode (not cc mode)
 	if (!button_print_arm_states_prev_ && (bool) command->buttons[button_index_print_arm_joint_states_])
