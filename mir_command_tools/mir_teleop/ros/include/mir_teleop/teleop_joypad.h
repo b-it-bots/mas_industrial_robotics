@@ -37,6 +37,7 @@ class TeleOpJoypad
 	bool getArmParameter();
 	bool moveGripper(std::string joint_position_name);
 	bool switchMotorsOnOff(std::string component_name, std::string state);
+	bool reconnect();
 
 	void cbJoypad(const sensor_msgs::Joy::ConstPtr& command);
 	void cbJointStates(const sensor_msgs::JointState::ConstPtr& state_msg);
@@ -92,6 +93,7 @@ class TeleOpJoypad
 	ros::ServiceClient srv_arm_motors_off_;
 	ros::ServiceClient srv_base_motors_on_;
 	ros::ServiceClient srv_base_motors_off_;
+	ros::ServiceClient srv_reconnect;
 
 	int button_index_deadman_;
 	int button_index_run_;

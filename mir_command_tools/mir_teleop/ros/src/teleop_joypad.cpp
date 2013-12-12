@@ -126,6 +126,7 @@ bool TeleOpJoypad::getJoypadConfigParameter()
 	return true;
 }
 
+
 void TeleOpJoypad::getBaseParameter()
 {
 	double param = 0;
@@ -268,7 +269,7 @@ bool TeleOpJoypad::reconnect()
 	std_srvs::Empty empty;
 	ros::ServiceClient* srv_client;
 
-	srv_client = &srv_arm_reconnect;
+	srv_client = &srv_reconnect;
 	
 	if (srv_client->call(empty))
 	{
@@ -280,7 +281,7 @@ bool TeleOpJoypad::reconnect()
 		ROS_ERROR_STREAM("Could not reconnect");
 		return false;
 	}
-
+	ROS_ERROR_STREAM("Could not make service call");
 	return true;
 }
 
@@ -474,9 +475,9 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
 
 			pub_base_cart_vel_.publish(base_cart_zero_vel_);
 		}
-		else if ((bool) command->buttons[button_index_arm_joint_3_4_] && (bool) command->buttons[button_index_arm_joint_1_2_]))
+		else if ((bool) command->buttons[button_index_arm_joint_3_4_] && (bool) command->buttons[button_index_arm_joint_1_2_] )
 		{
-			this->reconnect()
+			this->reconnect();
 		}
 	}
 
