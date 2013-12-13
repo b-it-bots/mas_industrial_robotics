@@ -269,22 +269,14 @@ bool TeleOpJoypad::switchMotorsOnOff(std::string component_name, std::string sta
 bool TeleOpJoypad::reconnect()
 {
 	std_srvs::Empty empty;
-	ros::ServiceClient* srv_client;
-
-	srv_client = &srv_reconnect;
 	
-	if (srv_client->call(empty))
+	if (srv_reconnect.call(empty))
 	{
-		ROS_INFO_STREAM("Reconnected");
+		ROS_INFO_STREAM("Call to serivce: " << srv_reconnect.getService() << " successful.");
 		return true;
 	}
-	else
-	{
-		ROS_ERROR_STREAM("Could not reconnect");
-		return false;
-	}
-	ROS_ERROR_STREAM("Could not make service call");
-	return true;
+	ROS_ERROR_STREAM("Could not call service: " << srv_reconnect.getService() << ".");
+	return false;
 }
 
 void TeleOpJoypad::setSingleArmJointVel(double motor_vel, std::string joint_name)
@@ -479,7 +471,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
 		}
 	}
 
-	if ( command->buttons[button_index_reconnect_] )
+	if ( (bool) command->buttons[button_index_reconnect_] && (bool) command->buttons[button_index_gripper_] )
 	{
 		this->reconnect();
 	}
