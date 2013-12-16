@@ -74,7 +74,8 @@ class TeleOpJoypad
 	bool button_base_motors_on_off_pressed_prev_;
 	bool button_base_motors_active_;
 
-	bool button_reconnect_pressed_prev_;
+	bool button_reconnect_left_pressed_prev_;
+    bool button_reconnect_right_pressed_prev_;
 
 	geometry_msgs::Twist base_cart_vel_;
 	geometry_msgs::Twist base_cart_zero_vel_;
@@ -101,7 +102,8 @@ class TeleOpJoypad
 	int button_index_run_;
 	int button_index_arm_motors_on_off_;
 	int button_index_base_motors_on_off_;
-	int button_index_reconnect_;
+	int button_index_reconnect_left_;
+    int button_index_reconnect_right_;
 	int button_index_print_arm_joint_states_;
 	int button_index_arm_joint_1_2_;
 	int button_index_arm_joint_3_4_;

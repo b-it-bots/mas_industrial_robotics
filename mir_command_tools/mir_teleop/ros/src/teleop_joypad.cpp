@@ -76,8 +76,10 @@ bool TeleOpJoypad::getJoypadConfigParameter()
 					button_index_base_motors_on_off_ = index_list[j];
 				else if (name_list[j] == "arm_motors_on_off")
 					button_index_arm_motors_on_off_ = index_list[j];
-				else if (name_list[j] == "reconnect")
-					button_index_reconnect_ = index_list[j];
+				else if (name_list[j] == "reconnect_left")
+					button_index_reconnect_left_ = index_list[j];
+                else if (name_list[j] == "reconnect_right")
+                    button_index_reconnect_right_ = index_list[j];
 				else if (name_list[j] == "arm_motor_1_2")
 					button_index_arm_joint_1_2_ = index_list[j];
 				else if (name_list[j] == "arm_motor_3_4")
@@ -471,7 +473,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
 		}
 	}
 
-	if ( (bool) command->buttons[button_index_reconnect_] && (bool) command->buttons[button_index_gripper_] )
+	if ( (bool) command->buttons[button_index_reconnect_left_] && (bool) command->buttons[button_index_reconnect_right_] )
 	{
 		this->reconnect();
 	}
