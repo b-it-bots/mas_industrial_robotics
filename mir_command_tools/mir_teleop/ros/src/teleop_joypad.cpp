@@ -78,8 +78,8 @@ bool TeleOpJoypad::getJoypadConfigParameter()
 					button_index_arm_motors_on_off_ = index_list[j];
 				else if (name_list[j] == "reconnect_left")
 					button_index_reconnect_left_ = index_list[j];
-                else if (name_list[j] == "reconnect_right")
-                    button_index_reconnect_right_ = index_list[j];
+				else if (name_list[j] == "reconnect_right")
+					button_index_reconnect_right_ = index_list[j];
 				else if (name_list[j] == "arm_motor_1_2")
 					button_index_arm_joint_1_2_ = index_list[j];
 				else if (name_list[j] == "arm_motor_3_4")
