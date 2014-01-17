@@ -2,6 +2,7 @@
 
 # create list of packages to install
 packagelist=(
+    python-pygraphviz
     python-setuptools
     ros-hydro-amcl
     ros-hydro-cob-srvs
@@ -23,7 +24,6 @@ packagelist=(
     ros-hydro-pr2-msgs
     ros-hydro-ros
     ros-hydro-rqt-pr2-dashboard
-    python-pygraphviz
 )
 
 ### install debian packages listed in array above
