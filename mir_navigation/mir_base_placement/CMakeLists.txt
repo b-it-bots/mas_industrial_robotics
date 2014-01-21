@@ -19,6 +19,10 @@ catkin_package(
     sensor_msgs
 )
 
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
+
 add_executable(base_placement_node 
   ros/src/base_placement_node.cpp
 )
