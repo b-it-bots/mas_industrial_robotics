@@ -55,12 +55,13 @@
 
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
-  <!--xacro:include filename="$(find mcr_description)/urdf/sensors/kinect_camera.urdf.xacro" />
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/pmd_camboard_nano_camera.urdf.xacro" />
+  <xacro:include filename="$(find youbot_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
+  <xacro:include filename="$(find youbot_description)/urdf/misc/camera_tower.urdf.xacro"/>
+
+  <!--xacro:include filename="$(find mcr_description)/urdf/sensors/pmd_camboard_nano_camera.urdf.xacro" />
 
   <xacro:include filename="$(find mir_calibration_data)/youbot-brsu-2/calibration.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/sensor_angle_shortend.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/laptop_case_frame.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/distance_screw.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" /> 
@@ -70,6 +71,16 @@
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
     <origin xyz="0.3 0 -0.03" rpy="0 0 0"/>
   </xacro:hokuyo_urg04_laser>
+
+  <!-- camera tower -->
+  <xacro:camera_tower name="camera_tower" parent="plate_link">
+    <origin xyz="-0.11 0.0 0.03" rpy="0 0 0" />
+  </xacro:camera_tower>
+
+  <!-- 3D camera on tower -->
+  <xacro:asus_xtion_camera name="tower_cam3d" parent="camera_tower_link" tilt="0.5">
+    <origin xyz="0 0 0.49" rpy="0 0 0" />
+  </xacro:asus_xtion_camera>
 
   <!-- brsu specific platforms 
   <xacro:rear_platform name="rear_platform" parent="base_link">
@@ -131,14 +142,5 @@
     <origin xyz="${cal_arm_cam3d_x} ${cal_arm_cam3d_y} ${cal_arm_cam3d_z}" rpy="${cal_arm_cam3d_roll} ${cal_arm_cam3d_pitch} ${cal_arm_cam3d_yaw}" />
   </xacro:pmd_camboard_nano_camera> 
   
-  <xacro:cam3d_tower name="tower" parent="rear_platform_link">
-    <origin xyz="-0.245 0.175 0.0" rpy="0 0 0" />
-  </xacro:cam3d_tower-->
-
-  <!-- 3D camera on tower 
-  <xacro:kinect_camera name="tower_cam3d" parent="tower_link">
-    <origin xyz="${cal_tower_cam3d_x} ${cal_tower_cam3d_y} ${cal_tower_cam3d_z}" rpy="${cal_tower_cam3d_roll} ${cal_tower_cam3d_pitch} ${cal_tower_cam3d_yaw}" />
-  </xacro:kinect_camera-->
-
-
+ 
 </robot>
