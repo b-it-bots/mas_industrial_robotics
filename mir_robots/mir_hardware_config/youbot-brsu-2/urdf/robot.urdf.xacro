@@ -140,7 +140,7 @@
   <!-- pmd on arm
   <xacro:pmd_camboard_nano_camera name="arm_cam3d" parent="arm_sensor_angle_shortend_part2_link">
     <origin xyz="${cal_arm_cam3d_x} ${cal_arm_cam3d_y} ${cal_arm_cam3d_z}" rpy="${cal_arm_cam3d_roll} ${cal_arm_cam3d_pitch} ${cal_arm_cam3d_yaw}" />
-  </xacro:pmd_camboard_nano_camera> 
+  </xacro:pmd_camboard_nano_camera--> 
   
  
 </robot>
