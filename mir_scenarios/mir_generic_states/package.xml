@@ -1,35 +1,34 @@
+<?xml version="1.0"?>
 <package>
-  <description brief="raw_generic_states">
-
-     raw_generic_states
-
-  </description>
-  <author>fred</author>
+  <name>mir_generic_states</name>
+  <version>0.0.1</version>
+  <description>Generic states and state machines common to all RoboCup@Work tasks</description>
+  <author email="alexander@dal.ca">Alex Moriarty</author>
+  <maintainer email="robotics@h-brs.de">B-IT-Bots Robotics Team</maintainer>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/raw_generic_states</url>
 
-  <depend package="actionlib"/>
-  <depend package="cob_script_server"/>
-  <depend package="geometry_msgs"/>
-  <depend package="move_base_msgs"/>
-  <depend package="rospy"/>
-  <depend package="smach"/>
-  <depend package="smach_ros"/>
-  <depend package="std_srvs"/>
-  <depend package="tf"/>
-  <depend package="youbot_arm_navigation"/>
+  <buildtool_depend>catkin</buildtool_depend>
 
-  <depend package="hbrs_srvs"/>
-  <depend package="hbrs_msgs"/>
-
-  <depend package="raw_base_placement"/>
-  <depend package="raw_srvs"/>
-
-  <export>
+  <run_depend>actionlib</run_depend>
+  <run_depend>cob_script_server</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>mir_base_placement</run_depend>
+  <run_depend>move_base_msgs</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>smach</run_depend>
+  <run_depend>smach_ros</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>tf</run_depend>
+  <!-- TODO missing depends-->
+  <!--depend package="youbot_arm_navigation"/-->
+  <!--depend package="hbrs_srvs"/-->
+  <!--depend package="hbrs_msgs"/-->
+  <!--depend package="raw_srvs"/-->
+  <!-- TODO test catkin sets include dir -->
+  <!--export>
     <python path="${prefix}/include:${prefix}/src"/>
     <python path="${prefix}/include:${prefix}/src/oldstates"/>
-  </export>
+  </export-->
 
 </package>
 
