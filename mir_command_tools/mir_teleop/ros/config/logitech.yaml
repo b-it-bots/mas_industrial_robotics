@@ -1,7 +1,7 @@
 joypad:
     buttons:
-        name: [deadman, run, base_motors_on_off, arm_motors_on_off, arm_motor_1_2, arm_motor_3_4, arm_motor_5, arm_cart_ctrl, gripper, print_arm_joint_states]
-        index: [5, 7, 8, 9, 0, 1, 2, 4, 3, 6]
+        name: [deadman, run, base_motors_on_off, arm_motors_on_off, reconnect_left, reconnect_right, arm_motor_1_2, arm_motor_3_4, arm_motor_5, arm_cart_ctrl, gripper, print_arm_joint_states]
+        index: [5, 7, 8, 9, 10, 11, 0, 1, 2, 4, 3, 6]
     axes:
         name: [base_linear_x, base_linear_y, base_angular_z, arm_linear_x, arm_linear_y, arm_linear_z, arm_angular_x, arm_angular_y, arm_angular_z, arm_joint_axes_1, arm_joint_axes_2]
         index: [1, 0, 2, 1, 0, 3, 2, 5, 4, 4, 5]
