@@ -5,6 +5,6 @@
 
   <arg name="pipeline" default="ompl" />
 
-  <include file="$(find mir_moveit_youbot-brsu-2)/launch/$(arg pipeline)_planning_pipeline.launch.xml" />
+  <include file="$(find mir_moveit_youbot_brsu_2)/launch/$(arg pipeline)_planning_pipeline.launch.xml" />
 
 </launch>

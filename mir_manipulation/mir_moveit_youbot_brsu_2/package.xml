@@ -1,6 +1,6 @@
 <package>
 
-  <name>mir_moveit_youbot-brsu-2</name>
+  <name>mir_moveit_youbot_brsu_2</name>
   <version>0.2.0</version>
   <description>
      An automatically generated package with all the configuration and launch files for using the youbot with the MoveIt Motion Planning Framework
