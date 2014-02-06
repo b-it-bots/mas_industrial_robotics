@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mir_moveit_youbot)
+project(mir_moveit_youbot-brsu-2)
 
 find_package(catkin REQUIRED)
 
