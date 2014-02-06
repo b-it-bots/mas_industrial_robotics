@@ -67,7 +67,7 @@
 
   <!-- camera tower -->
   <xacro:camera_tower name="camera_tower" parent="plate_link">
-    <origin xyz="-0.11 0.0 0.03" rpy="0 0 0" />
+    <origin xyz="-0.075 0.0 0.023" rpy="0 0 0" />
   </xacro:camera_tower>
 
   <!-- 3D camera on tower -->
