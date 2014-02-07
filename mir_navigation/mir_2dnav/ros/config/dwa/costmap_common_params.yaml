@@ -1,8 +1,19 @@
-map_type: costmap
-#transform_tolerance: 0.2
-obstacle_range: 2.5
-raytrace_range: 3.0
-footprint: [[0.26, 0.18],[0.26, 0.014],[0.31, 0.014],[0.31, -0.014],[0.26, -0.014],[0.26, -0.18],[-0.27, -0.18],[-0.27, 0.18]]
+map_type: costmap           # default: "voxel"
+#transform_tolerance: 0.2   # default: 0.2
+obstacle_range: 2.5         # default: 2.5 
+raytrace_range: 3.0         # default: 3.0
+footprint: [[0.26, 0.18],
+            [0.26, 0.014],
+            [0.31, 0.014],
+            [0.31, -0.014],
+            [0.26, -0.014],
+            [0.26, -0.18],
+            [-0.27, -0.18],
+            [-0.27, -0.014],
+            [-0.32, -0.014],
+            [-0.32, 0.014],
+            [-0.27, 0.014],
+            [-0.27, 0.18]]
 
 inflation_radius: 0.37
 observation_sources: laser_scanner_front laser_scanner_rear
