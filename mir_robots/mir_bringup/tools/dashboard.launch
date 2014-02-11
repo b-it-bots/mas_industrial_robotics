@@ -1,13 +1,16 @@
 <?xml version="1.0"?>
 <launch>
 
+  <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+  <arg name="robot_env" default="$(optenv ROBOT_ENV !!NO_ROBOT_ENV_SET!!)"/>
+
   <!-- start dashboard -->
   <include file="$(find youbot_dashboard)/launch/dashboard.launch" />
 	
   <!-- launch command GUI -->
   <node ns="command_gui" pkg="cob_command_gui" type="knoeppkes.py" name="command_gui" cwd="node" respawn="false" output="screen" >
-    <rosparam command="load" ns="control_buttons" file="$(find mir_default_robot_config)/$(env ROBOT)/command_gui_buttons.yaml"/>
-    <rosparam command="load" ns="nav_buttons" file="$(find mcr_default_env_config)/$(env ROBOT_ENV)/command_gui_buttons.yaml"/>
+    <rosparam command="load" ns="control_buttons" file="$(find mir_default_robot_config)/$(arg robot)/command_gui_buttons.yaml"/>
+    <rosparam command="load" ns="nav_buttons" file="$(find mcr_default_env_config)/$(arg robot_env)/command_gui_buttons.yaml"/>
   </node>
 	
 </launch>

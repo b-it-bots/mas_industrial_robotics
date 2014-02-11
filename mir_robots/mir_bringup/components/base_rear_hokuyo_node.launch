@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
 <launch>
 
+  <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+
 	<!-- start the hokuyo node -->
 	<node type="hokuyo_node" pkg="hokuyo_node" name="hokuyo_rear_node">  
-		<rosparam command="load" file="$(find mir_hardware_config)/$(env ROBOT)/config/laser_rear.yaml"/>
+		<rosparam command="load" file="$(find mir_hardware_config)/$(arg robot)/config/laser_rear.yaml"/>
 		<remap from="/scan" to="/scan_rear"/>
 	</node>
 </launch>

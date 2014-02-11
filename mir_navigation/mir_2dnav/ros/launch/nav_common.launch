@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
+  <arg name="robot_env" default="$(optenv ROBOT_ENV !!NO_ROBOT_ENV_SET!!)"/>
+
   <!-- navigation goals/orientations -->
 	<include file="$(find mcr_default_env_config)/upload_param.launch" />
     
@@ -8,7 +10,7 @@
 	<node pkg="mcr_navigation_tools" type="navigation_goals_as_marker" name="navigation_goals_as_marker" ns="mcr_navigation"/>
 
   <!-- map server -->
-	<arg name="map" default="$(find mcr_default_env_config)/$(env ROBOT_ENV)/map.yaml" />
+	<arg name="map" default="$(find mcr_default_env_config)/$(arg robot_env)/map.yaml" />
 	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map)"/>
 
   <!-- AMCL -->
