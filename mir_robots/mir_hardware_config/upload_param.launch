@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-  <rosparam command="load" ns="arm_1" file="$(find mir_hardware_config)/$(env ROBOT)/config/arm.yaml"/>
+  <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+
+  <rosparam command="load" ns="arm_1" file="$(find mir_hardware_config)/$(arg ROBOT)/config/arm.yaml"/>
 	
 </launch>
