@@ -5,12 +5,12 @@
 
   <!-- upload robot description and params (joint configurations) -->
   <include file="$(find mir_default_robot_config)/upload_param.launch" />
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find mir_hardware_config)/$(arg ROBOT)/urdf/robot.urdf.xacro'" />
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find mir_hardware_config)/$(arg robot)/urdf/robot.urdf.xacro'" />
 
   <!-- start robot_state_publisher -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen" />
 
   <!-- start robot-specific launch file -->
-  <include file="$(find mir_bringup)/robots/$(arg ROBOT).launch" />
+  <include file="$(find mir_bringup)/robots/$(arg robot).launch" />
 
 </launch>
