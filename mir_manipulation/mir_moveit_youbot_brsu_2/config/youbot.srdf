@@ -77,7 +77,7 @@
         <joint name="arm_joint_4" value="0.347168" />
         <joint name="arm_joint_5" value="2.94996" />
     </group_state>
-    <group_state name="pre_grasp" group="arm_1"> 2.89373, 1.53772, -1.68493, 2.9719, 2.9175
+    <group_state name="pre_grasp" group="arm_1">
         <joint name="arm_joint_1" value="2.89373" />
         <joint name="arm_joint_2" value="1.53772" />
         <joint name="arm_joint_3" value="-1.68493" />
