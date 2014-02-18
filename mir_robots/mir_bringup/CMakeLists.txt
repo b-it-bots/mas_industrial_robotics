@@ -21,6 +21,7 @@ catkin_package(
     youbot_diagnostic_aggregator
     youbot_joint_trajectory_action
     youbot_oodl
+    usb_cam
 )
 
 set(
