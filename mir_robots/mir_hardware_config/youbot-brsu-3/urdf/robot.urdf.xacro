@@ -61,17 +61,17 @@
   
   <!-- base laser front -->
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
-    <origin xyz="0.3 0 -0.03" rpy="0 0 0"/>
+    <origin xyz="0.3 0 -0.04" rpy="0 0 0"/>
   </xacro:hokuyo_urg04_laser>
 
   <!-- camera tower -->
   <xacro:camera_tower name="camera_tower" parent="plate_link">
-    <origin xyz="-0.075 0.0 0.023" rpy="0 0 0" />
+    <origin xyz="-0.05 0.0 0.023" rpy="0 0 0" />
   </xacro:camera_tower>
 
   <!-- 3D camera on tower -->
   <xacro:asus_xtion_camera name="tower_cam3d" parent="camera_tower_link" tilt="0.5">
-    <origin xyz="0 0 0.49" rpy="0 0 0" />
+    <origin xyz="-0.04 0.01 0.445" rpy="0 0 0" />
   </xacro:asus_xtion_camera>
 
   <!-- base laser rear 
