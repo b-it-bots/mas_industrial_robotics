@@ -2,7 +2,7 @@
 #
 #   Python Client
 #   Needs the tcp//... address of the server as argument 
-#	(e.g. $ pyton2.7 hwclient.py tcp://localhost.5555
+#   (e.g. $ pyton2.7 hwclient.py tcp://localhost.5555
 #   Sends the robot name ( in our case b-it-bots) 
 #   and waits for reply from the server
 #	
