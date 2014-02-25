@@ -1,6 +1,3 @@
-import roslib
-roslib.load_manifest('raw_basic_navigation_test')
-
 import rospy
 import smach
 

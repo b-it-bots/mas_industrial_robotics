@@ -1,10 +1,5 @@
 #!/usr/bin/python
 
-PACKAGE = 'raw_basic_navigation_test'
-
-import roslib
-roslib.load_manifest(PACKAGE)
-
 import sys
 import rospy
 import smach
