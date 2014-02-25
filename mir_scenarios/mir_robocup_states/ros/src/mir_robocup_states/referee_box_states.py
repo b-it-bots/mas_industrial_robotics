@@ -63,16 +63,16 @@ class get_task(smach.State):
 
         if not userdata.simulation:
             rospy.logdebug('Waiting for task specification (%s:%s)...' % (ip, port))
-            task_spec = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name, True)
+            task_spec = mir_robocup_states_common.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
         else:
             task_spec = self.HARDCODED_SPECS[userdata.test]
         rospy.loginfo("Task specification: %s" % task_spec)
         userdata.task_spec_copy = task_spec
         try:
-            userdata.task = tasks.parse_task(userdata.test, task_spec)
+            userdata.task = mir_robocup_states_common.parse_task(userdata.test, task_spec)
             rospy.loginfo('Parsed task:\n%s' % userdata.task)
             return 'task_received'
-        except tasks.TaskSpecFormatError:
+        except mir_robocup_states_common.task.TaskSpecFormatError:
             return 'wrong_task_format'
 
 class re_get_task(smach.State):
@@ -90,10 +90,10 @@ class re_get_task(smach.State):
         #    return 'test_not_set'
         task_spec = userdata.task_spec_copy        
         try:
-            userdata.task = tasks.parse_task(userdata.test, task_spec)
+            userdata.task = mir_robocup_states_common.parse_task(userdata.test, task_spec)
             rospy.loginfo('Parsed task:\n%s' % userdata.task)
             return 'task_received'
-        except tasks.TaskSpecFormatError:
+        except mir_robocup_states_common.task.TaskSpecFormatError:
             return 'wrong_task_format'
 
 
@@ -109,7 +109,7 @@ class get_basic_transportation_task(smach.State):
 		#transportation_task = 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>'
         #transportation_task = 'BTT<initialsituation(<S3,(F20_20_B,M20_100)>);goalsituation(<S2,zigzag(M20_100,F20_20_B)>)>'
         
-        transportation_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
+        transportation_task = mir_robocup_states_common.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
 
         rospy.loginfo("Task received: " + transportation_task)
         
@@ -216,7 +216,7 @@ class get_basic_competitive_task(smach.State):
     def execute(self, userdata):
 
         rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        competitive_task = referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BTT<(D1,N,6),(S2,E,3)>'
+        competitive_task = mir_robocup_states_common.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BTT<(D1,N,6),(S2,E,3)>'
         rospy.loginfo("Task received: " + competitive_task)
         
         # check if Task is a CTT task      
@@ -316,3 +316,4 @@ class get_basic_competitive_task(smach.State):
 
         
         return 'task_received'   
+
