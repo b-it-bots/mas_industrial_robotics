@@ -53,7 +53,7 @@ class get_task(smach.State):
         smach.State.__init__(self,
             outcomes=['task_received', 'wrong_task_format'], 
             input_keys=['test', 'simulation'],
-            io_keys=['task'])
+            io_keys=['task', 'task_spec_copy'])
         #outcomes=['task_received', 'wrong_task_format', 'test_not_set'],
 
     def execute(self, userdata):
