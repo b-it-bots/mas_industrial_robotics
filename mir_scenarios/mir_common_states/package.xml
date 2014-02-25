@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>mir_generic_states</name>
+  <name>mir_common_states</name>
   <version>0.0.1</version>
   <description>Generic states and state machines common to all RoboCup@Work tasks</description>
   <author email="alexander@dal.ca">Alex Moriarty</author>

@@ -1,5 +1,5 @@
 import roslib
-roslib.load_manifest('raw_generic_states')
+roslib.load_manifest('mir_common_states')
 import rospy
 import smach
 import smach_ros

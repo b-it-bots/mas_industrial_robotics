@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import roslib
-roslib.load_manifest('raw_generic_states')
+roslib.load_manifest('mir_common_states')
 import rospy
 import smach
 import smach_ros
@@ -10,6 +10,11 @@ import std_srvs.srv
 import raw_base_placement.msg
 import tf
 
+from geometry_msgs.msg import PoseStamped
+from raw_srvs.srv import SetPoseStamped
+from raw_srvs.srv import RelativeMovements
+from raw_base_placement.msg import OrientToBaseAction, OrientToBaseActionGoal
+from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
 sss = simple_script_server()
 
@@ -77,63 +82,80 @@ class place_base_in_front_of_object(smach.State):
         
         return 'succeeded'
 
-class approach_pose(smach.State):
 
-    def __init__(self, pose = ""):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
+class move_base(smach.State):
 
-        self.pose = pose;    
+    """
+    Move the robot to the pose stored in the 'move_base_to' field of userdata
+    or the pose passed to the constructor.
+
+    Input
+    -----
+    move_base_to: str
+        Name of the pose that the robot should approach. The name should exist
+        on the parameter server. If a pose was supplied to the state
+        constructor then it will override this input.
+
+    Output
+    ------
+    base_pose: str
+        Base position after the movement. If succeeded, then it will be set to
+        the commanded pose. If failed, will be set to None to indicate that the
+        pose is not known.
+    """
+
+    def __init__(self, pose=None, timeout=120):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed'],
+                             input_keys=['move_base_to'],
+                             output_keys=['base_pose'])
+        self.move_base_to = pose
+        self.timeout = rospy.Duration(timeout)
 
     def execute(self, userdata):
-        
-        if(self.pose == ""):
-            self.pose2 = userdata.base_pose_to_approach
-        else:
-	    	self.pose2 = self.pose 
-        
-        handle_base = sss.move("base", self.pose2)
-
-        while True:                
+        pose = self.move_base_to or userdata.move_base_to
+        handle_base = sss.move('base', pose, blocking=False)
+        started = rospy.Time.now()
+        while True:
             rospy.sleep(0.1)
             base_state = handle_base.get_state()
-            if (base_state == actionlib.simple_action_client.GoalStatus.SUCCEEDED):
-                return "succeeded"
-            elif (base_state == actionlib.simple_action_client.GoalStatus.ACTIVE):
+            if rospy.Time.now() - started > self.timeout:
+                return 'failed'
+            if base_state == GoalStatus.SUCCEEDED:
+                userdata.base_pose = pose
+                return 'succeeded'
+            elif base_state == GoalStatus.ACTIVE:
                 continue
             else:
-                print 'last state: ',base_state
-                return "failed"
-            
+                print 'Last state: ', base_state
+                userdata.base_pose = None
+                return 'failed'
 
-class adjust_pose_wrt_workspace(smach.State):
 
-    def __init__(self,distance):
+class adjust_to_workspace(smach.State):
+
+    ADJUST_SERVER = '/raw_base_placement/adjust_to_workspace'
+
+    def __init__(self, distance=0.20):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
-
-        self.ac_base_adj_name = '/raw_base_placement/adjust_to_workspace'
-        self.ac_base_adj = actionlib.SimpleActionClient(self.ac_base_adj_name, raw_base_placement.msg.OrientToBaseAction)
+        self.ac_base_adj = actionlib.SimpleActionClient(self.ADJUST_SERVER, OrientToBaseAction)
         self.distance = distance
+
     def execute(self, userdata):
-        
-            
-        rospy.loginfo("Waiting for action server <<%s>> to start ...", self.ac_base_adj_name);
+        rospy.logdebug("Waiting for action server <<%s>>...", self.ADJUST_SERVER)
         self.ac_base_adj.wait_for_server()
-        rospy.loginfo("action server <<%s>> is ready ...", self.ac_base_adj_name);
-        action_goal = raw_base_placement.msg.OrientToBaseActionGoal()
-            
-        action_goal.goal.distance = self.distance;
-        rospy.loginfo("send action");
-        self.ac_base_adj.send_goal(action_goal.goal);
-        
-        rospy.loginfo("wait for base to adjust");
-        finished_before_timeout = self.ac_base_adj.wait_for_result()
-    
-        if finished_before_timeout:
+        rospy.logdebug("Action server <<%s>> is ready...", self.ADJUST_SERVER)
+        action_goal = OrientToBaseActionGoal()
+        action_goal.goal.distance = self.distance
+        rospy.logdebug("Sending action goal...")
+        self.ac_base_adj.send_goal(action_goal.goal)
+        rospy.loginfo("Waiting for base to adjust...")
+        if self.ac_base_adj.wait_for_result():
             rospy.loginfo("Action finished: %s", self.ac_base_adj.get_state())
-            return 'succeeded'    
+            return 'succeeded'
         else:
             rospy.logerr("Action did not finish before the time out!")
-            return 'failed'         
+            return 'failed'
 
 
 class adjust_pose_wrt_recognized_obj(smach.State):
@@ -224,56 +246,49 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         print "succeeded"       
         return 'succeeded'
 
-class move_base_rel(smach.State):
 
-    def __init__(self, x_distance, y_distance):
-        smach.State.__init__(self, outcomes=['succeeded'])
-        
-        self.x_distance = x_distance
-        self.y_distance = y_distance
-        self.move_base_relative_srv = rospy.ServiceProxy('/raw_relative_movements/move_base_relative', raw_srvs.srv.SetPoseStamped) 
+class move_base_relative(smach.State):
+
+    """
+    Shift the robot by the offset stored in 'move_base_by' field of userdata
+    or the offset passed to the constructor.
+
+    Input
+    -----
+    move_base_by: 3-tuple
+        x, y, and theta displacement the shift the robot by. If an offset was
+        supplied to the state constructor then it will override this input.
+    """
+
+    SRV = '/raw_relative_movements/move_base_relative'
+
+    def __init__(self, offset=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed'],
+                             input_keys=['move_base_by'])
+        self.offset = offset
+        self.move_base_relative = rospy.ServiceProxy(self.SRV,RelativeMovements)
 
     def execute(self, userdata):
-        
-        print "wait for service: /raw_relative_movements/move_base_relative"   
-        rospy.wait_for_service('/raw_relative_movements/move_base_relative', 30)
-
-        goalpose = geometry_msgs.msg.PoseStamped()
-        goalpose.pose.position.x = self.x_distance
-        goalpose.pose.position.y = self.y_distance
-        goalpose.pose.position.z = 0.1 #speed
-        quat = tf.transformations.quaternion_from_euler(0,0,0)
-        goalpose.pose.orientation.x = quat[0]
-        goalpose.pose.orientation.y = quat[1]
-        goalpose.pose.orientation.z = quat[2]
-        goalpose.pose.orientation.w = quat[3]
-        
-        # call base placement service
+        rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
+        self.move_base_relative.wait_for_service()
+        offset = self.offset or userdata.move_base_by
+        pose = PoseStamped()
+        pose.pose.position.x = offset[0]
+        pose.pose.position.y = offset[1]
+        pose.pose.position.z = 0.1  # speed
+        quat = tf.transformations.quaternion_from_euler(0, 0, offset[2])
+        pose.pose.orientation.x = quat[0]
+        pose.pose.orientation.y = quat[1]
+        pose.pose.orientation.z = quat[2]
+        pose.pose.orientation.w = quat[3]
         try:
-            self.move_base_relative_srv(goalpose)
+            response = self.move_base_relative(pose)
+            if response.status == 'failure_obtacle_front':
+                # return values required by the scenario. This situation arises when the base is close to the platform
+                return 'succeeded'
         except:
-            print "could not execute <</raw_relative_movements/move_base_relative>> service"  
-        
+            rospy.logerr('Could no execute <<%s>>' % (self.SRV))
+            return 'failed'
         return 'succeeded'
-            
 
-class switch_to_navigation_ctrl_in_orocos(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded', 'srv_call_failed'])
-        
-        self.nav_ctrl_mode_srv_name = "/raw_arm_bridge_ros_orocos/enable_navigation_ctrl_mode";
-        self.nav_ctrl_mode_srv = rospy.ServiceProxy(self.nav_ctrl_mode_srv_name, std_srvs.srv.Empty)
-
-    def execute(self, userdata):
-        try:
-            rospy.wait_for_service(self.nav_ctrl_mode_srv_name, 15)
-            self.nav_ctrl_mode_srv()            
-        except Exception, e:
-            rospy.logerr("could not execute service <<%s>>: %s", self.nav_ctrl_mode_srv_name, e)
-            return 'srv_call_failed'
-
-        return "succeeded"
-      
