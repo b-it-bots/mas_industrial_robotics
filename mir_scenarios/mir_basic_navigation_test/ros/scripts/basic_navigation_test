@@ -5,9 +5,9 @@ import rospy
 import smach
 import smach_ros
 
-from referee_box_states import *
-from generic_navigation_states import *
-from basic_navigation_test_states import *
+from mir_robocup_states.referee_box_states import *
+from mir_common_states.generic_navigation_states import *
+from mir_basic_navigation_test.basic_navigation_test_states import *
 
 
 def main(simulation=False):
