@@ -1,19 +1,12 @@
 #!/usr/bin/python
-import roslib
-roslib.load_manifest('mir_common_states')
 import rospy
 import smach
 import smach_ros
 import actionlib 
-import raw_srvs.srv
 import std_srvs.srv
-import raw_base_placement.msg
 import tf
 
 from geometry_msgs.msg import PoseStamped
-from raw_srvs.srv import SetPoseStamped
-from raw_srvs.srv import RelativeMovements
-from raw_base_placement.msg import OrientToBaseAction, OrientToBaseActionGoal
 from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
 sss = simple_script_server()
