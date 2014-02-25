@@ -7,12 +7,12 @@ catkin_python_setup()
 
 catkin_package(
   CATKIN_DEPENDS
-    cob_script_server
-    mcr_default_env_config
+    mir_2dnav
     mir_bringup
     mir_bringup_sim
-    mir_2dnav
     mir_common_states
+    mir_robocup_states
+    rospy 
     smach
     smach_ros
 )
