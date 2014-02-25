@@ -1,6 +1,3 @@
-import roslib
-roslib.load_manifest('mir_common_states')
-
 import rospy
 import smach
 import referee_box_communication
