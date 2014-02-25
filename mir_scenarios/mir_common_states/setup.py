@@ -4,8 +4,9 @@ from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 d = generate_distutils_setup(
-    packages=['mir_common_states'],
-    package_dir={'mir_common_states': 'ros/src'},
+    packages=['mir_common_states_common', 'mir_common_states'],
+    package_dir={'mir_common_states_common' : 'common/src', 
+                 'mir_common_states' : 'ros/src'}
 )
 
 setup(**d)
