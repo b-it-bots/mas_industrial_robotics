@@ -1,9 +1,11 @@
+import re
 import rospy
 import smach
-import referee_box_communication
-import re
+import sys
+import zmq
 
-import tasks
+import mir_robocup_states_common.task
+import mir_robocup_states_common.referee_box_communication
 
 #from tasks import parse_task, TaskSpecFormatError
 
