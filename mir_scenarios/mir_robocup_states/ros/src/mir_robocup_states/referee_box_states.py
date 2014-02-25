@@ -13,7 +13,7 @@ try:
     ip = rospy.get_param('refbox_ip')
 except KeyError:
     rospy.logerr("Using Hardcoded refbox_ip")
-    ip = "192.168.51.167"
+    ip = "192.168.13.109"
 port = "11111"
 team_name = "b-it-bots"
 
