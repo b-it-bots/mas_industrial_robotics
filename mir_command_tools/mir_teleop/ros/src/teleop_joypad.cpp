@@ -17,6 +17,8 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
     button_gripper_active_ = false;
     button_arm_motors_active_ = false;
     button_base_motors_active_ = false;
+    button_arm_cart_pressed_prev_ = false;
+    arm_cart_zero_vel_.header.frame_id = "/base_link";
 
     if (!this->getJoypadConfigParameter())
     {
@@ -447,16 +449,18 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
                 arm_vel_.velocities[4].value = command->axes[axes_index_arm_joint_axes_1_] * arm_max_vel_ * speed_factor_ * (-1.0);
         }
 
-        if ((bool) command->buttons[button_index_arm_cart_])
+        if (button_arm_cart_pressed_prev_ && !((bool)command->buttons[button_index_arm_cart_]))
+            pub_arm_cart_vel_.publish(arm_cart_zero_vel_);  
+        else if ((bool) command->buttons[button_index_arm_cart_])
             pub_arm_cart_vel_.publish(arm_cart_vel_);
+        else if (!(bool) command->buttons[button_index_arm_cart_])
+            pub_base_cart_vel_.publish(base_cart_vel_);
 
         if (is_joint_space_ctrl_active_ && is_one_arm_joint_button_pressed)
         {
             this->checkArmJointLimits();
             pub_arm_joint_vel_.publish(arm_vel_);
         }
-        else if (!(bool) command->buttons[button_index_arm_cart_])
-            pub_base_cart_vel_.publish(base_cart_vel_);
     }
 
     else
@@ -490,4 +494,5 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
     button_arm_motors_on_off_pressed_prev_ = ((bool) command->buttons[button_index_arm_motors_on_off_]);
     button_base_motors_on_off_pressed_prev_ = ((bool) command->buttons[button_index_base_motors_on_off_]);
     button_print_arm_states_prev_ = (bool) command->buttons[button_index_print_arm_joint_states_];
+    button_arm_cart_pressed_prev_ = (bool) command->buttons[button_index_arm_cart_];
 }
