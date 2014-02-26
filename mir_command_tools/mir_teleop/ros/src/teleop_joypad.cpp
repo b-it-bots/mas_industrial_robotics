@@ -18,6 +18,11 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
     button_arm_motors_active_ = false;
     button_base_motors_active_ = false;
     button_arm_cart_pressed_prev_ = false;
+    button_arm_joint_1_2_pressed_prev_ = false;
+    button_arm_joint_3_4_pressed_prev_ = false;
+    button_arm_joint_5_pressed_prev_ = false;
+    is_one_arm_joint_button_pressed_ = false;
+
     arm_cart_zero_vel_.header.frame_id = "/base_link";
 
     if (!this->getJoypadConfigParameter())
@@ -351,7 +356,7 @@ void TeleOpJoypad::checkArmJointLimits()
 
 void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
 {
-    bool is_one_arm_joint_button_pressed = (bool) command->buttons[button_index_arm_joint_1_2_] || (bool) command->buttons[button_index_arm_joint_3_4_]
+    is_one_arm_joint_button_pressed_ = (bool) command->buttons[button_index_arm_joint_1_2_] || (bool) command->buttons[button_index_arm_joint_3_4_]
             || (bool) command->buttons[button_index_arm_joint_5_];
 
     if ((bool) command->buttons[button_index_deadman_])
@@ -408,7 +413,6 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
         // arm cartesian control mode OR base cartesian control mode
         if ((bool) command->buttons[button_index_arm_cart_])
         {
-
             arm_cart_vel_.header.frame_id = "/base_link";
             arm_cart_vel_.twist.linear.x = command->axes[axes_index_arm_linear_x_] * arm_cart_factor_ * speed_factor_;
             arm_cart_vel_.twist.linear.y = command->axes[axes_index_arm_linear_y_] * arm_cart_factor_ * speed_factor_;
@@ -435,7 +439,25 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
         // arm joint space control mode
         if (is_joint_space_ctrl_active_)
         {
-            if ((bool) command->buttons[button_index_arm_joint_1_2_])
+            if (button_arm_joint_1_2_pressed_prev_ && !((bool) command->buttons[button_index_arm_joint_1_2_]))
+            {
+                this->setSingleArmJointVel(0.0, arm_joint_names_[0]);
+                this->setSingleArmJointVel(0.0, arm_joint_names_[1]);
+                pub_arm_joint_vel_.publish(arm_vel_);
+            }
+            if (button_arm_joint_3_4_pressed_prev_ && !((bool) command->buttons[button_index_arm_joint_3_4_]))
+            {
+                this->setSingleArmJointVel(0.0, arm_joint_names_[2]);
+                this->setSingleArmJointVel(0.0, arm_joint_names_[3]);
+                pub_arm_joint_vel_.publish(arm_vel_);
+            }
+            if (button_arm_joint_5_pressed_prev_ && !((bool) command->buttons[button_index_arm_joint_5_]))
+            {
+                this->setSingleArmJointVel(0.0, arm_joint_names_[4]);
+                pub_arm_joint_vel_.publish(arm_vel_);
+            }
+
+            if((bool) command->buttons[button_index_arm_joint_1_2_])
             {
                 arm_vel_.velocities[0].value = command->axes[axes_index_arm_joint_axes_1_] * arm_max_vel_ * speed_factor_ * (-1.0);
                 arm_vel_.velocities[1].value = command->axes[axes_index_arm_joint_axes_2_] * arm_max_vel_ * speed_factor_;
@@ -456,7 +478,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
         else if (!(bool) command->buttons[button_index_arm_cart_])
             pub_base_cart_vel_.publish(base_cart_vel_);
 
-        if (is_joint_space_ctrl_active_ && is_one_arm_joint_button_pressed)
+        if (is_joint_space_ctrl_active_ && is_one_arm_joint_button_pressed_)
         {
             this->checkArmJointLimits();
             pub_arm_joint_vel_.publish(arm_vel_);
@@ -495,4 +517,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
     button_base_motors_on_off_pressed_prev_ = ((bool) command->buttons[button_index_base_motors_on_off_]);
     button_print_arm_states_prev_ = (bool) command->buttons[button_index_print_arm_joint_states_];
     button_arm_cart_pressed_prev_ = (bool) command->buttons[button_index_arm_cart_];
+    button_arm_joint_1_2_pressed_prev_ = (bool) command->buttons[button_index_arm_joint_1_2_];
+    button_arm_joint_3_4_pressed_prev_ = (bool) command->buttons[button_index_arm_joint_3_4_];
+    button_arm_joint_5_pressed_prev_ = (bool) command->buttons[button_index_arm_joint_5_];
 }

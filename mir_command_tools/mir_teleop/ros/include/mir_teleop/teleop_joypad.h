@@ -78,6 +78,13 @@ class TeleOpJoypad
     bool button_reconnect_right_pressed_prev_;
 
     bool button_arm_cart_pressed_prev_;
+
+    bool button_arm_joint_1_2_pressed_prev_;
+    bool button_arm_joint_3_4_pressed_prev_;
+    bool button_arm_joint_5_pressed_prev_;
+
+    bool is_one_arm_joint_button_pressed_;
+
     geometry_msgs::Twist base_cart_vel_;
     geometry_msgs::Twist base_cart_zero_vel_;
     geometry_msgs::Twist base_cart_factor_;
