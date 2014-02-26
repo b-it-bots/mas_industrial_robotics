@@ -470,6 +470,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
             }
 
             pub_base_cart_vel_.publish(base_cart_zero_vel_);
+            pub_arm_cart_vel_.publish(arm_cart_zero_vel_);
         }
     }
 

@@ -81,6 +81,8 @@ class TeleOpJoypad
     geometry_msgs::Twist base_cart_zero_vel_;
     geometry_msgs::Twist base_cart_factor_;
 
+    geometry_msgs::TwistStamped arm_cart_zero_vel_;
+
     // Subscriber
     ros::Subscriber sub_joypad_;
     ros::Subscriber sub_joint_states_;
