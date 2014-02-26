@@ -463,7 +463,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
     {
         if (button_deadman_pressed_prev_)
         {
-            if (is_joint_space_ctrl_active_ && is_one_arm_joint_button_pressed)
+            if (is_joint_space_ctrl_active_)
             {
                 this->setAllArmJointVel(0.0);
                 pub_arm_joint_vel_.publish(arm_vel_);
