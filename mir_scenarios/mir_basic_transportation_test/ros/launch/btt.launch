@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <group>
-
-    <arg name="sim" default="false">
-
+ 
+    <arg name="sim" default="false"/>
 
     <!-- real robot related launches  -->
     <group unless="$(arg sim)">
@@ -34,5 +32,8 @@
       
     <!-- Visual Servoing -->
     <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing.launch"/>
+ 
 
 </launch>
+
+
