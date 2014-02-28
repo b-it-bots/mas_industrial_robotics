@@ -11,7 +11,6 @@ catkin_package(
     mir_bringup
     mir_bringup_sim
     mir_common_states
-    mir_robocup_states
     rospy 
     smach
     smach_ros
