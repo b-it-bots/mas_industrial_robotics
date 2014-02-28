@@ -2,10 +2,10 @@ import tf
 import rospy
 import smach
 
-import generic_basic_states as gbs
-import generic_manipulation_states as gms
-import generic_navigation_states as gns
-import generic_perception_states as gps
+import mir_states.common.basic_states as gbs
+import mir_states.common.manipulation_states as gms
+import mir_states.common.navigation_states as gns
+import mir_states.common.perception_states as gps
 
 
 __all__ = ['load_object']

@@ -5,9 +5,9 @@ import rospy
 import smach
 import smach_ros
 
-from generic_perception_states_old import *
-from generic_manipulation_states_old import *
-from generic_navigation_states_old import *
+from mir_states.common.oldstates.perception_states_old import *
+from mir_states.common.oldstates.manipulation_states_old import *
+from mir_states.common.oldstates.navigation_states_old import *
 
 class sm_grasp_random_object(smach.StateMachine):
     def __init__(self):    

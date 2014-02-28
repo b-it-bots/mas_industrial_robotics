@@ -6,16 +6,15 @@ import smach
 import smach_ros
 
 # generic states
-import referee_box_states as rbs
-#import generic_basic_states as gbs
-import generic_navigation_states as gns
-import generic_manipulation_states as gms
-import generic_perception_states as gps
+import mir_states_common.robocup.referee_box_states as rbs
+from mir_states_common.common.rear_platform import RearPlatform
+
+import mir_states.common.navigation_states as gns
+import mir_states.common.manipulation_states as gms
+import mir_states.common.perception_states as gps
+import mir_states.state_machines as sm
+
 import basic_manipulation_test_states as bmts
-
-import state_machines as sm
-
-from rear_platform import RearPlatform
 
 def main(simulation=False):
 

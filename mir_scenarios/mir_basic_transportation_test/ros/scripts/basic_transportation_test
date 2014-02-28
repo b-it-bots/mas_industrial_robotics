@@ -7,15 +7,16 @@ import smach_ros
 
 # import of generic states
 # generic states
-import generic_basic_states_old as gbs_o
-import generic_robocup_states_old as grs_o
-import generic_navigation_states_old as gns_o
-import generic_manipulation_states_old as gms_o
-import generic_perception_states_old as gps_o
+import mir_states.common.oldstates.basic_states_old as gbs_o
+import mir_states.common.oldstates.robocup_states_old as grs_o
+import mir_states.common.oldstates.navigation_states_old as gns_o
+import mir_states.common.oldstates.manipulation_states_old as gms_o
+import mir_states.common.oldstates.perception_states_old as gps_o
+
 import basic_transportation_test_states as btts
 
 #### IMPORT SOME NEW STATES!! ###
-import generic_basic_states as gbs 
+import mir_states.common.basic_states as gbs 
 
 # main
 def main():
