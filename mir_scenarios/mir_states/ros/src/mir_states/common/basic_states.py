@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import hbrs_srvs.srv
+##import hbrs_srvs.srv
 import rospy
 import smach
 import smach_ros

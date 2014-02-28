@@ -6,13 +6,17 @@ import smach
 import smach_ros
 
 # generic states
-import mir_states_common.robocup.referee_box_states as rbs
+import mir_states.robocup.referee_box_states as rbs
 from mir_states_common.common.rear_platform import RearPlatform
 
 import mir_states.common.navigation_states as gns
 import mir_states.common.manipulation_states as gms
 import mir_states.common.perception_states as gps
-import mir_states.state_machines as sm
+import mir_states.state_machines.move_base_with_adjustment_and_arm as sm_mbwaaa
+import mir_states.state_machines.load_object as sm_lo
+import mir_states.state_machines.unload_object as sm_unlo
+
+
 import mir_states.robocup.basic_manipulation_test_states as bmts
 
 def main(simulation=False):
@@ -23,7 +27,7 @@ def main(simulation=False):
 
     SM.userdata.test = 'BMT'
     #SM.userdata.task = 'BMT'
-    SM.userdata.simulation = simulation
+    SM.userdata.simulation = True
     SM.userdata.task_spec_copy = ''
     SM.userdata.base_pose = None
     SM.userdata.found_objects = None
@@ -61,7 +65,7 @@ def main(simulation=False):
 
         returns
         '''
-        smach.StateMachine.add('MOVE_TO_SOURCE', sm.move_base_with_adjustment_and_arm(move_arm_to='out_of_view'),
+        smach.StateMachine.add('MOVE_TO_SOURCE', sm_mbwaaa.move_base_with_adjustment_and_arm(move_arm_to='out_of_view'),
             transitions={'succeeded': 'FIND_OBJECTS',
                          'failed': 'MOVE_TO_SOURCE'})
 
@@ -76,7 +80,7 @@ def main(simulation=False):
                          'find_objects': 'FIND_OBJECTS',
                          'failed': 'STOW_ARM_FAILED'})
 
-        smach.StateMachine.add('LOAD_OBJECT', sm.load_object(),
+        smach.StateMachine.add('LOAD_OBJECT', sm_lo.load_object(),
             transitions={'succeeded': 'LOAD_OBJECTS',
                          'vs_error': 'STOW_AND_REGET',
                          'failed': 'STOW_ARM_FAILED'})
@@ -84,7 +88,7 @@ def main(simulation=False):
         smach.StateMachine.add('SETUP_MOVE_TO_DESTINATION', bmts.setup_move_base_to('dest'),
             transitions={'succeeded': 'MOVE_TO_DESTINATION'})
 
-        smach.StateMachine.add('MOVE_TO_DESTINATION', sm.move_base_with_adjustment_and_arm(move_arm_to='platform_intermediate'),
+        smach.StateMachine.add('MOVE_TO_DESTINATION', sm_mbwaaa.move_base_with_adjustment_and_arm(move_arm_to='platform_intermediate'),
             transitions={'succeeded': 'UNLOAD_OBJECTS',
                          'failed': 'MOVE_TO_DESTINATION'})
 
@@ -97,7 +101,7 @@ def main(simulation=False):
             transitions={'succeeded': 'RE_GET_TASK',
                          'failed': 'MOVE_TO_EXIT_FAILED'})
 
-        smach.StateMachine.add('UNLOAD_OBJECT', sm.unload_object(),
+        smach.StateMachine.add('UNLOAD_OBJECT', sm_unlo.unload_object(),
             transitions={'succeeded': 'UNLOAD_OBJECTS',
                          'failed': 'STOW_ARM_FAILED'})
 

@@ -11,13 +11,15 @@ from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
 sss = simple_script_server()
 
+from mir_navigation_msgs.msg import OrientToBaseAction
+from mcr_navigation_msgs.srv import MoveRelative
 
 class place_base_in_front_of_object(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'srv_call_failed'], input_keys=['object_pose'])
 
-        self.move_base_relative_srv_name = '/raw_relative_movements/move_base_relative'
+        self.move_base_relative_srv_name = '/mir_relative_movements/move_base_relative'
         self.move_base_relative_srv = rospy.ServiceProxy(self.move_base_relative_srv_name, raw_srvs.srv.SetPoseStamped) 
 
         self.tf_listener = tf.TransformListener()
@@ -127,7 +129,7 @@ class move_base(smach.State):
 
 class adjust_to_workspace(smach.State):
 
-    ADJUST_SERVER = '/raw_base_placement/adjust_to_workspace'
+    ADJUST_SERVER = '/mir_navigation/base_placement/adjust_to_workspace'
 
     def __init__(self, distance=0.20):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
@@ -158,7 +160,7 @@ class adjust_pose_wrt_recognized_obj(smach.State):
         
         #self.base_placement_srv = rospy.ServiceProxy('/raw_base_placement/calculateOptimalBasePose', raw_srvs.srv.GetPoseStamped) 
         
-        self.move_base_relative_srv_name = '/raw_relative_movements/move_base_relative'
+        self.move_base_relative_srv_name = '/mir_navigation/mir_relative_movements/move_base_relative'
         self.move_base_relative_srv = rospy.ServiceProxy(self.move_base_relative_srv_name, raw_srvs.srv.SetPoseStamped) 
     def execute(self, userdata):
         
@@ -253,14 +255,14 @@ class move_base_relative(smach.State):
         supplied to the state constructor then it will override this input.
     """
 
-    SRV = '/raw_relative_movements/move_base_relative'
+    SRV = '/mcrnavigation/mcr_relative_movements/move_base_relative'
 
     def __init__(self, offset=None):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_base_by'])
         self.offset = offset
-        self.move_base_relative = rospy.ServiceProxy(self.SRV,RelativeMovements)
+        self.move_base_relative = rospy.ServiceProxy(self.SRV,MoveRelative)
 
     def execute(self, userdata):
         rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
