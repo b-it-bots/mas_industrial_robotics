@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <include file="$(find mir_basic_transportation_test)/btt.launch">
+  <include file="$(find mir_basic_transportation_test)/ros/launch/btt.launch">
     <arg name="sim" value="true"/>
   </include>
 
