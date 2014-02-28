@@ -13,8 +13,7 @@ import mir_states.common.navigation_states as gns
 import mir_states.common.manipulation_states as gms
 import mir_states.common.perception_states as gps
 import mir_states.state_machines as sm
-
-import basic_manipulation_test_states as bmts
+import mir_states.robocup.basic_manipulation_test_states as bmts
 
 def main(simulation=False):
 

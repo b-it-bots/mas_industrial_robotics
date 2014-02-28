@@ -13,7 +13,7 @@ import mir_states.common.oldstates.navigation_states_old as gns_o
 import mir_states.common.oldstates.manipulation_states_old as gms_o
 import mir_states.common.oldstates.perception_states_old as gps_o
 
-import basic_transportation_test_states as btts
+import mir_states.robocup.basic_transportation_test_states as btts
 
 #### IMPORT SOME NEW STATES!! ###
 import mir_states.common.basic_states as gbs 
