@@ -5,7 +5,7 @@ import rospy
 import smach
 import smach_ros
 
-from mir_states_common.robocup.referee_box_states import *
+from mir_states.robocup.referee_box_states import *
 from mir_states.common.navigation_states import *
 
 from mir_states.robocup.basic_navigation_test_states import *
