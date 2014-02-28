@@ -14,7 +14,7 @@ catkin_package(
     mir_base_placement
     mir_bringup
     mir_bringup_sim
-    mir_common_states
+    mir_states
     mir_relative_movements
     mir_object_detection
     mir_visual_servoing

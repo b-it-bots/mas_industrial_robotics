@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mir_common_states)
+project(mir_states)
 
 find_package(catkin REQUIRED)
 

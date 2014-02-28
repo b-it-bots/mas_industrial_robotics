@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import roslib
-roslib.load_manifest('mir_common_states')
+roslib.load_manifest('mir_states')
 
 import hbrs_srvs.srv
 import rospy
@@ -26,31 +26,14 @@ class init_robot(smach.State):
         gripper_open = sss.move("gripper", "open", blocking=False)
                 
         arm_to_init.wait();
+        # Gripper does not support wait()
+        # This call isn't working
         gripper_open.wait();
         
         rospy.loginfo("robot initialized")
         
         return 'succeeded'
-
-class loop_for(smach.State):
-    '''
-    This state will return 'loop' MAX-1 times.
-    On the MAX execute, 'continue' is returned.
-    '''
-    def __init__(self, MAX, sleep_time=0.0):
-        smach.State.__init__(self, outcomes=['loop', 'continue' ])
-        self.max_loop_count = MAX
-        self.loop_count = 0
-        self.sleep_time = sleep_time
-
-    def execute(self, foo):
-        if self.loop_count < self.max_loop_count:
-            rospy.sleep(self.sleep_time)
-            rospy.loginfo('run number: %d' % self.loop_count)
-            self.loop_count = self.loop_count + 1
-            return 'loop'
-        else:
-            return 'continue'    
+    
     
 class wait_for_open_door(smach.State):
     def __init__(self):

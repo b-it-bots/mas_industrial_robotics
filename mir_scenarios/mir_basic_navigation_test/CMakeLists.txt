@@ -10,7 +10,7 @@ catkin_package(
     mir_2dnav
     mir_bringup
     mir_bringup_sim
-    mir_common_states
+    mir_states
     rospy 
     smach
     smach_ros

@@ -20,7 +20,7 @@
   <run_depend>mir_base_placement</run_depend>
   <run_depend>mir_bringup</run_depend>
   <run_depend>mir_bringup_sim</run_depend>
-  <run_depend>mir_common_states</run_depend>
+  <run_depend>mir_states</run_depend>
   <run_depend>mir_object_detection</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>smach</run_depend>

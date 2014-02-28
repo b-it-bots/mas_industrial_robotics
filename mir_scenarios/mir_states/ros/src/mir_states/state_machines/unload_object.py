@@ -1,4 +1,4 @@
-PACKAGE = 'mir_common_states'
+PACKAGE = 'mir_states'
 
 import roslib
 roslib.load_manifest(PACKAGE)

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import roslib; roslib.load_manifest('mir_common_states')
+import roslib; roslib.load_manifest('mir_states')
 import rospy
 
 import smach
