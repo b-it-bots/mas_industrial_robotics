@@ -1,5 +1,3 @@
-import roslib
-roslib.load_manifest('mir_states')
 import rospy
 import smach
 import smach_ros

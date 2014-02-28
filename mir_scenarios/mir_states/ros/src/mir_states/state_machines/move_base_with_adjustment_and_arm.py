@@ -1,8 +1,3 @@
-PACKAGE = 'mir_states'
-
-import roslib
-roslib.load_manifest(PACKAGE)
-
 import tf
 import rospy
 import smach

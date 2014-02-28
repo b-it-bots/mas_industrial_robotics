@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-PACKAGE = 'raw_basic_manipulation_test'
-
-import roslib
-roslib.load_manifest(PACKAGE)
-
 import tf
 import rospy
 import smach

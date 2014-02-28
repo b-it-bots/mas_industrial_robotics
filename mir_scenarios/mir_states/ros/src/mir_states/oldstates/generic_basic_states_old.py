@@ -1,6 +1,4 @@
 #!/usr/bin/python
-import roslib
-roslib.load_manifest('mir_states')
 
 import hbrs_srvs.srv
 import rospy

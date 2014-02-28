@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import roslib; roslib.load_manifest('raw_basic_transportation_test')
+
 import rospy
 
 import smach
