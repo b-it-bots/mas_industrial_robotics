@@ -14,8 +14,8 @@ try:
 except KeyError:
     rospy.logerr("Using Hardcoded refbox_ip")
     ip = "192.168.13.109"
-port = "11111"
-team_name = "b-it-bots"
+    port = "11111"
+    team_name = "b-it-bots"
 
 
 class Bunch:
