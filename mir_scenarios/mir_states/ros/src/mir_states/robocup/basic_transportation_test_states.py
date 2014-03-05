@@ -6,8 +6,6 @@ import smach
 import smach_ros
 import tf
 from raw_srvs.srv import RelativeMovements
-from simple_script_server import *
-sss = simple_script_server()
 
 planning_mode=""
 
@@ -15,8 +13,9 @@ from geometry_msgs.msg import PoseStamped
 from raw_srvs.srv import SetPoseStamped
 from raw_base_placement.msg import OrientToBaseAction, OrientToBaseActionGoal
 from actionlib.simple_action_client import GoalStatus
-from simple_script_server import *
-sss = simple_script_server()
+
+import moveit_commander
+
 
 def print_task_spec(task_list):
     
@@ -128,10 +127,12 @@ class get_obj_poses_for_goal_configuration(smach.State):
             outcomes=['succeeded', 'configuration_poses_not_available'],
             input_keys=['task_spec','obj_goal_configuration_poses'],
             output_keys=['obj_goal_configuration_poses'])
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
         
     def execute(self, userdata):
         
-        sss.move("gripper","open")
+        self.gripper_command.set_named_target("open")
+        
         print userdata.task_spec.object_config 
         
         if (not rospy.has_param("/script_server/arm/" + userdata.task_spec.object_config)):
@@ -213,7 +214,10 @@ class grasp_obj_from_pltf_btt(smach.State):
         smach.State.__init__(self, outcomes=['object_grasped', 'no_more_obj_for_this_workspace'], 
                              input_keys=['rear_platform_occupied_poses', 'rear_platform_free_poses', 'base_pose_to_approach', 'task_list', 'last_grasped_obj'],
                              output_keys=['rear_platform_occupied_poses', 'rear_platform_free_poses', 'last_grasped_obj'])
-
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        #FIXME: is there a moveit Group for gripper?
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        
     def execute(self, userdata):   
         global planning_mode
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
@@ -250,19 +254,26 @@ class grasp_obj_from_pltf_btt(smach.State):
 	print "plat_pose: ", pltf_obj_pose.platform_pose
 	print "plat_name: ", pltf_obj_pose.obj_name
         if planning_mode != "planned":
-            sss.move("arm", "platform_intermediate")
-            sss.move("arm", str(pltf_obj_pose.platform_pose)+"_pre")
-
-        sss.move("arm", str(pltf_obj_pose.platform_pose), mode=planning_mode)
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+            self.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+            self.arm_command.go()
+            
+        self.arm_command.set_named_target(str(pltf_obj_pose.platform_pose))
+        self.arm_command.go()
         
-        sss.move("gripper", "close")
-        rospy.sleep(3)
-       
+        self.gripper_command.set_named_target("close")
+        self.gripper_command.go()
+        
+        #FIXME: Isnot Moveit always a planned motion
         if planning_mode != "planned":
-            sss.move("arm", str(pltf_obj_pose.platform_pose)+"_pre")
-            sss.move("arm", "platform_intermediate")
-
-        sss.move("arm", "candle", mode=planning_mode)
+            self.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+            self.arm_command.go()
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+            
+        self.arm_command.set_named_target("candle")
+        self.arm_command.go()
            
         return 'object_grasped'
 
@@ -273,6 +284,9 @@ class place_object_in_configuration_btt(smach.State):
             outcomes=['succeeded', 'no_more_cfg_poses'],
             input_keys=['base_pose_to_approach', 'objects_goal_configuration', 'last_grasped_obj', 'task_list', 'destinaton_free_poses', 'obj_goal_configuration_poses'],
             output_keys=['destinaton_free_poses', 'task_list'])
+        
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
         
     def execute(self, userdata):
         global planning_mode
@@ -293,12 +307,12 @@ class place_object_in_configuration_btt(smach.State):
         print "goal pose taken: ",cfg_goal_pose
         print "rest poses: ", userdata.destinaton_free_poses[i].free_poses
                 
-        sss.move("arm", cfg_goal_pose, mode=planning_mode)
+        self.arm_command.set_named_target(cfg_goal_pose)
+        self.arm_command.go()
         
-        sss.move("gripper","open")
-        rospy.sleep(2)
-        
-        
+        self.gripper_command.set_named_target("open")
+        self.gripper_command.go()
+                
         #delete placed obj from task list
         for j in range(len(userdata.task_list)):
             if userdata.task_list[j].type == 'destination' and userdata.task_list[j].location == userdata.base_pose_to_approach:
@@ -316,22 +330,26 @@ class place_object_in_configuration_btt(smach.State):
     
         return 'succeeded'
 
-
+#FIXME: replace by generic state
 class place_obj_on_rear_platform_btt(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'no_more_free_poses'], 
                                    input_keys=['object_to_grasp', 'rear_platform_free_poses', 'rear_platform_occupied_poses', 'task_list', 'base_pose_to_approach'], 
                                    output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses', 'task_list'])
-
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        
     def execute(self, userdata):   
         global planning_mode
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         
         if planning_mode != "planned":
-            sss.move("arm", "candle", mode=planning_mode)
-            sss.move("arm", "platform_intermediate", mode=planning_mode)
-
+            self.arm_command.set_named_target("candle")
+            self.arm_command.go()
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+            
         print_task_spec(userdata.task_list)
         
         if(len(userdata.rear_platform_free_poses) == 0):
@@ -342,14 +360,15 @@ class place_obj_on_rear_platform_btt(smach.State):
         pltf_pose = userdata.rear_platform_free_poses.pop();
 
         if planning_mode != "planned":
-            sss.move("arm", pltf_pose.platform_pose+"_pre")
+            self.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
+            self.arm_command.go()
+            
+        self.arm_command.set_named_target(pltf_pose.platform_pose)
+        self.arm_command.go()
+            
+        self.gripper_command.set_named_target("open")
+        self.gripper_command.go()
         
-        sss.move("arm", pltf_pose.platform_pose, mode=planning_mode)
-        
-        
-        sss.move("gripper", "open")
-        rospy.sleep(2)
-
         print "object_to_grasp: ", userdata.object_to_grasp.name
         #delete from task list
         for i in range(len(userdata.task_list)):
@@ -368,9 +387,11 @@ class place_obj_on_rear_platform_btt(smach.State):
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         
         if planning_mode != "planned":
-            sss.move("arm", pltf_pose.platform_pose+"_pre")
-        
-        sss.move("arm", "platform_intermediate", mode=planning_mode)
+            self.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
+            self.arm_command.go()
+            
+        self.arm_command.set_named_target("platform_intermediate")
+        self.arm_command.go()
 
         return 'succeeded'
 
@@ -432,6 +453,7 @@ class skip_pose(smach.State):
         print_task_spec(userdata.task_list)
                 
         return 'pose_skipped'
+
 class compute_pregrasp_pose(smach.State):
 
     """
@@ -554,7 +576,9 @@ class loop_for(smach.State):
                              output_keys=['vscount'])
         self.max_loop_count = 2
         self.loop_count = 0
-
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        
     def execute(self, userdata):
         self.loop_count = userdata.vscount
         if self.loop_count <= self.max_loop_count:
@@ -563,6 +587,8 @@ class loop_for(smach.State):
             return 'loop'
         else:
             userdata.vscount = 0
-            sss.move("arm", "platform_intermediate")
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+
             return 'continue'  
 

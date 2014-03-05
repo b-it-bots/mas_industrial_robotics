@@ -7,24 +7,26 @@ import smach_ros
 import commands
 import os
 
-from simple_script_server import *
-sss = simple_script_server()
+import moveit_commander
 
 class init_robot(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded'])
         
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        #FIXME: is there a moveit Group for gripper?
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        
     def execute(self, userdata):
         
         # init arm
-        arm_to_init = sss.move("arm", "home", blocking=False)
+        self.arm_command.set_named_target("home")
+        self.arm_command.go(wait=False)
         
         #init gripper
-        gripper_open = sss.move("gripper", "open", blocking=False)
-                
-        arm_to_init.wait();
-        gripper_open.wait();
+        self.gripper_command.set_named_target("open")
+        self.gripper_command.go(wait=False)
         
         rospy.loginfo("robot initialized")
         

@@ -5,34 +5,14 @@ import smach
 import smach_ros
 import math
 import tf
-## NOTE: WHAT REPLACES arm_navigation_msgs?
-##import arm_navigation_msgs.msg
 
 import moveit_commander
 
-
-##from simple_script_server import *
-##sss = simple_script_server()
-
-## NOTE: ANY REPLACEMENT for move_arm_cart_script_server?
-##from move_arm_cart_script_server import MoveArmCartScriptServer
-##arm_cart = MoveArmCartScriptServer() 
-
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
-##import hbrs_srvs.srv
-
 
 planning_mode = ""            # no arm planning
-#planning_mode = "planned"    # using arm planning
 
-##from mir_states.common import arm
-
-##from mir_common_states_common.common.rear_platform import *
-##arm = Arm(planning_mode='')
-
-# Gripper Wait Time
-GRIPPER_WAIT_TIME = 1.8
 
 class Bunch:
     def __init__(self, **kwds):

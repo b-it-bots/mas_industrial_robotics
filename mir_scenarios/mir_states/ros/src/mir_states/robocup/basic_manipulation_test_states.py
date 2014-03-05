@@ -8,9 +8,7 @@ import mir_states.common.manipulation_states as gms
 import mir_states.common.navigation_states as gns
 import mir_states.common.perception_states as gps
 
-import simple_script_server
-sss = simple_script_server.simple_script_server()
-
+import moveit_commander
 
 class load_objects(smach.State):
     def __init__(self):
@@ -91,9 +89,13 @@ class get_obj_poses_for_goal_configuration(smach.State):
             input_keys=['task_spec','obj_goal_configuration_poses'],
             output_keys=['obj_goal_configuration_poses'])
         
+        #FIXME: is there a moveit Group for gripper?
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        
     def execute(self, userdata):
         
-        sss.move("gripper","open")
+        self.gripper_command.set_named_target("open")
+        self.gripper_command.go()
         print userdata.task_spec.object_config 
         
         if (not rospy.has_param("/script_server/arm/" + userdata.task_spec.object_config)):
