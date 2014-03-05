@@ -8,6 +8,9 @@ import tf
 ## NOTE: WHAT REPLACES arm_navigation_msgs?
 ##import arm_navigation_msgs.msg
 
+import moveit_commander
+
+
 from simple_script_server import *
 sss = simple_script_server()
 
@@ -23,7 +26,8 @@ import std_srvs.srv
 planning_mode = ""            # no arm planning
 #planning_mode = "planned"    # using arm planning
 
-##from arm import *
+##from mir_states.common import arm
+
 ##from mir_common_states_common.common.rear_platform import *
 ##arm = Arm(planning_mode='')
 
@@ -42,6 +46,7 @@ class is_object_grasped(smach.State):
         self.obj_grasped_srv_name = '/gripper_controller/is_gripper_closed'
 
         self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, hbrs_srvs.srv.ReturnBool)
+        
         
     def execute(self, userdata):   
                 
@@ -73,19 +78,38 @@ class put_object_on_rear_platform(smach.State):
                                        'rear_platform_is_full',
                                        'failed'],
                              io_keys=['rear_platform'])
-
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        #FIXME: is there a moveit Group for gripper?
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        
     def execute(self, userdata):
         try:
             location = userdata.rear_platform.get_free_location()
-            arm.move_to('candle')
-            arm.move_to('platform_intermediate')
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_%s' % location)
-            arm.gripper('open')
-            rospy.sleep(GRIPPER_WAIT_TIME)
+            
+            #FIXME: do we need the intermediate positions with MoveIt?
+            self.arm_command.set_named_target("candle")
+            self.arm_command.go()
+            
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+            
+            self.arm_command.set_named_target('platform_%s_pre' % location)
+            self.arm_command.go()
+            
+            self.arm_command.set_named_target('platform_%s' % location)
+            self.arm_command.go()
+            
+            self.gripper_command.set_named_target('open')
+            self.gripper_command.go()
+            
+            self.arm_command.set_named_target('platform_%s_pre' % location)
+            self.arm_command.go()
+            
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+            
             userdata.rear_platform.store_object(location)
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_intermediate')
+            
             return 'succeeded'
         except RearPlatformFullError as a:
             return 'rear_platform_is_full'
@@ -103,20 +127,37 @@ class pick_object_from_rear_platform(smach.State):
                                        'failed'],
                              io_keys=['rear_platform'],
                              input_keys=['location'])
-
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        #FIXME: is there a moveit Group for gripper?
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        
     def execute(self, userdata):
         location = (userdata.location or
                     userdata.rear_platform.get_occupied_location())
         try:
-            arm.gripper('open')
-            arm.move_to('platform_intermediate')
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_%s' % location)
-            #rospy.sleep(3)
-            arm.gripper('close')
-            rospy.sleep(GRIPPER_WAIT_TIME)
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_intermediate')
+            #FIXME: do we need the intermediate positions with MoveIt?
+            
+            self.gripper_command.set_named_target('open')
+            self.gripper_command.go()
+            
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+            
+            self.arm_command.set_named_target('platform_%s_pre' % location)
+            self.arm_command.go()
+            
+            self.arm_command.set_named_target('platform_%s' % location)
+            self.arm_command.go()
+            
+            self.gripper_command.set_named_target('close')
+            self.gripper_command.go()
+            
+            self.arm_command.set_named_target('platform_%s_pre' % location)
+            self.arm_command.go()
+            
+            self.arm_command.set_named_target("platform_intermediate")
+            self.arm_command.go()
+            
             return 'succeeded'
         except RearPlatformEmptyError as a:
             return 'rear_platform_is_empty'
@@ -148,13 +189,18 @@ class move_arm(smach.State):
         self.move_arm_to = position
         self.blocking = blocking
         self.tolerance = tolerance
+        
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
 
     def execute(self, userdata):
         position = self.move_arm_to or userdata.move_arm_to
         rospy.loginfo('MOVING ARM TO')
         try:
             arm.move_to(position, blocking=self.blocking, tolerance=self.tolerance)
-        except ArmNavigationError as e:
+            self.arm_command.set_named_target(position)
+            self.arm_command.go()
+            
+        except Exception as e:
             rospy.logerr('Move arm failed: %s' % (str(e)))
             return 'failed'
         return 'succeeded'
@@ -170,8 +216,12 @@ class control_gripper(smach.State):
         smach.State.__init__(self, outcomes=['succeeded'])
         self.action = action
 
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+
     def execute(self, userdata):
-        arm.gripper(self.action)
+        self.gripper_command.set_named_target(self.action)
+        self.gripper_command.go()
+        
         return 'succeeded'
        
 
@@ -189,9 +239,13 @@ class grasp_object(smach.State):
                              outcomes=['succeeded', 'tf_error'])
         self.tf_listener = tf.TransformListener()
 
+        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+
     def execute(self, userdata):
-        arm.gripper('open')
-        rospy.sleep(GRIPPER_WAIT_TIME)
+        self.gripper_command.set_named_target("open")
+        self.gripper_command.go()
+        
         try:
             t = self.tf_listener.getLatestCommonTime('/base_link',
                                                       'gripper_finger_link')
@@ -211,11 +265,16 @@ class grasp_object(smach.State):
             #rospy.logerr('read dxyz ' + dx + ',' + dy + ',' + dz)
         except KeyError:
             rospy.logerr('No Grasp Pose Change Set.')
-        arm_cart.move([['/base_link', float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]])
-        #Will need to check if above call uses blocking.
-        #rospy.sleep(1)
-        arm.gripper('close')
-        rospy.sleep(GRIPPER_WAIT_TIME)
+
+        target_link = '/base_link'
+        target_pose = [float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]
+        
+        self.arm_command.set_pose_target(target_pose, target_link)
+        self.arm_command.go()
+        
+        self.gripper_command.set_named_target("close")
+        self.gripper_command.go()
+        
         return 'succeeded'
 
 
