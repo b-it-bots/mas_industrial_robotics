@@ -27,9 +27,9 @@ class is_object_grasped(smach.State):
 
         self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, hbrs_srvs.srv.ReturnBool)
         
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
         #FIXME: is there a moveit Group for gripper?
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
         
     def execute(self, userdata):   
@@ -59,9 +59,9 @@ class put_object_on_rear_platform(smach.State):
                                        'rear_platform_is_full',
                                        'failed'],
                              io_keys=['rear_platform'])
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
         #FIXME: is there a moveit Group for gripper?
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         try:
@@ -108,9 +108,9 @@ class pick_object_from_rear_platform(smach.State):
                                        'failed'],
                              io_keys=['rear_platform'],
                              input_keys=['location'])
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
         #FIXME: is there a moveit Group for gripper?
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         location = (userdata.location or
@@ -171,7 +171,7 @@ class move_arm(smach.State):
         self.blocking = blocking
         self.tolerance = tolerance
         
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
 
     def execute(self, userdata):
         position = self.move_arm_to or userdata.move_arm_to
@@ -196,7 +196,7 @@ class control_gripper(smach.State):
         smach.State.__init__(self, outcomes=['succeeded'])
         self.action = action
 
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
 
     def execute(self, userdata):
         self.gripper_command.set_named_target(self.action)
@@ -219,8 +219,8 @@ class grasp_object(smach.State):
                              outcomes=['succeeded', 'tf_error'])
         self.tf_listener = tf.TransformListener()
 
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
 
     def execute(self, userdata):
         self.gripper_command.set_named_target("open")
@@ -265,8 +265,8 @@ class grasp_obj_from_pltf(smach.State):
                              input_keys=['rear_platform_occupied_poses'],
                              output_keys=['rear_platform_occupied_poses'])
         
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):   
         global planning_mode
@@ -309,8 +309,8 @@ class place_object_in_configuration(smach.State):
             input_keys=['obj_goal_configuration_poses'],
             output_keys=['obj_goal_configuration_poses'])
         
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         global planning_mode

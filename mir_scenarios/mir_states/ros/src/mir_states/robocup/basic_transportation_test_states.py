@@ -127,7 +127,7 @@ class get_obj_poses_for_goal_configuration(smach.State):
             outcomes=['succeeded', 'configuration_poses_not_available'],
             input_keys=['task_spec','obj_goal_configuration_poses'],
             output_keys=['obj_goal_configuration_poses'])
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         
@@ -214,9 +214,9 @@ class grasp_obj_from_pltf_btt(smach.State):
         smach.State.__init__(self, outcomes=['object_grasped', 'no_more_obj_for_this_workspace'], 
                              input_keys=['rear_platform_occupied_poses', 'rear_platform_free_poses', 'base_pose_to_approach', 'task_list', 'last_grasped_obj'],
                              output_keys=['rear_platform_occupied_poses', 'rear_platform_free_poses', 'last_grasped_obj'])
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
         #FIXME: is there a moveit Group for gripper?
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):   
         global planning_mode
@@ -285,8 +285,8 @@ class place_object_in_configuration_btt(smach.State):
             input_keys=['base_pose_to_approach', 'objects_goal_configuration', 'last_grasped_obj', 'task_list', 'destinaton_free_poses', 'obj_goal_configuration_poses'],
             output_keys=['destinaton_free_poses', 'task_list'])
         
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         global planning_mode
@@ -337,8 +337,8 @@ class place_obj_on_rear_platform_btt(smach.State):
         smach.State.__init__(self, outcomes=['succeeded', 'no_more_free_poses'], 
                                    input_keys=['object_to_grasp', 'rear_platform_free_poses', 'rear_platform_occupied_poses', 'task_list', 'base_pose_to_approach'], 
                                    output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses', 'task_list'])
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):   
         global planning_mode
@@ -576,8 +576,8 @@ class loop_for(smach.State):
                              output_keys=['vscount'])
         self.max_loop_count = 2
         self.loop_count = 0
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         self.loop_count = userdata.vscount

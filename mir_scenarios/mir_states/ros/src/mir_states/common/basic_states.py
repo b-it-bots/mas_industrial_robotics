@@ -14,9 +14,9 @@ class init_robot(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded'])
         
-        self.arm_command = moveit_commander.MoveGroupCommander('arm')
+        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
         #FIXME: is there a moveit Group for gripper?
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         

@@ -90,7 +90,7 @@ class get_obj_poses_for_goal_configuration(smach.State):
             output_keys=['obj_goal_configuration_poses'])
         
         #FIXME: is there a moveit Group for gripper?
-        self.gripper_command = moveit_commander.MoveGroupCommander('gripper')
+        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
         
     def execute(self, userdata):
         
