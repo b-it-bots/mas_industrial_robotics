@@ -95,7 +95,8 @@ def main():
         smach.StateMachine.add('RECOGNIZE_OBJECTS', gps_o.find_objects(),
             transitions={'objects_found':'SELECT_OBJECT_TO_BE_GRASPED',
                         'no_objects_found':'RECOGNIZE_OBJECTS_LOOP',
-                        'srv_call_failed':'RECOGNIZE_OBJECTS'})
+                        'srv_call_failed':'RECOGNIZE_OBJECTS'},
+            remapping={'found_objects':'recognized_objects'})
 
         smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(2),
                                   transitions={'loop': 'RECOGNIZE_OBJECTS',

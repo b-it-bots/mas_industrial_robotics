@@ -45,7 +45,7 @@ class select_object_to_be_grasped(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
             outcomes=['obj_selected', 'no_obj_selected','no_more_free_poses_at_robot_platf'],
-            input_keys=['recognized_objects', 'objects_to_be_grasped', 'object_to_grasp', 'rear_platform_free_poses'],
+            input_keys=['recognized_objects', 'objects_to_be_grasped', 'object_to_grasp', 'rear_platform_free_poses','object_to_be_adjust_to'],
             output_keys=['object_to_grasp', 'object_to_be_adjust_to'])
         
     def execute(self, userdata):
@@ -487,7 +487,7 @@ class compute_base_shift_to_object(smach.State):
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'tf_error'],
-                             input_keys=['object_pose'],
+                             input_keys=['object_pose','move_base_by'],
                              output_keys=['move_base_by'])
         self.tf_listener = tf.TransformListener()
 

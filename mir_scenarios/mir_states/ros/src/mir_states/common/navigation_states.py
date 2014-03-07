@@ -256,7 +256,7 @@ class move_base_relative(smach.State):
         supplied to the state constructor then it will override this input.
     """
 
-    SRV = '/mcr_navigation/mcr_relative_movements/move_base_relative'
+    SRV = '/mcr_navigation/relative_movements/move_base_relative'
 
     def __init__(self, offset=None):
         smach.State.__init__(self,
