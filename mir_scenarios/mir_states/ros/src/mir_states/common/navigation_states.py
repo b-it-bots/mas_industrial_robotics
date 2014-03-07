@@ -126,7 +126,7 @@ class move_base(smach.State):
                 userdata.base_pose = None
                 return 'failed'
 
-
+       
 class adjust_to_workspace(smach.State):
 
     ADJUST_SERVER = '/mir_navigation/base_placement/adjust_to_workspace'
@@ -255,7 +255,7 @@ class move_base_relative(smach.State):
         supplied to the state constructor then it will override this input.
     """
 
-    SRV = '/mcrnavigation/mcr_relative_movements/move_base_relative'
+    SRV = '/mcr_navigation/mcr_relative_movements/move_base_relative'
 
     def __init__(self, offset=None):
         smach.State.__init__(self,
@@ -287,3 +287,30 @@ class move_base_relative(smach.State):
             return 'failed'
         return 'succeeded'
 
+## copied from old states
+class approach_pose(smach.State):
+
+    def __init__(self, pose = ""):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
+
+        self.pose = pose;    
+
+    def execute(self, userdata):
+        
+        if(self.pose == ""):
+            self.pose2 = userdata.base_pose_to_approach
+        else:
+            self.pose2 = self.pose 
+        
+        handle_base = sss.move("base", self.pose2)
+
+        while True:                
+            rospy.sleep(0.1)
+            base_state = handle_base.get_state()
+            if (base_state == actionlib.simple_action_client.GoalStatus.SUCCEEDED):
+                return "succeeded"
+            elif (base_state == actionlib.simple_action_client.GoalStatus.ACTIVE):
+                continue
+            else:
+                print 'last state: ',base_state
+                return "failed"

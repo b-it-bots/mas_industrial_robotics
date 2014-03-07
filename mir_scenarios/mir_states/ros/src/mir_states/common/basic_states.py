@@ -7,26 +7,25 @@ import smach_ros
 import commands
 import os
 
-import moveit_commander
+import mir_states.common.manipulation_states as manipulation
 
 class init_robot(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded'])
         
-        self.arm_command = moveit_commander.MoveGroupCommander('arm_1')
-        #FIXME: is there a moveit Group for gripper?
-        self.gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
+        manipulation.arm_command.set_named_target("home")
+        manipulation.arm_command.go(wait=False)
         
     def execute(self, userdata):
         
         # init arm
-        self.arm_command.set_named_target("home")
-        self.arm_command.go(wait=False)
+        manipulation.arm_command.set_named_target("home")
+        manipulation.arm_command.go(wait=False)
         
         #init gripper
-        self.gripper_command.set_named_target("open")
-        self.gripper_command.go(wait=False)
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go(wait=False)
         
         rospy.loginfo("robot initialized")
         
