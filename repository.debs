@@ -4,6 +4,7 @@
 packagelist=(
     python-pygraphviz
     python-setuptools
+    python-zmq
     ros-hydro-amcl
     ros-hydro-cob-srvs
     ros-hydro-dwa-local-planner
