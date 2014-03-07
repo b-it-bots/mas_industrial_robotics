@@ -28,6 +28,10 @@ def main():
     
     # world knowledge
     SM.userdata.task_list = []
+    
+    SM.userdata.simulation = True
+    SM.userdata.test = "BTT"
+    
     SM.userdata.base_pose_to_approach = 0
     SM.userdata.lasttask = btts.Bunch(location="", obj_names="")
     SM.userdata.current_task_index = 0
@@ -60,9 +64,14 @@ def main():
         smach.StateMachine.add('INIT_ROBOT', gbs_o.init_robot(),
             transitions={'succeeded':'GET_TASK'})
 
+#         smach.StateMachine.add('GET_TASK', refbox.get_task(),
+#             transitions={'task_received':'SETUP_BTT',
+#                          'wrong_task_format':'GET_TASK'})
         smach.StateMachine.add('GET_TASK', refbox.get_basic_transportation_task(),
             transitions={'task_received':'SETUP_BTT',
                          'wrong_task_format':'GET_TASK'})
+              
+        
         
         smach.StateMachine.add('SETUP_BTT', btts.setup_btt(),
             transitions={'success':'SELECT_SOURCE_SUBTASK'})

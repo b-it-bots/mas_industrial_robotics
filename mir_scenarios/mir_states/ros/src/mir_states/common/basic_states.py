@@ -14,9 +14,6 @@ class init_robot(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded'])
         
-        manipulation.arm_command.set_named_target("home")
-        manipulation.arm_command.go(wait=False)
-        
     def execute(self, userdata):
         
         # init arm

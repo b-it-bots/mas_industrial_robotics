@@ -47,7 +47,7 @@ class find_drawer(smach.State):
         
         return 'found_drawer'
 
-
+#FIXME: is this still used? not in BTT
 class detect_object(smach.State):
 
     def __init__(self):
@@ -82,10 +82,10 @@ class detect_object(smach.State):
             userdata.object_list = resp.objects
             return 'succeeded'
 
-
+#FIXME: What is the difference between detect_objects and find_objects
 class find_objects(smach.State):
 
-    DETECT_SERVER = '/detect_objects'
+    DETECT_SERVER = '/mcr_perception/detect_objects'
 
     def __init__(self, retries=5, frame_id=None):
         smach.State.__init__(self,

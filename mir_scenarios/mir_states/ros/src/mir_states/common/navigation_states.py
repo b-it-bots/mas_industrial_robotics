@@ -11,7 +11,7 @@ from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
 sss = simple_script_server()
 
-from mir_navigation_msgs.msg import OrientToBaseAction
+from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 from mcr_navigation_msgs.srv import MoveRelative
 
 class place_base_in_front_of_object(smach.State):
@@ -108,6 +108,7 @@ class move_base(smach.State):
         self.timeout = rospy.Duration(timeout)
 
     def execute(self, userdata):
+
         pose = self.move_base_to or userdata.move_base_to
         handle_base = sss.move('base', pose, blocking=False)
         started = rospy.Time.now()
@@ -288,6 +289,7 @@ class move_base_relative(smach.State):
         return 'succeeded'
 
 ## copied from old states
+## same as move_base?
 class approach_pose(smach.State):
 
     def __init__(self, pose = ""):

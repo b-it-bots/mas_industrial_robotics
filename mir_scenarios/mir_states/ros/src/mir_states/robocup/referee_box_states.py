@@ -96,20 +96,23 @@ class re_get_task(smach.State):
         except mir_states_common.robocup.task.TaskSpecFormatError:
             return 'wrong_task_format'
 
-
+#FIXME: merge into get_task
 class get_basic_transportation_task(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list', 'simulation'], output_keys=['task_list'])
         
     def execute(self, userdata):
 
-        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-
-		#transportation_task = 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>'
-        #transportation_task = 'BTT<initialsituation(<S3,(F20_20_B,M20_100)>);goalsituation(<S2,zigzag(M20_100,F20_20_B)>)>'
         
-        transportation_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
+        if(userdata.simulation):
+            rospy.loginfo("Task spec by hard coded string")
+
+            transportation_task = 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>'
+            #transportation_task = 'BTT<initialsituation(<S3,(F20_20_B,M20_100)>);goalsituation(<S2,zigzag(M20_100,F20_20_B)>)>'
+        else:
+            rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
+            transportation_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
 
         rospy.loginfo("Task received: " + transportation_task)
         
