@@ -28,6 +28,13 @@
         <joint name="arm_joint_4" value="0.02" />
         <joint name="arm_joint_5" value="0.02" />
     </group_state>
+    <group_state name="home" group="arm_1">
+        <joint name="arm_joint_1" value="2.9496" />
+        <joint name="arm_joint_2" value="1.13446" />
+        <joint name="arm_joint_3" value="-2.54818" />
+        <joint name="arm_joint_4" value="1.78896" />
+        <joint name="arm_joint_5" value="2.93075" />
+    </group_state>
     <group_state name="candle" group="arm_1">
         <joint name="arm_joint_1" value="2.9496" />
         <joint name="arm_joint_2" value="1.13446" />
@@ -84,6 +91,15 @@
         <joint name="arm_joint_4" value="2.9719" />
         <joint name="arm_joint_5" value="2.9175" />
     </group_state>
+    <group_state name="open" group="arm_1_gripper">
+        <joint name="gripper_finger_joint_l" value="0.012"/>
+        <joint name="gripper_finger_joint_r" value="0.012"/>
+    </group_state>
+    <group_state name="close" group="arm_1_gripper">
+        <joint name="gripper_finger_joint_l" value="0.0"/>
+        <joint name="gripper_finger_joint_r" value="0.0"/>
+    </group_state>
+
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="arm_1_gripper" parent_link="arm_link_5" group="arm_1_gripper" parent_group="arm_1" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
