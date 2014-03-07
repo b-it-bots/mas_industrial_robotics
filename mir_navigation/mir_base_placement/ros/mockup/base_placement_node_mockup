@@ -10,7 +10,7 @@ from mir_navigation_msgs.msg import OrientToBaseAction
 class BasePlacementMockup(object):
   
   def __init__(self):
-    self._as = actionlib.SimpleActionServer("adjust_to_workspace", OrientToBaseAction, execute_cb=self.execute_cb, auto_start = False)
+    self._as = actionlib.SimpleActionServer("~adjust_to_workspace", OrientToBaseAction, execute_cb=self.execute_cb, auto_start = False)
     self._as.start()
     
   def execute_cb(self, goal):
