@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_2dnav" type="move_base_node_mockup" respawn="false" name="move_base" output="screen">
+	</node>
+
+</launch>
