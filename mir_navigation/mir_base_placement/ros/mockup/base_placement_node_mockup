@@ -1,0 +1,23 @@
+#!/usr/bin/python
+
+import roslib
+import rospy
+
+import actionlib
+
+from mir_navigation_msgs.msg import OrientToBaseAction
+
+class BasePlacementMockup(object):
+  
+  def __init__(self):
+    self._as = actionlib.SimpleActionServer("adjust_to_workspace", OrientToBaseAction, execute_cb=self.execute_cb, auto_start = False)
+    self._as.start()
+    
+  def execute_cb(self, goal):
+    self._as.set_succeeded()
+      
+if __name__ == '__main__':
+  rospy.init_node('mir_base_placement_mockup')
+  BasePlacementMockup()
+  rospy.loginfo("Base plamcenemt MOCKUP started...")
+  rospy.spin()
