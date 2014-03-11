@@ -259,9 +259,6 @@ class grasp_object(smach.State):
         gripper_command.set_named_target("close")
         gripper_command.go()
 
-        #FIXME: just for mockup
-        mockup.remove_object(userdata.object_to_grasp)
-
         return 'succeeded'
 
 

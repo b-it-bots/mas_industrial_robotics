@@ -393,7 +393,7 @@ class place_obj_on_rear_platform_btt(smach.State):
 class check_if_platform_has_still_objects(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['still_o../../../mir_scenarios/mir_states/ros/src/mir_states/robocup/basic_transportation_test_states.pybjs_on_robot_pltf', 'no_more_objs_on_robot_pltf'], 
+        smach.State.__init__(self, outcomes=['still_objs_on_robot_pltf', 'no_more_objs_on_robot_pltf'],
                                    input_keys=['rear_platform_occupied_poses','source_visits','task_list'],
                                    output_keys=['source_visits','lasttask'])
 
