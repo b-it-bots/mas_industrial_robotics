@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_visual_servoing" type="visual_servoing_node_mockup" name="visual_servoing" ns="mir_controllers" output="screen"/>
+
+</launch>
