@@ -19,6 +19,9 @@ import std_srvs.srv
 
 planning_mode = ""            # no arm planning
 
+import mir_states.common.mockup_util  as mockup
+from mcr_perception_msgs.msg import ObjectList, Object
+
 
 class Bunch:
     def __init__(self, **kwds):
@@ -207,7 +210,7 @@ class grasp_object(smach.State):
 
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['succeeded', 'tf_error'])
+                             outcomes=['succeeded', 'tf_error'], input_keys=['object_to_grasp'])
         self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
@@ -215,11 +218,19 @@ class grasp_object(smach.State):
         gripper_command.go()
         
         try:
+            #FIXME: What is this doing? - Do we need this with moveIt?
+            #FIXME: what is the gripper_finger_link?
+#             t = self.tf_listener.getLatestCommonTime('/base_link',
+#                                                       'gripper_finger_link')
+#             (p, q) = self.tf_listener.lookupTransform('/base_link',
+#                                                       'gripper_finger_link',
+#                                                       t)
             t = self.tf_listener.getLatestCommonTime('/base_link',
-                                                      'gripper_finger_link')
+                                                      'gripper_palm_link')
             (p, q) = self.tf_listener.lookupTransform('/base_link',
-                                                      'gripper_finger_link',
+                                                      'gripper_palm_link',
                                                       t)
+
             rpy = tf.transformations.euler_from_quaternion(q)
         except (tf.LookupException,
                 tf.ConnectivityException,
@@ -227,9 +238,14 @@ class grasp_object(smach.State):
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
         try:
-            dx = rospy.get_param('script_server/arm/grasp_delta/x')
-            dy = rospy.get_param('script_server/arm/grasp_delta/y')
-            dz = rospy.get_param('script_server/arm/grasp_delta/z')
+            #FIXME: removed script_server values with 0.0 - is this OK?
+            dx = 0.0
+            dy = 0.0
+            dz = 0.0
+
+            #dx = rospy.get_param('script_server/arm/grasp_delta/x')
+            #dy = rospy.get_param('script_server/arm/grasp_delta/y')
+            #dz = rospy.get_param('script_server/arm/grasp_delta/z')
             #rospy.logerr('read dxyz ' + dx + ',' + dy + ',' + dz)
         except KeyError:
             rospy.logerr('No Grasp Pose Change Set.')
@@ -242,7 +258,10 @@ class grasp_object(smach.State):
         
         gripper_command.set_named_target("close")
         gripper_command.go()
-        
+
+        #FIXME: just for mockup
+        mockup.remove_object(userdata.object_to_grasp)
+
         return 'succeeded'
 
 

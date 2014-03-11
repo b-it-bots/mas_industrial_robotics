@@ -76,7 +76,7 @@ class select_btt_subtask(smach.State):
         
     def execute(self, userdata):
         
-        print_task_spec(userdata.task_list)
+        # print_task_spec(userdata.task_list)
 
         # check if there is a empty obj_names list for a given location and remove it
         for i in range(len(userdata.task_list)):
@@ -349,7 +349,7 @@ class place_obj_on_rear_platform_btt(smach.State):
             rospy.logerr("NO more free poses on platform")
             return 'no_more_free_poses'
 
-      # Removing free poses          
+        # Removing pre poses (Do we need these poses?)
         pltf_pose = userdata.rear_platform_free_poses.pop();
 
         if planning_mode != "planned":
@@ -393,7 +393,7 @@ class place_obj_on_rear_platform_btt(smach.State):
 class check_if_platform_has_still_objects(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['still_objs_on_robot_pltf', 'no_more_objs_on_robot_pltf'], 
+        smach.State.__init__(self, outcomes=['still_o../../../mir_scenarios/mir_states/ros/src/mir_states/robocup/basic_transportation_test_states.pybjs_on_robot_pltf', 'no_more_objs_on_robot_pltf'], 
                                    input_keys=['rear_platform_occupied_poses','source_visits','task_list'],
                                    output_keys=['source_visits','lasttask'])
 

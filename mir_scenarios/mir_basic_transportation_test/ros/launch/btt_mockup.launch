@@ -18,6 +18,9 @@
     <!-- perception pipeline -->
     <include file="$(find mcr_object_detection)/ros/launch/object_detection_mockup.launch" />
  
+    <!-- Visual Servoing -->
+    <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing_mockup.launch"/>
+
 </launch>
 
 

@@ -20,9 +20,43 @@ import mir_states.robocup.referee_box_states as refbox
 #### IMPORT SOME NEW STATES!! ###
 import mir_states.common.basic_states as gbs 
 
+import mir_states.common.mockup_util  as mockup
+from mcr_perception_msgs.msg import ObjectList, Object
+
+
 # main
 def main():
     rospy.init_node('basic_transportation_test')
+
+    #FIXME: add functionality to read from BTT task description and add items automatically
+    object_list = []
+    obj = Object()
+    obj.name = "M20_100"
+    obj.pose.header.frame_id = "/base_link"
+    object_list.append(obj)
+
+    obj = Object()
+    obj.name = "S40_40_G"
+    obj.pose.header.frame_id = "/base_link"
+    object_list.append(obj)
+
+    obj = Object()
+    obj.name = "F20_20_G"
+    obj.pose.header.frame_id = "/base_link"
+    object_list.append(obj)
+
+    obj = Object()
+    obj.name = "S40_40_B"
+    obj.pose.header.frame_id = "/base_link"
+    object_list.append(obj)
+
+    obj = Object()
+    obj.name = "F20_20_B"
+    obj.pose.header.frame_id = "/base_link"
+    object_list.append(obj)
+
+    mockup.set_object_list(object_list)
+
 
     SM = smach.StateMachine(outcomes=['done'])
     
@@ -98,6 +132,7 @@ def main():
                         'srv_call_failed':'RECOGNIZE_OBJECTS'},
             remapping={'found_objects':'recognized_objects'})
 
+        #FIXME: Is there a loop reset?
         smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(2),
                                   transitions={'loop': 'RECOGNIZE_OBJECTS',
                                                'continue': 'SKIP_SOURCE_POSE'})

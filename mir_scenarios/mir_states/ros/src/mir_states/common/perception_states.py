@@ -196,7 +196,7 @@ class find_holes(smach.State):
 
 class do_visual_servoing(smach.State):
 
-    SERVER = '/mir_controllers/mir_visual_servoing/do_visual_servoing'
+    SERVER = '/mir_controllers/visual_servoing/do_visual_servoing'
 
     def __init__( self ):
         smach.State.__init__( self,
