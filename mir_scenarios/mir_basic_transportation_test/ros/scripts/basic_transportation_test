@@ -7,16 +7,21 @@ import smach_ros
 
 # import of generic states
 # generic states
-import mir_states.common.oldstates.basic_states_old as gbs_o
-import mir_states.common.oldstates.robocup_states_old as grs_o
-import mir_states.common.oldstates.navigation_states_old as gns_o
-import mir_states.common.oldstates.manipulation_states_old as gms_o
-import mir_states.common.oldstates.perception_states_old as gps_o
+import mir_states.common.basic_states as gbs_o
+##import mir_states.common.robocup_states as grs_o
+import mir_states.common.navigation_states as gns_o
+import mir_states.common.manipulation_states as gms_o
+import mir_states.common.perception_states as gps_o
+
 
 import mir_states.robocup.basic_transportation_test_states as btts
+import mir_states.robocup.referee_box_states as refbox
 
 #### IMPORT SOME NEW STATES!! ###
 import mir_states.common.basic_states as gbs 
+
+import mir_states.common.perception_mockup_util as perception_mockup_util
+from mcr_perception_msgs.msg import ObjectList, Object
 
 # main
 def main():
@@ -26,8 +31,12 @@ def main():
     
     # world knowledge
     SM.userdata.task_list = []
+    
+    SM.userdata.simulation = True
+    SM.userdata.test = "BTT"
+    
     SM.userdata.base_pose_to_approach = 0
-    SM.userdata.lasttask = grs_o.Bunch(location="", obj_names="")
+    SM.userdata.lasttask = btts.Bunch(location="", obj_names="")
     SM.userdata.current_task_index = 0
     SM.userdata.recognized_objects = []
     SM.userdata.object_to_be_adjust_to = 0
@@ -39,9 +48,9 @@ def main():
     
 
     SM.userdata.rear_platform_free_poses = []
-    SM.userdata.rear_platform_free_poses.append(grs_o.Bunch(obj_name="", platform_pose='platform_right'))
-    SM.userdata.rear_platform_free_poses.append(grs_o.Bunch(obj_name="", platform_pose='platform_middle'))
-    SM.userdata.rear_platform_free_poses.append(grs_o.Bunch(obj_name="", platform_pose='platform_left'))
+    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj_name="", platform_pose='platform_right'))
+    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj_name="", platform_pose='platform_middle'))
+    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj_name="", platform_pose='platform_left'))
 
     SM.userdata.rear_platform_occupied_poses = []
     SM.userdata.obj_goal_configuration_poses = []
@@ -50,7 +59,7 @@ def main():
 
     SM.userdata.vscount = 0
 
-    
+    useMockup = False
     
      # open the container
     with SM:
@@ -58,53 +67,65 @@ def main():
         smach.StateMachine.add('INIT_ROBOT', gbs_o.init_robot(),
             transitions={'succeeded':'GET_TASK'})
 
-        smach.StateMachine.add('GET_TASK', grs_o.get_basic_transportation_task(),
+#         smach.StateMachine.add('GET_TASK', refbox.get_task(),
+#             transitions={'task_received':'SETUP_BTT',
+#                          'wrong_task_format':'GET_TASK'})
+        smach.StateMachine.add('GET_TASK', refbox.get_basic_transportation_task(),
             transitions={'task_received':'SETUP_BTT',
-                         'wront_task_format':'GET_TASK'})
+                         'wrong_task_format':'GET_TASK'})
+              
+        if (useMockup):
+                smach.StateMachine.add('SETUP_BTT', btts.setup_btt(),
+                    transitions={'success':'ADD_OBJECT_FROM_TASK_LIST_TO_OBJECT_DETECTION_MOCKUP'})
         
-        smach.StateMachine.add('SETUP_BTT', btts.setup_btt(),
-            transitions={'success':'SELECT_SOURCE_SUBTASK'})
+                smach.StateMachine.add("ADD_OBJECT_FROM_TASK_LIST_TO_OBJECT_DETECTION_MOCKUP",
+                                       perception_mockup_util.add_object_from_task_list_state(),
+                                       transitions={'success':'SELECT_SOURCE_SUBTASK'})
+        else:
+                smach.StateMachine.add('SETUP_BTT', btts.setup_btt(),
+                    transitions={'success':'SELECT_SOURCE_SUBTASK'})
         
+            
         smach.StateMachine.add('SELECT_SOURCE_SUBTASK', btts.select_btt_subtask(type="source"),
             transitions={'task_selected':'MOVE_TO_SOURCE_LOCATION',
                          'no_more_task_for_given_type':'SELECT_DELIVER_WORKSTATION'})
 
-        # move armo out of view..skipped alignment
+        # move arm out of view - skipped alignment
         smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION', gns_o.approach_pose(),
             transitions={'succeeded':'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE',
                         'failed':'MOVE_TO_SOURCE_LOCATION'})
 
-        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns_o.adjust_pose_wrt_workspace(0.2),
+        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns_o.adjust_to_workspace(0.2),
             transitions={'succeeded':'MOVE_ARM_OUT_OF_VIEW',
                         'failed':'MOVE_TO_SOURCE_LOCATION'})
 
         smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms_o.move_arm_out_of_view(),
             transitions={'succeeded':'RECOGNIZE_OBJECTS'})
 
-        smach.StateMachine.add('RECOGNIZE_OBJECTS', gps_o.recognize_objects(),
-            transitions={'found_objects':'SELECT_OBJECT_TO_BE_GRASPED',
+        smach.StateMachine.add('RECOGNIZE_OBJECTS', gps_o.find_objects(),
+            transitions={'objects_found':'SELECT_OBJECT_TO_BE_GRASPED',
                         'no_objects_found':'RECOGNIZE_OBJECTS_LOOP',
-                        'srv_call_failed':'RECOGNIZE_OBJECTS'})
+                        'srv_call_failed':'RECOGNIZE_OBJECTS'},
+            remapping={'found_objects':'recognized_objects'})
 
+        #FIXME: Is there a loop reset?
         smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(2),
                                   transitions={'loop': 'RECOGNIZE_OBJECTS',
                                                'continue': 'SKIP_SOURCE_POSE'})
-        
 
         smach.StateMachine.add('SELECT_OBJECT_TO_BE_GRASPED', btts.select_object_to_be_grasped(),
             transitions={'obj_selected':'COMPUTE_BASE_SHIFT_TO_OBJECT',
                         'no_obj_selected':'SKIP_SOURCE_POSE',
                         'no_more_free_poses_at_robot_platf':'SELECT_DELIVER_WORKSTATION'})
 
-      # new states
+        # new states
         # select object --> compute base position -> move relative -> pregrasp -> move arm ->do vs
-
         smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT', btts.compute_base_shift_to_object(),
             transitions={'succeeded': 'MOVE_BASE_RELATIVE',
                          'tf_error': 'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE'},
             remapping={'object_pose':'object_to_grasp'})
 
-        smach.StateMachine.add('MOVE_BASE_RELATIVE', btts.move_base_relative_btt(),
+        smach.StateMachine.add('MOVE_BASE_RELATIVE', gns_o.move_base_relative(),
             transitions={'succeeded': 'AVOID_WALLS_PRE',
                           'failed': 'MOVE_BASE_RELATIVE'})
 
@@ -115,7 +136,6 @@ def main():
 	remapping={'object_pose':'object_to_grasp'})
         '''
 
-      #
         smach.StateMachine.add('AVOID_WALLS_PRE', gms_o.move_arm('candle'),
             transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
                         'failed': 'AVOID_WALLS_PRE'})
@@ -125,7 +145,7 @@ def main():
                         'failed': 'MOVE_ARM_TO_PREGRASP'})
 
       # state skipped
-        smach.StateMachine.add('DO_VISUAL_SERVERING', gms_o.do_visual_servering(),
+        smach.StateMachine.add('DO_VISUAL_SERVERING', gps_o.do_visual_servoing(),
             transitions={'succeeded':'GRASP_OBJ',
                         'failed':'SKIP_SOURCE_POSE',
                         'timeout':'VISUAL_SERVOING_LOOP',
@@ -134,13 +154,21 @@ def main():
         smach.StateMachine.add('VISUAL_SERVOING_LOOP', btts.loop_for(),
                                   transitions={'loop': 'MOVE_ARM_TO_PREGRASP',
                                                'continue': 'SKIP_SOURCE_POSE'})
-                
-
-        smach.StateMachine.add('GRASP_OBJ', gms_o.grasp_object_btt(),
-            transitions={'succeeded':'AVOID_WALLS_POST',
-                        'tf_error':'SKIP_SOURCE_POSE'})
-
-
+        
+        if (useMockup):
+                smach.StateMachine.add('GRASP_OBJ', gms_o.grasp_object(),
+                    transitions={'succeeded':'REMOVE_OBJECT_FROM_MOCKUP',
+                                'tf_error':'SKIP_SOURCE_POSE'})
+        
+                smach.StateMachine.add("REMOVE_OBJECT_FROM_MOCKUP",
+                                       perception_mockup_util.remove_object_to_grasp_state(),
+                                       transitions={'success':'AVOID_WALLS_POST'})
+        else:
+                smach.StateMachine.add('GRASP_OBJ', gms_o.grasp_object(),
+                    transitions={'succeeded':'AVOID_WALLS_POST',
+                                'tf_error':'SKIP_SOURCE_POSE'})
+            
+            
         smach.StateMachine.add('AVOID_WALLS_POST', gms_o.move_arm('candle'),
             transitions={'succeeded': 'PLACE_OBJ_ON_REAR_PLATFORM',
                         'failed': 'AVOID_WALLS_POST'})
@@ -157,8 +185,6 @@ def main():
         smach.StateMachine.add('SKIP_DESTINATION_POSE', btts.skip_pose('destination'),
             transitions={'pose_skipped':'SELECT_DELIVER_WORKSTATION',
                          'pose_skipped_but_platform_limit_reached':'SELECT_DELIVER_WORKSTATION'})
-        
-        
 
         # DELIVERY
         smach.StateMachine.add('SELECT_DELIVER_WORKSTATION', btts.select_delivery_workstation(),
@@ -169,7 +195,7 @@ def main():
             transitions={'succeeded':'ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION',
                         'failed':'MOVE_TO_DESTINATION_LOCATION'})
         
-        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION', gns_o.adjust_pose_wrt_workspace(0.08),
+        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION', gns_o.adjust_to_workspace(0.08),
             transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF',
                         'failed':'MOVE_TO_DESTINATION_LOCATION'})
 
@@ -184,9 +210,9 @@ def main():
         smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW_2', gms_o.move_arm_out_of_view(),
             transitions={'succeeded':'SELECT_DELIVER_WORKSTATION'})
 
-
-        smach.StateMachine.add('MOVE_ARM_TO_INIT', gms_o.move_arm_command("home"),
-            transitions={'succeeded':'CHECK_IF_PLTF_HAS_STILL_OBJS'})
+        smach.StateMachine.add('MOVE_ARM_TO_INIT', gms_o.move_arm("home"),
+            transitions={'succeeded':'CHECK_IF_PLTF_HAS_STILL_OBJS',
+                         'failed':'CHECK_IF_PLTF_HAS_STILL_OBJS'})
 
         smach.StateMachine.add('CHECK_IF_PLTF_HAS_STILL_OBJS', btts.check_if_platform_has_still_objects(),
             transitions={'still_objs_on_robot_pltf':'SKIP_DESTINATION_POSE',

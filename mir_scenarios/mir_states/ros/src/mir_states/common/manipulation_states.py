@@ -5,30 +5,23 @@ import smach
 import smach_ros
 import math
 import tf
-## NOTE: WHAT REPLACES arm_navigation_msgs?
-##import arm_navigation_msgs.msg
 
-from simple_script_server import *
-sss = simple_script_server()
+import moveit_commander
+##
+## FIXME: not actualla a state, more a helper util
+##
+arm_command = moveit_commander.MoveGroupCommander('arm_1')
+gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
 
-## NOTE: ANY REPLACEMENT for move_arm_cart_script_server?
-##from move_arm_cart_script_server import MoveArmCartScriptServer
-##arm_cart = MoveArmCartScriptServer() 
 
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
-##import hbrs_srvs.srv
-
 
 planning_mode = ""            # no arm planning
-#planning_mode = "planned"    # using arm planning
 
-##from arm import *
-##from mir_common_states_common.common.rear_platform import *
-##arm = Arm(planning_mode='')
+import mir_states.common.mockup_util  as mockup
+from mcr_perception_msgs.msg import ObjectList, Object
 
-# Gripper Wait Time
-GRIPPER_WAIT_TIME = 1.8
 
 class Bunch:
     def __init__(self, **kwds):
@@ -41,20 +34,17 @@ class is_object_grasped(smach.State):
 
         self.obj_grasped_srv_name = '/gripper_controller/is_gripper_closed'
 
-        self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, hbrs_srvs.srv.ReturnBool)
+        self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, hbrs_srvs.srv.ReturnBool)       
         
     def execute(self, userdata):   
                 
         try:
-            rospy.loginfo("wait for service:  %s", self.obj_grasped_srv_name)
-            rospy.wait_for_service(self.obj_grasped_srv_name, 5)
-        
-            sss.move("gripper", "close")
-            rospy.sleep(GRIPPER_WAIT_TIME)
+            joint_positions = gripper_command.get_current_joint_values()
             
-            is_gripper_closed = self.obj_grasped_srv()
+            rospy.logerr("is_object_grasped-state need to be checked!!!!!!")
+            is_gripper_closed = joint_positions[0] + joint_positions[1] < 0.01
+            
         except:
-            rospy.logerr("could not call service  %s", self.obj_grasped_srv_name)
             return "srv_call_failed"
 
         print is_gripper_closed
@@ -73,19 +63,35 @@ class put_object_on_rear_platform(smach.State):
                                        'rear_platform_is_full',
                                        'failed'],
                              io_keys=['rear_platform'])
-
+      
     def execute(self, userdata):
         try:
             location = userdata.rear_platform.get_free_location()
-            arm.move_to('candle')
-            arm.move_to('platform_intermediate')
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_%s' % location)
-            arm.gripper('open')
-            rospy.sleep(GRIPPER_WAIT_TIME)
+            
+            #FIXME: do we need the intermediate positions with MoveIt?
+            arm_command.set_named_target("candle")
+            arm_command.go()
+            
+            arm_command.set_named_target("platform_intermediate")
+            arm_command.go()
+            
+            arm_command.set_named_target('platform_%s_pre' % location)
+            arm_command.go()
+            
+            arm_command.set_named_target('platform_%s' % location)
+            arm_command.go()
+            
+            gripper_command.set_named_target('open')
+            gripper_command.go()
+            
+            arm_command.set_named_target('platform_%s_pre' % location)
+            arm_command.go()
+            
+            arm_command.set_named_target("platform_intermediate")
+            arm_command.go()
+            
             userdata.rear_platform.store_object(location)
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_intermediate')
+            
             return 'succeeded'
         except RearPlatformFullError as a:
             return 'rear_platform_is_full'
@@ -103,20 +109,34 @@ class pick_object_from_rear_platform(smach.State):
                                        'failed'],
                              io_keys=['rear_platform'],
                              input_keys=['location'])
-
+       
     def execute(self, userdata):
         location = (userdata.location or
                     userdata.rear_platform.get_occupied_location())
         try:
-            arm.gripper('open')
-            arm.move_to('platform_intermediate')
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_%s' % location)
-            #rospy.sleep(3)
-            arm.gripper('close')
-            rospy.sleep(GRIPPER_WAIT_TIME)
-            arm.move_to('platform_%s_pre' % location)
-            arm.move_to('platform_intermediate')
+            #FIXME: do we need the intermediate positions with MoveIt?
+            
+            gripper_command.set_named_target('open')
+            gripper_command.go()
+            
+            arm_command.set_named_target("platform_intermediate")
+            arm_command.go()
+            
+            arm_command.set_named_target('platform_%s_pre' % location)
+            arm_command.go()
+            
+            arm_command.set_named_target('platform_%s' % location)
+            arm_command.go()
+            
+            gripper_command.set_named_target('close')
+            gripper_command.go()
+            
+            arm_command.set_named_target('platform_%s_pre' % location)
+            arm_command.go()
+            
+            arm_command.set_named_target("platform_intermediate")
+            arm_command.go()
+            
             return 'succeeded'
         except RearPlatformEmptyError as a:
             return 'rear_platform_is_empty'
@@ -148,13 +168,15 @@ class move_arm(smach.State):
         self.move_arm_to = position
         self.blocking = blocking
         self.tolerance = tolerance
-
+        
     def execute(self, userdata):
         position = self.move_arm_to or userdata.move_arm_to
         rospy.loginfo('MOVING ARM TO')
         try:
-            arm.move_to(position, blocking=self.blocking, tolerance=self.tolerance)
-        except ArmNavigationError as e:
+            arm_command.set_named_target(position)
+            arm_command.go()
+            
+        except Exception as e:
             rospy.logerr('Move arm failed: %s' % (str(e)))
             return 'failed'
         return 'succeeded'
@@ -171,7 +193,9 @@ class control_gripper(smach.State):
         self.action = action
 
     def execute(self, userdata):
-        arm.gripper(self.action)
+        gripper_command.set_named_target(self.action)
+        gripper_command.go()
+        
         return 'succeeded'
        
 
@@ -186,18 +210,27 @@ class grasp_object(smach.State):
 
     def __init__(self):
         smach.State.__init__(self,
-                             outcomes=['succeeded', 'tf_error'])
+                             outcomes=['succeeded', 'tf_error'], input_keys=['object_to_grasp'])
         self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
-        arm.gripper('open')
-        rospy.sleep(GRIPPER_WAIT_TIME)
+        gripper_command.set_named_target("open")
+        gripper_command.go()
+        
         try:
+            #FIXME: What is this doing? - Do we need this with moveIt?
+            #FIXME: what is the gripper_finger_link?
+#             t = self.tf_listener.getLatestCommonTime('/base_link',
+#                                                       'gripper_finger_link')
+#             (p, q) = self.tf_listener.lookupTransform('/base_link',
+#                                                       'gripper_finger_link',
+#                                                       t)
             t = self.tf_listener.getLatestCommonTime('/base_link',
-                                                      'gripper_finger_link')
+                                                      'gripper_palm_link')
             (p, q) = self.tf_listener.lookupTransform('/base_link',
-                                                      'gripper_finger_link',
+                                                      'gripper_palm_link',
                                                       t)
+
             rpy = tf.transformations.euler_from_quaternion(q)
         except (tf.LookupException,
                 tf.ConnectivityException,
@@ -205,17 +238,27 @@ class grasp_object(smach.State):
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
         try:
-            dx = rospy.get_param('script_server/arm/grasp_delta/x')
-            dy = rospy.get_param('script_server/arm/grasp_delta/y')
-            dz = rospy.get_param('script_server/arm/grasp_delta/z')
+            #FIXME: removed script_server values with 0.0 - is this OK?
+            dx = 0.0
+            dy = 0.0
+            dz = 0.0
+
+            #dx = rospy.get_param('script_server/arm/grasp_delta/x')
+            #dy = rospy.get_param('script_server/arm/grasp_delta/y')
+            #dz = rospy.get_param('script_server/arm/grasp_delta/z')
             #rospy.logerr('read dxyz ' + dx + ',' + dy + ',' + dz)
         except KeyError:
             rospy.logerr('No Grasp Pose Change Set.')
-        arm_cart.move([['/base_link', float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]])
-        #Will need to check if above call uses blocking.
-        #rospy.sleep(1)
-        arm.gripper('close')
-        rospy.sleep(GRIPPER_WAIT_TIME)
+
+        target_link = '/base_link'
+        target_pose = [float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]
+        
+        arm_command.set_pose_target(target_pose, target_link)
+        arm_command.go()
+        
+        gripper_command.set_named_target("close")
+        gripper_command.go()
+
         return 'succeeded'
 
 
@@ -225,7 +268,7 @@ class grasp_obj_from_pltf(smach.State):
         smach.State.__init__(self, outcomes=['succeeded', 'no_more_obj_on_pltf'], 
                              input_keys=['rear_platform_occupied_poses'],
                              output_keys=['rear_platform_occupied_poses'])
-
+              
     def execute(self, userdata):   
         global planning_mode
         
@@ -235,20 +278,27 @@ class grasp_obj_from_pltf(smach.State):
 
         pltf_obj_pose = userdata.rear_platform_occupied_poses.pop()
         
+        #FIXME Isnt moveIt always planned?
         if planning_mode != "planned":
-            sss.move("arm", "platform_intermediate")
-            sss.move("arm", pltf_obj_pose+"_pre")
+            arm_command.set_named_target("platform_intermediate")
+            arm_command.go()
+            arm_command.set_named_target(pltf_obj_pose+"_pre")
+            arm_command.go()
         
-        sss.move("arm", pltf_obj_pose, mode=planning_mode)
+        arm_command.set_named_target(pltf_obj_pose)
+        arm_command.go()
+            
+        gripper_command.set_named_target("close")
+        gripper_command.go()
         
-        sss.move("gripper", "close")
-        rospy.sleep(GRIPPER_WAIT_TIME)
-
-        if planning_mode != "planned":        
-            sss.move("arm", pltf_obj_pose+"_pre")
-            sss.move("arm", "platform_intermediate")
-        
-        sss.move("arm", "candle", mode=planning_mode)
+        if planning_mode != "planned": 
+            arm_command.set_named_target(pltf_obj_pose+"_pre")
+            arm_command.go()
+            arm_command.set_named_target("platform_intermediate")
+            arm_command.go()
+            
+        arm_command.set_named_target("candle")
+        arm_command.go()
            
         return 'succeeded'
     
@@ -259,7 +309,7 @@ class place_object_in_configuration(smach.State):
             outcomes=['succeeded', 'no_more_cfg_poses'],
             input_keys=['obj_goal_configuration_poses'],
             output_keys=['obj_goal_configuration_poses'])
-        
+                
     def execute(self, userdata):
         global planning_mode
         
@@ -271,12 +321,14 @@ class place_object_in_configuration(smach.State):
         print "goal pose taken: ",cfg_goal_pose
         print "rest poses: ", userdata.obj_goal_configuration_poses
         
-        sss.move("arm", cfg_goal_pose, mode=planning_mode)
+        arm_command.set_named_target(cfg_goal_pose)
+        arm_command.go()
         
-        sss.move("gripper","open")
-        rospy.sleep(GRIPPER_WAIT_TIME+1.0)
-
-        sss.move("arm", "candle", mode=planning_mode)
+        gripper_command.set_named_target("open")
+        gripper_command.go()
+        
+        arm_command.set_named_target("candle")
+        arm_command.go()
                 
         return 'succeeded'
 
@@ -316,4 +368,27 @@ class compute_pregrasp_pose(smach.State):
         userdata.move_arm_to = [self.FRAME_ID,
                                 p.x, p.y, p.z + 0.1,
                                 0, 3.14, 0]
+        return 'succeeded'
+
+
+##
+## copied from old states
+##
+class move_arm_out_of_view(smach.State):
+
+    def __init__(self, do_blocking = True):
+        smach.State.__init__(self, outcomes=['succeeded'])
+
+        self.do_blocking = do_blocking
+
+    def execute(self, userdata):   
+        global planning_mode
+
+        if planning_mode != "planned":
+            arm_command.set_named_target("candle")
+            arm_command.go()
+            
+        arm_command.set_named_target("out_of_view")
+        arm_command.go()
+                
         return 'succeeded'

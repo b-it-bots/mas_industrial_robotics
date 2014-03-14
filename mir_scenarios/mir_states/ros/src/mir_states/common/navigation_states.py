@@ -11,7 +11,7 @@ from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
 sss = simple_script_server()
 
-from mir_navigation_msgs.msg import OrientToBaseAction
+from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 from mcr_navigation_msgs.srv import MoveRelative
 
 class place_base_in_front_of_object(smach.State):
@@ -108,6 +108,7 @@ class move_base(smach.State):
         self.timeout = rospy.Duration(timeout)
 
     def execute(self, userdata):
+
         pose = self.move_base_to or userdata.move_base_to
         handle_base = sss.move('base', pose, blocking=False)
         started = rospy.Time.now()
@@ -126,7 +127,7 @@ class move_base(smach.State):
                 userdata.base_pose = None
                 return 'failed'
 
-
+       
 class adjust_to_workspace(smach.State):
 
     ADJUST_SERVER = '/mir_navigation/base_placement/adjust_to_workspace'
@@ -255,7 +256,7 @@ class move_base_relative(smach.State):
         supplied to the state constructor then it will override this input.
     """
 
-    SRV = '/mcrnavigation/mcr_relative_movements/move_base_relative'
+    SRV = '/mcr_navigation/relative_movements/move_base_relative'
 
     def __init__(self, offset=None):
         smach.State.__init__(self,
@@ -287,3 +288,31 @@ class move_base_relative(smach.State):
             return 'failed'
         return 'succeeded'
 
+## copied from old states
+## same as move_base?
+class approach_pose(smach.State):
+
+    def __init__(self, pose = ""):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
+
+        self.pose = pose;    
+
+    def execute(self, userdata):
+        
+        if(self.pose == ""):
+            self.pose2 = userdata.base_pose_to_approach
+        else:
+            self.pose2 = self.pose 
+        
+        handle_base = sss.move("base", self.pose2)
+
+        while True:                
+            rospy.sleep(0.1)
+            base_state = handle_base.get_state()
+            if (base_state == actionlib.simple_action_client.GoalStatus.SUCCEEDED):
+                return "succeeded"
+            elif (base_state == actionlib.simple_action_client.GoalStatus.ACTIVE):
+                continue
+            else:
+                print 'last state: ',base_state
+                return "failed"

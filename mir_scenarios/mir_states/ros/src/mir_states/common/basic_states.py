@@ -7,8 +7,7 @@ import smach_ros
 import commands
 import os
 
-from simple_script_server import *
-sss = simple_script_server()
+import mir_states.common.manipulation_states as manipulation
 
 class init_robot(smach.State):
 
@@ -18,13 +17,12 @@ class init_robot(smach.State):
     def execute(self, userdata):
         
         # init arm
-        arm_to_init = sss.move("arm", "home", blocking=False)
+        manipulation.arm_command.set_named_target("home")
+        manipulation.arm_command.go(wait=False)
         
         #init gripper
-        gripper_open = sss.move("gripper", "open", blocking=False)
-                
-        arm_to_init.wait();
-        gripper_open.wait();
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go(wait=False)
         
         rospy.loginfo("robot initialized")
         

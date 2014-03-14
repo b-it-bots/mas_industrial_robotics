@@ -8,8 +8,7 @@ import mir_states.common.manipulation_states as gms
 import mir_states.common.navigation_states as gns
 import mir_states.common.perception_states as gps
 
-import simple_script_server
-sss = simple_script_server.simple_script_server()
+import mir_states.common.manipulation_states as manipulation
 
 
 class load_objects(smach.State):
@@ -90,10 +89,11 @@ class get_obj_poses_for_goal_configuration(smach.State):
             outcomes=['succeeded', 'configuration_poses_not_available'],
             input_keys=['task_spec','obj_goal_configuration_poses'],
             output_keys=['obj_goal_configuration_poses'])
-        
+                
     def execute(self, userdata):
         
-        sss.move("gripper","open")
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go()
         print userdata.task_spec.object_config 
         
         if (not rospy.has_param("/script_server/arm/" + userdata.task_spec.object_config)):

@@ -5,18 +5,19 @@ import rospy
 import smach
 import smach_ros
 import tf
-from raw_srvs.srv import RelativeMovements
-from simple_script_server import *
-sss = simple_script_server()
+##from raw_srvs.srv import RelativeMovements
 
 planning_mode=""
 
 from geometry_msgs.msg import PoseStamped
-from raw_srvs.srv import SetPoseStamped
-from raw_base_placement.msg import OrientToBaseAction, OrientToBaseActionGoal
+##from raw_srvs.srv import SetPoseStamped
+from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
+
 from actionlib.simple_action_client import GoalStatus
-from simple_script_server import *
-sss = simple_script_server()
+
+import mir_states.common.manipulation_states as manipulation
+
+
 
 def print_task_spec(task_list):
     
@@ -44,7 +45,7 @@ class select_object_to_be_grasped(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
             outcomes=['obj_selected', 'no_obj_selected','no_more_free_poses_at_robot_platf'],
-            input_keys=['recognized_objects', 'objects_to_be_grasped', 'object_to_grasp', 'rear_platform_free_poses'],
+            input_keys=['recognized_objects', 'objects_to_be_grasped', 'object_to_grasp', 'rear_platform_free_poses','object_to_be_adjust_to'],
             output_keys=['object_to_grasp', 'object_to_be_adjust_to'])
         
     def execute(self, userdata):
@@ -75,7 +76,7 @@ class select_btt_subtask(smach.State):
         
     def execute(self, userdata):
         
-        print_task_spec(userdata.task_list)
+        # print_task_spec(userdata.task_list)
 
         # check if there is a empty obj_names list for a given location and remove it
         for i in range(len(userdata.task_list)):
@@ -128,10 +129,11 @@ class get_obj_poses_for_goal_configuration(smach.State):
             outcomes=['succeeded', 'configuration_poses_not_available'],
             input_keys=['task_spec','obj_goal_configuration_poses'],
             output_keys=['obj_goal_configuration_poses'])
-        
+       
     def execute(self, userdata):
         
-        sss.move("gripper","open")
+        manipulation.gripper_command.set_named_target("open")
+        
         print userdata.task_spec.object_config 
         
         if (not rospy.has_param("/script_server/arm/" + userdata.task_spec.object_config)):
@@ -213,7 +215,7 @@ class grasp_obj_from_pltf_btt(smach.State):
         smach.State.__init__(self, outcomes=['object_grasped', 'no_more_obj_for_this_workspace'], 
                              input_keys=['rear_platform_occupied_poses', 'rear_platform_free_poses', 'base_pose_to_approach', 'task_list', 'last_grasped_obj'],
                              output_keys=['rear_platform_occupied_poses', 'rear_platform_free_poses', 'last_grasped_obj'])
-
+       
     def execute(self, userdata):   
         global planning_mode
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
@@ -250,19 +252,26 @@ class grasp_obj_from_pltf_btt(smach.State):
 	print "plat_pose: ", pltf_obj_pose.platform_pose
 	print "plat_name: ", pltf_obj_pose.obj_name
         if planning_mode != "planned":
-            sss.move("arm", "platform_intermediate")
-            sss.move("arm", str(pltf_obj_pose.platform_pose)+"_pre")
-
-        sss.move("arm", str(pltf_obj_pose.platform_pose), mode=planning_mode)
+            manipulation.arm_command.set_named_target("platform_intermediate")
+            manipulation.arm_command.go()
+            manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+            manipulation.arm_command.go()
+            
+        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose))
+        manipulation.arm_command.go()
         
-        sss.move("gripper", "close")
-        rospy.sleep(3)
-       
+        manipulation.gripper_command.set_named_target("close")
+        manipulation.gripper_command.go()
+        
+        #FIXME: Isnot Moveit always a planned motion
         if planning_mode != "planned":
-            sss.move("arm", str(pltf_obj_pose.platform_pose)+"_pre")
-            sss.move("arm", "platform_intermediate")
-
-        sss.move("arm", "candle", mode=planning_mode)
+            manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+            manipulation.arm_command.go()
+            manipulation.arm_command.set_named_target("platform_intermediate")
+            manipulation.arm_command.go()
+            
+        manipulation.arm_command.set_named_target("candle")
+        manipulation.arm_command.go()
            
         return 'object_grasped'
 
@@ -273,7 +282,7 @@ class place_object_in_configuration_btt(smach.State):
             outcomes=['succeeded', 'no_more_cfg_poses'],
             input_keys=['base_pose_to_approach', 'objects_goal_configuration', 'last_grasped_obj', 'task_list', 'destinaton_free_poses', 'obj_goal_configuration_poses'],
             output_keys=['destinaton_free_poses', 'task_list'])
-        
+               
     def execute(self, userdata):
         global planning_mode
         
@@ -293,12 +302,12 @@ class place_object_in_configuration_btt(smach.State):
         print "goal pose taken: ",cfg_goal_pose
         print "rest poses: ", userdata.destinaton_free_poses[i].free_poses
                 
-        sss.move("arm", cfg_goal_pose, mode=planning_mode)
+        manipulation.arm_command.set_named_target(cfg_goal_pose)
+        manipulation.arm_command.go()
         
-        sss.move("gripper","open")
-        rospy.sleep(2)
-        
-        
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go()
+                
         #delete placed obj from task list
         for j in range(len(userdata.task_list)):
             if userdata.task_list[j].type == 'destination' and userdata.task_list[j].location == userdata.base_pose_to_approach:
@@ -316,40 +325,43 @@ class place_object_in_configuration_btt(smach.State):
     
         return 'succeeded'
 
-
+#FIXME: replace by generic state
 class place_obj_on_rear_platform_btt(smach.State):
 
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'no_more_free_poses'], 
                                    input_keys=['object_to_grasp', 'rear_platform_free_poses', 'rear_platform_occupied_poses', 'task_list', 'base_pose_to_approach'], 
                                    output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses', 'task_list'])
-
+       
     def execute(self, userdata):   
         global planning_mode
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         
         if planning_mode != "planned":
-            sss.move("arm", "candle", mode=planning_mode)
-            sss.move("arm", "platform_intermediate", mode=planning_mode)
-
+            manipulation.arm_command.set_named_target("candle")
+            manipulation.arm_command.go()
+            manipulation.arm_command.set_named_target("platform_intermediate")
+            manipulation.arm_command.go()
+            
         print_task_spec(userdata.task_list)
         
         if(len(userdata.rear_platform_free_poses) == 0):
             rospy.logerr("NO more free poses on platform")
             return 'no_more_free_poses'
 
-      # Removing free poses          
+        # Removing pre poses (Do we need these poses?)
         pltf_pose = userdata.rear_platform_free_poses.pop();
 
         if planning_mode != "planned":
-            sss.move("arm", pltf_pose.platform_pose+"_pre")
+            manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
+            manipulation.arm_command.go()
+            
+        manipulation.arm_command.set_named_target(pltf_pose.platform_pose)
+        manipulation.arm_command.go()
+            
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go()
         
-        sss.move("arm", pltf_pose.platform_pose, mode=planning_mode)
-        
-        
-        sss.move("gripper", "open")
-        rospy.sleep(2)
-
         print "object_to_grasp: ", userdata.object_to_grasp.name
         #delete from task list
         for i in range(len(userdata.task_list)):
@@ -368,9 +380,11 @@ class place_obj_on_rear_platform_btt(smach.State):
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         
         if planning_mode != "planned":
-            sss.move("arm", pltf_pose.platform_pose+"_pre")
-        
-        sss.move("arm", "platform_intermediate", mode=planning_mode)
+            manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
+            manipulation.arm_command.go()
+            
+        manipulation.arm_command.set_named_target("platform_intermediate")
+        manipulation.arm_command.go()
 
         return 'succeeded'
 
@@ -379,7 +393,7 @@ class place_obj_on_rear_platform_btt(smach.State):
 class check_if_platform_has_still_objects(smach.State):
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['still_objs_on_robot_pltf', 'no_more_objs_on_robot_pltf'], 
+        smach.State.__init__(self, outcomes=['still_objs_on_robot_pltf', 'no_more_objs_on_robot_pltf'],
                                    input_keys=['rear_platform_occupied_poses','source_visits','task_list'],
                                    output_keys=['source_visits','lasttask'])
 
@@ -432,6 +446,7 @@ class skip_pose(smach.State):
         print_task_spec(userdata.task_list)
                 
         return 'pose_skipped'
+
 class compute_pregrasp_pose(smach.State):
 
     """
@@ -472,7 +487,7 @@ class compute_base_shift_to_object(smach.State):
     def __init__(self):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'tf_error'],
-                             input_keys=['object_pose'],
+                             input_keys=['object_pose','move_base_by'],
                              output_keys=['move_base_by'])
         self.tf_listener = tf.TransformListener()
 
@@ -498,50 +513,50 @@ class compute_base_shift_to_object(smach.State):
         return 'succeeded'
 
 
-class move_base_relative_btt(smach.State):
-
-    """
-    Shift the robot by the offset stored in 'move_base_by' field of userdata
-    or the offset passed to the constructor.
-
-    Input
-    -----
-    move_base_by: 3-tuple
-        x, y, and theta displacement the shift the robot by. If an offset was
-        supplied to the state constructor then it will override this input.
-    """
-
-    SRV = '/raw_relative_movements/move_base_relative'
-
-    def __init__(self, offset=None):
-        smach.State.__init__(self,
-                             outcomes=['succeeded', 'failed'],
-                             input_keys=['move_base_by'])
-        self.offset = offset
-        self.move_base_relative = rospy.ServiceProxy(self.SRV, RelativeMovements)
-
-    def execute(self, userdata):
-        rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
-        self.move_base_relative.wait_for_service()
-        offset = self.offset or userdata.move_base_by
-        pose = PoseStamped()
-        pose.pose.position.x = offset[0]
-        pose.pose.position.y = offset[1]
-        pose.pose.position.z = 0.1  # speed
-        quat = tf.transformations.quaternion_from_euler(0, 0, offset[2])
-        pose.pose.orientation.x = quat[0]
-        pose.pose.orientation.y = quat[1]
-        pose.pose.orientation.z = quat[2]
-        pose.pose.orientation.w = quat[3]
-        try:
-            response = self.move_base_relative(pose)
-            if response.status == 'failure_obtacle_front':
-                # return values required by the scenario. This situation arises when the base is close to the platform
-                return 'succeeded'
-        except:
-            rospy.logerr('Could no execute <<%s>>' % (self.SRV))
-            return 'failed'
-        return 'succeeded'
+# class move_base_relative_btt(smach.State):
+# 
+#     """
+#     Shift the robot by the offset stored in 'move_base_by' field of userdata
+#     or the offset passed to the constructor.
+# 
+#     Input
+#     -----
+#     move_base_by: 3-tuple
+#         x, y, and theta displacement the shift the robot by. If an offset was
+#         supplied to the state constructor then it will override this input.
+#     """
+# 
+#     SRV = '/raw_relative_movements/move_base_relative'
+# 
+#     def __init__(self, offset=None):
+#         smach.State.__init__(self,
+#                              outcomes=['succeeded', 'failed'],
+#                              input_keys=['move_base_by'])
+#         self.offset = offset
+#         self.move_base_relative = rospy.ServiceProxy(self.SRV, RelativeMovements)
+# 
+#     def execute(self, userdata):
+#         rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
+#         self.move_base_relative.wait_for_service()
+#         offset = self.offset or userdata.move_base_by
+#         pose = PoseStamped()
+#         pose.pose.position.x = offset[0]
+#         pose.pose.position.y = offset[1]
+#         pose.pose.position.z = 0.1  # speed
+#         quat = tf.transformations.quaternion_from_euler(0, 0, offset[2])
+#         pose.pose.orientation.x = quat[0]
+#         pose.pose.orientation.y = quat[1]
+#         pose.pose.orientation.z = quat[2]
+#         pose.pose.orientation.w = quat[3]
+#         try:
+#             response = self.move_base_relative(pose)
+#             if response.status == 'failure_obtacle_front':
+#                 # return values required by the scenario. This situation arises when the base is close to the platform
+#                 return 'succeeded'
+#         except:
+#             rospy.logerr('Could no execute <<%s>>' % (self.SRV))
+#             return 'failed'
+#         return 'succeeded'
 
 class loop_for(smach.State):
     '''
@@ -554,7 +569,7 @@ class loop_for(smach.State):
                              output_keys=['vscount'])
         self.max_loop_count = 2
         self.loop_count = 0
-
+       
     def execute(self, userdata):
         self.loop_count = userdata.vscount
         if self.loop_count <= self.max_loop_count:
@@ -563,6 +578,8 @@ class loop_for(smach.State):
             return 'loop'
         else:
             userdata.vscount = 0
-            sss.move("arm", "platform_intermediate")
+            manipulation.arm_command.set_named_target("platform_intermediate")
+            manipulation.arm_command.go()
+
             return 'continue'  
 

@@ -12,7 +12,7 @@
     <!-- simulation related launches -->
     <group if="$(arg sim)">
       <include file="$(find mir_bringup_sim)/robot.launch" />   <!-- base components -->
-      <include file="$(find hbrs_gazebo_objects)/ros/launch/spawn_objects.launch"/>   <!-- spawn objects -->
+      <include file="$(find mcr_gazebo_objects)/ros/launch/spawn_objects.launch"/>   <!-- spawn objects -->
     </group>
 
     <!-- navigation -->

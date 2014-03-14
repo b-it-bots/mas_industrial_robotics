@@ -28,6 +28,13 @@
         <joint name="arm_joint_4" value="0.02" />
         <joint name="arm_joint_5" value="0.02" />
     </group_state>
+    <group_state name="home" group="arm_1">
+        <joint name="arm_joint_1" value="0.011" />
+        <joint name="arm_joint_2" value="0.011" />
+        <joint name="arm_joint_3" value="-0.1" />
+        <joint name="arm_joint_4" value="0.023" />
+        <joint name="arm_joint_5" value="0.12" />
+    </group_state>
     <group_state name="candle" group="arm_1">
         <joint name="arm_joint_1" value="2.9496" />
         <joint name="arm_joint_2" value="1.13446" />
@@ -63,12 +70,33 @@
         <joint name="arm_joint_4" value="0.347146" />
         <joint name="arm_joint_5" value="2.94998" />
     </group_state>
+    <group_state name="platform_middle_pre" group="arm_1">
+        <joint name="arm_joint_1" value="2.92379" />
+        <joint name="arm_joint_2" value="0.229669" />
+        <joint name="arm_joint_3" value="-2.73985" />
+        <joint name="arm_joint_4" value="0.47354" />
+        <joint name="arm_joint_5" value="2.94998" />
+    </group_state>
+    <group_state name="platform_intermediate" group="arm_1">
+        <joint name="arm_joint_1" value="2.92379" />
+        <joint name="arm_joint_2" value="1.17834" />
+        <joint name="arm_joint_3" value="-3.30993" />
+        <joint name="arm_joint_4" value="0.44033" />
+        <joint name="arm_joint_5" value="2.95170" />
+    </group_state>
     <group_state name="platform_left" group="arm_1">
         <joint name="arm_joint_1" value="3.26146" />
         <joint name="arm_joint_2" value="0.684746" />
         <joint name="arm_joint_3" value="-3.40583" />
         <joint name="arm_joint_4" value="0.347168" />
         <joint name="arm_joint_5" value="2.94996" />
+    </group_state>
+    <group_state name="platform_left_pre" group="arm_1">
+        <joint name="arm_joint_1" value="3.26146" />
+        <joint name="arm_joint_2" value="0.250139" />
+        <joint name="arm_joint_3" value="-2.74139" />
+        <joint name="arm_joint_4" value="0.476991" />
+        <joint name="arm_joint_5" value="2.69522" />
     </group_state>
     <group_state name="platform_right" group="arm_1">
         <joint name="arm_joint_1" value="2.66144" />
@@ -77,6 +105,13 @@
         <joint name="arm_joint_4" value="0.347168" />
         <joint name="arm_joint_5" value="2.94996" />
     </group_state>
+    <group_state name="platform_right_pre" group="arm_1">
+        <joint name="arm_joint_1" value="2.66144" />
+        <joint name="arm_joint_2" value="0.285049" />
+        <joint name="arm_joint_3" value="-2.93854" />
+        <joint name="arm_joint_4" value="0.658518" />
+        <joint name="arm_joint_5" value="3.04126" />
+    </group_state>
     <group_state name="pre_grasp" group="arm_1">
         <joint name="arm_joint_1" value="2.89373" />
         <joint name="arm_joint_2" value="1.53772" />
@@ -84,6 +119,65 @@
         <joint name="arm_joint_4" value="2.9719" />
         <joint name="arm_joint_5" value="2.9175" />
     </group_state>
+    <group_state name="pregrasp_laying" group="arm_1">
+        <joint name="arm_joint_1" value="2.89373" />
+        <joint name="arm_joint_2" value="1.53772" />
+        <joint name="arm_joint_3" value="-1.68493" />
+        <joint name="arm_joint_4" value="2.9719" />
+        <joint name="arm_joint_5" value="2.9175" />
+    </group_state>
+    <group_state name="line/line_1" group="arm_1">
+        <joint name="arm_joint_1" value="3.38231" />
+        <joint name="arm_joint_2" value="2.13810" />
+        <joint name="arm_joint_3" value="-1.67897" />
+        <joint name="arm_joint_4" value="2.52825" />
+        <joint name="arm_joint_5" value="2.92261" />
+    </group_state>
+    <group_state name="line/line_2" group="arm_1">
+        <joint name="arm_joint_1" value="2.93732" />
+        <joint name="arm_joint_2" value="1.91937" />
+        <joint name="arm_joint_3" value="-1.36863" />
+        <joint name="arm_joint_4" value="2.47464" />
+        <joint name="arm_joint_5" value="2.91953" />
+    </group_state>
+    <group_state name="line/line_3" group="arm_1">
+        <joint name="arm_joint_1" value="2.55503" />
+        <joint name="arm_joint_2" value="2.13815" />
+        <joint name="arm_joint_3" value="-1.67899" />
+        <joint name="arm_joint_4" value="2.52825" />
+        <joint name="arm_joint_5" value="2.92261" />
+    </group_state>
+    <group_state name="zigzag/zigzag_1" group="arm_1">
+        <joint name="arm_joint_1" value="3.33455" />
+        <joint name="arm_joint_2" value="2.35950" />
+        <joint name="arm_joint_3" value="-1.91344" />
+        <joint name="arm_joint_4" value="2.25267" />
+        <joint name="arm_joint_5" value="2.92261" />
+    </group_state>
+    <group_state name="zigzag/zigzag_2" group="arm_1">
+        <joint name="arm_joint_1" value="2.93732" />
+        <joint name="arm_joint_2" value="1.91937" />
+        <joint name="arm_joint_3" value="-1.36863" />
+        <joint name="arm_joint_4" value="2.47464" />
+        <joint name="arm_joint_5" value="2.91953" />
+    </group_state>
+    <group_state name="zigzag/zigzag_3" group="arm_1">
+        <joint name="arm_joint_1" value="2.60860" />
+        <joint name="arm_joint_2" value="2.35956" />
+        <joint name="arm_joint_3" value="-1.91344" />
+        <joint name="arm_joint_4" value="2.25269" />
+        <joint name="arm_joint_5" value="2.92261" />
+    </group_state>
+    
+    <group_state name="open" group="arm_1_gripper">
+        <joint name="gripper_finger_joint_l" value="0.012"/>
+        <joint name="gripper_finger_joint_r" value="0.012"/>
+    </group_state>
+    <group_state name="close" group="arm_1_gripper">
+        <joint name="gripper_finger_joint_l" value="0.0"/>
+        <joint name="gripper_finger_joint_r" value="0.0"/>
+    </group_state>
+
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="arm_1_gripper" parent_link="arm_link_5" group="arm_1_gripper" parent_group="arm_1" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
