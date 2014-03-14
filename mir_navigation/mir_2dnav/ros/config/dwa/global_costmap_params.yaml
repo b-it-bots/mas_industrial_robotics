@@ -1,5 +1,33 @@
+# Documentation available at http://wiki.ros.org/costmap_2d?distro=hydro
+
 global_costmap:
-  global_frame: /map                #default : odom
-  robot_base_frame: base_footprint  #default : "base_link"
-  update_frequency: 5.0             #default : 5.0
-  static_map: true                  #default : true
+
+# --------------------------------------------------------
+# global_frame: The global frame for the costmap to operate in
+# default : map
+
+  global_frame: /map
+
+# --------------------------------------------------------
+# robot_base_frame: The name of the frame for the base link of the robot
+# default : "base_link"
+
+  robot_base_frame: base_footprint
+  
+# --------------------------------------------------------
+# update_frequency: The frequency in Hz for the map to be updated
+# default : 5.0
+
+  update_frequency: 5.0
+# --------------------------------------------------------
+# publish_frequency: The frequency in Hz for the map to be publish display information
+# default : 0.0
+  
+  publish_frequency: 6.0
+  
+# --------------------------------------------------------
+# static_map: Whether or not to use the static map to initialize the costmap. 
+# If the rolling_window parameter is set to true, this parameter must be set to false
+# default : true
+
+  static_map: true
