@@ -41,6 +41,7 @@ class add_object_from_task_list_state(smach.State):
                     obj = Object()
                     obj.name = object_names
                     obj.pose.header.frame_id = "/base_link"
+                    obj.pose.pose.position.x = 0.61
                     object_list.append(obj)
                  
         set_object_list(object_list)

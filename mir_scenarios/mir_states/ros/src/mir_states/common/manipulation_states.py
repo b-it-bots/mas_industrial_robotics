@@ -6,18 +6,13 @@ import smach_ros
 import math
 import tf
 
-import moveit_commander
-##
-## FIXME: not actualla a state, more a helper util
-##
 arm_command = moveit_commander.MoveGroupCommander('arm_1')
 gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
-
 
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 
-planning_mode = ""            # no arm planning
+planning_mode = "planned" # |planned|<other>
 
 import mir_states.common.mockup_util  as mockup
 from mcr_perception_msgs.msg import ObjectList, Object
