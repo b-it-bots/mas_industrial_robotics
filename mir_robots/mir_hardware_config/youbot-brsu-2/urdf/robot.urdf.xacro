@@ -51,6 +51,9 @@
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
   <xacro:include filename="$(find youbot_description)/urdf/misc/camera_tower.urdf.xacro"/>
+  <xacro:include filename="$(find youbot_description)/urdf/misc/arm_pov_mount.urdf.xacro"/>
+  <xacro:include filename="$(find youbot_description)/urdf/misc/festo_mount.urdf.xacro"/>
+
 
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
 
@@ -74,5 +77,15 @@
   <xacro:asus_xtion_camera name="tower_cam3d" parent="camera_tower_link" tilt="0.5">
     <origin xyz="0.015 0 0.47" rpy="0 0 0" />
   </xacro:asus_xtion_camera>
- 
+
+  <!-- Arm POV Mount -->
+  <xacro:arm_pov_mount name="arm_pov_mount" parent="arm_link_5">
+    <origin xyz="0.075 0.0 -0.02" rpy="0 0 0" />
+  </xacro:arm_pov_mount>
+
+  <!-- Festo Finger Mount -->
+  <xacro:festo_mount name="festo_mount" parent="gripper_palm_link">
+    <origin xyz="0.0 0.0 0.05" rpy="0 0 0" />
+  </xacro:festo_mount>
+  
 </robot>
