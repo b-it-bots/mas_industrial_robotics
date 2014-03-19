@@ -7,4 +7,8 @@
   	
   </node> 
 
+  <node pkg="mcr_linear_regression" type="laser_scan_linear_regression_node" name="linear_regression" ns="mcr_perceptiion" respawn="false" output="screen" >
+        <param name="scan_topic" value="/scan_front" />
+  </node>
+
 </launch>
