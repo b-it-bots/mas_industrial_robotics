@@ -2,8 +2,6 @@
 <launch>
 
 
-
-
     <include file="$(find mir_basic_transportation_test)/ros/launch/btt_params.launch"/>
 
     <!-- real robot related launches  -->
@@ -20,6 +18,7 @@
 
     <!-- base placement -->
     <include file="$(find mir_base_placement)/ros/launch/base_placement.launch"/>
+    <include file="$(find mcr_linear_regression)/ros/launch/laser_scan_linear_regression.launch"/>
     <!--
     <include file="$(find mir_base_placement)/ros/launch/base_placement_mockup.launch" />
     -->
