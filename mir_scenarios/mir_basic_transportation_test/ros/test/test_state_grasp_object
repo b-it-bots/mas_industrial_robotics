@@ -1,0 +1,56 @@
+#!/usr/bin/python
+
+import rospy
+
+import smach
+import smach_ros
+
+# import of generic states
+# generic states
+# import mir_states.common.basic_states as gbs_o
+# ##import mir_states.common.robocup_states as grs_o
+#import mir_states.common.navigation_states as gns_o
+import mir_states.common.manipulation_states as gms_o
+# import mir_states.common.perception_states as gps_o
+# 
+# 
+# import mir_states.robocup.basic_transportation_test_states as btts
+# import mir_states.robocup.referee_box_states as refbox
+# 
+# #### IMPORT SOME NEW STATES!! ###
+# import mir_states.common.basic_states as gbs 
+# 
+# import mir_states.common.perception_mockup_util as perception_mockup_util
+# from mcr_perception_msgs.msg import ObjectList, Object
+
+# main
+def main():
+    rospy.init_node('test_state_adjust_to_workspace')
+
+    SM = smach.StateMachine(outcomes=['done'])
+
+    
+    SM.userdata.object_to_grasp = None
+    
+     # open the container
+    with SM:
+        
+        smach.StateMachine.add('GRASP_OBJ', gms_o.grasp_object(),
+                    transitions={'succeeded':'done',
+                                'tf_error':'SKIP_SOURCE_POSE'})
+       
+    # Start SMACH viewer
+    smach_viewer = smach_ros.IntrospectionServer('TEST_STATE_grasp_object', SM, 'TEST_STATE_grasp_object')
+    smach_viewer.start()
+
+    result = SM.execute()
+
+    # stop SMACH viewer
+    while (result is None):
+        rospy.spin()
+    rospy.loginfo('test state adjust_to_workspace is Done.')
+    # smach_thread.stop()
+    smach_viewer.stop()
+
+if __name__ == '__main__':
+    main()

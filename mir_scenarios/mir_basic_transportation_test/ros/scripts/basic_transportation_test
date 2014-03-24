@@ -59,7 +59,7 @@ def main():
 
     SM.userdata.vscount = 0
 
-    useMockup = False
+    useMockup = True
     
      # open the container
     with SM:

@@ -6,11 +6,21 @@ import smach_ros
 import math
 import tf
 
+import moveit_commander
+import geometry_msgs
+
 arm_command = moveit_commander.MoveGroupCommander('arm_1')
+arm_command.set_goal_position_tolerance(0.005)
+arm_command.set_goal_orientation_tolerance(0.005)
+arm_command.set_goal_joint_tolerance(0.005)
+
+
 gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
 
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
+
+from geometry_msgs.msg import StampedPose
 
 planning_mode = "planned" # |planned|<other>
 
@@ -245,10 +255,22 @@ class grasp_object(smach.State):
         except KeyError:
             rospy.logerr('No Grasp Pose Change Set.')
 
-        target_link = '/base_link'
+        target_link = 'arm_link_5'
         target_pose = [float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]
         
-        arm_command.set_pose_target(target_pose, target_link)
+        pose = StampedPose()
+        pose.header.frame_id = "/base_link"
+        pose.pose.position.x = float(p[0] - dx)
+        pose.pose.position.y = float(p[1] - dy)
+        pose.pose.position.z = float(p[2] - dz)
+        
+        
+        pose.orientation.x = q[0]
+        pose.orientation.y = q[1]
+        pose.orientation.z = q[2]
+        pose.orientation.w = q[3]
+        
+        arm_command.set_pose_target(pose, target_link)
         arm_command.go()
         
         gripper_command.set_named_target("close")

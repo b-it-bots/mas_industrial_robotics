@@ -52,8 +52,8 @@
   <xacro:include filename="$(find youbot_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
   <xacro:include filename="$(find youbot_description)/urdf/misc/camera_tower.urdf.xacro"/>
 
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/microsoft_lifecam_1080_mount.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
-
 
   <!-- base laser front -->
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
@@ -74,5 +74,10 @@
   <xacro:asus_xtion_camera name="tower_cam3d" parent="camera_tower_link" tilt="0.5">
     <origin xyz="0.015 0 0.47" rpy="0 0 0" />
   </xacro:asus_xtion_camera>
- 
+
+  <!-- Arm POV Mount -->
+  <xacro:microsoft_lifecam_1080_mount name="microsoft_lifecam_1080_mount" parent="arm_link_5">
+    <origin xyz="-0.035 0.0 -0.025" rpy="0 0 3.14159265" />
+  </xacro:microsoft_lifecam_1080_mount>
+
 </robot>
