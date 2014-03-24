@@ -1,7 +1,16 @@
 <?xml version="1.0"?>
 <launch>
 
+
+
+
     <include file="$(find mir_basic_transportation_test)/ros/launch/btt_params.launch"/>
+
+    <!-- real robot related launches  -->
+    <include file="$(find mir_bringup)/robot.launch" />
+
+    <!-- moveit -->
+    <include file="$(find mir_moveit_youbot_brsu_2)/launch/move_group.launch" />
     
     <!-- navigation -->
     <include file="$(find mir_2dnav)/ros/launch/2dnav.launch"/>
