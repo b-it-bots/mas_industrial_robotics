@@ -7,7 +7,8 @@
     <!-- real robot related launches  -->
     <include file="$(find mir_bringup)/robot.launch" />
 
-    <!-- base components -->
+    <!-- moveit -->
+    <include file="$(find mir_moveit_youbot_brsu_2)/launch/move_group.launch" />
 
     <!-- navigation -->
     <include file="$(find mir_2dnav)/ros/launch/2dnav_omni.launch"/>
