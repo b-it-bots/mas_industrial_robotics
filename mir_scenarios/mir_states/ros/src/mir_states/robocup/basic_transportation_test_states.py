@@ -7,8 +7,6 @@ import smach_ros
 import tf
 ##from raw_srvs.srv import RelativeMovements
 
-planning_mode=""
-
 from geometry_msgs.msg import PoseStamped
 ##from raw_srvs.srv import SetPoseStamped
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
@@ -217,7 +215,6 @@ class grasp_obj_from_pltf_btt(smach.State):
                              output_keys=['rear_platform_occupied_poses', 'rear_platform_free_poses', 'last_grasped_obj'])
        
     def execute(self, userdata):   
-        global planning_mode
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         print_task_spec(userdata.task_list)
         
@@ -251,11 +248,9 @@ class grasp_obj_from_pltf_btt(smach.State):
        
 	print "plat_pose: ", pltf_obj_pose.platform_pose
 	print "plat_name: ", pltf_obj_pose.obj_name
-        if planning_mode != "planned":
-            manipulation.arm_command.set_named_target("platform_intermediate")
-            manipulation.arm_command.go()
-            manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
-            manipulation.arm_command.go()
+
+        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+        manipulation.arm_command.go()
             
         manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose))
         manipulation.arm_command.go()
@@ -263,16 +258,9 @@ class grasp_obj_from_pltf_btt(smach.State):
         manipulation.gripper_command.set_named_target("close")
         manipulation.gripper_command.go()
         
-        #FIXME: Isnot Moveit always a planned motion
-        if planning_mode != "planned":
-            manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
-            manipulation.arm_command.go()
-            manipulation.arm_command.set_named_target("platform_intermediate")
-            manipulation.arm_command.go()
-            
-        manipulation.arm_command.set_named_target("candle")
+        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
         manipulation.arm_command.go()
-           
+
         return 'object_grasped'
 
 
@@ -284,7 +272,6 @@ class place_object_in_configuration_btt(smach.State):
             output_keys=['destinaton_free_poses', 'task_list'])
                
     def execute(self, userdata):
-        global planning_mode
         
         print_task_spec(userdata.task_list)
         
@@ -334,15 +321,8 @@ class place_obj_on_rear_platform_btt(smach.State):
                                    output_keys=['rear_platform_free_poses', 'rear_platform_occupied_poses', 'task_list'])
        
     def execute(self, userdata):   
-        global planning_mode
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         
-        if planning_mode != "planned":
-            manipulation.arm_command.set_named_target("candle")
-            manipulation.arm_command.go()
-            manipulation.arm_command.set_named_target("platform_intermediate")
-            manipulation.arm_command.go()
-            
         print_task_spec(userdata.task_list)
         
         if(len(userdata.rear_platform_free_poses) == 0):
@@ -352,9 +332,8 @@ class place_obj_on_rear_platform_btt(smach.State):
         # Removing pre poses (Do we need these poses?)
         pltf_pose = userdata.rear_platform_free_poses.pop();
 
-        if planning_mode != "planned":
-            manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
-            manipulation.arm_command.go()
+        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
+        manipulation.arm_command.go()
             
         manipulation.arm_command.set_named_target(pltf_pose.platform_pose)
         manipulation.arm_command.go()
@@ -379,13 +358,9 @@ class place_obj_on_rear_platform_btt(smach.State):
         
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         
-        if planning_mode != "planned":
-            manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
-            manipulation.arm_command.go()
-            
-        manipulation.arm_command.set_named_target("platform_intermediate")
+        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
         manipulation.arm_command.go()
-
+            
         return 'succeeded'
 
 

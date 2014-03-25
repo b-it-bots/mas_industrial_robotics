@@ -20,11 +20,8 @@ gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 
-from geometry_msgs.msg import StampedPose
+from geometry_msgs.msg import PoseStamped
 
-planning_mode = "planned" # |planned|<other>
-
-import mir_states.common.mockup_util  as mockup
 from mcr_perception_msgs.msg import ObjectList, Object
 
 
@@ -74,14 +71,14 @@ class put_object_on_rear_platform(smach.State):
             location = userdata.rear_platform.get_free_location()
             
             #FIXME: do we need the intermediate positions with MoveIt?
-            arm_command.set_named_target("candle")
-            arm_command.go()
+            #arm_command.set_named_target("candle")
+            #arm_command.go()
             
-            arm_command.set_named_target("platform_intermediate")
-            arm_command.go()
+            #arm_command.set_named_target("platform_intermediate")
+            #arm_command.go()
             
-            arm_command.set_named_target('platform_%s_pre' % location)
-            arm_command.go()
+            #arm_command.set_named_target('platform_%s_pre' % location)
+            #arm_command.go()
             
             arm_command.set_named_target('platform_%s' % location)
             arm_command.go()
@@ -92,8 +89,8 @@ class put_object_on_rear_platform(smach.State):
             arm_command.set_named_target('platform_%s_pre' % location)
             arm_command.go()
             
-            arm_command.set_named_target("platform_intermediate")
-            arm_command.go()
+            #arm_command.set_named_target("platform_intermediate")
+            #arm_command.go()
             
             userdata.rear_platform.store_object(location)
             
@@ -124,11 +121,11 @@ class pick_object_from_rear_platform(smach.State):
             gripper_command.set_named_target('open')
             gripper_command.go()
             
-            arm_command.set_named_target("platform_intermediate")
-            arm_command.go()
+            #arm_command.set_named_target("platform_intermediate")
+            #arm_command.go()
             
-            arm_command.set_named_target('platform_%s_pre' % location)
-            arm_command.go()
+            #arm_command.set_named_target('platform_%s_pre' % location)
+            #arm_command.go()
             
             arm_command.set_named_target('platform_%s' % location)
             arm_command.go()
@@ -139,8 +136,8 @@ class pick_object_from_rear_platform(smach.State):
             arm_command.set_named_target('platform_%s_pre' % location)
             arm_command.go()
             
-            arm_command.set_named_target("platform_intermediate")
-            arm_command.go()
+            #arm_command.set_named_target("platform_intermediate")
+            #arm_command.go()
             
             return 'succeeded'
         except RearPlatformEmptyError as a:
@@ -176,7 +173,7 @@ class move_arm(smach.State):
         
     def execute(self, userdata):
         position = self.move_arm_to or userdata.move_arm_to
-        rospy.loginfo('MOVING ARM TO')
+        rospy.loginfo('MOVING ARM TO: ' + str(position))
         try:
             arm_command.set_named_target(position)
             arm_command.go()
@@ -258,17 +255,17 @@ class grasp_object(smach.State):
         target_link = 'arm_link_5'
         target_pose = [float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]
         
-        pose = StampedPose()
+        pose = PoseStamped()
         pose.header.frame_id = "/base_link"
         pose.pose.position.x = float(p[0] - dx)
         pose.pose.position.y = float(p[1] - dy)
         pose.pose.position.z = float(p[2] - dz)
         
         
-        pose.orientation.x = q[0]
-        pose.orientation.y = q[1]
-        pose.orientation.z = q[2]
-        pose.orientation.w = q[3]
+        pose.pose.orientation.x = q[0]
+        pose.pose.orientation.y = q[1]
+        pose.pose.orientation.z = q[2]
+        pose.pose.orientation.w = q[3]
         
         arm_command.set_pose_target(pose, target_link)
         arm_command.go()
@@ -287,7 +284,6 @@ class grasp_obj_from_pltf(smach.State):
                              output_keys=['rear_platform_occupied_poses'])
               
     def execute(self, userdata):   
-        global planning_mode
         
         if len(userdata.rear_platform_occupied_poses) == 0:
             rospy.logerr("NO more objects on platform")
@@ -295,28 +291,15 @@ class grasp_obj_from_pltf(smach.State):
 
         pltf_obj_pose = userdata.rear_platform_occupied_poses.pop()
         
-        #FIXME Isnt moveIt always planned?
-        if planning_mode != "planned":
-            arm_command.set_named_target("platform_intermediate")
-            arm_command.go()
-            arm_command.set_named_target(pltf_obj_pose+"_pre")
-            arm_command.go()
-        
         arm_command.set_named_target(pltf_obj_pose)
         arm_command.go()
             
         gripper_command.set_named_target("close")
         gripper_command.go()
         
-        if planning_mode != "planned": 
-            arm_command.set_named_target(pltf_obj_pose+"_pre")
-            arm_command.go()
-            arm_command.set_named_target("platform_intermediate")
-            arm_command.go()
-            
-        arm_command.set_named_target("candle")
+        arm_command.set_named_target("platform_intermediate")
         arm_command.go()
-           
+            
         return 'succeeded'
     
     
@@ -328,7 +311,6 @@ class place_object_in_configuration(smach.State):
             output_keys=['obj_goal_configuration_poses'])
                 
     def execute(self, userdata):
-        global planning_mode
         
         if len(userdata.obj_goal_configuration_poses) == 0:
             rospy.logerr("no more configuration poses")
@@ -344,7 +326,7 @@ class place_object_in_configuration(smach.State):
         gripper_command.set_named_target("open")
         gripper_command.go()
         
-        arm_command.set_named_target("candle")
+        arm_command.set_named_target("platform_intermediate")
         arm_command.go()
                 
         return 'succeeded'
@@ -399,11 +381,6 @@ class move_arm_out_of_view(smach.State):
         self.do_blocking = do_blocking
 
     def execute(self, userdata):   
-        global planning_mode
-
-        if planning_mode != "planned":
-            arm_command.set_named_target("candle")
-            arm_command.go()
             
         arm_command.set_named_target("out_of_view")
         arm_command.go()
