@@ -28,13 +28,6 @@
         <joint name="arm_joint_4" value="0.02" />
         <joint name="arm_joint_5" value="0.02" />
     </group_state>
-    <group_state name="home" group="arm_1">
-        <joint name="arm_joint_1" value="0.011" />
-        <joint name="arm_joint_2" value="0.011" />
-        <joint name="arm_joint_3" value="-0.1" />
-        <joint name="arm_joint_4" value="0.023" />
-        <joint name="arm_joint_5" value="0.12" />
-    </group_state>
     <group_state name="candle" group="arm_1">
         <joint name="arm_joint_1" value="2.9496" />
         <joint name="arm_joint_2" value="1.13446" />

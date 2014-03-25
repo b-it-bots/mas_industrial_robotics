@@ -5,9 +5,8 @@ find_package(catkin REQUIRED)
 
 catkin_python_setup()
 
-
 catkin_package(
-  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS
     mir_manipulation_msgs
     rospy
     sensor_msgs

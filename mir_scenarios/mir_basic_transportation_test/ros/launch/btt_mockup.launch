@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+<<<<<<< HEAD
  
  	
     <include file="$(find mir_basic_transportation_test)/ros/launch/btt_params.launch"/>
@@ -11,21 +12,35 @@
     <include file="$(find mir_moveit_youbot_brsu_2)/launch/move_group.launch" />
 
     <!-- navigation -->
-    <include file="$(find mir_2dnav)/ros/launch/2dnav_omni.launch"/>
- 
- 
+    <include file="$(find mir_2dnav)/ros/launch/2dnav.launch"/>
+    <!--
+    <include file="$(find mir_2dnav)/ros/launch/2dnav_mockup.launch" />
+    -->
+
     <!-- base placement -->
     <include file="$(find mir_base_placement)/ros/launch/base_placement.launch"/>
-    
+    <include file="$(find mcr_linear_regression)/ros/launch/laser_scan_linear_regression.launch"/>
+    <!--
+    <include file="$(find mir_base_placement)/ros/launch/base_placement_mockup.launch" />
+    -->
+
     <!-- relative base controller -->
     <include file="$(find mcr_relative_movements)/ros/launch/relative_movements.launch" />
-    
-    
+    <!--
+    <include file="$(find mcr_relative_movements)/ros/launch/relative_movements_mockup.launch" />
+    -->
+
     <!-- perception pipeline -->
     <include file="$(find mcr_object_detection)/ros/launch/object_detection_mockup.launch" />
+    <!--
+    <include file="$(find mcr_object_detection)/ros/launch/object_detection.launch" />
+    -->
  
     <!-- Visual Servoing -->
     <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing_mockup.launch"/>
+    <!--
+    <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing_mockup.launch"/>
+    -->
 
 </launch>
 
