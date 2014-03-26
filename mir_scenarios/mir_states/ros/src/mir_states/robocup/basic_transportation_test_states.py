@@ -6,6 +6,8 @@ import smach
 import smach_ros
 import tf
 
+import math
+
 from geometry_msgs.msg import PoseStamped
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 
@@ -447,9 +449,8 @@ class compute_pregrasp_pose(smach.State):
             return 'srv_call_failed'
         p = pose.pose.position
         o = pose.pose.orientation
-        userdata.move_arm_to = [self.FRAME_ID,
-                                p.x - 0.04, p.y, p.z + 0.08,
-                                0, 3.14, 0]
+        frame_id = pose.header.frame_id
+        userdata.move_arm_to = [p.x - 0.10, p.y, p.z + 0.20, 0, (0.8 * math.pi), 0, frame_id]
         return 'succeeded'
 
 
