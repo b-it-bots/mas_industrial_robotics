@@ -15,15 +15,16 @@ class init_robot(smach.State):
         smach.State.__init__(self, outcomes=['succeeded'])
         
     def execute(self, userdata):
+
+        #init gripper
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go()
         
         # init arm
         manipulation.arm_command.set_named_target("folded")
-        manipulation.arm_command.go(wait=False)
+        manipulation.arm_command.go()
         
-        #init gripper
-        manipulation.gripper_command.set_named_target("open")
-        manipulation.gripper_command.go(wait=False)
-        
+       
         rospy.loginfo("robot initialized")
         
         return 'succeeded'
