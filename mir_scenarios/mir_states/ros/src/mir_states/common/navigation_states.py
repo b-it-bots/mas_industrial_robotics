@@ -6,7 +6,9 @@ import actionlib
 import std_srvs.srv
 import tf
 
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, Twist
+from std_msgs.msg import String
+
 from actionlib.simple_action_client import GoalStatus
 from simple_script_server import *
 sss = simple_script_server()
@@ -256,36 +258,52 @@ class move_base_relative(smach.State):
         supplied to the state constructor then it will override this input.
     """
 
-    SRV = '/mcr_navigation/move_base_relative'
-
     def __init__(self, offset=None):
         smach.State.__init__(self,
-                             outcomes=['succeeded', 'failed'],
+                             outcomes=['succeeded', 'timeout'],
                              input_keys=['move_base_by'])
         self.offset = offset
-        self.move_base_relative = rospy.ServiceProxy(self.SRV,MoveRelative)
+
+        self.pub_relative_base_ctrl_command = rospy.Publisher('/mcr_navigation/relative_base_controller/command', Twist, latch=True)
+        self.pub_relative_base_ctrl_event = rospy.Publisher('/mcr_navigation/relative_base_controller/event_in', String, latch=True)
+        self.sub_relative_base_ctrl_event = rospy.Subscriber('/mcr_navigation/relative_base_controller/event_out', String, self.relative_base_controller_event_cb)
+
+        self.relative_base_ctrl_event = ""
+
+    def relative_base_controller_event_cb(self, event):
+        self.relative_base_ctrl_event = event.data  
 
     def execute(self, userdata):
-        rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
-        self.move_base_relative.wait_for_service()
+
         offset = self.offset or userdata.move_base_by
-        pose = PoseStamped()
-        pose.pose.position.x = offset[0]
-        pose.pose.position.y = offset[1]
-        pose.pose.position.z = 0.1  # speed
-        quat = tf.transformations.quaternion_from_euler(0, 0, offset[2])
-        pose.pose.orientation.x = quat[0]
-        pose.pose.orientation.y = quat[1]
-        pose.pose.orientation.z = quat[2]
-        pose.pose.orientation.w = quat[3]
-        try:
-            response = self.move_base_relative(pose)
-            if response.status == 'failure_obtacle_front':
-                # return values required by the scenario. This situation arises when the base is close to the platform
+
+        relative_base_move = Twist()
+        relative_base_move.linear.x = offset[0]
+        relative_base_move.linear.y = offset[1]
+        relative_base_move.angular.z = offset[2]
+
+        self.relative_base_ctrl_event = ""
+
+        # publish desired relative movement
+        self.pub_relative_base_ctrl_command.publish(relative_base_move)
+
+        # publish event to start the movement
+        self.pub_relative_base_ctrl_event.publish(String("e_start"))
+
+        timeout = rospy.Duration.from_sec(10.0)  #wait for the done event max. 10 seconds
+        start_time = rospy.Time.now()
+        while(True):
+
+            if self.relative_base_ctrl_event == 'e_done':
+                rospy.loginfo('relative pose reached')
                 return 'succeeded'
-        except:
-            rospy.logerr('Could no execute <<%s>>' % (self.SRV))
-            return 'failed'
+            
+            if (rospy.Time.now() - start_time) > timeout:
+                rospy.logerr('timeout of %f seconds exceeded for relative base movement' % float(timeout.to_sec()))
+                return 'timeout'
+
+            rospy.sleep(0.01)
+        
         return 'succeeded'
 
 ## copied from old states
