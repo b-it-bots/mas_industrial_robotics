@@ -176,7 +176,7 @@ class move_arm(smach.State):
         rospy.loginfo('MOVING ARM TO: ' + str(position))
         try:
             arm_command.set_named_target(position)
-            arm_command.go()
+            arm_command.go() #TODO: check return if there is one and decide based on this the outcome of the state
             
         except Exception as e:
             rospy.logerr('Move arm failed: %s' % (str(e)))
