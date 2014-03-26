@@ -85,7 +85,7 @@ class detect_object(smach.State):
 #FIXME: What is the difference between detect_objects and find_objects
 class find_objects(smach.State):
 
-    DETECT_SERVER = '/mcr_perception/detect_objects'
+    DETECT_SERVER = '/mcr_perception/object_detector/detect_objects'
 
     def __init__(self, retries=5, frame_id=None):
         smach.State.__init__(self,
