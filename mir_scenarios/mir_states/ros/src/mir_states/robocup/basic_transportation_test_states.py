@@ -468,23 +468,21 @@ class compute_base_shift_to_object(smach.State):
 
     def execute(self, userdata):
         pose = userdata.object_pose.pose
+
         try:
             t = self.tf_listener.getLatestCommonTime(self.FRAME_ID,
                                                      pose.header.frame_id)
             pose.header.stamp = t
             relative = self.tf_listener.transformPose(self.FRAME_ID, pose)
+
         except (tf.LookupException,
                 tf.ConnectivityException,
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
             return 'failed'
-        self.y_shift = 0.0
-        if relative.pose.position.y >0.0:
-            self.y_shift  = relative.pose.position.y = relative.pose.position.y - 0.04
-        elif relative.pose.position.y < 0.0:
-            self.y_shift  = relative.pose.position.y = relative.pose.position.y + 0.04
-           
-        userdata.move_base_by = (relative.pose.position.x - 0.61, relative.pose.position.y, 0)
+       
+        userdata.move_base_by = (0, relative.pose.position.y, 0)
+
         return 'succeeded'
 
 
