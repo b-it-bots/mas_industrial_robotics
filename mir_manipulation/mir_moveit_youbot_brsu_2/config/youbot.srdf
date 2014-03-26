@@ -57,53 +57,53 @@
         <joint name="arm_joint_5" value="2.93033" />
     </group_state>
     <group_state name="platform_middle" group="arm_1">
-        <joint name="arm_joint_1" value="2.92379" />
-        <joint name="arm_joint_2" value="0.684746" />
-        <joint name="arm_joint_3" value="-3.40583" />
-        <joint name="arm_joint_4" value="0.347146" />
-        <joint name="arm_joint_5" value="2.94998" />
+        <joint name="arm_joint_1" value="2.93524" />
+        <joint name="arm_joint_2" value="0.758916" />
+        <joint name="arm_joint_3" value="-3.53484" />
+        <joint name="arm_joint_4" value="0.455088" />
+        <joint name="arm_joint_5" value="2.87557" />
     </group_state>
     <group_state name="platform_middle_pre" group="arm_1">
-        <joint name="arm_joint_1" value="2.92379" />
-        <joint name="arm_joint_2" value="0.229669" />
-        <joint name="arm_joint_3" value="-2.73985" />
-        <joint name="arm_joint_4" value="0.47354" />
-        <joint name="arm_joint_5" value="2.94998" />
+        <joint name="arm_joint_1" value="2.93385" />
+        <joint name="arm_joint_2" value="0.925038" />
+        <joint name="arm_joint_3" value="-3.52686" />
+        <joint name="arm_joint_4" value="0.382367" />
+        <joint name="arm_joint_5" value="2.87168" />
     </group_state>
     <group_state name="platform_intermediate" group="arm_1">
-        <joint name="arm_joint_1" value="2.92379" />
-        <joint name="arm_joint_2" value="1.17834" />
-        <joint name="arm_joint_3" value="-3.30993" />
-        <joint name="arm_joint_4" value="0.44033" />
-        <joint name="arm_joint_5" value="2.9517" />
+        <joint name="arm_joint_1" value="2.99884" />
+        <joint name="arm_joint_2" value="1.86356" />
+        <joint name="arm_joint_3" value="-4.1407" />
+        <joint name="arm_joint_4" value="1.08195" />
+        <joint name="arm_joint_5" value="2.8894" />
     </group_state>
     <group_state name="platform_left" group="arm_1">
-        <joint name="arm_joint_1" value="3.26146" />
-        <joint name="arm_joint_2" value="0.684746" />
-        <joint name="arm_joint_3" value="-3.40583" />
-        <joint name="arm_joint_4" value="0.347168" />
-        <joint name="arm_joint_5" value="2.94996" />
+        <joint name="arm_joint_1" value="3.2379" />
+        <joint name="arm_joint_2" value="0.741214" />
+        <joint name="arm_joint_3" value="-3.54222" />
+        <joint name="arm_joint_4" value="0.509734" />
+        <joint name="arm_joint_5" value="2.87566" />
     </group_state>
     <group_state name="platform_left_pre" group="arm_1">
-        <joint name="arm_joint_1" value="3.26146" />
-        <joint name="arm_joint_2" value="0.250139" />
-        <joint name="arm_joint_3" value="-2.74139" />
-        <joint name="arm_joint_4" value="0.476991" />
-        <joint name="arm_joint_5" value="2.69522" />
+        <joint name="arm_joint_1" value="3.23168" />
+        <joint name="arm_joint_2" value="0.961851" />
+        <joint name="arm_joint_3" value="-3.48616" />
+        <joint name="arm_joint_4" value="0.374226" />
+        <joint name="arm_joint_5" value="2.8752" />
     </group_state>
     <group_state name="platform_right" group="arm_1">
-        <joint name="arm_joint_1" value="2.66144" />
-        <joint name="arm_joint_2" value="0.684746" />
-        <joint name="arm_joint_3" value="-3.40583" />
-        <joint name="arm_joint_4" value="0.347168" />
-        <joint name="arm_joint_5" value="2.94996" />
+        <joint name="arm_joint_1" value="2.71415" />
+        <joint name="arm_joint_2" value="0.738617" />
+        <joint name="arm_joint_3" value="-3.55631" />
+        <joint name="arm_joint_4" value="0.532788" />
+        <joint name="arm_joint_5" value="2.88949" />
     </group_state>
     <group_state name="platform_right_pre" group="arm_1">
-        <joint name="arm_joint_1" value="2.66144" />
-        <joint name="arm_joint_2" value="0.285049" />
-        <joint name="arm_joint_3" value="-2.93854" />
-        <joint name="arm_joint_4" value="0.658518" />
-        <joint name="arm_joint_5" value="3.04126" />
+        <joint name="arm_joint_1" value="2.71192" />
+        <joint name="arm_joint_2" value="0.925038" />
+        <joint name="arm_joint_3" value="-3.52685" />
+        <joint name="arm_joint_4" value="0.382345" />
+        <joint name="arm_joint_5" value="2.87168" />
     </group_state>
     <group_state name="pre_grasp" group="arm_1">
         <joint name="arm_joint_1" value="2.89373" />
