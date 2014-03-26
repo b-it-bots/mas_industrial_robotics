@@ -5,10 +5,8 @@ import rospy
 import smach
 import smach_ros
 import tf
-##from raw_srvs.srv import RelativeMovements
 
 from geometry_msgs.msg import PoseStamped
-##from raw_srvs.srv import SetPoseStamped
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 
 from actionlib.simple_action_client import GoalStatus
