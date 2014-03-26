@@ -1,10 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-<<<<<<< HEAD
- 
  	
-    <include file="$(find mir_basic_transportation_test)/ros/launch/btt_params.launch"/>
-
     <!-- real robot related launches  -->
     <include file="$(find mir_bringup)/robot.launch" />
 
@@ -25,15 +21,12 @@
     -->
 
     <!-- relative base controller -->
-    <include file="$(find mcr_relative_movements)/ros/launch/relative_movements.launch" />
-    <!--
-    <include file="$(find mcr_relative_movements)/ros/launch/relative_movements_mockup.launch" />
-    -->
+    <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller.launch" />
 
     <!-- perception pipeline -->
-    <include file="$(find mcr_object_detection)/ros/launch/object_detection_mockup.launch" />
+    <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition.launch" />
     <!--
-    <include file="$(find mcr_object_detection)/ros/launch/object_detection.launch" />
+    <include file="$(find mcr_object_detection)/ros/launch/object_detection_mockup.launch" />
     -->
  
     <!-- Visual Servoing -->
