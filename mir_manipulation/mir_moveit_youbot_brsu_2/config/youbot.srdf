@@ -75,7 +75,7 @@
         <joint name="arm_joint_2" value="1.17834" />
         <joint name="arm_joint_3" value="-3.30993" />
         <joint name="arm_joint_4" value="0.44033" />
-        <joint name="arm_joint_5" value="2.95170" />
+        <joint name="arm_joint_5" value="2.9517" />
     </group_state>
     <group_state name="platform_left" group="arm_1">
         <joint name="arm_joint_1" value="3.26146" />
@@ -121,7 +121,7 @@
     </group_state>
     <group_state name="line/line_1" group="arm_1">
         <joint name="arm_joint_1" value="3.38231" />
-        <joint name="arm_joint_2" value="2.13810" />
+        <joint name="arm_joint_2" value="2.1381" />
         <joint name="arm_joint_3" value="-1.67897" />
         <joint name="arm_joint_4" value="2.52825" />
         <joint name="arm_joint_5" value="2.92261" />
@@ -142,7 +142,7 @@
     </group_state>
     <group_state name="zigzag/zigzag_1" group="arm_1">
         <joint name="arm_joint_1" value="3.33455" />
-        <joint name="arm_joint_2" value="2.35950" />
+        <joint name="arm_joint_2" value="2.3595" />
         <joint name="arm_joint_3" value="-1.91344" />
         <joint name="arm_joint_4" value="2.25267" />
         <joint name="arm_joint_5" value="2.92261" />
@@ -155,22 +155,20 @@
         <joint name="arm_joint_5" value="2.91953" />
     </group_state>
     <group_state name="zigzag/zigzag_3" group="arm_1">
-        <joint name="arm_joint_1" value="2.60860" />
+        <joint name="arm_joint_1" value="2.6086" />
         <joint name="arm_joint_2" value="2.35956" />
         <joint name="arm_joint_3" value="-1.91344" />
         <joint name="arm_joint_4" value="2.25269" />
         <joint name="arm_joint_5" value="2.92261" />
     </group_state>
-    
     <group_state name="close" group="arm_1_gripper">
-        <joint name="gripper_finger_joint_l" value="0.012"/>
-        <joint name="gripper_finger_joint_r" value="0.012"/>
+        <joint name="gripper_finger_joint_l" value="0.012" />
+        <joint name="gripper_finger_joint_r" value="0.012" />
     </group_state>
     <group_state name="open" group="arm_1_gripper">
-        <joint name="gripper_finger_joint_l" value="0.0"/>
-        <joint name="gripper_finger_joint_r" value="0.0"/>
+        <joint name="gripper_finger_joint_l" value="0" />
+        <joint name="gripper_finger_joint_r" value="0" />
     </group_state>
-
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="arm_1_gripper" parent_link="arm_link_5" group="arm_1_gripper" parent_group="arm_1" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
@@ -225,21 +223,20 @@
     <disable_collisions link1="arm_link_3" link2="base_laser_front_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="camera_tower_link" reason="Never" />
-    <disable_collisions link1="arm_link_3" link2="gripper_finger_link_l" reason="Never" />
-    <disable_collisions link1="arm_link_3" link2="gripper_finger_link_r" reason="Never" />
+    <disable_collisions link1="arm_link_3" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="arm_link_3" link2="microsoft_lifecam_1080_mount_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="tower_cam3d_foot_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="tower_cam3d_tilt_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="arm_link_5" reason="Adjacent" />
-    <disable_collisions link1="arm_link_4" link2="base_footprint" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="camera_tower_link" reason="Never" />
-    <disable_collisions link1="arm_link_4" link2="gripper_finger_link_l" reason="Never" />
-    <disable_collisions link1="arm_link_4" link2="gripper_finger_link_r" reason="Never" />
+    <disable_collisions link1="arm_link_4" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="arm_link_4" link2="microsoft_lifecam_1080_mount_link" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="tower_cam3d_foot_link" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="tower_cam3d_tilt_link" reason="Never" />
@@ -248,9 +245,9 @@
     <disable_collisions link1="arm_link_5" link2="base_footprint" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="camera_tower_link" reason="Never" />
-    <disable_collisions link1="arm_link_5" link2="gripper_finger_link_l" reason="Never" />
-    <disable_collisions link1="arm_link_5" link2="gripper_finger_link_r" reason="Never" />
+    <disable_collisions link1="arm_link_5" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="gripper_palm_link" reason="Adjacent" />
+    <disable_collisions link1="arm_link_5" link2="microsoft_lifecam_1080_mount_link" reason="Adjacent" />
     <disable_collisions link1="arm_link_5" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="tower_cam3d_foot_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="tower_cam3d_tilt_link" reason="Never" />
@@ -260,9 +257,9 @@
     <disable_collisions link1="base_footprint" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_link" reason="Adjacent" />
     <disable_collisions link1="base_footprint" link2="camera_tower_link" reason="Never" />
-    <disable_collisions link1="base_footprint" link2="gripper_finger_link_l" reason="Never" />
-    <disable_collisions link1="base_footprint" link2="gripper_finger_link_r" reason="Never" />
+    <disable_collisions link1="base_footprint" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="base_footprint" link2="microsoft_lifecam_1080_mount_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="plate_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="base_footprint" link2="tower_cam3d_foot_link" reason="Never" />
@@ -284,9 +281,9 @@
     <disable_collisions link1="base_laser_front_link" link2="wheel_link_fr" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="base_link" reason="Adjacent" />
     <disable_collisions link1="base_laser_rear_link" link2="camera_tower_link" reason="Never" />
-    <disable_collisions link1="base_laser_rear_link" link2="gripper_finger_link_l" reason="Never" />
-    <disable_collisions link1="base_laser_rear_link" link2="gripper_finger_link_r" reason="Never" />
+    <disable_collisions link1="base_laser_rear_link" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="base_laser_rear_link" link2="microsoft_lifecam_1080_mount_link" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="plate_link" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="tower_cam3d_foot_link" reason="Never" />
@@ -307,23 +304,21 @@
     <disable_collisions link1="camera_tower_link" link2="plate_link" reason="Adjacent" />
     <disable_collisions link1="camera_tower_link" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="camera_tower_link" link2="tower_cam3d_foot_link" reason="Adjacent" />
-    <disable_collisions link1="camera_tower_link" link2="tower_cam3d_tilt_link" reason="Never" />
+    <disable_collisions link1="camera_tower_link" link2="tower_cam3d_tilt_link" reason="Default" />
     <disable_collisions link1="camera_tower_link" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="camera_tower_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="camera_tower_link" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="camera_tower_link" link2="wheel_link_fr" reason="Never" />
-    <disable_collisions link1="gripper_finger_link_l" link2="gripper_finger_link_r" reason="Never" />
-    <disable_collisions link1="gripper_finger_link_l" link2="gripper_palm_link" reason="Adjacent" />
-    <disable_collisions link1="gripper_finger_link_l" link2="tower_cam3d_camera" reason="Never" />
-    <disable_collisions link1="gripper_finger_link_l" link2="tower_cam3d_foot_link" reason="Never" />
-    <disable_collisions link1="gripper_finger_link_l" link2="tower_cam3d_tilt_link" reason="Never" />
-    <disable_collisions link1="gripper_finger_link_r" link2="gripper_palm_link" reason="Adjacent" />
-    <disable_collisions link1="gripper_finger_link_r" link2="tower_cam3d_camera" reason="Never" />
-    <disable_collisions link1="gripper_finger_link_r" link2="tower_cam3d_foot_link" reason="Never" />
-    <disable_collisions link1="gripper_finger_link_r" link2="tower_cam3d_tilt_link" reason="Never" />
+    <disable_collisions link1="gripper_linkage_link" link2="gripper_palm_link" reason="Adjacent" />
+    <disable_collisions link1="gripper_linkage_link" link2="microsoft_lifecam_1080_mount_link" reason="Never" />
+    <disable_collisions link1="gripper_palm_link" link2="microsoft_lifecam_1080_mount_link" reason="Never" />
     <disable_collisions link1="gripper_palm_link" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="gripper_palm_link" link2="tower_cam3d_foot_link" reason="Never" />
     <disable_collisions link1="gripper_palm_link" link2="tower_cam3d_tilt_link" reason="Never" />
+    <disable_collisions link1="microsoft_lifecam_1080_mount_link" link2="tower_cam3d_camera" reason="Never" />
+    <disable_collisions link1="microsoft_lifecam_1080_mount_link" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="microsoft_lifecam_1080_mount_link" link2="tower_cam3d_tilt_link" reason="Never" />
+    <disable_collisions link1="microsoft_lifecam_1080_mount_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="plate_link" link2="tower_cam3d_camera" reason="Never" />
     <disable_collisions link1="plate_link" link2="tower_cam3d_foot_link" reason="Never" />
     <disable_collisions link1="plate_link" link2="tower_cam3d_tilt_link" reason="Never" />
