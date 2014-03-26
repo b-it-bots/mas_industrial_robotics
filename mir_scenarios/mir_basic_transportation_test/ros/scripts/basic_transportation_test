@@ -99,7 +99,7 @@ def main():
             transitions={'succeeded':'MOVE_ARM_OUT_OF_VIEW',
                         'failed':'MOVE_TO_SOURCE_LOCATION'})
 
-        smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms_o.move_arm_out_of_view(),
+        smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms_o.move_arm('out_of_view'),
             transitions={'succeeded':'RECOGNIZE_OBJECTS'})
 
         smach.StateMachine.add('RECOGNIZE_OBJECTS', gps_o.find_objects(),
@@ -207,7 +207,7 @@ def main():
             transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF',
                     'no_more_cfg_poses':'MOVE_ARM_OUT_OF_VIEW_2'})
 
-        smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW_2', gms_o.move_arm_out_of_view(),
+        smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW_2', gms_o.move_arm('out_of_view'),
             transitions={'succeeded':'SELECT_DELIVER_WORKSTATION'})
 
         smach.StateMachine.add('MOVE_ARM_TO_INIT', gms_o.move_arm("platform_intermediate"),

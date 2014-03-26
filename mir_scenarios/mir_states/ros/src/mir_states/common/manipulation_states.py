@@ -368,21 +368,3 @@ class compute_pregrasp_pose(smach.State):
                                 p.x, p.y, p.z + 0.1,
                                 0, 3.14, 0]
         return 'succeeded'
-
-
-##
-## copied from old states
-##
-class move_arm_out_of_view(smach.State):
-
-    def __init__(self, do_blocking = True):
-        smach.State.__init__(self, outcomes=['succeeded'])
-
-        self.do_blocking = do_blocking
-
-    def execute(self, userdata):   
-            
-        arm_command.set_named_target("out_of_view")
-        arm_command.go()
-                
-        return 'succeeded'
