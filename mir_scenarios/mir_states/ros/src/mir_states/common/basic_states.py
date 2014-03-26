@@ -17,7 +17,7 @@ class init_robot(smach.State):
     def execute(self, userdata):
         
         # init arm
-        manipulation.arm_command.set_named_target("home")
+        manipulation.arm_command.set_named_target("folded")
         manipulation.arm_command.go(wait=False)
         
         #init gripper
