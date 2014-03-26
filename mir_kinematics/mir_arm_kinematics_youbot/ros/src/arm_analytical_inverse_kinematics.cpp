@@ -40,10 +40,8 @@ int ArmAnalyticalInverseKinematics::CartToJnt(const KDL::JntArray& q_init,
 	// iterate over all redundant solutions
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 2; j++) {
-			for (int k = 0; k < 2; k++) {
-				solution = ik(p_in, bools[i], bools[j], bools[k]);
-				if (isSolutionValid(solution)) q_out.push_back(solution);
-			}
+			solution = ik(p_in, bools[i], bools[j]);
+			if (isSolutionValid(solution)) q_out.push_back(solution);
 		}
 	}
 
@@ -60,7 +58,7 @@ int ArmAnalyticalInverseKinematics::CartToJnt(const KDL::JntArray& q_init,
 
 
 KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
-		bool offset_joint_1, bool offset_joint_3, bool offset_joint_5)
+		bool offset_joint_1, bool offset_joint_3)
 {
 	// Parameters from youBot URDF file
 	double l0x = 0.024;
@@ -121,10 +119,6 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 	double r21 = g1.M(1, 0);
 	double r22 = g1.M(1, 1);
 	j5 = atan2(r21 * c1 - r11 * s1, r22 * c1 - r12 * s1);
-	if (offset_joint_5) {
-		if (j5 > 0.0) j5 -= M_PI;
-		else j5 += M_PI;
-	}
 
 	// The sum of joint angles two to four determines the overall "pitch" of the
 	// end effector
