@@ -74,12 +74,11 @@ class ArmAnalyticalInverseKinematics
 		 * @param pitch: Pitch of the gripper
 		 * @param offset_joint_1: Determines the result of the first joint
 		 * @param offset_joint_3: Determines the result of the third joint
-		 * @param offset_joint_5: Determines the result of the fifth joint
 		 * @return: If there is a solution a JntArray with five entries is
 		 * 			returned, else the JntArray is empty.
 		 */
 		KDL::JntArray ik(const KDL::Frame& frame, bool offset_joint_1 = false,
-				bool offset_joint_3 = false, bool offset_joint_5 = false);
+				bool offset_joint_3 = false);
 
 		KDL::Frame ProjectGoalOrientationIntoArmSubspace(const KDL::Frame &goal) const;
 
