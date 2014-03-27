@@ -114,7 +114,7 @@ def main():
                          'timeout': 'done'})
 
                
-        smach.StateMachine.add('COMPUTE_PREGRASP_POSE', btts.compute_pregrasp_pose(),
+        smach.StateMachine.add('COMPUTE_PREGRASP_POSE', gms_o.compute_pregrasp_pose(),
         transitions={'succeeded':'MOVE_ARM_TO_PREGRASP',
                        'srv_call_failed':'done'},
         remapping={'object_pose':'object_to_grasp'})
