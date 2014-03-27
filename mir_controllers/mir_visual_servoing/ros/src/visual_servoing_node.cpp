@@ -85,7 +85,7 @@ public:
 		m_is_visual_servoing_completed = 0;
 
 		//  Incoming message from usbs_cam. This must be running in order for this ROS node to run.
-		m_image_subscriber = m_image_transporter.subscribe( "/usb_cam/image_raw", 1, &VisualServoing::imageCallback, this );
+		m_image_subscriber = m_image_transporter.subscribe( "/arm_cam/image_raw", 1, &VisualServoing::imageCallback, this );
 
 		// get joint states and store them to a variable and go through them (arm_link_5) and check to see if the current state is
 		// to close to the min or max value.
@@ -161,7 +161,7 @@ private:
   void SetupYoubotArm()
   {
 	  XmlRpc::XmlRpcValue parameter_list;
-	  m_node_handler.getParam("/arm_controller/joints", parameter_list);
+	  m_node_handler.getParam("/arm_1/arm_controller/joints", parameter_list);
 	  ROS_ASSERT(parameter_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
 
 	  for (int32_t i = 0; i < parameter_list.size(); ++i)
@@ -175,8 +175,8 @@ private:
 	  {
 		moveit_msgs::JointLimits joint_limits;
 		joint_limits.joint_name = m_arm_joint_names[i];
-		m_node_handler.getParam("/arm_controller/limits/" + m_arm_joint_names[i] + "/min", joint_limits.min_position);
-		m_node_handler.getParam("/arm_controller/limits/" + m_arm_joint_names[i] + "/max", joint_limits.max_position);
+		m_node_handler.getParam("/arm_1/arm_controller/limits/" + m_arm_joint_names[i] + "/min", joint_limits.min_position);
+		m_node_handler.getParam("/arm_1/arm_controller/limits/" + m_arm_joint_names[i] + "/max", joint_limits.max_position);
 		m_upper_joint_limits.push_back( joint_limits.max_position );
 		m_lower_joint_limits.push_back( joint_limits.min_position );
 	  }
@@ -212,7 +212,7 @@ private:
             cv_img_tmp =  cv_bridge::toCvCopy(image_message, "bgr8");
             ipl_img_tmp = cv_img_tmp->image;
     
-  			//cv_image = &ipl_img_tmp;
+  			cv_image = &ipl_img_tmp;
   		}
   		catch( cv_bridge::Exception& e )
   		{
