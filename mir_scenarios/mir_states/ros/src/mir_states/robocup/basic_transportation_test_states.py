@@ -6,8 +6,6 @@ import smach
 import smach_ros
 import tf
 
-import math
-
 from geometry_msgs.msg import PoseStamped
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 
@@ -421,37 +419,6 @@ class skip_pose(smach.State):
         print_task_spec(userdata.task_list)
                 
         return 'pose_skipped'
-
-class compute_pregrasp_pose(smach.State):
-
-    """
-    Given an object pose compute a pregrasp position that is reachable and also
-    good for the visual servoing.
-    """
-
-    FRAME_ID = '/base_link'
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'srv_call_failed'], input_keys=['object_pose'],output_keys=['move_arm_to'])
-        self.tf_listener = tf.TransformListener()
-
-    def execute(self, userdata):
-        pose = userdata.object_pose.pose
-        try:
-            t = self.tf_listener.getLatestCommonTime(self.FRAME_ID,
-                                             pose.header.frame_id)
-            pose.header.stamp = t
-            pose = self.tf_listener.transformPose(self.FRAME_ID, pose)
-        except (tf.LookupException,
-                tf.ConnectivityException,
-                tf.ExtrapolationException) as e:
-            rospy.logerr('Tf error: %s' % str(e))
-            return 'srv_call_failed'
-        p = pose.pose.position
-        o = pose.pose.orientation
-        frame_id = pose.header.frame_id
-        userdata.move_arm_to = [p.x - 0.10, p.y, p.z + 0.20, 0, (0.8 * math.pi), 0, frame_id]
-        return 'succeeded'
 
 
 class compute_base_shift_to_object(smach.State):
