@@ -19,16 +19,6 @@
   <run_depend>smach_ros</run_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>tf</run_depend>
-  <!-- TODO missing depends-->
-  <!--depend package="youbot_arm_navigation"/-->
-  <!--depend package="hbrs_srvs"/-->
-  <!--depend package="hbrs_msgs"/-->
-  <!--depend package="raw_srvs"/-->
-  <!-- TODO test catkin sets include dir -->
-  <!--export>
-    <python path="${prefix}/include:${prefix}/src"/>
-    <python path="${prefix}/include:${prefix}/src/oldstates"/>
-  </export-->
 
 </package>
 
