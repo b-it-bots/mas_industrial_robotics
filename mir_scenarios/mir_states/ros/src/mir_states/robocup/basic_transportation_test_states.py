@@ -243,9 +243,8 @@ class grasp_obj_from_pltf_btt(smach.State):
             return 'no_more_obj_for_this_workspace'
         
        
-       
-	print "plat_pose: ", pltf_obj_pose.platform_pose
-	print "plat_name: ", pltf_obj_pose.obj_name
+        print "plat_pose: ", pltf_obj_pose.platform_pose
+        print "plat_name: ", pltf_obj_pose.obj_name
 
         manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
         manipulation.arm_command.go()
