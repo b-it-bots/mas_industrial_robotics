@@ -150,38 +150,53 @@ class pick_object_from_rear_platform(smach.State):
 class move_arm(smach.State):
 
     """
-    Move arm to a position. Position may be fixed at construction time or set
+    Move arm to a target. target may be fixed at construction time or set
     through userdata.
 
     Input
     -----
     move_arm_to: str | tuple | list
-        Position where the arm should move. If it is a string, then it gives
-        position name (should be availabile on the parameter server). If it as
+        target where the arm should move. If it is a string, then it gives
+        target name (should be availabile on the parameter server). If it as
         tuple or a list, then it is treated differently based on the length. If
-        there are 5 elements, then it is a list of joint values. If the length
-        is 3 or 4, then it is cartesian position and pitch angle.
+        are 7 items, then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame
     """
 
-    def __init__(self, position=None, blocking=True, tolerance=None):
+    def __init__(self, target=None, blocking=True, tolerance=None):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_arm_to'])
-        self.move_arm_to = position
+        self.move_arm_to = target
         self.blocking = blocking
         self.tolerance = tolerance
         
     def execute(self, userdata):
-        position = self.move_arm_to or userdata.move_arm_to
-        rospy.loginfo('MOVING ARM TO: ' + str(position))
-        try:
-            arm_command.set_named_target(position)
-            arm_command.go() #TODO: check return if there is one and decide based on this the outcome of the state
-            
-        except Exception as e:
-            rospy.logerr('Move arm failed: %s' % (str(e)))
-            return 'failed'
-        return 'succeeded'
+        target = self.move_arm_to or userdata.move_arm_to
+
+        # target is a string specifing a joint position
+        if type(target) is str:
+            rospy.loginfo('MOVING ARM TO: ' + str(target))
+            try:
+                arm_command.set_named_target(target)
+                arm_command.go() #TODO: check return if there is one and decide based on this the outcome of the state
+                
+            except Exception as e:
+                rospy.logerr('Move arm failed: %s' % (str(e)))
+                return 'failed'
+            return 'succeeded'
+
+        # target is a list ...
+        if type(target) is list:
+            # ... of 7 items: Cartesian pose (x, y, z, r, p, y, frame_id)
+            if len(target) == 7:
+                arm_command.set_pose_target(target[0:6])
+                arm_command.go()
+
+                return 'succeeded'
+
+        rospy.logerr("no valid target specified. Target should be a string (name of a joint position) or a list of 7 items (Cartesian Pose + frame id)")
+
+        return 'failed'
 
 
 class control_gripper(smach.State):
