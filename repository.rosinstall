@@ -33,11 +33,6 @@
     uri: git@github.com:mas-group/youbot_diagnostics.git
     version: hydro-devel
 
-#- git:
-#    local-name: youbot-manipulation
-#    uri: git@github.com:b-it-bots/youbot-manipulation.git
-#    version: groovy
-
 - git:
     local-name: cob_command_tools
     uri: git@github.com:mas-group/cob_command_tools.git
@@ -47,17 +42,3 @@
     local-name: cob_driver
     uri: git@github.com:mas-group/cob_driver.git
     version: minimal_version_for_atwork
-
-#- svn:
-#    local-name: bosch_drivers
-#    uri: http://svn.code.sf.net/p/bosch-ros-pkg/code/trunk/stacks/bosch_drivers
-
-#- git:
-#    local-name: ar_kinect
-#    uri:  https://github.com/mikeferguson/ar_kinect.git
-#    version: groovy-devel
-
-#- git:
-#    local-name: ar_tools
-#    uri:  https://github.com/IHeartEngineering/ar_tools.git 
-#    version: master
