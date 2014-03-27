@@ -5,7 +5,6 @@ find_package(catkin REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS
-    cob_command_gui
     hokuyo_node
     mcr_default_env_config
     mir_arm_cartesian_control
