@@ -63,11 +63,10 @@ def main():
     
      # open the container
     with SM:
-        '''
+        
         smach.StateMachine.add('INIT_ROBOT', gbs_o.init_robot(),
             transitions={'succeeded':'GET_TASK'})
         
-
         smach.StateMachine.add('GET_TASK', refbox.get_basic_transportation_task(),
             transitions={'task_received':'SETUP_BTT',
                          'wrong_task_format':'GET_TASK'})
@@ -82,7 +81,6 @@ def main():
         smach.StateMachine.add('MOVE_ARM', gms_o.move_arm("out_of_view"),
             transitions={'succeeded':'RECOGNIZE_OBJECTS',
                          'failed':'MOVE_ARM'})
-
 
         smach.StateMachine.add('RECOGNIZE_OBJECTS', gps_o.find_objects(frame_id='/odom'),
             transitions={'objects_found':'SELECT_OBJECT_TO_BE_GRASPED',
@@ -108,11 +106,9 @@ def main():
                          'tf_error': 'done'},
             remapping={'object_pose':'object_to_grasp'})
 
-
         smach.StateMachine.add('MOVE_BASE_RELATIVE', gns_o.move_base_relative(),
             transitions={'succeeded': 'COMPUTE_PREGRASP_POSE',
                          'timeout': 'done'})
-
                
         smach.StateMachine.add('COMPUTE_PREGRASP_POSE', gms_o.compute_pregrasp_pose(),
         transitions={'succeeded':'MOVE_ARM_TO_PREGRASP',
@@ -123,12 +119,10 @@ def main():
         #    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
         #                'failed': 'AVOID_WALLS_PRE'})
 
-        '''
         smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms_o.move_arm([0.45, 0.0, 0.20, 0, (math.pi * 0.8), 0.0, '/base_link']),
             transitions={'succeeded': 'done',
                         'failed': 'done'})
-
-        '''                        
+                          
         # state skipped
         smach.StateMachine.add('DO_VISUAL_SERVERING', gps_o.do_visual_servoing(),
             transitions={'succeeded':'GRASP_OBJ',
@@ -140,7 +134,6 @@ def main():
                                   transitions={'loop': 'MOVE_ARM_TO_PREGRASP',
                                                'continue': 'SKIP_SOURCE_POSE'})
         
-         '''
        
        
     # Start SMACH viewer
