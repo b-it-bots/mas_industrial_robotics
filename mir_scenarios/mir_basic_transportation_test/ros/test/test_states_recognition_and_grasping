@@ -116,9 +116,8 @@ def main():
                
         smach.StateMachine.add('COMPUTE_PREGRASP_POSE', gms_o.compute_pregrasp_pose(),
         transitions={'succeeded':'MOVE_ARM_TO_PREGRASP',
-                       'srv_call_failed':'done'},
-        remapping={'object_pose':'object_to_grasp'})
-        
+                     'tf_transform_failed':'done'},
+        remapping={'object_pose':'object_to_grasp'})      
 
         #smach.StateMachine.add('AVOID_WALLS_PRE', gms_o.move_arm('candle'),
         #    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
