@@ -145,7 +145,7 @@ def main():
        
        
     # Start SMACH viewer
-    smach_viewer = smach_ros.IntrospectionServer('BASIC_TRANSPORTATION_TEST', SM, 'BASIC_TRANSPORTATION_TEST')
+    smach_viewer = smach_ros.IntrospectionServer('PERCEPTION_GRASPING_TEST', SM, 'PERCEPTION_GRASPING_TEST')
     smach_viewer.start()
 
     result = SM.execute()
@@ -153,7 +153,7 @@ def main():
     # stop SMACH viewer
     while (result is None):
         rospy.spin()
-    rospy.loginfo('Basic transportation test is Done.')
+    rospy.loginfo('perception grasping test is Done.')
     # smach_thread.stop()
     smach_viewer.stop()
 
