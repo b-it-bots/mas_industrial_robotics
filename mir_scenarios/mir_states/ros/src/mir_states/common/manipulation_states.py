@@ -356,7 +356,7 @@ class compute_pregrasp_pose(smach.State):
     FRAME_ID = '/base_link'
 
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'srv_call_failed'], input_keys=['object_pose'],output_keys=['move_arm_to'])
+        smach.State.__init__(self, outcomes=['succeeded', 'tf_transform_failed'], input_keys=['object_pose'],output_keys=['move_arm_to'])
         self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
@@ -372,7 +372,7 @@ class compute_pregrasp_pose(smach.State):
                 tf.ConnectivityException,
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
-            return 'srv_call_failed'
+            return 'tf_transform_failed'
 
         p = pose.pose.position
         o = pose.pose.orientation
