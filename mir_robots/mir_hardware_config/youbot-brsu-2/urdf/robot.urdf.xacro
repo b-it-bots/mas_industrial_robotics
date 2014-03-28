@@ -41,11 +41,10 @@
   </xacro:youbot_arm>
   
   <!-- BRSU SPECIFIC STUFF -->
-  <xacro:include filename="$(find youbot_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
-  <xacro:include filename="$(find youbot_description)/urdf/misc/camera_tower.urdf.xacro"/>
-
-  <xacro:include filename="$(find mcr_description)/urdf/mounts/microsoft_lifecam_1080_mount.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/mounts/microsoft_lifecam_1080_mount.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/grippers/festo_gripper.urdf.xacro" />
 
   <!-- base laser front -->
@@ -59,9 +58,9 @@
   </xacro:hokuyo_urg04_laser>
 
   <!-- camera tower -->
-  <xacro:camera_tower name="camera_tower" parent="plate_link">
+  <xacro:cam3d_tower name="camera_tower" parent="plate_link">
     <origin xyz="-0.075 0.0 0.023" rpy="0 0 0" />
-  </xacro:camera_tower>
+  </xacro:cam3d_tower>
 
   <!-- 3D camera on tower -->
   <xacro:asus_xtion_camera name="tower_cam3d" parent="camera_tower_link" tilt="0.5">
