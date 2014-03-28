@@ -39,18 +39,10 @@ raytrace_range: 3.0
 # both clockwise and counter-clockwise orderings of points are supported
 # default: []
             
-footprint: [[0.26, 0.18],
-            [0.26, 0.014],
-            [0.31, 0.014],
-            [0.31, -0.014],
-            [0.26, -0.014],
-            [0.26, -0.18],
-            [-0.27, -0.18],
-            [-0.27, -0.014],
-            [-0.32, -0.014],
-            [-0.32, 0.014],
-            [-0.27, 0.014],
-            [-0.27, 0.18]]
+footprint: [[0.32, 0.18],
+            [0.32, -0.18],
+            [-0.32, -0.18],
+            [-0.32, 0.18]]
 
 # --------------------------------------------------------
 # observation_sources: A list of observation source names separated by spaces. 
