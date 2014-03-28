@@ -8,6 +8,7 @@
   <property name="cam3d_tower_height" value="0.49" />
   <property name="cam3d_tower_width" value="0.03" />
   <property name="cam3d_tower_depth" value="0.03" />
+  <property name="cam3d_tower_collision_offset" value="0.03" />
   
   <xacro:macro name="cam3d_tower" params="name parent *origin">
   	<link name="${name}_link">
@@ -28,7 +29,7 @@
       <collision>
         <origin xyz="0 0 ${cam3d_tower_height - (cam3d_tower_height/2)}" rpy="0 0 0" />
         <geometry>
-           <box size="${cam3d_tower_depth} ${cam3d_tower_width} ${cam3d_tower_height}"/>
+           <box size="${cam3d_tower_depth + cam3d_tower_collision_offset} ${cam3d_tower_width + cam3d_tower_collision_offset} ${cam3d_tower_height}"/>
         </geometry>
       </collision >
     </link>
