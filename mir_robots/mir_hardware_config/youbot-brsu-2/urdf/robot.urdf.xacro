@@ -65,8 +65,8 @@
   </xacro:hokuyo_urg04_laser>
 
   <!-- camera tower -->
-  <xacro:camera_tower name="camera_tower" parent="plate_link">
-    <origin xyz="-0.075 0.0 0.023" rpy="0 0 0" />
+  <xacro:camera_tower name="camera_tower" parent="rear_platform_link">
+    <origin xyz="-0.227 0.165 0.023" rpy="0 0 0" />
   </xacro:camera_tower>
 
   <!-- 3D camera on tower -->
