@@ -8,7 +8,6 @@
       <include file="$(find mir_bringup)/robot.launch" />   <!-- base components -->
     </group>
 
-
     <!-- simulation related launches -->
     <group if="$(arg sim)">
       <include file="$(find mir_bringup_sim)/robot.launch" />   <!-- base components -->
@@ -19,21 +18,19 @@
     <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
 
     <!-- manipulation -->
-    <!-- TBD -->
+    <include file="$(find mir_moveit_youbot_brsu_2)/launch/move_group.launch" />
 
     <!-- base placement -->
-    <include file="$(find mir_base_placement)/ros/launch/base_placement.launch" />
+    <include file="$(find mir_base_placement)/ros/launch/base_placement.launch"/>
+    <include file="$(find mcr_linear_regression)/ros/launch/laser_scan_linear_regression.launch"/>
 
     <!-- relative base controller -->
-    <include file="$(find mcr_relative_movements)/ros/launch/relative_movements.launch" />
+    <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller.launch" />
 
     <!-- perception pipeline -->
-    <include file="$(find mcr_object_detection)/ros/launch/object_detection.launch" />
+    <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition.launch" />
       
     <!-- Visual Servoing -->
     <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing.launch"/>
  
-
 </launch>
-
-
