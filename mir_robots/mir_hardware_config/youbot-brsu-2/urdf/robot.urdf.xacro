@@ -32,12 +32,16 @@
   <!-- standard youBot configuration -->
   <xacro:youbot_base name="base"/>
   
-  <xacro:youbot_plate name="plate" parent="base_link">
+  <!--xacro:youbot_plate name="plate" parent="base_link">
     <origin xyz="-0.159 0 0.046" rpy="0 0 0" />
-  </xacro:youbot_plate>
+  </xacro:youbot_plate-->
+
+  <xacro:rear_platform name="rear_platform" parent="base_link">
+    <origin xyz="-0.005 -0.175 0.051" rpy="0 0 0" />
+  </xacro:rear_platform>
   
   <xacro:youbot_arm name="arm" parent="base_link">
-    <origin xyz="0.143 0 0.046" rpy="0 0 0" />
+    <origin xyz="0.223 0 0.076" rpy="0 0 0" />
   </xacro:youbot_arm>
   
   <!-- BRSU SPECIFIC STUFF -->
@@ -47,6 +51,8 @@
   <xacro:include filename="$(find mcr_description)/urdf/mounts/microsoft_lifecam_1080_mount.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/grippers/festo_gripper.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform.urdf.xacro" />
+
 
   <!-- base laser front -->
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
