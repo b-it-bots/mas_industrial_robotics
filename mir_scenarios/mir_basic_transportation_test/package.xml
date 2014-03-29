@@ -12,16 +12,15 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>cob_script_server</run_depend>
-  <run_depend>mcr_default_env_config</run_depend>
+  <run_depend>mcr_gazebo_objects</run_depend>
+  <run_depend>mcr_linear_regression</run_depend>
+  <run_depend>mcr_relative_base_controller</run_depend>
   <run_depend>mir_2dnav</run_depend>
-  <run_depend>mir_arm_navigation</run_depend>
   <run_depend>mir_base_placement</run_depend>
   <run_depend>mir_bringup</run_depend>
   <run_depend>mir_bringup_sim</run_depend>
   <run_depend>mir_states</run_depend>
-  <run_depend>mir_relative_movements</run_depend>
-  <run_depend>mir_object_detection</run_depend>
+  <run_depend>mcr_object_recognition_bounding_box</run_depend>
   <run_depend>mir_visual_servoing</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>smach</run_depend>
