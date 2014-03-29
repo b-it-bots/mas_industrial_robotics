@@ -10,7 +10,7 @@ catkin_package(
     cob_script_server
     mcr_gazebo_objects
     mcr_linear_regression
-    mcr_relative_base_controller    
+    mcr_relative_base_controller
     mir_2dnav
     mir_base_placement
     mir_bringup
