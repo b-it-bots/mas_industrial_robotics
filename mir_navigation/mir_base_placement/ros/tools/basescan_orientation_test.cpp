@@ -8,7 +8,7 @@ int main (int argc, char **argv)
 {
   ros::init(argc, argv, "base_orientation_Test");
 
-  actionlib::SimpleActionClient<mir_navigation_msgs::OrientToBaseAction> ac("/mir_navigation_msgs/adjust_to_workspace", true);
+  actionlib::SimpleActionClient<mir_navigation_msgs::OrientToBaseAction> ac("/mir_navigation/base_placement/adjust_to_workspace", true);
 
   ROS_INFO("Waiting for action server to start.");
   // wait for the action server to start
