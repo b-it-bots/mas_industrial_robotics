@@ -8,19 +8,19 @@ catkin_python_setup()
 catkin_package(
   CATKIN_DEPENDS
     cob_script_server
-    mcr_default_env_config
     mcr_gazebo_objects
-    mcr_relative_movements
+    mcr_linear_regression
+    mcr_relative_base_controller
     mir_2dnav
     mir_base_placement
     mir_bringup
     mir_bringup_sim
     mir_states
-    mir_object_detection
+    mcr_object_recognition_bounding_box
+    mir_visual_servoing
     rospy
     smach
     smach_ros
-    mir_visual_servoing
 )
 
 
