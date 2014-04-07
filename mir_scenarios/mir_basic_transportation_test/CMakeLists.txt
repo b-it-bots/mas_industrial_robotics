@@ -7,7 +7,6 @@ catkin_python_setup()
 
 catkin_package(
   CATKIN_DEPENDS
-    cob_script_server
     mcr_gazebo_objects
     mcr_linear_regression
     mcr_relative_base_controller
