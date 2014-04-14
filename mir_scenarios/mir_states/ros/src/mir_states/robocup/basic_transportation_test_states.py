@@ -456,11 +456,11 @@ class loop_for(smach.State):
     This state will return 'loop' MAX-1 times.
     On the MAX execute, 'continue' is returned.
     '''
-    def __init__(self):
+    def __init__(self, max_loop_count=2):
         smach.State.__init__(self, outcomes=['loop', 'continue'],
                              input_keys=['vscount'],
                              output_keys=['vscount'])
-        self.max_loop_count = 2
+        self.max_loop_count = max_loop_count
         self.loop_count = 0
        
     def execute(self, userdata):
