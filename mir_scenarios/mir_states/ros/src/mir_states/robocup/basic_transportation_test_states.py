@@ -453,7 +453,7 @@ class compute_base_shift_to_object(smach.State):
 
 class loop_for(smach.State):
     '''
-    This state will return 'loop' MAX-1 times.
+    This state will return 'loop' MAX+1 times.
     On the MAX execute, 'continue' is returned.
     '''
     def __init__(self, max_loop_count=2):
