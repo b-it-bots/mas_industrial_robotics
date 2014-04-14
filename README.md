@@ -116,11 +116,6 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 
      roslaunch mir_teleop teleop_keyboard.launch
      
-     
-## Test the arm and gripper
-
-     roslaunch mir_bringup dashboard.launch
-     
 
 ## Visualize the robot state and sensor data
 
