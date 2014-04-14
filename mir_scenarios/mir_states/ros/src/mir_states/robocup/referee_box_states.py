@@ -97,6 +97,93 @@ class re_get_task(smach.State):
             return 'wrong_task_format'
 
 #FIXME: merge into get_task
+class get_basic_manipulation_task(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+        
+    def execute(self, userdata):
+
+        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
+       
+        #man_task = "BMT<S5,S5,S4,line(S40_40_B,F20_20_B),S4>"
+        man_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
+
+        rospy.loginfo("Task received: " + man_task)
+        
+        # check if Task is a BMT task      
+        if(man_task[0:3] != "BMT"):
+           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
+           return 'wront_task_format' 
+
+        # remove leading start description        
+        man_task = man_task[3:len(man_task)]
+        
+        # check if description has beginning '<' and ending '>
+        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
+            rospy.loginfo("task spec not in correct format")
+            return 'wront_task_format' 
+        
+        
+        # remove beginning '<' and ending '>'
+        man_task = man_task[1:len(man_task)-1]
+        
+        #print man_task
+        
+        task_list = man_task.split(',')
+        
+        #print task_list
+
+        init_pose = task_list[0]
+        src_pose = task_list[1]
+        dest_pose = task_list[2]
+        
+        subtask_list = task_list[3].split('(')
+        obj_cfg = subtask_list[0]
+        
+        obj_names = []
+        obj_names.append(subtask_list[1])
+   
+        print task_list
+        
+        for i in range(4, (len(task_list)-1)):
+            if i == (len(task_list)-2):
+                print task_list[i]
+                task_list[i] = task_list[i][0:(len(task_list[i])-1)]
+                print task_list[i]
+                
+                 
+            obj_names.append(task_list[i])
+               
+        
+        fnl_pose = task_list[len(task_list)-1]
+        
+        for obj in range(len(obj_names)):
+            if obj_names[obj] == "V20":
+                obj_names[obj] = "R20"
+
+
+        print obj_names
+        
+        # which object to get from the source location
+        source_tasklist = Bunch(type = 'source', location = src_pose, object_names = list(obj_names)) 
+        userdata.task_list.append(source_tasklist)        
+
+        # where to deliver the objects and in which configuration
+        destination_tasklist = Bunch(type = 'destination', location = dest_pose, object_names = list(obj_names),  object_config = obj_cfg)
+        userdata.task_list.append(destination_tasklist) 
+
+        print "PARSED TASK: "
+        print "-----------------------------------------------------"
+        for task in userdata.task_list:
+          print "type:", task.type
+          print "   location:", task.location
+          print "   objects:", task.object_names  
+          if task.type == "destination":
+            print "   objects:", task.object_config       
+          print "-----------------------------------------------------"
+
+        return 'task_received' 
 class get_basic_transportation_task(smach.State):
 
     def __init__(self):
