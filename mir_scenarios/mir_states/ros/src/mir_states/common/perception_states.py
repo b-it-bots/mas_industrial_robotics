@@ -3,17 +3,9 @@
 import rospy
 import smach
 import smach_ros
-##import hbrs_srvs.srv
 import std_srvs.srv
 import tf
 import geometry_msgs.msg
-##import hbrs_msgs.msg
-
-##from hbrs_srvs.srv import GetObjects, ReturnBool
-##from raw_srvs.srv import FindHoles
-##from raw_msgs.msg import Hole
-##from raw_srvs.srv import DoVisualServoing
-##from raw_msgs.msg import VisualServoing
 
 from mcr_perception_msgs.srv import GetObjectList
 from mir_controller_msgs.srv import StartVisualServoing
