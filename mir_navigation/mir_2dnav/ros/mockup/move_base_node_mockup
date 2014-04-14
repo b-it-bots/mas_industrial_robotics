@@ -6,15 +6,23 @@ import rospy
 import actionlib
 
 from move_base_msgs.msg import MoveBaseAction
+from std_srvs.srv import *
 
 class MoveBaseMockup(object):
   
   def __init__(self):
     self._as = actionlib.SimpleActionServer("move_base", MoveBaseAction, execute_cb=self.execute_cb, auto_start = False)
     self._as.start()
-    
+    s = rospy.Service('/move_base/clear_costmaps', Empty, self.clear_costmap_cb)
+
+
   def execute_cb(self, goal):
     self._as.set_succeeded()
+
+  def clear_costmap_cb(self, req):
+    rospy.loginfo("clear costmaps")    
+    return EmptyResponse()
+
       
 if __name__ == '__main__':
   rospy.init_node('mir_move_base_mockup')
