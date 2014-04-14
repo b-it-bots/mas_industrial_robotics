@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_moveit_youbot</name>
+  <version>0.0.0</version>
+  <description>The mir_moveit_youbot package</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author> -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>mir_moveit_youbot_brsu_1</run_depend>
+  <run_depend>mir_moveit_youbot_brsu_2</run_depend>
+  <run_depend>mir_moveit_youbot_brsu_3</run_depend>
+  <run_depend>mir_moveit_youbot_brsu_4</run_depend>
+
+</package>

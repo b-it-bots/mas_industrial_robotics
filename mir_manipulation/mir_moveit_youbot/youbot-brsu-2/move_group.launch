@@ -1,0 +1,5 @@
+<launch>
+
+  <include file="$(find mir_moveit_youbot_brsu_2)/launch/move_group.launch" />
+  
+</launch>
