@@ -10,7 +10,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>actionlib</run_depend>
-  <run_depend>cob_script_server</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>mir_base_placement</run_depend>
   <run_depend>move_base_msgs</run_depend>

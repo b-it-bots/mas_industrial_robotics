@@ -32,13 +32,3 @@
     local-name: youbot_diagnostics
     uri: git@github.com:mas-group/youbot_diagnostics.git
     version: hydro-devel
-
-- git:
-    local-name: cob_command_tools
-    uri: git@github.com:mas-group/cob_command_tools.git
-    version: hydro_dev
-
-- git:
-    local-name: cob_driver
-    uri: git@github.com:mas-group/cob_driver.git
-    version: minimal_version_for_atwork

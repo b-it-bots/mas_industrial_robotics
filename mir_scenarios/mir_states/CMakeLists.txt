@@ -9,7 +9,6 @@ catkin_package(
   INCLUDE_DIRS ros/include
   CATKIN_DEPENDS
     actionlib
-    cob_script_server
     geometry_msgs
     mir_base_placement
     move_base_msgs

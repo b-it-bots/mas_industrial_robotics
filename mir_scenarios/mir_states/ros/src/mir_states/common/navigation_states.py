@@ -10,8 +10,6 @@ from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import String
 
 from actionlib.simple_action_client import GoalStatus
-from simple_script_server import *
-sss = simple_script_server()
 
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 from mcr_navigation_msgs.srv import MoveRelative
