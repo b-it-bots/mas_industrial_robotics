@@ -1,10 +1,38 @@
-# Documentation available at: http://wiki.ros.org/costmap_2d?distro=hydro
+map_type: costmap           # default: "voxel"
+obstacle_range: 2.5         # default: 2.5 
+raytrace_range: 3.0         # default: 3.0
+footprint: [[0.26, 0.18],
+            [0.26, 0.014],
+            [0.31, 0.014],
+            [0.31, -0.014],
+            [0.26, -0.014],
+            [0.26, -0.18],
+            [-0.27, -0.18],
+            [-0.27, -0.014],
+            [-0.32, -0.014],
+            [-0.32, 0.014],
+            [-0.27, 0.014],
+            [-0.27, 0.18]]
+
+observation_sources: laser_scanner_front laser_scanner_rear     # default : ""
+laser_scanner_front: {sensor_frame: base_laser_front_link, data_type: LaserScan, topic: /scan_front, expected_update_rate: 1.2, observation_persistence: 0.0,  marking: true, clearing: true, min_obstacle_height: -0.10, max_obstacle_height: 2.0}
+laser_scanner_rear: {sensor_frame: base_laser_rear_link, data_type: LaserScan, topic: /scan_rear, expected_update_rate: 1.2, observation_persistence: 0.0,  marking: true, clearing: true, min_obstacle_height: -0.10, max_obstacle_height: 2.0}
+
+#==============================================================
+# (Documentation available at: http://wiki.ros.org/costmap_2d?distro=hydro)
 # --------------------------------------------------------
+# default sensor_frame : ""
+# default data_type : "PointCloud"
+# default topic : "PointCloud", "PointCloud2", or "LaserScan"
+# default expected_update_rate : 0.0
+# default observation_persistence : 0.0
+# default marking : true
+# default clearing : false
+# default min_obstacle_height : 0.0
+# default max_obstacle_height: 2.0
+#==============================================================
 # map_type: What map type to use. "voxel" or "costmap" are the supported types, with the difference between them being a 3D-view of the world vs. a 2D-view of the world
 # default : "voxel"
-
-map_type: costmap
-
 # --------------------------------------------------------
 # transform_tolerance: Specifies the delay in transform (tf) data that is tolerable in seconds. 
 # This parameter serves as a safeguard to losing a link in the tf tree while still 
@@ -15,64 +43,20 @@ map_type: costmap
 # robot_base_frame parameters is transform_tolerance seconds older than ros::Time::now(), 
 # then the navigation stack will stop the robot.
 # default : 0.2
-
-transform_tolerance: 0.2
-
 # --------------------------------------------------------
 # obstacle_range: 
 # default : 2.5
-
-obstacle_range: 2.5
-
 # --------------------------------------------------------
 # raytrace_range: 
 # default : 3.0
-
-raytrace_range: 3.0
-
 # --------------------------------------------------------
-
 # footprint: The footprint of the robot specified in the robot_base_frame 
 # coordinate frame as a list in the format: [ [x1, y1], [x2, y2], ...., [xn, yn] ]. 
 # The footprint specification assumes the center point of the robot is 
 # at (0.0, 0.0) in the robot_base_frame and that the points are specified in meters, 
 # both clockwise and counter-clockwise orderings of points are supported
-# default: []
-            
-footprint: [[0.32, 0.18],
-            [0.32, -0.18],
-            [-0.32, -0.18],
-            [-0.32, 0.18]]
-
 # --------------------------------------------------------
 # observation_sources: A list of observation source names separated by spaces. 
 # This defines each of the <source_name> namespaces defined below. 
 # default : ""
-
-observation_sources: laser_scanner_front laser_scanner_rear
-
 # --------------------------------------------------------
-
-laser_scanner_front: {sensor_frame: base_laser_front_link, data_type: LaserScan, topic: /scan_front, expected_update_rate: 0.2, observation_persistence: 0.0,  marking: true, clearing: true, min_obstacle_height: -0.10, max_obstacle_height: 2.0}
-# default sensor_frame : ""
-# default data_type : "PointCloud"
-# default topic : "PointCloud", "PointCloud2", or "LaserScan"
-# default expected_update_rate : 0.0
-# default observation_persistence : 0.0
-# default marking : true
-# default clearing : false
-# default min_obstacle_height : 0.0
-# default max_obstacle_height: 2.0
-
-# --------------------------------------------------------
-
-laser_scanner_rear: {sensor_frame: base_laser_rear_link, data_type: LaserScan, topic: /scan_rear, expected_update_rate: 0.2, observation_persistence: 0.0,  marking: true, clearing: true, min_obstacle_height: -0.10, max_obstacle_height: 2.0}
-# default sensor_frame : ""
-# default data_type : "PointCloud"
-# default topic : "PointCloud", "PointCloud2", or "LaserScan"
-# default expected_update_rate : 0.0
-# default observation_persistence : 0.0
-# default marking : true
-# default clearing : false
-# default min_obstacle_height : 0.0
-# default max_obstacle_height: 2.0
