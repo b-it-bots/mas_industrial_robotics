@@ -17,6 +17,8 @@
         <joint name="arm_joint_5" />
     </group>
     <group name="arm_1_gripper">
+        <link name="gripper_tip_link" />
+        <link name="gripper_grasp_link" />
         <joint name="gripper_finger_joint_l" />
         <joint name="gripper_finger_joint_r" />
     </group>
