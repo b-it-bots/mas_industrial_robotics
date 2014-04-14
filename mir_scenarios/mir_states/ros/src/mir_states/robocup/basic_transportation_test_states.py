@@ -451,51 +451,6 @@ class compute_base_shift_to_object(smach.State):
         return 'succeeded'
 
 
-# class move_base_relative_btt(smach.State):
-# 
-#     """
-#     Shift the robot by the offset stored in 'move_base_by' field of userdata
-#     or the offset passed to the constructor.
-# 
-#     Input
-#     -----
-#     move_base_by: 3-tuple
-#         x, y, and theta displacement the shift the robot by. If an offset was
-#         supplied to the state constructor then it will override this input.
-#     """
-# 
-#     SRV = '/raw_relative_movements/move_base_relative'
-# 
-#     def __init__(self, offset=None):
-#         smach.State.__init__(self,
-#                              outcomes=['succeeded', 'failed'],
-#                              input_keys=['move_base_by'])
-#         self.offset = offset
-#         self.move_base_relative = rospy.ServiceProxy(self.SRV, RelativeMovements)
-# 
-#     def execute(self, userdata):
-#         rospy.logdebug('Waiting for service <<%s>>...' % (self.SRV))
-#         self.move_base_relative.wait_for_service()
-#         offset = self.offset or userdata.move_base_by
-#         pose = PoseStamped()
-#         pose.pose.position.x = offset[0]
-#         pose.pose.position.y = offset[1]
-#         pose.pose.position.z = 0.1  # speed
-#         quat = tf.transformations.quaternion_from_euler(0, 0, offset[2])
-#         pose.pose.orientation.x = quat[0]
-#         pose.pose.orientation.y = quat[1]
-#         pose.pose.orientation.z = quat[2]
-#         pose.pose.orientation.w = quat[3]
-#         try:
-#             response = self.move_base_relative(pose)
-#             if response.status == 'failure_obtacle_front':
-#                 # return values required by the scenario. This situation arises when the base is close to the platform
-#                 return 'succeeded'
-#         except:
-#             rospy.logerr('Could no execute <<%s>>' % (self.SRV))
-#             return 'failed'
-#         return 'succeeded'
-
 class loop_for(smach.State):
     '''
     This state will return 'loop' MAX-1 times.
