@@ -55,6 +55,7 @@
 
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro"/>
 
   <!-- base laser front -->
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
@@ -66,5 +67,9 @@
      <origin xyz="-0.3 0 -0.03" rpy="0 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
 
+  <!-- camera tower -->
+  <xacro:cam3d_tower name="camera_tower" parent="plate_link">
+    <origin xyz="-0.10 0.0 -0.01" rpy="0 0 0" />
+  </xacro:cam3d_tower>
 
 </robot>
