@@ -131,11 +131,6 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ### Omni-directional navigation
 
      roslaunch mir_2dnav 2dnav.launch nav_mode:=omni
-     
-
-### Differential navigation
-
-     roslaunch mir_2dnav 2dnav.launch nav_mode:=diff
 
      
 
