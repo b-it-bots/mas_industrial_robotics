@@ -42,9 +42,21 @@ class move_base(smach.State):
                              output_keys=['base_pose'])
         self.move_base_to = pose
         self.timeout = rospy.Duration(timeout)
+        self.clear_costmap_srv_name = '/move_base/clear_costmaps'
+        self.clear_costmap_srv = rospy.ServiceProxy(self.clear_costmap_srv_name, std_srvs.srv.Empty)
 
     def execute(self, userdata):
+        # remove close obstacles from the costmap
+        try:
+            rospy.loginfo("wait for service: %s", self.clear_costmap_srv_name)
+            rospy.wait_for_service(self.clear_costmap_srv_name, 30)
 
+            self.clear_costmap_srv()
+        except:
+            rospy.logerr("could not execute service <<%s>>", self.clear_costmap_srv_name)
+            return 'failed'
+
+        # start the motion
         pose = self.move_base_to or userdata.move_base_to
         handle_base = sss.move('base', pose, blocking=False)
         started = rospy.Time.now()
@@ -157,9 +169,20 @@ class approach_pose(smach.State):
     def __init__(self, pose = ""):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
 
-        self.pose = pose;    
+        self.pose = pose;  
+        self.clear_costmap_srv_name = '/move_base/clear_costmaps'
+        self.clear_costmap_srv = rospy.ServiceProxy(self.clear_costmap_srv_name, std_srvs.srv.Empty)  
 
     def execute(self, userdata):
+        # remove close obstacles from the costmap
+        try:
+            rospy.loginfo("wait for service: %s", self.clear_costmap_srv_name)
+            rospy.wait_for_service(self.clear_costmap_srv_name, 30)
+
+            self.clear_costmap_srv()
+        except:
+            rospy.logerr("could not execute service <<%s>>", self.clear_costmap_srv_name)
+            return 'failed'
         
         if(self.pose == ""):
             self.pose2 = userdata.base_pose_to_approach
