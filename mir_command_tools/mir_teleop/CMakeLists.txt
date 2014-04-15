@@ -3,6 +3,7 @@ project(mir_teleop)
 
 find_package(catkin REQUIRED
   COMPONENTS
+    dynamic_reconfigure
     brics_actuator
     geometry_msgs
     joy
@@ -13,6 +14,10 @@ find_package(catkin REQUIRED
 )
 
 find_package(Boost REQUIRED)
+
+generate_dynamic_reconfigure_options(
+  ros/config/TeleopJoypad.cfg
+)
 
 catkin_package(
   CATKIN_DEPENDS
@@ -35,6 +40,7 @@ add_executable(teleop_joypad_node
 )
 add_dependencies(teleop_joypad_node
   ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg
 )
 target_link_libraries(teleop_joypad_node
   ${catkin_LIBRARIES}

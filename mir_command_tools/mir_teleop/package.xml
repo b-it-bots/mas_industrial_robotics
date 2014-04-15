@@ -14,6 +14,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>brics_actuator</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>joy</build_depend>
   <build_depend>moveit_msgs</build_depend>

@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <moveit_msgs/JointLimits.h>
+#include <dynamic_reconfigure/server.h>
 #include <brics_actuator/JointVelocities.h>
 #include <brics_actuator/JointPositions.h>
 #include <geometry_msgs/Twist.h>
@@ -23,6 +24,8 @@
 
 #include <boost/units/systems/si.hpp>
 #include <boost/units/io.hpp>
+
+#include "mir_teleop/TeleopJoypadConfig.h"
 
 #define MAX_JOYPAD                      1.0
 
@@ -41,12 +44,18 @@ class TeleOpJoypad
 
     void cbJoypad(const sensor_msgs::Joy::ConstPtr& command);
     void cbJointStates(const sensor_msgs::JointState::ConstPtr& state_msg);
+    void cbDynamicReconfigure(mir_teleop::TeleopJoypadConfig &config, uint32_t level);
     void setAllArmJointVel(double motor_vel);
     void setSingleArmJointVel(double motor_vel, std::string joint_name);
     void checkArmJointLimits();
     void printArmJointStates();
 
     ros::NodeHandle* nh_;
+
+    dynamic_reconfigure::Server<mir_teleop::TeleopJoypadConfig> dyn_recfg_server;
+    dynamic_reconfigure::Server<mir_teleop::TeleopJoypadConfig>::CallbackType dyn_recfg_cb;
+
+    mir_teleop::TeleopJoypadConfig teleop_config_;
 
     sensor_msgs::JointState current_joint_states_;
     bool is_in_soft_joint_limits_;

@@ -23,7 +23,8 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
     button_arm_joint_5_pressed_prev_ = false;
     is_one_arm_joint_button_pressed_ = false;
 
-    arm_cart_zero_vel_.header.frame_id = "/base_link";
+    dyn_recfg_cb = boost::bind(&TeleOpJoypad::cbDynamicReconfigure, this, _1, _2);
+    dyn_recfg_server.setCallback(dyn_recfg_cb);
 
     if (!this->getJoypadConfigParameter())
     {
@@ -237,6 +238,12 @@ bool TeleOpJoypad::moveGripper(std::string joint_position_name)
     return true;
 }
 
+void TeleOpJoypad::cbDynamicReconfigure(mir_teleop::TeleopJoypadConfig &config, uint32_t level)
+{
+    teleop_config_ = config;
+    arm_cart_zero_vel_.header.frame_id = teleop_config_.arm_cartesian_reference_link;
+}
+
 void TeleOpJoypad::cbJointStates(const sensor_msgs::JointState::ConstPtr& state_msg)
 {
     current_joint_states_ = *state_msg;
@@ -413,7 +420,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
         // arm cartesian control mode OR base cartesian control mode
         if ((bool) command->buttons[button_index_arm_cart_])
         {
-            arm_cart_vel_.header.frame_id = "/base_link";
+            arm_cart_vel_.header.frame_id = teleop_config_.arm_cartesian_reference_link;
             arm_cart_vel_.twist.linear.x = command->axes[axes_index_arm_linear_x_] * arm_cart_factor_ * speed_factor_;
             arm_cart_vel_.twist.linear.y = command->axes[axes_index_arm_linear_y_] * arm_cart_factor_ * speed_factor_;
             arm_cart_vel_.twist.linear.z = command->axes[axes_index_arm_linear_z_] * arm_cart_factor_ * speed_factor_;
