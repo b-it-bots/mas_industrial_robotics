@@ -63,6 +63,7 @@ class GripperCommandControllerServer:
 		
 		self.pub_joint_positions.publish(jnt_pos)
 		
+		rospy.sleep(3.0)
 		self.server.set_succeeded()
 	
 	def joint_states_callback(self, msg):
