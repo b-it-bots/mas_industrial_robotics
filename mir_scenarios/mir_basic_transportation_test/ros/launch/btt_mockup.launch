@@ -1,8 +1,19 @@
 <?xml version="1.0"?>
 <launch>
  	
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+    <arg name="sim" default="false"/>
+
     <!-- real robot related launches  -->
-    <include file="$(find mir_bringup)/robot.launch" />
+    <group unless="$(arg sim)">
+      <include file="$(find mir_bringup)/robot.launch" />   <!-- base components -->
+    </group>
+
+    <!-- simulation related launches -->
+    <group if="$(arg sim)">
+      <include file="$(find mir_bringup_sim)/robot.launch" />   <!-- base components -->
+      <!--include file="$(find mcr_gazebo_objects)/ros/launch/spawn_objects.launch"/-->   <!-- spawn objects -->
+    </group>
 
     <!-- moveit -->
     <include file="$(find mir_moveit_youbot_brsu_2)/launch/move_group.launch" />
