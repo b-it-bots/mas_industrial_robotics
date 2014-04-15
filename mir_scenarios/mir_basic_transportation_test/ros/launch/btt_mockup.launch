@@ -22,26 +22,16 @@
     <include file="$(find mir_2dnav)/ros/launch/2dnav_mockup.launch" />
    
     <!-- base placement -->
-    <include file="$(find mir_base_placement)/ros/launch/base_placement.launch"/>
-    <include file="$(find mcr_linear_regression)/ros/launch/laser_scan_linear_regression.launch"/>
-    <!--
     <include file="$(find mir_base_placement)/ros/launch/base_placement_mockup.launch" />
-    -->
-
+    
     <!-- relative base controller -->
-    <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller.launch" />
+    <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller_mockup.launch" />
 
     <!-- perception pipeline -->
-    <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition.launch" />
-    <!--
-    <include file="$(find mcr_object_detection)/ros/launch/object_detection_mockup.launch" />
-    -->
+    <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition_mockup.launch" />
  
     <!-- Visual Servoing -->
     <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing_mockup.launch"/>
-    <!--
-    <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing_mockup.launch"/>
-    -->
 
 </launch>
 
