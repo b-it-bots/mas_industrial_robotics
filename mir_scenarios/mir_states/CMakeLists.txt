@@ -6,7 +6,6 @@ find_package(catkin REQUIRED)
 catkin_python_setup()
 
 catkin_package(
-  INCLUDE_DIRS ros/include
   CATKIN_DEPENDS
     actionlib
     geometry_msgs
