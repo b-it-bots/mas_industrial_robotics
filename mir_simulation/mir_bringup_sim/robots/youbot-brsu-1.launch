@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
+  <!-- launch base controller -->
+  <include file="$(find youbot_gazebo_control)/launch/base_controller.launch" />
+
   <!-- launch arm and gripper controller -->
   <include file="$(find youbot_gazebo_control)/launch/arm_controller.launch" />
 
