@@ -30,9 +30,8 @@ set(
 ) 
 foreach(dir ${INSTALL_DIRS}) 
   install(DIRECTORY ${dir}
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir}
-  )
-endforeach(dir)
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
+endforeach()
 
 install(FILES robot.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
