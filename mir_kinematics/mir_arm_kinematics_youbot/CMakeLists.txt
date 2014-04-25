@@ -8,20 +8,15 @@ find_package(catkin REQUIRED COMPONENTS
   tf_conversions
 )
 
-find_package(orocos_kdl REQUIRED)
-
 include_directories(
   ros/include
   common/include
   common/include/${PROJECT_NAME}
   ${catkin_INCLUDE_DIRS}
-  ${orocos_kdl_INCLUDE_DIRS}
 )
 
 link_directories(
   ${catkin_LIBRARY_DIRS}
-  ${orocos_kdl_LIBRARY_DIRS}
-)
 )
 
 catkin_package()
