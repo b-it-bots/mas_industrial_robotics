@@ -19,7 +19,11 @@ link_directories(
   ${catkin_LIBRARY_DIRS}
 )
 
-catkin_package()
+catkin_package(
+  CATKIN_DEPENDS
+    pluginlib
+    moveit_core
+)
 
 add_library(arm_analytical_inverse_kinematics_youbot_moveit_plugin
   ros/src/arm_analytical_inverse_kinematics_youbot_moveit_plugin.cpp
