@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mir_arm_kinematics_youbot)
 
-find_package(catkin REQUIRED COMPONENTS
-  moveit_core
-  pluginlib
-  roscpp
-  tf_conversions
+find_package(catkin REQUIRED 
+  COMPONENTS
+    pluginlib
+    roscpp
+    tf_conversions
 )
 
 include_directories(

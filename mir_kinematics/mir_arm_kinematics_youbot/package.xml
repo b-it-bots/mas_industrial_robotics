@@ -11,15 +11,16 @@
   <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>moveit_core</build_depend>
-  <run_depend>moveit_core</run_depend>
-  <build_depend>pluginlib</build_depend>
-  <run_depend>pluginlib</run_depend>
+
   <build_depend>roscpp</build_depend>
-  <run_depend>roscpp</run_depend>
   <build_depend>tf_conversions</build_depend>
-  <run_depend>tf_conversions</run_depend>
+  <build_depend>pluginlib</build_depend>
+
+  <run_depend>pluginlib</run_depend>
+  <run_depend>moveit_core</run_depend>
+
   <export>
     <moveit_core plugin="${prefix}/plugins.xml"/>
   </export>
+
 </package>
