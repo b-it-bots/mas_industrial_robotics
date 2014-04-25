@@ -32,21 +32,19 @@ catkin_package(
 )
 
 
-set(IKFAST_LIBRARY_NAME arm_analytical_inverse_kinematics_youbot_moveit_plugin)
-
-add_library(${IKFAST_LIBRARY_NAME} 
+add_library(arm_analytical_inverse_kinematics_youbot_moveit_plugin
   ros/src/arm_analytical_inverse_kinematics_youbot_moveit_plugin.cpp
   ros/src/arm_analytical_inverse_kinematics.cpp
 )
-target_link_libraries(${IKFAST_LIBRARY_NAME} 
+
+target_link_libraries(arm_analytical_inverse_kinematics_youbot_moveit_plugin
   ${catkin_LIBRARIES} 
   ${Boost_LIBRARIES} 
   ${LAPACK_LIBRARIES}
-  ${orocos_kdl_LIBRARIES}
 )
 
 
-install(TARGETS ${IKFAST_LIBRARY_NAME} 
+install(TARGETS arm_analytical_inverse_kinematics_youbot_moveit_plugin
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
