@@ -18,8 +18,7 @@ catkin_package(
     youbot_dashboard
     youbot_description 
     youbot_diagnostic_aggregator
-    youbot_joint_trajectory_action
-    youbot_oodl
+    youbot_driver_ros_interface
     usb_cam
 )
 
