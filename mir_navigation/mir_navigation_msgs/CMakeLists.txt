@@ -4,6 +4,7 @@ project(mir_navigation_msgs)
 find_package(catkin REQUIRED
   COMPONENTS
     actionlib_msgs
+    message_generation
     std_msgs
 )
 
@@ -19,5 +20,8 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS actionlib_msgs std_msgs
+  CATKIN_DEPENDS
+    actionlib_msgs
+    message_runtime    
+    std_msgs
 )
