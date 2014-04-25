@@ -2,7 +2,7 @@
 <package>
   <name>mir_2dslam</name>
   <version>0.0.1</version>
-  <description>The mir_2dslam package</description>
+  <description>map building with SLAM (e.g. gmapping)</description>
 
   <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
   <maintainer email="praveen.ramanujam@smail.inf.h-brs.de">Praveen Ramanujam</maintainer>
