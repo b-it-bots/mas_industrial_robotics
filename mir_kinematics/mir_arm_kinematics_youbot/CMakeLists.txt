@@ -11,7 +11,6 @@ find_package(catkin REQUIRED
 include_directories(
   ros/include
   common/include
-  common/include/${PROJECT_NAME}
   ${catkin_INCLUDE_DIRS}
 )
 
