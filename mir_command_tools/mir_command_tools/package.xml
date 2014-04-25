@@ -2,7 +2,7 @@
 <package>
   <name>mir_command_tools</name>
   <version>0.0.1</version>
-  <description>tools for making the robot move with other devices i.e. a joypad</description>
+  <description>Command tools for making the robot move with other devices i.e. a joypad</description>
 
   <license>GPLv3</license>
 
