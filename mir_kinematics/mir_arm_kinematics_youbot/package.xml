@@ -2,7 +2,7 @@
 <package>
   <name>mir_arm_kinematics_youbot</name>
   <version>0.0.1</version>
-  <description>manipulation related messages, services and actions</description>
+  <description>arm kinematics for the youBot</description>
   <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
   <license>GPLv3</license>
   <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
