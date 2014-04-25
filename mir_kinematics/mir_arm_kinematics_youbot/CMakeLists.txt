@@ -22,15 +22,9 @@ link_directories(
   ${catkin_LIBRARY_DIRS}
   ${orocos_kdl_LIBRARY_DIRS}
 )
-
-catkin_package(
-  DEPENDS
-    moveit_core
-    pluginlib
-    roscpp
-    tf_conversions
 )
 
+catkin_package()
 
 add_library(arm_analytical_inverse_kinematics_youbot_moveit_plugin
   ros/src/arm_analytical_inverse_kinematics_youbot_moveit_plugin.cpp
