@@ -25,7 +25,6 @@ catkin_package(
     geometry_msgs
     mcr_teleop
     moveit_msgs
-    pr2_teleop
     sensor_msgs
     std_srvs
 )
