@@ -3,8 +3,6 @@ project(mir_basic_transportation_test)
 
 find_package(catkin REQUIRED)
 
-catkin_python_setup()
-
 catkin_package(
   CATKIN_DEPENDS
     mcr_gazebo_objects
