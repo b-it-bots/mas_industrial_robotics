@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="nav_mode" default="omni" />
+  <arg name="nav_mode" default="dwa" />
 
   <include file="$(find mir_2dnav)/ros/launch/2dnav_$(arg nav_mode).launch" />
 
