@@ -8,6 +8,7 @@ packagelist=(
     ros-hydro-amcl
     ros-hydro-cob-srvs
     ros-hydro-dwa-local-planner
+    ros-hydro-eband-local-planner
     ros-hydro-gazebo-ros-control
     ros-hydro-gmapping
     ros-hydro-hokuyo-node
