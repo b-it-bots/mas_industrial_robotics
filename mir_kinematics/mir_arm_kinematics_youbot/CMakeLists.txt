@@ -3,6 +3,7 @@ project(mir_arm_kinematics_youbot)
 
 find_package(catkin REQUIRED 
   COMPONENTS
+    moveit_core
     pluginlib
     roscpp
     tf_conversions
