@@ -43,7 +43,7 @@
     <origin xyz="-0.159 0 0.046" rpy="0 0 0" />
   </xacro:youbot_plate>
   <xacro:youbot_arm name="arm" parent="base_link">
-    <origin xyz="0.143 0 0.046" rpy="0 0 0" />
+    <origin xyz="0.223 0.017 0.088" rpy="0 0 ${-M_PI / 4}" />
   </xacro:youbot_arm>
 
   <!-- BRSU SPECIFIC STUFF -->
@@ -52,6 +52,11 @@
   <xacro:include filename="$(find mcr_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/mounts/microsoft_lifecam_1080_mount.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/grippers/festo_gripper.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
+
+  <xacro:adapter_plate name="adapter_plate" parent="base_link">
+    <origin xyz="${0.159+0.08} 0 0.051" rpy="0 0 0" />
+  </xacro:adapter_plate>
 
   <!-- base laser front -->
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
