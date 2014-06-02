@@ -20,6 +20,7 @@ def main(simulation=False):
     SM.userdata.test = 'BNT'
     SM.userdata.simulation = simulation
     SM.userdata.task = None
+    SM.userdata.base_pose_to_approach = ""
 
     with SM:
 
@@ -32,14 +33,14 @@ def main(simulation=False):
                          'unknown_pose': 'SELECT_TARGET_POSE',
                          'no_more_targets': 'MOVE_BASE_TO_EXIT'})
 
-        smach.StateMachine.add('MOVE_BASE', move_base(),
+        smach.StateMachine.add('MOVE_BASE', approach_pose(),
             transitions={'succeeded': 'WAIT_DESIRED_DURATION',
                          'failed': 'SELECT_TARGET_POSE'})
 
         smach.StateMachine.add('WAIT_DESIRED_DURATION', wait_for_desired_duration(),
             transitions={'succeeded': 'SELECT_TARGET_POSE'})
 
-        smach.StateMachine.add('MOVE_BASE_TO_EXIT', move_base('EXIT'),
+        smach.StateMachine.add('MOVE_BASE_TO_EXIT', approach_pose('EXIT'),
             transitions={'succeeded': 'overall_succeeded',
                          'failed': 'MOVE_BASE_TO_EXIT'})
 

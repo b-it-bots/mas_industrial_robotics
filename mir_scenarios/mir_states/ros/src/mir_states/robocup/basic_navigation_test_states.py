@@ -26,7 +26,7 @@ class select_target_pose(smach.State):
                                        'unknown_pose',
                                        'no_more_targets'],
                              input_keys=['task'],
-                             output_keys=['move_base_to',
+                             output_keys=['base_pose_to_approach',
                                           'task',
                                           'subtask'])
 
@@ -54,7 +54,7 @@ class select_target_pose(smach.State):
         rospy.set_param("script_server/base/" + subtask[0], [position[0], position[1], orientation])
 
         rospy.loginfo('Selected position: %s, orientation: %s' % (subtask[0], subtask[1]))
-        userdata.move_base_to = subtask[0]
+        userdata.base_pose_to_approach = subtask[0]
         userdata.subtask = subtask
         return 'pose_selected'
 

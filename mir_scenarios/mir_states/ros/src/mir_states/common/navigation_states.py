@@ -5,75 +5,17 @@ import smach_ros
 import actionlib 
 import std_srvs.srv
 import tf
+import move_base_msgs.msg
+import actionlib_msgs.msg 
 
 from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import String
+
 
 from actionlib.simple_action_client import GoalStatus
 
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 from mcr_navigation_msgs.srv import MoveRelative
-
-class move_base(smach.State):
-
-    """
-    Move the robot to the pose stored in the 'move_base_to' field of userdata
-    or the pose passed to the constructor.
-
-    Input
-    -----
-    move_base_to: str
-        Name of the pose that the robot should approach. The name should exist
-        on the parameter server. If a pose was supplied to the state
-        constructor then it will override this input.
-
-    Output
-    ------
-    base_pose: str
-        Base position after the movement. If succeeded, then it will be set to
-        the commanded pose. If failed, will be set to None to indicate that the
-        pose is not known.
-    """
-
-    def __init__(self, pose=None, timeout=120):
-        smach.State.__init__(self,
-                             outcomes=['succeeded', 'failed'],
-                             input_keys=['move_base_to'],
-                             output_keys=['base_pose'])
-        self.move_base_to = pose
-        self.timeout = rospy.Duration(timeout)
-        self.clear_costmap_srv_name = '/move_base/clear_costmaps'
-        self.clear_costmap_srv = rospy.ServiceProxy(self.clear_costmap_srv_name, std_srvs.srv.Empty)
-
-    def execute(self, userdata):
-        # remove close obstacles from the costmap
-        try:
-            rospy.loginfo("wait for service: %s", self.clear_costmap_srv_name)
-            rospy.wait_for_service(self.clear_costmap_srv_name, 30)
-
-            self.clear_costmap_srv()
-        except:
-            rospy.logerr("could not execute service <<%s>>", self.clear_costmap_srv_name)
-            return 'failed'
-
-        # start the motion
-        pose = self.move_base_to or userdata.move_base_to
-        handle_base = sss.move('base', pose, blocking=False)
-        started = rospy.Time.now()
-        while True:
-            rospy.sleep(0.1)
-            base_state = handle_base.get_state()
-            if rospy.Time.now() - started > self.timeout:
-                return 'failed'
-            if base_state == GoalStatus.SUCCEEDED:
-                userdata.base_pose = pose
-                return 'succeeded'
-            elif base_state == GoalStatus.ACTIVE:
-                continue
-            else:
-                print 'Last state: ', base_state
-                userdata.base_pose = None
-                return 'failed'
 
        
 class adjust_to_workspace(smach.State):
@@ -166,10 +108,14 @@ class move_base_relative(smach.State):
 ## same as move_base?
 class approach_pose(smach.State):
 
-    def __init__(self, pose = ""):
+    def __init__(self, pose_name = ""):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
 
-        self.pose = pose;  
+        self.pose_name = pose_name;  
+
+        self.move_base_action_name = '/move_base'
+        self.move_base_action = actionlib.SimpleActionClient(self.move_base_action_name, move_base_msgs.msg.MoveBaseAction)
+
         self.clear_costmap_srv_name = '/move_base/clear_costmaps'
         self.clear_costmap_srv = rospy.ServiceProxy(self.clear_costmap_srv_name, std_srvs.srv.Empty)  
 
@@ -184,20 +130,57 @@ class approach_pose(smach.State):
             rospy.logerr("could not execute service <<%s>>", self.clear_costmap_srv_name)
             return 'failed'
         
-        if(self.pose == ""):
-            self.pose2 = userdata.base_pose_to_approach
-        else:
-            self.pose2 = self.pose 
+        # wait for action server
+        rospy.loginfo("Wait for action: %s", self.move_base_action_name)
+        if not self.move_base_action.wait_for_server(rospy.Duration(5)):
+            rospy.logerr("%s action server not ready within timeout, aborting...", self.move_base_action_name)
+            return 'failed'
         
-        handle_base = sss.move("base", self.pose2)
+        # check if argument has been passed or userdata should be used
+        if(self.pose_name == ""):
+            self.pose_name2 = userdata.base_pose_to_approach
+        else:
+            self.pose_name2 = self.pose_name 
 
-        while True:                
-            rospy.sleep(0.1)
-            base_state = handle_base.get_state()
-            if (base_state == actionlib.simple_action_client.GoalStatus.SUCCEEDED):
-                return "succeeded"
-            elif (base_state == actionlib.simple_action_client.GoalStatus.ACTIVE):
-                continue
-            else:
-                print 'last state: ',base_state
-                return "failed"
+    
+        # get pose from parameter server
+        if type(self.pose_name2) is str:
+            parameter_name = "/script_server/base/" + self.pose_name2
+            if not rospy.has_param(parameter_name):
+                rospy.logerr("parameter <<%s>> does not exist on ROS Parameter Server, aborting...", parameter_name)
+                return 'failed'
+            
+            self.target_pose = rospy.get_param(parameter_name)
+        else:
+            rospy.logerr("pose parameter <<%s>> is not a string, aborting...", self.pose_name2)
+            return 'failed'
+        
+
+        # prepare action message
+    	pose = PoseStamped()
+        pose.header.stamp = rospy.Time.now()
+        pose.header.frame_id = "/map"
+        pose.pose.position.x = self.target_pose[0]
+        pose.pose.position.y = self.target_pose[1]
+        pose.pose.position.z = 0.0
+        q = tf.transformations.quaternion_from_euler(0, 0, self.target_pose[2])
+        pose.pose.orientation.x = q[0]
+        pose.pose.orientation.y = q[1]
+        pose.pose.orientation.z = q[2]
+        pose.pose.orientation.w = q[3]
+
+    	goal = move_base_msgs.msg.MoveBaseGoal()
+        goal.target_pose = pose     
+
+        # call action
+        self.move_base_action.send_goal(goal)
+
+        self.move_base_action.wait_for_result()
+
+        # evaluate result
+        result = self.move_base_action.get_state()
+
+        if (result == actionlib_msgs.msg.GoalStatus.SUCCEEDED):
+            return "succeeded"
+        else:
+            return "failed"
