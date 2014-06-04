@@ -2,13 +2,13 @@ local_costmap:
   global_frame: /map                    #_default : "/map"
   inflation_radius: 0.43                #_default: 0.55
   robot_base_frame: base_footprint      #default : "base_link"
-  update_frequency: 2.0                 #_default : 5.0
-  publish_frequency: 1.0                #_default : 0.0
+  update_frequency: 1.0                 #_default : 5.0
+  publish_frequency: 1.5                #_default : 0.0
   static_map: false                     #default : true
   rolling_window: true                  #_default : false
   width: 2.5                            #_default : 10
   height: 2.5                           #_default : 10
-  resolution: 0.01                      #default : 0.05
+  resolution: 0.04                      #default : 0.05
 
 #================================================  
 # (Documentation available at http://wiki.ros.org/costmap_2d?distro=hydro)
