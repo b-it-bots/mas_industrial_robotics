@@ -23,7 +23,6 @@
 
     <!-- base placement -->
     <include file="$(find mir_base_placement)/ros/launch/base_placement.launch"/>
-    <include file="$(find mcr_linear_regression)/ros/launch/laser_scan_linear_regression.launch"/>
 
     <!-- relative base controller -->
     <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller.launch" />
