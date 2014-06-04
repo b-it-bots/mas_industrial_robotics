@@ -42,7 +42,7 @@ vtheta_samples: 15              #_default : 20
 sim_period: 0.2                 #default : not found
 
 xy_goal_tolerance: 0.075         #default : 0.10,       best: 0.05
-yaw_goal_tolerance: 0.05         #default : 0.05,      best: 0.12
+yaw_goal_tolerance: 0.1         #default : 0.05,      best: 0.12
 
 rot_stopped_vel: 0.01           #default : not found
 trans_stopped_vel: 0.01         #default : not found
