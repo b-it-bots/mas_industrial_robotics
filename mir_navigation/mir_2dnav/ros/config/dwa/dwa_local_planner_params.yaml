@@ -1,20 +1,20 @@
 #-------------SPEED----------------------------
 
-max_trans_vel: 0.5              #_default : 0.55
-min_trans_vel: 0.01             #_default : 0.1
+max_trans_vel: 0.6              #_default : 0.55
+min_trans_vel: 0.1             #_default : 0.1
 
-max_vel_x: 0.4                  #_default : 0.55
+max_vel_x: 0.6                  #_default : 0.55
 min_vel_x: -0.3                 #_default : 0.0
 
-max_vel_y: 0.2                  #_default : 0.1
-min_vel_y: -0.2                 #_default : -0.1
+max_vel_y: 0.1                  #_default : 0.1
+min_vel_y: -0.1                 #_default : -0.1
 
-max_rot_vel: 0.5                #_default : 1.0
-min_rot_vel: 0.0                #_default : 0.4
+max_rot_vel: 0.75                #_default : 1.0
+min_rot_vel: 0.2                #_default : 0.4
 
-acc_lim_x: 0.8                  #_default : 2.5
-acc_lim_y: 0.8                  #_default : 2.5
-acc_lim_theta: 1.0              #_default : 3.2
+acc_lim_x: 1.5                  #_default : 2.5
+acc_lim_y: 1.5                  #_default : 2.5
+acc_lim_theta: 1.5              #_default : 3.2
 acc_limit_trans: 0.1            #default : 0.1
 
 #----------------------------------------------
@@ -22,112 +22,34 @@ acc_limit_trans: 0.1            #default : 0.1
 sim_time: 1.7                   #default : 1.7
 sim_granularity: 0.025          #default : 0.025
 
-goal_distance_bias: 15.0        #default : 24.0
-path_distance_bias: 35.0        #default : 32.0
-occdist_scale: 0.5              #default : 0.01
+goal_distance_bias: 19.0        #default : 24.0, best: 15.0
+path_distance_bias: 33.0        #default : 32.0, best: 35.0
+
+occdist_scale: 0.01              #default : 0.01
 
 stop_time_buffer: 0.2           #default : 0.2
 oscillation_reset_dist: 0.05    #default : 0.05
 
-forward_point_distance: 0.325   #default : 0.325
+forward_point_distance: 0.4   #default : 0.325
 
-scaling_speed: 0.25             #default : 0.25
-max_scaling_factor: 0.2         #default : 0.2
+scaling_speed: 0.35             #default : 0.25
+max_scaling_factor: 0.1         #default : 0.2
 
-vx_samples: 3                   #default : 3
-vy_samples: 7                   #_default : 10
-vtheta_samples: 22              #_default : 20
+vx_samples: 6                   #default : 3
+vy_samples: 3                   #_default : 10
+vtheta_samples: 15              #_default : 20
 
-sim_period: 0.1                 #default : not found
+sim_period: 0.2                 #default : not found
 
-xy_goal_tolerance: 0.05         #default : 0.10,       best: 0.05
-yaw_goal_tolerance: 0.12         #default : 0.05,      best: 0.12
+xy_goal_tolerance: 0.075         #default : 0.10,       best: 0.05
+yaw_goal_tolerance: 0.05         #default : 0.05,      best: 0.12
 
 rot_stopped_vel: 0.01           #default : not found
 trans_stopped_vel: 0.01         #default : not found
 
 penalize_negative_x: false      #default : true
 
-# =================================================================================
-# (Documentation available at http://wiki.ros.org/dwa_local_planner?distro=hydro)
-# ----------SPEED-----------------------------------------
-# acc_lim_th: The rotational acceleration limit of the robot in radians/sec^2 
-# acc_lim_x: The x acceleration limit of the robot in meters/sec^2 
-# acc_lim_y: The y acceleration limit of the robot in meters/sec^2
-# 
-# max_vel_x: The maximum x velocity for the robot in m/s 
-# min_vel_x: The minimum x velocity for the robot in m/s
-# 
-# max_vel_y: The maximum y velocity for the robot in m/s 
-# min_vel_y: The minimum y velocity for the robot in m/s 
-# 
-# 
-# max_trans_vel: The absolute value of the maximum translational velocity for the robot in m/s 
-# min_trans_vel: The absolute value of the minimum translational velocity for the robot in m/s
-# 
-# max_rot_vel: The absolute value of the maximum rotational velocity for the robot in rad/s 
-# min_rot_vel: The absolute value of the minimum rotational velocity for the robot in rad/s 
-# --------------------------------------------------------
-# sim_time: The amount of time to forward-simulate trajectories in seconds 
-# default : 1.7
-# --------------------------------------------------------
-# sim_granularity: The step size, in meters, to take between points on a given trajectory
-# default : 0.025
-# --------------------------------------------------------
-# goal_distance_bias: The weighting for how much the controller should attempt 
-# to reach its local goal, also controls speed 
-# default : 24.0
-# --------------------------------------------------------
-# path_distance_bias: The weighting for how much the controller should stay close 
-# to the path it was given 
-# default : 32.0
-# --------------------------------------------------------
-# occdist_scale: The weighting for how much the controller should attempt to avoid obstacles 
-# default : 0.01
-# --------------------------------------------------------
-# stop_time_buffer: The amount of time that the robot must stop before a collision 
-# in order for a trajectory to be considered valid in seconds 
-# default : 0.2
-# --------------------------------------------------------
-# oscillation_reset_dist: How far the robot must travel in meters before oscillation flags are reset 
-# default : 0.05
-# --------------------------------------------------------
-# forward_point_distance: The distance from the center point of the robot 
-# to place an additional scoring point, in meters
-# default : 0.325
-# --------------------------------------------------------
-# scaling_speed: The absolute value of the veolicty at which 
-# to start scaling the robot's footprint, in m/s
-# default : 0.25
-# --------------------------------------------------------
-# max_scaling_factor: The maximum factor to scale the robot's footprint by 
-# default : 0.2
-# --------------------------------------------------------
-# vx_samples: The number of samples to use when exploring the x velocity space 
-# default : 3
-# --------------------------------------------------------
-# vy_samples: The number of samples to use when exploring the y velocity space 
-# default : 10
-# --------------------------------------------------------
-# vtheta_samples: The number of samples to use when exploring the theta velocity space 
-# default : 20
-# --------------------------------------------------------
-# sim_period:
-# default : not found
-# --------------------------------------------------------
-# xy_goal_tolerance: The tolerance in meters for the controller 
-# in the x & y distance when achieving a goal 
-# default : 0.10
-# --------------------------------------------------------
-# yaw_goal_tolerance: The tolerance in radians for the controller 
-# in yaw/rotation when achieving its goal 
-# default : 0.05
-# --------------------------------------------------------
-# rot_stopped_vel:
-# default : not found
-# --------------------------------------------------------
-# trans_stopped_vel:
-# default : not found
-# --------------------------------------------------------
-# penalize_negative_x: Whether to penalize trajectories that have negative x velocities
-# default : true
+NavfnROS:
+  allow_unknown: false
+  default_tolerance: 0.2
+
