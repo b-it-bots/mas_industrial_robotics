@@ -167,10 +167,9 @@ protected:
 	geometry_msgs::Twist 							m_youbot_base_velocities;
 	brics_actuator::JointVelocities 				m_youbot_arm_velocities;
 	std::vector<std::string> 						m_arm_joint_names;
-
 	ros::Publisher 									m_base_velocities_publisher;
 	ros::Publisher 									m_arm_velocities_publisher;
-	  ros::Publisher									m_pub_visual_servoing_status;
+	ros::Publisher									m_pub_visual_servoing_status;
 	ros::NodeHandle 								m_node_handler;
 
 	bool											m_is_blob_lost;
