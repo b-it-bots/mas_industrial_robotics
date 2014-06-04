@@ -8,6 +8,7 @@ import tf
 
 import geometry_msgs.msg
 import moveit_commander
+import moveit_msgs.msg
 
 arm_command = moveit_commander.MoveGroupCommander('arm_1')
 arm_command.set_goal_position_tolerance(0.005)
@@ -171,30 +172,48 @@ class move_arm(smach.State):
     def execute(self, userdata):
         target = self.move_arm_to or userdata.move_arm_to
 
-        # target is a string specifing a joint position
-        if type(target) is str:
+        if type(target) is str:         # target is a string specifing a joint position
             rospy.loginfo('MOVING ARM TO: ' + str(target))
             try:
                 arm_command.set_named_target(target)
-                arm_command.go() #TODO: check return if there is one and decide based on this the outcome of the state
-                
             except Exception as e:
-                rospy.logerr('Move arm failed: %s' % (str(e)))
+                rospy.logerr('unable to set target position: %s' % (str(e)))
                 return 'failed'
+
+        elif type(target) is list:      # target is a list ...
+            if len(target) == 7:        # ... of 7 items: Cartesian pose (x, y, z, r, p, y, frame_id)
+                try:
+                    pose = geometry_msgs.msg.PoseStamped()
+                    pose.header.frame_id = target[6]
+                    pose.pose.position.x = float(target[0])
+                    pose.pose.position.y = float(target[1])
+                    pose.pose.position.z = float(target[2])
+                    
+                    q = tf.transformations.quaternion_from_euler(target[3], target[4], target[5])
+                    pose.pose.orientation.x = q[0]
+                    pose.pose.orientation.y = q[1]
+                    pose.pose.orientation.z = q[2]
+                    pose.pose.orientation.w = q[3]
+
+                    arm_command.set_pose_target(pose)
+                except Exception as e:
+                    rospy.logerr('unable to set target position: %s' % (str(e)))
+                    return 'failed'
+            else:
+                rospy.logerr("target list is malformed")
+                return 'failed'
+        else:
+            rospy.logerr("no valid target specified. Target should be a string (name of a joint position) or a list of 7 items (Cartesian Pose + frame id)")
+            return 'failed'
+
+        # plan and execute arm movement        
+        error_code = arm_command.go(wait=self.blocking)
+
+        if error_code == moveit_msgs.msg.MoveItErrorCodes.SUCCESS:
             return 'succeeded'
-
-        # target is a list ...
-        if type(target) is list:
-            # ... of 7 items: Cartesian pose (x, y, z, r, p, y, frame_id)
-            if len(target) == 7:
-                arm_command.set_pose_target(target[0:6])
-                arm_command.go()
-
-                return 'succeeded'
-
-        rospy.logerr("no valid target specified. Target should be a string (name of a joint position) or a list of 7 items (Cartesian Pose + frame id)")
-
-        return 'failed'
+        else:
+            rospy.logerr("Arm movement failed with error code: %d", error_code)
+            return 'failed'
 
 
 class control_gripper(smach.State):
