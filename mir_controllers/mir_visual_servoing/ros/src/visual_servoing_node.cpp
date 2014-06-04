@@ -330,7 +330,7 @@ protected:
 
   int 												m_is_visual_servoing_completed;
 
-  const static int 									m_visual_servoing_timeout = 15;
+  const static int 									m_visual_servoing_timeout = 20;
 
   //KDL::Chain 										m_arm_chain;
 };
