@@ -6,8 +6,8 @@ import smach_ros
 import math
 import tf
 
+import geometry_msgs.msg
 import moveit_commander
-import geometry_msgs
 
 arm_command = moveit_commander.MoveGroupCommander('arm_1')
 arm_command.set_goal_position_tolerance(0.005)
@@ -19,8 +19,6 @@ gripper_command = moveit_commander.MoveGroupCommander('arm_1_gripper')
 
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
-
-from geometry_msgs.msg import PoseStamped
 
 from mcr_perception_msgs.msg import ObjectList, Object
 
