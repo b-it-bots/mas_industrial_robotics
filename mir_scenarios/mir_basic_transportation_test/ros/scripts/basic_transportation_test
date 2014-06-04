@@ -134,7 +134,8 @@ def main():
         #    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
         #                'failed': 'AVOID_WALLS_PRE'})
 
-        smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms_o.move_arm([0.45, 0.0, 0.20, 0, (math.pi * 0.8), 0.0, '/base_link']),
+        #smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms_o.move_arm([0.45, 0.0, 0.20, 0, (math.pi * 0.8), 0.0, '/base_link']),
+	smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms_o.move_arm("pre_grasp"),
             transitions={'succeeded': 'DO_VISUAL_SERVERING',
                         'failed': 'MOVE_ARM_TO_PREGRASP'})
 
