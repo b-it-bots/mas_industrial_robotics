@@ -344,8 +344,8 @@ class get_basic_transportation_task(smach.State):
         if(userdata.simulation):
             rospy.loginfo("Task spec by hard coded string")
 
-            #transportation_task = 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>'
-            transportation_task = 'BTT<initialsituation(<S3,(F20_20_B,M20_100)>);goalsituation(<S2,zigzag(M20_100,F20_20_B)>)>'
+            transportation_task = 'BTT<initialsituation(<S4,(M20_100,S40_40_G,V20)><S5,(F20_20_G,S40_40_B,F20_20_B)><S2,(M30,M20,R20)>);goalsituation(<S3,line(S40_40_G,F20_20_G,S40_40_B,F20_20_B)><C1,zigzag(M20_100,V20,M30,M20,R20)>)>'
+            #transportation_task = 'BTT<initialsituation(<S2,(S40_40_B)>);goalsituation(<S1,line(S40_40_B)>)>'
         else:
             rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
             transportation_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
