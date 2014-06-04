@@ -152,7 +152,7 @@ def main():
         if (useMockup):
                 smach.StateMachine.add('GRASP_OBJ', gms_o.grasp_object(),
                     transitions={'succeeded':'REMOVE_OBJECT_FROM_MOCKUP',
-                                'tf_error':'SKIP_SOURCE_POSE'})
+                                'failed':'SKIP_SOURCE_POSE'})
         
                 smach.StateMachine.add("REMOVE_OBJECT_FROM_MOCKUP",
                                        perception_mockup_util.remove_object_to_grasp_state(),
@@ -160,7 +160,7 @@ def main():
         else:
                 smach.StateMachine.add('GRASP_OBJ', gms_o.grasp_object(),
                     transitions={'succeeded':'PLACE_OBJ_ON_REAR_PLATFORM',
-                                'tf_error':'SKIP_SOURCE_POSE'})
+                                 'failed':'SKIP_SOURCE_POSE'})
             
             
         #smach.StateMachine.add('AVOID_WALLS_POST', gms_o.move_arm('candle'),

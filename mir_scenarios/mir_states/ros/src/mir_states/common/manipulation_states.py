@@ -9,6 +9,7 @@ import tf
 import geometry_msgs.msg
 import moveit_commander
 import moveit_msgs.msg
+import std_msgs.msg
 
 arm_command = moveit_commander.MoveGroupCommander('arm_1')
 arm_command.set_goal_position_tolerance(0.005)
@@ -236,76 +237,37 @@ class control_gripper(smach.State):
 class grasp_object(smach.State):
 
     """
-    Should be called after visual servoing has aligned the gripper with the
-    object.
+    Should be called after visual servoing has aligned the gripper with the object.
     """
 
-    FRAME_ID = '/base_link'
-
     def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['succeeded', 'tf_error'], input_keys=['object_to_grasp'])
-        self.tf_listener = tf.TransformListener()
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+        self.result = None
+        self.event_out = rospy.Publisher('/arm_relative_motion_controller/event_in', std_msgs.msg.String)
+        rospy.Subscriber('/arm_relative_motion_controller/event_out', std_msgs.msg.String, self.event_cb)
+        
 
     def execute(self, userdata):
-        gripper_command.set_named_target("open")
+        self.result = None
+
+        gripper_command.set_named_target('open')
         gripper_command.go()
         
-        try:
-            #FIXME: What is this doing? - Do we need this with moveIt?
-            #FIXME: what is the gripper_finger_link?
-#             t = self.tf_listener.getLatestCommonTime('/base_link',
-#                                                       'gripper_finger_link')
-#             (p, q) = self.tf_listener.lookupTransform('/base_link',
-#                                                       'gripper_finger_link',
-#                                                       t)
-            t = self.tf_listener.getLatestCommonTime('/base_link',
-                                                      'gripper_palm_link')
-            (p, q) = self.tf_listener.lookupTransform('/base_link',
-                                                      'gripper_palm_link',
-                                                      t)
+        # start the relative approach and wait for the result
+        self.event_out.publish('e_start')
+        while not self.result:
+            rospy.sleep(0.1)
 
-            rpy = tf.transformations.euler_from_quaternion(q)
-        except (tf.LookupException,
-                tf.ConnectivityException,
-                tf.ExtrapolationException) as e:
-            rospy.logerr('Tf error: %s' % str(e))
-            return 'tf_error'
-        try:
-            #FIXME: removed script_server values with 0.0 - is this OK?
-            dx = 0.0
-            dy = 0.0
-            dz = 0.0
+        if self.result.data != 'e_success':
+            return 'failed'
 
-            #dx = rospy.get_param('script_server/arm/grasp_delta/x')
-            #dy = rospy.get_param('script_server/arm/grasp_delta/y')
-            #dz = rospy.get_param('script_server/arm/grasp_delta/z')
-            #rospy.logerr('read dxyz ' + dx + ',' + dy + ',' + dz)
-        except KeyError:
-            rospy.logerr('No Grasp Pose Change Set.')
-
-        target_link = 'arm_link_5'
-        target_pose = [float(p[0] - dx), float(p[1] - dy), float(p[2] - dz), rpy[0], rpy[1], rpy[2]]
-        
-        pose = PoseStamped()
-        pose.header.frame_id = "/base_link"
-        pose.pose.position.x = float(p[0] - dx)
-        pose.pose.position.y = float(p[1] - dy)
-        pose.pose.position.z = float(p[2] - dz)
-        
-        
-        pose.pose.orientation.x = q[0]
-        pose.pose.orientation.y = q[1]
-        pose.pose.orientation.z = q[2]
-        pose.pose.orientation.w = q[3]
-        
-        arm_command.set_pose_target(pose, target_link)
-        arm_command.go()
-        
-        gripper_command.set_named_target("close")
+        gripper_command.set_named_target('close')
         gripper_command.go()
 
         return 'succeeded'
+
+    def event_cb(self, msg):
+        self.result = msg
 
 
 class grasp_obj_from_pltf(smach.State):
