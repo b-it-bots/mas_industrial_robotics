@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <moveit_msgs/JointLimits.h>
 #include <brics_actuator/JointVelocities.h>
 #include <brics_actuator/JointPositions.h>
@@ -15,10 +16,12 @@
 
 // OpenCV Includes
 #include <image_transport/image_transport.h>
+#include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
 
 // cvBlobsLib Includes.
 #include <cvblobs/BlobResult.h>
@@ -171,6 +174,8 @@ protected:
 	ros::Publisher 									m_arm_velocities_publisher;
 	ros::Publisher									m_pub_visual_servoing_status;
 	ros::NodeHandle 								m_node_handler;
+	image_transport::ImageTransport m_image_transport;
+	image_transport::Publisher	m_image_publisher;
 
 	bool											m_is_blob_lost;
 	ros::Time 										m_time_when_lost;
@@ -198,6 +203,10 @@ protected:
 
 	int								m_rot_target;
 	int								m_rot_tolerance;
+
+	ros::Publisher pub_cart_vel_;
+	geometry_msgs::TwistStamped cart_zero_vel_;
+
 };
 
 #endif /* VISUALSERVOING2D_H_ */

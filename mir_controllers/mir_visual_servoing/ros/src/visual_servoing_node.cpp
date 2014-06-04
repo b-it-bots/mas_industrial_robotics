@@ -288,6 +288,7 @@ private:
    */
   void ShutDown()
   {
+  	  m_visual_servoing->DestroyPublishers();
 	  // Zero all publishers
 	  geometry_msgs::Twist zero_vel;
 	  base_velocities_publisher.publish(zero_vel);

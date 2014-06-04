@@ -9,19 +9,19 @@
 
 VisualServoing2D::VisualServoing2D( bool debugging,
 									int mode,
-									std::vector<std::string> arm_joint_names )
+									std::vector<std::string> arm_joint_names ) : m_image_transport( m_node_handler )
 {
   m_min_blob_area = 2000;
 	m_max_blob_area = 90000;
 	m_verticle_offset = 3;
 	m_x_velocity = 0.012;
 	m_y_velocity = 0.012;
-	m_rot_velocity = 0.3;
+	m_rot_velocity = 0.2;
 	m_x_target = 0;
 	m_x_threshold = 20;
 	m_y_target = 0;
 	m_y_threshold = 15;
-	m_lost_blob_timeout = 3;
+	m_lost_blob_timeout = 20;
 
 	m_rot_target = 90;
 	m_rot_tolerance = 5;
@@ -74,6 +74,17 @@ VisualServoing2D::~VisualServoing2D()
 int
 VisualServoing2D::VisualServoing( IplImage* input_image )
 {
+	/*  // Use this snippet to update new background image
+	std::string path = ros::package::getPath("mir_visual_servoing") + "/common/data/background.png";
+	cv::Mat m = cv::cvarrToMat(input_image);
+	cv::imwrite(path.c_str(), m); */
+
+	RegionOfInterest(input_image,0.7);
+	RegionOfInterest(m_background_image,0.7);
+
+	cvFlip(input_image, input_image, -1); //Flip image around horizontal and vertical axis to match new camera position
+	cvFlip(m_background_image, m_background_image, -1); //Flip image around horizontal and vertical axis to match new camera position
+
 	bool return_val = 0;
 
 	double x_offset = 0;
@@ -103,12 +114,12 @@ VisualServoing2D::VisualServoing( IplImage* input_image )
 	m_verticle_offset = 3;
 	m_x_velocity = 0.012;
 	m_y_velocity = 0.012;
-	m_rot_velocity = 0.3;
+	m_rot_velocity = 0.2;
 	m_x_target = 0;
 	m_x_threshold = 20;
 	m_y_target = 0;
 	m_y_threshold = 15;
-	m_lost_blob_timeout = 3;
+	m_lost_blob_timeout = 20;
 
 	m_rot_target = 90;
 	m_rot_tolerance = 5;
@@ -126,6 +137,7 @@ VisualServoing2D::VisualServoing( IplImage* input_image )
 	{
 		if( ( ros::Time::now() - m_time_when_lost ).toSec() < m_lost_blob_timeout )
 		{
+			m_is_blob_lost = false; // Reintialize to false so that next service call is not affected
 			return 2;
 		}
 	}
@@ -156,23 +168,25 @@ g only at a region of interest instead of the whole image.
 	// TODO: Modify the program so that it can still run without a background image!
 	IplImage* background_threshold = cvCreateImage( cvGetSize( m_background_image ), 8, 1 );
 	cvCvtColor( m_background_image, background_threshold, CV_BGR2GRAY );
-	cvSmooth( background_threshold, background_threshold, CV_GAUSSIAN, 11, 11 );
-	cvThreshold( background_threshold, background_threshold, m_dynamic_variables.binary_threshold , 255, CV_THRESH_BINARY_INV | CV_THRESH_OTSU );
+	//cvSmooth( background_threshold, background_threshold, CV_GAUSSIAN, 11, 11 );
+	//cvEqualizeHist(background_threshold, background_threshold);
+	cvAdaptiveThreshold(background_threshold, background_threshold, 255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY_INV, 15, 0);
+	//cvThreshold( background_threshold, background_threshold, m_dynamic_variables.binary_threshold , 255, CV_THRESH_BINARY_INV | CV_THRESH_OTSU );
 
 	blob_image = cvCreateImage( cvGetSize( cv_image ), IPL_DEPTH_8U, cv_image->nChannels );
 
 	IplImage* gray = cvCreateImage( cvGetSize( cv_image ), 8, 1 );
 	cvCvtColor( cv_image, gray, CV_BGR2GRAY );
-	cvSmooth( gray, gray, CV_GAUSSIAN, 11, 11 );
+	//cvSmooth( gray, gray, CV_GAUSSIAN, 11, 11 );
+	//cvEqualizeHist(gray, gray);
 
 	ROS_WARN_STREAM( "Dynamic Var: " << m_dynamic_variables.binary_threshold ); 
-	cvThreshold( gray, gray, m_dynamic_variables.binary_threshold, 255, CV_THRESH_BINARY_INV | CV_THRESH_OTSU );
+	cvAdaptiveThreshold(gray, gray, 255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY_INV, 15, 0);
+	//cvThreshold( gray, gray, m_dynamic_variables.binary_threshold, 255, CV_THRESH_BINARY_INV | CV_THRESH_OTSU );
 
 	//    This takes a background image (the gripper on a white background) and removes
 	//  it from the current image (cv_image). The results are stored again in cv_image.
-	cvSub( gray, background_threshold, gray );
-
-	cvShowImage( "GRAY", gray ); 
+	//cvSub( gray, background_threshold, gray );
 
 	// Find any blobs that are not white.
 	CBlobResult blobs = CBlobResult( gray, NULL, 0 );
@@ -258,13 +272,14 @@ g only at a region of interest instead of the whole image.
 
 	if( g_debugging )
 	{
+		cvShowImage( "GRAY - Substracted", gray );
 		//  Draw the blob we are tracking as well as a circle to represent the centroid of that object.
 		temp_tracked_blob.FillBlob( blob_image, CV_RGB( 0, 0, 255 ) );
 		cvCircle( blob_image, cvPoint( m_tracked_x, m_tracked_y ), 10, CV_RGB( 255, 0, 0 ), 2 );
 	}
 
-	x_offset = ( m_tracked_x ) - ( m_image_width / 2 );
-	y_offset = ( m_tracked_y ) - ( (m_image_height/2) + m_verticle_offset );
+	x_offset = ( m_tracked_x * 100 / 63.125 ) - ( m_image_width / 2 ); // Wierd math for present camera and gripper position // TODO later
+	y_offset = ( m_tracked_y * 100 / 77.5 ) - ( (m_image_height/2) + m_verticle_offset ); // Wierd math for present camera and gripper position // TODO later
 	rot_offset = get_orientation( temp_tracked_blob );
 	if( rot_offset > 180 )
 	{
@@ -301,8 +316,8 @@ g only at a region of interest instead of the whole image.
 	if( done_x && done_y && done_t )
 	{
 		return_val = 1;
-		DestroyPublishers();
-		ROS_INFO( "Visual Servoing Completed." );
+		//DestroyPublishers(); //Taken care by visual servoing node shutdown
+		ROS_INFO( "Visual Servoing Completed." );		
 	}
 
 
@@ -330,10 +345,19 @@ g only at a region of interest instead of the whole image.
 		cvPutText( blob_image, rot_str.c_str(), cvPoint( 350, blob_image->height - 10 ), &font, CV_RGB( 255, 0, 0 ) );
 
 		HUD("b-it-bots Visual Servoing", 3, cv_image, m_background_image, blob_image );
-		cvSetZero( blob_image );
 		cvWaitKey( 10 );
 	}
+	
+	cv_bridge::CvImage cv_img_tmp;
+	cv::Mat mat_image(blob_image);
 
+	//imshow ("mat_image",mat_image);
+
+	cv_img_tmp.encoding = sensor_msgs::image_encodings::BGR8;
+	cv_img_tmp.image = mat_image;
+	sensor_msgs::ImagePtr image_msg = cv_img_tmp.toImageMsg();
+
+	m_image_publisher.publish(cv_img_tmp.toImageMsg());
 
 	cvSetZero( gray );
 	cvSetZero( cv_image );
@@ -432,6 +456,10 @@ VisualServoing2D::BaseAdjustmentX( double x_offset )
 	// Prepare and then send the base movement commands.
 	m_youbot_base_velocities.linear.y = move_speed;
 	m_base_velocities_publisher.publish( m_youbot_base_velocities );
+	geometry_msgs::TwistStamped cart_vel_y_;
+	cart_vel_y_.header.frame_id = "/base_link";
+	cart_vel_y_.twist.linear.y = move_speed;
+	//pub_cart_vel_.publish(cart_vel_y_);
 	return return_val;
 }
 
@@ -555,6 +583,10 @@ VisualServoing2D::BaseAdjustmentY( double y_offset )
 	// Prepare and then send the base movement commands.
 	m_youbot_base_velocities.linear.x = move_speed;
 	m_base_velocities_publisher.publish( m_youbot_base_velocities );
+	geometry_msgs::TwistStamped cart_vel_x_;
+	cart_vel_x_.header.frame_id = "/base_link";
+	cart_vel_x_.twist.linear.x = move_speed;
+	//pub_cart_vel_.publish(cart_vel_x_);
 
 	return return_val;
 }
@@ -562,6 +594,7 @@ VisualServoing2D::BaseAdjustmentY( double y_offset )
 bool
 VisualServoing2D::ArmAdjustment( double orientation )
 {
+	geometry_msgs::TwistStamped cart_vel_r_;
 	bool return_val = false; 
 	double difference = fabs( orientation - m_rot_target );
 	double rotational_speed = 0.0;
@@ -572,7 +605,7 @@ VisualServoing2D::ArmAdjustment( double orientation )
 		/**
 		 * We are not to far to the right of the object and our difference is not small enough yet.
 		 */
-		rotational_speed = m_rot_velocity;
+		rotational_speed = -m_rot_velocity; //Change the sign for joint space
 		return_val = false;
 	}
 	else if( orientation < m_rot_target && difference > m_rot_tolerance )
@@ -580,7 +613,7 @@ VisualServoing2D::ArmAdjustment( double orientation )
 		/**
 		 * we are to far to the left of the object and our difference is still to large.
 		 */
-		rotational_speed = -m_rot_velocity;
+		rotational_speed = m_rot_velocity; //Change the sign for joint space
 		return_val = false;
 	}
 	else if( difference < m_rot_tolerance )
@@ -617,10 +650,12 @@ VisualServoing2D::ArmAdjustment( double orientation )
 
 		if( i == 4 )
 		{
-		  joint_value.value = rotational_speed;
+			cart_vel_r_.twist.angular.z = rotational_speed;
+		  	joint_value.value = rotational_speed;
 		}
 		else
 		{
+		cart_vel_r_.twist.angular.z = 0.0;
 		  joint_value.value = 0.0;
 		}
 
@@ -628,7 +663,9 @@ VisualServoing2D::ArmAdjustment( double orientation )
 		
 	}
 
-	m_arm_velocities_publisher.publish( m_youbot_arm_velocities );
+	//m_arm_velocities_publisher.publish( m_youbot_arm_velocities );
+	cart_vel_r_.header.frame_id = "/arm_link_5";
+	pub_cart_vel_.publish(cart_vel_r_);
 	return return_val;
 }
 
@@ -687,7 +724,7 @@ VisualServoing2D::RegionOfInterest( IplImage* input_image, double scale )
 	int x = ( (input_image->width - width) / 2 );
 	int y = ( (input_image->height - height) / 2 );
 
-	cvSetImageROI( input_image, cvRect( x, y, width, height ) );
+	cvSetImageROI( input_image, cvRect( x, y, width-0.45*x, height+0.5*y ) ); //Wierd math for present camera and gripper position - TODO later
 
 	if( g_debugging )
 	{
@@ -702,6 +739,9 @@ VisualServoing2D::CreatePublishers( int arm_model )
 {
 	// Set up the base velocities publisher:
 	m_base_velocities_publisher = m_node_handler.advertise<geometry_msgs::Twist>( "/cmd_vel", 1 );
+
+	pub_cart_vel_ = m_node_handler.advertise< geometry_msgs::TwistStamped > ("/arm_1/arm_controller/cartesian_velocity_command", 1);
+	
 	ROS_INFO( "Robot Base Publisher Setup" );
 
 	m_pub_visual_servoing_status = m_node_handler.advertise<std_msgs::String>( "/visual_servoing_status", 1 );
@@ -713,7 +753,7 @@ VisualServoing2D::CreatePublishers( int arm_model )
 	}
 	else if( arm_model == 1 )
 	{
-		m_arm_velocities_publisher = m_node_handler.advertise<brics_actuator::JointVelocities>( "/arm_controller/velocity_command", 1 );
+		m_arm_velocities_publisher = m_node_handler.advertise<brics_actuator::JointVelocities>( "/arm_1/arm_controller/velocity_command", 1 );
 		ROS_INFO( "KUKA YouBot Arm Publisher is set up" );
 	}
 	else if( arm_model == 2 )
@@ -724,6 +764,8 @@ VisualServoing2D::CreatePublishers( int arm_model )
 	{
 		ROS_ERROR( "Unkown robotic arm model provided" );
 	}
+
+	m_image_publisher = m_image_transport.advertise("/arm_cam/visual_servoing/debug_image", 1);
 }
 
 void
@@ -734,16 +776,33 @@ VisualServoing2D::DestroyPublishers()
 	 */
 	geometry_msgs::Twist zero_vel;
 	m_base_velocities_publisher.publish( zero_vel );
-	m_base_velocities_publisher.shutdown();
+	
 	ROS_INFO( "Base velocity publisher zeroed and shutdown" );
 
 	/**
 	 * Zero and shutdown the arm velocity publisher.
 	 */
-	brics_actuator::JointVelocities zero_arm_vel;
-	m_arm_velocities_publisher.publish( zero_arm_vel );
+	brics_actuator::JointValue zero_joint_vel;
+	brics_actuator::JointVelocities 	zero_arm_velocities;
+	zero_joint_vel.timeStamp = ros::Time::now();
+	zero_joint_vel.joint_uri = m_arm_joint_names[4];
+	zero_joint_vel.unit = to_string(boost::units::si::radian_per_second);
+	zero_joint_vel.value = 0.0;
+	zero_arm_velocities.velocities.push_back(zero_joint_vel);
+	//m_arm_velocities_publisher.publish( zero_arm_velocities );
+
+	cart_zero_vel_.header.frame_id = "/arm_link_5";
+	pub_cart_vel_.publish(cart_zero_vel_);
+
+	ros::Rate(10).sleep();
+
 	m_arm_velocities_publisher.shutdown();
+	m_base_velocities_publisher.shutdown();
+	pub_cart_vel_.shutdown();
+	m_image_publisher.shutdown();
+	
 	ROS_INFO( "Arm velcoity publisher zeroed and shutdown" );
+
 }
 
 void
