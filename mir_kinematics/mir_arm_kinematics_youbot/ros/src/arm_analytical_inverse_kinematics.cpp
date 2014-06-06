@@ -17,7 +17,7 @@ ArmAnalyticalInverseKinematics::ArmAnalyticalInverseKinematics(
     const std::vector<double> &max_angles)
 {
 	_min_angles = min_angles;
-  _max_angles = max_angles;
+	_max_angles = max_angles;
 }
 
 
@@ -68,8 +68,7 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 	double l2 = 0.155;
 	double l3 = 0.135;
 
-	// Distance from arm_link_3 to arm_link_5 (can also be replaced by e.g.
-	// distance from arm_link_3 to tool center point)
+	// Distance from arm_link_4 to arm_link_5
 	double d = 0.13;
 
 	double j1;
@@ -106,12 +105,6 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 	}
 
 	// Fifth joint, determines the roll of the gripper (= wrist angle)
-	// The joint can either be oriented according to the calculated angle or
-	// offset from the angle by +Pi or -Pi.
-	// To choose between +Pi and -Pi we consider the angle in order to stay
-	// within the joint limits:
-	// * if the angle is greater than zero use -Pi
-	// * if the angle is less than or equal to zero use +Pi
 	double s1 = sin(j1);
 	double c1 = cos(j1);
 	double r11 = g1.M(0, 0);
@@ -129,6 +122,7 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 
 	KDL::Vector p2 = g2_proj.p;
 
+	// In the arm's subplane, offset from the end-effector to the fourth joint
 	p2.x(p2.x() - d * sin(j234));
 	p2.z(p2.z() - d * cos(j234));
 
@@ -139,26 +133,22 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 	}
 
 	// Third joint
-	double j3_cos = ((p2.x() * p2.x()) + (p2.z() * p2.z()) - (l2 * l2) - (l3 * l3)) / (2 * l2 * l3);
+	double l_sqr = (p2.x() * p2.x()) + (p2.z() * p2.z());
+	double l2_sqr = l2 * l2;
+	double l3_sqr = l3 * l3;
+	double j3_cos = (l_sqr - l2_sqr - l3_sqr) / (2.0 * l2 * l3);
+
 	if (j3_cos > ALMOST_PLUS_ONE) j3 = 0.0;
 	else if (j3_cos < ALMOST_MINUS_ONE) j3 = M_PI;
-	else j3 = atan2(sqrt(1 - (j3_cos * j3_cos)), j3_cos);
+	else j3 = atan2(sqrt(1.0 - (j3_cos * j3_cos)), j3_cos);
+
 	if (offset_joint_3) j3 = -j3;
 
+
 	// Second joint
-	if (!offset_joint_3) {
-		if (j3 >= 0) j2 = -atan2(p2.z(), p2.x()) - atan2(l3 * sin(j3), l2 + l3 * cos(j3));
-		else j2 = -atan2(p2.z(), p2.x()) + atan2(l3 * sin(j3), l2 + l3 * cos(j3));
-	} else {
-		double t1 = atan2(p2.z(), p2.x());
-		double t2 = atan2(l3 * sin(j3), l2 + l3 * cos(j3));
-
-		if (t1 < 0.0) t1 = (2.0 * M_PI) + t1;
-
-		if (j3 >= 0) j2 = -t1 + t2;
-		else j2 = -t1 - t2;
-	}
-	j2 += M_PI_2;
+	double t1 = atan2(p2.z(), p2.x());
+	double t2 = atan2(l3 * sin(j3), l2 + l3 * cos(j3));
+	j2 = M_PI_2 - t1 - t2;
 
 
 	// Fourth joint, determines the pitch of the gripper
