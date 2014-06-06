@@ -159,7 +159,7 @@ def main(simulation=False):
         # state skipped
         smach.StateMachine.add('DO_VISUAL_SERVERING', gps_o.do_visual_servoing(),
             transitions={'succeeded':'GRASP_OBJ',
-                        'failed':'SKIP_SOURCE_POSE',
+                        'failed':'VISUAL_SERVOING_LOOP',
                         'timeout':'VISUAL_SERVOING_LOOP',
                         'lost_object': 'VISUAL_SERVOING_LOOP'})
                              
