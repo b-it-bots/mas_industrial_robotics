@@ -99,8 +99,12 @@ def main(simulation=False):
                         'failed':'MOVE_TO_SOURCE_LOCATION'})
 
         smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns_o.adjust_to_workspace(0.15),
-            transitions={'succeeded':'MOVE_ARM_OUT_OF_VIEW',
+            transitions={'succeeded':'AVOID_WALLS_PRE_1',
                         'failed':'MOVE_TO_SOURCE_LOCATION'})
+
+        smach.StateMachine.add('AVOID_WALLS_PRE_1', gms_o.move_arm('candle'),
+            transitions={'succeeded': 'MOVE_ARM_OUT_OF_VIEW',
+                        'failed': 'AVOID_WALLS_PRE_1'})
 
         smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms_o.move_arm('out_of_view'),
             transitions={'succeeded':'RECOGNIZE_OBJECTS',
@@ -134,14 +138,14 @@ def main(simulation=False):
                           'timeout': 'MOVE_BASE_RELATIVE'})
 
         smach.StateMachine.add('COMPUTE_PREGRASP_POSE', gms_o.compute_pregrasp_pose(),
-            transitions={'succeeded':'MOVE_ARM_TO_PREGRASP',
+            transitions={'succeeded':'AVOID_WALLS_PRE_2',
                          'tf_transform_failed':'COMPUTE_PREGRASP_POSE'},
             remapping={'object_pose':'object_to_grasp'})
 
 
-        #smach.StateMachine.add('AVOID_WALLS_PRE', gms_o.move_arm('candle'),
-        #    transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
-        #                'failed': 'AVOID_WALLS_PRE'})
+        smach.StateMachine.add('AVOID_WALLS_PRE_2', gms_o.move_arm('candle'),
+            transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
+                        'failed': 'AVOID_WALLS_PRE_2'})
 
         smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms_o.move_arm([0.45, 0.0, 0.20, 0, (math.pi * 0.8), 0.0, '/base_link']),
             transitions={'succeeded': 'DO_VISUAL_SERVERING',
@@ -203,14 +207,22 @@ def main(simulation=False):
                         'failed':'MOVE_TO_DESTINATION_LOCATION'})
 
         smach.StateMachine.add('GRASP_OBJECT_FROM_PLTF', btts.grasp_obj_from_pltf_btt(),
-            transitions={'object_grasped':'PLACE_OBJ_IN_CONFIGURATION',
+            transitions={'object_grasped':'MOVE_TO_INTERMEDIATE_POSE',
                     'no_more_obj_for_this_workspace':'MOVE_ARM_TO_INIT'})
+
+        smach.StateMachine.add('MOVE_TO_INTERMEDIATE_POSE', gms_o.move_arm('platform_intermediate'),
+            transitions={'succeeded':'PLACE_OBJ_IN_CONFIGURATION',
+                    'failed':'MOVE_TO_INTERMEDIATE_POSE'})
     
         smach.StateMachine.add('PLACE_OBJ_IN_CONFIGURATION', btts.place_object_in_configuration_btt(),
             transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF',
-                    'no_more_cfg_poses':'MOVE_ARM_OUT_OF_VIEW_2'})
+                    'no_more_cfg_poses':'AVOID_WALLS_PRE_3'})
 
-        smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW_2', gms_o.move_arm('out_of_view'),
+        smach.StateMachine.add('AVOID_WALLS_PRE_3', gms_o.move_arm('candle'),
+            transitions={'succeeded': 'MOVE_ARM_OUT_OF_VIEW_2',
+                        'failed': 'AVOID_WALLS_PRE_3'})
+
+        smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW_2', gms_o.move_arm('platform_intermediate'),
             transitions={'succeeded':'SELECT_DELIVER_WORKSTATION',
                          'failed':'MOVE_ARM_OUT_OF_VIEW_2'})
 
