@@ -198,7 +198,7 @@ def main(simulation=False):
             transitions={'succeeded':'ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION',
                         'failed':'MOVE_TO_DESTINATION_LOCATION'})
         
-        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION', gns_o.adjust_to_workspace(0.05),
+        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION', gns_o.adjust_to_workspace(0.12),
             transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF',
                         'failed':'MOVE_TO_DESTINATION_LOCATION'})
 
