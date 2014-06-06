@@ -112,9 +112,13 @@ def main(simulation=False):
 
         smach.StateMachine.add('RECOGNIZE_OBJECTS', gps_o.find_objects(retries=3, frame_id='/odom'),
             transitions={'objects_found':'SELECT_OBJECT_TO_BE_GRASPED',
-                        'no_objects_found':'RECOGNIZE_OBJECTS_LOOP',
+                        'no_objects_found':'SHIFT_BASE_RANDOM',
                         'srv_call_failed':'RECOGNIZE_OBJECTS'},
             remapping={'found_objects':'recognized_objects'})
+
+        smach.StateMachine.add('SHIFT_BASE_RANDOM', gns_o.move_base_relative([0.0, 0.0, -0.03, 0.03, 0.0, 0.0]),
+            transitions={'succeeded': 'RECOGNIZE_OBJECTS_LOOP',
+                          'timeout': 'RECOGNIZE_OBJECTS_LOOP'})
 
         #FIXME: Is there a loop reset?
         smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(1),
