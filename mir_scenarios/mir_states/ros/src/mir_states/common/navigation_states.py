@@ -7,10 +7,11 @@ import std_srvs.srv
 import tf
 import move_base_msgs.msg
 import actionlib_msgs.msg 
+import random
+import math
 
 from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import String
-
 
 from actionlib.simple_action_client import GoalStatus
 
@@ -71,14 +72,31 @@ class move_base_relative(smach.State):
     def relative_base_controller_event_cb(self, event):
         self.relative_base_ctrl_event = event.data  
 
+    def sample_with_boundary(self, lower, upper):
+        if (lower == 0.0) and (upper == 0.0):
+            return 0.0
+        
+        value = random.uniform(lower, upper)
+        if -0.015 <= value <= 0.015:
+            value = math.copysign(0.015, value)
+        
+        return value
+
     def execute(self, userdata):
 
         offset = self.offset or userdata.move_base_by
 
         relative_base_move = Twist()
-        relative_base_move.linear.x = offset[0]
-        relative_base_move.linear.y = offset[1]
-        relative_base_move.angular.z = offset[2]
+
+        if(len(offset) == 3):
+            relative_base_move.linear.x = offset[0]
+            relative_base_move.linear.y = offset[1]
+            relative_base_move.angular.z = offset[2]
+
+        elif(len(offset) == 6):
+            relative_base_move.linear.x = self.sample_with_boundary(offset[0], offset[1])
+            relative_base_move.linear.y = self.sample_with_boundary(offset[2], offset[3])
+            relative_base_move.angular.z = self.sample_with_boundary(offset[4], offset[5])
 
         self.relative_base_ctrl_event = ""
 
