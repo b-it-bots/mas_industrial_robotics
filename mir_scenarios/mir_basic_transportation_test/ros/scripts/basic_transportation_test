@@ -9,7 +9,6 @@ import math
 # import of generic states
 # generic states
 import mir_states.common.basic_states as gbs_o
-##import mir_states.common.robocup_states as grs_o
 import mir_states.common.navigation_states as gns_o
 import mir_states.common.manipulation_states as gms_o
 import mir_states.common.perception_states as gps_o
