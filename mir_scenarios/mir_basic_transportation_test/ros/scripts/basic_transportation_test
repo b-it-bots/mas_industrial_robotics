@@ -154,7 +154,7 @@ def main(simulation=False):
                         'timeout':'VISUAL_SERVOING_LOOP',
                         'lost_object': 'VISUAL_SERVOING_LOOP'})
                              
-        smach.StateMachine.add('VISUAL_SERVOING_LOOP', btts.loop_for(),
+        smach.StateMachine.add('VISUAL_SERVOING_LOOP', btts.loop_for(max_loop_count=1),
                                   transitions={'loop': 'MOVE_ARM_TO_PREGRASP',
                                                'continue': 'SKIP_SOURCE_POSE'})
         
