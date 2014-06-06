@@ -77,10 +77,17 @@ def main(simulation=False):
         smach.StateMachine.add('GET_TASK', refbox.get_basic_transportation_task(),
             transitions={'task_received':'SETUP_BTT',
                          'wrong_task_format':'GET_TASK'})
-              
-        smach.StateMachine.add('SETUP_BTT', btts.setup_btt(),
-            transitions={'success':'SELECT_SOURCE_SUBTASK'})
+
+        if (useMockup):
+            smach.StateMachine.add('SETUP_BTT', btts.setup_btt(),
+                transitions={'success':'ADD_OBJECT_FROM_TASK_LIST_TO_OBJECT_DETECTION_MOCKUP'})
         
+            smach.StateMachine.add("ADD_OBJECT_FROM_TASK_LIST_TO_OBJECT_DETECTION_MOCKUP",
+                perception_mockup_util.add_object_from_task_list_state(),
+                transitions={'success':'SELECT_SOURCE_SUBTASK'})
+        else:
+            smach.StateMachine.add('SETUP_BTT', btts.setup_btt(),
+                transitions={'success':'SELECT_SOURCE_SUBTASK'})
             
         smach.StateMachine.add('SELECT_SOURCE_SUBTASK', btts.select_btt_subtask(type="source"),
             transitions={'task_selected':'MOVE_TO_SOURCE_LOCATION',
