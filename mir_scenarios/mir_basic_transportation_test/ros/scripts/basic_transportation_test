@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import sys
+
 import rospy
 
 import smach
@@ -24,7 +26,8 @@ import mir_states.common.perception_mockup_util as perception_mockup_util
 from mcr_perception_msgs.msg import ObjectList, Object
 
 # main
-def main():
+def main(simulation=False):
+
     rospy.init_node('basic_transportation_test')
 
     SM = smach.StateMachine(outcomes=['done'])
@@ -32,7 +35,7 @@ def main():
     # world knowledge
     SM.userdata.task_list = []
     
-    SM.userdata.simulation = True
+    SM.userdata.simulation = simulation
     SM.userdata.test = "BTT"
     
     SM.userdata.base_pose_to_approach = 0
@@ -232,4 +235,4 @@ def main():
     smach_viewer.stop()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[-1] == '--simulation')
