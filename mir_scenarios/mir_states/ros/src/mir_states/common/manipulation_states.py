@@ -12,8 +12,8 @@ import moveit_msgs.msg
 import std_msgs.msg
 
 arm_command = moveit_commander.MoveGroupCommander('arm_1')
-arm_command.set_goal_position_tolerance(0.005)
-arm_command.set_goal_orientation_tolerance(0.005)
+arm_command.set_goal_position_tolerance(0.01)
+arm_command.set_goal_orientation_tolerance(0.01)
 arm_command.set_goal_joint_tolerance(0.005)
 
 
