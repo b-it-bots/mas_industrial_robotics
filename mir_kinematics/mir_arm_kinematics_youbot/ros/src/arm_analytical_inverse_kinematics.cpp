@@ -68,8 +68,7 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 	double l2 = 0.155;
 	double l3 = 0.135;
 
-	// Distance from arm_link_3 to arm_link_5 (can also be replaced by e.g.
-	// distance from arm_link_3 to tool center point)
+	// Distance from arm_link_4 to arm_link_5
 	double d = 0.13;
 
 	double j1;
@@ -106,12 +105,6 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 	}
 
 	// Fifth joint, determines the roll of the gripper (= wrist angle)
-	// The joint can either be oriented according to the calculated angle or
-	// offset from the angle by +Pi or -Pi.
-	// To choose between +Pi and -Pi we consider the angle in order to stay
-	// within the joint limits:
-	// * if the angle is greater than zero use -Pi
-	// * if the angle is less than or equal to zero use +Pi
 	double s1 = sin(j1);
 	double c1 = cos(j1);
 	double r11 = g1.M(0, 0);
@@ -129,6 +122,7 @@ KDL::JntArray ArmAnalyticalInverseKinematics::ik(const KDL::Frame& g0,
 
 	KDL::Vector p2 = g2_proj.p;
 
+	// In the arm's subplane, offset from the end-effector to the fourth joint
 	p2.x(p2.x() - d * sin(j234));
 	p2.z(p2.z() - d * cos(j234));
 
