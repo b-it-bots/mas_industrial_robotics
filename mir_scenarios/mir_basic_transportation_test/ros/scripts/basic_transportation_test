@@ -98,7 +98,7 @@ def main(simulation=False):
             transitions={'succeeded':'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE',
                         'failed':'MOVE_TO_SOURCE_LOCATION'})
 
-        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns_o.adjust_to_workspace(0.2),
+        smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns_o.adjust_to_workspace(0.15),
             transitions={'succeeded':'MOVE_ARM_OUT_OF_VIEW',
                         'failed':'MOVE_TO_SOURCE_LOCATION'})
 
