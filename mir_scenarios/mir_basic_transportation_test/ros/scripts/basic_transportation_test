@@ -164,8 +164,13 @@ def main(simulation=False):
                         'lost_object': 'VISUAL_SERVOING_LOOP'})
                              
         smach.StateMachine.add('VISUAL_SERVOING_LOOP', btts.loop_for(max_loop_count=1),
-                                  transitions={'loop': 'MOVE_ARM_TO_PREGRASP',
+                                  transitions={'loop': 'HELP_VISUAL_SERVOING',
                                                'continue': 'SKIP_SOURCE_POSE'})
+
+        smach.StateMachine.add('HELP_VISUAL_SERVOING', gns_o.move_base_relative([0.03, 0.0, 0.0]),
+            transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
+                         'timeout': 'MOVE_ARM_TO_PREGRASP'})
+
         
         if (useMockup):
                 smach.StateMachine.add('GRASP_OBJ', gms_o.grasp_object(),
