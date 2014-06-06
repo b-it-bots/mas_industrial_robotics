@@ -113,7 +113,7 @@ def main(simulation=False):
             remapping={'found_objects':'recognized_objects'})
 
         #FIXME: Is there a loop reset?
-        smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(2),
+        smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(1),
                                   transitions={'loop': 'RECOGNIZE_OBJECTS',
                                                'continue': 'SKIP_SOURCE_POSE'})
 
