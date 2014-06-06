@@ -17,7 +17,7 @@ ArmAnalyticalInverseKinematics::ArmAnalyticalInverseKinematics(
     const std::vector<double> &max_angles)
 {
 	_min_angles = min_angles;
-  _max_angles = max_angles;
+	_max_angles = max_angles;
 }
 
 
