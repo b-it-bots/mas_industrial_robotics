@@ -45,6 +45,8 @@
 
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
 
@@ -77,4 +79,13 @@
      <origin xyz="-0.3 0 -0.03" rpy="0 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
 
+  <!-- camera tower -->
+  <xacro:cam3d_tower name="camera_tower" parent="rear_platform_link">
+    <origin xyz="-0.227 0.165 0.023" rpy="0 0 0" />
+  </xacro:cam3d_tower>
+
+  <!-- 3D camera on tower -->
+  <xacro:asus_xtion_camera name="tower_cam3d" parent="camera_tower_link" tilt="0.5">
+    <origin xyz="0.015 0 0.47" rpy="0 0 0" />
+  </xacro:asus_xtion_camera>
 </robot>
