@@ -42,34 +42,57 @@
 
   <!-- foot for arm-->
   <xacro:youbot_base name="base"/>
-  <xacro:youbot_plate name="plate" parent="base_link">
-    <origin xyz="-0.159 0 0.046" rpy="0 0 0" />
-  </xacro:youbot_plate>
-  <xacro:youbot_arm name="arm" parent="base_link">
-    <origin xyz="0.223 0.017 0.088" rpy="0 0 ${-M_PI / 4}" />
-  </xacro:youbot_arm>
-  <xacro:youbot_gripper name="gripper" parent="arm_link_5">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-  </xacro:youbot_gripper>
-
 
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/mounts/microsoft_lifecam_1080_mount.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
 
-  <xacro:adapter_plate name="adapter_plate" parent="base_link">
+  <!-- Rear Platform -->
+  <xacro:rear_platform name="rear_platform" parent="base_link">
+    <origin xyz="-0.005 -0.175 0.051" rpy="0 0 0" />
+  </xacro:rear_platform>
+
+  <!-- Arm Plate moving arm 8cm foward and 45 degree rotation -->
+  <xacro:adapter_plate name="adapter_plate" parent="base_link" arm_angle="${M_PI / 4}">
     <origin xyz="${0.159+0.08} 0 0.051" rpy="0 0 0" />
   </xacro:adapter_plate>
+
+  <xacro:youbot_arm name="arm" parent="adapter_plate_arm_root_link">
+    <origin xyz="-0.022 0.0 0.037" rpy="0 0 0" />
+  </xacro:youbot_arm>
+
+  <!-- Standard YB Gripper -->
+  <xacro:youbot_gripper name="gripper" parent="arm_link_5">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:youbot_gripper>
 
   <!-- base laser front -->
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
     <origin xyz="0.3 0 -0.03" rpy="0 0 0"/>
   </xacro:hokuyo_urg04_laser>
 
-  <!-- base laser rear 
+  <!-- base laser rear -->
   <xacro:hokuyo_urg04_laser name="base_laser_rear" parent="base" ros_topic="scan_rear" update_rate="10" min_angle="-1.57" max_angle="1.57" >
      <origin xyz="-0.3 0 -0.03" rpy="0 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
-  -->
+
+  <!-- camera tower -->
+  <xacro:cam3d_tower name="camera_tower" parent="rear_platform_link">
+    <origin xyz="-0.227 0.165 0.023" rpy="0 0 0" />
+  </xacro:cam3d_tower>
+
+  <!-- 3D camera on tower -->
+  <xacro:asus_xtion_camera name="tower_cam3d" parent="camera_tower_link" tilt="0.5">
+    <origin xyz="0.015 0 0.47" rpy="0 0 0" />
+  </xacro:asus_xtion_camera>
+
+  <!-- Arm POV Mount -->
+  <xacro:microsoft_lifecam_1080_mount name="microsoft_lifecam_1080_mount" parent="arm_link_5">
+    <origin xyz="-0.035 0.0 -0.025" rpy="0 0 3.14159265" />
+  </xacro:microsoft_lifecam_1080_mount>
 
 </robot>
