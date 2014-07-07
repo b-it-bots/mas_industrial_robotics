@@ -6,7 +6,7 @@
 
 	
 	
-	<xacro:macro name="adapter_plate" params="parent name *origin">
+	<xacro:macro name="adapter_plate" params="parent name arm_angle *origin">
 
 		<!-- joint between arm_7_link and sdh_palm_link -->
 		<joint name="${name}_joint" type="fixed" >
@@ -38,6 +38,12 @@
 			</collision>
 		</link>
 
+		<joint name="${name}_arm_root" type="fixed" >
+			<origin xyz="0 0 0" rpy="0 0 ${arm_angle}" />
+			<parent link="${name}_link" />
+			<child link="${name}_arm_root_link" />
+		</joint>
+		<link name="${name}_arm_root_link" />
 		<!-- extensions -->
 		
 	
