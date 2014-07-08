@@ -2,8 +2,7 @@
 <launch>
 	<!--- Run AMCL -->
 	<node pkg="amcl" type="amcl" name="amcl">
-		<!-- Used for single laser scanner localization -->
-		<!--remap from="scan" to="scan_front" /-->
+		<remap from="scan" to="scan_combined"/>
 
 		<!--- Odometery model parameters  -->
 		<param name="odom_model_type" value="omni"/>
