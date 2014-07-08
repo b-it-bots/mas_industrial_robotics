@@ -61,7 +61,7 @@ class OrientToLaserReadingAction
 
 		cmd_pub = nh_.advertise < geometry_msgs::Twist > (cmd_vel_topic, 1000);
 
-		ROS_DEBUG("Create service clinet");
+		ROS_DEBUG("Create service client");
 
 		client = nh_.serviceClient < BaseScanLinearRegression > (service_name);
 
