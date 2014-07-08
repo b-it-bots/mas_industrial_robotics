@@ -57,7 +57,7 @@
   </xacro:rear_platform>
 
   <!-- Arm Plate moving arm 8cm foward and 45 degree rotation -->
-  <xacro:adapter_plate name="adapter_plate" parent="base_link" arm_angle="${M_PI / 4}">
+  <xacro:adapter_plate name="adapter_plate" parent="base_link" arm_angle="${-M_PI / 4}">
     <origin xyz="${0.159+0.08} 0 0.051" rpy="0 0 0" />
   </xacro:adapter_plate>
 
