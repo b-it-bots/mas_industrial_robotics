@@ -14,6 +14,11 @@
 	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map)"/>
 
   <!-- AMCL -->
+	<!-- Republish scanner topics into a single topic -->
+	<node pkg="topic_tools" type="relay" name="front_laser_scanner_repub" args="/scan_rear /scan_combined"/>
+	<node pkg="topic_tools" type="relay" name="rear_laser_scanner_repub" args="/scan_front /scan_combined"/>
+
+	<!--particle filter-->
 	<include file="$(find mir_2dnav)/ros/launch/amcl.launch" />
 	
 </launch>

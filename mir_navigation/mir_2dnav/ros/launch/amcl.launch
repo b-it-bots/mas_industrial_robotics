@@ -2,7 +2,7 @@
 <launch>
 	<!--- Run AMCL -->
 	<node pkg="amcl" type="amcl" name="amcl">
-		<remap from="scan" to="scan_front" />
+		<remap from="scan" to="scan_combined"/>
 
 		<!--- Odometery model parameters  -->
 		<param name="odom_model_type" value="omni"/>
@@ -27,6 +27,7 @@
 		<param name="recovery_alpha_slow" value="0.0"/>
 		<param name="recovery_alpha_fast" value="0.0"/>
 		<param name="gui_publish_rate" value="-1"/>
+              	<param name="use_map_topic" value="true"/>
 		<param name="first_map_only" value="true"/>				
 	
 		<!--Laser model parameters -->
