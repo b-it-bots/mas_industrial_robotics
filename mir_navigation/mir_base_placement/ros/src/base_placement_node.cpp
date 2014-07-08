@@ -24,7 +24,7 @@ class OrientToLaserReadingAction
 	std::string cmd_vel_topic;
 
 	float target_distance;
-	float max_velocity;
+	float max_linear_velocity;
 	float max_angular_velocity;
 
 	double error_angle_int;
@@ -54,7 +54,7 @@ class OrientToLaserReadingAction
 
 		target_distance = 0.05;
 
-		max_velocity = 0.075;
+		max_linear_velocity = 0.075;
 		max_angular_velocity = 0.1;
 
 		ROS_DEBUG("Register publisher");
@@ -117,15 +117,15 @@ class OrientToLaserReadingAction
 		std::cout << "a_d: " << error_angle_d * ang_d << std::endl;
 		*/
 
-		if (cmd.linear.x > max_velocity)
-			cmd.linear.x = max_velocity;
-		else if (cmd.linear.x < -max_velocity)
-			cmd.linear.x = -max_velocity;
+		if (cmd.linear.x > max_linear_velocity)
+			cmd.linear.x = max_linear_velocity;
+		else if (cmd.linear.x < -max_linear_velocity)
+			cmd.linear.x = -max_linear_velocity;
 
-		if (cmd.linear.y > max_velocity)
-			cmd.linear.y = max_velocity;
-		else if (cmd.linear.y < -max_velocity)
-			cmd.linear.y = -max_velocity;
+		if (cmd.linear.y > max_linear_velocity)
+			cmd.linear.y = max_linear_velocity;
+		else if (cmd.linear.y < -max_linear_velocity)
+			cmd.linear.y = -max_linear_velocity;
 
 		if (cmd.angular.z > max_angular_velocity)
 			cmd.angular.z = max_angular_velocity;
