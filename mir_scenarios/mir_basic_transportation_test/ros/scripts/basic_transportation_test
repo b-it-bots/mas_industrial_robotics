@@ -70,10 +70,6 @@ def main(simulation=False):
         smach.StateMachine.add('INIT_ROBOT', gbs_o.init_robot(),
             transitions={'succeeded':'GET_TASK'})
 
-#         smach.StateMachine.add('GET_TASK', refbox.get_task(),
-#             transitions={'task_received':'SETUP_BTT',
-#                          'wrong_task_format':'GET_TASK'})
-
         smach.StateMachine.add('GET_TASK', refbox.get_task(),
             transitions={'task_received':'SETUP_BTT',
                          'wrong_task':'GET_TASK',
