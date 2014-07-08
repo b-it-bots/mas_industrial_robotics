@@ -4,16 +4,13 @@ import smach
 import sys
 import zmq
 
-import mir_states_common.robocup.task
 import mir_states_common.robocup.referee_box_communication
-
-#from tasks import parse_task, TaskSpecFormatError
 
 try:
     ip = rospy.get_param('refbox_ip')
 except KeyError:
     rospy.logerr("Using Hardcoded refbox_ip")
-    ip = "192.168.13.106"
+    ip = "192.168.25.132"
     port = "11111"
     team_name = "b-it-bots"
 
@@ -44,517 +41,441 @@ class get_task(smach.State):
         received specification.
     """
 
-    HARDCODED_SPECS = {'BNT': 'BNT<(D,W,3),(S1,E,3),(T3,N,3),(S3,S,3),(T1,S,3),(D1,E,3),(S4,N,3),(S5,N,3),(T4,W,3),(T2,S,3),(S2,E,3),(EXIT,E,3)>',
-                       'BMT': 'BMT<D1,D1,D1,line(F20_20_B,R20,M20_100),D1>',
-                	   'BTT': 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>',
+    HARDCODED_SPECS = {'BNT': 'BNT<(C1,W,3),(S1,E,3),(T3,N,3),(S3,S,3),(T1,S,3),(D1,E,3),(S4,N,3),(S5,N,3),(T4,W,3),(T2,S,3),(S2,E,3)>',
+                       'BMT': 'BMT<S5,S5,S4,line(S40_40_B,F20_20_B),S4>',
+                       'BTT': 'BTT<initialsituation(<S1,(M20_100,S40_40_G)><S2,(F20_20_G,S40_40_B,F20_20_B)>);goalsituation(<S3,line(S40_40_G,F20_20_G)><D1,zigzag(F20_20_B,S40_40_B,M20_100)>)>',
                        'PPT': 'PPT<S6,S5>'}
 
     def __init__(self):
         smach.State.__init__(self,
-            outcomes=['task_received', 'wrong_task_format'], 
+            outcomes=['task_received', 'wrong_task', 'wrong_task_format'], 
             input_keys=['test', 'simulation'],
-            io_keys=['task', 'task_spec_copy'])
-        #outcomes=['task_received', 'wrong_task_format', 'test_not_set'],
+            io_keys=['task_list'])
 
     def execute(self, userdata):
-        #if len(userdata.test) <= 0:
-        #    rospy.logerr("userdata.test NOT set. Please specifiy in the test state machine")
-        #    return 'test_not_set'
 
         if not userdata.simulation:
-            rospy.logdebug('Waiting for task specification (%s:%s)...' % (ip, port))
+            rospy.loginfo('Waiting for task specification (%s:%s)...' % (ip, port))
             task_spec = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
         else:
+            rospy.loginfo('Using hardcoded specification')
             task_spec = self.HARDCODED_SPECS[userdata.test]
+
         rospy.loginfo("Task specification: %s" % task_spec)
-        userdata.task_spec_copy = task_spec
-        try:
-            userdata.task = mir_states_common.robocup.parse_task(userdata.test, task_spec)
-            rospy.loginfo('Parsed task:\n%s' % userdata.task)
-            return 'task_received'
-        except mir_states_common.robocup.task.TaskSpecFormatError:
-            return 'wrong_task_format'
-
-class re_get_task(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self,
-            outcomes=['task_received', 'wrong_task_format'], 
-            input_keys=['test', 'simulation'],
-            io_keys=['task','task_spec_copy'])
-        #outcomes=['task_received', 'wrong_task_format', 'test_not_set'],
-
-    def execute(self, userdata):
-        #if len(userdata.test) <= 0:
-        #    rospy.logerr("userdata.test NOT set. Please specifiy in the test state machine")
-        #    return 'test_not_set'
-        task_spec = userdata.task_spec_copy        
-        try:
-            userdata.task = mir_states_common.robocup.parse_task(userdata.test, task_spec)
-            rospy.loginfo('Parsed task:\n%s' % userdata.task)
-            return 'task_received'
-        except mir_states_common.robocup.task.TaskSpecFormatError:
-            return 'wrong_task_format'
-
-#FIXME: merge into get_task
-class get_basic_manipulation_task(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
-        
-    def execute(self, userdata):
-
-        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-       
-        #man_task = "BMT<S5,S5,S4,line(S40_40_B,F20_20_B),S4>"
-        man_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BNT<(D1,N,6),
-
-        rospy.loginfo("Task received: " + man_task)
-        
-        # check if Task is a BMT task      
-        if(man_task[0:3] != "BMT"):
-           rospy.logerr("Excepted <<BMT>> task, but received <<" + man_task[0:3] + ">> received")
-           return 'wront_task_format' 
+    
+        test_name = task_spec[0:3]
+        if(test_name != userdata.test):
+            rospy.logerr("Expected <<" + userdata.test + ">> task, but received <<" + test_name + ">> specification")
+            return 'wrong_task'
 
         # remove leading start description        
-        man_task = man_task[3:len(man_task)]
-        
-        # check if description has beginning '<' and ending '>
-        if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wront_task_format' 
-        
-        
-        # remove beginning '<' and ending '>'
-        man_task = man_task[1:len(man_task)-1]
-        
-        #print man_task
-        
-        task_list = man_task.split(',')
-        
-        #print task_list
+        task_spec = task_spec[3:len(task_spec)]
 
-        init_pose = task_list[0]
-        src_pose = task_list[1]
-        dest_pose = task_list[2]
-        
-        subtask_list = task_list[3].split('(')
-        obj_cfg = subtask_list[0]
-        
-        obj_names = []
-        obj_names.append(subtask_list[1])
-   
-        print task_list
-        
-        for i in range(4, (len(task_list)-1)):
-            if i == (len(task_list)-2):
-                print task_list[i]
-                task_list[i] = task_list[i][0:(len(task_list[i])-1)]
-                print task_list[i]
-                
-                 
-            obj_names.append(task_list[i])
-               
-        
-        fnl_pose = task_list[len(task_list)-1]
-        
-        for obj in range(len(obj_names)):
-            if obj_names[obj] == "V20":
-                obj_names[obj] = "R20"
-
-
-        print obj_names
-        
-        # which object to get from the source location
-        source_tasklist = Bunch(type = 'source', location = src_pose, object_names = list(obj_names)) 
-        userdata.task_list.append(source_tasklist)        
-
-        # where to deliver the objects and in which configuration
-        destination_tasklist = Bunch(type = 'destination', location = dest_pose, object_names = list(obj_names),  object_config = obj_cfg)
-        userdata.task_list.append(destination_tasklist) 
-
-        print "PARSED TASK: "
-        print "-----------------------------------------------------"
-        for task in userdata.task_list:
-          print "type:", task.type
-          print "   location:", task.location
-          print "   objects:", task.object_names  
-          if task.type == "destination":
-            print "   objects:", task.object_config       
-          print "-----------------------------------------------------"
+        try:
+            if(test_name == "BNT"):
+                userdata.task_list = get_basic_navigation_task(task_spec)
+            if(test_name == "BMT"):
+                userdata.task_list = get_basic_manipulation_task(task_spec)
+            elif(test_name == "BTT"):
+                userdata.task_list = get_basic_transportation_task(task_spec)
+            elif(test_name == "PTT"):
+                userdata.task_list = get_precision_placement_task(task_spec)
+            elif(test_name == "CBT"):
+                userdata.task_list = get_competitive_transportation_task(task_spec)
+        except Exception as e:
+            rospy.logerr("Exception: %s", e)
+            return 'wrong_task_format'
 
         return 'task_received' 
 
-#FIXME: merge into get_task
-class get_precision_placement_task(smach.State):
 
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list', 'simulation'], output_keys=['task_list'])
-        
-    def execute(self, userdata):
+def get_basic_navigation_task(navigation_task):
 
-        
-        if(userdata.simulation):
-            rospy.loginfo("Task spec by hard coded string")
+    # remove outer task name and '<', '>'. If task name is not correct throws an Exception.
+    navigation_task = re.findall(r'<(.*)>', navigation_task)
 
-            precision_task = 'PTT<S2,(M20,F20_20_B,F20_20_G,R20,V20),S1>'
+    if len(navigation_task) != 1:
+        raise Exception('Malformed task specification')
 
-        else:
-            rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-            precision_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
+    task_list = re.findall(r'\('
+                            '(?P<place>.+?),'
+                            '(?P<orientation>[NESW]),'
+                            '(?P<break>[123])'
+                            '\)', navigation_task[0])
+    
+    return task_list
 
-        rospy.loginfo("Task received: " + precision_task)
+def get_basic_manipulation_task(man_task):
+    task_list = []
 
-        ptt_string = precision_task
+    # check if description has beginning '<' and ending '>
+    if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
+        raise Exception('Task specification ' + man_task + ' not in correct format')       
+    
+    # remove beginning '<' and ending '>'
+    man_task = man_task[1:len(man_task)-1]
+    
+    #print man_task
+    
+    task_list = man_task.split(',')
+    
+    #print task_list
 
-        objects = re.findall("\(.*?\)", ptt_string)
-        objects = objects[0] 
-        #print objects
+    init_pose = task_list[0]
+    src_pose = task_list[1]
+    dest_pose = task_list[2]
+    
+    subtask_list = task_list[3].split('(')
+    obj_cfg = subtask_list[0]
+    
+    obj_names = []
+    obj_names.append(subtask_list[1])
 
-        source = re.findall("<.*?,",ptt_string)[0]
-        #print source
-
-        destination = re.findall(".?.?>",ptt_string)[0]
-        destination = re.match(".\w",destination).group()
-        #print destination
-        #destination = destination.group()
-
-        result = "BTT<initialsituation(" + source
-        result = result + objects + ">);"
-        result = result + "goalsituation(<" + destination + ","
-        result = result + "line" + objects + ">)>"
-
-        transportation_task = result
-        
-        # check if Task is a BTT task      
-        if(transportation_task[0:3] != "BTT"):
-           rospy.logerr("Excepted <<BTT>> task, but received <<" + transportation_task[0:3] + ">> received")
-           return 'wrong_task_format' 
-
-        # remove leading start description        
-        transportation_task = transportation_task[3:len(transportation_task)]
-        
-        
-        # check if description has beginning '<' and ending '>
-        if(transportation_task[0] != "<" or transportation_task[(len(transportation_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wrong_task_format' 
-        
-        # remove beginning '<' and ending '>'
-        transportation_task = transportation_task[1:len(transportation_task)-1]
-
-        # Task split
-        task_situation = transportation_task.split(';')
-        rospy.loginfo("split1: %s",task_situation)  
-        
-
-        # Initial Situation
-        initial_situation = task_situation[0]
-        rospy.loginfo("init: %s", initial_situation)        
-
-        if(initial_situation[0:16] != "initialsituation"):
-           rospy.logerr("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
-           return 'wrong_task_format' 
-
-        initial_situation = initial_situation[16:len(initial_situation)]
-        rospy.loginfo('removed <> and (): %s',initial_situation)
-
-        init_tasks = re.findall('\<(?P<name>.*?)\>', initial_situation)
-        rospy.loginfo("split into poses: %s",init_tasks)
-
-        # Update userdata with expcted initial situation information
-        for item in init_tasks:            
-            desired_loc = item[0:2]
-
-            obj_taskspec = item[3:len(item)]
-
-            objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
-            objs = objs[0].split(',')
-
-            for i in range(len(objs)):
-                if objs[i] == "V20":
-                    objs[i] = "R20"
-
-            obj_conf = obj_taskspec.split('(')
-            obj_conf = obj_conf[0]
-
-            rospy.loginfo("    %s %s", desired_loc, objs)
-  
-            initial_tasklist = Bunch(type='source', location = desired_loc, object_names=objs) 
-            userdata.task_list.append(initial_tasklist)
-
-        
-        # Goal Situation
-        goal_situation = task_situation[1]
-        rospy.loginfo('goal %s', goal_situation)    
-
-        if(goal_situation[0:13] != "goalsituation"):
-           rospy.logerr("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
-           return 'wrong_task_format' 
-
-        goal_situation = goal_situation[13:len(goal_situation)]
-        rospy.loginfo('removed goal string: %s', goal_situation)
-
-        goal_tasks = re.findall('\<(?P<name>.*?)\>', goal_situation)
-        rospy.loginfo('split into locations: %s', goal_tasks)
-
-        # Update userdata with expcted goal situation information
-        for item in goal_tasks:
-            desired_loc = item[0:2]
+    print task_list
+    
+    for i in range(4, (len(task_list)-1)):
+        if i == (len(task_list)-2):
+            print task_list[i]
+            task_list[i] = task_list[i][0:(len(task_list[i])-1)]
+            print task_list[i]
             
-            obj_taskspec = item[3:len(item)]
+             
+        obj_names.append(task_list[i])
+           
+    
+    fnl_pose = task_list[len(task_list)-1]
+    
+    for obj in range(len(obj_names)):
+        if obj_names[obj] == "V20":
+            obj_names[obj] = "R20"
 
-            objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
-            objs = objs[0].split(',')
 
-            for i in range(len(objs)):
-                if objs[i] == "V20":
-                    objs[i] = "R20"
+    print obj_names
+    
+    # which object to get from the source location
+    source_tasklist = Bunch(type = 'source', location = src_pose, object_names = list(obj_names)) 
+    task_list.append(source_tasklist)        
 
-            obj_conf = obj_taskspec.split('(')
-            obj_conf = obj_conf[0]
+    # where to deliver the objects and in which configuration
+    destination_tasklist = Bunch(type = 'destination', location = dest_pose, object_names = list(obj_names),  object_config = obj_cfg)
+    task_list.append(destination_tasklist) 
 
-            rospy.loginfo("    %s %s %s", desired_loc, obj_conf, objs)
+    print "PARSED TASK: "
+    print "-----------------------------------------------------"
+    for task in task_list:
+      print "type:", task.type
+      print "   location:", task.location
+      print "   objects:", task.object_names  
+      if task.type == "destination":
+        print "   objects:", task.object_config       
+      print "-----------------------------------------------------"
 
-            
-            goal_tasklist = Bunch(type='destination', location = desired_loc, object_names = objs,  object_config = obj_conf)
-            userdata.task_list.append(goal_tasklist)    
+    return task_list
 
-        print "PARSED TASK: "
-        print "-----------------------------------------------------"
-        for task in userdata.task_list:
-          print "type:", task.type
-          print "   location:", task.location
-          print "   objects:", task.object_names  
-          if task.type == "destination":
-            print "   objects:", task.object_config       
-          print "-----------------------------------------------------"
+
+def get_precision_placement_task(precision_task):
+
+    task_list = []
+
+    ptt_string = precision_task
+
+    objects = re.findall("\(.*?\)", ptt_string)
+    objects = objects[0] 
+    #print objects
+
+    source = re.findall("<.*?,",ptt_string)[0]
+    #print source
+
+    destination = re.findall(".?.?>",ptt_string)[0]
+    destination = re.match(".\w",destination).group()
+    #print destination
+    #destination = destination.group()
+
+    result = "BTT<initialsituation(" + source
+    result = result + objects + ">);"
+    result = result + "goalsituation(<" + destination + ","
+    result = result + "line" + objects + ">)>"
+
+    transportation_task = result
+    
+    # check if Task is a BTT task      
+    if(transportation_task[0:3] != "BTT"):
+       raise Exception("Excepted <<BTT>> task, but received <<" + transportation_task[0:3] + ">> received")
+
+
+    # remove leading start description        
+    transportation_task = transportation_task[3:len(transportation_task)]
+    
+    
+    # check if description has beginning '<' and ending '>
+    if(transportation_task[0] != "<" or transportation_task[(len(transportation_task)-1)] != ">"):
+        raise Exception("task spec not in correct format")
+    
+    # remove beginning '<' and ending '>'
+    transportation_task = transportation_task[1:len(transportation_task)-1]
+
+    # Task split
+    task_situation = transportation_task.split(';')
+    rospy.loginfo("split1: %s",task_situation)  
+    
+
+    # Initial Situation
+    initial_situation = task_situation[0]
+    rospy.loginfo("init: %s", initial_situation)        
+
+    if(initial_situation[0:16] != "initialsituation"):
+       raise Exception("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
+
+    initial_situation = initial_situation[16:len(initial_situation)]
+    rospy.loginfo('removed <> and (): %s',initial_situation)
+
+    init_tasks = re.findall('\<(?P<name>.*?)\>', initial_situation)
+    rospy.loginfo("split into poses: %s",init_tasks)
+
+    # Update task list with expcted initial situation information
+    for item in init_tasks:            
+        desired_loc = item[0:2]
+
+        obj_taskspec = item[3:len(item)]
+
+        objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
+        objs = objs[0].split(',')
+
+        for i in range(len(objs)):
+            if objs[i] == "V20":
+                objs[i] = "R20"
+
+        obj_conf = obj_taskspec.split('(')
+        obj_conf = obj_conf[0]
+
+        rospy.loginfo("    %s %s", desired_loc, objs)
+
+        initial_tasklist = Bunch(type='source', location = desired_loc, object_names=objs) 
+        task_list.append(initial_tasklist)
 
     
-        return 'task_received'   
+    # Goal Situation
+    goal_situation = task_situation[1]
+    rospy.loginfo('goal %s', goal_situation)    
 
-class get_basic_transportation_task(smach.State):
+    if(goal_situation[0:13] != "goalsituation"):
+       raise Exception("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
 
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list', 'simulation'], output_keys=['task_list'])
+    goal_situation = goal_situation[13:len(goal_situation)]
+    rospy.loginfo('removed goal string: %s', goal_situation)
+
+    goal_tasks = re.findall('\<(?P<name>.*?)\>', goal_situation)
+    rospy.loginfo('split into locations: %s', goal_tasks)
+
+    # Update task list with expcted goal situation information
+    for item in goal_tasks:
+        desired_loc = item[0:2]
         
-    def execute(self, userdata):
+        obj_taskspec = item[3:len(item)]
 
-        
-        if(userdata.simulation):
-            rospy.loginfo("Task spec by hard coded string")
+        objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
+        objs = objs[0].split(',')
 
-            #transportation_task = 'BTT<initialsituation(<S4,(M20_100,S40_40_G,V20)><S5,(F20_20_G,S40_40_B,F20_20_B)><S2,(M30,M20,R20)>);goalsituation(<S3,line(S40_40_G,F20_20_G,S40_40_B,F20_20_B)><C1,zigzag(M20_100,V20,M30,M20,R20)>)>'
-            #transportation_task = 'BTT<initialsituation(<S2,(S40_40_B)>);goalsituation(<S1,line(S40_40_B)>)>'
-            transportation_task = 'BTT<initialsituation(<S2,(S40_40_G,F20_20_B,R20)><S3,(F20_20_G,S40_40_B,R20)><S5,(M20_100,M30,M20)>);goalsituation(<S1,line(F20_20_B,F20_20_G)><C1,line(R20,R20,M20)><S5,line(S40_40_G,S40_40_B)><S4,line(M20_100,M30)>)>'
+        for i in range(len(objs)):
+            if objs[i] == "V20":
+                objs[i] = "R20"
 
-        else:
-            rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-            transportation_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name) 
+        obj_conf = obj_taskspec.split('(')
+        obj_conf = obj_conf[0]
 
-        rospy.loginfo("Task received: " + transportation_task)
-        
-        # check if Task is a BTT task      
-        if(transportation_task[0:3] != "BTT"):
-           rospy.logerr("Excepted <<BTT>> task, but received <<" + transportation_task[0:3] + ">> received")
-           return 'wrong_task_format' 
-
-        # remove leading start description        
-        transportation_task = transportation_task[3:len(transportation_task)]
-        
-        
-        # check if description has beginning '<' and ending '>
-        if(transportation_task[0] != "<" or transportation_task[(len(transportation_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wrong_task_format' 
-        
-        # remove beginning '<' and ending '>'
-        transportation_task = transportation_task[1:len(transportation_task)-1]
-
-        # Task split
-        task_situation = transportation_task.split(';')
-        rospy.loginfo("split1: %s",task_situation)  
-        
-
-        # Initial Situation
-        initial_situation = task_situation[0]
-        rospy.loginfo("init: %s", initial_situation)        
-
-        if(initial_situation[0:16] != "initialsituation"):
-           rospy.logerr("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
-           return 'wrong_task_format' 
-
-        initial_situation = initial_situation[16:len(initial_situation)]
-        rospy.loginfo('removed <> and (): %s',initial_situation)
-
-        init_tasks = re.findall('\<(?P<name>.*?)\>', initial_situation)
-        rospy.loginfo("split into poses: %s",init_tasks)
-
-        # Update userdata with expcted initial situation information
-        for item in init_tasks:            
-            desired_loc = item[0:2]
-
-            obj_taskspec = item[3:len(item)]
-
-            objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
-            objs = objs[0].split(',')
-
-            for i in range(len(objs)):
-                if objs[i] == "V20":
-                    objs[i] = "R20"
-
-            obj_conf = obj_taskspec.split('(')
-            obj_conf = obj_conf[0]
-
-            rospy.loginfo("    %s %s", desired_loc, objs)
-  
-            initial_tasklist = Bunch(type='source', location = desired_loc, object_names=objs) 
-            userdata.task_list.append(initial_tasklist)
+        rospy.loginfo("    %s %s %s", desired_loc, obj_conf, objs)
 
         
-        # Goal Situation
-        goal_situation = task_situation[1]
-        rospy.loginfo('goal %s', goal_situation)    
+        goal_tasklist = Bunch(type='destination', location = desired_loc, object_names = objs,  object_config = obj_conf)
+        task_list.append(goal_tasklist)    
 
-        if(goal_situation[0:13] != "goalsituation"):
-           rospy.logerr("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
-           return 'wrong_task_format' 
+    print "PARSED TASK: "
+    print "-----------------------------------------------------"
+    for task in task_list:
+      print "type:", task.type
+      print "   location:", task.location
+      print "   objects:", task.object_names  
+      if task.type == "destination":
+        print "   objects:", task.object_config       
+      print "-----------------------------------------------------"
 
-        goal_situation = goal_situation[13:len(goal_situation)]
-        rospy.loginfo('removed goal string: %s', goal_situation)
+    return task_list
 
-        goal_tasks = re.findall('\<(?P<name>.*?)\>', goal_situation)
-        rospy.loginfo('split into locations: %s', goal_tasks)
 
-        # Update userdata with expcted goal situation information
-        for item in goal_tasks:
-            desired_loc = item[0:2]
-            
-            obj_taskspec = item[3:len(item)]
+def get_basic_transportation_task(transportation_task):
+    task_list = []
 
-            objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
-            objs = objs[0].split(',')
-
-            for i in range(len(objs)):
-                if objs[i] == "V20":
-                    objs[i] = "R20"
-
-            obj_conf = obj_taskspec.split('(')
-            obj_conf = obj_conf[0]
-
-            rospy.loginfo("    %s %s %s", desired_loc, obj_conf, objs)
-
-            
-            goal_tasklist = Bunch(type='destination', location = desired_loc, object_names = objs,  object_config = obj_conf)
-            userdata.task_list.append(goal_tasklist)        
-        return 'task_received'   
+    # check if description has beginning '<' and ending '>
+    if(transportation_task[0] != "<" or transportation_task[(len(transportation_task)-1)] != ">"):
+        raise Exception("task spec not in correct format")
     
-class get_basic_competitive_task(smach.State):
+    # remove beginning '<' and ending '>'
+    transportation_task = transportation_task[1:len(transportation_task)-1]
 
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['task_received', 'wrong_task_format'], input_keys=['task_list'], output_keys=['task_list'])
+    # Task split
+    task_situation = transportation_task.split(';')
+    rospy.loginfo("split1: %s",task_situation)  
+    
+
+    # Initial Situation
+    initial_situation = task_situation[0]
+    rospy.loginfo("init: %s", initial_situation)        
+
+    if(initial_situation[0:16] != "initialsituation"):
+       raise Exception("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
+
+    initial_situation = initial_situation[16:len(initial_situation)]
+    rospy.loginfo('removed <> and (): %s',initial_situation)
+
+    init_tasks = re.findall('\<(?P<name>.*?)\>', initial_situation)
+    rospy.loginfo("split into poses: %s",init_tasks)
+
+    # Update task list with expcted initial situation information
+    for item in init_tasks:            
+        desired_loc = item[0:2]
+
+        obj_taskspec = item[3:len(item)]
+
+        objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
+        objs = objs[0].split(',')
+
+        for i in range(len(objs)):
+            if objs[i] == "V20":
+                objs[i] = "R20"
+
+        obj_conf = obj_taskspec.split('(')
+        obj_conf = obj_conf[0]
+
+        rospy.loginfo("    %s %s", desired_loc, objs)
+
+        initial_tasklist = Bunch(type='source', location = desired_loc, object_names=objs) 
+        task_list.append(initial_tasklist)
+
+    
+    # Goal Situation
+    goal_situation = task_situation[1]
+    rospy.loginfo('goal %s', goal_situation)    
+
+    if(goal_situation[0:13] != "goalsituation"):
+       raise Exception("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
+
+    goal_situation = goal_situation[13:len(goal_situation)]
+    rospy.loginfo('removed goal string: %s', goal_situation)
+
+    goal_tasks = re.findall('\<(?P<name>.*?)\>', goal_situation)
+    rospy.loginfo('split into locations: %s', goal_tasks)
+
+    # Update task list with expcted goal situation information
+    for item in goal_tasks:
+        desired_loc = item[0:2]
         
-    def execute(self, userdata):
+        obj_taskspec = item[3:len(item)]
 
-        rospy.loginfo("Wait for task specification from server: " + ip + ":" + port + " (team-name: " + team_name + ")")
-        competitive_task = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)  #'BTT<(D1,N,6),(S2,E,3)>'
-        rospy.loginfo("Task received: " + competitive_task)
-        
-        # check if Task is a CTT task      
-        if(competitive_task[0:3] != "CTT"):
-           rospy.logerr("Excepted <<BTT>> task, but received <<" + competitive_task[0:3] + ">> received")
-           return 'wrong_task_format' 
+        objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
+        objs = objs[0].split(',')
 
-        # remove leading start description        
-        competitive_task = competitive_task[3:len(competitive_task)]
-        
-        
-        # check if description has beginning '<' and ending '>
-        if(competitive_task[0] != "<" or competitive_task[(len(competitive_task)-1)] != ">"):
-            rospy.loginfo("task spec not in correct format")
-            return 'wrong_task_format' 
-        
-        # remove beginning '<' and ending '>'
-        competitive_task = competitive_task[1:len(competitive_task)-1]
+        for i in range(len(objs)):
+            if objs[i] == "V20":
+                objs[i] = "R20"
 
-        # Task split
-        task_situation = competitive_task.split(';')
-        rospy.loginfo(task_situation)  
-        
+        obj_conf = obj_taskspec.split('(')
+        obj_conf = obj_conf[0]
 
-        # Initial Situation
-        initial_situation = task_situation[0]
-        rospy.loginfo(initial_situation)        
-
-        if(initial_situation[0:16] != "initialsituation"):
-           rospy.logerr("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
-           return 'wrong_task_format' 
-
-        initial_situation = initial_situation[16:len(initial_situation)]
-        rospy.loginfo(initial_situation)
-
-        init_tasks = re.findall('\<(?P<name>.*?)\>', initial_situation)
-        rospy.loginfo(init_tasks)
-
-        # Update userdata with expcted initial situation information
-        for item in init_tasks:            
-            desired_loc = item[0:2]
-
-            if item[0] == "D":
-                base_orientation = "W"
-            elif item[0] == "S":
-                base_orientation = "E"
-
-            obj_taskspec = item[3:len(item)]
-
-            objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
-            objs = objs[0].split(',')
-
-            obj_conf = obj_taskspec.split('(')
-            obj_conf = obj_conf[0]
-
-  
-            initial_tasklist = Bunch(location=desired_loc,orientation=base_orientation,task='fetch object workspace',object_names=objs,object_config=obj_conf) 
-            userdata.task_list.append(initial_tasklist)
-
-        
-        # Goal Situation
-        goal_situation = task_situation[1]
-        rospy.loginfo(goal_situation)    
-
-        if(goal_situation[0:13] != "goalsituation"):
-           rospy.logerr("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
-           return 'wrong_task_format' 
-
-        rospy.loginfo(goal_situation)
-        goal_situation = goal_situation[13:len(goal_situation)]
-        rospy.loginfo(goal_situation)
-
-        goal_tasks = re.findall('\<(?P<name>.*?)\>', goal_situation)
-        rospy.loginfo(goal_tasks)
-
-        # Update userdata with expcted goal situation information
-        for item in goal_tasks:
-            desired_loc = item[0:2]
-            if item[0] == "D":
-                base_orientation = "W"
-            elif item[0] == "S":
-                base_orientation = "E"
-            
-            obj_taskspec = item[3:len(item)]
-
-            objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
-            objs = objs[0].split(',')
-            rospy.loginfo(objs)
-
-            obj_conf = obj_taskspec.split('(')
-            obj_conf = obj_conf[0]
-            rospy.loginfo(obj_conf)
-
-            
-            goal_tasklist = Bunch(location=desired_loc,orientation=base_orientation,task='place object in workspace',object_names = objs, object_config = obj_conf)
-            userdata.task_list.append(goal_tasklist)
+        rospy.loginfo("    %s %s %s", desired_loc, obj_conf, objs)
 
         
-        return 'task_received'   
+        goal_tasklist = Bunch(type='destination', location = desired_loc, object_names = objs,  object_config = obj_conf)
+        task_list.append(goal_tasklist)        
+
+    return task_list
+ 
+
+def get_basic_competitive_task(competitive_task):
+    task_list = []
+   
+    # check if description has beginning '<' and ending '>
+    if(competitive_task[0] != "<" or competitive_task[(len(competitive_task)-1)] != ">"):
+        raise Exception("task spec not in correct format")
+    
+    # remove beginning '<' and ending '>'
+    competitive_task = competitive_task[1:len(competitive_task)-1]
+
+    # Task split
+    task_situation = competitive_task.split(';')
+    rospy.loginfo(task_situation)  
+    
+
+    # Initial Situation
+    initial_situation = task_situation[0]
+    rospy.loginfo(initial_situation)        
+
+    if(initial_situation[0:16] != "initialsituation"):
+       raise Exception("Excepted <<initialsituation>>, but received <<" + initial_situation[0:16] + ">> received")
+
+    initial_situation = initial_situation[16:len(initial_situation)]
+    rospy.loginfo(initial_situation)
+
+    init_tasks = re.findall('\<(?P<name>.*?)\>', initial_situation)
+    rospy.loginfo(init_tasks)
+
+    # Update task list with expcted initial situation information
+    for item in init_tasks:            
+        desired_loc = item[0:2]
+
+        if item[0] == "D":
+            base_orientation = "W"
+        elif item[0] == "S":
+            base_orientation = "E"
+
+        obj_taskspec = item[3:len(item)]
+
+        objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
+        objs = objs[0].split(',')
+
+        obj_conf = obj_taskspec.split('(')
+        obj_conf = obj_conf[0]
+
+
+        initial_tasklist = Bunch(location=desired_loc,orientation=base_orientation,task='fetch object workspace',object_names=objs,object_config=obj_conf) 
+        task_list.append(initial_tasklist)
+
+    
+    # Goal Situation
+    goal_situation = task_situation[1]
+    rospy.loginfo(goal_situation)    
+
+    if(goal_situation[0:13] != "goalsituation"):
+       raise Exception("Excepted <<goalsituation>>, but received <<" + goal_situation[0:13] + ">> received")
+
+    rospy.loginfo(goal_situation)
+    goal_situation = goal_situation[13:len(goal_situation)]
+    rospy.loginfo(goal_situation)
+
+    goal_tasks = re.findall('\<(?P<name>.*?)\>', goal_situation)
+    rospy.loginfo(goal_tasks)
+
+    # Update task list with expcted goal situation information
+    for item in goal_tasks:
+        desired_loc = item[0:2]
+        if item[0] == "D":
+            base_orientation = "W"
+        elif item[0] == "S":
+            base_orientation = "E"
+        
+        obj_taskspec = item[3:len(item)]
+
+        objs = re.findall('\((?P<name>.*?)\)', obj_taskspec)
+        objs = objs[0].split(',')
+        rospy.loginfo(objs)
+
+        obj_conf = obj_taskspec.split('(')
+        obj_conf = obj_conf[0]
+        rospy.loginfo(obj_conf)
+
+        
+        goal_tasklist = Bunch(location=desired_loc,orientation=base_orientation,task='place object in workspace',object_names = objs, object_config = obj_conf)
+        task_list.append(goal_tasklist)
+
+    
+    return task_list
 

@@ -25,14 +25,14 @@ class select_target_pose(smach.State):
                              outcomes=['pose_selected',
                                        'unknown_pose',
                                        'no_more_targets'],
-                             input_keys=['task'],
+                             input_keys=['task_list'],
                              output_keys=['base_pose_to_approach',
-                                          'task',
+                                          'task_list',
                                           'subtask'])
 
     def execute(self, userdata):
         try:
-            subtask = userdata.task.pop()
+            subtask = userdata.task_list.pop(0)
         except IndexError:
             return 'no_more_targets'
 
