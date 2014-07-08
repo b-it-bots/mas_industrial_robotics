@@ -18,7 +18,12 @@ int main (int argc, char **argv)
 
   mir_navigation_msgs::OrientToBaseActionGoal goal;
 
-  goal.goal.distance = 0.25;
+  if (argc > 1)
+  {
+    goal.goal.distance = atof(argv[1]);
+  }
+  else
+    goal.goal.distance = 0.25;
 
   ac.sendGoal(goal.goal);
 
