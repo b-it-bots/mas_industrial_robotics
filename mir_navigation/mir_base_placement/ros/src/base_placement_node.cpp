@@ -25,8 +25,6 @@ class OrientToLaserReadingAction
 
 	float target_distance;
 	float max_velocity;
-	float min_velocity;
-	float min_angular_velocity;
 	float max_angular_velocity;
 
 	double error_angle_int;
@@ -57,9 +55,6 @@ class OrientToLaserReadingAction
 		target_distance = 0.05;
 
 		max_velocity = 0.075;
-		min_velocity = 0.01;
-
-		min_angular_velocity = 0.025;
 		max_angular_velocity = 0.1;
 
 		ROS_DEBUG("Register publisher");
