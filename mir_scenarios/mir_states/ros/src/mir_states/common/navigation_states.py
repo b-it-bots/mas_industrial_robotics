@@ -191,8 +191,10 @@ class approach_pose(smach.State):
         goal.target_pose = pose     
 
         # call action
+        rospy.loginfo("send navigation goal")
         self.move_base_action.send_goal(goal)
 
+        rospy.loginfo("wait for %s action to reach %s", self.move_base_action_name, self.pose_name2)
         self.move_base_action.wait_for_result()
 
         # evaluate result

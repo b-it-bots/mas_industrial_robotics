@@ -74,8 +74,9 @@ def main(simulation=False):
 #             transitions={'task_received':'SETUP_BTT',
 #                          'wrong_task_format':'GET_TASK'})
 
-        smach.StateMachine.add('GET_TASK', refbox.get_basic_transportation_task(),
+        smach.StateMachine.add('GET_TASK', refbox.get_task(),
             transitions={'task_received':'SETUP_BTT',
+                         'wrong_task':'GET_TASK',
                          'wrong_task_format':'GET_TASK'})
 
         if (useMockup):
