@@ -99,7 +99,7 @@ class OrientToLaserReadingAction
 		error_lin_d = error_lin - last_error_lin;
 		last_error_lin = error_lin;
 
-		cmd.linear.x = error_lin * ang_p + error_angle_int * lin_i + error_lin_d * lin_d;
+		cmd.linear.x = error_lin * lin_p + error_lin_int * lin_i + error_lin_d * lin_d;
 
 
 		/*
