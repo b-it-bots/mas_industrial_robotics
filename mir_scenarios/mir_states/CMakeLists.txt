@@ -17,7 +17,3 @@ catkin_package(
     std_srvs
     tf
 )
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
