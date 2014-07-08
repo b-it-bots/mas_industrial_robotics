@@ -63,25 +63,23 @@ class get_task(smach.State):
 
         rospy.loginfo("Task specification: %s" % task_spec)
     
-        test_name = task_spec[0:3]
-        if(test_name != userdata.test):
-            rospy.logerr("Expected <<" + userdata.test + ">> task, but received <<" + test_name + ">> specification")
-            return 'wrong_task'
+        # remove outer task name and '<', '>'. If task name is not correct throws an Exception.
+        task_spec = re.findall(r'%s<(.*)>' % userdata.test, task_spec)
 
-        # remove leading start description        
-        task_spec = task_spec[3:len(task_spec)]
+        if len(task_spec) != 1:
+           raise Exception('Malformed task specification')
 
         try:
-            if(test_name == "BNT"):
-                userdata.task_list = get_basic_navigation_task(task_spec)
-            if(test_name == "BMT"):
-                userdata.task_list = get_basic_manipulation_task(task_spec)
-            elif(test_name == "BTT"):
-                userdata.task_list = get_basic_transportation_task(task_spec)
-            elif(test_name == "PTT"):
-                userdata.task_list = get_precision_placement_task(task_spec)
-            elif(test_name == "CBT"):
-                userdata.task_list = get_competitive_transportation_task(task_spec)
+            if(userdata.test == "BNT"):
+                userdata.task_list = get_basic_navigation_task(task_spec[0])
+            if(userdata.test == "BMT"):
+                userdata.task_list = get_basic_manipulation_task(task_spec[0])
+            elif(userdata.test == "BTT"):
+                userdata.task_list = get_basic_transportation_task(task_spec[0])
+            elif(userdata.test == "PTT"):
+                userdata.task_list = get_precision_placement_task(task_spec[0])
+            elif(userdata.test == "CBT"):
+                userdata.task_list = get_competitive_transportation_task(task_spec[0])
         except Exception as e:
             rospy.logerr("Exception: %s", e)
             return 'wrong_task_format'
@@ -89,35 +87,20 @@ class get_task(smach.State):
         return 'task_received' 
 
 
-def get_basic_navigation_task(navigation_task):
-
-    # remove outer task name and '<', '>'. If task name is not correct throws an Exception.
-    navigation_task = re.findall(r'<(.*)>', navigation_task)
-
-    if len(navigation_task) != 1:
-        raise Exception('Malformed task specification')
+def get_basic_navigation_task(navigation_task):  
 
     task_list = re.findall(r'\('
                             '(?P<place>.+?),'
                             '(?P<orientation>[NESW]),'
                             '(?P<break>[123])'
-                            '\)', navigation_task[0])
+                            '\)', navigation_task)
     
     return task_list
 
 
 def get_basic_manipulation_task(man_task):
     task_list = []
-
-    # check if description has beginning '<' and ending '>
-    if(man_task[0] != "<" or man_task[(len(man_task)-1)] != ">"):
-        raise Exception('Task specification ' + man_task + ' not in correct format')       
-    
-    # remove beginning '<' and ending '>'
-    man_task = man_task[1:len(man_task)-1]
-    
-    #print man_task
-    
+   
     task_list = man_task.split(',')
     
     #print task_list
@@ -176,13 +159,6 @@ def get_basic_manipulation_task(man_task):
 
 def get_basic_transportation_task(transportation_task):
     task_list = []
-
-    # check if description has beginning '<' and ending '>
-    if(transportation_task[0] != "<" or transportation_task[(len(transportation_task)-1)] != ">"):
-        raise Exception("task spec not in correct format")
-    
-    # remove beginning '<' and ending '>'
-    transportation_task = transportation_task[1:len(transportation_task)-1]
 
     # Task split
     task_situation = transportation_task.split(';')
@@ -280,29 +256,13 @@ def get_precision_placement_task(precision_task):
     #print destination
     #destination = destination.group()
 
-    result = "BTT<initialsituation(" + source
+    result = "initialsituation(" + source
     result = result + objects + ">);"
     result = result + "goalsituation(<" + destination + ","
-    result = result + "line" + objects + ">)>"
+    result = result + "line" + objects + ">)"
 
     transportation_task = result
     
-    # check if Task is a BTT task      
-    if(transportation_task[0:3] != "BTT"):
-       raise Exception("Excepted <<BTT>> task, but received <<" + transportation_task[0:3] + ">> received")
-
-
-    # remove leading start description        
-    transportation_task = transportation_task[3:len(transportation_task)]
-    
-    
-    # check if description has beginning '<' and ending '>
-    if(transportation_task[0] != "<" or transportation_task[(len(transportation_task)-1)] != ">"):
-        raise Exception("task spec not in correct format")
-    
-    # remove beginning '<' and ending '>'
-    transportation_task = transportation_task[1:len(transportation_task)-1]
-
     # Task split
     task_situation = transportation_task.split(';')
     rospy.loginfo("split1: %s",task_situation)  
@@ -393,13 +353,6 @@ def get_precision_placement_task(precision_task):
 
 def get_basic_competitive_task(competitive_task):
     task_list = []
-   
-    # check if description has beginning '<' and ending '>
-    if(competitive_task[0] != "<" or competitive_task[(len(competitive_task)-1)] != ">"):
-        raise Exception("task spec not in correct format")
-    
-    # remove beginning '<' and ending '>'
-    competitive_task = competitive_task[1:len(competitive_task)-1]
 
     # Task split
     task_situation = competitive_task.split(';')
