@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_precision_placement_test</name>
+  <version>0.0.1</version>
+  <description>state machine for the RoboCup@Work precision placement test (PPT)</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>mir_basic_transportation_test</run_depend>
+
+</package>
