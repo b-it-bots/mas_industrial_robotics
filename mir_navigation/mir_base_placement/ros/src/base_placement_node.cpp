@@ -24,9 +24,7 @@ class OrientToLaserReadingAction
 	std::string cmd_vel_topic;
 
 	float target_distance;
-	float max_velocity;
-	float min_velocity;
-	float min_angular_velocity;
+	float max_linear_velocity;
 	float max_angular_velocity;
 
 	double error_angle_int;
@@ -37,6 +35,8 @@ class OrientToLaserReadingAction
 
 	double last_error_lin;
 	double last_error_angular;
+
+	double error_tolerance;
 
 	ros::Publisher cmd_pub;
 	ros::ServiceClient client;
@@ -56,17 +56,14 @@ class OrientToLaserReadingAction
 
 		target_distance = 0.05;
 
-		max_velocity = 0.075;
-		min_velocity = 0.01;
-
-		min_angular_velocity = 0.025;
-		max_angular_velocity = 0.1;
+		ros::param::param<float>("~max_linear_velocity", max_linear_velocity, 0.075);
+		ros::param::param<float>("~max_angular_velocity", max_angular_velocity, 0.1);
 
 		ROS_DEBUG("Register publisher");
 
 		cmd_pub = nh_.advertise < geometry_msgs::Twist > (cmd_vel_topic, 1000);
 
-		ROS_DEBUG("Create service clinet");
+		ROS_DEBUG("Create service client");
 
 		client = nh_.serviceClient < BaseScanLinearRegression > (service_name);
 
@@ -79,13 +76,19 @@ class OrientToLaserReadingAction
 	{
 		geometry_msgs::Twist cmd;
 
-		double lin_p = 0.5;
-		double lin_i = 0.0;
-		double lin_d = 0.0;
+		double lin_p;
+		ros::param::param<double>("~lin_p", lin_p, 0.8);
+		double lin_i;
+		ros::param::param<double>("~lin_i", lin_i, 0.0);
+		double lin_d;
+		ros::param::param<double>("~lin_d", lin_d, 0.0);
 
-		double ang_p = 0.8;
-		double ang_i = 0.0;
-		double ang_d = 0.0;
+		double ang_p;
+		ros::param::param<double>("~ang_p", ang_p, 0.5);
+		double ang_i;
+		ros::param::param<double>("~ang_i", ang_i, 0.0);
+		double ang_d;
+		ros::param::param<double>("~ang_d", ang_d, 0.0);
 
 		double error_angle = -b;
 		double error_lin = (a - target_distance);
@@ -104,7 +107,7 @@ class OrientToLaserReadingAction
 		error_lin_d = error_lin - last_error_lin;
 		last_error_lin = error_lin;
 
-		cmd.linear.x = error_lin * ang_p + error_angle_int * lin_i + error_lin_d * lin_d;
+		cmd.linear.x = error_lin * lin_p + error_lin_int * lin_i + error_lin_d * lin_d;
 
 
 		/*
@@ -122,15 +125,15 @@ class OrientToLaserReadingAction
 		std::cout << "a_d: " << error_angle_d * ang_d << std::endl;
 		*/
 
-		if (cmd.linear.x > max_velocity)
-			cmd.linear.x = max_velocity;
-		else if (cmd.linear.x < -max_velocity)
-			cmd.linear.x = -max_velocity;
+		if (cmd.linear.x > max_linear_velocity)
+			cmd.linear.x = max_linear_velocity;
+		else if (cmd.linear.x < -max_linear_velocity)
+			cmd.linear.x = -max_linear_velocity;
 
-		if (cmd.linear.y > max_velocity)
-			cmd.linear.y = max_velocity;
-		else if (cmd.linear.y < -max_velocity)
-			cmd.linear.y = -max_velocity;
+		if (cmd.linear.y > max_linear_velocity)
+			cmd.linear.y = max_linear_velocity;
+		else if (cmd.linear.y < -max_linear_velocity)
+			cmd.linear.y = -max_linear_velocity;
 
 		if (cmd.angular.z > max_angular_velocity)
 			cmd.angular.z = max_angular_velocity;
@@ -164,6 +167,7 @@ class OrientToLaserReadingAction
 		error_lin_d = 0.0;
 		last_error_angular = 0.0;
 		last_error_lin = 0.0;
+		ros::param::param<double>("~error_tolerance", error_tolerance, 0.02);
 
 		while (true)
 		{
@@ -183,7 +187,7 @@ class OrientToLaserReadingAction
 
 				// std::cout << "current error: " << error << std::endl;
 
-				if (error < 0.01)
+				if (error < error_tolerance)
 				{
 
 					ROS_DEBUG("Point reached");
