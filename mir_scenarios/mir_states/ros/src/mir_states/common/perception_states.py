@@ -2,13 +2,12 @@
 
 import rospy
 import smach
-import smach_ros
-import std_srvs.srv
+import std_msgs.msg
 import tf
-import geometry_msgs.msg
 
-from mcr_perception_msgs.srv import GetObjectList
-from mir_controller_msgs.srv import StartVisualServoing
+import mcr_perception_msgs.msg
+import mcr_perception_msgs.srv
+import mir_controller_msgs.srv
 
 class find_drawer(smach.State):
 
@@ -51,7 +50,7 @@ class find_objects(smach.State):
                                        'srv_call_failed'],
                              input_keys=['found_objects'],
                              output_keys=['found_objects'])
-        self.detect_objects = rospy.ServiceProxy(self.DETECT_SERVER, GetObjectList)
+        self.detect_objects = rospy.ServiceProxy(self.DETECT_SERVER, mcr_perception_msgs.srv.GetObjectList)
         self.tf_listener = tf.TransformListener()
         self.retries = retries
         self.frame_id = frame_id
@@ -160,7 +159,7 @@ class do_visual_servoing(smach.State):
                               outcomes=[ 'succeeded', 'failed', 'timeout', 'lost_object' ],
                               input_keys=['simulation', 'vscount'],
                               output_keys=['vscount'])
-        self.do_vs = rospy.ServiceProxy( self.SERVER, StartVisualServoing )
+        self.do_vs = rospy.ServiceProxy( self.SERVER, mir_controller_msgs.srv.StartVisualServoing )
 
     def execute( self, userdata ):
         #if( userdata.simulation = True ):
