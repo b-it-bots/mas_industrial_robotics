@@ -350,7 +350,7 @@ def get_precision_placement_task(precision_task):
     return task_list
 
 
-def get_basic_competitive_task(competitive_task):
+def get_competitive_transportation_task(competitive_task):
     task_list = []
 
     # Task split
