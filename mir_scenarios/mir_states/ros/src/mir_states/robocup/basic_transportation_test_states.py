@@ -181,7 +181,7 @@ class select_delivery_workstation(smach.State):
         return 'no_more_dest_tasks'
                         
 
-class setup_btt(smach.State):
+class setup_task(smach.State):
     def __init__(self, type=""):
         smach.State.__init__(self, 
             outcomes=['success'],
