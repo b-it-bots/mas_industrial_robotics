@@ -79,7 +79,7 @@ class get_task(smach.State):
                 userdata.task_list = get_basic_transportation_task(task_spec[0])
             elif(userdata.test == "PTT"):
                 userdata.task_list = get_precision_placement_task(task_spec[0])
-            elif(userdata.test == "CBT"):
+            elif(userdata.test == "CTT"):
                 userdata.task_list = get_competitive_transportation_task(task_spec[0])
         except Exception as e:
             rospy.logerr("Exception: %s", e)
