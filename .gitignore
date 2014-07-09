@@ -3,6 +3,7 @@
 .project
 .pydevproject
 *.pyc
+.idea/
 *.vpp.*
 *.vpp~*
 
