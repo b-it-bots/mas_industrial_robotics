@@ -100,35 +100,32 @@ def get_basic_navigation_task(navigation_task):
 
 
 def get_basic_manipulation_task(man_task):
-    task_list = []
    
-    task_list = man_task.split(',')
+    task_spec = man_task.split(',')
     
-    #print task_list
-
-    init_pose = task_list[0]
-    src_pose = task_list[1]
-    dest_pose = task_list[2]
+    init_pose = task_spec[0]
+    src_pose = task_spec[1]
+    dest_pose = task_spec[2]
     
-    subtask_list = task_list[3].split('(')
-    obj_cfg = subtask_list[0]
+    subtask_spec = task_spec[3].split('(')
+    obj_cfg = subtask_spec[0]
     
     obj_names = []
-    obj_names.append(subtask_list[1])
+    obj_names.append(subtask_spec[1])
 
-    print task_list
+    print task_spec
     
-    for i in range(4, (len(task_list)-1)):
-        if i == (len(task_list)-2):
-            print task_list[i]
-            task_list[i] = task_list[i][0:(len(task_list[i])-1)]
-            print task_list[i]
+    for i in range(4, (len(task_spec)-1)):
+        if i == (len(task_spec)-2):
+            print task_spec[i]
+            task_spec[i] = task_spec[i][0:(len(task_spec[i])-1)]
+            print task_spec[i]
             
              
-        obj_names.append(task_list[i])
+        obj_names.append(task_spec[i])
            
     
-    fnl_pose = task_list[len(task_list)-1]
+    fnl_pose = task_spec[len(task_spec)-1]
     
     for obj in range(len(obj_names)):
         if obj_names[obj] == "V20":
@@ -138,6 +135,7 @@ def get_basic_manipulation_task(man_task):
     print obj_names
     
     # which object to get from the source location
+    task_list = []
     source_tasklist = Bunch(type = 'source', location = src_pose, object_names = list(obj_names)) 
     task_list.append(source_tasklist)        
 
