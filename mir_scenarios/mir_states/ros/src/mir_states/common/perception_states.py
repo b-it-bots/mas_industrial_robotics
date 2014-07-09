@@ -152,3 +152,53 @@ class do_visual_servoing(smach.State):
             return 'timeout' 
         elif( response.return_value.error_code == -3 ):
             return 'lost_object' 
+
+
+class find_holes(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['found_holes','found_no_holes','timeout'],
+            input_keys=['all_found_holes'],
+            output_keys=['all_found_holes'])
+
+        self.pub_find_holes_event = rospy.Publisher('/mcr_perception/hole_detection/event_in', std_msgs.msg.String, latch=True)
+        self.sub_find_holes_event = rospy.Subscriber('/mcr_perception/hole_detection/event_out', std_msgs.msg.String, self.hole_detection_event_cb)
+        self.sub_found_holes = rospy.Subscriber('/mcr_perception/hole_detection/detected_holes', mcr_perception_msgs.msg.ObjectList, self.found_hole_detection_cb)
+
+        self.hole_detection_event = None
+        self.all_found_holes = None
+
+    def hole_detection_event_cb(self, event):
+        self.hole_detection_event = event.data
+
+    def found_hole_detection_cb(self, msg):
+        self.all_found_holes = msg.objects
+
+    def execute(self, userdata):
+
+        self.hole_detection_event = None
+        self.all_found_holes = None
+
+        # publish event to start the movement
+        self.pub_find_holes_event.publish(std_msgs.msg.String('e_trigger'))
+
+        timeout = rospy.Duration.from_sec(5.0)  #wait for the done event max. 5 seconds
+        start_time = rospy.Time.now()
+        while not rospy.is_shutdown():
+
+            if self.hole_detection_event and self.hole_detection_event == 'e_done':
+                rospy.loginfo('got done event and detections from hole detection')
+                userdata.all_found_holes = self.all_found_holes
+
+                if (len(self.all_found_holes) > 0):
+                    return 'found_holes'
+                else:
+                    return 'found_no_holes'
+
+            if (rospy.Time.now() - start_time) > timeout:
+                rospy.logerr('timeout of %f seconds exceeded for relative base movement' % float(timeout.to_sec()))
+                return 'timeout'
+
+            rospy.sleep(0.1)
+
+        return 'found_no_holes'
