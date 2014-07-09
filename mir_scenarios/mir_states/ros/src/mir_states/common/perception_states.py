@@ -91,6 +91,7 @@ class find_holes(smach.State):
 
     SERVER = '/find_holes'
 
+    # todo: check this service!!
     def __init__(self, retries=3, frame_id=None):
         smach.State.__init__(self,
                              outcomes=['holes_found',
@@ -141,7 +142,7 @@ class find_holes(smach.State):
                   (0.13507245481, 0.125635072589, 1.12861084938),
                   (0.208152621984, 0.263396263123, 0.849790096283),
                   (0.0932492688298, 0.279482185841, 0.823174893856)]:
-            h = Hole()
+            h = Hole()      # todo: check this service!!
             pp = h.position.position
             pp.x, pp.y, pp.z = p
             h.header.stamp = rospy.Time.now()
