@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+ 
+  <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+  <arg name="sim" default="false"/>
+
+  <!-- load same components as in the BTT test -->
+  <include file="$(find mir_basic_transportation_test)/ros/launch/btt.launch">
+    <arg name="robot" value="$(arg robot)"/>
+    <arg name="sim" value="$(arg sim)"/>
+  </include>
+
+  <!-- hole detection -->
+  <!--include file="$(find mcr_hole_detection)/ros/launch/hole_detection.launch" /-->
+ 
+</launch>
