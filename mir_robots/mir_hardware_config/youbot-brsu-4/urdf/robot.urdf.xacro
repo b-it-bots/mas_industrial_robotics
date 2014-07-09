@@ -50,6 +50,7 @@
   <xacro:include filename="$(find mcr_description)/urdf/mounts/microsoft_lifecam_1080_mount.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/festo_gripper.urdf.xacro" />
 
   <!-- Rear Platform -->
   <xacro:rear_platform name="rear_platform" parent="base_link">

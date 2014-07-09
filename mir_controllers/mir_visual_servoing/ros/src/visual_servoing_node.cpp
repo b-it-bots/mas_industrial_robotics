@@ -54,7 +54,7 @@ public:
 	 */
 	VisualServoing( ): m_image_transporter( m_node_handler )
 	{
-		ros::NodeHandle temp( "~" );
+		ros::NodeHandle nh( "~" );
 
 		SetupYoubotArm();
 
@@ -63,7 +63,7 @@ public:
 		m_dynamic_reconfigre_subscriber.setCallback(boost::bind( &VisualServoing::dynamic_reconfig_callback, this, _1, _2 ) );
 
 		// Service commands to allow this node to be started and stopped externally
-		service_do_visual_serv = m_node_handler.advertiseService( "do_visual_servoing", &VisualServoing::do_visual_servoing, this );
+		service_do_visual_serv = nh.advertiseService("do_visual_servoing", &VisualServoing::do_visual_servoing, this );
 		ROS_INFO( "Advertised 'start_visual_servoing' service for visual_servoing" );
 		ROS_INFO( "Visual servoing node initialized." );
 	}

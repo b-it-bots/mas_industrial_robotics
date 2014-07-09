@@ -39,42 +39,7 @@ class find_drawer(smach.State):
         
         return 'found_drawer'
 
-#FIXME: is this still used? not in BTT
-class detect_object(smach.State):
 
-    def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=['succeeded', 'failed'],
-            output_keys=['object_list'])
-        
-        self.object_finder_srv = rospy.ServiceProxy('/hbrs_object_finder/get_segmented_objects', hbrs_srvs.srv.GetObjects)
-
-    def execute(self, userdata):     
-        #get object pose list
-        rospy.wait_for_service('/hbrs_object_finder/get_segmented_objects', 30)
-
-        for i in range(10): 
-            print "find object try: ", i
-            resp = self.object_finder_srv()
-              
-            if (len(resp.objects) <= 0):
-                rospy.loginfo('found no objects')
-                rospy.sleep(0.1);
-            else:    
-                rospy.loginfo('found {0} objects'.format(len(resp.objects)))
-                break
-            
-        if (len(resp.objects) <= 0):
-            rospy.logerr("no graspable objects found");
-            userdata.object_list = []            
-            return 'failed'
-        
-        else:
-            userdata.object_list = resp.objects
-            return 'succeeded'
-
-#FIXME: What is the difference between detect_objects and find_objects
 class find_objects(smach.State):
 
     DETECT_SERVER = '/mcr_perception/object_detector/detect_objects'
@@ -188,7 +153,7 @@ class find_holes(smach.State):
 
 class do_visual_servoing(smach.State):
 
-    SERVER = '/mir_controllers/do_visual_servoing'
+    SERVER = '/mir_controllers/visual_servoing/do_visual_servoing'
 
     def __init__( self ):
         smach.State.__init__( self,
