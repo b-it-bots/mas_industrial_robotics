@@ -51,6 +51,7 @@ class get_task(smach.State):
         smach.State.__init__(self,
             outcomes=['task_received', 'wrong_task', 'wrong_task_format'], 
             input_keys=['test', 'simulation'],
+            output_keys=['ppt_platform_location'],
             io_keys=['task_list'])
 
     def execute(self, userdata):
@@ -77,8 +78,10 @@ class get_task(smach.State):
                 userdata.task_list = get_basic_manipulation_task(task_spec[0])
             elif(userdata.test == "BTT"):
                 userdata.task_list = get_basic_transportation_task(task_spec[0])
-            elif(userdata.test == "PTT"):
-                userdata.task_list = get_precision_placement_task(task_spec[0])
+            elif(userdata.test == "PPT"):
+                ppt_description = get_precision_placement_task(task_spec[0])
+                userdata.task_list = ppt_description[0]
+                userdata.ppt_platform_location = ppt_description[1]
             elif(userdata.test == "CTT"):
                 userdata.task_list = get_competitive_transportation_task(task_spec[0])
         except Exception as e:
