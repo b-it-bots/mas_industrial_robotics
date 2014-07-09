@@ -255,6 +255,7 @@ def get_precision_placement_task(precision_task):
     #print destination
     #destination = destination.group()
 
+    # create BTT task spec
     result = "initialsituation(" + source
     result = result + objects + ">);"
     result = result + "goalsituation(<" + destination + ","
