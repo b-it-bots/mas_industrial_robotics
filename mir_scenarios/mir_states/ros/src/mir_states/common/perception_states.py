@@ -30,7 +30,7 @@ class find_objects(smach.State):
         self.frame_id = frame_id
     
     def object_list_cb(self, event):
-        self.object_list = event.data
+        self.object_list = event
     
     def event_out_cb(self, event):
         self.event_msg = event.data
@@ -42,7 +42,7 @@ class find_objects(smach.State):
             self.event_msg = ""
 
             rospy.loginfo('Looking for objects (attempt %i/%i)' % (i + 1, self.retries))
-            event_in_pub.publish("e_trigger")
+            self.event_in_pub.publish("e_trigger")
 
             timeout = rospy.Duration.from_sec(10.0) # wait max of 10.0 seconds
             start_time = rospy.Time.now()

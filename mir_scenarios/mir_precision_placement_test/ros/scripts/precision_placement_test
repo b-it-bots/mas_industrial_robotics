@@ -66,12 +66,13 @@ def main(simulation=False):
     SM.userdata.destinaton_free_poses = []
     SM.userdata.source_visits = []
     SM.userdata.objects_to_be_grasped = 0
-
+    SM.userdata.last_grasped_obj = None
     SM.userdata.vscount = 0
 
     SM.userdata.ppt_platform_location = ''
     SM.userdata.all_found_holes = None
     SM.userdata.selected_hole = None
+    SM.userdata.selected_hole_pose = None
 
     use_mockup = False
 
