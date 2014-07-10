@@ -35,8 +35,8 @@ class select_hole(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['hole_selected','no_match','no_more_obj_for_this_workspace'],
-            input_keys=['rear_platform_occupied_poses', 'task_list', 'base_pose_to_approach', 'all_found_holes'],
-            io_keys=['selected_hole', 'selected_hole_pose'])
+            input_keys=['selected_hole_pose','selected_hole','rear_platform_occupied_poses', 'task_list', 'base_pose_to_approach', 'all_found_holes'],
+            output_keys=['selected_hole_pose','selected_hole'])
 
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
@@ -82,8 +82,8 @@ class grasp_obj_for_hole_from_pltf(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['object_grasped', 'no_more_obj_for_this_workspace'],
-            input_keys=['selected_hole'],
-            io_keys=['rear_platform_occupied_poses','rear_platform_free_poses','last_grasped_obj'])
+            input_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses','selected_hole'],
+            output_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses'])
 
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
@@ -127,8 +127,8 @@ class select_arm_position(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['arm_pose_selected'],
-            input_keys=['selected_hole'],
-            io_keys=['move_arm_to'])
+            input_keys=['move_arm_to','selected_hole'],
+            output_keys=['move_arm_to'])
 
     def execute(self, userdata):
         '''
