@@ -19,6 +19,7 @@
   <run_depend>mir_base_placement</run_depend>
   <run_depend>mir_bringup</run_depend>
   <run_depend>mir_bringup_sim</run_depend>
+  <run_depend>mir_moveit_scene</run_depend>
   <run_depend>mir_states</run_depend>
   <run_depend>mcr_object_recognition_bounding_box</run_depend>
   <run_depend>mir_visual_servoing</run_depend>
