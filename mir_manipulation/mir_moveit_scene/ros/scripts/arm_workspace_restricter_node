@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import mir_moveit_scene_ros.restrict_arm_workspace
+
+if __name__ == '__main__':
+    mir_moveit_scene_ros.restrict_arm_workspace.main()
