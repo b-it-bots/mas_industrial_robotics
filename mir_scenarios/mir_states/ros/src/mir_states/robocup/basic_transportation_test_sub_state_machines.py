@@ -77,8 +77,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
 
             smach.StateMachine.add('RECOGNIZE_OBJECTS', gps.find_objects(retries=3, frame_id='/odom'),
                 transitions={'objects_found':'SELECT_OBJECT_TO_BE_GRASPED',
-                            'no_objects_found':'SHIFT_BASE_RANDOM',
-                            'srv_call_failed':'RECOGNIZE_OBJECTS'},
+                            'no_objects_found':'SHIFT_BASE_RANDOM'},
                 remapping={'found_objects':'recognized_objects'})
 
             smach.StateMachine.add('SHIFT_BASE_RANDOM', gns.move_base_relative([0.0, 0.0, -0.03, 0.03, 0.0, 0.0]),
