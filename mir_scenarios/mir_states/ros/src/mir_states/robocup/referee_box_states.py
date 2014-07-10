@@ -240,11 +240,11 @@ def get_basic_transportation_task(transportation_task):
     return task_list
  
 
-def get_precision_placement_task(precision_task):
+def get_precision_placement_task(ptt_string):
 
     task_list = []
 
-    ptt_string = precision_task
+    print ptt_string
 
     objects = re.findall("\(.*?\)", ptt_string)
     objects = objects[0] 
