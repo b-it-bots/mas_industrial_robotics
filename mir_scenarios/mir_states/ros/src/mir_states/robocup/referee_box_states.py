@@ -247,7 +247,7 @@ def get_precision_placement_task(ptt_string):
     print ptt_string
 
     objects = re.findall("\(.*?\)", ptt_string)
-    objects = objects[0] 
+    objects = objects[0]
 
     source = re.findall("<.*?,",ptt_string)[0]
 
