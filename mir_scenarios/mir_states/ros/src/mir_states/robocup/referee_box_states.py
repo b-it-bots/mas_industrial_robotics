@@ -45,7 +45,7 @@ class get_task(smach.State):
                        'BMT': 'BMT<S3,S3,S2,line(M20_100,F20_20_G,F20_20_B),S2>',
                        'BTT': 'BTT<initialsituation(<S5,(R20,M30,S40_40_B)><S2,(S40_40_G,M20,R20)><S3,(F20_20_B,M20_100,F20_20_G)>);goalsituation(<C1,line(M20_100,M30,M20)><S4,line(F20_20_G,R20,R20)><S1,line(S40_40_B,S40_40_G,F20_20_B)>)>',
                        #'BTT': 'BTT<initialsituation(<S4,(S40_40_G)>);goalsituation(<S5,line(S40_40_G)>)>',
-                       'PPT': 'PPT<S1,(M20, S_40_40_G),S2>'}
+                       'PPT': 'PPT<S1,(M20,S_40_40_G),S2>'}
 
     def __init__(self):
         smach.State.__init__(self,
