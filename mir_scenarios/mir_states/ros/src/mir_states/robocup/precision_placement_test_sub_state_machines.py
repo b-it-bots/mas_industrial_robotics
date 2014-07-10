@@ -19,8 +19,27 @@ class sub_sm_place_in_holes(smach.StateMachine):
     def __init__(self):
         smach.StateMachine.__init__(
             self, outcomes=['succeeded', 'failed', 'no_object_for_ppt_platform'],
-            input_keys=[],
-            output_keys=[])
+            input_keys=['all_found_holes',
+                        'base_pose_to_approach',
+                        'last_grasped_obj',
+                        'move_arm_to',
+                        'move_base_by',
+                        'object_pose',
+                        'rear_platform_free_poses',
+                        'rear_platform_occupied_poses',
+                        'selected_hole',
+                        'selected_hole_pose',
+                        'task_list'],
+            output_keys=['all_found_holes',
+                         'base_pose_to_approach',
+                         'last_grasped_obj',
+                         'move_arm_to'
+                         'move_base_by',
+                         'rear_platform_free_poses',
+                         'rear_platform_occupied_poses',
+                         'selected_hole',
+                         'selected_hole_pose',
+                         'task_list'])
 
         with self:
             smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms.move_arm('out_of_view'),
