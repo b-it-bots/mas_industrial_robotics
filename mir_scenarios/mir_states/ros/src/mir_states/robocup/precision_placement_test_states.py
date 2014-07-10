@@ -15,6 +15,10 @@ import math
 
 import mir_states.common.manipulation_states as manipulation
 
+def print_all_found_holes(holes):
+    rospy.loginfo("all_found_holes: ")
+    for hole in holes:
+        rospy.loginfo("      %s", hole.name)
 
 class check_platform_type(smach.State):
     def __init__(self):
@@ -41,7 +45,8 @@ class select_hole(smach.State):
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         btts.print_task_spec(userdata.task_list)
-        btts.print_all_found_holes(userdata.all_found_holes)
+
+        print_all_found_holes(userdata.all_found_holes)
 
         #get objects to be placed at current workstation
         objs_for_this_ws = []
