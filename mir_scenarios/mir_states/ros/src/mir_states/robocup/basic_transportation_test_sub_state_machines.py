@@ -34,7 +34,6 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                       'rear_platform_free_poses',
                                                       'rear_platform_occupied_poses',
                                                       'recognized_objects',
-                                                      'simulation',
                                                       'source_visits',
                                                       'task_list',
                                                       'vscount'],

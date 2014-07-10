@@ -30,7 +30,7 @@ class get_task(smach.State):
     test: str
         Type of test ('BNT', 'BTT', etc). The task specification will be parsed
         according to this type.
-    simulation: bool
+    no_refbox: bool
         If this is set to True, then no communication with Referee box will
         happen and rather a hard-coded task specification will be used.
 
@@ -50,13 +50,13 @@ class get_task(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['task_received', 'wrong_task', 'wrong_task_format'], 
-            input_keys=['test', 'simulation'],
+            input_keys=['test', 'no_refbox'],
             output_keys=['ppt_platform_location'],
             io_keys=['task_list'])
 
     def execute(self, userdata):
 
-        if not userdata.simulation:
+        if not userdata.no_refbox:
             rospy.loginfo('Waiting for task specification (%s:%s)...' % (ip, port))
             task_spec = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
         else:

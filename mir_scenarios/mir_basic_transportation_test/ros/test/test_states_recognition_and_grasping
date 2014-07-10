@@ -34,7 +34,7 @@ def main():
     # world knowledge
     SM.userdata.task_list = []
     
-    SM.userdata.simulation = True
+    SM.userdata.no_refbox = True
     SM.userdata.test = "BTT"
     
     SM.userdata.base_pose_to_approach = 0

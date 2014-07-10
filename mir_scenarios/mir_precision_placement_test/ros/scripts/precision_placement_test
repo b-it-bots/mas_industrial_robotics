@@ -29,7 +29,7 @@ import mir_states.common.perception_mockup_util as perception_mockup_util
 from mcr_perception_msgs.msg import ObjectList, Object
 
 # main
-def main(simulation=False):
+def main(no_refbox=False):
 
     rospy.init_node('precision_placement_test')
 
@@ -38,7 +38,7 @@ def main(simulation=False):
     # world knowledge
     SM.userdata.task_list = []
 
-    SM.userdata.simulation = simulation
+    SM.userdata.no_refbox = no_refbox
     SM.userdata.test = "PPT"
 
     SM.userdata.base_pose_to_approach = 0
@@ -147,4 +147,4 @@ def main(simulation=False):
     smach_viewer.stop()
 
 if __name__ == '__main__':
-    main(sys.argv[-1] == '--simulation')
+    main(sys.argv[-1] == '--no-refbox')

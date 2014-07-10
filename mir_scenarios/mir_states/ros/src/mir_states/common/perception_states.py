@@ -87,7 +87,7 @@ class do_visual_servoing(smach.State):
     def __init__( self ):
         smach.State.__init__( self,
                               outcomes=[ 'succeeded', 'failed', 'timeout', 'lost_object' ],
-                              input_keys=['simulation', 'vscount'],
+                              input_keys=['vscount'],
                               output_keys=['vscount'])
         self.do_vs = rospy.ServiceProxy( self.SERVER, mir_controller_msgs.srv.StartVisualServoing )
 
