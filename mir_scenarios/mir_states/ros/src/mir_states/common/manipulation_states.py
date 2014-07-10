@@ -360,3 +360,35 @@ class compute_pregrasp_pose(smach.State):
         userdata.move_arm_to = [p.x - 0.10, p.y, p.z + 0.20, 0, (0.8 * math.pi), 0, frame_id]
 
         return 'succeeded'
+
+
+class configure_planning_scene(smach.State):
+
+    """
+    trigger component to add walls, objects, etc. to the the planning scene of moveit
+    """
+
+    def __init__(self, element, action):
+        smach.State.__init__(self, outcomes=['succeeded'])
+
+        self.walls_event_out = rospy.Publisher('/mir_manipulation/arm_workspace_restricter/event_in', std_msgs.msg.String)
+
+        self.action = action
+        self.element = element
+
+    def execute(self, userdata):
+
+        # check which action to perform
+        if(self.action == 'add'):
+            event_command = 'e_start'
+        elif(self.action == 'remove'):
+            event_command = 'e_stop'
+
+        #check which element to add/remove
+        if(self.element == 'walls'):
+            self.walls_event_out.publish(event_command)
+
+        return 'succeeded'
+
+
+
