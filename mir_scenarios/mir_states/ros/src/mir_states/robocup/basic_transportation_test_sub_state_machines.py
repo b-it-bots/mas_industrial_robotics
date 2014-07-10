@@ -175,6 +175,7 @@ class sub_sm_go_to_destination(smach.StateMachine):
                                                     'overall_done'],
                                           input_keys=['base_pose_to_approach',
                                                       'objects_goal_configuration',
+                                                      'objects_to_be_grasped',
                                                       'rear_platform_occupied_poses',
                                                       'task_list'],
                                           output_keys=['base_pose_to_approach',
