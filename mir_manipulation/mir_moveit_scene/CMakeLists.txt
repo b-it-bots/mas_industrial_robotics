@@ -11,6 +11,7 @@ catkin_python_setup()
 catkin_package(
   CATKIN_DEPENDS
     geometry_msgs
+    mcr_perception_msgs
     moveit_msgs
     rospy
     shape_msgs
