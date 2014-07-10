@@ -70,8 +70,6 @@ class do_visual_servoing(smach.State):
         self.do_vs = rospy.ServiceProxy( self.SERVER, mir_controller_msgs.srv.StartVisualServoing )
 
     def execute( self, userdata ):
-        #if( userdata.simulation = True ):
-        #   return 'succeeded'
         try:
             rospy.loginfo( "Calling service <<%s>>" % self.SERVER )
             response = self.do_vs()
