@@ -248,15 +248,11 @@ def get_precision_placement_task(ptt_string):
 
     objects = re.findall("\(.*?\)", ptt_string)
     objects = objects[0] 
-    #print objects
 
     source = re.findall("<.*?,",ptt_string)[0]
-    #print source
 
     destination = re.findall(".?.?>",ptt_string)[0]
     destination = re.match(".\w",destination).group()
-    #print destination
-    #destination = destination.group()
 
     # create BTT task spec
     result = "initialsituation(" + source
