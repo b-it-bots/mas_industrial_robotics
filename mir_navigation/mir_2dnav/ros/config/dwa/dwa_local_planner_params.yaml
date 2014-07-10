@@ -48,8 +48,3 @@ rot_stopped_vel: 0.01           #default : not found
 trans_stopped_vel: 0.01         #default : not found
 
 penalize_negative_x: false      #default : true
-
-NavfnROS:
-  allow_unknown: false
-  default_tolerance: 0.2
-
