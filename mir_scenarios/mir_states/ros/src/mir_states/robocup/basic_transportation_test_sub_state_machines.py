@@ -103,7 +103,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
 
             smach.StateMachine.add('MOVE_BASE_RELATIVE', gns.move_base_relative(),
                 transitions={'succeeded': 'COMPUTE_PREGRASP_POSE',
-                              'timeout': 'MOVE_BASE_RELATIVE'})
+                            'timeout': 'MOVE_BASE_RELATIVE'})
 
             smach.StateMachine.add('COMPUTE_PREGRASP_POSE', gms.compute_pregrasp_pose(),
                 transitions={'succeeded':'AVOID_WALLS_PRE_2',
@@ -113,11 +113,11 @@ class sub_sm_go_and_pick(smach.StateMachine):
 
             smach.StateMachine.add('AVOID_WALLS_PRE_2', gms.move_arm('candle'),
                 transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
-                            'failed': 'AVOID_WALLS_PRE_2'})
+                             'failed': 'AVOID_WALLS_PRE_2'})
 
             smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
                 transitions={'succeeded': 'DO_VISUAL_SERVERING',
-                            'failed': 'MOVE_ARM_TO_PREGRASP'})
+                             'failed': 'MOVE_ARM_TO_PREGRASP'})
 
             # state skipped
             smach.StateMachine.add('DO_VISUAL_SERVERING', gps.do_visual_servoing(),
@@ -138,7 +138,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
             if (self.use_mockup):
                     smach.StateMachine.add('GRASP_OBJ', gms.grasp_object(),
                         transitions={'succeeded':'REMOVE_OBJECT_FROM_MOCKUP',
-                                    'failed':'SKIP_SOURCE_POSE'})
+                                     'failed':'SKIP_SOURCE_POSE'})
 
                     smach.StateMachine.add("REMOVE_OBJECT_FROM_MOCKUP",
                                            perception_mockup_util.remove_object_to_grasp_state(),
@@ -150,7 +150,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
  
             smach.StateMachine.add('PLACE_OBJ_ON_REAR_PLATFORM', btts.place_obj_on_rear_platform_btt(),
                 transitions={'succeeded':'SELECT_OBJECT_TO_BE_GRASPED',
-                            'no_more_free_poses':'no_more_free_poses'})
+                             'no_more_free_poses':'no_more_free_poses'})
 
             # MISC STATES
             smach.StateMachine.add('SKIP_SOURCE_POSE', btts.skip_pose('source'),
@@ -223,15 +223,15 @@ class sub_sm_place(smach.StateMachine):
 
             smach.StateMachine.add('MOVE_TO_INTERMEDIATE_POSE', gms.move_arm('platform_intermediate'),
                 transitions={'succeeded':'PLACE_OBJ_IN_CONFIGURATION',
-                        'failed':'MOVE_TO_INTERMEDIATE_POSE'})
+                             'failed':'MOVE_TO_INTERMEDIATE_POSE'})
 
             smach.StateMachine.add('PLACE_OBJ_IN_CONFIGURATION', btts.place_object_in_configuration_btt(),
                 transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF',
-                        'no_more_cfg_poses':'AVOID_WALLS_PRE_3'})
+                             'no_more_cfg_poses':'AVOID_WALLS_PRE_3'})
 
             smach.StateMachine.add('AVOID_WALLS_PRE_3', gms.move_arm('candle'),
                 transitions={'succeeded': 'MOVE_ARM_OUT_OF_VIEW_2',
-                            'failed': 'AVOID_WALLS_PRE_3'})
+                             'failed': 'AVOID_WALLS_PRE_3'})
 
             smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW_2', gms.move_arm('platform_intermediate'),
                 transitions={'succeeded':'succeeded',
