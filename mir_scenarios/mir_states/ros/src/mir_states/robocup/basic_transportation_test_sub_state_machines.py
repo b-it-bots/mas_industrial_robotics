@@ -116,7 +116,6 @@ class sub_sm_go_and_pick(smach.StateMachine):
                 transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
                             'failed': 'AVOID_WALLS_PRE_2'})
 
-            #smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm([0.45, 0.0, 0.20, 0, (math.pi * 0.8), 0.0, '/base_link']),
             smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
                 transitions={'succeeded': 'DO_VISUAL_SERVERING',
                             'failed': 'MOVE_ARM_TO_PREGRASP'})
@@ -149,11 +148,6 @@ class sub_sm_go_and_pick(smach.StateMachine):
                     smach.StateMachine.add('GRASP_OBJ', gms.grasp_object(),
                         transitions={'succeeded':'PLACE_OBJ_ON_REAR_PLATFORM',
                                      'failed':'SKIP_SOURCE_POSE'})
-
-
-            #smach.StateMachine.add('AVOID_WALLS_POST', gms.move_arm('candle'),
-            #    transitions={'succeeded': 'PLACE_OBJ_ON_REAR_PLATFORM',
-            #                'failed': 'AVOID_WALLS_POST'})
  
             smach.StateMachine.add('PLACE_OBJ_ON_REAR_PLATFORM', btts.place_obj_on_rear_platform_btt(),
                 transitions={'succeeded':'SELECT_OBJECT_TO_BE_GRASPED',
