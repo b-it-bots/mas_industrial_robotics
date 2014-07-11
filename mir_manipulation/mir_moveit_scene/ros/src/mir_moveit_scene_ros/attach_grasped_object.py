@@ -158,6 +158,7 @@ class GraspedObjectAttacher(object):
         trans, rot = self.listener.lookupTransform(self.fixed_frame_id,
             self.attachment_frame_id, tf_time)
         pitch = tf.transformations.euler_from_quaternion(rot)[1]
+
         # Look up object_name from list
         for obj in self.object_list.objects:
             if obj.name == self.object_name:
