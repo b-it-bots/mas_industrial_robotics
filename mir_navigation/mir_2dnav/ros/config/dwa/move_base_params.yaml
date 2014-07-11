@@ -31,7 +31,7 @@ GlobalPlanner:
     use_grid_path: False
     use_dijkstra: True
     allow_unknown: False
-    default_tolerance: 0.0
+    default_tolerance: 0.0 #previous value: 0.2
     visualize_potential: True
     use_quadratic: True)
     use_grid_path: False)
