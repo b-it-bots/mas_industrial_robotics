@@ -35,7 +35,7 @@ class ArmRelativeMotionControl:
 		self.tooltip_armlink5_distance = 0.166
 		self.planning_fraction_tolerance = 0.2
 		self.platformsurface_to_tooltip_tolerance = 0.02
-		self.platformsurface_wrt_baselink = 0.012
+		self.platformsurface_wrt_baselink = 0.007
 		
 	def init_moveit(self):
 		'''

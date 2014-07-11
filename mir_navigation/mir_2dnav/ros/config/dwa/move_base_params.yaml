@@ -1,4 +1,3 @@
-#change this
 footprint: [[-0.2720, -0.1869],
             [-0.2720, -0.0331],
             [-0.3260, -0.0310],
@@ -27,3 +26,13 @@ recovery_behaviors:
     type: 'clear_costmap_recovery/ClearCostmapRecovery'
   - name: 'aggressive_reset'
     type: 'clear_costmap_recovery/ClearCostmapRecovery'
+base_global_planner: global_planner/GlobalPlanner
+GlobalPlanner:
+    use_grid_path: False
+    use_dijkstra: True
+    allow_unknown: False
+    default_tolerance: 0.0 #previous value: 0.2
+    visualize_potential: True
+    use_quadratic: True)
+    use_grid_path: False)
+    old_navfn_behavior: False
