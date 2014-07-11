@@ -325,8 +325,8 @@ class place_object_in_configuration(smach.State):
                 
         return 'succeeded'
 
-class compute_pregrasp_pose(smach.State):
 
+class compute_pregrasp_pose(smach.State):
     """
     Given an object pose compute a pregrasp position that is reachable and also
     good for the visual servoing.
@@ -389,6 +389,7 @@ class configure_planning_scene(smach.State):
             self.walls_event_out.publish(event_command)
 
         return 'succeeded'
+
 
 
 
