@@ -74,7 +74,7 @@ class get_task(smach.State):
         try:
             if(userdata.test == "BNT"):
                 userdata.task_list = get_basic_navigation_task(task_spec[0])
-            if(userdata.test == "BMT"):
+            elif(userdata.test == "BMT"):
                 userdata.task_list = get_basic_manipulation_task(task_spec[0])
             elif(userdata.test == "BTT"):
                 userdata.task_list = get_basic_transportation_task(task_spec[0])
