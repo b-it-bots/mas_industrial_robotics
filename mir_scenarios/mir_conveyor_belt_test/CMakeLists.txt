@@ -6,3 +6,7 @@ find_package(catkin REQUIRED)
 catkin_package(
   CATKIN_DEPENDS
 )
+
+install(DIRECTORY ros/launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
+)
