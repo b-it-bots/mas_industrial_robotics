@@ -55,8 +55,8 @@ class sub_sm_go_and_pick(smach.StateMachine):
 
         with self:
             smach.StateMachine.add('SELECT_SOURCE_SUBTASK', btts.select_btt_subtask(type="source"),
-                transitions={'task_selected':'MOVE_TO_SOURCE_LOCATION',
-                             'no_more_task_for_given_type':'no_more_task_for_given_type'})
+                transitions={'task_selected': 'MOVE_TO_SOURCE_LOCATION',
+                             'no_more_task_for_given_type': 'no_more_task_for_given_type'})
 
             smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION', gns.approach_pose(),
                 transitions={'succeeded':'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE',
