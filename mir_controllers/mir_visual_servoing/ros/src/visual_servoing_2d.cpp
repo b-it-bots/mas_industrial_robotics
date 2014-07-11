@@ -11,7 +11,7 @@ VisualServoing2D::VisualServoing2D( bool debugging,
 									int mode,
 									std::vector<std::string> arm_joint_names ) : m_image_transport( m_node_handler )
 {
-  m_min_blob_area = 2000;
+	m_min_blob_area = 2000;
 	m_max_blob_area = 90000;
 	m_verticle_offset = 3;
 	m_x_velocity = 0.012;
