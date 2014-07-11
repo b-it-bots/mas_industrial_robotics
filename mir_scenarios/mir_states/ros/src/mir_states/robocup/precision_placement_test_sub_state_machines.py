@@ -90,3 +90,4 @@ class sub_sm_place_in_holes(smach.StateMachine):
             smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_2', gms.move_arm('platform_intermediate'),
                 transitions={'succeeded': 'succeeded',
                              'failed': 'MOVE_ARM_TO_INTERMEDIATE_2'})
+
