@@ -28,6 +28,7 @@ packagelist=(
     ros-hydro-ros-controllers
     ros-hydro-rqt-pr2-dashboard
     ros-hydro-usb-cam
+    ros-hydro-global-planner
 )
 
 ### install debian packages listed in array above
