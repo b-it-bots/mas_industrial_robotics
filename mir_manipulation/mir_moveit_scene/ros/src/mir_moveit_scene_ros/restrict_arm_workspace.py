@@ -113,9 +113,11 @@ class ArmWorkspaceRestricter(object):
 
     def add_walls(self):
         self.add_box("restricter_left_wall",
-            0.25, self.wall_distance, 0.10, 1.0, 0.04, self.wall_height)
+            0.25, self.wall_distance, self.wall_height / 2.0,
+            1.0, 0.04, self.wall_height)
         self.add_box("restricter_right_wall",
-            0.25, -self.wall_distance, 0.10, 1.0, 0.04, self.wall_height)
+            0.25, -self.wall_distance, self.wall_height / 2.0,
+            1.0, 0.04, self.wall_height)
         self.is_restricted = True
 
     def remove_walls(self):
