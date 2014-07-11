@@ -24,7 +24,7 @@ class ArmWorkspaceRestricter(object):
         self.is_restricted = False
 
         # node cycle rate (in seconds)
-        self.loop_rate = rospy.get_param('~loop_rate', 0.1)
+        self.cycle_time = rospy.get_param('~cycle_time', 0.1)
         self.wall_frame_id = rospy.get_param('~wall_frame_id', "/base_link")
         self.wall_height = rospy.get_param('~wall_height', 0.35)
         self.wall_distance = rospy.get_param('~wall_distance', 0.35)
@@ -64,7 +64,7 @@ class ArmWorkspaceRestricter(object):
                 state = self.running_state()
 
             rospy.logdebug("State: {0}".format(state))
-            rospy.sleep(self.loop_rate)
+            rospy.sleep(self.cycle_time)
 
     def init_state(self):
         """

@@ -3,7 +3,7 @@
     <node pkg="mir_moveit_scene" type="arm_workspace_restricter_node"
             ns="mir_manipulation" name="arm_workspace_restricter" output="screen">
         <remap from="~planning_scene" to="/planning_scene" />
-        <param name="loop_rate" type="double" value="0.1" />
+        <param name="cycle_time" type="double" value="0.1" />
         <param name="wall_frame_id" type="str" value="/base_link" />
         <param name="wall_height" type="double" value="0.35" />
         <param name="wall_distance" type="double" value="0.35" />
