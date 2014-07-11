@@ -8,9 +8,12 @@ from this list. The first object in the list with the matching name is taken.
 A box with the dimensions defined in the selected object is attached
 to the gripper. 
 
-The box is attached to the arm at attachment_frame_id with the orientation in
-the gripper as if the object were on a surface with the same orientation of 
-the fixed_frame_id at the time of receiving e_start.
+The box is attached to the gripper at attachment_frame_id with the orientation in
+the gripper as if:
+1. the object was first sitting on a surface and the gripper is ready to 
+   grasp the object.
+2. the surface which the object is sitting has the same orientation as
+   the fixed_frame_id at the time of receiving e_start.
 
 event_in expects "e_start" and "e_stop",
 start attaches the object, stop detaches the object.
@@ -164,6 +167,8 @@ class GraspedObjectAttacher(object):
         pitch = tf.transformations.euler_from_quaternion(rot)[1]
 
         # Look up object_name from list
+        # PLEASE NOTE: the order y,x,z instead of x,y,z because the current 
+        # implementation of perception pipeline returns the values in this order.
         for obj in self.object_list.objects:
             if obj.name == self.object_name:
                 self.attach_box(self.object_name,
