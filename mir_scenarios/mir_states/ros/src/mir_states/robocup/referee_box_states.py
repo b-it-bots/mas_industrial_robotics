@@ -84,6 +84,9 @@ class get_task(smach.State):
                 userdata.ppt_platform_location = ppt_description[1]
             elif(userdata.test == "CTT"):
                 userdata.task_list = get_competitive_transportation_task(task_spec[0])
+            else:
+                return 'wrong_task_format'
+
         except Exception as e:
             rospy.logerr("Exception: %s", e)
             return 'wrong_task_format'
