@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>mir_conveyor_beltn_test</name>
+  <name>mir_conveyor_belt_test</name>
   <version>0.0.1</version>
   <description>state machine for the RoboCup@Work conveyor belt test (CBT)</description>
 
