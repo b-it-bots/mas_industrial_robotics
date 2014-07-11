@@ -6,7 +6,11 @@ Adds an attached object to the gripper in the planning scene.
 The node receives a list of objects and the name of an object to select
 from this list. The first object in the list with the matching name is taken.
 A box with the dimensions defined in the selected object is attached
-to the gripper. The box is attached to the arm at attachment_frame_id
+to the gripper. 
+
+The box is attached to the arm at attachment_frame_id with the orientation in
+the gripper as if the object were on a surface with the same orientation of 
+the fixed_frame_id at the time of receiving e_start.
 
 event_in expects "e_start" and "e_stop",
 start attaches the object, stop detaches the object.
