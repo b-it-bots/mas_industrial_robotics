@@ -33,7 +33,7 @@ class sub_sm_place_in_holes(smach.StateMachine):
             output_keys=['all_found_holes',
                          'base_pose_to_approach',
                          'last_grasped_obj',
-                         'move_arm_to'
+                         'move_arm_to',
                          'move_base_by',
                          'rear_platform_free_poses',
                          'rear_platform_occupied_poses',
