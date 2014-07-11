@@ -1,0 +1,56 @@
+#!/usr/bin/python
+
+
+import sys
+
+# ROS imports
+import rospy
+import smach
+import smach_ros
+
+# Generic state imports
+import mir_states.common.basic_states as gbs
+
+# RoboCup state imports
+import mir_states.robocup.referee_box_states as refbox
+
+# main
+def main(no_refbox=False):
+
+    rospy.init_node('conveyor_belt_test')
+
+    SM = smach.StateMachine(outcomes=['overall_done'])
+
+    SM.userdata.task_list = []
+    SM.userdata.no_refbox = no_refbox
+    SM.userdata.test = "CBT"
+       
+    # open the container
+    with SM:
+        
+        smach.StateMachine.add('INIT_ROBOT', gbs.init_robot(),
+            transitions={'succeeded':'GET_TASK'})
+
+        smach.StateMachine.add('GET_TASK', refbox.get_task(),
+            transitions={'task_received':'overall_done',
+                         'wrong_task':'GET_TASK',
+                         'wrong_task_format':'GET_TASK'})
+
+       
+       
+    # Start SMACH viewer
+    smach_viewer = smach_ros.IntrospectionServer('CONVEYOR_BELT_TEST', SM, 'CONVEYOR_BELT_TEST')
+    smach_viewer.start()
+
+    result = SM.execute()
+
+    # stop SMACH viewer
+    while (result is None):
+        rospy.spin()
+    rospy.loginfo('conveyor belt test is done.')
+    
+    # smach_thread.stop()
+    smach_viewer.stop()
+
+if __name__ == '__main__':
+    main(sys.argv[-1] == '--no-refbox')
