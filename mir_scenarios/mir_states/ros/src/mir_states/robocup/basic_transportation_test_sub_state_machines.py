@@ -157,10 +157,10 @@ class sub_sm_go_and_pick(smach.StateMachine):
             smach.StateMachine.add('VISUAL_SERVOING_LOOP', btts.loop_for(max_loop_count=1),
                                       transitions={'loop': 'HELP_VISUAL_SERVOING',
                                                    'continue': 'SKIP_SOURCE_POSE'})
-
-            smach.StateMachine.add('HELP_VISUAL_SERVOING', gns.move_base_relative([0.03, 0.0, 0.0]),
-                transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
-                             'timeout': 'MOVE_ARM_TO_PREGRASP'})
+ 
+            smach.StateMachine.add('HELP_VISUAL_SERVOING', gns.adjust_to_workspace(0.12),
+                transitions={'succeeded':'MOVE_ARM_TO_PREGRASP',
+                             'failed':'MOVE_ARM_TO_PREGRASP'})
 
             if (self.use_mockup):
                     smach.StateMachine.add('GRASP_OBJ', gms.grasp_object(),
