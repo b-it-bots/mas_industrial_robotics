@@ -88,6 +88,8 @@ class move_base_relative(smach.State):
     def execute(self, userdata):
 
         offset = self.offset or userdata.move_base_by
+        if not offset: 
+          offset = [0,0,0]
 
         relative_base_move = Twist()
 
