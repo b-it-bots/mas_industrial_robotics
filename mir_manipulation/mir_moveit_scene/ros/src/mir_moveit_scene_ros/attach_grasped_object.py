@@ -12,7 +12,7 @@ The box is attached to the gripper at attachment_frame_id with the orientation i
 the gripper as if:
 1. the object was first sitting on a surface and the gripper is ready to 
    grasp the object.
-2. the surface which the object is sitting has the same orientation as
+2. the surface which the object is sitting on has the same orientation as
    the fixed_frame_id at the time of receiving e_start.
 
 event_in expects "e_start" and "e_stop",
@@ -167,8 +167,8 @@ class GraspedObjectAttacher(object):
         pitch = tf.transformations.euler_from_quaternion(rot)[1]
 
         # Look up object_name from list
-        # PLEASE NOTE: the order y,x,z instead of x,y,z because the current 
-        # implementation of perception pipeline returns the values in this order.
+        # PLEASE NOTE: the order y,x,z instead of x,y,z. This is because the current 
+        # implementation of perception pipeline sets the values in this order.
         for obj in self.object_list.objects:
             if obj.name == self.object_name:
                 self.attach_box(self.object_name,
