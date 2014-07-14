@@ -10,5 +10,6 @@ catkin_package(
     geometry_msgs
     std_msgs
     tf
+    actionlib
 )
 

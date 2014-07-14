@@ -6,6 +6,7 @@
   
   <maintainer email="shehzad@h-brsu.de">Shehzad Ahmed</maintainer>
   <license>BSD</license>
+  
   <buildtool_depend>catkin</buildtool_depend>
   
   <run_depend>rospy</run_depend>
@@ -14,4 +15,6 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>actionlib</run_depend>
+  
 </package>
