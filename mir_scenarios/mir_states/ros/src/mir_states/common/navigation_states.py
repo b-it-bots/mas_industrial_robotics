@@ -178,7 +178,7 @@ class approach_pose(smach.State):
 
 
         # prepare action message
-    	pose = PoseStamped()
+        pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
         pose.header.frame_id = "/map"
         pose.pose.position.x = self.target_pose[0]
@@ -190,7 +190,7 @@ class approach_pose(smach.State):
         pose.pose.orientation.z = q[2]
         pose.pose.orientation.w = q[3]
 
-    	goal = move_base_msgs.msg.MoveBaseGoal()
+        goal = move_base_msgs.msg.MoveBaseGoal()
         goal.target_pose = pose     
 
         # call action
