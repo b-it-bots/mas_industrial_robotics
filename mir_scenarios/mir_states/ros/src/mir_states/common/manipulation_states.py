@@ -70,16 +70,6 @@ class put_object_on_rear_platform(smach.State):
         try:
             location = userdata.rear_platform.get_free_location()
             
-            #FIXME: do we need the intermediate positions with MoveIt?
-            #arm_command.set_named_target("candle")
-            #arm_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
-            
-            #arm_command.set_named_target('platform_%s_pre' % location)
-            #arm_command.go()
-            
             arm_command.set_named_target('platform_%s' % location)
             arm_command.go()
             
@@ -88,9 +78,6 @@ class put_object_on_rear_platform(smach.State):
             
             arm_command.set_named_target('platform_%s_pre' % location)
             arm_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
             
             userdata.rear_platform.store_object(location)
             
@@ -116,16 +103,9 @@ class pick_object_from_rear_platform(smach.State):
         location = (userdata.location or
                     userdata.rear_platform.get_occupied_location())
         try:
-            #FIXME: do we need the intermediate positions with MoveIt?
-            
+
             gripper_command.set_named_target('open')
             gripper_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
-            
-            #arm_command.set_named_target('platform_%s_pre' % location)
-            #arm_command.go()
             
             arm_command.set_named_target('platform_%s' % location)
             arm_command.go()
@@ -135,9 +115,6 @@ class pick_object_from_rear_platform(smach.State):
             
             arm_command.set_named_target('platform_%s_pre' % location)
             arm_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
             
             return 'succeeded'
         except RearPlatformEmptyError as a:
