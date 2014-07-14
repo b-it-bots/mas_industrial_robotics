@@ -4,7 +4,7 @@
   <version>0.0.1</version>
   <description>The mir_arm_relative_motion_control package</description>
   
-  <maintainer email="shehzad@h-brsu.de">shehzad</maintainer>
+  <maintainer email="shehzad@h-brsu.de">Shehzad Ahmed</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
   
