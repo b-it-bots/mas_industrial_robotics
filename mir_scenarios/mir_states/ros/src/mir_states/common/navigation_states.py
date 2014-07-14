@@ -23,10 +23,15 @@ class adjust_to_workspace(smach.State):
 
     ADJUST_SERVER = '/mir_navigation/base_placement/adjust_to_workspace'
 
-    def __init__(self, distance=0.20):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+    def __init__(self, distance=None):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], 
+                                   input_keys=['desired_distance_to_workspace'])
+
         self.ac_base_adj = actionlib.SimpleActionClient(self.ADJUST_SERVER, OrientToBaseAction)
-        self.distance = distance
+
+        self.distance = distance or userdata.desired_distance_to_workspace
+        if not self.distance:
+          self.distance = 0.20
 
     def execute(self, userdata):
         rospy.logdebug("Waiting for action server <<%s>>...", self.ADJUST_SERVER)

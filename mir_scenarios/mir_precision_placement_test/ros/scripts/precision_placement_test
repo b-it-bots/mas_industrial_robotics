@@ -73,6 +73,7 @@ def main(no_refbox=False):
     SM.userdata.all_found_holes = None
     SM.userdata.selected_hole = None
     SM.userdata.selected_hole_pose = None
+    SM.userdata.desired_distance_to_workspace = None
 
     use_mockup = False
 
