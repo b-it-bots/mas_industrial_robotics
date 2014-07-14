@@ -150,7 +150,7 @@ class approach_pose(smach.State):
 
     def execute(self, userdata):
     
-        if(clear_costmaps):
+        if(self.clear_costmaps):
           # remove close obstacles from the costmap
           try:
               rospy.loginfo("wait for service: %s", self.clear_costmap_srv_name)
