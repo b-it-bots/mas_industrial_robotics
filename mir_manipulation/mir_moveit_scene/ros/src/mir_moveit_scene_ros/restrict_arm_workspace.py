@@ -25,8 +25,11 @@ class ArmWorkspaceRestricter(object):
 
         # node cycle rate (in seconds)
         self.cycle_time = rospy.get_param('~cycle_time', 0.1)
+        # frame which walls and workspace are added wrt
         self.wall_frame_id = rospy.get_param('~wall_frame_id', "/base_link")
+        # wall height wrt wall_frame_id (m)
         self.wall_height = rospy.get_param('~wall_height', 0.35)
+        # distance from wall_frame_id to side walls (m)
         self.wall_distance = rospy.get_param('~wall_distance', 0.35)
         # distance to platform from base wall_frame_id (m)
         self.platform_distance = rospy.get_param('~platform_distance', 0.6)
