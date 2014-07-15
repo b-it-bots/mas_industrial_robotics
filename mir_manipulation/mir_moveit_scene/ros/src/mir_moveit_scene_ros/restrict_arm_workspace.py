@@ -28,6 +28,10 @@ class ArmWorkspaceRestricter(object):
         self.wall_frame_id = rospy.get_param('~wall_frame_id', "/base_link")
         self.wall_height = rospy.get_param('~wall_height', 0.35)
         self.wall_distance = rospy.get_param('~wall_distance', 0.35)
+        # distance to platform from base wall_frame_id (m)
+        self.platform_distance = rospy.get_param('~platform_distance', 0.6)
+        # height of platform with respect to wall_frame_id (m)
+        self.platform_height = rospy.get_param('~platform_height', 0.05)
 
         # publishers
         self.planning_scene_diff_publisher = rospy.Publisher('~planning_scene',
@@ -118,6 +122,9 @@ class ArmWorkspaceRestricter(object):
         self.add_box("restricter_right_wall",
             0.25, -self.wall_distance, self.wall_height / 2.0,
             1.0, 0.04, self.wall_height)
+        self.add_box("restricter_platform",
+            self.platform_distance, 0.0, 0.0,
+            0.5 , self.wall_distance * 2.0, self.platform_height / 2.0)
         self.is_restricted = True
 
     def remove_walls(self):
