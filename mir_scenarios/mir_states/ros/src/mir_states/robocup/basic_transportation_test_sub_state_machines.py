@@ -74,7 +74,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
             with sm_con_prepare_for_perception:
                 sm_sub_move_arm_safe = smach.StateMachine(outcomes=['succeeded'])
                 with sm_sub_move_arm_safe:
-                    smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.configure_planning_scene("walls", "add"),
+                    smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"),
                         transitions={'succeeded':'MOVE_ARM_OUT_OF_VIEW'})
 
                     smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms.move_arm('out_of_view'),
@@ -135,7 +135,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                      'timeout': 'MOVE_BASE_RELATIVE'})
 
                 smach.Concurrence.add('ALIGN_BASE_WITH_OBJECT', sm_sub_shift_base)
-                smach.Concurrence.add('ADD_WALLS_TO_PLANNING_SCENE', gms.configure_planning_scene("walls", "add"))
+                smach.Concurrence.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"))
 
             smach.StateMachine.add('PREPARE_FOR_GRASPING', sm_con_prepare_for_grasping,
                 transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
@@ -205,7 +205,7 @@ class sub_sm_go_to_destination(smach.StateMachine):
                                                        'task_list'])
 
         with self:
-            smach.StateMachine.add('REMOVE_WALLS_FROM_PLANNING_SCENE', gms.configure_planning_scene("walls", "remove"),
+            smach.StateMachine.add('REMOVE_WALLS_FROM_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "remove"),
                 transitions={'succeeded':'SELECT_DELIVER_WORKSTATION'})
 
             smach.StateMachine.add('SELECT_DELIVER_WORKSTATION', btts.select_delivery_workstation(),
@@ -248,7 +248,7 @@ class sub_sm_place(smach.StateMachine):
                                                       'task_list'])
 
         with self:
-            smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.configure_planning_scene("walls", "add"),
+            smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"),
                 transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF'})
 
             smach.StateMachine.add('GRASP_OBJECT_FROM_PLTF', btts.grasp_obj_from_pltf_btt(),
@@ -271,7 +271,7 @@ class sub_sm_place(smach.StateMachine):
                 transitions={'succeeded':'succeeded',
                              'failed':'MOVE_ARM_INSIDE_BASE_BOUNDARIES'})
 
-            smach.StateMachine.add('REMOVE_WALLS_FROM_PLANNING_SCENE', gms.configure_planning_scene("walls", "remove"),
+            smach.StateMachine.add('REMOVE_WALLS_FROM_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "remove"),
                 transitions={'succeeded':'no_more_obj_for_this_workspace'})
 
 

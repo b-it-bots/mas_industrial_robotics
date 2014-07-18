@@ -217,7 +217,7 @@ class compute_pregrasp_pose(smach.State):
         return 'succeeded'
 
 
-class configure_planning_scene(smach.State):
+class update_static_elements_in_planning_scene(smach.State):
 
     """
     trigger component to add walls, objects, etc. to the the planning scene of moveit
