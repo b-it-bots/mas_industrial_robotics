@@ -59,8 +59,8 @@ class select_hole(smach.State):
         list_of_carried_objects_that_must_be_placed = []
         for i in range(len(userdata.rear_platform_occupied_poses)):
             for obj_name in objs_for_this_ws:
-                rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj_name: %s     obj_name: %s", userdata.rear_platform_occupied_poses[i].obj_name, obj_name)
-                if userdata.rear_platform_occupied_poses[i].obj_name == obj_name:
+                rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj.name: %s     obj_name: %s", userdata.rear_platform_occupied_poses[i].obj.name, obj_name)
+                if userdata.rear_platform_occupied_poses[i].obj.name == obj_name:
                     list_of_carried_objects_that_must_be_placed.append(obj_name)
                     stop = True
                     break;
@@ -96,12 +96,12 @@ class grasp_obj_for_hole_from_pltf(smach.State):
 
         pltf_obj_pose = None
         for i in range(len(userdata.rear_platform_occupied_poses)):
-            rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj_name: %s", userdata.rear_platform_occupied_poses[i].obj_name)
-            if  userdata.selected_hole.name in userdata.rear_platform_occupied_poses[i].obj_name:
+            rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj.name: %s", userdata.rear_platform_occupied_poses[i].obj.name)
+            if  userdata.selected_hole.name in userdata.rear_platform_occupied_poses[i].obj.name:
                 pltf_obj_pose = userdata.rear_platform_occupied_poses.pop(i)
                 userdata.rear_platform_free_poses.append(pltf_obj_pose)
-                userdata.last_grasped_obj = pltf_obj_pose.obj_name
-                rospy.loginfo("LAST OBJ: %s", userdata.last_grasped_obj)
+                userdata.last_grasped_obj = pltf_obj_pose.obj
+                rospy.loginfo("LAST OBJ: %s", userdata.last_grasped_obj.name)
                 break
 
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
@@ -111,7 +111,7 @@ class grasp_obj_for_hole_from_pltf(smach.State):
 
 
         print "plat_pose: ", pltf_obj_pose.platform_pose
-        print "plat_name: ", pltf_obj_pose.obj_name
+        print "plat_name: ", pltf_obj_pose.obj.name
 
         manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
         manipulation.arm_command.go()
