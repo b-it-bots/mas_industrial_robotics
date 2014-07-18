@@ -19,7 +19,8 @@ catkin_package(
 )
 
 install(PROGRAMS
-  ros/scripts/add_workspace_walls_node
+  ros/scripts/arm_workspace_restricter_node
+  ros/scripts/grasped_object_attacher_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
