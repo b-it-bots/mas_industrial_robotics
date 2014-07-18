@@ -246,5 +246,24 @@ class update_static_elements_in_planning_scene(smach.State):
         return 'succeeded'
 
 
+class update_robot_planning_scene(smach.State):
 
+    """
+    trigger component to attach, detach, reattach and delete an object to/from the robot's planning scene
+    """
 
+    def __init__(self, action):
+        smach.State.__init__(self, outcomes=['succeeded'],
+                                   input_keys=['object'])
+
+        self.pub_event = rospy.Publisher('/mir_manipulation/grasped_object_attacher/event_in', std_msgs.msg.String)
+        self.pub_object_id = rospy.Publisher('/mir_manipulation/grasped_object_attacher/object_id', std_msgs.msg.Int32)
+
+        self.action = action
+
+    def execute(self, userdata):
+
+        self.pub_object_id.publish(userdata.object.database_id)
+        self.pub_event.publish("e_" + self.action)
+        
+        return 'succeeded'
