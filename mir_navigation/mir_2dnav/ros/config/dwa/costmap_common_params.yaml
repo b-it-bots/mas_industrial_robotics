@@ -2,18 +2,6 @@ map_type: costmap           # default: "voxel"
 #transform_tolerance: 0.2   # default: 0.2
 obstacle_range: 2.5         # default: 2.5 
 raytrace_range: 3.0         # default: 3.0
-footprint: [[-0.2720, -0.1869],
-            [-0.2720, -0.0331],
-            [-0.3260, -0.0310],
-            [-0.3260, 0.0310],
-            [-0.2720, 0.0325],
-            [-0.2720, 0.1875],
-            [0.2720, 0.1875],
-            [0.2720, 0.0865],
-            [0.3160, 0.0425],
-            [0.3160, -0.0425],
-            [0.2720, -0.0865],
-            [0.2720, -0.1875]]
 
 observation_sources: laser_scanner_front laser_scanner_rear
 
