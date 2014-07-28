@@ -11,7 +11,5 @@
   <author email="praveen.ramanujam@smail.inf.h-brs.de">Praveen Ramanajum</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-
-  <build_depend>roscpp</build_depend>
  
 </package>
