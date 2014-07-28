@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
+    <!-- Republish laser scan topics to a single topic -->
+    <node pkg="topic_tools" type="relay" name="front_laser_scanner_repub" args="/scan_rear /scan_combined"/>
+    <node pkg="topic_tools" type="relay" name="rear_laser_scanner_repub" args="/scan_front /scan_combined"/>
 
     <!--- Run AMCL -->
     <node pkg="amcl" type="amcl" name="amcl">
