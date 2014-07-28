@@ -17,10 +17,12 @@ class MoveBaseMockup(object):
 
 
   def execute_cb(self, goal):
+    rospy.sleep(1)
     self._as.set_succeeded()
 
   def clear_costmap_cb(self, req):
-    rospy.loginfo("clear costmaps")    
+    rospy.loginfo("clear costmaps")
+    rospy.sleep(1)    
     return EmptyResponse()
 
       
