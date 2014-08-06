@@ -45,18 +45,19 @@ def main(no_refbox=False):
     SM.userdata.object_to_be_adjust_to = 0
    
     SM.userdata.objects_to_be_grasped = 0
-    SM.userdata.object_to_grasp = 0
+    SM.userdata.object_to_grasp = None
     SM.userdata.move_arm_to = 0
     SM.userdata.move_base_by = 0
     SM.userdata.objects_goal_configuration = 0
     SM.userdata.found_objects = 0
     SM.userdata.object_pose = 0
+    SM.userdata.desired_distance_to_workspace = None
     
 
     SM.userdata.rear_platform_free_poses = []
-    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj_name="", platform_pose='platform_right'))
-    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj_name="", platform_pose='platform_middle'))
-    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj_name="", platform_pose='platform_left'))
+    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_right'))
+    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_middle'))
+    SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_left'))
 
     SM.userdata.rear_platform_occupied_poses = []
     SM.userdata.obj_goal_configuration_poses = []

@@ -18,24 +18,32 @@ from actionlib.simple_action_client import GoalStatus
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 from mcr_navigation_msgs.srv import MoveRelative
 
-       
+
 class adjust_to_workspace(smach.State):
 
     ADJUST_SERVER = '/mir_navigation/base_placement/adjust_to_workspace'
 
-    def __init__(self, distance=0.20):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+    def __init__(self, distance=None):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'], 
+                                   input_keys=['desired_distance_to_workspace'])
+
         self.ac_base_adj = actionlib.SimpleActionClient(self.ADJUST_SERVER, OrientToBaseAction)
-        self.distance = distance
+
+        self.distance = distance or userdata.desired_distance_to_workspace
+        if not self.distance:
+          self.distance = 0.20
 
     def execute(self, userdata):
         rospy.logdebug("Waiting for action server <<%s>>...", self.ADJUST_SERVER)
         self.ac_base_adj.wait_for_server()
         rospy.logdebug("Action server <<%s>> is ready...", self.ADJUST_SERVER)
+
         action_goal = OrientToBaseActionGoal()
         action_goal.goal.distance = self.distance
+
         rospy.logdebug("Sending action goal...")
         self.ac_base_adj.send_goal(action_goal.goal)
+
         rospy.loginfo("Waiting for base to adjust...")
         if self.ac_base_adj.wait_for_result():
             rospy.loginfo("Action finished: %s", self.ac_base_adj.get_state())
@@ -75,16 +83,18 @@ class move_base_relative(smach.State):
     def sample_with_boundary(self, lower, upper):
         if (lower == 0.0) and (upper == 0.0):
             return 0.0
-        
+
         value = random.uniform(lower, upper)
         if -0.015 <= value <= 0.015:
             value = math.copysign(0.015, value)
-        
+
         return value
 
     def execute(self, userdata):
 
         offset = self.offset or userdata.move_base_by
+        if not offset: 
+          offset = [0,0,0]
 
         relative_base_move = Twist()
 
@@ -113,7 +123,7 @@ class move_base_relative(smach.State):
             if self.relative_base_ctrl_event == 'e_done':
                 rospy.loginfo('relative pose reached')
                 return 'succeeded'
-            
+
             if (rospy.Time.now() - start_time) > timeout:
                 rospy.logerr('timeout of %f seconds exceeded for relative base movement' % float(timeout.to_sec()))
                 return 'timeout'
@@ -126,9 +136,10 @@ class move_base_relative(smach.State):
 ## same as move_base?
 class approach_pose(smach.State):
 
-    def __init__(self, pose_name = ""):
+    def __init__(self, pose_name = "", clear_costmaps=True):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
 
+        self.clear_costmaps = clear_costmaps
         self.pose_name = pose_name;  
 
         self.move_base_action_name = '/move_base'
@@ -138,22 +149,24 @@ class approach_pose(smach.State):
         self.clear_costmap_srv = rospy.ServiceProxy(self.clear_costmap_srv_name, std_srvs.srv.Empty)  
 
     def execute(self, userdata):
-        # remove close obstacles from the costmap
-        try:
-            rospy.loginfo("wait for service: %s", self.clear_costmap_srv_name)
-            rospy.wait_for_service(self.clear_costmap_srv_name, 30)
+    
+        if(self.clear_costmaps):
+          # remove close obstacles from the costmap
+          try:
+              rospy.loginfo("wait for service: %s", self.clear_costmap_srv_name)
+              rospy.wait_for_service(self.clear_costmap_srv_name, 30)
 
-            self.clear_costmap_srv()
-        except:
-            rospy.logerr("could not execute service <<%s>>", self.clear_costmap_srv_name)
-            return 'failed'
-        
+              self.clear_costmap_srv()
+          except:
+              rospy.logerr("could not execute service <<%s>>", self.clear_costmap_srv_name)
+              return 'failed'
+
         # wait for action server
         rospy.loginfo("Wait for action: %s", self.move_base_action_name)
         if not self.move_base_action.wait_for_server(rospy.Duration(5)):
             rospy.logerr("%s action server not ready within timeout, aborting...", self.move_base_action_name)
             return 'failed'
-        
+
         # check if argument has been passed or userdata should be used
         if(self.pose_name == ""):
             self.pose_name2 = userdata.base_pose_to_approach
@@ -167,15 +180,15 @@ class approach_pose(smach.State):
             if not rospy.has_param(parameter_name):
                 rospy.logerr("parameter <<%s>> does not exist on ROS Parameter Server, aborting...", parameter_name)
                 return 'failed'
-            
+
             self.target_pose = rospy.get_param(parameter_name)
         else:
             rospy.logerr("pose parameter <<%s>> is not a string, aborting...", self.pose_name2)
             return 'failed'
-        
+
 
         # prepare action message
-    	pose = PoseStamped()
+        pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
         pose.header.frame_id = "/map"
         pose.pose.position.x = self.target_pose[0]
@@ -187,7 +200,7 @@ class approach_pose(smach.State):
         pose.pose.orientation.z = q[2]
         pose.pose.orientation.w = q[3]
 
-    	goal = move_base_msgs.msg.MoveBaseGoal()
+        goal = move_base_msgs.msg.MoveBaseGoal()
         goal.target_pose = pose     
 
         # call action
