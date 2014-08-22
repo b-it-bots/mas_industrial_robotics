@@ -10,14 +10,14 @@ import mir_states.common.navigation_states as gns
 import mir_states.robocup.basic_navigation_test_states as bnts
 
 
-def main(simulation=False):
+def main(no_refbox=False):
 
     rospy.init_node('basic_navigation_test')
 
     SM = smach.StateMachine(outcomes=['overall_succeeded', 'overall_failed'])
 
     SM.userdata.test = 'BNT'
-    SM.userdata.simulation = simulation
+    SM.userdata.no_refbox = no_refbox
     SM.userdata.task_list = None
     SM.userdata.base_pose_to_approach = ""
 
@@ -33,7 +33,7 @@ def main(simulation=False):
                          'unknown_pose': 'SELECT_TARGET_POSE',
                          'no_more_targets': 'MOVE_BASE_TO_EXIT'})
 
-        smach.StateMachine.add('MOVE_BASE', gns.approach_pose(),
+        smach.StateMachine.add('MOVE_BASE', gns.approach_pose(clear_costmaps=False),
             transitions={'succeeded': 'WAIT_DESIRED_DURATION',
                          'failed': 'SELECT_TARGET_POSE'})
 
@@ -53,4 +53,4 @@ def main(simulation=False):
     smach_viewer.stop()
 
 if __name__ == '__main__':
-    main(sys.argv[-1] == '--simulation')
+    main(sys.argv[-1] == '--no-refbox')

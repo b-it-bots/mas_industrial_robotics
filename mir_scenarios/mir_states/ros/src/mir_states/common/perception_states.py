@@ -12,49 +12,71 @@ import mir_controller_msgs.srv
 
 class find_objects(smach.State):
 
-    DETECT_SERVER = '/mcr_perception/object_detector/detect_objects'
+    OBJECT_LIST_TOPIC = '/mcr_perception/object_detector/object_list'
+    EVENT_IN_TOPIC = '/mcr_perception/object_detector/event_in'
+    EVENT_OUT_TOPIC = '/mcr_perception/object_detector/event_out'
 
     def __init__(self, retries=5, frame_id=None):
         smach.State.__init__(self,
                              outcomes=['objects_found',
-                                       'no_objects_found',
-                                       'srv_call_failed'],
+                                       'no_objects_found'],
                              input_keys=['found_objects'],
                              output_keys=['found_objects'])
-        self.detect_objects = rospy.ServiceProxy(self.DETECT_SERVER, mcr_perception_msgs.srv.GetObjectList)
+        self.object_list_sub = rospy.Subscriber(self.OBJECT_LIST_TOPIC, mcr_perception_msgs.msg.ObjectList, self.object_list_cb)
+        self.event_out_sub = rospy.Subscriber(self.EVENT_OUT_TOPIC, std_msgs.msg.String, self.event_out_cb)
+        self.event_in_pub = rospy.Publisher(self.EVENT_IN_TOPIC, std_msgs.msg.String)
         self.tf_listener = tf.TransformListener()
         self.retries = retries
         self.frame_id = frame_id
+    
+    def object_list_cb(self, event):
+        self.object_list = event
+    
+    def event_out_cb(self, event):
+        self.event_msg = event.data
 
-    def execute(self, userdata):
+    def execute(self, userdata):        
         userdata.found_objects = None
         for i in range(self.retries):
+            self.object_list = None
+            self.event_msg = ""
+
             rospy.loginfo('Looking for objects (attempt %i/%i)' % (i + 1, self.retries))
-            try:
-                rospy.wait_for_service(self.DETECT_SERVER, 15)
-                resp = self.detect_objects()
-            except Exception as e:
-                rospy.logerr("Service call to <<%s>> failed", self.DETECT_SERVER)
-                return 'srv_call_failed'
-            if not resp.objects:
+            self.event_in_pub.publish("e_trigger")
+
+            timeout = rospy.Duration.from_sec(10.0) # wait max of 10.0 seconds
+            start_time = rospy.Time.now()
+
+            while(True):
+                if self.event_msg == "e_done" and self.object_list is not None:
+                    break
+                elif self.event_msg == "e_failed":
+                    rospy.loginfo('Found no objects')
+                    break
+                elif (rospy.Time.now() - start_time) > timeout:
+                    rospy.logerr('Timeout of %f seconds exceeded waiting for object_detector' % float(timeout.to_sec()))
+                    break
+                rospy.sleep(0.1)
+
+            if not self.object_list:
                 rospy.loginfo('Found no objects')
             else:
-                n = str([obj.name for obj in resp.objects])
-                rospy.loginfo('Found %i objects: %s' % (len(resp.objects), n))
+                n = str([obj.name for obj in self.object_list.objects])
+                rospy.loginfo('Found %i objects: %s' % (len(self.object_list.objects), n))
                 break
 
-        if not resp.objects:
+        if not self.object_list:
             rospy.loginfo('No objects in the field of view')
             return 'no_objects_found'
 
         if self.frame_id:
-            for obj in resp.objects:
+            for obj in self.object_list.objects:
                 try:
                     obj.pose = self.tf_listener.transformPose(self.frame_id, obj.pose)
                 except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                     rospy.logerr('Unable to transform %s -> %s' % (obj.pose.header.frame_id, self.frame_id))
 
-        userdata.found_objects = resp.objects
+        userdata.found_objects = self.object_list.objects
         return 'objects_found'
 
 
@@ -65,7 +87,7 @@ class do_visual_servoing(smach.State):
     def __init__( self ):
         smach.State.__init__( self,
                               outcomes=[ 'succeeded', 'failed', 'timeout', 'lost_object' ],
-                              input_keys=['simulation', 'vscount'],
+                              input_keys=['vscount'],
                               output_keys=['vscount'])
         self.do_vs = rospy.ServiceProxy( self.SERVER, mir_controller_msgs.srv.StartVisualServoing )
 

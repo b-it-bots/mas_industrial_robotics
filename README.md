@@ -49,6 +49,7 @@ In order to understand at least the different core components of ROS, you have t
 
 ## Set up a catkin workspace
 
+    source /opt/ros/hydro/setup.bash
     mkdir -p ~/catkin_ws/src; cd ~/catkin_ws/src
     catkin_init_workspace
     cd ..
@@ -67,7 +68,7 @@ Then go on with installing further external dependencies:
     
     source ~/catkin_ws/devel/setup.bash
 
-The last two commands, should be added to the ~/.bashrc file, so that they do not need to be executed everytime you open a new terminal.
+The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
 
 
 And finally compile the repository:

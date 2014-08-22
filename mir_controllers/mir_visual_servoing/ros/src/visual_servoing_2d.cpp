@@ -11,7 +11,7 @@ VisualServoing2D::VisualServoing2D( bool debugging,
 									int mode,
 									std::vector<std::string> arm_joint_names ) : m_image_transport( m_node_handler )
 {
-  m_min_blob_area = 2000;
+	m_min_blob_area = 2000;
 	m_max_blob_area = 90000;
 	m_verticle_offset = 3;
 	m_x_velocity = 0.012;
@@ -112,9 +112,9 @@ VisualServoing2D::VisualServoing( IplImage* input_image )
   m_min_blob_area = 2000;
 	m_max_blob_area = 90000;
 	m_verticle_offset = 3;
-	m_x_velocity = 0.012;
-	m_y_velocity = 0.012;
-	m_rot_velocity = 0.2;
+	m_x_velocity = 0.03;
+	m_y_velocity = 0.03;
+	m_rot_velocity = 0.4;
 	m_x_target = 0;
 	m_x_threshold = 20;
 	m_y_target = 0;

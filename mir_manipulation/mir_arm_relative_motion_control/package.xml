@@ -4,8 +4,17 @@
   <version>0.0.1</version>
   <description>The mir_arm_relative_motion_control package</description>
   
-  <maintainer email="shehzad@h-brsu.de">shehzad</maintainer>
+  <maintainer email="shehzad@h-brsu.de">Shehzad Ahmed</maintainer>
   <license>BSD</license>
+  
   <buildtool_depend>catkin</buildtool_depend>
+  
+  <run_depend>rospy</run_depend>
+  <run_depend>moveit_commander</run_depend>
+  <run_depend>moveit_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>actionlib</run_depend>
   
 </package>

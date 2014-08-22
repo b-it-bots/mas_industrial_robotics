@@ -33,7 +33,7 @@ class sub_sm_place_in_holes(smach.StateMachine):
             output_keys=['all_found_holes',
                          'base_pose_to_approach',
                          'last_grasped_obj',
-                         'move_arm_to'
+                         'move_arm_to',
                          'move_base_by',
                          'rear_platform_free_poses',
                          'rear_platform_occupied_poses',
@@ -42,6 +42,9 @@ class sub_sm_place_in_holes(smach.StateMachine):
                          'task_list'])
 
         with self:
+            smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.configure_planning_scene("walls", "add"),
+                transitions={'succeeded': 'MOVE_ARM_OUT_OF_VIEW'})
+
             smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms.move_arm('out_of_view'),
                 transitions={'succeeded': 'FIND_HOLES',
                              'failed': 'MOVE_ARM_OUT_OF_VIEW'})
@@ -87,3 +90,4 @@ class sub_sm_place_in_holes(smach.StateMachine):
             smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_2', gms.move_arm('platform_intermediate'),
                 transitions={'succeeded': 'succeeded',
                              'failed': 'MOVE_ARM_TO_INTERMEDIATE_2'})
+

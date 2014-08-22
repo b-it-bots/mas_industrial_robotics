@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_conveyor_belt_test</name>
+  <version>0.0.1</version>
+  <description>state machine for the RoboCup@Work conveyor belt test (CBT)</description>
+
+  <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
+  <maintainer email="jose.loza@h-brs.de">Jose Loza</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+  <author email="jose.loza@h-brs.de">Jose Loza</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

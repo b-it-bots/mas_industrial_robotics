@@ -15,6 +15,10 @@ import math
 
 import mir_states.common.manipulation_states as manipulation
 
+def print_all_found_holes(holes):
+    rospy.loginfo("all_found_holes: ")
+    for hole in holes:
+        rospy.loginfo("      %s", hole.name)
 
 class check_platform_type(smach.State):
     def __init__(self):
@@ -41,7 +45,8 @@ class select_hole(smach.State):
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         btts.print_task_spec(userdata.task_list)
-        btts.print_all_found_holes(userdata.all_found_holes)
+
+        print_all_found_holes(userdata.all_found_holes)
 
         #get objects to be placed at current workstation
         objs_for_this_ws = []
@@ -54,8 +59,8 @@ class select_hole(smach.State):
         list_of_carried_objects_that_must_be_placed = []
         for i in range(len(userdata.rear_platform_occupied_poses)):
             for obj_name in objs_for_this_ws:
-                rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj_name: %s     obj_name: %s", userdata.rear_platform_occupied_poses[i].obj_name, obj_name)
-                if userdata.rear_platform_occupied_poses[i].obj_name == obj_name:
+                rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj.name: %s     obj_name: %s", userdata.rear_platform_occupied_poses[i].obj.name, obj_name)
+                if userdata.rear_platform_occupied_poses[i].obj.name == obj_name:
                     list_of_carried_objects_that_must_be_placed.append(obj_name)
                     stop = True
                     break;
@@ -91,12 +96,12 @@ class grasp_obj_for_hole_from_pltf(smach.State):
 
         pltf_obj_pose = None
         for i in range(len(userdata.rear_platform_occupied_poses)):
-            rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj_name: %s", userdata.rear_platform_occupied_poses[i].obj_name)
-            if  userdata.selected_hole.name in userdata.rear_platform_occupied_poses[i].obj_name:
+            rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj.name: %s", userdata.rear_platform_occupied_poses[i].obj.name)
+            if  userdata.selected_hole.name in userdata.rear_platform_occupied_poses[i].obj.name:
                 pltf_obj_pose = userdata.rear_platform_occupied_poses.pop(i)
                 userdata.rear_platform_free_poses.append(pltf_obj_pose)
-                userdata.last_grasped_obj = pltf_obj_pose.obj_name
-                rospy.loginfo("LAST OBJ: %s", userdata.last_grasped_obj)
+                userdata.last_grasped_obj = pltf_obj_pose.obj
+                rospy.loginfo("LAST OBJ: %s", userdata.last_grasped_obj.name)
                 break
 
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
@@ -106,7 +111,7 @@ class grasp_obj_for_hole_from_pltf(smach.State):
 
 
         print "plat_pose: ", pltf_obj_pose.platform_pose
-        print "plat_name: ", pltf_obj_pose.obj_name
+        print "plat_name: ", pltf_obj_pose.obj.name
 
         manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
         manipulation.arm_command.go()

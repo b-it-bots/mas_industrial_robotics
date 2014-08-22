@@ -7,6 +7,9 @@ import geometry_msgs.msg
 import std_msgs.msg
 import numpy
 import tf
+import actionlib
+
+
 
 '''
 Usage:
@@ -35,7 +38,7 @@ class ArmRelativeMotionControl:
 		self.tooltip_armlink5_distance = 0.166
 		self.planning_fraction_tolerance = 0.2
 		self.platformsurface_to_tooltip_tolerance = 0.02
-		self.platformsurface_wrt_baselink = 0.012
+		self.platformsurface_wrt_baselink = 0.007
 		
 	def init_moveit(self):
 		'''
@@ -45,6 +48,13 @@ class ArmRelativeMotionControl:
 		create this DisplayTrajectory publisher which is used below 
 			to publish trajectories for RVIZ to visualize.
 		'''
+		
+		# temporary fix to wait for moveit to come up, otherwise MoveGroupCommander will fail after a timeout
+		client = actionlib.SimpleActionClient('/move_group', moveit_msgs.msg.MoveGroupAction)
+		rospy.loginfo("Wait for MoveIt! to come up ...", )
+		client.wait_for_server()
+		rospy.loginfo("... MoveIt! is up")
+		
 		self.group = moveit_commander.MoveGroupCommander('arm_1')
        
 		self.display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',moveit_msgs.msg.DisplayTrajectory)

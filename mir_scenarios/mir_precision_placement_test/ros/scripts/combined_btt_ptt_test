@@ -16,9 +16,12 @@ import mir_states.common.perception_states as gps
 
 #import of sub state machines
 import mir_states.robocup.basic_transportation_test_sub_state_machines as btt_sms
+import mir_states.robocup.precision_placement_test_sub_state_machines as ppt_sms
+
 
 #import robocup specific states
 import mir_states.robocup.basic_transportation_test_states as btts
+import mir_states.robocup.precision_placement_test_states as ppts
 import mir_states.robocup.referee_box_states as refbox
 
 
@@ -28,22 +31,22 @@ from mcr_perception_msgs.msg import ObjectList, Object
 # main
 def main(no_refbox=False):
 
-    rospy.init_node('basic_manipulation_test')
+    rospy.init_node('precision_placement_test')
 
     SM = smach.StateMachine(outcomes=['done'])
-    
+
     # world knowledge
     SM.userdata.task_list = []
-    
+
     SM.userdata.no_refbox = no_refbox
-    SM.userdata.test = "BMT"
-    
+    SM.userdata.test = "PPT"
+
     SM.userdata.base_pose_to_approach = 0
     SM.userdata.lasttask = btts.Bunch(location="", obj_names="")
     SM.userdata.current_task_index = 0
     SM.userdata.recognized_objects = []
     SM.userdata.object_to_be_adjust_to = 0
-   
+
     SM.userdata.objects_to_be_grasped = 0
     SM.userdata.object_to_grasp = None
     SM.userdata.move_arm_to = 0
@@ -51,7 +54,7 @@ def main(no_refbox=False):
     SM.userdata.objects_goal_configuration = 0
     SM.userdata.found_objects = 0
     SM.userdata.object_pose = 0
-    SM.userdata.desired_distance_to_workspace = None 
+
 
     SM.userdata.rear_platform_free_poses = []
     SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_right'))
@@ -62,62 +65,77 @@ def main(no_refbox=False):
     SM.userdata.obj_goal_configuration_poses = []
     SM.userdata.destinaton_free_poses = []
     SM.userdata.source_visits = []
-
+    SM.userdata.objects_to_be_grasped = 0
+    SM.userdata.last_grasped_obj = None
     SM.userdata.vscount = 0
 
+    SM.userdata.ppt_platform_location = ''
+    SM.userdata.all_found_holes = None
+    SM.userdata.selected_hole = None
+    SM.userdata.selected_hole_pose = None
+    SM.userdata.desired_distance_to_workspace = None
+
     use_mockup = False
-    
+
      # open the container
     with SM:
-        
+
         smach.StateMachine.add('INIT_ROBOT', gbs.init_robot(),
-            transitions={'succeeded':'GET_TASK'})
+            transitions={'succeeded': 'GET_TASK'})
 
         smach.StateMachine.add('GET_TASK', refbox.get_task(),
-            transitions={'task_received':'SETUP_TASK',
-                         'wrong_task':'GET_TASK',
-                         'wrong_task_format':'GET_TASK'})
+            transitions={'task_received': 'SETUP_TASK',
+                         'wrong_task': 'GET_TASK',
+                         'wrong_task_format': 'GET_TASK'})
 
         if (use_mockup):
             smach.StateMachine.add('SETUP_TASK', btts.setup_task(),
-                transitions={'success':'ADD_OBJECT_FROM_TASK_LIST_TO_OBJECT_DETECTION_MOCKUP'})
-        
+                transitions={'success': 'ADD_OBJECT_FROM_TASK_LIST_TO_OBJECT_DETECTION_MOCKUP'})
+
             smach.StateMachine.add("ADD_OBJECT_FROM_TASK_LIST_TO_OBJECT_DETECTION_MOCKUP",
                 perception_mockup_util.add_object_from_task_list_state(),
-                transitions={'success':'GO_AND_PICK'})
+                transitions={'success': 'GO_AND_PICK'})
         else:
             smach.StateMachine.add('SETUP_TASK', btts.setup_task(),
-                transitions={'success':'GO_AND_PICK'})
-                  
+                transitions={'success': 'GO_AND_PICK'})
+
         smach.StateMachine.add('GO_AND_PICK', btt_sms.sub_sm_go_and_pick(use_mockup),
-                transitions={'pose_skipped_but_platform_limit_reached':'GO_TO_DESTINATION',
-                             'no_more_free_poses':'GO_TO_DESTINATION',
-                             'no_more_free_poses_at_robot_platf':'GO_TO_DESTINATION',
-                             'no_more_task_for_given_type':'GO_TO_DESTINATION'})
- 
+                transitions={'pose_skipped_but_platform_limit_reached': 'GO_TO_DESTINATION',
+                             'no_more_free_poses': 'GO_TO_DESTINATION',
+                             'no_more_free_poses_at_robot_platf': 'GO_TO_DESTINATION',
+                             'no_more_task_for_given_type': 'GO_TO_DESTINATION'})
+
         smach.StateMachine.add('SKIP_DESTINATION_POSE', btts.skip_pose('destination'),
-            transitions={'pose_skipped':'GO_TO_DESTINATION',
-                         'pose_skipped_but_platform_limit_reached':'GO_TO_DESTINATION'})
+            transitions={'pose_skipped': 'GO_TO_DESTINATION',
+                         'pose_skipped_but_platform_limit_reached': 'GO_TO_DESTINATION'})
 
         smach.StateMachine.add('GO_TO_DESTINATION', btt_sms.sub_sm_go_to_destination(),
-                transitions={'destination_reached':'PLACE_OBJECT_ON_WORKSTATION',
-                             'overall_done':'done'})
+                transitions={'destination_reached': 'CHECK_PLATFORM_TYPE',
+                             'overall_done': 'done'})
 
-        smach.StateMachine.add('PLACE_OBJECT_ON_WORKSTATION', btt_sms.sub_sm_place(),
-                transitions={'succeeded':'GO_TO_DESTINATION',
-                             'no_more_obj_for_this_workspace':'MOVE_ARM_TO_INIT'})  
+        smach.StateMachine.add('CHECK_PLATFORM_TYPE', ppts.check_platform_type(),
+            transitions={'ppt': 'PLACE_IN_HOLE',
+                        'btt': 'PLACE_OBJECT_ON_REGULAR_WORKSTATION'})
+
+        smach.StateMachine.add('PLACE_IN_HOLE', ppt_sms.sub_sm_place_in_holes(),
+            transitions={'succeeded': 'CHECK_IF_PLTF_HAS_STILL_OBJS',
+                         'failed': 'PLACE_OBJECT_ON_REGULAR_WORKSTATION',
+                         'no_object_for_ppt_platform': 'MOVE_ARM_TO_INIT'})
+
+        smach.StateMachine.add('PLACE_OBJECT_ON_REGULAR_WORKSTATION', btt_sms.sub_sm_place(),
+                transitions={'succeeded': 'GO_TO_DESTINATION',
+                             'no_more_obj_for_this_workspace': 'MOVE_ARM_TO_INIT'})
 
         smach.StateMachine.add('MOVE_ARM_TO_INIT', gms.move_arm("platform_intermediate"),
-            transitions={'succeeded':'CHECK_IF_PLTF_HAS_STILL_OBJS',
-                         'failed':'CHECK_IF_PLTF_HAS_STILL_OBJS'})
+            transitions={'succeeded': 'CHECK_IF_PLTF_HAS_STILL_OBJS',
+                         'failed': 'CHECK_IF_PLTF_HAS_STILL_OBJS'})
 
         smach.StateMachine.add('CHECK_IF_PLTF_HAS_STILL_OBJS', btts.check_if_platform_has_still_objects(),
-            transitions={'still_objs_on_robot_pltf':'SKIP_DESTINATION_POSE',
-                         'no_more_objs_on_robot_pltf':'GO_AND_PICK'})
-
+            transitions={'still_objs_on_robot_pltf': 'SKIP_DESTINATION_POSE',
+                         'no_more_objs_on_robot_pltf': 'GO_AND_PICK'})
 
     # Start SMACH viewer
-    smach_viewer = smach_ros.IntrospectionServer('BASIC_MANIPULATION_TEST', SM, 'BASIC_MANIPULATION_TEST')
+    smach_viewer = smach_ros.IntrospectionServer('PRECISION_PLACEMENT_TEST', SM, 'PRECISION_PLACEMENT_TEST')
     smach_viewer.start()
 
     result = SM.execute()
@@ -125,7 +143,7 @@ def main(no_refbox=False):
     # stop SMACH viewer
     while (result is None):
         rospy.spin()
-    rospy.loginfo('Basic manipulation test is Done.')
+    rospy.loginfo('Precision placement test is Done.')
     # smach_thread.stop()
     smach_viewer.stop()
 

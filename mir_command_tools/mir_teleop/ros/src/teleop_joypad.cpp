@@ -490,6 +490,11 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
             this->checkArmJointLimits();
             pub_arm_joint_vel_.publish(arm_vel_);
         }
+
+        if ( (bool) command->buttons[button_index_reconnect_left_] && (bool) command->buttons[button_index_reconnect_right_] )
+        {
+            this->reconnect();
+        }
     }
 
     else
@@ -506,12 +511,6 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
             pub_arm_cart_vel_.publish(arm_cart_zero_vel_);
         }
     }
-
-    if ( (bool) command->buttons[button_index_reconnect_left_] && (bool) command->buttons[button_index_reconnect_right_] )
-    {
-        this->reconnect();
-    }
-
 
     //check if arm is in joint mode (not cc mode)
     if (!button_print_arm_states_prev_ && (bool) command->buttons[button_index_print_arm_joint_states_])

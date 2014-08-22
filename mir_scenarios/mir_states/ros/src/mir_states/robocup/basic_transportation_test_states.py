@@ -27,7 +27,7 @@ def print_occupied_platf_poses(poses):
     
     rospy.loginfo("occupied_platform poses: ")
     for item in poses:
-        rospy.loginfo("     %s", item.obj_name)
+        rospy.loginfo("     %s", item.obj.name)
     
     return
 
@@ -164,10 +164,10 @@ class select_delivery_workstation(smach.State):
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
         
         for task in userdata.task_list:
-            for obj in userdata.rear_platform_occupied_poses:
+            for platform_item in userdata.rear_platform_occupied_poses:
                 if task.type == 'destination':
                     for dest in task.object_names:
-                        if dest == obj.obj_name:
+                        if dest == platform_item.obj.name:
                             userdata.base_pose_to_approach = task.location
                             userdata.objects_goal_configuration = task.object_config
                             return 'success'
@@ -226,12 +226,12 @@ class grasp_obj_from_pltf_btt(smach.State):
         stop = False
         for i in range(len(userdata.rear_platform_occupied_poses)):
             for obj_name in objs_for_this_ws:
-                rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj_name: %s     obj_name: %s", userdata.rear_platform_occupied_poses[i].obj_name, obj_name)
-                if userdata.rear_platform_occupied_poses[i].obj_name == obj_name:
+                rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj.name: %s     obj_name: %s", userdata.rear_platform_occupied_poses[i].obj.name, obj_name)
+                if userdata.rear_platform_occupied_poses[i].obj.name == obj_name:
                     pltf_obj_pose =  userdata.rear_platform_occupied_poses.pop(i)
                     userdata.rear_platform_free_poses.append(pltf_obj_pose)
-                    userdata.last_grasped_obj = pltf_obj_pose.obj_name
-                    print "LAST OBJ: ", userdata.last_grasped_obj
+                    userdata.last_grasped_obj = pltf_obj_pose.obj
+                    print "LAST OBJ: ", userdata.last_grasped_obj.name
                     stop = True
                     break;
             if stop:
@@ -244,7 +244,7 @@ class grasp_obj_from_pltf_btt(smach.State):
         
        
         print "plat_pose: ", pltf_obj_pose.platform_pose
-        print "plat_name: ", pltf_obj_pose.obj_name
+        print "plat_name: ", pltf_obj_pose.obj.name
 
         manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
         manipulation.arm_command.go()
@@ -295,9 +295,9 @@ class place_object_in_configuration_btt(smach.State):
         #delete placed obj from task list
         for j in range(len(userdata.task_list)):
             if userdata.task_list[j].type == 'destination' and userdata.task_list[j].location == userdata.base_pose_to_approach:
-                print "lllll: ", userdata.last_grasped_obj
+                print "lllll: ", userdata.last_grasped_obj.name
                 print "list: ", userdata.task_list[j].object_names 
-                userdata.task_list[j].object_names.remove(userdata.last_grasped_obj)
+                userdata.task_list[j].object_names.remove(userdata.last_grasped_obj.name)
                 
                 if len(userdata.task_list[j].object_names) == 0:
                     userdata.task_list.pop(j)
@@ -350,7 +350,7 @@ class place_obj_on_rear_platform_btt(smach.State):
         print_task_spec(userdata.task_list)
         
         # remember what is on the platform
-        pltf_pose.obj_name = userdata.object_to_grasp.name
+        pltf_pose.obj = userdata.object_to_grasp
         userdata.rear_platform_occupied_poses.append(pltf_pose)
         
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)

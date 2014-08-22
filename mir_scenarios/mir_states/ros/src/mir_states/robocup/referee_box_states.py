@@ -30,7 +30,7 @@ class get_task(smach.State):
     test: str
         Type of test ('BNT', 'BTT', etc). The task specification will be parsed
         according to this type.
-    simulation: bool
+    no_refbox: bool
         If this is set to True, then no communication with Referee box will
         happen and rather a hard-coded task specification will be used.
 
@@ -45,18 +45,19 @@ class get_task(smach.State):
                        'BMT': 'BMT<S3,S3,S2,line(M20_100,F20_20_G,F20_20_B),S2>',
                        'BTT': 'BTT<initialsituation(<S5,(R20,M30,S40_40_B)><S2,(S40_40_G,M20,R20)><S3,(F20_20_B,M20_100,F20_20_G)>);goalsituation(<C1,line(M20_100,M30,M20)><S4,line(F20_20_G,R20,R20)><S1,line(S40_40_B,S40_40_G,F20_20_B)>)>',
                        #'BTT': 'BTT<initialsituation(<S4,(S40_40_G)>);goalsituation(<S5,line(S40_40_G)>)>',
-                       'PPT': 'PPT<S1,(M20,S_40_40_G),S2>'}
+                       'PPT': 'PPT<S2,(M20_100,M20,F20_20_B),S1>',
+                       'CBT': 'CBT<C1>'}
 
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['task_received', 'wrong_task', 'wrong_task_format'], 
-            input_keys=['test', 'simulation'],
+            input_keys=['test', 'no_refbox'],
             output_keys=['ppt_platform_location'],
             io_keys=['task_list'])
 
     def execute(self, userdata):
 
-        if not userdata.simulation:
+        if not userdata.no_refbox:
             rospy.loginfo('Waiting for task specification (%s:%s)...' % (ip, port))
             task_spec = mir_states_common.robocup.referee_box_communication.obtainTaskSpecFromServer(ip, port, team_name)
         else:
@@ -74,7 +75,7 @@ class get_task(smach.State):
         try:
             if(userdata.test == "BNT"):
                 userdata.task_list = get_basic_navigation_task(task_spec[0])
-            if(userdata.test == "BMT"):
+            elif(userdata.test == "BMT"):
                 userdata.task_list = get_basic_manipulation_task(task_spec[0])
             elif(userdata.test == "BTT"):
                 userdata.task_list = get_basic_transportation_task(task_spec[0])
@@ -84,6 +85,11 @@ class get_task(smach.State):
                 userdata.ppt_platform_location = ppt_description[1]
             elif(userdata.test == "CTT"):
                 userdata.task_list = get_competitive_transportation_task(task_spec[0])
+            elif(userdata.test == "CBT"):
+                userdata.task_list = task_spec[0]
+            else:
+                return 'wrong_task_format'
+
         except Exception as e:
             rospy.logerr("Exception: %s", e)
             return 'wrong_task_format'

@@ -12,6 +12,7 @@ catkin_package(
     mir_base_placement
     mir_bringup
     mir_bringup_sim
+    mir_moveit_scene
     mir_states
     mcr_object_recognition_bounding_box
     mir_visual_servoing
