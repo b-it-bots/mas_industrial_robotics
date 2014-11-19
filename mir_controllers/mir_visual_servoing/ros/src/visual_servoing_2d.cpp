@@ -294,22 +294,28 @@ g only at a region of interest instead of the whole image.
 	{
 		m_head_left = false;
 		m_head_right = true;
-		done_x = BaseAdjustmentX( y_offset );
-		done_y = BaseAdjustmentY( x_offset );
+		//done_x = BaseAdjustmentX( y_offset );
+		//done_y = BaseAdjustmentY( x_offset );
+		done_x = BaseAdjustmentX( x_offset );
+		done_y = BaseAdjustmentY( -y_offset );
 	}
 	else if( m_gripper_position > 3.9277 )
 	{
 		m_head_left = true;
 		m_head_right = false;
-		done_x = BaseAdjustmentX( y_offset );
-		done_y = BaseAdjustmentY( x_offset );
+		//done_x = BaseAdjustmentX( y_offset );
+		//done_y = BaseAdjustmentY( x_offset );
+		done_x = BaseAdjustmentX( x_offset );
+		done_y = BaseAdjustmentY( -y_offset );
 	}
 	else
 	{
 		m_head_left = false;
 		m_head_right = false;
-		done_x = BaseAdjustmentX( x_offset );
-		done_y = BaseAdjustmentY( y_offset );
+		//done_x = BaseAdjustmentX( x_offset );
+		//done_y = BaseAdjustmentY( y_offset );
+		done_x = BaseAdjustmentX( -y_offset );
+		done_y = BaseAdjustmentY( x_offset );
 	}
 	done_t = ArmAdjustment( rot_offset );
 
