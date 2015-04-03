@@ -28,14 +28,14 @@ class find_objects(smach.State):
         self.tf_listener = tf.TransformListener()
         self.retries = retries
         self.frame_id = frame_id
-    
+
     def object_list_cb(self, event):
         self.object_list = event
-    
+
     def event_out_cb(self, event):
         self.event_msg = event.data
 
-    def execute(self, userdata):        
+    def execute(self, userdata):
         userdata.found_objects = None
         for i in range(self.retries):
             self.object_list = None
@@ -105,9 +105,9 @@ class do_visual_servoing(smach.State):
         elif( response.return_value.error_code == -1 ):
             return 'failed'
         elif( response.return_value.error_code == -2 ):
-            return 'timeout' 
+            return 'timeout'
         elif( response.return_value.error_code == -3 ):
-            return 'lost_object' 
+            return 'lost_object'
 
 
 class find_holes(smach.State):
@@ -158,3 +158,54 @@ class find_holes(smach.State):
             rospy.sleep(0.1)
 
         return 'found_no_holes'
+
+class find_cavities(smach.State):
+    def __init__(self, frame_id=None):
+        smach.State.__init__(self,
+            outcomes=['succeeded','not_all_cavities_found', 'timeout'],
+            input_keys=['selected_objects', 'found_cavities'],
+            output_keys=['found_cavities'])
+
+        self.sub_cavity = rospy.Subscriber('/mcr_perception/cavity_message_builder/output/cavity', mcr_perception_msgs.msg.Cavity, self.cavity_cb)
+        self.pub_contour_finder_event = rospy.Publisher('/mcr_perception/contour_finder/input/event_in', std_msgs.msg.String)
+        self.pub_object_category = rospy.Publisher('/mcr_perception/cavity_template_publisher/input/object_name', std_msgs.msg.String)
+        self.tf_listener = tf.TransformListener()
+        self.cavity = None
+        self.frame_id = frame_id
+
+    def cavity_cb(self, cavity):
+        self.cavity = cavity
+
+    def execute(self, userdata):
+        userdata.found_cavities = []
+        for obj in userdata.selected_objects:
+            self.cavity = None
+            self.pub_object_category.publish(obj.name)
+            self.pub_contour_finder_event.publish("e_trigger")
+
+            timeout = rospy.Duration.from_sec(5.0)  #wait for the done event max. 5 seconds
+            start_time = rospy.Time.now()
+            while not rospy.is_shutdown():
+                if self.cavity:
+                    rospy.loginfo('Received Cavity message for %s', obj.name)
+                    self.cavity.object_name = obj.name
+                    userdata.found_cavities.append(self.cavity)
+                    break
+
+                if (rospy.Time.now() - start_time) > timeout:
+                    rospy.logerr('timeout of %f seconds exceeded for finding cavity' % float(timeout.to_sec()))
+                    return 'timeout'
+
+                rospy.sleep(0.1)
+
+        if self.frame_id:
+            for cavity in userdata.found_cavities:
+                try:
+                    cavity.pose = self.tf_listener.transformPose(self.frame_id, cavity.pose)
+                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                    rospy.logerr('Unable to transform %s -> %s' % (cavity.pose.header.frame_id, self.frame_id))
+
+        if len(userdata.found_cavities) == len(userdata.selected_objects):
+            return 'succeeded'
+        else:
+            return 'not_all_cavities_found'
