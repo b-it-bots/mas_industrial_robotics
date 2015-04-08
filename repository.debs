@@ -4,6 +4,7 @@
 packagelist=(
     libcap2-bin
     python-pygraphviz
+    python-scipy
     python-setuptools
     python-zmq
     ros-hydro-amcl
@@ -18,9 +19,11 @@ packagelist=(
     ros-hydro-map-server
     ros-hydro-move-base
     ros-hydro-moveit-core
+    ros-hydro-moveit-commander
     ros-hydro-moveit-msgs
     ros-hydro-moveit-planners
     ros-hydro-moveit-ros-move-group
+    ros-hydro-moveit-setup-assistant
     ros-hydro-moveit-simple-controller-manager
     ros-hydro-pr2-dashboard-aggregator
     ros-hydro-pr2-description
