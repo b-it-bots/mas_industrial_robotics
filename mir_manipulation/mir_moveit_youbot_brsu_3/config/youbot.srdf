@@ -213,15 +213,17 @@
     <disable_collisions link1="adapter_plate_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="adapter_plate_link" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="adapter_plate_link" link2="wheel_link_fr" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="arm_cam3d_foot_link" reason="Default" />
+    <disable_collisions link1="arm_cam3d_camera" link2="arm_cam3d_foot_link" reason="Never" />
     <disable_collisions link1="arm_cam3d_camera" link2="arm_cam3d_tilt_link" reason="Adjacent" />
     <disable_collisions link1="arm_cam3d_camera" link2="arm_link_3" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="arm_link_5" reason="Default" />
+    <disable_collisions link1="arm_cam3d_camera" link2="arm_link_4" reason="Never" />
+    <disable_collisions link1="arm_cam3d_camera" link2="arm_link_5" reason="Never" />
     <disable_collisions link1="arm_cam3d_camera" link2="base_footprint" reason="Never" />
     <disable_collisions link1="arm_cam3d_camera" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="arm_cam3d_camera" link2="gripper_linkage_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="gripper_palm_link" reason="Default" />
+    <disable_collisions link1="arm_cam3d_camera" link2="gripper_palm_link" reason="Never" />
     <disable_collisions link1="arm_cam3d_camera" link2="wheel_link_bl" reason="Never" />
+    <disable_collisions link1="arm_cam3d_camera" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_cam3d_foot_link" link2="arm_cam3d_tilt_link" reason="Adjacent" />
     <disable_collisions link1="arm_cam3d_foot_link" link2="arm_link_3" reason="Never" />
     <disable_collisions link1="arm_cam3d_foot_link" link2="arm_link_4" reason="Never" />
@@ -298,8 +300,6 @@
     <disable_collisions link1="base_footprint" link2="base_laser_front_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_link" reason="Adjacent" />
-    <disable_collisions link1="base_footprint" link2="gripper_linkage_link" reason="Never" />
-    <disable_collisions link1="base_footprint" link2="gripper_palm_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="base_footprint" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="base_footprint" link2="wheel_link_fl" reason="Never" />
