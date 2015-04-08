@@ -22,6 +22,7 @@ packagelist=(
     ros-hydro-moveit-planners
     ros-hydro-moveit-ros-move-group
     ros-hydro-moveit-simple-controller-manager
+    ros-hydro-openni2-launch
     ros-hydro-pr2-dashboard-aggregator
     ros-hydro-pr2-description
     ros-hydro-pr2-msgs
