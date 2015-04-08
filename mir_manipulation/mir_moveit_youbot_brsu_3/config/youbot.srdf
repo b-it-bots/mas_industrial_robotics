@@ -22,13 +22,12 @@
     </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="camera_calibration_snake" group="arm_1">
-        <joint name="arm_joint_1" value="2.143171" />
-        <joint name="arm_joint_2" value="1.131245" />
-        <joint name="arm_joint_3" value="-2.547109" />
+        <joint name="arm_joint_1" value="2.14317" />
+        <joint name="arm_joint_2" value="1.13125" />
+        <joint name="arm_joint_3" value="-2.54711" />
         <joint name="arm_joint_4" value="3.35851" />
-        <joint name="arm_joint_5" value="2.92727851" />
+        <joint name="arm_joint_5" value="2.92728" />
     </group_state>
-
     <group_state name="camera_calibration_elbow" group="arm_1">
         <joint name="arm_joint_1" value="5.30383" />
         <joint name="arm_joint_2" value="0.069407" />
@@ -36,7 +35,6 @@
         <joint name="arm_joint_4" value="3.426" />
         <joint name="arm_joint_5" value="2.9831" />
     </group_state>
-
     <group_state name="lookat_workspace" group="arm_1">
         <joint name="arm_joint_1" value="2.1262" />
         <joint name="arm_joint_2" value="0.306859" />
@@ -229,36 +227,6 @@
     <disable_collisions link1="adapter_plate_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="adapter_plate_link" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="adapter_plate_link" link2="wheel_link_fr" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="arm_cam3d_foot_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="arm_cam3d_tilt_link" reason="Adjacent" />
-    <disable_collisions link1="arm_cam3d_camera" link2="arm_link_3" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="arm_link_4" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="arm_link_5" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="base_footprint" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="base_laser_rear_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="gripper_linkage_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="gripper_palm_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="wheel_link_bl" reason="Never" />
-    <disable_collisions link1="arm_cam3d_camera" link2="wheel_link_br" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="arm_cam3d_tilt_link" reason="Adjacent" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="arm_link_3" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="arm_link_4" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="arm_link_5" reason="Adjacent" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="base_footprint" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="base_laser_rear_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="gripper_linkage_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="gripper_palm_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="wheel_link_bl" reason="Never" />
-    <disable_collisions link1="arm_cam3d_foot_link" link2="wheel_link_br" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="arm_link_3" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="arm_link_4" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="arm_link_5" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="base_footprint" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="base_laser_rear_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="gripper_linkage_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="gripper_palm_link" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="wheel_link_bl" reason="Never" />
-    <disable_collisions link1="arm_cam3d_tilt_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_0" link2="arm_link_1" reason="Adjacent" />
     <disable_collisions link1="arm_link_0" link2="arm_link_2" reason="Never" />
     <disable_collisions link1="arm_link_0" link2="base_footprint" reason="Never" />
@@ -295,6 +263,9 @@
     <disable_collisions link1="arm_link_3" link2="base_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="arm_link_3" link2="tower_cam3d_camera" reason="Never" />
+    <disable_collisions link1="arm_link_3" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="arm_link_3" link2="tower_cam3d_tilt_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_fl" reason="Never" />
@@ -305,17 +276,26 @@
     <disable_collisions link1="arm_link_4" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="arm_link_4" link2="tower_cam3d_camera" reason="Never" />
+    <disable_collisions link1="arm_link_4" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="arm_link_4" link2="tower_cam3d_tilt_link" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="base_footprint" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="gripper_linkage_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="gripper_palm_link" reason="Adjacent" />
+    <disable_collisions link1="arm_link_5" link2="tower_cam3d_camera" reason="Never" />
+    <disable_collisions link1="arm_link_5" link2="tower_cam3d_foot_link" reason="Adjacent" />
+    <disable_collisions link1="arm_link_5" link2="tower_cam3d_tilt_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_laser_front_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_link" reason="Adjacent" />
+    <disable_collisions link1="base_footprint" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="base_footprint" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="base_footprint" link2="tower_cam3d_tilt_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="base_footprint" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="base_footprint" link2="wheel_link_fl" reason="Never" />
@@ -328,6 +308,9 @@
     <disable_collisions link1="base_laser_front_link" link2="wheel_link_fr" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="base_link" reason="Adjacent" />
     <disable_collisions link1="base_laser_rear_link" link2="gripper_palm_link" reason="Never" />
+    <disable_collisions link1="base_laser_rear_link" link2="tower_cam3d_camera" reason="Never" />
+    <disable_collisions link1="base_laser_rear_link" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="base_laser_rear_link" link2="tower_cam3d_tilt_link" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="base_laser_rear_link" link2="wheel_link_fl" reason="Never" />
@@ -337,8 +320,23 @@
     <disable_collisions link1="base_link" link2="wheel_link_fl" reason="Adjacent" />
     <disable_collisions link1="base_link" link2="wheel_link_fr" reason="Adjacent" />
     <disable_collisions link1="gripper_linkage_link" link2="gripper_palm_link" reason="Adjacent" />
+    <disable_collisions link1="gripper_linkage_link" link2="tower_cam3d_camera" reason="Never" />
+    <disable_collisions link1="gripper_linkage_link" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="gripper_linkage_link" link2="tower_cam3d_tilt_link" reason="Never" />
+    <disable_collisions link1="gripper_palm_link" link2="tower_cam3d_camera" reason="Never" />
+    <disable_collisions link1="gripper_palm_link" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="gripper_palm_link" link2="tower_cam3d_tilt_link" reason="Never" />
     <disable_collisions link1="gripper_palm_link" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="gripper_palm_link" link2="wheel_link_br" reason="Never" />
+    <disable_collisions link1="tower_cam3d_camera" link2="tower_cam3d_foot_link" reason="Never" />
+    <disable_collisions link1="tower_cam3d_camera" link2="tower_cam3d_tilt_link" reason="Adjacent" />
+    <disable_collisions link1="tower_cam3d_camera" link2="wheel_link_bl" reason="Never" />
+    <disable_collisions link1="tower_cam3d_camera" link2="wheel_link_br" reason="Never" />
+    <disable_collisions link1="tower_cam3d_foot_link" link2="tower_cam3d_tilt_link" reason="Adjacent" />
+    <disable_collisions link1="tower_cam3d_foot_link" link2="wheel_link_bl" reason="Never" />
+    <disable_collisions link1="tower_cam3d_foot_link" link2="wheel_link_br" reason="Never" />
+    <disable_collisions link1="tower_cam3d_tilt_link" link2="wheel_link_bl" reason="Never" />
+    <disable_collisions link1="tower_cam3d_tilt_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="wheel_link_bl" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="wheel_link_bl" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="wheel_link_bl" link2="wheel_link_fr" reason="Never" />
