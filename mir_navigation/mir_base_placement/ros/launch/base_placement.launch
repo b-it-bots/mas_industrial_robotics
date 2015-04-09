@@ -2,13 +2,13 @@
 <launch>
 
   <node pkg="mcr_linear_regression" type="laser_scan_linear_regression_node" name="linear_regression" ns="mcr_perception" respawn="false" output="screen" >
-        <param name="scan_topic" value="/scan_rear" />
+        <param name="scan_topic" value="/scan_front" />
   </node>
 
   <node pkg="mir_base_placement" type="base_placement_node" name="base_placement" ns="mir_navigation" respawn="false" output="screen">
   	<param name="cmd_vel_topic" value="/cmd_vel" />
-  	<param name="linear_regression_service" value="/scan_rear_linearregression" />  	
-  	<param name="laser_axis" value="-y" />
+  	<param name="linear_regression_service" value="/scan_front_linearregression" />  	
+  	<param name="laser_axis" value="+x" />
   	<param name="max_linear_velocity" value="0.18" />
   	<param name="max_angular_velocity" value="0.18" />
   	<param name="lin_p" value="0.5" />
