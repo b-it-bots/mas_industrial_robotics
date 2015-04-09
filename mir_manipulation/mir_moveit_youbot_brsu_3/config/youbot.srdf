@@ -35,7 +35,7 @@
         <joint name="arm_joint_4" value="3.426" />
         <joint name="arm_joint_5" value="2.9831" />
     </group_state>
-    <group_state name="lookat_workspace" group="arm_1">
+    <group_state name="out_of_view" group="arm_1">
         <joint name="arm_joint_1" value="2.1262" />
         <joint name="arm_joint_2" value="0.306859" />
         <joint name="arm_joint_3" value="-1.19222" />
@@ -55,13 +55,6 @@
         <joint name="arm_joint_3" value="-2.54818" />
         <joint name="arm_joint_4" value="1.78896" />
         <joint name="arm_joint_5" value="2.93075" />
-    </group_state>
-    <group_state name="out_of_view" group="arm_1">
-        <joint name="arm_joint_1" value="4.9916" />
-        <joint name="arm_joint_2" value="2.4048" />
-        <joint name="arm_joint_3" value="-2.7208" />
-        <joint name="arm_joint_4" value="2.6022" />
-        <joint name="arm_joint_5" value="2.9158" />
     </group_state>
     <group_state name="tower_right" group="arm_1">
         <joint name="arm_joint_1" value="1.9199" />
