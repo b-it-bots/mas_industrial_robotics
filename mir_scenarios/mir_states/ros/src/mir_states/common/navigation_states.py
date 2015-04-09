@@ -10,7 +10,7 @@ import actionlib_msgs.msg
 import random
 import math
 
-from geometry_msgs.msg import PoseStamped, Twist
+from geometry_msgs.msg import PoseStamped, Twist, Quaternion
 from std_msgs.msg import String
 
 from actionlib.simple_action_client import GoalStatus
@@ -61,7 +61,7 @@ class move_base_relative(smach.State):
     Input
     -----
     move_base_by: 3-tuple
-        x, y, and theta displacement the shift the robot by. If an offset was
+        x, y, and yaw displacement the shift the robot by (in /base_link). If an offset was
         supplied to the state constructor then it will override this input.
     """
 
@@ -71,7 +71,7 @@ class move_base_relative(smach.State):
                              input_keys=['move_base_by'])
         self.offset = offset
 
-        self.pub_relative_base_ctrl_command = rospy.Publisher('/mcr_navigation/relative_base_controller/command', Twist, latch=True)
+        self.pub_relative_base_ctrl_command = rospy.Publisher('/mcr_navigation/relative_base_controller/command', PoseStamped, latch=True)
         self.pub_relative_base_ctrl_event = rospy.Publisher('/mcr_navigation/relative_base_controller/event_in', String, latch=True)
         self.sub_relative_base_ctrl_event = rospy.Subscriber('/mcr_navigation/relative_base_controller/event_out', String, self.relative_base_controller_event_cb)
 
@@ -96,17 +96,23 @@ class move_base_relative(smach.State):
         if not offset: 
           offset = [0,0,0]
 
-        relative_base_move = Twist()
+        relative_base_move = PoseStamped()
+        relative_base_move.header.stamp = rospy.Time.now()
+        relative_base_move.header.frame_id = "/base_link"
 
         if(len(offset) == 3):
-            relative_base_move.linear.x = offset[0]
-            relative_base_move.linear.y = offset[1]
-            relative_base_move.angular.z = offset[2]
+            relative_base_move.pose.position.x = offset[0]
+            relative_base_move.pose.position.y = offset[1]
+            
+            q = tf.transformations.quaternion_from_euler(0, 0, offset[2])
+            relative_base_move.pose.orientation = Quaternion(*q)
 
         elif(len(offset) == 6):
-            relative_base_move.linear.x = self.sample_with_boundary(offset[0], offset[1])
-            relative_base_move.linear.y = self.sample_with_boundary(offset[2], offset[3])
-            relative_base_move.angular.z = self.sample_with_boundary(offset[4], offset[5])
+            relative_base_move.pose.position.x = self.sample_with_boundary(offset[0], offset[1])
+            relative_base_move.pose.position.y = self.sample_with_boundary(offset[2], offset[3])
+            
+            q = tf.transformations.quaternion_from_euler(0, 0, self.sample_with_boundary(offset[4], offset[5]))
+            relative_base_move.pose.orientation = Quaternion(*q)
 
         self.relative_base_ctrl_event = ""
 
