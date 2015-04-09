@@ -8,9 +8,11 @@ import mir_states_common.robocup.referee_box_communication
 
 try:
     ip = rospy.get_param('refbox_ip')
+    port = rospy.get_param('refbox_port')
+    team_name = rospy.get_param('refbox_team_name')
 except KeyError:
     rospy.logerr("Using Hardcoded refbox_ip")
-    ip = "192.168.25.132"
+    ip = "192.168.25.143"
     port = "11111"
     team_name = "b-it-bots"
 
