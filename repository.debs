@@ -31,6 +31,7 @@ packagelist=(
     ros-hydro-ros
     ros-hydro-ros-controllers
     ros-hydro-rqt-pr2-dashboard
+    ros-hydro-smach
     ros-hydro-usb-cam
     ros-hydro-global-planner
 )

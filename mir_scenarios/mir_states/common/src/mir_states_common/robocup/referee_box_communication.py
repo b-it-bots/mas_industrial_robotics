@@ -13,7 +13,7 @@ from zmq import ssh
 def obtainTaskSpecFromServer(ServerIP, ServerPort, TeamName, 
                              use_ssh=False, ssh_server="youbot-hbrs2-pc2"):
     context = zmq.Context()
-    connection_address = "tcp://" + ServerIP + ":" + ServerPort
+    connection_address = "tcp://" + str(ServerIP) + ":" + str(ServerPort)
     print "Start connection to " + connection_address
 
     #  Socket to talk to server
