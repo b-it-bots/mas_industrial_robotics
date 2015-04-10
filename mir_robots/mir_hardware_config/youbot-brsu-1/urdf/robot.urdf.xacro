@@ -65,17 +65,21 @@
      <origin xyz="-0.3 0.0 -0.03" rpy="0 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
 
-  <!-- camera tower
+  <!-- camera tower -->
   <xacro:cam3d_tower name="camera_tower" parent="rear_platform_link">
     <origin xyz="-0.227 0.165 0.023" rpy="0 0 0" />
   </xacro:cam3d_tower>
-  -->
+
   <!-- 3D camera on arm -->
   <xacro:asus_xtion_camera name="tower_cam3d" parent="arm_link_5" tilt="0.0">
     <origin xyz="${-0.035 - 0.030 + 0.030} ${0 - 0.025} ${-0.025}" rpy="0 ${-M_PI / 2} 0" />
   </xacro:asus_xtion_camera>
 
-
+  <!-- 3D camera on tower (not used at the moment) -->
+  <xacro:asus_xtion_camera name="tower_cam3d_dummy" parent="camera_tower_link" tilt="0.5">
+    <origin xyz="0.015 0 0.47" rpy="0 0 0" />
+  </xacro:asus_xtion_camera>
+  
   <!-- Arm POV Mount 
   <xacro:microsoft_lifecam_1080_mount name="microsoft_lifecam_1080_mount" parent="arm_link_5">
     <origin xyz="-0.035 0.0 -0.025" rpy="0 0 3.14159265" />
