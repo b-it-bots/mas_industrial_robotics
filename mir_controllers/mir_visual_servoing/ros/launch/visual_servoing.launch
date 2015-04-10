@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-    <node pkg="mir_visual_servoing" type="visual_servoing_node" name="visual_servoing" ns="mir_controllers" output="screen"/>
+    <node pkg="mir_visual_servoing" type="visual_servoing_node" name="visual_servoing" ns="mir_controllers" output="screen" respawn="true">
+    	<remap from="~input_image" to="/tower_cam3d/rgb/image_raw"/>
+    </node>
 
 </launch>
