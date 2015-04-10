@@ -39,6 +39,11 @@
 
   <!-- foot for arm-->
   <xacro:youbot_base name="base"/>
+  
+  <!-- rear platform -->
+  <xacro:youbot_plate name="plate" parent="base_link">
+    <origin xyz="-0.159 0 0.046" rpy="0 0 0" />
+  </xacro:youbot_plate>
 
   <!-- BRSU SPECIFIC STUFF -->
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
