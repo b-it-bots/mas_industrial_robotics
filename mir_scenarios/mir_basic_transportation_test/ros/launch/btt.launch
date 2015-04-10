@@ -31,8 +31,6 @@
     <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller.launch" />
 
     <!-- perception pipeline -->
-    <!-- subscriber to XYZRGB pointcloud to solve the problem of first destructed pointclouds temporarly -->
-    <node pkg="rostopic" type="rostopic" name="rostopic" args="hz /tower_cam3d/depth_registered/points"/> 
     <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition.launch" />
       
     <!-- Visual Servoing -->
