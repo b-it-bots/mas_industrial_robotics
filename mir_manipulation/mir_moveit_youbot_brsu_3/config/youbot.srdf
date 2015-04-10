@@ -42,6 +42,20 @@
         <joint name="arm_joint_4" value="3.56838" />
         <joint name="arm_joint_5" value="2.95004" />
     </group_state>
+    <group_state name="look_at_workspace_right" group="arm_1">
+        <joint name="arm_joint_1" value="2.57483" />
+        <joint name="arm_joint_2" value="0.306859" />
+        <joint name="arm_joint_3" value="-1.19222" />
+        <joint name="arm_joint_4" value="3.56838" />
+        <joint name="arm_joint_5" value="2.95004" />
+    </group_state>
+    <group_state name="look_at_workspace_left" group="arm_1">
+        <joint name="arm_joint_1" value="1.70711" />
+        <joint name="arm_joint_2" value="0.306859" />
+        <joint name="arm_joint_3" value="-1.19222" />
+        <joint name="arm_joint_4" value="3.56838" />
+        <joint name="arm_joint_5" value="2.95004" />
+    </group_state>
     <group_state name="folded" group="arm_1">
         <joint name="arm_joint_1" value="0.02" />
         <joint name="arm_joint_2" value="0.02" />
