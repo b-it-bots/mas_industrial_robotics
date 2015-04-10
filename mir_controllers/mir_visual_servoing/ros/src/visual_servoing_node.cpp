@@ -85,7 +85,7 @@ public:
 		m_is_visual_servoing_completed = 0;
 
 		//  Incoming message from usbs_cam. This must be running in order for this ROS node to run.
-		m_image_subscriber = m_image_transporter.subscribe( "/arm_cam/image_raw", 1, &VisualServoing::imageCallback, this );
+		m_image_subscriber = m_image_transporter.subscribe( "/tower_cam3d/rgb/image_raw", 1, &VisualServoing::imageCallback, this );
 
 		// get joint states and store them to a variable and go through them (arm_link_5) and check to see if the current state is
 		// to close to the min or max value.
