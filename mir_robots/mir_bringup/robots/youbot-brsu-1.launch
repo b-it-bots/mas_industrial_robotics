@@ -16,6 +16,5 @@
 
   <!-- cameras -->
   <include file="$(find mir_bringup)/components/openni2.launch" />
-  <include file="$(find mir_bringup)/components/microsoft_life_cam.launch" />
 
 </launch>
