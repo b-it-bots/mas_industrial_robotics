@@ -8,6 +8,7 @@
 
   <include file="$(find mir_teleop)/ros/launch/teleop_joypad.launch" />
 
+  <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />	
   <include file="$(find mir_gripper_controller)/ros/launch/gripper_controller.launch" />	
 
   <include file="$(find mir_bringup)/components/openni2.launch" />
