@@ -58,14 +58,14 @@ class find_objects(smach.State):
                     break
                 rospy.sleep(0.1)
 
-            if not self.object_list:
+            if not self.object_list or len(self.object_list.objects) <= 0:
                 rospy.loginfo('Found no objects')
             else:
                 n = str([obj.name for obj in self.object_list.objects])
                 rospy.loginfo('Found %i objects: %s' % (len(self.object_list.objects), n))
                 break
 
-        if not self.object_list:
+        if not self.object_list  or len(self.object_list.objects) <= 0:
             rospy.loginfo('No objects in the field of view')
             return 'no_objects_found'
 
