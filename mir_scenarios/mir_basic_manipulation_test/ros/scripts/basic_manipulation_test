@@ -52,6 +52,7 @@ def main(no_refbox=False):
     SM.userdata.found_objects = 0
     SM.userdata.object_pose = 0
     SM.userdata.desired_distance_to_workspace = None 
+    SM.userdata.next_arm_pose_index = 0
 
     SM.userdata.rear_platform_free_poses = []
     SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_right'))

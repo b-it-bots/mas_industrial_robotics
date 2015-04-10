@@ -28,6 +28,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                       'lasttask',
                                                       'move_arm_to',
                                                       'move_base_by',
+						      'next_arm_pose_index',
                                                       'object_pose',
                                                       'object_to_be_adjust_to',
                                                       'object_to_grasp',
@@ -43,6 +44,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                        'lasttask',
                                                        'move_arm_to',
                                                        'move_base_by',
+						       'next_arm_pose_index',
                                                        'object_to_be_adjust_to',
                                                        'object_to_grasp',
                                                        'objects_to_be_grasped',
@@ -91,17 +93,26 @@ class sub_sm_go_and_pick(smach.StateMachine):
             ### end of concurrent state(s)
 
 
-            smach.StateMachine.add('RECOGNIZE_OBJECTS', gps.find_objects(retries=3, frame_id='/odom'),
+            smach.StateMachine.add('RECOGNIZE_OBJECTS', gps.find_objects(retries=1, frame_id='/odom'),
                 transitions={'objects_found':'SELECT_OBJECT_TO_BE_GRASPED',
-                            'no_objects_found':'SHIFT_BASE_RANDOM'},
+                            'no_objects_found':'SELECT_ARM_POSE_RANDOM'},
                 remapping={'found_objects':'recognized_objects'})
 
-            smach.StateMachine.add('SHIFT_BASE_RANDOM', gns.move_base_relative([0.0, 0.0, -0.03, 0.03, 0.0, 0.0]),
+            #smach.StateMachine.add('SHIFT_SHIFT_RANDOM', gns.move_base_relative([0.0, 0.0, -0.03, 0.03, 0.0, 0.0]),
+            #    transitions={'succeeded': 'RECOGNIZE_OBJECTS_LOOP',
+            #                  'timeout': 'RECOGNIZE_OBJECTS_LOOP'})
+	    smach.StateMachine.add('SELECT_ARM_POSE_RANDOM', gms.select_arm_pose(['look_at_workspace_right','look_at_workspace_left']),
+                transitions={'succeeded': 'LOOK_AROUND',
+			     'failed': 'RECOGNIZE_OBJECTS'})
+
+	    
+	    smach.StateMachine.add('LOOK_AROUND', gms.move_arm(),
                 transitions={'succeeded': 'RECOGNIZE_OBJECTS_LOOP',
-                              'timeout': 'RECOGNIZE_OBJECTS_LOOP'})
+                              'failed': 'LOOK_AROUND'})
+
 
             #FIXME: Is there a loop reset?
-            smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(1),
+            smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(2),
                                       transitions={'loop': 'RECOGNIZE_OBJECTS',
                                                    #'continue': 'SHIFT_BASE_RANDOM'})  # For BMT
                                                    'continue': 'SKIP_SOURCE_POSE'})  # For BTT

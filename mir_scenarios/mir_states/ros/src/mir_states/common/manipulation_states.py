@@ -267,3 +267,36 @@ class update_robot_planning_scene(smach.State):
         self.pub_event.publish("e_" + self.action)
         
         return 'succeeded'
+
+class select_arm_pose(smach.State):
+
+    """
+    TODO
+    """
+
+    def __init__(self, pose_name_list=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded','failed'],
+			     input_keys=['next_arm_pose_index'],
+                             output_keys=['move_arm_to','next_arm_pose_index'])
+        self.pose_name_list = pose_name_list
+	
+    def execute(self, userdata):
+	if type(userdata.next_arm_pose_index) is not int:
+	     userdata.next_arm_pose_index = 0
+
+	if len(self.pose_name_list) <= 0:
+	    rospy.logerr("pose name list is empty")
+	    return 'failed'
+
+	if userdata.next_arm_pose_index >= len(self.pose_name_list):
+	    rospy.logerr("pose index out of range")
+	    return 'failed'
+
+	userdata.move_arm_to = self.pose_name_list[userdata.next_arm_pose_index]
+	userdata.next_arm_pose_index += 1
+	userdata.next_arm_pose_index %= len(self.pose_name_list)
+
+	return 'succeeded'	
+
+	
