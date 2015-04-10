@@ -84,7 +84,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                      'failed':'MOVE_ARM_OUT_OF_VIEW'})
 
 
-                smach.Concurrence.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns.adjust_to_workspace(0.15))
+                smach.Concurrence.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns.adjust_to_workspace(0.25))
                 smach.Concurrence.add('MOVE_ARM_OUT_OF_VIEW_SAFE', sm_sub_move_arm_safe)
 
             smach.StateMachine.add('PREPARE_FOR_PERCEPTION', sm_con_prepare_for_perception, transitions={'succeeded': 'RECOGNIZE_OBJECTS',
