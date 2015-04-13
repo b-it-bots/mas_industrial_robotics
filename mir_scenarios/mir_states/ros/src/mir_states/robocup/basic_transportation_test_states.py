@@ -13,7 +13,7 @@ from actionlib.simple_action_client import GoalStatus
 
 import mir_states.common.manipulation_states as manipulation
 
-
+import math
 
 def print_task_spec(task_list):
     
@@ -194,7 +194,7 @@ class setup_task(smach.State):
         
         for task in userdata.task_list:
             if task.type == 'destination':
-                poses = ['1', '2', '3']
+                poses = ['3','3','1', '2', '3']
                 loc_free_poses = Bunch(location = task.location, free_poses = poses)
                 userdata.destinaton_free_poses.append(loc_free_poses)
             if task.type == 'source':
@@ -419,8 +419,41 @@ class skip_pose(smach.State):
                 
         return 'pose_skipped'
 
+class transform_pose_to_reference_frame(smach.State):
 
-class compute_base_shift_to_object(smach.State):
+    def __init__(self, frame_id=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'tf_error'],
+                             input_keys=['object_pose'],
+                             output_keys=['object_pose'])
+        self.tf_listener = tf.TransformListener()
+        self.frame_id = frame_id
+
+    def execute(self, userdata):
+
+        pose = userdata.object_pose.pose
+     
+        print 'object_pose', pose
+
+        try:
+            t = self.tf_listener.getLatestCommonTime(self.frame_id,
+                                                     pose.header.frame_id)
+            pose.header.stamp = t
+            transformed_pose = self.tf_listener.transformPose(self.frame_id, pose)
+
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
+
+        userdata.object_pose.pose = transformed_pose
+
+        print 'transformed_pose:', transformed_pose
+
+        return 'succeeded'
+
+class compute_base_shift_to_object_old(smach.State):
 
     FRAME_ID = '/base_link'
 
@@ -450,6 +483,49 @@ class compute_base_shift_to_object(smach.State):
 
         return 'succeeded'
 
+class compute_base_shift_to_object(smach.State):
+
+    def __init__(self, target_frame=None, source_frame=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'tf_error'],
+                             input_keys=['object_pose','move_base_by'],
+                             output_keys=['move_base_by'])
+        self.listener = tf.TransformListener()
+        self.source_frame = source_frame
+        self.target_frame = target_frame
+        self.br = tf.TransformBroadcaster()
+
+    def execute(self, userdata):
+        pose = userdata.object_pose.pose.pose
+        rospy.sleep(2.0)
+
+        try:
+            self.listener.waitForTransform(
+                self.target_frame, self.source_frame,
+                rospy.Time(0), rospy.Duration(0.1)
+            )
+
+            (trans,rot) = self.listener.lookupTransform(self.target_frame, 
+                self.source_frame, rospy.Time(0))
+
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
+
+        base_shift_x_direction = pose.position.x - trans[0] - 0.05
+
+        base_shift_y_direction = pose.position.y - trans[1]
+
+        base_shift_z_direction = pose.position.z - trans[2]
+
+        if (base_shift_x_direction > 0.25):
+           rospy.logwarn("Base shift in x direction is greater than 25 cm")
+           base_shift_x_direction = 0.0
+        userdata.move_base_by = (base_shift_x_direction, base_shift_y_direction, 0.0)
+        print 'userdata.move_base_by' , userdata.move_base_by 
+        return 'succeeded'
 
 class loop_for(smach.State):
     '''
