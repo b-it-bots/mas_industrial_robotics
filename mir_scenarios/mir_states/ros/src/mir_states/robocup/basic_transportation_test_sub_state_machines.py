@@ -38,6 +38,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                       'recognized_objects',
                                                       'source_visits',
                                                       'task_list',
+						      'test',
                                                       'vscount'],
                                           output_keys=['base_pose_to_approach', 
                                                        'found_objects',
@@ -52,6 +53,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                        'rear_platform_occupied_poses',
                                                        'source_visits',
                                                        'task_list',
+						       'test',
                                                        'vscount'])
 
         self.use_mockup = use_mockup
@@ -136,14 +138,24 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                        input_keys=['object_to_grasp','move_base_by'],
                                                        output_keys=['move_base_by'])
                 with sm_sub_shift_base:
-                    smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT', btts.compute_base_shift_to_object(),
-                        transitions={'succeeded': 'MOVE_BASE_RELATIVE',
-                                     'tf_error': 'tf_error_in_computing_base_shift'},
+                    smach.StateMachine.add('TRANSFORM_POSE_INTO_REFERENCE_FRAME', btts.transform_pose_to_reference_frame(frame_id='/base_link'),
+                        transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
+                                      'tf_error': 'tf_error_in_computing_base_shift'},
                         remapping={'object_pose': 'object_to_grasp'})
+
+                    smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
+                        transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT',
+                                     'failed': 'MOVE_ARM_TO_PREGRASP'})
+
+                    smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT', btts.compute_base_shift_to_object('/base_link', '/tower_cam3d_rgb_optical_frame'),
+                        transitions={'succeeded': 'MOVE_BASE_RELATIVE',
+                                      'tf_error': 'COMPUTE_BASE_SHIFT_TO_OBJECT'},
+                                    remapping={'object_pose': 'object_to_grasp'})
 
                     smach.StateMachine.add('MOVE_BASE_RELATIVE', gns.move_base_relative(),
                         transitions={'succeeded': 'succeeded',
                                      'timeout': 'MOVE_BASE_RELATIVE'})
+
 
                 smach.Concurrence.add('ALIGN_BASE_WITH_OBJECT', sm_sub_shift_base)
                 smach.Concurrence.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"))
