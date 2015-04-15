@@ -26,19 +26,18 @@ class ArmRelativeMotionControl:
 	
 	def __init__(self):
 		
+		self.update_parameters()
 		self.init_moveit()
-		self.init_param()
 		
 		rospy.Subscriber("~event_in",std_msgs.msg.String,self.event_in_cb)
 		self.pub = rospy.Publisher("~event_out",std_msgs.msg.String)
-		
-					
-	def init_param(self):
-		self.relative_distance = 0.00
-		self.tooltip_armlink5_distance = 0.166
-		self.planning_fraction_tolerance = 0.2
-		self.platformsurface_to_tooltip_tolerance = 0.02
-		self.platformsurface_wrt_baselink = 0.007
+			
+	def update_parameters(self):
+		self.target_frame = rospy.get_param('~target_frame', 'base_link')
+		self.reference_frame = rospy.get_param('~reference_frame', 'arm_link_5')
+		self.relative_distance_x = rospy.get_param('~relative_distance_x', 0.0)
+		self.relative_distance_y = rospy.get_param('~relative_distance_y', 0.0)
+		self.relative_distance_z = rospy.get_param('~relative_distance_z', 0.0)
 		
 	def init_moveit(self):
 		'''
@@ -48,8 +47,6 @@ class ArmRelativeMotionControl:
 		create this DisplayTrajectory publisher which is used below 
 			to publish trajectories for RVIZ to visualize.
 		'''
-		
-		# temporary fix to wait for moveit to come up, otherwise MoveGroupCommander will fail after a timeout
 		client = actionlib.SimpleActionClient('/move_group', moveit_msgs.msg.MoveGroupAction)
 		rospy.loginfo("Wait for MoveIt! to come up ...", )
 		client.wait_for_server()
@@ -59,12 +56,10 @@ class ArmRelativeMotionControl:
        
 		self.display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',moveit_msgs.msg.DisplayTrajectory)
 
-		self.group.set_pose_reference_frame('/base_link')
+		self.group.set_pose_reference_frame(self.target_frame)
 		self.group.set_goal_position_tolerance(0.0003)
 		self.group.set_goal_orientation_tolerance(0.1)
 		self.group.set_goal_joint_tolerance(0.003)
-		
-		self.moveit_debug_messages()
 		
 	def event_in_cb(self,msg):
 		if (msg.data == event_in[0]):
@@ -80,20 +75,14 @@ class ArmRelativeMotionControl:
 		Computes desired wrist(arm_link_5) pose.
 		Plan and execute desired relative motion using current and desired wrist pose. 
 		'''
-		self.group.set_end_effector_link('gripper_tip_link')
-		
+		self.update_parameters()
+		self.group.set_end_effector_link(self.reference_frame)
+
 		tool_tip_wrt_base = geometry_msgs.msg.Pose()
 		tool_tip_wrt_base = self.group.get_current_pose().pose
-		
-		if (tool_tip_wrt_base.position.z > self.platformsurface_to_tooltip_tolerance):
-			
-			self.relative_distance = (tool_tip_wrt_base.position.z - self.platformsurface_wrt_baselink) 
-			self.group.set_end_effector_link('arm_link_5')
-			
-			desired_wrist_wrt_base = self.compute_desired_wrist_pose(tool_tip_wrt_base)
-			self.plan_execute_relative_motion(self.group.get_current_pose().pose,desired_wrist_wrt_base.pose)
-		else:
-			self.relative_distance = 0.0			
+
+		desired_wrist_wrt_base = self.compute_desired_wrist_pose(tool_tip_wrt_base)
+		self.plan_execute_relative_motion(self.group.get_current_pose().pose,desired_wrist_wrt_base.pose)			
 							
 	def plan_execute_relative_motion(self,current_pose,goal_pose):
 		'''
@@ -115,13 +104,12 @@ class ArmRelativeMotionControl:
 		rospy.loginfo("Planning Fraction result: %f",fraction)
 		rospy.loginfo("Length of the planned trajectory: %d",planned_trajectory_length)
 		
-		if(fraction > self.planning_fraction_tolerance):
-			joint_values = list(plan.joint_trajectory.points[planned_trajectory_length-1].positions)
-			self.move_arm_joint_space(joint_values)
+		if (fraction == 1.0):
+			self.group.execute(plan)
 			self.event_out_publish("e_success")
 		else:
 			self.event_out_publish("e_failure")
-			
+
 	def compute_desired_wrist_pose(self,current_tooltip_pose):
 		'''
 		It computes the desired wrist pose because moveit 
@@ -129,29 +117,27 @@ class ArmRelativeMotionControl:
 		desired_tip_relative_motion: Desired relative motion
 		tip_wrt_wrist: Projecting the tool tip to wrist
 		'''
-		quat = [current_tooltip_pose.orientation.x,current_tooltip_pose.orientation.y,
-				current_tooltip_pose.orientation.z,current_tooltip_pose.orientation.w]
-		pose = [[current_tooltip_pose.position.x],[current_tooltip_pose.position.y],[current_tooltip_pose.position.z]]
-		
+		quat = [current_tooltip_pose.orientation.x, \
+				current_tooltip_pose.orientation.y, \
+				current_tooltip_pose.orientation.z, \
+				current_tooltip_pose.orientation.w]
+		pose = [[current_tooltip_pose.position.x], \
+				[current_tooltip_pose.position.y], \
+				[current_tooltip_pose.position.z]]
+
 		tool_tip_wrt_base = tf.transformations.quaternion_matrix(quat)
 		tool_tip_wrt_base[0:3,3:4] = numpy.matrix(pose)
-		
+
 		desired_tip_relative_motion = numpy.matrix([
-							[1.0, 0.0, 0.0, -0.03],
-							[0.0, 1.0, 0.0, 0.0],
-							[0.0, 0.0, 1.0,self.relative_distance],
-							[0.0, 0.0, 0.0, 1.0]])
-		
-		tip_wrt_wrist = numpy.matrix([
-			[1.0,  0.0, 0.0, 0.0],
-			[0.0, 1.0, 0.0 , 0.0],
-			[0.0,  0.0,  1.0, -self.tooltip_armlink5_distance],
-			[0.0,  0.0,  0.0, 1.0]])
-		
-		wrist_wrt_base = tool_tip_wrt_base * tip_wrt_wrist * desired_tip_relative_motion 
-		desired_wrist_wrt_base = self.matrix_to_pose('base_link', wrist_wrt_base )
+										[1.0, 0.0, 0.0, self.relative_distance_x],
+										[0.0, 1.0, 0.0, self.relative_distance_y],
+										[0.0, 0.0, 1.0, self.relative_distance_z],
+										[0.0, 0.0, 0.0, 1.0]])
+
+		wrist_wrt_base = tool_tip_wrt_base * desired_tip_relative_motion
+		desired_wrist_wrt_base = self.matrix_to_pose(self.target_frame, wrist_wrt_base )
 		return desired_wrist_wrt_base
-		
+
 	def move_arm_joint_space(self,target_joint_angles):
 		
 		self.group.clear_pose_targets()
@@ -190,12 +176,6 @@ class ArmRelativeMotionControl:
 		pose.pose.orientation.w = quat[3]
 
 		return pose
-		
-	def moveit_debug_messages(self):
-		
-		rospy.loginfo("Planning reference frame : %s" , self.group.get_planning_frame())
-		rospy.loginfo("Pose reference frame : %s" ,self.group.get_pose_reference_frame())
-		rospy.loginfo("End effector reference frame : %s" ,self.group.get_end_effector_link())
 
 if __name__=='__main__':
 	
@@ -207,6 +187,3 @@ if __name__=='__main__':
 			rospy.sleep(0.5)
 	except rospy.ROSInterruptException: 
 		pass
-	
-	
-	
