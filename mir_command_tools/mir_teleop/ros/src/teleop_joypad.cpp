@@ -45,7 +45,7 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
         ROS_ERROR("No arm joint limit parameters available. Joint space control: DEACTIVATED.");
 
     sub_joypad_ = nh_->subscribe < sensor_msgs::Joy > ("/joy", 1, &TeleOpJoypad::cbJoypad, this);
-    pub_base_cart_vel_ = nh_->advertise < geometry_msgs::Twist > ("/cmd_vel", 1);
+    pub_base_cart_vel_ = nh_->advertise < geometry_msgs::Twist > ("cmd_vel", 1);
     pub_arm_cart_vel_ = nh_->advertise < geometry_msgs::TwistStamped > ("/arm_1/arm_controller/cartesian_velocity_command", 1);
     pub_gripper_position_ = nh_->advertise < brics_actuator::JointPositions > ("/arm_1/gripper_controller/position_command", 1);
 
