@@ -5,7 +5,6 @@ import rospy
 import smach
 import smach_ros
 import tf
-
 from geometry_msgs.msg import PoseStamped
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
 
@@ -419,93 +418,40 @@ class skip_pose(smach.State):
                 
         return 'pose_skipped'
 
-class transform_pose_to_reference_frame(smach.State):
-
-    def __init__(self, frame_id=None):
-        smach.State.__init__(self,
-                             outcomes=['succeeded', 'tf_error'],
-                             input_keys=['object_pose'],
-                             output_keys=['object_pose'])
-        self.tf_listener = tf.TransformListener()
-        self.frame_id = frame_id
-
-    def execute(self, userdata):
-
-        pose = userdata.object_pose.pose
-     
-        print 'object_pose', pose
-
-        try:
-            t = self.tf_listener.getLatestCommonTime(self.frame_id,
-                                                     pose.header.frame_id)
-            pose.header.stamp = t
-            transformed_pose = self.tf_listener.transformPose(self.frame_id, pose)
-
-        except (tf.LookupException,
-                tf.ConnectivityException,
-                tf.ExtrapolationException) as e:
-            rospy.logerr('Tf error: %s' % str(e))
-            return 'tf_error'
-
-        userdata.object_pose.pose = transformed_pose
-
-        print 'transformed_pose:', transformed_pose
-
-        return 'succeeded'
-
-class compute_base_shift_to_object_old(smach.State):
-
-    FRAME_ID = '/base_link'
-
-    def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['succeeded', 'tf_error'],
-                             input_keys=['object_pose','move_base_by'],
-                             output_keys=['move_base_by'])
-        self.tf_listener = tf.TransformListener()
-
-    def execute(self, userdata):
-        pose = userdata.object_pose.pose
-
-        try:
-            t = self.tf_listener.getLatestCommonTime(self.FRAME_ID,
-                                                     pose.header.frame_id)
-            pose.header.stamp = t
-            relative = self.tf_listener.transformPose(self.FRAME_ID, pose)
-
-        except (tf.LookupException,
-                tf.ConnectivityException,
-                tf.ExtrapolationException) as e:
-            rospy.logerr('Tf error: %s' % str(e))
-            return 'tf_error'
-       
-        userdata.move_base_by = (0, relative.pose.position.y, 0)
-
-        return 'succeeded'
-
-class compute_base_shift_to_object(smach.State):
+class compute_arm_base_shift_to_object(smach.State):
 
     def __init__(self, target_frame=None, source_frame=None):
         smach.State.__init__(self,
-                             outcomes=['succeeded', 'tf_error'],
-                             input_keys=['object_pose','move_base_by'],
-                             output_keys=['move_base_by'])
-        self.listener = tf.TransformListener()
+                             outcomes=['succeeded','tf_error'],
+                             input_keys=['object_pose','move_base_by','move_arm_to'],
+                             output_keys=['move_base_by', 'move_arm_to'])
+        self.tf_listener = tf.TransformListener()
         self.source_frame = source_frame
         self.target_frame = target_frame
         self.br = tf.TransformBroadcaster()
 
     def execute(self, userdata):
-        pose = userdata.object_pose.pose.pose
-        rospy.sleep(2.0)
+        pose = userdata.object_pose.pose
+        rospy.sleep(1.0)
+        try:
+            t = self.tf_listener.getLatestCommonTime(self.target_frame,
+                                                     pose.header.frame_id)
+            pose.header.stamp = t
+            pose = self.tf_listener.transformPose(self.target_frame, pose)
+
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            rospy.logerr('Tf error: %s' % str(e))
+            return 'tf_error'
 
         try:
-            self.listener.waitForTransform(
+            self.tf_listener.waitForTransform(
                 self.target_frame, self.source_frame,
                 rospy.Time(0), rospy.Duration(0.1)
             )
 
-            (trans,rot) = self.listener.lookupTransform(self.target_frame, 
+            (trans,rot) = self.tf_listener.lookupTransform(self.target_frame, 
                 self.source_frame, rospy.Time(0))
 
         except (tf.LookupException,
@@ -514,17 +460,41 @@ class compute_base_shift_to_object(smach.State):
             rospy.logerr('Tf error: %s' % str(e))
             return 'tf_error'
 
-        base_shift_x_direction = pose.position.x - trans[0] - 0.05
+        '''
+        Computing base translation offset of the base to object.
+        Subtracting 5cm from x-shift to bring full object into camera view. 
+        '''
+        base_shift_x_direction = pose.pose.position.x - trans[0] - 0.05
 
-        base_shift_y_direction = pose.position.y - trans[1]
+        base_shift_y_direction = pose.pose.position.y - trans[1]
 
-        base_shift_z_direction = pose.position.z - trans[2]
-
-        if (base_shift_x_direction > 0.25):
-           rospy.logwarn("Base shift in x direction is greater than 25 cm")
-           base_shift_x_direction = 0.0
         userdata.move_base_by = (base_shift_x_direction, base_shift_y_direction, 0.0)
-        print 'userdata.move_base_by' , userdata.move_base_by 
+
+        '''
+        Computing rotation of last joint of the arm to object.
+        Pose must be transformed into base_link to select roll 
+        as a reference angle of rotation.
+        '''
+        rotation_x = pose.pose.orientation.x
+
+        rotation_y = pose.pose.orientation.y
+
+        rotation_z = pose.pose.orientation.z
+
+        rotation_w = pose.pose.orientation.w
+
+        quat = [rotation_x, rotation_y, rotation_z, rotation_w]
+        rpy = tf.transformations.euler_from_quaternion(quat) 
+
+        rotation_angle = rpy[0]
+        if(rotation_angle > 0.0):
+          rotation_angle = rotation_angle - math.pi
+        rotation_angle = rotation_angle + (math.pi/2)
+
+        joint_values = manipulation.arm_command.get_current_joint_values()
+        joint_values[4] = joint_values[4] + rotation_angle
+
+        userdata.move_arm_to = joint_values 
         return 'succeeded'
 
 class loop_for(smach.State):
