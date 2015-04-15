@@ -83,21 +83,78 @@ class select_hole(smach.State):
         return 'no_match'
 
 
+# select all objects from the rear platform that needs to be placed at the PPT workspace
+class select_objects_to_place(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['objects_selected','no_more_obj_for_this_workspace'],
+            input_keys=['rear_platform_occupied_poses', 'task_list', 'base_pose_to_approach'],
+            output_keys=['selected_objects'])
+
+    def execute(self, userdata):
+        btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
+        btts.print_task_spec(userdata.task_list)
+
+        #get objects to be placed at current workstation
+        objs_for_this_ws = []
+        for task in userdata.task_list:
+            if task.type == 'destination' and task.location == userdata.base_pose_to_approach:
+                objs_for_this_ws = task.object_names
+
+        # filter out all objects, that the robot is currently carrying AND that must be placed at the current platform
+        stop = False
+        list_of_carried_objects_that_must_be_placed = []
+        for i in range(len(userdata.rear_platform_occupied_poses)):
+            for obj_name in objs_for_this_ws:
+                rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj.name: %s     obj_name: %s", userdata.rear_platform_occupied_poses[i].obj.name, obj_name)
+                if userdata.rear_platform_occupied_poses[i].obj.name == obj_name:
+                    list_of_carried_objects_that_must_be_placed.append(userdata.rear_platform_occupied_poses[i].obj)
+
+        if len(list_of_carried_objects_that_must_be_placed) == 0:
+            return 'no_more_obj_for_this_workspace'
+
+        userdata.selected_objects = list_of_carried_objects_that_must_be_placed
+        return 'objects_selected'
+
+
+# select one object to place based on recognized cavities
+class select_object_to_place(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['object_selected','no_more_cavities', 'no_more_objects'],
+            input_keys=['rear_platform_occupied_poses', 'found_cavities'],
+            output_keys=['selected_object','cavity_pose'])
+
+    def execute(self, userdata):
+        if len(userdata.found_cavities) == 0:
+            return 'no_more_cavities'
+        else:
+            look_for = userdata.found_cavities[-1].object_name
+            for i in range(len(userdata.rear_platform_occupied_poses)):
+                if userdata.rear_platform_occupied_poses[i].obj.name == look_for:
+                    userdata.selected_object = userdata.rear_platform_occupied_poses[i].obj
+                    userdata.cavity_pose = userdata.found_cavities[-1]
+                    print "Selected %s to place" %userdata.rear_platform_occupied_poses[i].obj.name
+                    return 'object_selected'
+            return 'no_more_objects'
+
+
+
 class grasp_obj_for_hole_from_pltf(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['object_grasped', 'no_more_obj_for_this_workspace'],
-            input_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses','selected_hole'],
+            input_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses','selected_object'],
             output_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses'])
 
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
-        rospy.loginfo('userdata.selected_hole: %s', userdata.selected_hole)
+        rospy.loginfo('userdata.selected_object: %s', userdata.selected_object)
 
         pltf_obj_pose = None
         for i in range(len(userdata.rear_platform_occupied_poses)):
             rospy.loginfo("userdata.rear_platform_occupied_poses[i].obj.name: %s", userdata.rear_platform_occupied_poses[i].obj.name)
-            if  userdata.selected_hole.name in userdata.rear_platform_occupied_poses[i].obj.name:
+            if  userdata.selected_object.name in userdata.rear_platform_occupied_poses[i].obj.name:
                 pltf_obj_pose = userdata.rear_platform_occupied_poses.pop(i)
                 userdata.rear_platform_free_poses.append(pltf_obj_pose)
                 userdata.last_grasped_obj = pltf_obj_pose.obj
@@ -132,7 +189,7 @@ class select_arm_position(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['arm_pose_selected'],
-            input_keys=['move_arm_to','selected_hole'],
+            input_keys=['move_arm_to','selected_objects'],
             output_keys=['move_arm_to'])
 
     def execute(self, userdata):

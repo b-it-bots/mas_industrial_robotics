@@ -54,6 +54,8 @@ def main(no_refbox=False):
     SM.userdata.objects_goal_configuration = 0
     SM.userdata.found_objects = 0
     SM.userdata.object_pose = 0
+    SM.userdata.selected_objects = []
+    SM.userdata.cavity_pose = None
 
 
     SM.userdata.rear_platform_free_poses = []
@@ -68,6 +70,7 @@ def main(no_refbox=False):
     SM.userdata.objects_to_be_grasped = 0
     SM.userdata.last_grasped_obj = None
     SM.userdata.vscount = 0
+    SM.userdata.next_arm_pose_index = 0
 
     SM.userdata.ppt_platform_location = ''
     SM.userdata.all_found_holes = None
