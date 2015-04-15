@@ -9,8 +9,6 @@ import numpy
 import tf
 import actionlib
 
-
-
 '''
 Usage:
 Publish on the topics 'event_in' message string 'e_start' to 
@@ -23,167 +21,164 @@ event_in = ['e_start']
 event_out = ['e_success','e_failure']
 
 class ArmRelativeMotionControl:
-	
-	def __init__(self):
-		
-		self.update_parameters()
-		self.init_moveit()
-		
-		rospy.Subscriber("~event_in",std_msgs.msg.String,self.event_in_cb)
-		self.pub = rospy.Publisher("~event_out",std_msgs.msg.String)
-			
-	def update_parameters(self):
-		self.target_frame = rospy.get_param('~target_frame', 'base_link')
-		self.reference_frame = rospy.get_param('~reference_frame', 'arm_link_5')
-		self.relative_distance_x = rospy.get_param('~relative_distance_x', 0.0)
-		self.relative_distance_y = rospy.get_param('~relative_distance_y', 0.0)
-		self.relative_distance_z = rospy.get_param('~relative_distance_z', 0.0)
-		
-	def init_moveit(self):
-		'''
-		Instantiate a RobotCommander object
-		Instantiate a PlanningSceneInterface object
-		Instantiate a MoveGroupCommander object
-		create this DisplayTrajectory publisher which is used below 
-			to publish trajectories for RVIZ to visualize.
-		'''
-		client = actionlib.SimpleActionClient('/move_group', moveit_msgs.msg.MoveGroupAction)
-		rospy.loginfo("Wait for MoveIt! to come up ...", )
-		client.wait_for_server()
-		rospy.loginfo("... MoveIt! is up")
-		
-		self.group = moveit_commander.MoveGroupCommander('arm_1')
-       
-		self.display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',moveit_msgs.msg.DisplayTrajectory)
 
-		self.group.set_pose_reference_frame(self.target_frame)
-		self.group.set_goal_position_tolerance(0.0003)
-		self.group.set_goal_orientation_tolerance(0.1)
-		self.group.set_goal_joint_tolerance(0.003)
-		
-	def event_in_cb(self,msg):
-		if (msg.data == event_in[0]):
-			self.pregrasp_relative_motion_cb()
-			
-	def event_out_publish(self,data):
-		self.pub.publish(data)
-					
-	def pregrasp_relative_motion_cb(self):		
-		'''
-		Gets current end-effector pose.
-		Extracts z-component from the pose to estimate distance from the platform surface
-		Computes desired wrist(arm_link_5) pose.
-		Plan and execute desired relative motion using current and desired wrist pose. 
-		'''
-		self.update_parameters()
-		self.group.set_end_effector_link(self.reference_frame)
+    def __init__(self):
 
-		tool_tip_wrt_base = geometry_msgs.msg.Pose()
-		tool_tip_wrt_base = self.group.get_current_pose().pose
+        self.update_parameters()
+        self.init_moveit()
 
-		desired_wrist_wrt_base = self.compute_desired_wrist_pose(tool_tip_wrt_base)
-		self.plan_execute_relative_motion(self.group.get_current_pose().pose,desired_wrist_wrt_base.pose)			
-							
-	def plan_execute_relative_motion(self,current_pose,goal_pose):
-		'''
-		Creates a list from start and goal poses
-		Calls moveit compute cartesian path method to plan cartesian motions
-		 		Passed Arguments: waypoints of trajectory 
-		 		Returned Result:
-		 		plan and fraction(percentage of total trajectory is planned)
-		 Sending last joint configuration from cartesian plan to moveit to plan in joint space
-		'''				
-		waypoints = []
-		waypoints.append(current_pose)
-		waypoints.append(goal_pose)
-		
-		(plan, fraction) = self.group.compute_cartesian_path(waypoints,0.01, 0.0)
-		planned_trajectory_length = len(plan.joint_trajectory.points)
-		
-		rospy.loginfo("Moveit Cartesian path planner output")
-		rospy.loginfo("Planning Fraction result: %f",fraction)
-		rospy.loginfo("Length of the planned trajectory: %d",planned_trajectory_length)
-		
-		if (fraction == 1.0):
-			self.group.execute(plan)
-			self.event_out_publish("e_success")
-		else:
-			self.event_out_publish("e_failure")
+        rospy.Subscriber("~event_in",std_msgs.msg.String,self.event_in_cb)
+        self.pub = rospy.Publisher("~event_out",std_msgs.msg.String)
 
-	def compute_desired_wrist_pose(self,current_tooltip_pose):
-		'''
-		It computes the desired wrist pose because moveit 
-		is using arm_link_5 as end effector reference frame.
-		desired_tip_relative_motion: Desired relative motion
-		tip_wrt_wrist: Projecting the tool tip to wrist
-		'''
-		quat = [current_tooltip_pose.orientation.x, \
-				current_tooltip_pose.orientation.y, \
-				current_tooltip_pose.orientation.z, \
-				current_tooltip_pose.orientation.w]
-		pose = [[current_tooltip_pose.position.x], \
-				[current_tooltip_pose.position.y], \
-				[current_tooltip_pose.position.z]]
+    def update_parameters(self):
+        self.target_frame = rospy.get_param('~target_frame', 'base_link')
+        self.reference_frame = rospy.get_param('~reference_frame', 'arm_link_5')
+        self.relative_distance_x = rospy.get_param('~relative_distance_x', 0.0)
+        self.relative_distance_y = rospy.get_param('~relative_distance_y', 0.0)
+        self.relative_distance_z = rospy.get_param('~relative_distance_z', 0.0)
 
-		tool_tip_wrt_base = tf.transformations.quaternion_matrix(quat)
-		tool_tip_wrt_base[0:3,3:4] = numpy.matrix(pose)
+    def init_moveit(self):
+        '''
+        Instantiate a RobotCommander object
+        Instantiate a PlanningSceneInterface object
+        Instantiate a MoveGroupCommander object
+        create this DisplayTrajectory publisher which is used below 
+            to publish trajectories for RVIZ to visualize.
+        '''
+        client = actionlib.SimpleActionClient('/move_group', moveit_msgs.msg.MoveGroupAction)
+        rospy.loginfo("Wait for MoveIt! to come up ...", )
+        client.wait_for_server()
+        rospy.loginfo("... MoveIt! is up")
 
-		desired_tip_relative_motion = numpy.matrix([
-										[1.0, 0.0, 0.0, self.relative_distance_x],
-										[0.0, 1.0, 0.0, self.relative_distance_y],
-										[0.0, 0.0, 1.0, self.relative_distance_z],
-										[0.0, 0.0, 0.0, 1.0]])
+        self.group = moveit_commander.MoveGroupCommander('arm_1')
 
-		wrist_wrt_base = tool_tip_wrt_base * desired_tip_relative_motion
-		desired_wrist_wrt_base = self.matrix_to_pose(self.target_frame, wrist_wrt_base )
-		return desired_wrist_wrt_base
+        self.display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',moveit_msgs.msg.DisplayTrajectory)
 
-	def move_arm_joint_space(self,target_joint_angles):
-		
-		self.group.clear_pose_targets()
-		self.group.set_joint_value_target(target_joint_angles)
-		try:
-			plan = self.group.plan()
-			self.group.execute(plan) 
-		except rospy.ROSInterruptException:
-			rospy.loginfo("Planning in joint space failed.")
-		
-	def matrix_to_pose(self,frame, matrix):
-		'''
-		:param frame: Name of the reference frame in which the pose is
-		specified.
-		:type frame: String
+        self.group.set_pose_reference_frame(self.target_frame)
+        self.group.set_goal_position_tolerance(0.0003)
+        self.group.set_goal_orientation_tolerance(0.1)
+        self.group.set_goal_joint_tolerance(0.003)
 
-		:param matrix: The 4x4 transformation matrix.
-		:type matrix: numpy.matrix
+    def event_in_cb(self,msg):
+        if (msg.data == event_in[0]):
+            self.pregrasp_relative_motion_cb()
 
-		:return: The pose interpretable by ROS.
-		:rtype: geometry_msgs.msg.PoseStamepd
-		'''
-		pose = geometry_msgs.msg.PoseStamped()
+    def event_out_publish(self,data):
+        self.pub.publish(data)
 
-		pose.header.frame_id = frame
-		pose.header.stamp = rospy.Time.now()
+    def pregrasp_relative_motion_cb(self):      
+        '''
+        Gets current end-effector pose.
+        Extracts z-component from the pose to estimate distance from the platform surface
+        Computes desired wrist(arm_link_5) pose.
+        Plan and execute desired relative motion using current and desired wrist pose. 
+        '''
+        self.update_parameters()
+        self.group.set_end_effector_link(self.reference_frame)
 
-		pose.pose.position.x = matrix[0, 3]
-		pose.pose.position.y = matrix[1, 3]
-		pose.pose.position.z = matrix[2, 3]
+        tool_tip_wrt_base = geometry_msgs.msg.Pose()
+        tool_tip_wrt_base = self.group.get_current_pose().pose
 
-		quat = tf.transformations.quaternion_from_matrix(matrix)
-		pose.pose.orientation.x = quat[0]
-		pose.pose.orientation.y = quat[1]
-		pose.pose.orientation.z = quat[2]
-		pose.pose.orientation.w = quat[3]
+        desired_wrist_wrt_base = self.compute_desired_wrist_pose(tool_tip_wrt_base)
+        self.plan_execute_relative_motion(self.group.get_current_pose().pose,desired_wrist_wrt_base.pose)
 
-		return pose
+    def plan_execute_relative_motion(self,current_pose,goal_pose):
+        '''
+        Creates a list from start and goal poses
+        Calls moveit compute cartesian path method to plan cartesian motions
+                Passed Arguments: waypoints of trajectory 
+                Returned Result:
+                plan and fraction(percentage of total trajectory is planned)
+         Sending last joint configuration from cartesian plan to moveit to plan in joint space
+        '''
+        waypoints = []
+        waypoints.append(current_pose)
+        waypoints.append(goal_pose)
+
+        (plan, fraction) = self.group.compute_cartesian_path(waypoints,0.01, 0.0)
+        planned_trajectory_length = len(plan.joint_trajectory.points)
+
+        rospy.loginfo("Moveit Cartesian path planner output")
+        rospy.loginfo("Planning Fraction result: %f",fraction)
+        rospy.loginfo("Length of the planned trajectory: %d",planned_trajectory_length)
+
+        if (fraction == 1.0):
+            self.group.execute(plan)
+            self.event_out_publish("e_success")
+        else:
+            self.event_out_publish("e_failure")
+
+    def compute_desired_wrist_pose(self,current_tooltip_pose):
+        '''
+        desired_tip_relative_motion: Desired relative motion
+        '''
+        quat = [current_tooltip_pose.orientation.x, \
+                current_tooltip_pose.orientation.y, \
+                current_tooltip_pose.orientation.z, \
+                current_tooltip_pose.orientation.w]
+        pose = [[current_tooltip_pose.position.x], \
+                [current_tooltip_pose.position.y], \
+                [current_tooltip_pose.position.z]]
+
+        tool_tip_wrt_base = tf.transformations.quaternion_matrix(quat)
+        tool_tip_wrt_base[0:3,3:4] = numpy.matrix(pose)
+
+        desired_tip_relative_motion = numpy.matrix([
+                                        [1.0, 0.0, 0.0, self.relative_distance_x],
+                                        [0.0, 1.0, 0.0, self.relative_distance_y],
+                                        [0.0, 0.0, 1.0, self.relative_distance_z],
+                                        [0.0, 0.0, 0.0, 1.0]])
+
+        wrist_wrt_base = tool_tip_wrt_base * desired_tip_relative_motion
+        desired_wrist_wrt_base = self.matrix_to_pose(self.target_frame, wrist_wrt_base )
+        return desired_wrist_wrt_base
+
+    def move_arm_joint_space(self,target_joint_angles):
+
+        self.group.clear_pose_targets()
+        self.group.set_joint_value_target(target_joint_angles)
+        try:
+            plan = self.group.plan()
+            self.group.execute(plan) 
+        except rospy.ROSInterruptException:
+            rospy.loginfo("Planning in joint space failed.")
+
+    def matrix_to_pose(self,frame, matrix):
+        '''
+        :param frame: Name of the reference frame in which the pose is
+        specified.
+        :type frame: String
+
+        :param matrix: The 4x4 transformation matrix.
+        :type matrix: numpy.matrix
+
+        :return: The pose interpretable by ROS.
+        :rtype: geometry_msgs.msg.PoseStamepd
+        '''
+        pose = geometry_msgs.msg.PoseStamped()
+
+        pose.header.frame_id = frame
+        pose.header.stamp = rospy.Time.now()
+
+        pose.pose.position.x = matrix[0, 3]
+        pose.pose.position.y = matrix[1, 3]
+        pose.pose.position.z = matrix[2, 3]
+
+        quat = tf.transformations.quaternion_from_matrix(matrix)
+        pose.pose.orientation.x = quat[0]
+        pose.pose.orientation.y = quat[1]
+        pose.pose.orientation.z = quat[2]
+        pose.pose.orientation.w = quat[3]
+
+        return pose
 
 if __name__=='__main__':
-	
-	rospy.init_node('arm_relative_motion_controller')
-	
-	try:
-		ArmRelativeMotionControl()
-		while not rospy.is_shutdown():
-			rospy.sleep(0.5)
-	except rospy.ROSInterruptException: 
-		pass
+
+    rospy.init_node('arm_relative_motion_controller')
+
+    try:
+        ArmRelativeMotionControl()
+        while not rospy.is_shutdown():
+            rospy.sleep(0.5)
+    except rospy.ROSInterruptException: 
+        pass
