@@ -45,9 +45,9 @@ class get_task(smach.State):
 
     HARDCODED_SPECS = {'BNT': 'BNT<(C1,W,3),(S1,E,3),(T3,N,3),(S3,S,3),(T1,S,3),(D1,E,3),(S4,N,3),(S5,N,3),(T4,W,3),(T2,S,3),(S2,E,3)>',
                        'BMT': 'BMT<S2,S2,S3,line(M20_100,F20_20_G,F20_20_B,S40_40_B,S40_40_G,R20,M30),EXIT>',
-                       'BTT': 'BTT<initialsituation(<S5,(R20,M30,S40_40_B)><S2,(S40_40_G,M20,R20)><S3,(F20_20_B,M20_100,F20_20_G)>);goalsituation(<C1,line(M20_100,M30,M20)><S4,line(F20_20_G,R20,R20)><S1,line(S40_40_B,S40_40_G,F20_20_B)>)>',
-                       #'BTT': 'BTT<initialsituation(<S4,(S40_40_G)>);goalsituation(<S5,line(S40_40_G)>)>',
-                       'PPT': 'PPT<S2,(M20_100,M20,F20_20_B),S1>',
+                       #'BTT': 'BTT<initialsituation(<S5,(R20,M30,S40_40_B)><S2,(S40_40_G,M20,R20)><S3,(F20_20_B,M20_100,F20_20_G)>);goalsituation(<C1,line(M20_100,M30,M20)><S4,line(F20_20_G,R20,R20)><S1,line(S40_40_B,S40_40_G,F20_20_B)>)>',
+                       'BTT': 'BTT<initialsituation(<S3,(S40_40_B,F20_20_B,F20_20_B,M20)>);goalsituation(<S1,line(S40_40_B,F20_20_B,F20_20_B,M20)>)>',
+                       'PPT': 'PPT<S3,(S40_40_B,M20,F20_20_B),S4>',
                        'CBT': 'CBT<C1>'}
 
     def __init__(self):

@@ -41,8 +41,9 @@ class move_arm(smach.State):
     move_arm_to: str | tuple | list
         target where the arm should move. If it is a string, then it gives
         target name (should be availabile on the parameter server). If it as
-        tuple or a list, then it is treated differently based on the length. If
-        are 7 items, then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame
+        tuple or a list, then it is treated differently based on the length. If it
+        has 7 items, then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame.
+        If it has 5 items, then it is arm configuration in join space.
     """
 
     def __init__(self, target=None, blocking=True, tolerance=None):
@@ -80,6 +81,12 @@ class move_arm(smach.State):
                     pose.pose.orientation.w = q[3]
 
                     arm_command.set_pose_target(pose)
+                except Exception as e:
+                    rospy.logerr('unable to set target position: %s' % (str(e)))
+                    return 'failed'
+            elif len(target) == 5:      # ... of 5 items: Joint space configuration
+                try:
+                    arm_command.set_joint_value_target(target)               
                 except Exception as e:
                     rospy.logerr('unable to set target position: %s' % (str(e)))
                     return 'failed'
