@@ -9,8 +9,8 @@
     relative_distance_x and relative_distance_y parameters are set to help
     visual servoing so that the arm land exactly at the middle of the object.
     -->
-    <param name="relative_distance_x" type="double" value="-0.05"/>
-    <param name="relative_distance_y" type="double" value="-0.01"/>
-    <param name="relative_distance_z" type="double" value="0.075"/>
+    <param name="relative_distance_x" type="double" value="0.0"/>
+    <param name="relative_distance_y" type="double" value="0.0"/>
+    <param name="relative_distance_z" type="double" value="0.09"/>
     </node>
 </launch>

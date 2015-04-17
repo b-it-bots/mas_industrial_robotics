@@ -103,7 +103,16 @@ class ArmRelativeMotionControl:
         rospy.loginfo("Length of the planned trajectory: %d",planned_trajectory_length)
 
         if (fraction == 1.0):
-            self.group.execute(plan)
+            '''
+            Bug: Plan returned by compute_cartesian_path contains melformed trajectory i.e.
+                 it does not contain time information for trajectory points. Therefore, the
+                 the trajectory needs to be time parameterized.
+            Temporary FIX:
+                 we selected last joint configuration from the plan and planned again in
+                 joint space.
+            '''
+            joint_values = list(plan.joint_trajectory.points[planned_trajectory_length-1].positions)
+            self.move_arm_in_joint_space(joint_values)
             self.event_out_publish("e_success")
         else:
             self.event_out_publish("e_failure")
@@ -133,7 +142,7 @@ class ArmRelativeMotionControl:
         desired_wrist_wrt_base = self.matrix_to_pose(self.target_frame, wrist_wrt_base )
         return desired_wrist_wrt_base
 
-    def move_arm_joint_space(self,target_joint_angles):
+    def move_arm_in_joint_space(self,target_joint_angles):
 
         self.group.clear_pose_targets()
         self.group.set_joint_value_target(target_joint_angles)
@@ -180,5 +189,5 @@ if __name__=='__main__':
         ArmRelativeMotionControl()
         while not rospy.is_shutdown():
             rospy.sleep(0.5)
-    except rospy.ROSInterruptException: 
+    except rospy.ROSInterruptException:
         pass
