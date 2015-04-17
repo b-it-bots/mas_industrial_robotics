@@ -60,15 +60,21 @@ class sub_sm_go_and_pick(smach.StateMachine):
 
         with self:
             smach.StateMachine.add('SELECT_SOURCE_SUBTASK', btts.select_btt_subtask(type="source"),
-                transitions={'task_selected': 'MOVE_TO_SOURCE_LOCATION',
+                transitions={'task_selected': 'MOVE_TO_SOURCE_LOCATION_SAFE',
                              'no_more_task_for_given_type': 'no_more_task_for_given_type'})
+
+            # required before any call to gns.approach_pose, moves arm within footprint
+            smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION_SAFE', gms.move_arm('within_footprint_forward'),
+                transitions={'succeeded': 'MOVE_TO_SOURCE_LOCATION',
+                             'failed': 'MOVE_TO_SOURCE_LOCATION_SAFE'})
 
             smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION', gns.approach_pose(),
                 transitions={'succeeded': 'PREPARE_FOR_PERCEPTION',
                              'failed': 'MOVE_TO_SOURCE_LOCATION'})
 
-
-            ### start of concurrent state(s)
+            ### start of concurrent states
+            ### Adjusts_to_workspace, while moving arm safely to "out_of_view" aka look at platform.
+            ### Adds static walls to planning scene before arm motions
             sm_con_prepare_for_perception = smach.Concurrence(outcomes=['succeeded', 'failed_to_adjust_base','concurrency_mapping_failure'],
                                        default_outcome='concurrency_mapping_failure',
                                        outcome_map={'succeeded': {'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE': 'succeeded',
@@ -90,41 +96,44 @@ class sub_sm_go_and_pick(smach.StateMachine):
                 smach.Concurrence.add('MOVE_ARM_OUT_OF_VIEW_SAFE', sm_sub_move_arm_safe)
 
             smach.StateMachine.add('PREPARE_FOR_PERCEPTION', sm_con_prepare_for_perception, transitions={'succeeded': 'RECOGNIZE_OBJECTS',
-                                                                                  'failed_to_adjust_base': 'MOVE_TO_SOURCE_LOCATION',
+                                                                                  'failed_to_adjust_base': 'MOVE_TO_SOURCE_LOCATION_SAFE',
                                                                                   'concurrency_mapping_failure': 'PREPARE_FOR_PERCEPTION'})
-            ### end of concurrent state(s)
-
+            ### Done adjust_to_workspace and move arm to "out_of_view"
+            ### end of concurrent states 
 
             smach.StateMachine.add('RECOGNIZE_OBJECTS', gps.find_objects(retries=1, frame_id='/odom'),
                 transitions={'objects_found':'SELECT_OBJECT_TO_BE_GRASPED',
-                            'no_objects_found':'SELECT_ARM_POSE_RANDOM'},
+                            'no_objects_found':'SELECT_NEXT_LOOK_POSE'},
                 remapping={'found_objects':'recognized_objects'})
 
-            #smach.StateMachine.add('SHIFT_SHIFT_RANDOM', gns.move_base_relative([0.0, 0.0, -0.03, 0.03, 0.0, 0.0]),
-            #    transitions={'succeeded': 'RECOGNIZE_OBJECTS_LOOP',
-            #                  'timeout': 'RECOGNIZE_OBJECTS_LOOP'})
-	    smach.StateMachine.add('SELECT_ARM_POSE_RANDOM', gms.select_arm_pose(['look_at_workspace_right','look_at_workspace_left']),
-                transitions={'succeeded': 'LOOK_AROUND',
-			     'failed': 'RECOGNIZE_OBJECTS'})
+            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right','look_at_workspace_left']),
+                    transitions={'succeeded': 'LOOK_AROUND',
+		            'failed': 'RECOGNIZE_OBJECTS'})
 
 	    
 	    smach.StateMachine.add('LOOK_AROUND', gms.move_arm(),
                 transitions={'succeeded': 'RECOGNIZE_OBJECTS_LOOP',
-                              'failed': 'LOOK_AROUND'})
+                             'failed': 'LOOK_AROUND'})
 
 
             #FIXME: Is there a loop reset?
+            # THIS STATE was in the previously different for BMT, BTT, but now is the same behaviour for both.
+            # Meaning, BMT could skip source pose. TODO: Ensure this doesn't exit the arena in BMT before grasping.
             smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(2),
                                       transitions={'loop': 'RECOGNIZE_OBJECTS',
-                                                   #'continue': 'SHIFT_BASE_RANDOM'})  # For BMT
-                                                   'continue': 'SKIP_SOURCE_POSE'})  # For BTT
+                                                   'continue': 'SKIP_SOURCE_POSE_SAFE'})
 
             smach.StateMachine.add('SELECT_OBJECT_TO_BE_GRASPED', btts.select_object_to_be_grasped(),
                 transitions={'obj_selected':'PREPARE_FOR_GRASPING',
-                            'no_obj_selected':'SKIP_SOURCE_POSE',
+                            'no_obj_selected':'SKIP_SOURCE_POSE_SAFE',
                             'no_more_free_poses_at_robot_platf':'no_more_free_poses_at_robot_platf'})
-
-            ### start of concurrent state(s)
+            
+            ### start of concurrent states
+            ### Has recognized objects
+            ###   moves arm to pregrasp then computes arm+base shift to object
+            ###     then moves base and arm in two steps to align to object
+            ###  while
+            ###   adding walls to planning scene. TODO: this is out of order or not required. 
             sm_con_prepare_for_grasping = smach.Concurrence(outcomes=['succeeded', 'tf_error_in_computing_base_shift','concurrency_mapping_failure'],
                                                             default_outcome='concurrency_mapping_failure',
                                                             outcome_map={'succeeded': {'ALIGN_BASE_WITH_OBJECT': 'succeeded',
@@ -135,43 +144,45 @@ class sub_sm_go_and_pick(smach.StateMachine):
 
             with sm_con_prepare_for_grasping:
                 sm_sub_shift_base = smach.StateMachine(outcomes=['succeeded', 'tf_error_in_computing_base_shift'],
-                                                       input_keys=['object_to_grasp','move_base_by'],
-                                                       output_keys=['move_base_by'])
+                                                       input_keys=['object_to_grasp','move_base_by'], # TODO move_base_by not needed anymore?
+                                                       output_keys=['move_base_by']) # TODO move_base_by? 
+                # substate machine
                 with sm_sub_shift_base:
-                    smach.StateMachine.add('TRANSFORM_POSE_INTO_REFERENCE_FRAME', btts.transform_pose_to_reference_frame(frame_id='/base_link'),
-                        transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
-                                      'tf_error': 'tf_error_in_computing_base_shift'},
-                        remapping={'object_pose': 'object_to_grasp'})
-
                     smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
-                        transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT',
+                        transitions={'succeeded': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT',
                                      'failed': 'MOVE_ARM_TO_PREGRASP'})
 
-                    smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT', btts.compute_base_shift_to_object('/base_link', '/tower_cam3d_rgb_optical_frame'),
+                    smach.StateMachine.add('COMPUTE_ARM_BASE_SHIFT_TO_OBJECT', btts.compute_arm_base_shift_to_object('/base_link', '/gripper_tip_link'),
                         transitions={'succeeded': 'MOVE_BASE_RELATIVE',
-                                      'tf_error': 'COMPUTE_BASE_SHIFT_TO_OBJECT'},
+                                      'tf_error': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT'},
                                     remapping={'object_pose': 'object_to_grasp'})
 
+                    # TODO: COULD BE ANOTHER CONCURRENT STATE - AFTER approach has been well tested.
                     smach.StateMachine.add('MOVE_BASE_RELATIVE', gns.move_base_relative(),
-                        transitions={'succeeded': 'succeeded',
+                        transitions={'succeeded': 'MOVE_ARM_RELATIVE',
                                      'timeout': 'MOVE_BASE_RELATIVE'})
 
-
+                    smach.StateMachine.add('MOVE_ARM_RELATIVE', gms.move_arm(),
+                        transitions={'succeeded': 'succeeded',
+                                     'failed': 'MOVE_ARM_RELATIVE'})
+                # end substate machine
                 smach.Concurrence.add('ALIGN_BASE_WITH_OBJECT', sm_sub_shift_base)
                 smach.Concurrence.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"))
 
             smach.StateMachine.add('PREPARE_FOR_GRASPING', sm_con_prepare_for_grasping,
-                transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
+                transitions={'succeeded': 'DO_VISUAL_SERVOING',
                              'tf_error_in_computing_base_shift': 'PREPARE_FOR_PERCEPTION',
                              'concurrency_mapping_failure': 'PREPARE_FOR_GRASPING'})
             ### end of concurrent state(s)
 
+            # TODO: THIS REVERTS TO Original Style - visual servoing from pregrasp
+            #       THIS only happens after visual servoing has failed once.
+            # FIX in future, everything is already in /odom frame. 
             smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
-                transitions={'succeeded': 'DO_VISUAL_SERVERING',
+                transitions={'succeeded': 'DO_VISUAL_SERVOING',
                              'failed': 'MOVE_ARM_TO_PREGRASP'})
 
-            # state skipped
-            smach.StateMachine.add('DO_VISUAL_SERVERING', gps.do_visual_servoing(),
+            smach.StateMachine.add('DO_VISUAL_SERVOING', gps.do_visual_servoing(),
                 transitions={'succeeded':'GRASP_OBJ',
                             'failed':'VISUAL_SERVOING_LOOP',
                             'timeout':'VISUAL_SERVOING_LOOP',
@@ -179,16 +190,16 @@ class sub_sm_go_and_pick(smach.StateMachine):
  
             smach.StateMachine.add('VISUAL_SERVOING_LOOP', btts.loop_for(max_loop_count=1),
                                       transitions={'loop': 'HELP_VISUAL_SERVOING',
-                                                   'continue': 'SKIP_SOURCE_POSE'})
- 
+                                                   'continue': 'SKIP_SOURCE_POSE_SAFE'})
+            # TODO: is this still needed
             smach.StateMachine.add('HELP_VISUAL_SERVOING', gns.adjust_to_workspace(0.12),
                 transitions={'succeeded':'MOVE_ARM_TO_PREGRASP',
                              'failed':'MOVE_ARM_TO_PREGRASP'})
 
             if (self.use_mockup):
-                    smach.StateMachine.add('GRASP_OBJ', gms.grasp_object(),
+                    smach.StateMachine.add('GRASP_OBJ', gms.linear_motion(operation='grasp'),
                         transitions={'succeeded':'ATTACH_OBJECT_TO_ROBOT',
-                                     'failed':'SKIP_SOURCE_POSE'})
+                                     'failed':'SKIP_SOURCE_POSE_SAFE'})
 
                     smach.StateMachine.add('ATTACH_OBJECT_TO_ROBOT', gms.update_robot_planning_scene("attach"),
                         transitions={'succeeded':'REMOVE_OBJECT_FROM_MOCKUP'},
@@ -198,23 +209,34 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                            perception_mockup_util.remove_object_to_grasp_state(),
                                            transitions={'success':'PLACE_OBJ_ON_REAR_PLATFORM'})
             else:
-                    smach.StateMachine.add('GRASP_OBJ', gms.grasp_object(),
+                    smach.StateMachine.add('GRASP_OBJ', gms.linear_motion(operation='grasp'),
                         transitions={'succeeded':'ATTACH_OBJECT_TO_ROBOT',
-                                     'failed':'SKIP_SOURCE_POSE'})
+                                     'failed':'SKIP_SOURCE_POSE_SAFE'})
 
                     smach.StateMachine.add('ATTACH_OBJECT_TO_ROBOT', gms.update_robot_planning_scene("attach"),
                         transitions={'succeeded':'PLACE_OBJ_ON_REAR_PLATFORM'},
                         remapping={'object': 'object_to_grasp'})
 
+            # THESE ARE NEVER ENTERED?
+            # It would mean we've grasped the object - and don't have somewhere to place it.
+            # If we don't have somewhere to place it, we won't grasp in the first place?
             smach.StateMachine.add('PLACE_OBJ_ON_REAR_PLATFORM', btts.place_obj_on_rear_platform_btt(),
                 transitions={'succeeded':'DETACH_OBJECT_FROM_ROBOT',
-                             'no_more_free_poses':'no_more_free_poses'})
+                             'no_more_free_poses':'NO_MORE_FREE_POSES_SAFE'})
+
+            smach.StateMachine.add('NO_MORE_FREE_POSES_SAFE',gms.move_arm('within_footprint_forward'),
+                transitions={'succeeded':'no_more_free_poses',
+                             'failed':'NO_MORE_FREE_POSES_SAFE'})
 
             smach.StateMachine.add('DETACH_OBJECT_FROM_ROBOT', gms.update_robot_planning_scene("load"),
                 transitions={'succeeded':'SELECT_OBJECT_TO_BE_GRASPED'},
                 remapping={'object': 'object_to_grasp'})
 
             # MISC STATES
+            smach.StateMachine.add('SKIP_SOURCE_POSE_SAFE', gms.move_arm('within_footprint_forward'),
+                transitions={'succeeded':'SKIP_SOURCE_POSE',
+                             'failed':'SKIP_SOURCE_POSE_SAFE'})
+
             smach.StateMachine.add('SKIP_SOURCE_POSE', btts.skip_pose('source'),
                 transitions={'pose_skipped':'SELECT_SOURCE_SUBTASK',
                              'pose_skipped_but_platform_limit_reached':'pose_skipped_but_platform_limit_reached'})
@@ -244,8 +266,14 @@ class sub_sm_go_to_destination(smach.StateMachine):
                 transitions={'succeeded':'SELECT_DELIVER_WORKSTATION'})
 
             smach.StateMachine.add('SELECT_DELIVER_WORKSTATION', btts.select_delivery_workstation(),
-                transitions={'success':'MOVE_TO_DESTINATION_LOCATION',
-                             'no_more_dest_tasks':'MOVE_TO_EXIT'})
+                transitions={'success':'MOVE_TO_DESTINATION_LOCATION_SAFE',
+                             'no_more_dest_tasks':'MOVE_TO_EXIT_SAFE'})
+            
+            smach.StateMachine.add('MOVE_TO_DESTINATION_LOCATION_SAFE', gms.move_arm('within_footprint_forward'),
+                transitions={'succeeded': 'MOVE_TO_DESTINATION_LOCATION',
+                             'failed': 'MOVE_TO_DESTINATION_LOCATION_SAFE'})
+
+            
 
             smach.StateMachine.add('MOVE_TO_DESTINATION_LOCATION', gns.approach_pose(),
                 transitions={'succeeded':'ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION',
@@ -254,6 +282,11 @@ class sub_sm_go_to_destination(smach.StateMachine):
             smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION', gns.adjust_to_workspace(0.12),
                 transitions={'succeeded':'destination_reached',
                              'failed':'MOVE_TO_DESTINATION_LOCATION'})
+
+            smach.StateMachine.add('MOVE_TO_EXIT_SAFE', gms.move_arm('within_footprint_forward'),
+                transitions={'succeeded': 'MOVE_TO_EXIT',
+                             'failed': 'MOVE_TO_EXIT_SAFE'})
+
 
             smach.StateMachine.add('MOVE_TO_EXIT', gns.approach_pose("EXIT"),
                 transitions={'succeeded':'overall_done',
