@@ -124,14 +124,16 @@ class control_gripper(smach.State):
         return 'succeeded'
        
 
-class grasp_object(smach.State):
+class linear_motion(smach.State):
 
     """
     Should be called after visual servoing has aligned the gripper with the object.
+    Should probably be renamed in the future, or seperated into linear motion and grasping/releasing. 
     """
 
-    def __init__(self):
+    def __init__(self, operation='grasp'):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+        self.operation = operation
         self.result = None
         self.event_out = rospy.Publisher('/arm_relative_motion_controller/event_in', std_msgs.msg.String)
         rospy.Subscriber('/arm_relative_motion_controller/event_out', std_msgs.msg.String, self.event_cb)
@@ -140,9 +142,12 @@ class grasp_object(smach.State):
     def execute(self, userdata):
         self.result = None
 
-        gripper_command.set_named_target('open')
-        gripper_command.go()
-        
+        if self.operation == 'grasp': 
+            gripper_command.set_named_target('open')
+            gripper_command.go()
+        elif self.operation == 'release':
+            pass # Don't do anything, assume the gripper is already closed
+
         # start the relative approach and wait for the result
         self.event_out.publish('e_start')
         while not self.result:
@@ -151,8 +156,12 @@ class grasp_object(smach.State):
         if self.result.data != 'e_success':
             return 'failed'
 
-        gripper_command.set_named_target('close')
-        gripper_command.go()
+        if self.operation == 'grasp':
+            gripper_command.set_named_target('close')
+            gripper_command.go()
+        elif self.operation == 'release':
+            gripper_command.set_named_target('open')
+            gripper_command.go()
 
         return 'succeeded'
 
