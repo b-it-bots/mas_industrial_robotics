@@ -65,6 +65,13 @@
         <joint name="arm_joint_4" value="0.02" />
         <joint name="arm_joint_5" value="0.02" />
     </group_state>
+    <group_state name="within_footprint_forward" group="arm_1">
+        <joint name="arm_joint_1" value="2.09854" />
+        <joint name="arm_joint_2" value="0.0769791" />
+        <joint name="arm_joint_3" value="-1.86351" />
+        <joint name="arm_joint_4" value="3.05427" />
+        <joint name="arm_joint_5" value="2.94987" />
+    </group_state>
     <group_state name="candle" group="arm_1">
         <joint name="arm_joint_1" value="2.1642" />
         <joint name="arm_joint_2" value="1.13446" />
