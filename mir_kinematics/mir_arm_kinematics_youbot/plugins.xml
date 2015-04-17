@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='ASCII'?>
-<library path="lib/libarm_analytical_inverse_kinematics_youbot_moveit_plugin">
-  <class name="arm_analytical_inverse_kinematics_youbot/ArmAnalyticalInverseKinematicsYoubotPlugin" type="arm_analytical_inverse_kinematics_youbot::ArmAnalyticalInverseKinematicsYoubotPlugin" base_class_type="kinematics::KinematicsBase">
-    <description>analytical arm kinematics for KUKA youBot</description>
-  </class>
-</library>
