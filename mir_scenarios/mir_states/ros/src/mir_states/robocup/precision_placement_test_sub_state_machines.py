@@ -64,52 +64,59 @@ class sub_sm_place_in_holes(smach.StateMachine):
                              'timeout': 'failed'})
 
             smach.StateMachine.add('SELECT_OBJECT_TO_PLACE', ppts.select_object_to_place(),
-                transitions={'object_selected': 'TRANSFORM_POSE_INTO_REFERENCE_FRAME',
+                transitions={'object_selected': 'MOVE_ARM_TO_PREGRASP',
                              'no_more_objects' : 'succeeded',
                              'no_more_cavities': 'succeeded'})
 
-            smach.StateMachine.add('TRANSFORM_POSE_INTO_REFERENCE_FRAME', btts.transform_pose_to_reference_frame(frame_id='/base_link'),
-                transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
-                              'tf_error': 'failed'},
-                remapping={'object_pose': 'cavity_pose'})
+#            smach.StateMachine.add('TRANSFORM_POSE_INTO_REFERENCE_FRAME', btts.transform_pose_to_reference_frame(frame_id='/base_link'),
+#               transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
+#                             'tf_error': 'failed'},
+#               remapping={'object_pose': 'cavity_pose'})
 
             smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
-                transitions={'succeeded': 'COMPUTE_BASE_SHIFT_TO_OBJECT',
+                transitions={'succeeded': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT',
                              'failed': 'MOVE_ARM_TO_PREGRASP'})
 
-            smach.StateMachine.add('COMPUTE_BASE_SHIFT_TO_OBJECT', btts.compute_base_shift_to_object('/base_link', '/tower_cam3d_rgb_optical_frame'),
+            smach.StateMachine.add('COMPUTE_ARM_BASE_SHIFT_TO_OBJECT', btts.compute_arm_base_shift_to_object('/base_link', '/gripper_tip_link'),
                 transitions={'succeeded': 'MOVE_BASE_RELATIVE',
-                             'tf_error': 'COMPUTE_BASE_SHIFT_TO_OBJECT'},
+                             'tf_error': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT'},
                 remapping={'object_pose': 'cavity_pose'})
 
             smach.StateMachine.add('MOVE_BASE_RELATIVE', gns.move_base_relative(),
                 transitions={'succeeded': 'GRASP_OBJECT_FOR_HOLE_FROM_PLTF',
                              'timeout': 'MOVE_BASE_RELATIVE'})
 
+#            smach.StateMachine.add('MOVE_ARM_TO', gms.move_arm(),
+#                        transitions={'succeeded': 'REMOVE_OBJECT_FROM_LIST',
+#                                     'failed': 'MOVE_ARM_TO'})
+
+            # TODO Check if we need intermediate poses
             smach.StateMachine.add('GRASP_OBJECT_FOR_HOLE_FROM_PLTF', ppts.grasp_obj_for_hole_from_pltf(),
-                transitions={'object_grasped': 'MOVE_TO_INTERMEDIATE_POSE',
+                transitions={'object_grasped': 'MOVE_ARM',
                              'no_more_obj_for_this_workspace': 'no_object_for_ppt_platform'})
 
-            ###### DO WE NEED THIS !?!?! BECAUSE OTHERWISE IT WILL HIT THE CAMERA AND ALIGN THE OBJECT "PROPERLY" !?!??!
-            smach.StateMachine.add('MOVE_TO_INTERMEDIATE_POSE', gms.move_arm('platform_intermediate'),
-                transitions={'succeeded': 'MOVE_TO_PLACE_POSE',
-                             'failed': 'MOVE_TO_INTERMEDIATE_POSE'})
+            ## DO WE NEED THIS !?!?! BECAUSE OTHERWISE IT WILL HIT THE CAMERA AND ALIGN THE OBJECT "PROPERLY" !?!??!
+#            smach.StateMachine.add('MOVE_TO_INTERMEDIATE_POSE', gms.move_arm('platform_intermediate'),
+#                transitions={'succeeded': 'MOVE_TO_PLACE_POSE',
+#                             'failed': 'MOVE_TO_INTERMEDIATE_POSE'})
 
-            smach.StateMachine.add('MOVE_TO_PLACE_POSE', gms.move_arm('pre_grasp'),
-                transitions={'succeeded': 'MOVE_GRIPPER',
-                             'failed': 'MOVE_TO_PLACE_POSE'})
+#            smach.StateMachine.add('MOVE_TO_PLACE_POSE', gms.move_arm('pre_grasp'),
+#                transitions={'succeeded': 'MOVE_GRIPPER',
+#                             'failed': 'MOVE_TO_PLACE_POSE'})
 
-            smach.StateMachine.add('SELECT_ARM_POSITION', ppts.select_arm_position(),
-                transitions={'arm_pose_selected': 'MOVE_ARM'})
+#            smach.StateMachine.add('SELECT_ARM_POSITION', ppts.select_arm_position(),
+#                transitions={'arm_pose_selected': 'MOVE_ARM'})
 
             smach.StateMachine.add('MOVE_ARM', gms.move_arm(),
-                transitions={'succeeded': 'MOVE_GRIPPER',
+                transitions={'succeeded': 'RELEASE_OBJECT',
                              'failed': 'MOVE_ARM'})
 
-            smach.StateMachine.add('MOVE_GRIPPER', gms.control_gripper('open'),
-                transitions={'succeeded': 'MOVE_ARM_TO_INTERMEDIATE_2'})
+            # TODO check if this, and next could cause infinite loop?
+            smach.StateMachine.add('RELEASE_OBJECT', gms.linear_motion(operation='release'),
+                transitions={'succeeded':'MOVE_ARM_TO_INTERMEDIATE_POSE',
+                             'failed':'RELEASE_OBJECT'})
 
-            smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_2', gms.move_arm('platform_intermediate'),
+            smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_POSE', gms.move_arm('out_of_view'),
                 transitions={'succeeded': 'SELECT_OBJECT_TO_PLACE',
-                             'failed': 'MOVE_ARM_TO_INTERMEDIATE_2'})
+                             'failed': 'MOVE_ARM_TO_INTERMEDIATE_POSE'})
 

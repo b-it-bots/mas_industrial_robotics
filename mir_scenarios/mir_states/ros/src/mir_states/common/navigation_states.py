@@ -67,15 +67,19 @@ class move_base_relative(smach.State):
 
     def __init__(self, offset=None):
         smach.State.__init__(self,
-                             outcomes=['succeeded', 'timeout'],
+                             outcomes=['succeeded', 'timeout','unreachable'],
                              input_keys=['move_base_by'])
         self.offset = offset
 
         self.pub_relative_base_ctrl_command = rospy.Publisher('/mcr_navigation/relative_base_controller/command', PoseStamped, latch=True)
         self.pub_relative_base_ctrl_event = rospy.Publisher('/mcr_navigation/relative_base_controller/event_in', String, latch=True)
         self.sub_relative_base_ctrl_event = rospy.Subscriber('/mcr_navigation/relative_base_controller/event_out', String, self.relative_base_controller_event_cb)
-
+        self.sub_collision_velocity_filter_event = rospy.Subscriber('/mcr_navigation/collision_velocity_filter/event_out', String, self.collision_velocity_filter_event_cb)
         self.relative_base_ctrl_event = ""
+        self.collision_velocity_filter_event = ""
+   
+    def collision_velocity_filter_event_cb(self, event):
+        self.collision_velocity_filter_event = event.data  
 
     def relative_base_controller_event_cb(self, event):
         self.relative_base_ctrl_event = event.data  
@@ -115,7 +119,7 @@ class move_base_relative(smach.State):
             relative_base_move.pose.orientation = Quaternion(*q)
 
         self.relative_base_ctrl_event = ""
-
+        self.collision_velocity_filter_event = ""
         # publish desired relative movement
         self.pub_relative_base_ctrl_command.publish(relative_base_move)
 
@@ -129,6 +133,11 @@ class move_base_relative(smach.State):
             if self.relative_base_ctrl_event == 'e_done':
                 rospy.loginfo('relative pose reached')
                 return 'succeeded'
+
+            if self.collision_velocity_filter_event == 'e_zero_velocities_forwarded':
+                rospy.loginfo('relative pose unreachable')
+                self.pub_relative_base_ctrl_event.publish('e_stop')
+                return 'unreachable'
 
             if (rospy.Time.now() - start_time) > timeout:
                 rospy.logerr('timeout of %f seconds exceeded for relative base movement' % float(timeout.to_sec()))
