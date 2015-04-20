@@ -39,12 +39,12 @@ void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState:
     joint_state.header.stamp = msg->header.stamp;
 
     joint_state.name.push_back("gripper_finger_joint_r");
-    joint_state.position.push_back(mapFromRadiansToMeter(msg->current_pos)); 
+    joint_state.position.push_back((mapFromRadiansToMeter(msg->current_pos) / 2.0)); 
     joint_state.velocity.push_back(msg->velocity);
     joint_state.effort.push_back(msg->load);
 
     joint_state.name.push_back("gripper_finger_joint_l");
-    joint_state.position.push_back(mapFromRadiansToMeter(msg->current_pos)); 
+    joint_state.position.push_back((mapFromRadiansToMeter(msg->current_pos) / 2.0)); 
     joint_state.velocity.push_back(msg->velocity);
     joint_state.effort.push_back(msg->load);
 
