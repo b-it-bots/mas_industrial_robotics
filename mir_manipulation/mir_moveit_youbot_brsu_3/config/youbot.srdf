@@ -36,7 +36,7 @@
         <joint name="arm_joint_5" value="2.9831" />
     </group_state>
     <group_state name="out_of_view" group="arm_1">
-        <joint name="arm_joint_1" value="2.1262" />
+        <joint name="arm_joint_1" value="2.2219" />
         <joint name="arm_joint_2" value="0.306859" />
         <joint name="arm_joint_3" value="-1.19222" />
         <joint name="arm_joint_4" value="3.56838" />
@@ -133,13 +133,21 @@
         <joint name="arm_joint_4" value="0.162655" />
         <joint name="arm_joint_5" value="2.90575" />
     </group_state>
-    <group_state name="pre_grasp" group="arm_1">
+    <group_state name="pre_grasp_old" group="arm_1">
         <joint name="arm_joint_1" value="2.2219" />
         <joint name="arm_joint_2" value="1.4" />
         <joint name="arm_joint_3" value="-1.42" />
         <joint name="arm_joint_4" value="3.21" />
         <joint name="arm_joint_5" value="2.92" />
     </group_state>
+    <group_state name="pre_grasp" group="arm_1">
+        <joint name="arm_joint_1" value="2.14717" />
+        <joint name="arm_joint_2" value="1.67731" />
+        <joint name="arm_joint_3" value="-1.75397" />
+        <joint name="arm_joint_4" value="3.52055" />
+        <joint name="arm_joint_5" value="2.92" />
+    </group_state>
+
     <group_state name="pre_grasp_visual_servoing" group="arm_1">
         <joint name="arm_joint_1" value="2.2219" />
         <joint name="arm_joint_2" value="1.4" />
