@@ -11,8 +11,8 @@ shutdown_costmaps: false             #default : false
 recovery_behaviors:
   - name: 'force_field_recovery'
     type: 'force_field_recovery/ForceFieldRecovery'
-  #- name: 'aggressive_reset'
-    #type: 'clear_costmap_recovery/ClearCostmapRecovery'
+  - name: 'clear_costmap_recovery'
+    type: 'clear_costmap_recovery/ClearCostmapRecovery'
 base_global_planner: global_planner/GlobalPlanner
 GlobalPlanner:
     use_grid_path: False

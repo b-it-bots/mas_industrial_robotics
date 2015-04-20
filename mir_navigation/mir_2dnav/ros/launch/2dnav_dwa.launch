@@ -20,7 +20,9 @@
     <rosparam file="$(find mir_2dnav)/ros/config/dwa/dwa_local_planner_params.yaml" command="load" ns="DWAPlannerROS" />
 	
 	<!-- Upload recovery behavior parameters-->    
-	<rosparam file="$(find mcr_recovery_behaviors)/ros/config/force_field_parameters.yaml" command="load" ns="force_field_recovery"/>    
+	<rosparam file="$(find mir_2dnav)/ros/config/recovery_behaviors/force_field_parameters.yaml" command="load" ns="force_field_recovery"/>    
+	<rosparam file="$(find mir_2dnav)/ros/config/recovery_behaviors/clear_costmap_parameters.yaml" command="load" ns="clear_costmap_recovery"/>    
+	
   </node>
 
 </launch>
