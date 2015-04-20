@@ -415,7 +415,7 @@ class skip_pose(smach.State):
                     return 'pose_skipped'
             
         print_task_spec(userdata.task_list)
-                
+                        
         return 'pose_skipped'
 
 class compute_arm_base_shift_to_object(smach.State):
@@ -432,14 +432,21 @@ class compute_arm_base_shift_to_object(smach.State):
 
     def execute(self, userdata):
         pose = userdata.object_pose.pose
-        rospy.sleep(1.0)
+        rospy.sleep(3.0)
         try:
+            
             t = self.tf_listener.getLatestCommonTime(self.target_frame,
                                                      pose.header.frame_id)
             pose.header.stamp = t
-            pose = self.tf_listener.transformPose(self.target_frame, pose)
+            
+            self.tf_listener.waitForTransform(
+                self.target_frame, pose.header.frame_id,
+                pose.header.stamp, rospy.Duration(0.1)
+            )
 
-        except (tf.LookupException,
+            pose = self.tf_listener.transformPose(self.target_frame, pose)
+            print 'object to base position : ', pose.pose.position
+        except (tf.LookupException, 
                 tf.ConnectivityException,
                 tf.ExtrapolationException) as e:
             rospy.logerr('Tf error: %s' % str(e))
@@ -453,7 +460,7 @@ class compute_arm_base_shift_to_object(smach.State):
 
             (trans,rot) = self.tf_listener.lookupTransform(self.target_frame, 
                 self.source_frame, rospy.Time(0))
-
+            print 'tooltip to base position: ', trans 
         except (tf.LookupException,
                 tf.ConnectivityException,
                 tf.ExtrapolationException) as e:
@@ -464,9 +471,9 @@ class compute_arm_base_shift_to_object(smach.State):
         Computing base translation offset of the base to object.
         Subtracting 5cm from x-shift to bring full object into camera view. 
         '''
-        base_shift_x_direction = pose.pose.position.x - trans[0] - 0.05
+        base_shift_x_direction = pose.pose.position.x - trans[0]
 
-        base_shift_y_direction = pose.pose.position.y - trans[1]
+        base_shift_y_direction = pose.pose.position.y - trans[1] - 0.02
 
         userdata.move_base_by = (base_shift_x_direction, base_shift_y_direction, 0.0)
 
@@ -484,18 +491,30 @@ class compute_arm_base_shift_to_object(smach.State):
         rotation_w = pose.pose.orientation.w
 
         quat = [rotation_x, rotation_y, rotation_z, rotation_w]
-        rpy = tf.transformations.euler_from_quaternion(quat) 
+        quat90 = list(tf.transformations.quaternion_from_euler(0,math.pi/2,0))
 
-        rotation_angle = rpy[0]
-        if(rotation_angle > 0.0):
-          rotation_angle = rotation_angle - math.pi
-        rotation_angle = rotation_angle + (math.pi/2)
+        '''
+        To avoid gimble lock problem because pitch is approx. -90 when
+        we convert original quaternion to euler angles. So, we perform a
+        rotation of 90 degrees and then convert to euler angles.
+        '''
+        rotated_quat = tf.transformations.quaternion_multiply(quat, quat90)
+        rpy = tf.transformations.euler_from_quaternion(rotated_quat)
 
+        rotation_angle = self.compute_rotation_angle(rpy[2])
         joint_values = manipulation.arm_command.get_current_joint_values()
         joint_values[4] = joint_values[4] + rotation_angle
 
+        print "move base by: ", userdata.move_base_by
+        print "rotate arm joint 5 by: ", rotation_angle
         userdata.move_arm_to = joint_values 
         return 'succeeded'
+    
+    def  compute_rotation_angle(self, rotation):
+        if(rotation < 0):
+          rotation = rotation + math.pi
+        rotation = rotation - (math.pi/2)
+        return rotation
 
 class loop_for(smach.State):
     '''
