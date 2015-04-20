@@ -47,6 +47,8 @@ void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState:
     joint_state.position.push_back(mapFromRadiansToMeter(msg->current_pos)); 
     joint_state.velocity.push_back(msg->velocity);
     joint_state.effort.push_back(msg->load);
+
+    pub_joint_states_.publish(joint_state);
 }
 
 double DynamixelGripperNode::mapFromRadiansToMeter(const double &radians)
