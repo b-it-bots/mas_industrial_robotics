@@ -10,7 +10,7 @@
     visual servoing so that the arm land exactly at the middle of the object.
     -->
     <param name="relative_distance_x" type="double" value="0.0"/>
-    <param name="relative_distance_y" type="double" value="0.0"/>
-    <param name="relative_distance_z" type="double" value="0.09"/>
+    <param name="relative_distance_y" type="double" value="0.00"/>
+    <param name="relative_distance_z" type="double" value="0.040"/>
     </node>
 </launch>
