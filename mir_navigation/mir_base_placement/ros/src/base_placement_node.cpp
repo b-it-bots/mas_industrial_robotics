@@ -107,8 +107,25 @@ class OrientToLaserReadingAction
 		error_lin_d = error_lin - last_error_lin;
 		last_error_lin = error_lin;
 
-		cmd.linear.x = error_lin * lin_p + error_lin_int * lin_i + error_lin_d * lin_d;
-
+		double calculated_velocity = error_lin * lin_p + error_lin_int * lin_i + error_lin_d * lin_d;
+		std::string laser_axis;
+		ros::param::param<std::string>("~laser_axis", laser_axis, "+x");
+		if (laser_axis == "+x")
+		{
+			cmd.linear.x = calculated_velocity;
+		}
+		else if (laser_axis == "-x")
+		{
+			cmd.linear.x = -calculated_velocity;
+		}
+		else if (laser_axis == "+y")
+		{
+			cmd.linear.y = calculated_velocity;
+		}
+		else if (laser_axis == "-y")
+		{
+			cmd.linear.y = -calculated_velocity;
+		}
 
 		/*
 		std::cout << "=======================" << std::endl;

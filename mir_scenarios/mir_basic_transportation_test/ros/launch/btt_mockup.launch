@@ -18,6 +18,7 @@
     <!-- manipulation -->
     <include file="$(find mir_moveit_youbot_brsu_2)/launch/move_group.launch" />
     <include file="$(find mir_moveit_scene)/ros/launch/arm_workspace_restricter.launch" />
+    <include file="$(find mir_moveit_scene)/ros/launch/grasped_object_attacher.launch" />
 
     <!-- navigation -->
     <include file="$(find mir_2dnav)/ros/launch/2dnav_mockup.launch" />

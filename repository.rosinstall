@@ -32,3 +32,8 @@
     local-name: youbot_diagnostics
     uri: git@github.com:mas-group/youbot_diagnostics.git
     version: hydro-devel
+
+- git:
+    local-name: youbot-manipulation
+    uri: git@github.com:svenschneider/youbot-manipulation.git
+    version: hydro 

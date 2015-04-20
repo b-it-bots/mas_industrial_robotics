@@ -1,5 +1,5 @@
 arm_1:
-  kinematics_solver: arm_analytical_inverse_kinematics_youbot/ArmAnalyticalInverseKinematicsYoubotPlugin
+  kinematics_solver: youbot_arm_kinematics_moveit::KinematicsPlugin
   kinematics_solver_search_resolution: 0.01
   kinematics_solver_timeout: 0.1
   kinematics_solver_attempts: 1

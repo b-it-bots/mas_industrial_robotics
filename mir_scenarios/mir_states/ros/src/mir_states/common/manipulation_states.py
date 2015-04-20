@@ -29,123 +29,6 @@ class Bunch:
     def __init__(self, **kwds):
          self.__dict__.update(kwds)
 
-class is_object_grasped(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['obj_grasped', 'obj_not_grasped', 'srv_call_failed'])
-
-        self.obj_grasped_srv_name = '/gripper_controller/is_gripper_closed'
-
-        self.obj_grasped_srv = rospy.ServiceProxy(self.obj_grasped_srv_name, hbrs_srvs.srv.ReturnBool)       
-        
-    def execute(self, userdata):   
-                
-        try:
-            joint_positions = gripper_command.get_current_joint_values()
-            
-            rospy.logerr("is_object_grasped-state need to be checked!!!!!!")
-            is_gripper_closed = joint_positions[0] + joint_positions[1] < 0.01
-            
-        except:
-            return "srv_call_failed"
-
-        print is_gripper_closed
-
-        if is_gripper_closed.value:
-            return 'obj_not_grasped'
-        else:
-            return 'obj_grasped'
-
-
-class put_object_on_rear_platform(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['succeeded',
-                                       'rear_platform_is_full',
-                                       'failed'],
-                             io_keys=['rear_platform'])
-      
-    def execute(self, userdata):
-        try:
-            location = userdata.rear_platform.get_free_location()
-            
-            #FIXME: do we need the intermediate positions with MoveIt?
-            #arm_command.set_named_target("candle")
-            #arm_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
-            
-            #arm_command.set_named_target('platform_%s_pre' % location)
-            #arm_command.go()
-            
-            arm_command.set_named_target('platform_%s' % location)
-            arm_command.go()
-            
-            gripper_command.set_named_target('open')
-            gripper_command.go()
-            
-            arm_command.set_named_target('platform_%s_pre' % location)
-            arm_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
-            
-            userdata.rear_platform.store_object(location)
-            
-            return 'succeeded'
-        except RearPlatformFullError as a:
-            return 'rear_platform_is_full'
-        except ArmNavigationError as e:
-            rospy.logerr('Move arm failed: %s' % (str(e)))
-            return 'failed'
-
-
-class pick_object_from_rear_platform(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['succeeded',
-                                       'rear_platform_is_empty',
-                                       'failed'],
-                             io_keys=['rear_platform'],
-                             input_keys=['location'])
-       
-    def execute(self, userdata):
-        location = (userdata.location or
-                    userdata.rear_platform.get_occupied_location())
-        try:
-            #FIXME: do we need the intermediate positions with MoveIt?
-            
-            gripper_command.set_named_target('open')
-            gripper_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
-            
-            #arm_command.set_named_target('platform_%s_pre' % location)
-            #arm_command.go()
-            
-            arm_command.set_named_target('platform_%s' % location)
-            arm_command.go()
-            
-            gripper_command.set_named_target('close')
-            gripper_command.go()
-            
-            arm_command.set_named_target('platform_%s_pre' % location)
-            arm_command.go()
-            
-            #arm_command.set_named_target("platform_intermediate")
-            #arm_command.go()
-            
-            return 'succeeded'
-        except RearPlatformEmptyError as a:
-            return 'rear_platform_is_empty'
-        except ArmNavigationError as e:
-            rospy.logerr('Move arm failed: %s' % (str(e)))
-            return 'failed'
-
 
 class move_arm(smach.State):
 
@@ -158,8 +41,9 @@ class move_arm(smach.State):
     move_arm_to: str | tuple | list
         target where the arm should move. If it is a string, then it gives
         target name (should be availabile on the parameter server). If it as
-        tuple or a list, then it is treated differently based on the length. If
-        are 7 items, then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame
+        tuple or a list, then it is treated differently based on the length. If it
+        has 7 items, then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame.
+        If it has 5 items, then it is arm configuration in join space.
     """
 
     def __init__(self, target=None, blocking=True, tolerance=None):
@@ -197,6 +81,12 @@ class move_arm(smach.State):
                     pose.pose.orientation.w = q[3]
 
                     arm_command.set_pose_target(pose)
+                except Exception as e:
+                    rospy.logerr('unable to set target position: %s' % (str(e)))
+                    return 'failed'
+            elif len(target) == 5:      # ... of 5 items: Joint space configuration
+                try:
+                    arm_command.set_joint_value_target(target)               
                 except Exception as e:
                     rospy.logerr('unable to set target position: %s' % (str(e)))
                     return 'failed'
@@ -268,35 +158,7 @@ class grasp_object(smach.State):
 
     def event_cb(self, msg):
         self.result = msg
-
-
-class grasp_obj_from_pltf(smach.State):
-
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'no_more_obj_on_pltf'], 
-                             input_keys=['rear_platform_occupied_poses'],
-                             output_keys=['rear_platform_occupied_poses'])
-              
-    def execute(self, userdata):   
-        
-        if len(userdata.rear_platform_occupied_poses) == 0:
-            rospy.logerr("NO more objects on platform")
-            return 'no_more_obj_on_pltf'
-
-        pltf_obj_pose = userdata.rear_platform_occupied_poses.pop()
-        
-        arm_command.set_named_target(pltf_obj_pose)
-        arm_command.go()
-            
-        gripper_command.set_named_target("close")
-        gripper_command.go()
-        
-        arm_command.set_named_target("platform_intermediate")
-        arm_command.go()
-            
-        return 'succeeded'
-    
-    
+   
 class place_object_in_configuration(smach.State):
     def __init__(self):
         smach.State.__init__(self, 
@@ -362,7 +224,7 @@ class compute_pregrasp_pose(smach.State):
         return 'succeeded'
 
 
-class configure_planning_scene(smach.State):
+class update_static_elements_in_planning_scene(smach.State):
 
     """
     trigger component to add walls, objects, etc. to the the planning scene of moveit
@@ -391,5 +253,57 @@ class configure_planning_scene(smach.State):
         return 'succeeded'
 
 
+class update_robot_planning_scene(smach.State):
 
+    """
+    trigger component to attach, detach, reattach and delete an object to/from the robot's planning scene
+    """
 
+    def __init__(self, action):
+        smach.State.__init__(self, outcomes=['succeeded'],
+                                   input_keys=['object'])
+
+        self.pub_event = rospy.Publisher('/mir_manipulation/grasped_object_attacher/event_in', std_msgs.msg.String)
+        self.pub_object_id = rospy.Publisher('/mir_manipulation/grasped_object_attacher/object_id', std_msgs.msg.Int32)
+
+        self.action = action
+
+    def execute(self, userdata):
+
+        self.pub_object_id.publish(userdata.object.database_id)
+        self.pub_event.publish("e_" + self.action)
+        
+        return 'succeeded'
+
+class select_arm_pose(smach.State):
+
+    """
+    TODO
+    """
+
+    def __init__(self, pose_name_list=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded','failed'],
+			     input_keys=['next_arm_pose_index'],
+                             output_keys=['move_arm_to','next_arm_pose_index'])
+        self.pose_name_list = pose_name_list
+	
+    def execute(self, userdata):
+	if type(userdata.next_arm_pose_index) is not int:
+	     userdata.next_arm_pose_index = 0
+
+	if len(self.pose_name_list) <= 0:
+	    rospy.logerr("pose name list is empty")
+	    return 'failed'
+
+	if userdata.next_arm_pose_index >= len(self.pose_name_list):
+	    rospy.logerr("pose index out of range")
+	    return 'failed'
+
+	userdata.move_arm_to = self.pose_name_list[userdata.next_arm_pose_index]
+	userdata.next_arm_pose_index += 1
+	userdata.next_arm_pose_index %= len(self.pose_name_list)
+
+	return 'succeeded'	
+
+	

@@ -54,8 +54,6 @@ def main(no_refbox=False):
     SM.userdata.objects_goal_configuration = 0
     SM.userdata.found_objects = 0
     SM.userdata.object_pose = 0
-    SM.userdata.selected_objects = []
-    SM.userdata.cavity_pose = None
 
 
     SM.userdata.rear_platform_free_poses = []
@@ -70,7 +68,6 @@ def main(no_refbox=False):
     SM.userdata.objects_to_be_grasped = 0
     SM.userdata.last_grasped_obj = None
     SM.userdata.vscount = 0
-    SM.userdata.next_arm_pose_index = 0
 
     SM.userdata.ppt_platform_location = ''
     SM.userdata.all_found_holes = None
@@ -113,13 +110,25 @@ def main(no_refbox=False):
                          'pose_skipped_but_platform_limit_reached': 'GO_TO_DESTINATION'})
 
         smach.StateMachine.add('GO_TO_DESTINATION', btt_sms.sub_sm_go_to_destination(),
-                transitions={'destination_reached': 'PLACE_IN_HOLE',
+                transitions={'destination_reached': 'CHECK_PLATFORM_TYPE',
                              'overall_done': 'done'})
+
+        smach.StateMachine.add('CHECK_PLATFORM_TYPE', ppts.check_platform_type(),
+            transitions={'ppt': 'PLACE_IN_HOLE',
+                        'btt': 'PLACE_OBJECT_ON_REGULAR_WORKSTATION'})
 
         smach.StateMachine.add('PLACE_IN_HOLE', ppt_sms.sub_sm_place_in_holes(),
             transitions={'succeeded': 'CHECK_IF_PLTF_HAS_STILL_OBJS',
-                         'failed': 'PLACE_IN_HOLE',
-                         'no_object_for_ppt_platform': 'CHECK_IF_PLTF_HAS_STILL_OBJS'})
+                         'failed': 'PLACE_OBJECT_ON_REGULAR_WORKSTATION',
+                         'no_object_for_ppt_platform': 'MOVE_ARM_TO_INIT'})
+
+        smach.StateMachine.add('PLACE_OBJECT_ON_REGULAR_WORKSTATION', btt_sms.sub_sm_place(),
+                transitions={'succeeded': 'GO_TO_DESTINATION',
+                             'no_more_obj_for_this_workspace': 'MOVE_ARM_TO_INIT'})
+
+        smach.StateMachine.add('MOVE_ARM_TO_INIT', gms.move_arm("platform_intermediate"),
+            transitions={'succeeded': 'CHECK_IF_PLTF_HAS_STILL_OBJS',
+                         'failed': 'CHECK_IF_PLTF_HAS_STILL_OBJS'})
 
         smach.StateMachine.add('CHECK_IF_PLTF_HAS_STILL_OBJS', btts.check_if_platform_has_still_objects(),
             transitions={'still_objs_on_robot_pltf': 'SKIP_DESTINATION_POSE',

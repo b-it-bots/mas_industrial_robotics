@@ -82,8 +82,8 @@ VisualServoing2D::VisualServoing( IplImage* input_image )
 	RegionOfInterest(input_image,0.7);
 	RegionOfInterest(m_background_image,0.7);
 
-	cvFlip(input_image, input_image, -1); //Flip image around horizontal and vertical axis to match new camera position
-	cvFlip(m_background_image, m_background_image, -1); //Flip image around horizontal and vertical axis to match new camera position
+	//cvFlip(input_image, input_image, -1); //Flip image around horizontal and vertical axis to match new camera position
+	//cvFlip(m_background_image, m_background_image, -1); //Flip image around horizontal and vertical axis to match new camera position
 
 	bool return_val = 0;
 
@@ -296,6 +296,8 @@ g only at a region of interest instead of the whole image.
 		m_head_right = true;
 		done_x = BaseAdjustmentX( y_offset );
 		done_y = BaseAdjustmentY( x_offset );
+		//done_x = BaseAdjustmentX( x_offset );
+		//done_y = BaseAdjustmentY( -y_offset );
 	}
 	else if( m_gripper_position > 3.9277 )
 	{
@@ -303,6 +305,8 @@ g only at a region of interest instead of the whole image.
 		m_head_right = false;
 		done_x = BaseAdjustmentX( y_offset );
 		done_y = BaseAdjustmentY( x_offset );
+		//done_x = BaseAdjustmentX( x_offset );
+		//done_y = BaseAdjustmentY( -y_offset );
 	}
 	else
 	{
@@ -310,6 +314,8 @@ g only at a region of interest instead of the whole image.
 		m_head_right = false;
 		done_x = BaseAdjustmentX( x_offset );
 		done_y = BaseAdjustmentY( y_offset );
+		//done_x = BaseAdjustmentX( -y_offset );
+		//done_y = BaseAdjustmentY( x_offset );
 	}
 	done_t = ArmAdjustment( rot_offset );
 

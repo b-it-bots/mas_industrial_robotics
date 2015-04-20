@@ -1,5 +1,16 @@
 <launch>
 
-    <node pkg="mir_arm_relative_motion_control" type="arm_relative_motion_controller" name="arm_relative_motion_controller" />
-	
+    <node pkg="mir_arm_relative_motion_control" type="arm_relative_motion_controller" name="arm_relative_motion_controller" output="screen">
+
+    <param name="target_frame" type="string" value="base_link"/>
+    <param name="reference_frame" type="string" value="arm_link_5"/>  
+    <!--
+    Linear distances w.r.t frame specified by 'reference_frame'.
+    relative_distance_x and relative_distance_y parameters are set to help
+    visual servoing so that the arm land exactly at the middle of the object.
+    -->
+    <param name="relative_distance_x" type="double" value="0.0"/>
+    <param name="relative_distance_y" type="double" value="0.0"/>
+    <param name="relative_distance_z" type="double" value="0.09"/>
+    </node>
 </launch>

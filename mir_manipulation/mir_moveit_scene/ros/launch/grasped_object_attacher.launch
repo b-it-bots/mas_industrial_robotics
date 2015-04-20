@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="mir_moveit_scene" type="grasped_object_attacher_node"
+            ns="mir_manipulation" name="grasped_object_attacher" output="screen">
+        <remap from="~planning_scene" to="/planning_scene" />
+        <remap from="~object_list" to="/mcr_perception/object_detector/object_list" />
+        <param name="cycle_time" type="double" value="0.1" />
+        <param name="attachment_frame_id" type="str" value="gripper_grasp_link" />
+        <param name="fixed_frame_id" type="str" value="/base_link" />
+    </node>
+</launch>

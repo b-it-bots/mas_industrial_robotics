@@ -11,6 +11,7 @@ catkin_python_setup()
 catkin_package(
   CATKIN_DEPENDS
     geometry_msgs
+    mcr_perception_msgs
     moveit_msgs
     rospy
     shape_msgs
@@ -18,7 +19,8 @@ catkin_package(
 )
 
 install(PROGRAMS
-  ros/scripts/add_workspace_walls_node
+  ros/scripts/arm_workspace_restricter_node
+  ros/scripts/grasped_object_attacher_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

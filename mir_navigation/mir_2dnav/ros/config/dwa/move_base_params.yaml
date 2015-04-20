@@ -1,16 +1,3 @@
-footprint: [[-0.2720, -0.1869],
-            [-0.2720, -0.0331],
-            [-0.3260, -0.0310],
-            [-0.3260, 0.0310],
-            [-0.2720, 0.0325],
-            [-0.2720, 0.1875],
-            [0.2720, 0.1875],
-            [0.2720, 0.0865],
-            [0.3160, 0.0425],
-            [0.3160, -0.0425],
-            [0.2720, -0.0865],
-            [0.2720, -0.1875]]
-
 recovery_behavior_enabled: true     #default : true
 controller_frequency: 10.0          #default : 20.0
 controller_patience: 2.0            #default : 15.0
@@ -22,10 +9,10 @@ clearing_rotation_allowed: false    #default : true
 oscillation_distance: 2.0           #default : 0.5
 shutdown_costmaps: false             #default : false
 recovery_behaviors:
-  - name: 'conservative_reset'
-    type: 'clear_costmap_recovery/ClearCostmapRecovery'
-  - name: 'aggressive_reset'
-    type: 'clear_costmap_recovery/ClearCostmapRecovery'
+  - name: 'force_field_recovery'
+    type: 'force_field_recovery/ForceFieldRecovery'
+  #- name: 'aggressive_reset'
+    #type: 'clear_costmap_recovery/ClearCostmapRecovery'
 base_global_planner: global_planner/GlobalPlanner
 GlobalPlanner:
     use_grid_path: False

@@ -9,4 +9,5 @@
 *.vpp~*
 
 *~
-
+html/
+latex/
