@@ -146,11 +146,12 @@ class ArmRelativeMotionControl:
 
         self.group.clear_pose_targets()
         self.group.set_joint_value_target(target_joint_angles)
-        try:
-            plan = self.group.plan()
-            self.group.execute(plan) 
-        except rospy.ROSInterruptException:
-            rospy.loginfo("Planning in joint space failed.")
+        error_code = self.group.go(wait=True) 
+        if error_code == moveit_msgs.msg.MoveItErrorCodes.SUCCESS:
+             return 'succeeded'
+        else:
+             rospy.logerr("Arm movement failed with error code: %d", error_code)
+             return 'failed'
 
     def matrix_to_pose(self,frame, matrix):
         '''
