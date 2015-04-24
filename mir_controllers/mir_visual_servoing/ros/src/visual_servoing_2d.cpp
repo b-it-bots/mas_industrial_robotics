@@ -272,7 +272,7 @@ g only at a region of interest instead of the whole image.
 
 	if( g_debugging )
 	{
-		cvShowImage( "GRAY - Substracted", gray );
+		//cvShowImage( "GRAY - Substracted", gray );
 		//  Draw the blob we are tracking as well as a circle to represent the centroid of that object.
 		temp_tracked_blob.FillBlob( blob_image, CV_RGB( 0, 0, 255 ) );
 		cvCircle( blob_image, cvPoint( m_tracked_x, m_tracked_y ), 10, CV_RGB( 255, 0, 0 ), 2 );
@@ -350,7 +350,7 @@ g only at a region of interest instead of the whole image.
 		cvPutText( blob_image, y_str.c_str(),  cvPoint( 185, blob_image->height - 10 ), &font, CV_RGB( 255, 0, 0 ) );
 		cvPutText( blob_image, rot_str.c_str(), cvPoint( 350, blob_image->height - 10 ), &font, CV_RGB( 255, 0, 0 ) );
 
-		HUD("b-it-bots Visual Servoing", 3, cv_image, m_background_image, blob_image );
+		//HUD("b-it-bots Visual Servoing", 3, cv_image, m_background_image, blob_image );
 		cvWaitKey( 10 );
 	}
 	
