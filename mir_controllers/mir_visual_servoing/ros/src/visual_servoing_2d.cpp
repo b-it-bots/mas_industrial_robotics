@@ -112,9 +112,9 @@ VisualServoing2D::VisualServoing( IplImage* input_image )
   m_min_blob_area = 2000;
 	m_max_blob_area = 90000;
 	m_verticle_offset = 3;
-	m_x_velocity = 0.03;
-	m_y_velocity = 0.03;
-	m_rot_velocity = 0.4;
+	m_x_velocity = 0.02;
+	m_y_velocity = 0.02;
+	m_rot_velocity = 0.3;
 	m_x_target = 0;
 	m_x_threshold = 20;
 	m_y_target = 0;
@@ -278,8 +278,8 @@ g only at a region of interest instead of the whole image.
 		cvCircle( blob_image, cvPoint( m_tracked_x, m_tracked_y ), 10, CV_RGB( 255, 0, 0 ), 2 );
 	}
 
-	x_offset = ( m_tracked_x * 100 / 63.125 ) - ( m_image_width / 2 ); // Wierd math for present camera and gripper position // TODO later
-	y_offset = ( m_tracked_y * 100 / 77.5 ) - ( (m_image_height/2) + m_verticle_offset ); // Wierd math for present camera and gripper position // TODO later
+	x_offset = ( m_tracked_x * 100 / 65 ) - ( m_image_width / 2 ); // Wierd math for present camera and gripper position // TODO later
+	y_offset = ( m_tracked_y * 100 / 70 ) - ( (m_image_height/2) + m_verticle_offset ); // Wierd math for present camera and gripper position // TODO later
 	rot_offset = get_orientation( temp_tracked_blob );
 	if( rot_offset > 180 )
 	{
@@ -724,13 +724,13 @@ VisualServoing2D::RegionOfInterest( IplImage* input_image, double scale )
 		scale = 0.7;
 	}
 
-	int width = (int)(input_image->width * scale );
+	int width = (int)(input_image->width * (scale-0.05) );
 	int height = (int)( input_image->height * scale );
 
 	int x = ( (input_image->width - width) / 2 );
 	int y = ( (input_image->height - height) / 2 );
 
-	cvSetImageROI( input_image, cvRect( x, y, width-0.45*x, height+0.5*y ) ); //Wierd math for present camera and gripper position - TODO later
+	cvSetImageROI( input_image, cvRect( x, y, width, height ) ); //Wierd math for present camera and gripper position - TODO later
 
 	if( g_debugging )
 	{
@@ -771,7 +771,7 @@ VisualServoing2D::CreatePublishers( int arm_model )
 		ROS_ERROR( "Unkown robotic arm model provided" );
 	}
 
-	m_image_publisher = m_image_transport.advertise("/arm_cam/visual_servoing/debug_image", 1);
+	m_image_publisher = m_image_transport.advertise("/mir_controllers/visual_servoing/debug_image", 1);
 }
 
 void
