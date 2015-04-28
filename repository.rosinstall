@@ -11,7 +11,7 @@
 - git:
     local-name: youbot_driver
     uri: git@github.com:mas-group/youbot_driver.git
-    version: catkin
+    version: hydro-devel
 
 - git:
     local-name: youbot_driver_ros_interface
