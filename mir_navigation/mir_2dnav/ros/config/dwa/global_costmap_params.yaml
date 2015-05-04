@@ -5,4 +5,4 @@ global_costmap:
   update_frequency: 0.3             #default : 5.0
   publish_frequency: 0.3            #default : 0.0
   static_map: true                  #default : true
-  footprint_padding: 0.0            #default : 0.01
+  footprint_padding: 0.03            #default : 0.01
