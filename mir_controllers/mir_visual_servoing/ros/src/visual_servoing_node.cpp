@@ -58,7 +58,7 @@ public:
 
 		SetupYoubotArm();
 
-		m_visual_servoing = new VisualServoing2D( false, 0, m_arm_joint_names );
+		m_visual_servoing = new VisualServoing2D( true, 0, m_arm_joint_names );
  
 		m_dynamic_reconfigre_subscriber.setCallback(boost::bind( &VisualServoing::dynamic_reconfig_callback, this, _1, _2 ) );
 

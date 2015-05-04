@@ -4,7 +4,6 @@ controller_patience: 2.0            #default : 15.0
 planner_patience: 2.0               #default : 5.0
 planner_frequency: 0.2              #default : 0.0
 clearing_radius: 0.6              #default : not found
-footprint_padding: 0.0             #default : not found
 clearing_rotation_allowed: false    #default : true
 oscillation_distance: 2.0           #default : 0.5
 shutdown_costmaps: false             #default : false
