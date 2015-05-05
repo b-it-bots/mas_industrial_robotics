@@ -2,6 +2,7 @@
 .autotools
 .cproject
 .project
+.settings/
 
 .pydevproject
 .idea/
