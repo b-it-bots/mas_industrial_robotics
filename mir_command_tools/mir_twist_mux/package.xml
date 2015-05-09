@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_twist_mux</name>
+  <version>0.0.1</version>
+  <description>
+      Launch and configure a Twist multiplexer, which multiplex several velocity commands (topics) and
+      allows to priorize or disable them (locks). twist_mux is part of ros-teleop.
+  </description>
+
+  <maintainer email="alexander.moriarty@brsu.de">Alexander Moriarty</maintainer>
+  <author email="alexander.moriarty@brsu.de">Alexander Moriarty</author>
+
+  <license>CC BY-NC-SA 4.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>twist_mux</run_depend>
+
+</package>
