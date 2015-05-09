@@ -12,7 +12,8 @@
 
   <!-- start youbot teleop node -->
   <node pkg="mir_teleop" type="teleop_joypad_node" name="mir_teleop_joypad" output="screen">
-    <remap from="~cmd_vel" to="/cmd_vel" />
+    <!-- remap for twist mux -->
+    <remap from="~cmd_vel" to="/joy_vel" />
     <rosparam command="load" file="$(arg joypad_cfg_file)"/>
     <rosparam command="load" file="$(find mir_hardware_config)/$(arg robot)/config/teleop.yaml"/>  
   </node>
