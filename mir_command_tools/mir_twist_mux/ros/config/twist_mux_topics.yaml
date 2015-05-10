@@ -10,10 +10,14 @@ topics:
   name    : joystick
   topic   : joy_vel
   timeout : 0.5
-  priority: 100
+  priority: 200
 -
   name    : navigation
   topic   : nav_vel
   timeout : 0.5
-  priority: 50
-
+  priority: 10
+-
+  name    : relative
+  topic   : rel_vel
+  timeout : 0.1
+  priority: 20
