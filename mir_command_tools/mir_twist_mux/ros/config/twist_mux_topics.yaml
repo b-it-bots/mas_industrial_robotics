@@ -18,6 +18,6 @@ topics:
   priority: 10
 -
   name    : relative
-  topic   : rel_vel
+  topic   : rel_vel_filtered
   timeout : 0.1
   priority: 20
