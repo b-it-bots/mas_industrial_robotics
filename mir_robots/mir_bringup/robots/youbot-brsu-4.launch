@@ -5,7 +5,9 @@
 
   <include file="$(find mir_bringup)/components/base_front_hokuyo_node.launch" />
   <include file="$(find mir_bringup)/components/base_rear_hokuyo_node.launch" />
-    
+
+  <include file="$(find mir_twist_mux)/ros/launch/twist_mux.launch" />
+
   <include file="$(find mir_teleop)/ros/launch/teleop_joypad.launch" />
 
   <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />	
