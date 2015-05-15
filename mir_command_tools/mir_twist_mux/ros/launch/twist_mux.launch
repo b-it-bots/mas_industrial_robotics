@@ -1,20 +1,14 @@
 <launch>
-  <include file="$(find mcr_collision_velocity_filter)/ros/launch/collision_velocity_filter.launch" >
-    <arg name="footprint_file" value="$(find mir_hardware_config)/$(env ROBOT)/config/base_footprint_rectangular.yaml" />
-    <arg name="scan_topics" value="[/scan_front, /scan_rear]" />
-    <arg name="cmd_vel_out" value="/rel_vel_filtered" />
-    <arg name="cmd_vel_in" value="/rel_vel" />
-  </include>
   <arg name="cmd_vel_out" default="/cmd_vel"/>
 
-  <arg name="config_locks"  default="$(find mir_twist_mux)/ros/config/twist_mux_locks.yaml"/>
-  <arg name="config_topics" default="$(find mir_twist_mux)/ros/config/twist_mux_topics.yaml"/>
+  <arg name="locks_config_file"  default="$(find mir_twist_mux)/ros/config/locks.yaml"/>
+  <arg name="topics_config_file" default="$(find mir_twist_mux)/ros/config/topics.yaml"/>
 
-  <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
+  <node pkg="twist_mux" type="twist_mux" ns="mir_command_tools" name="twist_mux" output="screen">
     <remap from="cmd_vel_out" to="$(arg cmd_vel_out)"/>
 
-    <rosparam file="$(arg config_locks)"  command="load"/>
-    <rosparam file="$(arg config_topics)" command="load"/>
+    <rosparam file="$(arg locks_config_file)"  command="load"/>
+    <rosparam file="$(arg topics_config_file)" command="load"/>
   </node>
 </launch>
 

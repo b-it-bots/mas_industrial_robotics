@@ -4,3 +4,10 @@ project(mir_twist_mux)
 find_package(catkin REQUIRED)
 
 catkin_package()
+
+install(DIRECTORY ros/launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
+)
+install(DIRECTORY ros/config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/config
+)

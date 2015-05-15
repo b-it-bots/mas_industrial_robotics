@@ -6,6 +6,13 @@
   <include file="$(find mir_bringup)/components/base_front_hokuyo_node.launch" />
   <include file="$(find mir_bringup)/components/base_rear_hokuyo_node.launch" />
 
+  <include file="$(find mcr_collision_velocity_filter)/ros/launch/collision_velocity_filter.launch" >
+    <arg name="footprint_file" value="$(find mir_hardware_config)/$(env ROBOT)/config/base_footprint_rectangular.yaml" />
+    <arg name="scan_topics" value="[/scan_front, /scan_rear]" />
+    <arg name="cmd_vel_out" value="/rel_vel_filtered" />
+    <arg name="cmd_vel_in" value="/rel_vel" />
+  </include>
+
   <include file="$(find mir_twist_mux)/ros/launch/twist_mux.launch" />
 
   <include file="$(find mir_teleop)/ros/launch/teleop_joypad.launch" />
