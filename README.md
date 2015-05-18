@@ -34,7 +34,7 @@ If you have never worked with git before, we recommend to go through the followi
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
 
 
-- ROS Hydro - http://www.ros.org/wiki/Hydro/Installation/Ubuntu
+- ROS Hydro - http://wiki.ros.org/hydro/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
   
@@ -42,7 +42,7 @@ NOTE: Do not forget to update your .bashrc!
 ### ROS Tutorials
 If you have never worked with ROS before, we recommend to go through the beginner tutorials provided by ROS:
 
-     http://www.ros.org/wiki/ROS/Tutorials
+     http://wiki.ros.org/ROS/Tutorials
 
 In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters"). 
 
