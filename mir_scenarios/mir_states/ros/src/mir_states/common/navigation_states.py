@@ -147,35 +147,19 @@ class move_base_relative(smach.State):
         
         return 'succeeded'
 
-## copied from old states
-## same as move_base?
+
 class approach_pose(smach.State):
 
-    def __init__(self, pose_name = "", clear_costmaps=True):
+    def __init__(self, pose_name = ""):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['base_pose_to_approach'])
 
-        self.clear_costmaps = clear_costmaps
         self.pose_name = pose_name;  
 
         self.move_base_action_name = '/move_base'
         self.move_base_action = actionlib.SimpleActionClient(self.move_base_action_name, move_base_msgs.msg.MoveBaseAction)
 
-        self.clear_costmap_srv_name = '/move_base/clear_costmaps'
-        self.clear_costmap_srv = rospy.ServiceProxy(self.clear_costmap_srv_name, std_srvs.srv.Empty)  
-
     def execute(self, userdata):
     
-        if(self.clear_costmaps):
-          # remove close obstacles from the costmap
-          try:
-              rospy.loginfo("wait for service: %s", self.clear_costmap_srv_name)
-              rospy.wait_for_service(self.clear_costmap_srv_name, 30)
-
-              self.clear_costmap_srv()
-          except:
-              rospy.logerr("could not execute service <<%s>>", self.clear_costmap_srv_name)
-              return 'failed'
-
         # wait for action server
         rospy.loginfo("Wait for action: %s", self.move_base_action_name)
         if not self.move_base_action.wait_for_server(rospy.Duration(5)):

@@ -33,7 +33,7 @@ def main(no_refbox=False):
                          'unknown_pose': 'SELECT_TARGET_POSE',
                          'no_more_targets': 'MOVE_BASE_TO_EXIT'})
 
-        smach.StateMachine.add('MOVE_BASE', gns.approach_pose(clear_costmaps=False),
+        smach.StateMachine.add('MOVE_BASE', gns.approach_pose(),
             transitions={'succeeded': 'WAIT_DESIRED_DURATION',
                          'failed': 'SELECT_TARGET_POSE'})
 
