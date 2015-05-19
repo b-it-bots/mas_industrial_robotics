@@ -4,6 +4,7 @@
 packagelist=(
     libcap2-bin
     python-pygraphviz
+    python-rosinstall
     python-setuptools
     python-zmq
     ros-hydro-amcl
