@@ -36,4 +36,4 @@
 - git:
     local-name: youbot-manipulation
     uri: https://github.com/svenschneider/youbot-manipulation.git
-    version: hydro 
+    version: indigo 
