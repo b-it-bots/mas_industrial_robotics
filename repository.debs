@@ -7,37 +7,37 @@ packagelist=(
     python-rosinstall
     python-setuptools
     python-zmq
-    ros-hydro-amcl
-    ros-hydro-clear-costmap-recovery
-    ros-hydro-cob-srvs
-    ros-hydro-dwa-local-planner
-    ros-hydro-dynamixel-controllers
-    ros-hydro-dynamixel-msgs
-    ros-hydro-eband-local-planner
-    ros-hydro-gazebo-ros-control
-    ros-hydro-gmapping
-    ros-hydro-hokuyo-node
-    ros-hydro-joint-state-controller
-    ros-hydro-joy
-    ros-hydro-map-server
-    ros-hydro-move-base
-    ros-hydro-moveit-core
-    ros-hydro-moveit-commander
-    ros-hydro-moveit-msgs
-    ros-hydro-moveit-planners
-    ros-hydro-moveit-ros-move-group
-    ros-hydro-moveit-setup-assistant
-    ros-hydro-moveit-simple-controller-manager
-    ros-hydro-openni2-launch
-    ros-hydro-pr2-dashboard-aggregator
-    ros-hydro-pr2-description
-    ros-hydro-pr2-msgs
-    ros-hydro-ros
-    ros-hydro-ros-controllers
-    ros-hydro-rqt-pr2-dashboard
-    ros-hydro-smach
-    ros-hydro-usb-cam
-    ros-hydro-global-planner
+    ros-indigo-amcl
+    ros-indigo-clear-costmap-recovery
+    ros-indigo-cob-srvs
+    ros-indigo-dwa-local-planner
+    ros-indigo-dynamixel-controllers
+    ros-indigo-dynamixel-msgs
+    ros-indigo-eband-local-planner
+    ros-indigo-gazebo-ros-control
+    ros-indigo-gmapping
+    ros-indigo-hokuyo-node
+    ros-indigo-joint-state-controller
+    ros-indigo-joy
+    ros-indigo-map-server
+    ros-indigo-move-base
+    ros-indigo-moveit-core
+    ros-indigo-moveit-commander
+    ros-indigo-moveit-msgs
+    ros-indigo-moveit-planners
+    ros-indigo-moveit-ros-move-group
+    ros-indigo-moveit-setup-assistant
+    ros-indigo-moveit-simple-controller-manager
+    ros-indigo-openni2-launch
+    ros-indigo-pr2-dashboard-aggregator
+    ros-indigo-pr2-description
+    ros-indigo-pr2-msgs
+    ros-indigo-ros
+    ros-indigo-ros-controllers
+    ros-indigo-rqt-robot-dashboard
+    ros-indigo-smach
+    ros-indigo-usb-cam
+    ros-indigo-global-planner
 )
 
 ### install debian packages listed in array above
