@@ -35,6 +35,8 @@ if(CATKIN_ENABLE_TESTING)
     roslaunch_add_file_check(robots)
 endif()
 
+
+### INSTALLS
 set(
   INSTALL_DIRS 
     components
