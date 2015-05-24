@@ -10,13 +10,13 @@ catkin_package(
     youbot_description
 )
 
-set(
-  INSTALL_DIRS 
-    youbot-brsu-1 
-    youbot-brsu-2 
-    youbot-brsu-3 
-    youbot-brsu-4
+set(robot_list
+  youbot-brsu-1 
+  youbot-brsu-2 
+  youbot-brsu-3 
+  youbot-brsu-4
 ) 
+
 
 ### TESTS
 if(CATKIN_ENABLE_TESTING)
@@ -30,8 +30,8 @@ endif()
 
 
 ### INSTALLS
-foreach(dir ${INSTALL_DIRS}) 
-  install(DIRECTORY ${dir}
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir}
+foreach(robot ${robot_list}) 
+  install(DIRECTORY ${robot}
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${robot}
   )
 endforeach() 
