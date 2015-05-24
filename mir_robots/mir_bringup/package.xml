@@ -18,9 +18,11 @@
   <run_depend>mir_arm_cartesian_control</run_depend>
   <run_depend>mir_default_robot_config</run_depend>
   <run_depend>mir_gripper_services</run_depend>
+  <run_depend>mir_gripper_controller</run_depend>
   <run_depend>mir_hardware_config</run_depend>
   <run_depend>mir_teleop</run_depend>
   <run_depend>openni_launch</run_depend>
+  <run_depend>openni2_launch</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>youbot_dashboard</run_depend>
