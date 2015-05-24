@@ -23,7 +23,10 @@ catkin_package(
   CATKIN_DEPENDS
     brics_actuator
     geometry_msgs
+    joy
     mcr_teleop
+    mir_default_robot_config
+    mir_hardware_config
     moveit_msgs
     sensor_msgs
     std_srvs
