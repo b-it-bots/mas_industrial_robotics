@@ -13,6 +13,18 @@ catkin_package(
     youbot_gazebo_control
 )
 
+### TEST
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED
+    COMPONENTS
+      roslaunch
+  )
+
+  roslaunch_add_file_check(robots)
+endif()
+
+
+### INSTALLS
 install(DIRECTORY robots/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/robots
 )
