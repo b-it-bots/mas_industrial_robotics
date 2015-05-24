@@ -4,6 +4,17 @@ find_package(catkin REQUIRED)
 
 catkin_package()
 
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED
+    COMPONENTS
+      roslaunch
+  )
+
+  roslaunch_add_file_check(upload_param.launch robot:=youbot-brsu-1)
+endif()
+
 install(FILES upload_param.launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
