@@ -12,6 +12,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>roslaunch</build_depend>
+
   <run_depend>hokuyo_node</run_depend>
   <run_depend>mcr_default_env_config</run_depend>
   <run_depend>mcr_collision_velocity_filter</run_depend>
