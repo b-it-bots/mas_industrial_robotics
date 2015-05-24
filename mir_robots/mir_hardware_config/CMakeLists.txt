@@ -28,6 +28,8 @@ if(CATKIN_ENABLE_TESTING)
   roslaunch_add_file_check(upload_param.launch robot:=youbot-brsu-1)
 endif()
 
+
+### INSTALLS
 foreach(dir ${INSTALL_DIRS}) 
   install(DIRECTORY ${dir}
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir}
