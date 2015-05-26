@@ -34,6 +34,8 @@ if(CATKIN_ENABLE_TESTING)
 
   #roslaunch_add_file_check(robot.launch robot:=youbot-brsu-1)
   roslaunch_add_file_check(robots)
+  roslaunch_add_file_check(components robot:=youbot-brsu-1)
+  roslaunch_add_file_check(tools)
 endif()
 
 
