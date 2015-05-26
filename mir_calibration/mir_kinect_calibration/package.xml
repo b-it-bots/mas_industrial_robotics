@@ -23,7 +23,9 @@
   <!--run_depend>arm_navigation_msgs</run_depend-->   <!-- need to be changed to moveit, but this involves more changes -->
   <run_depend>actionlib</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>mir_bringup</run_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>rviz</run_depend>
   <run_depend>tf</run_depend>
 
 
