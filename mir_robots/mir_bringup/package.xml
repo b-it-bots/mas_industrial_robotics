@@ -26,6 +26,7 @@
   <run_depend>openni_launch</run_depend>
   <run_depend>openni2_launch</run_depend>
   <run_depend>robot_state_publisher</run_depend>
+  <run_depend>rgbd_launch</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>youbot_dashboard</run_depend>
   <run_depend>youbot_description</run_depend> 
