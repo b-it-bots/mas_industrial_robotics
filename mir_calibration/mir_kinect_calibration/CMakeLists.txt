@@ -59,7 +59,7 @@ if(CATKIN_ENABLE_TESTING)
       roslaunch
   )
 
-  roslaunch_add_file_check(ros/launch)
+  #roslaunch_add_file_check(ros/launch/kinect_calibration.launch robot:=youbot-brsu-1)
 endif()
 
 
