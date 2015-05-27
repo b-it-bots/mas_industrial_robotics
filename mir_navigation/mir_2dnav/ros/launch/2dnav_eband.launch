@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   
-    <arg name="robot" default="$(optenv ROBOT) !!ROBOT_ENV NOT SET!!" />
+    <arg name="robot" default="$(optenv ROBOT !!ROBOT_ENV NOT SET!!)" />
 
     <!-- eband planner set to omni by default -->
     <arg name="diff" default="false"/>
