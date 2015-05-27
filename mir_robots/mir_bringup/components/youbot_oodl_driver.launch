@@ -17,6 +17,7 @@ or enable the USE_SETCAP flag in the cmake file and recompile again.
   <param name="youBotHasArms" type="bool" value="true"/> 
 
   <param name="youBotDriverCycleFrequencyInHz" type="double" value="50.0"/>
+  <param name="youBotDriverGripperReadingsCycleFrequencyInHz" type="double" value="0.5" />
   <param name="youBotConfigurationFilePath" type="string" value="$(find youbot_driver)/config"/>
 
   <param name="trajectoryActionServerEnable" type="bool" value="true"/>
