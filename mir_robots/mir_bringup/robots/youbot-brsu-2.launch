@@ -13,6 +13,15 @@
     <arg name="robot" value="$(arg robot)" />
   </include>
 
+  <include file="$(find mcr_collision_velocity_filter)/ros/launch/collision_velocity_filter.launch" > 
+    <arg name="footprint_file" value="$(find mir_hardware_config)/$(arg robot)/config/base_footprint_rectangular.yaml" /> 
+    <arg name="scan_topics" value="[/scan_front, /scan_rear]" /> 
+    <arg name="cmd_vel_out" value="/cmd_vel_prio_low" /> 
+    <arg name="cmd_vel_in" value="/cmd_vel_safe" /> 
+  </include>
+
+  <include file="$(find mir_twist_mux)/ros/launch/twist_mux.launch" />
+
   <include file="$(find mir_teleop)/ros/launch/teleop_joypad.launch">
     <arg name="robot" value="$(arg robot)"/>
   </include>
