@@ -10,13 +10,11 @@
 
 locks:
 -
-  name    : joystick
-  topic   : joy_priority
-  timeout : 0.0
-  priority: 100
--
-  name    : navigation
-  topic   : nav_priority
-  timeout : 0.0
-  priority: 50
-
+  name    : foo_lock #unused
+  topic   : foo_priority #unused
+  timeout : 0.0 #unused
+  priority: 1 #unused
+#
+# Currently these are not used, but leaving them empty or no having them
+# causes twist_mux to not launch
+# 

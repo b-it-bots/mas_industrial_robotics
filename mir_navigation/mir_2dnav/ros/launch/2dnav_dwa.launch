@@ -24,7 +24,7 @@
 	<rosparam file="$(find mir_2dnav)/ros/config/recovery_behaviors/clear_costmap_parameters.yaml" command="load" ns="clear_costmap_recovery"/>    
 
     <!-- Remap for twist mux -->
-    <remap from="cmd_vel" to="/nav_vel"/>
+    <remap from="cmd_vel" to="/cmd_vel_prio_medium"/>
   </node>
 
 </launch>

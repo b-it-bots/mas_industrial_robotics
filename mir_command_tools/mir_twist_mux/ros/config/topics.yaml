@@ -7,17 +7,17 @@
 
 topics:
 -
-  name    : joystick
-  topic   : joy_vel
+  name    : priority_high
+  topic   : cmd_vel_prio_high
   timeout : 0.5
   priority: 200
 -
-  name    : navigation
-  topic   : nav_vel
+  name    : priority_medium
+  topic   : cmd_vel_prio_medium
   timeout : 0.5
-  priority: 10
+  priority: 150
 -
-  name    : relative
-  topic   : rel_vel_filtered
-  timeout : 0.1
-  priority: 20
+  name    : priority_low
+  topic   : cmd_vel_prio_low
+  timeout : 0.5
+  priority: 100

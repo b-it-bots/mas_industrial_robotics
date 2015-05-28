@@ -7,6 +7,10 @@
   <node pkg="twist_mux" type="twist_mux" ns="mir_command_tools" name="twist_mux" output="screen">
     <remap from="cmd_vel_out" to="$(arg cmd_vel_out)"/>
 
+    <remap from="cmd_vel_prio_high" to="/cmd_vel_prio_high"/>
+    <remap from="cmd_vel_prio_medium" to="/cmd_vel_prio_medium"/>
+    <remap from="cmd_vel_prio_low" to="/cmd_vel_prio_low"/>
+
     <rosparam file="$(arg locks_config_file)"  command="load"/>
     <rosparam file="$(arg topics_config_file)" command="load"/>
   </node>
