@@ -23,6 +23,7 @@
   <run_depend>mir_gripper_controller</run_depend>
   <run_depend>mir_hardware_config</run_depend>
   <run_depend>mir_teleop</run_depend>
+  <run_depend>mir_twist_mux</run_depend>
   <run_depend>openni_launch</run_depend>
   <run_depend>openni2_launch</run_depend>
   <run_depend>robot_state_publisher</run_depend>
