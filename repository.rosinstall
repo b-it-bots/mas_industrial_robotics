@@ -37,3 +37,10 @@
     local-name: youbot-manipulation
     uri: https://github.com/svenschneider/youbot-manipulation.git
     version: hydro 
+
+- git:
+    local-name: realsense_camera
+    uri: https://github.com/mas-group/realsense_camera.git
+    version: master 
+
+
