@@ -19,6 +19,7 @@
   <run_depend>mir_arm_cartesian_control</run_depend>
   <run_depend>mir_default_robot_config</run_depend>
   <run_depend>mir_hardware_config</run_depend>
+  <run_depend>mir_twist_mux</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>youbot_gazebo_control</run_depend>
  
