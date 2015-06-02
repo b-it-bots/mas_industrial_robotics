@@ -49,6 +49,16 @@ target_link_libraries(teleop_joypad_node
   ${catkin_LIBRARIES}
 )
 
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+
+  roslaunch_add_file_check(ros/launch robot:=youbot-brsu-1)
+endif()
+
+
+### INSTALLS
 install(TARGETS teleop_joypad_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
