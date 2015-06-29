@@ -43,4 +43,8 @@
     uri: https://github.com/mas-group/realsense_camera.git
     version: master 
 
+- git:
+    local-name: srdf_parser_py
+    uri: https://github.com/ubi-agni/srdf_parser_py.git
+    version: master 
 
