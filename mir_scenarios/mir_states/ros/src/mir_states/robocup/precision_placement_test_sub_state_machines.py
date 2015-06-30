@@ -141,11 +141,11 @@ class sub_sm_place_in_holes(smach.StateMachine):
                 transitions={'succeeded':'WIGGLE_ARM_LEFT',
                              'failed':'RELEASE_OBJECT'})
 
-            smach.StateMachine.add('WIGGLE_ARM_LEFT', btts.ppt_wiggle_arm(wiggle_offset=-0.12),
+            smach.StateMachine.add('WIGGLE_ARM_LEFT', ppts.ppt_wiggle_arm(wiggle_offset=-0.12),
                 transitions={'succeeded':'WIGGLE_ARM_RIGHT',
                              'failed':'WIGGLE_ARM_RIGHT'})
 
-            smach.StateMachine.add('WIGGLE_ARM_RIGHT', btts.ppt_wiggle_arm(wiggle_offset=0.24),
+            smach.StateMachine.add('WIGGLE_ARM_RIGHT', ppts.ppt_wiggle_arm(wiggle_offset=0.24),
                 transitions={'succeeded':'MOVE_ARM_TO_INTERMEDIATE_POSE',
                              'failed':'MOVE_ARM_TO_INTERMEDIATE_POSE'})
 

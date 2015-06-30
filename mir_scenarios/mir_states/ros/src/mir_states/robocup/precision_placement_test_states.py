@@ -11,6 +11,7 @@ import tf
 
 import std_msgs.msg
 import mcr_perception_msgs.msg
+import moveit_msgs.msg
 import math
 
 import mir_states.common.manipulation_states as manipulation
@@ -238,3 +239,29 @@ class clear_cavities(smach.State):
     def execute(self, userdata):
         userdata.found_cavities = []
         return 'succeeded'
+
+class ppt_wiggle_arm(smach.State):
+
+    def __init__(self, wiggle_offset=0.0):
+        smach.State.__init__(self,
+                             outcomes=['succeeded','failed'])
+        self.wiggle_offset = wiggle_offset
+        self.blocking = True
+
+    def execute(self, userdata):
+        joint_values = manipulation.arm_command.get_current_joint_values()
+        joint_values[0] = joint_values[0] + self.wiggle_offset
+        try:
+            manipulation.arm_command.set_joint_value_target(joint_values)
+        except Exception as e:
+            rospy.logerr('unable to set target position: %s' % (str(e)))
+            return 'failed'
+
+        error_code = manipulation.arm_command.go(wait=self.blocking)
+
+        if error_code == moveit_msgs.msg.MoveItErrorCodes.SUCCESS:
+            return 'succeeded'
+        else:
+            rospy.logerr("Arm movement failed with error code: %d", error_code)
+            return 'failed'
+
