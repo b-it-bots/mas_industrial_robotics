@@ -16,7 +16,7 @@ class find_objects(smach.State):
     EVENT_IN_TOPIC = '/mcr_perception/object_detector/event_in'
     EVENT_OUT_TOPIC = '/mcr_perception/object_detector/event_out'
 
-    def __init__(self, retries=5, frame_id=None):
+    def __init__(self, retries=5):
         smach.State.__init__(self,
                              outcomes=['objects_found',
                                        'no_objects_found'],
@@ -25,9 +25,7 @@ class find_objects(smach.State):
         self.object_list_sub = rospy.Subscriber(self.OBJECT_LIST_TOPIC, mcr_perception_msgs.msg.ObjectList, self.object_list_cb)
         self.event_out_sub = rospy.Subscriber(self.EVENT_OUT_TOPIC, std_msgs.msg.String, self.event_out_cb)
         self.event_in_pub = rospy.Publisher(self.EVENT_IN_TOPIC, std_msgs.msg.String)
-        self.tf_listener = tf.TransformListener()
         self.retries = retries
-        self.frame_id = frame_id
 
     def object_list_cb(self, event):
         self.object_list = event
@@ -69,16 +67,35 @@ class find_objects(smach.State):
             rospy.loginfo('No objects in the field of view')
             return 'no_objects_found'
 
-        if self.frame_id:
-            for obj in self.object_list.objects:
-                try:
-                    obj.pose = self.tf_listener.transformPose(self.frame_id, obj.pose)
-                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                    rospy.logerr('Unable to transform %s -> %s' % (obj.pose.header.frame_id, self.frame_id))
-
         userdata.found_objects = self.object_list.objects
         return 'objects_found'
 
+class transform_object_poses(smach.State):
+
+    def __init__(self, frame_id=None):
+        smach.State.__init__(self,
+                             outcomes=['succeeded',
+                                       'no_frame_specified',
+                                       'tf_error'],
+                             input_keys=['found_objects'],
+                             output_keys=['found_objects'])
+        self.tf_listener = tf.TransformListener()
+        self.frame_id = frame_id
+
+    def execute(self, userdata):
+        if self.frame_id:
+            for obj in userdata.found_objects:
+                try:
+                    self.tf_listener.waitForTransform(
+                                    self.frame_id, obj.pose.header.frame_id,
+                                    obj.pose.header.stamp, rospy.Duration(0.1))
+                    obj.pose = self.tf_listener.transformPose(self.frame_id, obj.pose)
+                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                    rospy.logerr('Unable to transform %s -> %s' % (obj.pose.header.frame_id, self.frame_id))
+                    return 'tf_error'
+        else:
+            return 'no_frame_specified'
+        return 'succeeded'
 
 class do_visual_servoing(smach.State):
 
@@ -159,6 +176,7 @@ class find_holes(smach.State):
 
         return 'found_no_holes'
 
+
 class find_cavities(smach.State):
     def __init__(self, frame_id=None):
         smach.State.__init__(self,
@@ -172,12 +190,13 @@ class find_cavities(smach.State):
         self.tf_listener = tf.TransformListener()
         self.cavity = None
         self.frame_id = frame_id
+        self.matching_threshold = 0.1
 
     def cavity_cb(self, cavity):
         self.cavity = cavity
 
     def execute(self, userdata):
-        userdata.found_cavities = []
+        local_found_cavities = []
         for obj in userdata.selected_objects:
             self.cavity = None
             self.pub_object_category.publish(obj.name)
@@ -187,9 +206,9 @@ class find_cavities(smach.State):
             start_time = rospy.Time.now()
             while not rospy.is_shutdown():
                 if self.cavity:
-                    rospy.loginfo('Received Cavity message for %s', obj.name)
+                    rospy.loginfo('Received Cavity message for %s, matching error: %.5f', obj.name, self.cavity.template_matching_error.matching_error)
                     self.cavity.object_name = obj.name
-                    userdata.found_cavities.append(self.cavity)
+                    local_found_cavities.append(self.cavity)
                     break
 
                 if (rospy.Time.now() - start_time) > timeout:
@@ -199,11 +218,25 @@ class find_cavities(smach.State):
                 rospy.sleep(0.1)
 
         if self.frame_id:
-            for cavity in userdata.found_cavities:
+            for cavity in local_found_cavities:
                 try:
                     cavity.pose = self.tf_listener.transformPose(self.frame_id, cavity.pose)
                 except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                     rospy.logerr('Unable to transform %s -> %s' % (cavity.pose.header.frame_id, self.frame_id))
+
+        # if we find a better matched cavity, replace it
+        for cavity in local_found_cavities:
+            exists = False
+            for idx,c in enumerate(userdata.found_cavities):
+                if cavity.object_name == c.object_name:
+                    if cavity.template_matching_error.matching_error < c.template_matching_error.matching_error:
+                        userdata.found_cavities[idx] = cavity
+                        print "Found better cavity for ", cavity.object_name, ". Old: ", c.template_matching_error.matching_error, " New: ", cavity.template_matching_error.matching_error
+                    exists = True
+
+            if exists == False:
+                if cavity.template_matching_error.matching_error < self.matching_threshold:
+                    userdata.found_cavities.append(cavity)
 
         if len(userdata.found_cavities) == len(userdata.selected_objects):
             return 'succeeded'
