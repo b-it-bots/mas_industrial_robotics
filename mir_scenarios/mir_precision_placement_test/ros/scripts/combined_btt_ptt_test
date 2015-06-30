@@ -28,6 +28,10 @@ import mir_states.robocup.referee_box_states as refbox
 import mir_states.common.perception_mockup_util as perception_mockup_util
 from mcr_perception_msgs.msg import ObjectList, Object
 
+# Usage: Before running this test, specify the PPT platform name below if a PPT platform is available
+#        for example: SM.userdata.ppt_platform_location = 'S5'
+#        Note: If there is no PPT platform (i.e. if it's a BTT test), there is no need to specify the PPT platform
+
 # main
 def main(no_refbox=False):
 
@@ -39,7 +43,10 @@ def main(no_refbox=False):
     SM.userdata.task_list = []
 
     SM.userdata.no_refbox = no_refbox
-    SM.userdata.test = "PPT"
+    # for combined btt ppt test, the refbox sends a btt spec
+    SM.userdata.test = "BTT"
+    # specify PPT platform location name (eg. S5)
+    SM.userdata.ppt_platform_location = ''
 
     SM.userdata.base_pose_to_approach = 0
     SM.userdata.lasttask = btts.Bunch(location="", obj_names="")
@@ -54,6 +61,8 @@ def main(no_refbox=False):
     SM.userdata.objects_goal_configuration = 0
     SM.userdata.found_objects = 0
     SM.userdata.object_pose = 0
+    SM.userdata.selected_objects = []
+    SM.userdata.cavity_pose = None
 
 
     SM.userdata.rear_platform_free_poses = []
@@ -66,10 +75,10 @@ def main(no_refbox=False):
     SM.userdata.destinaton_free_poses = []
     SM.userdata.source_visits = []
     SM.userdata.objects_to_be_grasped = 0
+    SM.userdata.next_arm_pose_index = 0
     SM.userdata.last_grasped_obj = None
     SM.userdata.vscount = 0
 
-    SM.userdata.ppt_platform_location = ''
     SM.userdata.all_found_holes = None
     SM.userdata.selected_hole = None
     SM.userdata.selected_hole_pose = None
@@ -119,8 +128,12 @@ def main(no_refbox=False):
 
         smach.StateMachine.add('PLACE_IN_HOLE', ppt_sms.sub_sm_place_in_holes(),
             transitions={'succeeded': 'CHECK_IF_PLTF_HAS_STILL_OBJS',
-                         'failed': 'PLACE_OBJECT_ON_REGULAR_WORKSTATION',
+                         'failed': 'ADJUST_TO_REGULAR_WORKSTATION',
                          'no_object_for_ppt_platform': 'MOVE_ARM_TO_INIT'})
+
+        smach.StateMachine.add('ADJUST_TO_REGULAR_WORKSTATION', gns.adjust_to_workspace(0.10),
+            transitions={'succeeded': 'PLACE_OBJECT_ON_REGULAR_WORKSTATION',
+                         'failed': 'PLACE_OBJECT_ON_REGULAR_WORKSTATION'})
 
         smach.StateMachine.add('PLACE_OBJECT_ON_REGULAR_WORKSTATION', btt_sms.sub_sm_place(),
                 transitions={'succeeded': 'GO_TO_DESTINATION',
