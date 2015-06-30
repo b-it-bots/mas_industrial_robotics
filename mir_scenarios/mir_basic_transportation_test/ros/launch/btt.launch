@@ -21,7 +21,6 @@
     <!-- manipulation -->
     <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch" />
     <include file="$(find mir_arm_relative_motion_control)/ros/launch/arm_relative_motion_controller.launch" />
-    <include file="$(find mir_moveit_scene)/ros/launch/grasped_object_attacher.launch" />
     
     <!-- base placement -->
     <include file="$(find mir_base_placement)/ros/launch/base_placement.launch"/>
