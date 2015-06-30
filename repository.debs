@@ -40,6 +40,7 @@ packagelist=(
     ros-hydro-twist-mux
     ros-hydro-usb-cam
     ros-hydro-global-planner
+    ros-hydro-urdfdom-py
 )
 
 ### install debian packages listed in array above
