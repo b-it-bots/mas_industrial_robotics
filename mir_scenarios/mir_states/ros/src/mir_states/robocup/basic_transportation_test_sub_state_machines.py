@@ -136,28 +136,6 @@ class sub_sm_go_and_pick(smach.StateMachine):
                             'no_obj_selected':'SKIP_SOURCE_POSE_SAFE',
                             'no_more_free_poses_at_robot_platf':'no_more_free_poses_at_robot_platf'})
 
-            ### start of concurrent states
-            ### Has recognized objects
-            ###   moves arm to pregrasp then computes arm+base shift to object
-            ###     then moves base and arm in two steps to align to object
-            ###  while
-            ###   adding walls to planning scene. TODO: this is out of order or not required.
-            '''
-            sm_con_prepare_for_grasping = smach.Concurrence(outcomes=['succeeded', 'tf_error_in_computing_base_shift','concurrency_mapping_failure'],
-                                                            default_outcome='concurrency_mapping_failure',
-                                                            outcome_map={'succeeded': {'ALIGN_BASE_WITH_OBJECT': 'succeeded',
-                                                                                       'ADD_WALLS_TO_PLANNING_SCENE': 'succeeded'},
-                                                                         'tf_error_in_computing_base_shift': {'ALIGN_BASE_WITH_OBJECT': 'tf_error_in_computing_base_shift'}},
-                                                            input_keys=['object_to_grasp','move_base_by'],
-                                                            output_keys=['move_base_by'])
-
-            with sm_con_prepare_for_grasping:
-                sm_sub_shift_base = smach.StateMachine(outcomes=['succeeded', 'tf_error_in_computing_base_shift'],
-                                                       input_keys=['object_to_grasp','move_base_by'], # TODO move_base_by not needed anymore?
-                                                       output_keys=['move_base_by']) # TODO move_base_by?
-                # substate machine
-                with sm_sub_shift_base:
-            '''
             smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
                         transitions={'succeeded': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT',
                                      'failed': 'MOVE_ARM_TO_PREGRASP'})
@@ -181,17 +159,6 @@ class sub_sm_go_and_pick(smach.StateMachine):
                smach.StateMachine.add('MOVE_ARM_RELATIVE', gms.move_arm(),
                          transitions={'succeeded':'GRASP_OBJ',
                                       'failed': 'MOVE_ARM_RELATIVE'})
-            '''
-                # end substate machine
-                smach.Concurrence.add('ALIGN_BASE_WITH_OBJECT', sm_sub_shift_base)
-                smach.Concurrence.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"))
-
-            smach.StateMachine.add('PREPARE_FOR_GRASPING', sm_con_prepare_for_grasping,
-                transitions={'succeeded': 'DO_VISUAL_SERVOING',
-                             'tf_error_in_computing_base_shift': 'PREPARE_FOR_PERCEPTION',
-                             'concurrency_mapping_failure': 'PREPARE_FOR_GRASPING'})
-            ### end of concurrent state(s)
-            '''
             # TODO: THIS REVERTS TO Original Style - visual servoing from pregrasp
             #       THIS only happens after visual servoing has failed once.
             # FIX in future, everything is already in /odom frame.
