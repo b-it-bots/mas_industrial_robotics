@@ -134,6 +134,7 @@ class select_object_to_place(smach.State):
                 if userdata.rear_platform_occupied_poses[i].obj.name == look_for:
                     userdata.selected_object = userdata.rear_platform_occupied_poses[i].obj
                     userdata.cavity_pose = userdata.found_cavities[-1]
+                    del userdata.found_cavities[-1]
                     print "Selected %s to place" %userdata.rear_platform_occupied_poses[i].obj.name
                     return 'object_selected'
             return 'no_more_objects'
@@ -144,8 +145,8 @@ class grasp_obj_for_hole_from_pltf(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['object_grasped', 'no_more_obj_for_this_workspace'],
-            input_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses','selected_object'],
-            output_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses'])
+            input_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses','selected_object', 'task_list', 'base_pose_to_approach'],
+            output_keys=['last_grasped_obj','rear_platform_free_poses','rear_platform_occupied_poses', 'task_list'])
 
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
@@ -162,6 +163,20 @@ class grasp_obj_for_hole_from_pltf(smach.State):
                 break
 
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
+
+        #delete placed obj from task list
+        for j in range(len(userdata.task_list)):
+            if userdata.task_list[j].type == 'destination' and userdata.task_list[j].location == userdata.base_pose_to_approach:
+                print "lllll: ", userdata.last_grasped_obj.name
+                print "list: ", userdata.task_list[j].object_names 
+                userdata.task_list[j].object_names.remove(userdata.last_grasped_obj.name)
+                
+                if len(userdata.task_list[j].object_names) == 0:
+                    userdata.task_list.pop(j)
+                
+                break
+            
+        btts.print_task_spec(userdata.task_list)
 
         if not pltf_obj_pose:
             return 'no_more_obj_for_this_workspace'
@@ -212,3 +227,14 @@ class select_arm_position(smach.State):
         userdata.move_arm_to = 'line/line_2'
 
         return 'arm_pose_selected'
+
+class clear_cavities(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['succeeded'],
+            input_keys=['found_cavities'],
+            output_keys=['found_cavities'])
+
+    def execute(self, userdata):
+        userdata.found_cavities = []
+        return 'succeeded'
