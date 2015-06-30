@@ -208,7 +208,6 @@ class setup_task(smach.State):
 
         for task in userdata.task_list:
             if task.type == 'destination':
-                #poses = ['3','3','1', '2', '3']
                 poses = ['2','2','3', '1', '2']
                 loc_free_poses = Bunch(location = task.location, free_poses = poses)
                 userdata.destinaton_free_poses.append(loc_free_poses)
