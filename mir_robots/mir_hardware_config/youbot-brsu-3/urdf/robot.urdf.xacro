@@ -4,7 +4,7 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        name="youbot" >
-  
+
   <!-- The following included files set up definitions of parts of the robot body -->
   <!-- misc common stuff -->
   <xacro:include filename="$(find youbot_description)/urdf/common.xacro" />
@@ -15,11 +15,11 @@
   <!-- youbot arm and gripper-->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/grippers/festo_gripper.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_gripper.urdf.xacro" />
   <!-- controller manager -->
   <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
   <!-- materials for visualization -->
-  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />				     
+  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />
   <!-- sensors -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_camera.urdf.xacro"/>
@@ -55,11 +55,10 @@
 
   <!-- 3D camera on arm --> <!-- NOTE: still called tower_cam3d due to legacy code -->
   <xacro:realsense_camera name="tower_cam3d" parent="arm_link_5">
-    <origin xyz="-0.075 0 0.02" rpy="0 ${-M_PI / 2} 0" />
+    <origin xyz="-0.075 0.024 0.04" rpy="0 ${-M_PI / 2} 0" />
   </xacro:realsense_camera>
 
-  <xacro:festo_gripper name="gripper" parent="arm_link_5">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-  </xacro:festo_gripper>
-
+  <xacro:dynamixel_gripper name="gripper" parent="arm_link_5">
+    <origin xyz="0 0 -0.02" rpy="0 0 0" />
+  </xacro:dynamixel_gripper>
 </robot>
