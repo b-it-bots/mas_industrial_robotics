@@ -55,7 +55,7 @@
 
   <!-- 3D camera on arm --> <!-- NOTE: still called tower_cam3d due to legacy code -->
   <xacro:realsense_camera name="tower_cam3d" parent="arm_link_5">
-    <origin xyz="-0.075 0 0.02" rpy="0 ${-M_PI / 2} 0" />
+    <origin xyz="-0.075 0.05 0.05" rpy="-0.05 ${-M_PI / 2 + 0.25} 0" />
   </xacro:realsense_camera>
 
   <xacro:festo_gripper name="gripper" parent="arm_link_5">
