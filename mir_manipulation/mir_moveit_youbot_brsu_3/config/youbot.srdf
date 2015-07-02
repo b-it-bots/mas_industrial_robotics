@@ -227,12 +227,12 @@
         <joint name="arm_joint_5" value="2.91953" />
     </group_state>
     <group_state name="close" group="arm_1_gripper">
-        <joint name="gripper_finger_joint_l" value="0.001" />
-        <joint name="gripper_finger_joint_r" value="0.001" />
+        <joint name="gripper_finger_joint_l" value="0.1" />
+        <joint name="gripper_finger_joint_r" value="0.1" />
     </group_state>
     <group_state name="open" group="arm_1_gripper">
-        <joint name="gripper_finger_joint_l" value="0.011" />
-        <joint name="gripper_finger_joint_r" value="0.0104" />
+        <joint name="gripper_finger_joint_l" value="1.35" />
+        <joint name="gripper_finger_joint_r" value="1.35" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="arm_1_gripper" parent_link="arm_link_5" group="arm_1_gripper" parent_group="arm_1" />
