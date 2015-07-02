@@ -33,6 +33,6 @@
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
   <!-- cameras -->
-  <include file="$(find mir_bringup)/components/openni2.launch" />
+  <include file="$(find mir_bringup)/components/realsense_camera.launch" />
 
 </launch>
