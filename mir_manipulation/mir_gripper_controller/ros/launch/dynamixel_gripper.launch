@@ -18,6 +18,8 @@
         <remap from="dynamixel_command" to="/gripper_controller/command" />
         <remap from="dynamixel_motor_states" to="/gripper_controller/state" />
         <remap from="joint_state" to="/joint_states" />
+        
+        <param name="soft_torque_limit" type="double" value="soft_torque_limit" />
       </node>
     </group>
   

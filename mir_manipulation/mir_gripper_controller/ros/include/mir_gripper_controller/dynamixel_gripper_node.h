@@ -41,8 +41,7 @@ private:
 
     ros::NodeHandle nh_;
 
-
-    double torque_limit_;
+    double soft_torque_limit_;
  
 };
 

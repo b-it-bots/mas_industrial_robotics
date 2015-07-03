@@ -8,7 +8,7 @@
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
 
 DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
-        action_server_(nh, "gripper_controller", false), joint_states_received_(false), torque_limit_(0.5)
+        action_server_(nh, "gripper_controller", false), joint_states_received_(false)
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
     sub_dynamixel_motor_states_ = nh_.subscribe("dynamixel_motor_states", 10, &DynamixelGripperNode::jointStatesCallback, this);
@@ -16,7 +16,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     pub_joint_states_ = nh_.advertise < sensor_msgs::JointState > ("joint_state", 10);
 
     // ToDo: as parameters
-    torque_limit_ = 0.5;
+    nh.param("soft_torque_limit", soft_torque_limit_, 0.5);
 
     action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
     action_server_.start();
@@ -78,11 +78,11 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
             loop_rate.sleep();
         }
 
-        if(joint_states_->load >= torque_limit_)
+        if(joint_states_->load >= soft_torque_limit_)
         {
             gripper_pos.data = joint_states_->current_pos;
             pub_dynamixel_command_.publish(gripper_pos);
-            ROS_WARN_STREAM("Torque soft limit reached (cur: " << joint_states_->load <<  ", limit: " << torque_limit_ <<  ")  " << set_pos << " reached");
+            ROS_WARN_STREAM("Torque soft limit reached (cur: " << joint_states_->load <<  ", limit: " << soft_torque_limit_ <<  ")  " << set_pos << " reached");
 
             break;
         }
