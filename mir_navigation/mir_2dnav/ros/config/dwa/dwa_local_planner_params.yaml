@@ -4,7 +4,7 @@ max_trans_vel: 0.6              #_default : 0.55
 min_trans_vel: 0.1             #_default : 0.1
 
 max_vel_x: 0.6                  #_default : 0.55
-min_vel_x: -0.3                 #_default : 0.0
+min_vel_x: -0.6                 #_default : 0.0
 
 max_vel_y: 0.1                  #_default : 0.1
 min_vel_y: -0.1                 #_default : -0.1
@@ -19,7 +19,7 @@ acc_limit_trans: 0.1            #default : 0.1
 
 #----------------------------------------------
 
-sim_time: 1.7                   #default : 1.7
+sim_time: 0.8                   #default : 1.7
 sim_granularity: 0.025          #default : 0.025
 
 goal_distance_bias: 19.0        #default : 24.0, best: 15.0
