@@ -15,9 +15,10 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 
     pub_joint_states_ = nh_.advertise < sensor_msgs::JointState > ("joint_state", 10);
 
-    // ToDo: as parameters
+    // read parameters
     nh.param("soft_torque_limit", soft_torque_limit_, 0.5);
 
+    // start action server
     action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
     action_server_.start();
 }
