@@ -22,8 +22,8 @@ acc_limit_trans: 1.5            #default : 0.1, slow params: 0.1
 sim_time: 0.8                   #default : 1.7
 sim_granularity: 0.025          #default : 0.025
 
-goal_distance_bias: 15.0        #default : 24.0, slow params: 19.0
-path_distance_bias: 34.0        #default : 32.0, slow params: 33.0
+goal_distance_bias: 14.0        #default : 24.0, slow params: 19.0
+path_distance_bias: 35.0        #default : 32.0, slow params: 33.0
 
 occdist_scale: 0.01             #default : 0.01
 

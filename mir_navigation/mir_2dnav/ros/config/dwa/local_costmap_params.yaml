@@ -9,4 +9,4 @@ local_costmap:
   width: 2.5                            #default : 10
   height: 2.5                           #default : 10
   resolution: 0.02                      #default : 0.05
-  footprint_padding: 0.03               #default : 0.01, slow params: 0.01
+  footprint_padding: 0.01               #default : 0.01
