@@ -28,7 +28,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     torque_srv.request.torque_limit = hard_torque_limit_;
 
     ROS_INFO_STREAM("Wait for service: " << hard_torque_limit_srv_name_);
-    ros::service::waitForService(hard_torque_limit_srv_name_, 10);
+    ros::service::waitForService(hard_torque_limit_srv_name_, ros::Duration(10.0));
 
     if (!srv_client_torque.call(torque_srv))
 		ROS_ERROR_STREAM("Failed to call service: " << hard_torque_limit_srv_name_);
