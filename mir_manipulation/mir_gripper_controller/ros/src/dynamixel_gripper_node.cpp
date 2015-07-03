@@ -18,6 +18,21 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     // read parameters
     nh.param("soft_torque_limit", soft_torque_limit_, 0.5);
 
+    nh.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
+    nh.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
+
+    // set the hard torque limit
+    dynamixel_controllers::SetTorqueLimit torque_srv;
+    ros::ServiceClient srv_client_torque = nh_.serviceClient<dynamixel_controllers::SetTorqueLimit>(hard_torque_limit_srv_name_);
+
+    torque_srv.request.torque_limit = hard_torque_limit_;
+
+    ROS_INFO_STREAM("Wait for service: " << hard_torque_limit_srv_name_);
+    ros::service::waitForService(hard_torque_limit_srv_name_, 10);
+
+    if (!srv_client_torque.call(torque_srv))
+		ROS_ERROR_STREAM("Failed to call service: " << hard_torque_limit_srv_name_);
+
     // start action server
     action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
     action_server_.start();

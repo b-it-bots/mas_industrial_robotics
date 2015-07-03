@@ -5,6 +5,7 @@ find_package(catkin REQUIRED
   COMPONENTS
     actionlib
     control_msgs
+    dynamixel_controllers
     dynamixel_msgs
     roscpp
     sensor_msgs

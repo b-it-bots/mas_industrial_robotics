@@ -10,6 +10,7 @@
 
 #include <actionlib/server/simple_action_server.h>
 #include <control_msgs/GripperCommandAction.h>
+#include <dynamixel_controllers/SetTorqueLimit.h>
 #include <dynamixel_msgs/JointState.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
@@ -42,7 +43,9 @@ private:
     ros::NodeHandle nh_;
 
     double soft_torque_limit_;
- 
+
+    std::string hard_torque_limit_srv_name_;
+    double hard_torque_limit_;
 };
 
 #endif /* DYNAMIXEL_GRIPPER_NODE_H_ */
