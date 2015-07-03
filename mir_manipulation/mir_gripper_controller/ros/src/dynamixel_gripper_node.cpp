@@ -125,7 +125,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "dynamixel_gripper");
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
 
     DynamixelGripperNode gripper(nh);
 
