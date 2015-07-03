@@ -2,9 +2,8 @@
 <robot>
   <!-- common properties -->
   <property name="M_PI" value="3.1415926535897931" />
-  <property name="threshold" value="0.001" />
 
   <!-- fingers limits, values are in meters -->
-  <property name="finger_joint" value="2.17" />
-  <property name="finger_joint_soft" value="2.16" />
+  <property name="dynamixel_joint_min" value="0.0" />
+  <property name="dynamixel_joint_max" value="2.17" />
 </robot>

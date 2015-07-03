@@ -49,8 +49,8 @@
       <axis xyz="0 -1 0" />
 
       <dynamics damping="1.0" friction="1.0" />
-      <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/>
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${threshold}" soft_upper_limit="${finger_joint_soft}" />
+      <limit effort="1" velocity="0.1" lower="0" upper="${dynamixel_joint_max}"/>
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${dynamixel_joint_min}" soft_upper_limit="${dynamixel_joint_max}" />
     </joint>
 
     <link name="${name}_finger_link_l">
@@ -71,8 +71,8 @@
       <child link="${name}_finger_link_r"/>
       <axis xyz="0 -1 0" />
       <dynamics damping="1.0" friction="1.0" />
-      <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/>
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${threshold}" soft_upper_limit="${finger_joint_soft}" />
+      <limit effort="1" velocity="0.1" lower="0" upper="${dynamixel_joint_max}"/>
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${dynamixel_joint_min}" soft_upper_limit="${dynamixel_joint_max}" />
     </joint>
 
     <link name="${name}_finger_link_r">
@@ -119,16 +119,9 @@
     </link>
 
     <joint name="${name}_static_finger_joint_l" type="fixed">
-      <!--<origin xyz="0.004 0.008 0.046" rpy="0 0 ${M_PI}" />
-      -->
       <origin xyz="0.0 0.04 0.05" rpy="0 0 ${M_PI}" />
       <parent link="${name}_palm_link"/>
       <child link="${name}_static_finger_link_l"/>
-      <axis xyz="0 -1 0" />
-
-      <dynamics damping="1.0" friction="1.0" />
-      <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/>
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${threshold}" soft_upper_limit="${finger_joint_soft}" />
     </joint>
 
     <link name="${name}_static_finger_link_l">
@@ -158,10 +151,6 @@
       <origin xyz="0.0 -0.04 0.05" rpy="0 0 0" />
       <parent link="${name}_palm_link"/>
       <child link="${name}_static_finger_link_r"/>
-      <axis xyz="0 -1 0" />
-      <dynamics damping="1.0" friction="1.0" />
-      <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/>
-      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${threshold}" soft_upper_limit="${finger_joint_soft}" />
     </joint>
 
     <link name="${name}_static_finger_link_r">
