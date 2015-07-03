@@ -1,31 +1,31 @@
 #-------------SPEED----------------------------
 
-max_trans_vel: 0.6              #_default : 0.55
-min_trans_vel: 0.1             #_default : 0.1
+max_trans_vel: 1.0              #default : 0.55, slow params: 0.6
+min_trans_vel: 0.1              #default : 0.1
 
-max_vel_x: 0.6                  #_default : 0.55
-min_vel_x: -0.6                 #_default : 0.0
+max_vel_x: 1.0                  #default : 0.55, slow params: 0.6
+min_vel_x: -1.0                 #default : 0.0, slow params: -0.6
 
-max_vel_y: 0.1                  #_default : 0.1
-min_vel_y: -0.1                 #_default : -0.1
+max_vel_y: 0.1                  #default : 0.1
+min_vel_y: -0.1                 #default : -0.1
 
-max_rot_vel: 0.75                #_default : 1.0
-min_rot_vel: 0.2                #_default : 0.4
+max_rot_vel: 1.5                #default : 1.0, slow params: 0.75
+min_rot_vel: 0.2                #default : 0.4
 
-acc_lim_x: 1.5                  #_default : 2.5
-acc_lim_y: 1.5                  #_default : 2.5
-acc_lim_theta: 1.5              #_default : 3.2
-acc_limit_trans: 0.1            #default : 0.1
+acc_lim_x: 1.5                  #default : 2.5
+acc_lim_y: 1.5                  #default : 2.5
+acc_lim_theta: 3.2              #default : 3.2, slow params: 1.5
+acc_limit_trans: 1.5            #default : 0.1, slow params: 0.1
 
 #----------------------------------------------
 
 sim_time: 0.8                   #default : 1.7
 sim_granularity: 0.025          #default : 0.025
 
-goal_distance_bias: 19.0        #default : 24.0, best: 15.0
-path_distance_bias: 33.0        #default : 32.0, best: 35.0
+goal_distance_bias: 14.0        #default : 24.0, slow params: 19.0
+path_distance_bias: 35.0        #default : 32.0, slow params: 33.0
 
-occdist_scale: 0.01              #default : 0.01
+occdist_scale: 0.01             #default : 0.01
 
 stop_time_buffer: 0.2           #default : 0.2
 oscillation_reset_dist: 0.05    #default : 0.05
@@ -36,13 +36,14 @@ scaling_speed: 0.35             #default : 0.25
 max_scaling_factor: 0.1         #default : 0.2
 
 vx_samples: 6                   #default : 3
-vy_samples: 3                   #_default : 10
-vtheta_samples: 15              #_default : 20
+vy_samples: 3                   #default : 10
+vtheta_samples: 15              #default : 20
 
 sim_period: 0.2                 #default : not found
 
-xy_goal_tolerance: 0.075         #default : 0.10,       best: 0.05
-yaw_goal_tolerance: 0.1         #default : 0.05,      best: 0.12
+xy_goal_tolerance: 0.075        #default : 0.10
+yaw_goal_tolerance: 0.1         #default : 0.05
+latch_xy_goal_tolerance: true   #default : false, slow params: false
 
 rot_stopped_vel: 0.01           #default : not found
 trans_stopped_vel: 0.01         #default : not found

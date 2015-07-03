@@ -1,6 +1,6 @@
 global_costmap:
   global_frame: /map                #default : odom
-  inflation_radius: 0.46           #_default : 0.55
+  inflation_radius: 0.46            #default : 0.55
   robot_base_frame: base_footprint  #default : "base_link"
   update_frequency: 0.3             #default : 5.0
   publish_frequency: 0.3            #default : 0.0
