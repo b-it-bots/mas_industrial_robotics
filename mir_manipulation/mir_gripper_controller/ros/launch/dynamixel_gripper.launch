@@ -15,9 +15,9 @@
 
     <group ns="arm_1">
       <node pkg="mir_gripper_controller" type="dynamixel_gripper_node" name="gripper_controller" output="screen" >
-        <remap from="~dynamixel_command" to="/gripper_controller/command" />
-        <remap from="~dynamixel_motor_states" to="/gripper_controller/state" />
-        <remap from="~joint_state" to="/joint_states" />
+        <remap from="dynamixel_command" to="/gripper_controller/command" />
+        <remap from="dynamixel_motor_states" to="/gripper_controller/state" />
+        <remap from="joint_state" to="/joint_states" />
         
         <param name="soft_torque_limit" type="double" value="0.5" />
         

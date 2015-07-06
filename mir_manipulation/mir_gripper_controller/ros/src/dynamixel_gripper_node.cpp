@@ -17,11 +17,12 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 
     // read parameters
     ROS_INFO("Parameters:");
-    nh.param("soft_torque_limit", soft_torque_limit_, 0.5);
+    ros::NodeHandle nh_prv("~");
+    nh_prv.param("soft_torque_limit", soft_torque_limit_, 0.5);
     ROS_INFO_STREAM("\tSoft torque limit: " << soft_torque_limit_);
 
-    nh.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
-    nh.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
+    nh_prv.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
+    nh_prv.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
     ROS_INFO_STREAM("\tHard torque limit srv name:" << hard_torque_limit_srv_name_);
     ROS_INFO_STREAM("\tHard torque limit:" << hard_torque_limit_);
 
@@ -127,7 +128,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "dynamixel_gripper");
-    ros::NodeHandle nh("~");
+    ros::NodeHandle nh;
 
     DynamixelGripperNode gripper(nh);
 
