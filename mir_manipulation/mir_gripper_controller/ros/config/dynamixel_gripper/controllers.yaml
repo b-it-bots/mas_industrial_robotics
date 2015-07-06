@@ -4,7 +4,7 @@ gripper_controller:
         module: joint_position_controller_dual_motor
         type: JointPositionControllerDual
     joint_name: gripper_joint
-    joint_speed: 1.0
+    joint_speed: 3.0
     motor_master:
         id: 1
         init: 60
