@@ -23,8 +23,8 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 
     nh_prv.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
     nh_prv.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
-    ROS_INFO_STREAM("\tHard torque limit srv name:" << hard_torque_limit_srv_name_);
-    ROS_INFO_STREAM("\tHard torque limit:" << hard_torque_limit_);
+    ROS_INFO_STREAM("\tHard torque limit srv name: " << hard_torque_limit_srv_name_);
+    ROS_INFO_STREAM("\tHard torque limit: " << hard_torque_limit_);
 
     // set the hard torque limit
     dynamixel_controllers::SetTorqueLimit torque_srv;
