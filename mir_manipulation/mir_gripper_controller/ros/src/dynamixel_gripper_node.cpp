@@ -16,10 +16,14 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     pub_joint_states_ = nh_.advertise < sensor_msgs::JointState > ("joint_state", 10);
 
     // read parameters
+    ROS_INFO("Parameters:");
     nh.param("soft_torque_limit", soft_torque_limit_, 0.5);
+    ROS_INFO_STREAM("\tSoft torque limit: " << soft_torque_limit_);
 
     nh.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
     nh.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
+    ROS_INFO_STREAM("\tHard torque limit srv name:" << hard_torque_limit_srv_name_);
+    ROS_INFO_STREAM("\tHard torque limit:" << hard_torque_limit_);
 
     // set the hard torque limit
     dynamixel_controllers::SetTorqueLimit torque_srv;
