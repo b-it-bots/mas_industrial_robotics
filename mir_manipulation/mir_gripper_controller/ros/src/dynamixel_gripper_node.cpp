@@ -33,8 +33,11 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     torque_srv.request.torque_limit = hard_torque_limit_;
 
     ros::service::waitForService(hard_torque_limit_srv_name_, ros::Duration(10.0));
-    if (!srv_client_torque.call(torque_srv))
-		ROS_ERROR_STREAM("Failed to call service: " << hard_torque_limit_srv_name_);
+    while(!srv_client_torque.call(torque_srv))
+    {
+        ROS_ERROR_STREAM("Failed to call service: " << hard_torque_limit_srv_name_ << "! Will try again ...");
+        sleep(1);
+    }
 
     // start action server
     action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
