@@ -36,12 +36,12 @@
 - git:
     local-name: youbot-manipulation
     uri: https://github.com/svenschneider/youbot-manipulation.git
-    version: hydro 
+    version: hydro
 
 - git:
     local-name: realsense_camera
     uri: https://github.com/mas-group/realsense_camera.git
-    version: master 
+    version: master
 
 - git:
     local-name: srdf_parser_py
