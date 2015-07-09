@@ -46,5 +46,5 @@
 - git:
     local-name: srdf_parser_py
     uri: https://github.com/ubi-agni/srdf_parser_py.git
-    version: master 
+    version: 9b6aa4ae954c437452fc43b96759380a7aef0cab
 
