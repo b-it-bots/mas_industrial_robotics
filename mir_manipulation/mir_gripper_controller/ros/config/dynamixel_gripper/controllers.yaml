@@ -7,9 +7,9 @@ gripper_controller:
     joint_speed: 3.0
     motor_master:
         id: 1
-        init: 60
+        init: 40
         min: 0
-        max: 350
+        max: 400
     motor_slave:
         id: 2
         calbration_offset: 0
