@@ -80,7 +80,7 @@
         
         <param name="debug_depth_unit" value="$(arg debug_depth_unit)" />
 
-        <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml" />
+        <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration_640_480.yaml" />
 
     </node>
     
