@@ -48,3 +48,7 @@
     uri: https://github.com/ubi-agni/srdf_parser_py.git
     version: 9b6aa4ae954c437452fc43b96759380a7aef0cab
 
+- git:
+    local-name: dynamixel_motor
+    uri: https://github.com/arebgun/dynamixel_motor.git
+    version: 4f79026beb414a33f2b76e2a463952a5c9581158
