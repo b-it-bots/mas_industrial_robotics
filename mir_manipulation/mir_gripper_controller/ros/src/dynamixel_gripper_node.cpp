@@ -85,7 +85,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
     gripper_pos.data = set_pos;
     pub_dynamixel_command_.publish(gripper_pos);
     
-    // wait until position is or max. torque read
+    // wait until position or max. torque is reached
     while(ros::ok())
     {
         joint_states_received_ = false;       
@@ -104,7 +104,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
             break;
         }
 
-        ROS_DEBUG_STREAM("Positions diff: " << (joint_states_->current_pos - set_pos));
+        ROS_DEBUG_STREAM("Position difference: " << (joint_states_->current_pos - set_pos));
         
         if(fabs(joint_states_->current_pos - set_pos) < 0.05)
         {
