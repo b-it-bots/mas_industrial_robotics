@@ -26,6 +26,7 @@ private:
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void gripperCommandGoalCallback();
 
+    ros::NodeHandle nh_;
 
     ros::Publisher pub_dynamixel_command_;
     ros::Publisher pub_joint_states_;
@@ -38,8 +39,6 @@ private:
 
     dynamixel_msgs::JointState::Ptr joint_states_;
     bool joint_states_received_;
-
-    ros::NodeHandle nh_;
 
     double soft_torque_limit_;
 
