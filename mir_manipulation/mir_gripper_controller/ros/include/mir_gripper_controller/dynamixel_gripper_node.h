@@ -26,7 +26,6 @@ private:
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void gripperCommandGoalCallback();
 
-    double mapFromRadiansToMeter(const double &radians);
 
     ros::Publisher pub_dynamixel_command_;
     ros::Publisher pub_joint_states_;
