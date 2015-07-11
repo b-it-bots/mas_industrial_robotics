@@ -36,10 +36,10 @@ private:
     control_msgs::GripperCommandFeedback gripper_feedback_;
     control_msgs::GripperCommandResult gripper_result_;
 
-
     dynamixel_msgs::JointState::Ptr joint_states_;
     bool joint_states_received_;
 
+    // Parameters
     double soft_torque_limit_;
 
     std::string hard_torque_limit_srv_name_;
