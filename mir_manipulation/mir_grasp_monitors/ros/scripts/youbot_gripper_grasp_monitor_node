@@ -4,7 +4,7 @@ import rospy
 import mir_manipulation_msgs.srv
 import sensor_msgs.msg
 
-class GripperServiceServer:
+class YoubotGripperGraspMonitor:
 	def __init__(self):
 		self.received_state = False
 		
@@ -52,7 +52,7 @@ class GripperServiceServer:
 		return True	
 
 if __name__ == "__main__":
-	rospy.init_node("gripper_service_server")	
-	gripper_srv = GripperServiceServer()		
-	rospy.loginfo("gripper service server started")
+	rospy.init_node("grasp_monitor")	
+	gripper_srv = YoubotGripperGraspMonitor()		
+
 	rospy.spin()

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<group ns="gripper_controller">
-		<node pkg="mir_gripper_services" type="gripper_service_server" name="gripper_service_server" output="screen">
+		<node pkg="mir_grasp_monitors" type="youbot_gripper_grasp_monitor_node" name="grasp_monitor" output="screen">
 			<remap from="joint_states" to="/joint_states" />
 		</node>
 	</group>
