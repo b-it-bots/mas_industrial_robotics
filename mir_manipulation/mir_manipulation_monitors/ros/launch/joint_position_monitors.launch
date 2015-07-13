@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="mcr_manipulation_monitors" type="joint_position_monitors_node"
+          name="pregrasp_arm_monitor" output="screen">
+        <remap from="~joint_states" to="/joint_states"/>
+        <remap from="~configuration" to="/pregrasp_planner/joint_configuration_out_transformed"/>
+        <rosparam param="~target_joint_names">
+          - 'arm_joint_1'
+          - 'arm_joint_2'
+          - 'arm_joint_3'
+          - 'arm_joint_4'
+          - 'arm_joint_5'
+        </rosparam>
+
+        <!-- the cycle rate of the node (in seconds) -->
+        <param name="loop_rate" value="0.1"/>
+
+        <!-- tolerance for the joint positions -->
+        <param name="epsilon" value="0.05"/>
+    </node>
+</launch>
+
+

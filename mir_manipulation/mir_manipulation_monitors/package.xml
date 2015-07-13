@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_manipulation_monitors</name>
+  <version>0.1.0</version>
+
+  <description>
+     The package provides launcher for mcr_manipulation_monitors package 
+     to use joint position monitor component.
+  </description>
+
+  <maintainer email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</maintainer>
+  <author email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</author>
+
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roslaunch</build_depend>
+  <run_depend>mcr_manipulation_monitors</run_depend>
+
+</package>
