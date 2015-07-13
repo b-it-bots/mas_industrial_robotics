@@ -3,7 +3,7 @@
 
   <group ns="gripper_controller">
     <node pkg="mir_grasp_monitors" type="dynamixel_gripper_grasp_monitor_node" name="grasp_monitor" output="screen" >
-      <remap from="dynamixel_motor_states" to="/gripper_controller/state" />	
+      <remap from="~dynamixel_motor_states" to="/gripper_controller/state" />	
     </node>
     
   </group>
