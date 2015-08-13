@@ -4,54 +4,35 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        name="youbot" >
-  
+
   <!-- The following included files set up definitions of parts of the robot body -->
-  <!-- misc common stuff? -->
+  <!-- misc common stuff -->
   <xacro:include filename="$(find youbot_description)/urdf/common.xacro" />
-
-  <!-- youbot base -->
+  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <!-- youbot base and rear platform -->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
-
-  <!-- youbot plate -->
-  <xacro:include filename="$(find youbot_description)/urdf/youbot_plate/plate.urdf.xacro" /> 
-
-  <!-- youbot arm -->
+  <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform.urdf.xacro" />
+  <!-- youbot arm and gripper-->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
-
+  <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_gripper.urdf.xacro" />
   <!-- controller manager -->
   <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
-  
   <!-- materials for visualization -->
-  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />				     
-
+  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />
   <!-- sensors -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_camera.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
 
-  <!-- The first use of a macro.  This one was defined in base.urdf.xacro above.
-       A macro like this will expand to a set of link and joint definitions, and to additional
-       Gazebo-related extensions (sensor plugins, etc).  The macro takes an argument, name, 
-       that equals "base", and uses it to generate names for its component links and joints 
-       (e.g., base_link).  The included origin block is also an argument to the macro.  By convention, 
-       the origin block defines where the component is w.r.t its parent (in this case the parent 
-       is the world frame). For more, see http://www.ros.org/wiki/xacro -->
-
-  <!-- foot for arm-->
+  <!-- standard youBot configuration -->
   <xacro:youbot_base name="base"/>
-  
-  <!-- rear platform -->
-  <xacro:youbot_plate name="plate" parent="base_link">
-    <origin xyz="-0.159 0 0.046" rpy="0 0 0" />
-  </xacro:youbot_plate>
 
-  <!-- BRSU SPECIFIC STUFF -->
-  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/misc/cam3d_tower.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/mounts/microsoft_lifecam_1080_mount.urdf.xacro"/>
-  <xacro:include filename="$(find mir_description)/urdf/grippers/festo_gripper.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
+  <!-- Rear Platform -->
+  <xacro:rear_platform name="rear_platform" parent="base_link">
+    <origin xyz="-0.005 -0.175 0.051" rpy="0 0 0" />
+  </xacro:rear_platform>
 
   <!-- Arm Plate moving arm 8cm foward and 45 degree rotation -->
   <xacro:adapter_plate name="adapter_plate" parent="base_link" arm_angle="${-M_PI / 4}">
@@ -66,30 +47,18 @@
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
     <origin xyz="0.3 0 -0.03" rpy="0 0 0"/>
   </xacro:hokuyo_urg04_laser>
-  
+
   <!-- base laser rear -->
   <xacro:hokuyo_urg04_laser name="base_laser_rear" parent="base" ros_topic="scan_rear" update_rate="10" min_angle="-1.57" max_angle="1.57" >
-     <origin xyz="-0.3 0 -0.03" rpy="0 0 ${M_PI}" />
+     <origin xyz="-0.3 0.0 -0.03" rpy="0 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
 
-  <!-- camera tower
-  <xacro:cam3d_tower name="camera_tower" parent="plate_link">
-    <origin xyz="-0.10 0.0 -0.01" rpy="0 0 0" />
-  </xacro:cam3d_tower>
-  -->
-  <!-- 3D camera on arm -->
-  <xacro:asus_xtion_camera name="tower_cam3d" parent="arm_link_5" tilt="0.0">
-    <origin xyz="${-0.035 - 0.030 + 0.030 + 0.01} ${0 - 0.055} ${-0.025 - 0.0}" rpy="0 ${-M_PI / 2} 0" />
-  </xacro:asus_xtion_camera>
+  <!-- 3D camera on arm --> <!-- NOTE: still called tower_cam3d due to legacy code -->
+  <xacro:realsense_camera name="tower_cam3d" parent="arm_link_5">
+    <origin xyz="-0.075 0.05 0.05" rpy="-0.05 ${-M_PI / 2 + 0.25} 0" />
+  </xacro:realsense_camera>
 
-
-  <!-- Arm POV Mount 
-  <xacro:microsoft_lifecam_1080_mount name="microsoft_lifecam_1080_mount" parent="arm_link_5">
-    <origin xyz="-0.035 0.0 -0.025" rpy="0 0 3.14159265" />
-  </xacro:microsoft_lifecam_1080_mount>
-  -->
-  <xacro:festo_gripper name="gripper" parent="arm_link_5">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-  </xacro:festo_gripper>
-
+  <xacro:dynamixel_gripper name="gripper" parent="arm_link_5">
+    <origin xyz="0 0 -0.02" rpy="0 0 0" />
+  </xacro:dynamixel_gripper>
 </robot>

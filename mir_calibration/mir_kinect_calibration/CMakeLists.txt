@@ -51,6 +51,19 @@ add_dependencies(transform_estimation
   ${catkin_EXPORTED_TARGETS}
 )
 
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED
+    COMPONENTS
+      roslaunch
+  )
+
+  #roslaunch_add_file_check(ros/launch/kinect_calibration.launch robot:=youbot-brsu-1)
+endif()
+
+
+### INSTALLS
 install(
   PROGRAMS
     ros/scripts/calibrate_kinect

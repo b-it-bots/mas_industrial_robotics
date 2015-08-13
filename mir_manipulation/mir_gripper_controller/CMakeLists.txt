@@ -5,6 +5,7 @@ find_package(catkin REQUIRED
   COMPONENTS
     actionlib
     control_msgs
+    dynamixel_controllers
     dynamixel_msgs
     roscpp
     sensor_msgs
@@ -33,6 +34,18 @@ add_dependencies(dynamixel_gripper_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(dynamixel_gripper_node
   ${catkin_LIBRARIES}
 )
+
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED
+    COMPONENTS
+      roslaunch
+  )
+
+  roslaunch_add_file_check(ros/launch)
+endif()
+
 
 ### INSTALL ###
 install(PROGRAMS

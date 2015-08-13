@@ -4,6 +4,7 @@
   <version>0.1.0</version>
   <description>visual servoing based on (biggest) blob detection</description>
 
+  <maintainer email="ashok.meenakshi@smail.inf.h-brs.de">Ashok Meenakshi Sundaram</maintainer>
   <maintainer email="matthew.stephen.roscoe@gmail.com">Matthew Roscoe</maintainer>
 
   <license>GPLv3</license>

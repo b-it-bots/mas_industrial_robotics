@@ -2,7 +2,7 @@
 
 <launch>
 
-    <node pkg="dynamixel_controllers" type="controller_manager.py" name="controller_manager" output="screen" >
+    <node pkg="dynamixel_controllers" type="controller_manager.py" name="controller_manager" output="screen" respawn="true" >
       <rosparam command="load" file="$(find mir_gripper_controller)/ros/config/dynamixel_gripper/motors.yaml" />
     </node>
     
@@ -14,10 +14,16 @@
             output="screen"  />
 
     <group ns="arm_1">
-      <node pkg="mir_gripper_controller" type="dynamixel_gripper_node" name="gripper_controller" output="screen" >
+      <node pkg="mir_gripper_controller" type="dynamixel_gripper_node" name="gripper_controller" output="screen" respawn="true" >
         <remap from="dynamixel_command" to="/gripper_controller/command" />
         <remap from="dynamixel_motor_states" to="/gripper_controller/state" />
         <remap from="joint_state" to="/joint_states" />
+        
+        <param name="soft_torque_limit" type="double" value="0.8" />
+        
+        <param name="hard_torque_limit_srv_name" type="string" value="/gripper_controller/set_torque_limit" />
+        <param name="hard_torque_limit" type="double" value="1.0" />
+        
       </node>
     </group>
   

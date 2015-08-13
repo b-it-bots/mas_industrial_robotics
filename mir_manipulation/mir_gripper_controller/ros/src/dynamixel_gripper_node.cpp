@@ -8,16 +8,38 @@
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
 
 DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
-        action_server_(nh, "gripper_controller", false), joint_states_received_(false), torque_limit_(0.5)
+        action_server_(nh, "gripper_controller", false), joint_states_received_(false)
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
     sub_dynamixel_motor_states_ = nh_.subscribe("dynamixel_motor_states", 10, &DynamixelGripperNode::jointStatesCallback, this);
 
     pub_joint_states_ = nh_.advertise < sensor_msgs::JointState > ("joint_state", 10);
 
-    // ToDo: as parameters
-    torque_limit_ = 0.5;
+    // read parameters
+    ROS_INFO("Parameters:");
+    ros::NodeHandle nh_prv("~");
+    nh_prv.param("soft_torque_limit", soft_torque_limit_, 0.5);
+    ROS_INFO_STREAM("\tSoft torque limit: " << soft_torque_limit_);
 
+    nh_prv.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
+    nh_prv.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
+    ROS_INFO_STREAM("\tHard torque limit srv name: " << hard_torque_limit_srv_name_);
+    ROS_INFO_STREAM("\tHard torque limit: " << hard_torque_limit_);
+
+    // set the hard torque limit
+    dynamixel_controllers::SetTorqueLimit torque_srv;
+    ros::ServiceClient srv_client_torque = nh_.serviceClient<dynamixel_controllers::SetTorqueLimit>(hard_torque_limit_srv_name_);
+
+    torque_srv.request.torque_limit = hard_torque_limit_;
+
+    ros::service::waitForService(hard_torque_limit_srv_name_, ros::Duration(10.0));
+    while(!srv_client_torque.call(torque_srv))
+    {
+        ROS_ERROR_STREAM("Failed to call service: " << hard_torque_limit_srv_name_ << "! Will try again ...");
+        sleep(1);
+    }
+
+    // start action server
     action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
     action_server_.start();
 }
@@ -39,21 +61,16 @@ void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState:
     joint_state.header.stamp = msg->header.stamp;
 
     joint_state.name.push_back("gripper_finger_joint_r");
-    joint_state.position.push_back((mapFromRadiansToMeter(msg->current_pos) / 2.0)); 
+    joint_state.position.push_back(msg->current_pos);
     joint_state.velocity.push_back(msg->velocity);
     joint_state.effort.push_back(msg->load);
 
     joint_state.name.push_back("gripper_finger_joint_l");
-    joint_state.position.push_back((mapFromRadiansToMeter(msg->current_pos) / 2.0)); 
+    joint_state.position.push_back(msg->current_pos);
     joint_state.velocity.push_back(msg->velocity);
     joint_state.effort.push_back(msg->load);
 
     pub_joint_states_.publish(joint_state);
-}
-
-double DynamixelGripperNode::mapFromRadiansToMeter(const double &radians)
-{
-    return (radians * 3.33);    // ToDo: as a parameter
 }
 
 void DynamixelGripperNode::gripperCommandGoalCallback()
@@ -68,7 +85,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
     gripper_pos.data = set_pos;
     pub_dynamixel_command_.publish(gripper_pos);
     
-    // wait until position is or max. torque read
+    // wait until position or max. torque is reached
     while(ros::ok())
     {
         joint_states_received_ = false;       
@@ -78,16 +95,16 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
             loop_rate.sleep();
         }
 
-        if(joint_states_->load >= torque_limit_)
+        if(joint_states_->load >= soft_torque_limit_)
         {
             gripper_pos.data = joint_states_->current_pos;
             pub_dynamixel_command_.publish(gripper_pos);
-            ROS_WARN_STREAM("Torque soft limit reached (cur: " << joint_states_->load <<  ", limit: " << torque_limit_ <<  ")  " << set_pos << " reached");
+            ROS_WARN_STREAM("Torque soft limit reached (cur: " << joint_states_->load <<  ", limit: " << soft_torque_limit_ <<  ")  " << set_pos << " reached");
 
             break;
         }
 
-        ROS_DEBUG_STREAM("Positions diff: " << (joint_states_->current_pos - set_pos));
+        ROS_DEBUG_STREAM("Position difference: " << (joint_states_->current_pos - set_pos));
         
         if(fabs(joint_states_->current_pos - set_pos) < 0.05)
         {

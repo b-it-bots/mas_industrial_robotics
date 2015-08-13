@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot>
+  <!-- common properties -->
+  <property name="M_PI" value="3.1415926535897931" />
+
+  <!-- fingers limits, values are in meters -->
+  <property name="dynamixel_joint_min" value="0.0" />
+  <property name="dynamixel_joint_max" value="2.17" />
+</robot>

@@ -3,16 +3,22 @@
   <arg name="joypad_cfg_file" default="$(find mir_teleop)/ros/config/logitech.yaml"/>
   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
 
-  <include file="$(find mir_hardware_config)/upload_param.launch" />
-  <include file="$(find mir_default_robot_config)/upload_param.launch" />
-    
+  <include file="$(find mir_hardware_config)/upload_param.launch">
+    <arg name="robot" value="$(arg robot)"/>
+  </include>
+  
+  <include file="$(find mir_default_robot_config)/upload_param.launch">
+      <arg name="robot" value="$(arg robot)"/>
+  </include>
+  
   <node pkg="joy" type="joy_node" name="joy_node">
     <rosparam command="load" file="$(find mir_hardware_config)/$(arg robot)/config/joy.yaml"/>
   </node>
 
   <!-- start youbot teleop node -->
   <node pkg="mir_teleop" type="teleop_joypad_node" name="mir_teleop_joypad" output="screen">
-    <remap from="~cmd_vel" to="/cmd_vel" />
+    <!-- remap for twist mux -->
+    <remap from="~cmd_vel" to="/cmd_vel_prio_high" />
     <rosparam command="load" file="$(arg joypad_cfg_file)"/>
     <rosparam command="load" file="$(find mir_hardware_config)/$(arg robot)/config/teleop.yaml"/>  
   </node>

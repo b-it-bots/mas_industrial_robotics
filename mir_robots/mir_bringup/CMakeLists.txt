@@ -10,10 +10,12 @@ catkin_package(
     mcr_default_env_config
     mir_arm_cartesian_control
     mir_default_robot_config
+    mir_gripper_controller
     mir_gripper_services
     mir_hardware_config
     mir_teleop
     openni_launch
+    openni2_launch
     robot_state_publisher
     tf
     youbot_dashboard
@@ -23,6 +25,21 @@ catkin_package(
     usb_cam
 )
 
+### TEST
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED
+    COMPONENTS
+      roslaunch
+  )
+
+  #roslaunch_add_file_check(robot.launch robot:=youbot-brsu-1)
+  roslaunch_add_file_check(robots)
+  roslaunch_add_file_check(components robot:=youbot-brsu-1)
+  roslaunch_add_file_check(tools)
+endif()
+
+
+### INSTALLS
 set(
   INSTALL_DIRS 
     components

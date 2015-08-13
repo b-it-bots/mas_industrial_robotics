@@ -1,0 +1,18 @@
+<launch>
+  <arg name="cmd_vel_out" default="/cmd_vel"/>
+
+  <arg name="locks_config_file"  default="$(find mir_twist_mux)/ros/config/locks.yaml"/>
+  <arg name="topics_config_file" default="$(find mir_twist_mux)/ros/config/topics.yaml"/>
+
+  <node pkg="twist_mux" type="twist_mux" ns="mir_command_tools" name="twist_mux" output="screen">
+    <remap from="cmd_vel_out" to="$(arg cmd_vel_out)"/>
+
+    <remap from="cmd_vel_prio_high" to="/cmd_vel_prio_high"/>
+    <remap from="cmd_vel_prio_medium" to="/cmd_vel_prio_medium"/>
+    <remap from="cmd_vel_prio_low" to="/cmd_vel_prio_low"/>
+
+    <rosparam file="$(arg locks_config_file)"  command="load"/>
+    <rosparam file="$(arg topics_config_file)" command="load"/>
+  </node>
+</launch>
+

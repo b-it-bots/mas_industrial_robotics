@@ -9,4 +9,6 @@
 
   <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />	
 
+  <include file="$(find mir_twist_mux)/ros/launch/twist_mux.launch" />
+
 </launch>

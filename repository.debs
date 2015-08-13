@@ -3,6 +3,7 @@
 # create list of packages to install
 packagelist=(
     libcap2-bin
+    libudev-dev
     python-pygraphviz
     python-rosinstall
     python-setuptools

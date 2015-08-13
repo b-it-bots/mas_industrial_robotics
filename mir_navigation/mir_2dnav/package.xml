@@ -4,6 +4,7 @@
   <version>0.0.1</version>
   <description>2d base navigation</description>
 
+  <maintainer email="oscar.lima@smail.inf.h-brs.de">Oscar Lima Carrion</maintainer>
   <maintainer email="praveen.ramanujam@smail.inf.h-brs.de">Praveen Ramanajum</maintainer>
 
   <license>GPLv3</license>

@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_gripper.gazebo.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_gripper.transmission.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_limits.urdf.xacro" />
+
+  <xacro:macro name="dynamixel_gripper" params="parent name *origin">
+
+    <!-- joint between arm_5_link and dynamixel_palm_link -->
+    <joint name="${name}_palm_joint" type="fixed" >
+      <insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${name}_palm_link" />
+    </joint>
+
+    <link name="${name}_palm_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI}" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel_gripper_core_assembly.dae" scale="0.01 0.01 0.01" />
+        </geometry>
+        <material name="White" />
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI}" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel_gripper_core_assembly_convexhull.dae" scale="0.01 0.01 0.01" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${name}_finger_joint_l" type="prismatic">
+      <!--<origin xyz="0.004 0.008 0.046" rpy="0 0 ${M_PI}" />
+      -->
+      <origin xyz="0 0.002 0.05" rpy="0 0 ${M_PI}" />
+      <parent link="${name}_palm_link"/>
+      <child link="${name}_finger_link_l"/>
+      <axis xyz="0 -1 0" />
+
+      <dynamics damping="1.0" friction="1.0" />
+      <limit effort="1" velocity="0.1" lower="0" upper="${dynamixel_joint_max}"/>
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${dynamixel_joint_min}" soft_upper_limit="${dynamixel_joint_max}" />
+    </joint>
+
+    <link name="${name}_finger_link_l">
+      <inertial>
+        <origin xyz="0 -0.001 0" rpy="0 0 0" />
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <!--
+        No Visual or Collision tags to avoid collision checking
+        Done below with gripper in static open position
+      -->
+    </link>
+
+    <joint name="${name}_finger_joint_r" type="prismatic">
+      <origin xyz="0 -0.002 0.05" rpy="0 0 0" />
+      <parent link="${name}_palm_link"/>
+      <child link="${name}_finger_link_r"/>
+      <axis xyz="0 -1 0" />
+      <dynamics damping="1.0" friction="1.0" />
+      <limit effort="1" velocity="0.1" lower="0" upper="${dynamixel_joint_max}"/>
+      <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${dynamixel_joint_min}" soft_upper_limit="${dynamixel_joint_max}" />
+    </joint>
+
+    <link name="${name}_finger_link_r">
+      <inertial>
+        <origin xyz="0.000 -0.001 0" rpy="0 0 0" />
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <!--
+        No Visual or Collision tags to avoid collision checking
+        Done below with gripper in static open position
+      -->
+    </link>
+
+    <!-- tip joint -->
+    <joint name="${name}_tip_joint" type="fixed" >
+      <origin xyz="0.0 0.0 0.13" rpy="0 0 0"/>
+      <parent link="${name}_palm_link" />
+      <child link="${name}_tip_link" />
+    </joint>
+
+    <!-- tip link -->
+    <link name="${name}_tip_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+    </link>
+
+    <!-- grasp joint -->
+    <joint name="${name}_grasp_joint" type="fixed" >
+      <origin xyz="0.0 0.0 0.1" rpy="0 0 0"/>
+      <parent link="${name}_palm_link" />
+      <child link="${name}_grasp_link" />
+    </joint>
+
+    <!-- grasp link -->
+    <link name="${name}_grasp_link">
+      <inertial>
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+    </link>
+
+    <joint name="${name}_static_finger_joint_l" type="fixed">
+      <origin xyz="0.0 0.04 0.05" rpy="0 0 ${M_PI}" />
+      <parent link="${name}_palm_link"/>
+      <child link="${name}_static_finger_link_l"/>
+    </joint>
+
+    <link name="${name}_static_finger_link_l">
+      <inertial>
+        <origin xyz="0 -0.001 0" rpy="0 0 0" />
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+
+      <visual>
+        <origin xyz="-0.0125 0 0" rpy="0 0 ${-M_PI/2}" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_l.dae" scale="0.01 0.01 0.01" />
+        </geometry>
+        <material name="White" />
+      </visual>
+
+      <collision>
+        <origin xyz="-0.0125 0 0" rpy="0 0 ${-M_PI/2}" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_l_convexhull.dae" scale="0.01 0.01 0.01" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${name}_static_finger_joint_r" type="fixed">
+      <origin xyz="0.0 -0.04 0.05" rpy="0 0 0" />
+      <parent link="${name}_palm_link"/>
+      <child link="${name}_static_finger_link_r"/>
+    </joint>
+
+    <link name="${name}_static_finger_link_r">
+      <inertial>
+        <origin xyz="0.000 -0.001 0" rpy="0 0 0" />
+        <mass value="0.01"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0.0125 0 0" rpy="0 0 ${M_PI/2}" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_r.dae" scale="0.01 0.01 0.01" />
+        </geometry>
+        <material name="White" />
+      </visual>
+
+      <collision>
+        <origin xyz="0.0125 0 0" rpy="0 0 ${M_PI/2}" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_r_convexhull.dae" scale="0.01 0.01 0.01" />
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- extensions -->
+    <xacro:dynamixel_gripper_gazebo name="${name}" />
+    <xacro:dynamixel_gripper_transmission name="${name}" />
+
+  </xacro:macro>
+
+</robot>

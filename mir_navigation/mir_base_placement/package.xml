@@ -4,6 +4,8 @@
   <version>0.0.1</version>
   <description>orient the base w.r.t. to the coefficients of the linear regression</description>
 
+  <maintainer email="arka.mallick@smail.inf.h-brs.de">Arka Mallick</maintainer>
+  <maintainer email="santosh.thoduka@smail.inf.h-brs.de">Santosh George Thoduka</maintainer>
   <maintainer email="matthias.fueller@h-brs.de">Matthias Füller</maintainer>
 
   <license>GPLv3</license>

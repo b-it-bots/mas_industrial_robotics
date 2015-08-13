@@ -10,6 +10,7 @@
 
 #include <actionlib/server/simple_action_server.h>
 #include <control_msgs/GripperCommandAction.h>
+#include <dynamixel_controllers/SetTorqueLimit.h>
 #include <dynamixel_msgs/JointState.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
@@ -25,7 +26,7 @@ private:
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void gripperCommandGoalCallback();
 
-    double mapFromRadiansToMeter(const double &radians);
+    ros::NodeHandle nh_;
 
     ros::Publisher pub_dynamixel_command_;
     ros::Publisher pub_joint_states_;
@@ -35,15 +36,14 @@ private:
     control_msgs::GripperCommandFeedback gripper_feedback_;
     control_msgs::GripperCommandResult gripper_result_;
 
-
     dynamixel_msgs::JointState::Ptr joint_states_;
     bool joint_states_received_;
 
-    ros::NodeHandle nh_;
+    // Parameters
+    double soft_torque_limit_;
 
-
-    double torque_limit_;
- 
+    std::string hard_torque_limit_srv_name_;
+    double hard_torque_limit_;
 };
 
 #endif /* DYNAMIXEL_GRIPPER_NODE_H_ */
