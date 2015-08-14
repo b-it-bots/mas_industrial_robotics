@@ -8,6 +8,8 @@ catkin_package(
     gmapping
 )
 
+
+### INSTALLS
 install(DIRECTORY ros/launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
 )
