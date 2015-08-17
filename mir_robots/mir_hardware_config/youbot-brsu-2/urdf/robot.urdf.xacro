@@ -5,61 +5,44 @@
        xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        name="youbot" >
   
-  <!-- The following included files set up definitions of parts of the robot body -->
-  <!-- misc common stuff -->
+  <!-- The following xacro:included files set up definitions of parts of the robot body -->
+  <!-- misc common stuff? -->
   <xacro:include filename="$(find youbot_description)/urdf/common.xacro" />
-  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
-  <!-- youbot base and rear platform -->
+
+  <!-- youbot base -->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform.urdf.xacro" />
-  <!-- youbot arm and gripper-->
+
+  <!-- youbot plate -->
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_plate/plate.urdf.xacro" /> 
+
+  <!-- youbot arm -->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
-  <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/grippers/festo_gripper.urdf.xacro" />
+
+  <!-- youbot gripper -->
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_gripper/gripper.urdf.xacro" />
+ 
   <!-- controller manager -->
   <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
+  
   <!-- materials for visualization -->
-  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />				     
+  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />
+
   <!-- sensors -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
 
-  <!-- Now we can start using the macros included above to define the actual youbot -->
-
-  <!-- standard youBot configuration -->
+  <!-- foot for arm-->
   <xacro:youbot_base name="base"/>
 
-  <!-- Rear Platform -->
-  <xacro:rear_platform name="rear_platform" parent="base_link">
-    <origin xyz="-0.005 -0.175 0.051" rpy="0 0 0" />
-  </xacro:rear_platform>
+  <xacro:youbot_plate name="plate" parent="base_link">
+    <origin xyz="-0.159 0 0.046" rpy="0 0 0" />
+  </xacro:youbot_plate>
 
-  <!-- Arm Plate moving arm 8cm foward and 45 degree rotation -->
-  <xacro:adapter_plate name="adapter_plate" parent="base_link" arm_angle="${-M_PI / 4}">
-    <origin xyz="${0.159+0.08} 0 0.051" rpy="0 0 0" />
-  </xacro:adapter_plate>
-
-  <xacro:youbot_arm name="arm" parent="adapter_plate_arm_root_link">
-    <origin xyz="-0.022 0.0 0.037" rpy="0 0 0" />
+  <xacro:youbot_arm name="arm" parent="base_link">
+    <origin xyz="0.143 0 0.046" rpy="0 0 0" />
   </xacro:youbot_arm>
 
-  <!-- base laser front -->
-  <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
-    <origin xyz="0.3 0 -0.03" rpy="0 0 0"/>
-  </xacro:hokuyo_urg04_laser>
-
-  <!-- base laser rear -->
-  <xacro:hokuyo_urg04_laser name="base_laser_rear" parent="base" ros_topic="scan_rear" update_rate="10" min_angle="-1.57" max_angle="1.57" >
-     <origin xyz="-0.3 0.0 -0.03" rpy="0 0 ${M_PI}" />
-  </xacro:hokuyo_urg04_laser>
-
-  <!-- 3D camera on arm --> <!-- NOTE: still called tower_cam3d due to legacy code -->
-  <xacro:asus_xtion_camera name="tower_cam3d" parent="arm_link_5" tilt="0.0">
-    <origin xyz="${-0.035 - 0.030 + 0.030} ${0 - 0.015} ${-0.09}" rpy="0 ${-M_PI / 2} 0" />
-  </xacro:asus_xtion_camera>
-
-  <xacro:festo_gripper name="gripper" parent="arm_link_5">
+  <xacro:youbot_gripper name="gripper" parent="arm_link_5">
     <origin xyz="0 0 0" rpy="0 0 0" />
-  </xacro:festo_gripper>
-
+  </xacro:youbot_gripper>
+  
 </robot>
