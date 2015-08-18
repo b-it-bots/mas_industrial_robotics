@@ -1,12 +1,12 @@
 - git:
     local-name: mas_common_robotics
     uri: gitgate@mas.b-it-center.de:mas-group/mas_common_robotics.git
-    version: hydro
+    version: indigo
 
 - git:
     local-name: mas_third_party_software
     uri: gitgate@mas.b-it-center.de:mas-group/mas_third_party_software.git
-    version: hydro
+    version: indigo
 
 - git:
     local-name: youbot_driver
