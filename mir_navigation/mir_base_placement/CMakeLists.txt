@@ -23,6 +23,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+
+### EXECUTABLES
 add_executable(base_placement_node 
   ros/src/base_placement_node.cpp
 )
@@ -43,9 +45,23 @@ target_link_libraries(basescan_orientation_test
   ${catkin_LIBRARIES}
 )
 
-install(TARGETS base_placement_node
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+
+  roslaunch_add_file_check(ros/launch)
+endif()
+
+
+### INSTALLS
+install(
+  TARGETS
+    base_placement_node
+    basescan_orientation_test
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
 install(DIRECTORY ros/launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch/
 )
