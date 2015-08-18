@@ -19,6 +19,8 @@
 
   <build_depend>rospy</build_depend>
 
+  <build_depend>roslaunch</build_depend>
+
   <test_depend>unittest</test_depend>
 
   <run_depend>rospy</run_depend>
