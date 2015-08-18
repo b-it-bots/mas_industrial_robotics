@@ -16,7 +16,6 @@ from std_msgs.msg import String
 from actionlib.simple_action_client import GoalStatus
 
 from mir_navigation_msgs.msg import OrientToBaseAction, OrientToBaseActionGoal
-from mcr_navigation_msgs.srv import MoveRelative
 
 
 class adjust_to_workspace(smach.State):

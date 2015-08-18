@@ -13,3 +13,21 @@ catkin_package(
     actionlib
 )
 
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+
+  roslaunch_add_file_check(ros/launch)
+endif()
+
+
+### INSTALLS
+install(PROGRAMS
+  ros/scripts/arm_relative_motion_controller
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY ros/launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
+)

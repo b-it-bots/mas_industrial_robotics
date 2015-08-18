@@ -11,6 +11,20 @@ catkin_package(
     mir_moveit_youbot_brsu_4
 )
 
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+
+  roslaunch_add_file_check(youbot-brsu-1)
+  roslaunch_add_file_check(youbot-brsu-2)
+  roslaunch_add_file_check(youbot-brsu-3)
+  roslaunch_add_file_check(youbot-brsu-4)
+endif()
+
+
+
+### INSTALLS
 install(DIRECTORY youbot-brsu-1
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/youbot-brsu-1
 )

@@ -18,6 +18,16 @@ catkin_package(
     std_msgs
 )
 
+
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+
+  roslaunch_add_file_check(ros/launch)
+endif()
+
+
+### INSTALLS
 install(PROGRAMS
   ros/scripts/arm_workspace_restricter_node
   ros/scripts/grasped_object_attacher_node
