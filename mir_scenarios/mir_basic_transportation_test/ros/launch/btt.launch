@@ -30,7 +30,7 @@
 
     <!-- perception pipeline -->
     <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition.launch" >
-        <arg name="workspace_finder_config_file" value="$(find mir_default_robot_config)/$(env ROBOT)/workspace_constraints.yaml" />
+        <arg name="workspace_finder_config_file" value="$(find mir_default_robot_config)/$(arg robot)/workspace_constraints.yaml" />
     </include>
       
     <!-- Visual Servoing -->
