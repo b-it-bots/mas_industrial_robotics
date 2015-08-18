@@ -16,6 +16,7 @@ packagelist=(
     ros-indigo-dynamixel-msgs
     ros-indigo-eband-local-planner
     ros-indigo-gazebo-ros-control
+    ros-indigo-gazebo-plugins
     ros-indigo-gmapping
     ros-indigo-hokuyo-node
     ros-indigo-joint-state-controller
@@ -37,6 +38,7 @@ packagelist=(
     ros-indigo-ros-controllers
     ros-indigo-rqt-robot-dashboard
     ros-indigo-smach
+    ros-indigo-twist-mux
     ros-indigo-usb-cam
     ros-indigo-global-planner
 )
