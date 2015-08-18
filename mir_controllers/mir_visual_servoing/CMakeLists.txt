@@ -33,13 +33,14 @@ catkin_package(
     sensor_msgs
 )
 
-
 include_directories(
   ros/include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 
+
+### EXECUTABLES
 add_executable(visual_servoing_node 
   ros/src/visual_servoing_node.cpp
   ros/src/visual_servoing_2d.cpp
@@ -55,6 +56,15 @@ target_link_libraries(visual_servoing_node
 )
 
 
+### TESTS
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+
+  roslaunch_add_file_check(ros/launch)
+endif()
+
+
+### INSTALLS
 install(TARGETS visual_servoing_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
