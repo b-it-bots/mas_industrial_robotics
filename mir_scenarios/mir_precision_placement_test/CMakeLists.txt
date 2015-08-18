@@ -9,8 +9,10 @@ catkin_package(
 )
 
 
+### INSTALLS
 install(PROGRAMS
   ros/scripts/precision_placement_test
+  ros/scripts/combined_btt_ppt_test
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/ros/scripts
 )
 install(DIRECTORY ros/launch/
