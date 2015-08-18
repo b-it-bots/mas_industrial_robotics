@@ -38,6 +38,7 @@ packagelist=(
     ros-indigo-ros-controllers
     ros-indigo-rqt-robot-dashboard
     ros-indigo-smach
+    ros-indigo-srdfdom
     ros-indigo-twist-mux
     ros-indigo-usb-cam
     ros-indigo-global-planner
