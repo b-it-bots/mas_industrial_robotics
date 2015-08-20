@@ -21,12 +21,12 @@
 - git:
     local-name: youbot_description
     uri: https://github.com/mas-group/youbot_description.git
-    version: indigo
+    version: indigo-devel
 
 - git:
     local-name: youbot_simulation
     uri: https://github.com/mas-group/youbot_simulation.git
-    version: indigo
+    version: indigo-devel
 
 - git:
     local-name: youbot_diagnostics
