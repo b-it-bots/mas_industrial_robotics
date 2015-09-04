@@ -1,7 +1,7 @@
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
-- ROS Hydro: Ubuntu 14.04
+- ROS Indigo: Ubuntu 14.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -34,7 +34,7 @@ If you have never worked with git before, we recommend to go through the followi
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
 
 
-- ROS Indigo - http://wiki.ros.org/hydro/Installation/Ubuntu
+- ROS Indigo - http://wiki.ros.org/indigo/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
   
