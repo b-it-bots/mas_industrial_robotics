@@ -30,6 +30,9 @@
 
     <!-- Remap for twist mux -->
     <remap from="cmd_vel" to="/cmd_vel_prio_medium"/>
+	
+	<!-- Remap for force field recovery behavior -->
+	<remap from="/move_base/force_field_recovery/cmd_vel" to="/cmd_vel_prio_medium"/>
   </node>
 
 </launch>
