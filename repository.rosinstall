@@ -45,5 +45,5 @@
 
 - git:
     local-name: dynamixel_motor
-    uri: https://github.com/arebgun/dynamixel_motor.git
-    version: 4f79026beb414a33f2b76e2a463952a5c9581158
+    uri: https://github.com/mas-group/dynamixel_motor.git
+    version: master
