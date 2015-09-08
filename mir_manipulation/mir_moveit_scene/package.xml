@@ -3,10 +3,10 @@
   <name>mir_moveit_scene</name>
   <version>0.1.0</version>
   <description>
-  A package for interacting with the arm motion planning scene.
+  Interacting with the arm motion planning scene.
 
   The planning scene represents obstacles which the arm could collide with
-  Obstacles can be part of the planning scene which should be avoided,
+  obstacles can be part of the planning scene which should be avoided,
   or they can be attached to the arm and the planner will avoid collisions between
   the arm with attached object and other collision objects in the scene.
   </description>
@@ -18,8 +18,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>rospy</build_depend>
-
-  <test_depend>unittest</test_depend>
 
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
