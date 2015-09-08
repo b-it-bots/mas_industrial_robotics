@@ -4,8 +4,8 @@
   <version>0.1.0</version>
 
   <description>
-     The package provides launcher for mcr_manipulation_monitors package 
-     to use joint position monitor component.
+     Launcher for mcr_manipulation_monitors package to use joint position
+     monitor component.
   </description>
 
   <maintainer email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</maintainer>
