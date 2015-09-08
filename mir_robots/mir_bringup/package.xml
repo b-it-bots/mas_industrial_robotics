@@ -17,7 +17,6 @@
   <run_depend>mcr_collision_velocity_filter</run_depend>
   <run_depend>mir_arm_cartesian_control</run_depend>
   <run_depend>mir_default_robot_config</run_depend>
-  <run_depend>mir_gripper_services</run_depend>
   <run_depend>mir_gripper_controller</run_depend>
   <run_depend>mir_hardware_config</run_depend>
   <run_depend>mir_teleop</run_depend>

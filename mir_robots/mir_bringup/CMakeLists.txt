@@ -11,7 +11,6 @@ catkin_package(
     mir_arm_cartesian_control
     mir_default_robot_config
     mir_gripper_controller
-    mir_gripper_services
     mir_hardware_config
     mir_teleop
     openni_launch
