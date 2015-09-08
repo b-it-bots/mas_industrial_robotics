@@ -9,8 +9,6 @@
   
   <buildtool_depend>catkin</buildtool_depend>
   
-  <build_depend>roslaunch</build_depend>
-
   <run_depend>rospy</run_depend>
   <run_depend>moveit_commander</run_depend>
   <run_depend>moveit_msgs</run_depend>
@@ -18,5 +16,7 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>actionlib</run_depend>
-  
+
+  <test_depend>roslaunch</test_depend>  
+
 </package>

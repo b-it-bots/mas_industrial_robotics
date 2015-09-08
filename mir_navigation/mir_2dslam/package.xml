@@ -14,8 +14,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roslaunch</build_depend>
-
   <run_depend>gmapping</run_depend>
+
+  <test_depend>roslaunch</test_depend>  
 
 </package>
