@@ -12,11 +12,11 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roslaunch</build_depend>
-
   <run_depend>mir_moveit_youbot_brsu_1</run_depend>
   <run_depend>mir_moveit_youbot_brsu_2</run_depend>
   <run_depend>mir_moveit_youbot_brsu_3</run_depend>
   <run_depend>mir_moveit_youbot_brsu_4</run_depend>
+
+  <test_depend>roslaunch</test_depend>
 
 </package>

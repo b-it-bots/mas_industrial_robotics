@@ -24,7 +24,6 @@
   <build_depend>moveit_msgs</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>roslaunch</build_depend>
 
   <run_depend>brics_actuator</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
@@ -32,5 +31,7 @@
   <run_depend>mir_controller_msgs</run_depend>
   <run_depend>moveit_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
+
+  <test_depend>roslaunch</test_depend>
 
 </package>
