@@ -19,8 +19,6 @@
 
   <build_depend>rospy</build_depend>
 
-  <test_depend>unittest</test_depend>
-
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>mcr_perception_msgs</run_depend>
