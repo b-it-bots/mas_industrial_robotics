@@ -14,13 +14,13 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roslaunch</build_depend>
-
   <run_depend>mcr_gazebo_objects</run_depend>
   <run_depend>mir_2dnav</run_depend>
   <run_depend>mir_base_placement</run_depend>
   <run_depend>mir_bringup</run_depend>
   <run_depend>mir_bringup_sim</run_depend>
   <run_depend>mir_moveit_youbot</run_depend>
+
+  <test_depend>roslaunch</test_depend>
 
 </package>

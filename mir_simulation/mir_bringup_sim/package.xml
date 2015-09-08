@@ -12,8 +12,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roslaunch</build_depend>
-
   <run_depend>gazebo_ros</run_depend>
   <run_depend>mcr_gazebo_worlds</run_depend>   
   <run_depend>mir_arm_cartesian_control</run_depend>
@@ -22,5 +20,7 @@
   <run_depend>mir_twist_mux</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>youbot_gazebo_control</run_depend>
+
+  <test_depend>roslaunch</test_depend>  
  
 </package>
