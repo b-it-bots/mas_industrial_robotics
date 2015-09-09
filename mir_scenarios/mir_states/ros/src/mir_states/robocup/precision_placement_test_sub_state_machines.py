@@ -8,6 +8,7 @@ import smach_ros
 import mir_states.common.navigation_states as gns
 import mir_states.common.manipulation_states as gms
 import mir_states.common.perception_states as gps
+import mir_states.common.basic_states as gbs
 
 #import robocup specific states
 import mir_states.robocup.basic_transportation_test_states as btts
@@ -27,6 +28,7 @@ class sub_sm_place_in_holes(smach.StateMachine):
                         'rear_platform_free_poses',
                         'rear_platform_occupied_poses',
                         'selected_objects',
+                        'next_arm_pose_index',
                         'cavity_pose',
                         'task_list'],
             output_keys=['base_pose_to_approach',
@@ -36,110 +38,132 @@ class sub_sm_place_in_holes(smach.StateMachine):
                          'rear_platform_free_poses',
                          'rear_platform_occupied_poses',
                          'selected_objects',
+                         'next_arm_pose_index',
                          'cavity_pose',
                          'task_list'])
 
         with self:
-            smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"),
-                transitions={'succeeded': 'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE'})
 
             # TODO: ENSURE WE HAVE ENOUGH SPACE IN THE ARENA 
-            smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns.adjust_to_workspace(0.4),
+            smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns.adjust_to_workspace(0.2),
                 transitions={'succeeded': 'SELECT_OBJECTS_TO_PLACE',
                              'failed': 'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE'})
 
-            # Could to this while doing adjustment.
+
+            # Select object from task list which needs to be place in cavities.
             smach.StateMachine.add('SELECT_OBJECTS_TO_PLACE', ppts.select_objects_to_place(),
                 transitions={'objects_selected': 'CLEAR_CAVITIES',
                              'no_more_obj_for_this_workspace': 'no_object_for_ppt_platform'})
 
             smach.StateMachine.add('CLEAR_CAVITIES', ppts.clear_cavities(),
-                transitions={'succeeded': 'LOOK_AT_WORKSPACE'})
+                transitions={'succeeded': 'SELECT_NEXT_LOOK_POSE'})
 
-            smach.StateMachine.add('LOOK_AT_WORKSPACE', gms.move_arm('out_of_view'),
-                transitions={'succeeded': 'FIND_CAVITIES',
-                             'failed': 'LOOK_AT_WORKSPACE'})
+            # CAVITY RECOGNITION PIPELINE
+            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right_ppt', 'look_at_workspace_straight_ppt', 'look_at_workspace_left_ppt']),
+                    transitions={'succeeded': 'LOOK_AROUND',
+                                'failed': 'CHECK_FOUND_CAVITIES'})
 
-            # TODO: IF NOT ALL HAVE BEEN FOUND ? What then?
-            smach.StateMachine.add('FIND_CAVITIES', gps.find_cavities(frame_id='/odom'),
-                transitions={'succeeded': 'LOOK_LEFT',
-                             'not_all_cavities_found': 'LOOK_LEFT',
-                             'timeout': 'LOOK_LEFT'})
+            smach.StateMachine.add('LOOK_AROUND', gms.move_arm(),
+                transitions={'succeeded': 'FIND_CAVITIES_LOOP',
+                             'failed': 'LOOK_AROUND'})
 
-            smach.StateMachine.add('LOOK_LEFT', gms.move_arm('look_at_workspace_left'),
-                transitions={'succeeded': 'FIND_CAVITIES_LEFT',
-                             'failed': 'LOOK_LEFT'})
+            smach.StateMachine.add('FIND_CAVITIES_LOOP', gbs.loop_for(3),
+                                      transitions={'loop': 'FIND_CAVITIES',
+                                                   'continue': 'CHECK_FOUND_CAVITIES'})
 
-            # TODO: IF NOT ALL HAVE BEEN FOUND ? What then?
-            smach.StateMachine.add('FIND_CAVITIES_LEFT', gps.find_cavities(frame_id='/odom'),
-                transitions={'succeeded': 'LOOK_RIGHT',
-                             'not_all_cavities_found': 'LOOK_RIGHT',
-                             'timeout': 'LOOK_RIGHT'})
+            smach.StateMachine.add('FIND_CAVITIES', gps.find_cavities(),
+                transitions={'succeeded': 'TRANSFORM_CAVITIES',
+                             'failed': 'SELECT_NEXT_LOOK_POSE'})
 
-            smach.StateMachine.add('LOOK_RIGHT', gms.move_arm('look_at_workspace_right'),
-                transitions={'succeeded': 'FIND_CAVITIES_RIGHT',
-                             'failed': 'LOOK_RIGHT'})
+            smach.StateMachine.add('TRANSFORM_CAVITIES', gps.transform_object_poses(frame_id='/odom'),
+                transitions={'succeeded': 'FIND_BEST_MATCHED_CAVITIES'},
+                remapping={'found_objects': 'found_cavities'})
 
-            # TODO: IF NOT ALL HAVE BEEN FOUND ? What then?
-            smach.StateMachine.add('FIND_CAVITIES_RIGHT', gps.find_cavities(frame_id='/odom'),
-                transitions={'succeeded': 'SELECT_OBJECT_TO_PLACE',
-                             'not_all_cavities_found': 'failed',
-                             'timeout': 'failed'})
+            smach.StateMachine.add('FIND_BEST_MATCHED_CAVITIES', gps.find_best_matched_cavities(),
+                transitions={'succeeded': 'SELECT_NEXT_LOOK_POSE',
+                             'complete': 'CHECK_FOUND_CAVITIES'})            
 
+            smach.StateMachine.add('CHECK_FOUND_CAVITIES', gps.check_found_cavities(),
+                transitions={'cavities_found': 'STOP_ALL_COMPONENTS_AT_START',
+                             'no_cavities_found': 'failed'})
+           
+ 
+            smach.StateMachine.add('STOP_ALL_COMPONENTS_AT_START', gbs.send_event([('/gripper_to_object_pose_error_calculator/event_in','e_stop'),
+                                                                          ('/mcr_common/relative_displacement_calculator/event_in','e_stop'),
+                                                                          ('/pregrasp_planner/event_in','e_stop'),
+                                                                          ('/pregrasp_arm_monitor/event_in', 'e_stop'),
+                                                                          ('/mcr_navigation/relative_base_controller/event_in','e_stop'),
+                                                                          ('/planned_motion/event_in','e_stop')]),
+                transitions={'success':'SELECT_OBJECT_TO_PLACE'})
+
+            # OBJECT PLACING pipeline
+            # select cavitiy based on recognized cavities and list of objects to place in cavity.
             smach.StateMachine.add('SELECT_OBJECT_TO_PLACE', ppts.select_object_to_place(),
-                transitions={'object_selected': 'MOVE_ARM_TO_PREGRASP',
+                transitions={'object_selected': 'COMPUTE_ARM_BASE_SHIFT_TO_CAVITY',
                              'no_more_objects' : 'succeeded',
-                             'no_more_cavities': 'succeeded'})
+                             'no_more_cavities': 'succeeded'},
+                remapping={'found_objects': 'best_matched_cavities'})
 
-#            smach.StateMachine.add('TRANSFORM_POSE_INTO_REFERENCE_FRAME', btts.transform_pose_to_reference_frame(frame_id='/base_link'),
-#               transitions={'succeeded': 'MOVE_ARM_TO_PREGRASP',
-#                             'tf_error': 'failed'},
-#               remapping={'object_pose': 'cavity_pose'})
 
-            smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
-                transitions={'succeeded': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT',
-                             'failed': 'MOVE_ARM_TO_PREGRASP'})
+            # ARM AND BASE ALIGNMENT TO CAVITY PIPELINE
+            smach.StateMachine.add('COMPUTE_ARM_BASE_SHIFT_TO_CAVITY', gbs.send_event([('/pregrasp_planner/event_in','e_start'),
+                                                                                       ('/gripper_to_object_pose_error_calculator/event_in','e_start'),
+                                                                                       ('/mcr_common/relative_displacement_calculator/event_in','e_start')]),
+                transitions={'success':'WAIT_COMPUTE_ARM_BASE_SHIFT_TO_CAVITY'})
 
-            smach.StateMachine.add('COMPUTE_ARM_BASE_SHIFT_TO_OBJECT', btts.compute_arm_base_shift_to_object('/base_link', '/gripper_tip_link', 0.0, -0.02),
-                transitions={'succeeded': 'MOVE_BASE_RELATIVE',
-                             'tf_error': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT'},
-                remapping={'object_pose': 'cavity_pose'})
+            smach.StateMachine.add('WAIT_COMPUTE_ARM_BASE_SHIFT_TO_CAVITY', gbs.wait_for_events([('/pregrasp_planner/event_out','e_success', True),
+                                                                                                 ('/gripper_to_object_pose_error_calculator/event_out','e_success', True),
+                                                                                                 ('/mcr_common/relative_displacement_calculator/event_out','e_done', True)]),
+                transitions={'success':'STOP_COMPUTE_ARM_BASE_SHIFT_TO_CAVITY',
+                             'timeout': 'STOP_ALL_COMPONENTS', #should we try again for compute arm base shift
+                             'failure':'STOP_ALL_COMPONENTS'}) #should we try again for compute arm base shift 
 
-            smach.StateMachine.add('MOVE_BASE_RELATIVE', gns.move_base_relative(),
-                transitions={'succeeded': 'GRASP_OBJECT_FOR_HOLE_FROM_PLTF',
-                             'unreachable': 'GRASP_OBJECT_FOR_HOLE_FROM_PLTF',
-                             'timeout': 'MOVE_BASE_RELATIVE'})
+            smach.StateMachine.add('STOP_COMPUTE_ARM_BASE_SHIFT_TO_CAVITY', gbs.send_event([('/gripper_to_object_pose_error_calculator/event_in','e_stop'),
+                                                                                            ('/pregrasp_planner/event_in','e_stop'),
+                                                                                            ('/mcr_common/relative_displacement_calculator/event_in','e_stop')]),
+                transitions={'success':'ALIGN_BASE_WITH_CAVITY'})
 
-#            smach.StateMachine.add('MOVE_ARM_TO', gms.move_arm(),
-#                        transitions={'succeeded': 'REMOVE_OBJECT_FROM_LIST',
-#                                     'failed': 'MOVE_ARM_TO'})
+            smach.StateMachine.add('ALIGN_BASE_WITH_CAVITY', gbs.send_event([('/mcr_navigation/relative_base_controller/event_in','e_start')]),
+                transitions={'success':'WAIT_ALIGN_BASE_WITH_CAVITY'})
 
-            # TODO Check if we need intermediate poses
-            smach.StateMachine.add('GRASP_OBJECT_FOR_HOLE_FROM_PLTF', ppts.grasp_obj_for_hole_from_pltf(),
-                transitions={'object_grasped': 'MOVE_ARM',
+            smach.StateMachine.add('WAIT_ALIGN_BASE_WITH_CAVITY', gbs.wait_for_events([('/mcr_navigation/relative_base_controller/event_out','e_done', True),
+                                                                                     ('/mcr_navigation/collision_velocity_filter/event_out','e_zero_velocities_forwarded', False)]),
+                transitions={'success':'STOP_ALIGN_BASE_WITH_CAVITY',
+                             'timeout': 'STOP_ALL_COMPONENTS',  #should we try again for compute and aligh arm and base to object 
+                             'failure':'STOP_ALL_COMPONENTS'})  #should we try again for compute and aligh arm and base to object
+
+            smach.StateMachine.add('STOP_ALIGN_BASE_WITH_CAVITY', gbs.send_event([('/mcr_navigation/relative_base_controller/event_in','e_stop')]),
+                transitions={'success':'GRASP_OBJECT_FOR_CAVITY_FROM_PLTF' })
+            
+            # make sure that gripper is open  
+            smach.StateMachine.add('GRASP_OBJECT_FOR_CAVITY_FROM_PLTF', ppts.grasp_obj_for_hole_from_pltf(),
+                transitions={'object_grasped': 'MOVE_ARM_TO_CAVITY',
                              'no_more_obj_for_this_workspace': 'no_object_for_ppt_platform'})
 
-            ## DO WE NEED THIS !?!?! BECAUSE OTHERWISE IT WILL HIT THE CAMERA AND ALIGN THE OBJECT "PROPERLY" !?!??!
-#            smach.StateMachine.add('MOVE_TO_INTERMEDIATE_POSE', gms.move_arm('platform_intermediate'),
-#                transitions={'succeeded': 'MOVE_TO_PLACE_POSE',
-#                             'failed': 'MOVE_TO_INTERMEDIATE_POSE'})
+            smach.StateMachine.add('GO_TO_PREGRASP', gms.move_arm('pre_grasp'),
+                transitions={'succeeded': 'MOVE_ARM_TO_CAVITY',
+                             'failed': 'MOVE_ARM_TO_CAVITY'})
 
-#            smach.StateMachine.add('MOVE_TO_PLACE_POSE', gms.move_arm('pre_grasp'),
-#                transitions={'succeeded': 'MOVE_GRIPPER',
-#                             'failed': 'MOVE_TO_PLACE_POSE'})
+            smach.StateMachine.add('MOVE_ARM_TO_CAVITY', gbs.send_event([('/planned_motion/event_in', 'e_start'),
+            #smach.StateMachine.add('MOVE_ARM_TO_CAVITY', gbs.send_event([('/planned_motion/event_in', 'e_start')]),
+                                                                          ('/pregrasp_arm_monitor/event_in', 'e_start')]),
+                transitions={'success':'WAIT_MOVE_ARM_TO_CAVITY'})
 
-#            smach.StateMachine.add('SELECT_ARM_POSITION', ppts.select_arm_position(),
-#                transitions={'arm_pose_selected': 'MOVE_ARM'})
+            smach.StateMachine.add('WAIT_MOVE_ARM_TO_CAVITY', gbs.wait_for_events([('/pregrasp_arm_monitor/event_out','e_done', True)]),
+  #          smach.StateMachine.add('WAIT_MOVE_ARM_TO_CAVITY', gbs.wait_for_events([('/planned_motion/event_out','e_success', True)]),
+#                                                                             ('/pregrasp_arm_monitor/event_out', 'e_done', True)]),
+                transitions={'success':'STOP_MOVE_ARM_TO_CAVITY',
+                             'timeout': 'STOP_ALL_COMPONENTS',  #should we try again for compute and aligh arm and base to object 
+                             'failure':'STOP_ALL_COMPONENTS'})  #should we try again for compute and aligh arm and base to object
 
+            #smach.StateMachine.add('STOP_MOVE_ARM_TO_CAVITY', gbs.send_event([('/planned_motion/event_in','e_stop')]),
+            smach.StateMachine.add('STOP_MOVE_ARM_TO_CAVITY', gbs.send_event([('/planned_motion/event_in','e_stop'),
+                                                                             ('/pregrasp_arm_monitor/event_in', 'e_stop')]),
+                transitions={'success':'MOVE_ARM_TO_INTERMEDIATE_POSE' })
 
-            smach.StateMachine.add('MOVE_ARM', gms.move_arm(),
-                transitions={'succeeded': 'RELEASE_OBJECT',
-                             'failed': 'MOVE_ARM'})
-
-            # TODO check if this, and next could cause infinite loop?
-            smach.StateMachine.add('RELEASE_OBJECT', gms.linear_motion(operation='release'),
+            smach.StateMachine.add('PLACE_OBJECT', gms.linear_motion(operation='release'),
                 transitions={'succeeded':'WIGGLE_ARM_LEFT',
-                             'failed':'RELEASE_OBJECT'})
+                             'failed':'PLACE_OBJECT'})
 
             smach.StateMachine.add('WIGGLE_ARM_LEFT', ppts.ppt_wiggle_arm(wiggle_offset=-0.12),
                 transitions={'succeeded':'WIGGLE_ARM_RIGHT',
@@ -149,7 +173,14 @@ class sub_sm_place_in_holes(smach.StateMachine):
                 transitions={'succeeded':'MOVE_ARM_TO_INTERMEDIATE_POSE',
                              'failed':'MOVE_ARM_TO_INTERMEDIATE_POSE'})
 
-            smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_POSE', gms.move_arm('out_of_view'),
+            smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_POSE', gms.move_arm('look_at_workspace_straight_ppt'),
                 transitions={'succeeded': 'SELECT_OBJECT_TO_PLACE',
                              'failed': 'MOVE_ARM_TO_INTERMEDIATE_POSE'})
-
+            
+            #normal placing if arm and base alignment pipeline fails
+            smach.StateMachine.add('STOP_ALL_COMPONENTS', gbs.send_event([('/gripper_to_object_pose_error_calculator/event_in','e_stop'),
+                                                                          ('/pregrasp_arm_monitor/event_in', 'e_stop'),
+                                                                          ('/mcr_common/relative_displacement_calculator/event_in','e_stop'),
+                                                                          ('/mcr_navigation/relative_base_controller/event_in','e_stop'),
+                                                                          ('/planned_motion/event_in','e_stop')]),
+                transitions={'success':'SELECT_OBJECT_TO_PLACE'})
