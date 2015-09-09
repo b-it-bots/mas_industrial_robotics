@@ -263,31 +263,25 @@ class sub_sm_go_to_destination(smach.StateMachine):
                                                        'task_list'])
 
         with self:
-            smach.StateMachine.add('REMOVE_WALLS_FROM_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "remove"),
-                transitions={'succeeded':'SELECT_DELIVER_WORKSTATION'})
-
             smach.StateMachine.add('SELECT_DELIVER_WORKSTATION', btts.select_delivery_workstation(),
                 transitions={'success':'MOVE_TO_DESTINATION_LOCATION_SAFE',
                              'no_more_dest_tasks':'MOVE_TO_EXIT_SAFE'})
 
-            smach.StateMachine.add('MOVE_TO_DESTINATION_LOCATION_SAFE', gms.move_arm('out_of_view'),
+            smach.StateMachine.add('MOVE_TO_DESTINATION_LOCATION_SAFE', gms.move_arm('look_at_workspace_straight'),
                 transitions={'succeeded': 'MOVE_TO_DESTINATION_LOCATION',
                              'failed': 'MOVE_TO_DESTINATION_LOCATION_SAFE'})
-
-
 
             smach.StateMachine.add('MOVE_TO_DESTINATION_LOCATION', gns.approach_pose(),
                 transitions={'succeeded':'ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION',
                              'failed':'MOVE_TO_DESTINATION_LOCATION'})
 
-            smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION', gns.adjust_to_workspace(0.12),
+            smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_DESTINATION', gns.adjust_to_workspace(0.08),
                 transitions={'succeeded':'destination_reached',
                              'failed':'MOVE_TO_DESTINATION_LOCATION'})
 
-            smach.StateMachine.add('MOVE_TO_EXIT_SAFE', gms.move_arm('out_of_view'),
+            smach.StateMachine.add('MOVE_TO_EXIT_SAFE', gms.move_arm('look_at_workspace_straight'),
                 transitions={'succeeded': 'MOVE_TO_EXIT',
                              'failed': 'MOVE_TO_EXIT_SAFE'})
-
 
             smach.StateMachine.add('MOVE_TO_EXIT', gns.approach_pose("EXIT"),
                 transitions={'succeeded':'overall_done',
