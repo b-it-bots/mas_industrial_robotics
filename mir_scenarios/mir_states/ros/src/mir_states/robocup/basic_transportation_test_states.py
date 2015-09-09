@@ -271,9 +271,6 @@ class grasp_obj_from_pltf_btt(smach.State):
         manipulation.gripper_command.set_named_target("close")
         manipulation.gripper_command.go()
 
-        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
-        manipulation.arm_command.go()
-
         return 'object_grasped'
 
 
@@ -303,6 +300,7 @@ class place_object_in_configuration_btt(smach.State):
         print "rest poses: ", userdata.destinaton_free_poses[i].free_poses
 
         manipulation.arm_command.set_named_target(cfg_goal_pose)
+        manipulation.arm_command.go()
         manipulation.arm_command.go()
 
         manipulation.gripper_command.set_named_target("open")
@@ -345,9 +343,6 @@ class place_obj_on_rear_platform_btt(smach.State):
         # Removing pre poses (Do we need these poses?)
         pltf_pose = userdata.rear_platform_free_poses.pop();
 
-        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
-        manipulation.arm_command.go()
-
         manipulation.arm_command.set_named_target(pltf_pose.platform_pose)
         manipulation.arm_command.go()
 
@@ -370,9 +365,6 @@ class place_obj_on_rear_platform_btt(smach.State):
         userdata.rear_platform_occupied_poses.append(pltf_pose)
 
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
-
-        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
-        manipulation.arm_command.go()
 
         return 'succeeded'
 
