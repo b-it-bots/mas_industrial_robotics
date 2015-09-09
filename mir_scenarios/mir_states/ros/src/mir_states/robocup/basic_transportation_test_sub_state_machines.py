@@ -311,42 +311,15 @@ class sub_sm_place(smach.StateMachine):
                                                       'task_list'])
 
         with self:
-            smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"),
-                transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF'})
 
             smach.StateMachine.add('GRASP_OBJECT_FROM_PLTF', btts.grasp_obj_from_pltf_btt(),
-                transitions={'object_grasped':'REATTACH_OBJECT_TO_ROBOT',
-                             'no_more_obj_for_this_workspace':'REMOVE_WALLS_FROM_PLANNING_SCENE'})
-
-            smach.StateMachine.add('REATTACH_OBJECT_TO_ROBOT', gms.update_robot_planning_scene("unload"),
-                transitions={'succeeded':'MOVE_TO_INTERMEDIATE_POSE'},
-                remapping={'object': 'last_grasped_obj'})
-
-            smach.StateMachine.add('MOVE_TO_INTERMEDIATE_POSE', gms.move_arm('platform_intermediate'),
-                transitions={'succeeded':'PLACE_OBJ_IN_CONFIGURATION',
-                             'failed':'MOVE_TO_INTERMEDIATE_POSE'})
+                transitions={'object_grasped':'PLACE_OBJ_IN_CONFIGURATION',
+                             'no_more_obj_for_this_workspace':'no_more_obj_for_this_workspace'})
 
             smach.StateMachine.add('PLACE_OBJ_IN_CONFIGURATION', btts.place_object_in_configuration_btt(),
-                transitions={'succeeded':'DELETE_OBJECT_FROM_ROBOT_1',
-                             'no_more_cfg_poses':'DELETE_OBJECT_FROM_ROBOT_2'})
+                transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF',
+                             'no_more_cfg_poses':'MOVE_ARM_INSIDE_BASE_BOUNDARIES'})
 
-            smach.StateMachine.add('DELETE_OBJECT_FROM_ROBOT_1', gms.update_robot_planning_scene("detach"),
-                transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF'},
-                remapping={'object': 'last_grasped_obj'})
-
-            smach.StateMachine.add('DELETE_OBJECT_FROM_ROBOT_2', gms.update_robot_planning_scene("detach"),
-                transitions={'succeeded':'MOVE_ARM_INSIDE_BASE_BOUNDARIES'},
-                remapping={'object': 'object_to_grasp'})
-
-            #smach.StateMachine.add('AVOID_WALLS_PRE_3', gms.move_arm('candle'),
-            #    transitions={'succeeded': 'MOVE_ARM_INSIDE_BASE_BOUNDARIES',
-            #                 'failed': 'AVOID_WALLS_PRE_3'})
-
-            smach.StateMachine.add('MOVE_ARM_INSIDE_BASE_BOUNDARIES', gms.move_arm('platform_intermediate'),
+            smach.StateMachine.add('MOVE_ARM_INSIDE_BASE_BOUNDARIES', gms.move_arm('look_at_workspace_straight'),
                 transitions={'succeeded':'succeeded',
                              'failed':'MOVE_ARM_INSIDE_BASE_BOUNDARIES'})
-
-            smach.StateMachine.add('REMOVE_WALLS_FROM_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "remove"),
-                transitions={'succeeded':'no_more_obj_for_this_workspace'})
-
-
