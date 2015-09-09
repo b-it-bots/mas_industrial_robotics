@@ -193,3 +193,84 @@ class find_cavities(smach.State):
             return 'succeeded'
         else:
             return 'not_all_cavities_found'
+
+
+
+
+class accumulate_recognized_objects_list(smach.State):
+    def __init__(self, loop=3):
+        '''
+        Youbot views the workbench from different angles and finds the objects.
+        The function then accumulates the list together to remove any duplicates.
+        '''
+        smach.State.__init__( self,
+                outcomes=[ 'complete', 'merged'],
+                input_keys=['recognized_objects'],
+                output_keys=['recognized_objects'])
+
+        self.loop = loop        #Number of times the accumulate is called
+        self.loop_counter = 0
+
+        #List containing the union of all the recognized objects from different views
+        self.overall_recognized_objects = list()
+
+    def execute(self, userdata):
+        self.similarity_distance_threshold = 0.02
+        if not self.overall_recognized_objects and userdata.recognized_objects:
+            self.overall_recognized_objects = list(userdata.recognized_objects)
+        elif self.overall_recognized_objects and userdata.recognized_objects:
+            new_objects = list()
+            old_objects = list()
+            for recognized_object in userdata.recognized_objects:
+                duplicate_found  = False
+
+                for overall_object in self.overall_recognized_objects[:]:
+                    diff_x = abs(overall_object.pose.pose.position.x -
+                            recognized_object.pose.pose.position.x)
+                    diff_y = abs(overall_object.pose.pose.position.y - 
+                            recognized_object.pose.pose.position.y)
+                    diff_z = abs(overall_object.pose.pose.position.z - 
+                            recognized_object.pose.pose.position.z)
+                    if diff_x < self.similarity_distance_threshold and  \
+                            diff_y < self.similarity_distance_threshold and  \
+                            diff_z < self.similarity_distance_threshold:
+                                #Check for probability and add which duplicate to append
+                        if overall_object.probability < recognized_object.probability:
+                            # the new object has higher probability then
+                            duplicate_found  = False
+                            self.overall_recognized_objects.remove(overall_object)
+                        else :
+                            duplicate_found  = True
+
+                if duplicate_found == False:
+                    print "Adding object : ",recognized_object.name, " to list "
+                    new_objects.append(recognized_object)
+                    duplicate_found = True
+
+            self.overall_recognized_objects.extend(new_objects) 
+        userdata.recognized_objects = []
+
+
+
+        self.loop_counter = self.loop_counter + 1
+        if (self.loop_counter == self.loop):
+            #Accumulate has been called for n times.
+            # copying the local union list to userdata
+            userdata.recognized_objects = list(self.overall_recognized_objects)
+
+            #Reset counter and list
+            self.loop_counter = 0
+            self.overall_recognized_objects = list()
+
+            rospy.loginfo("(before shuffle) MERGED OBJECT LIST : %s" 
+                    % ([obj.name for obj in userdata.recognized_objects]) )
+            if userdata.recognized_objects:
+                random.shuffle(userdata.recognized_objects)
+            print "FINAL LIST : ", [obj.name for obj in userdata.recognized_objects]
+            rospy.loginfo("FINAL MERGED OBJECT LIST : %s" 
+                    % ([obj.name for obj in userdata.recognized_objects]) )
+            return 'complete'
+        else :
+            return 'merged'
+
+
