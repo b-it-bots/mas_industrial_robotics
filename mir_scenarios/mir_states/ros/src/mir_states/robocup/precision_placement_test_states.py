@@ -242,11 +242,12 @@ class clear_cavities(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['succeeded'],
-            input_keys=['found_cavities'],
-            output_keys=['found_cavities'])
+            input_keys=['found_cavities', 'best_matched_cavities'],
+            output_keys=['found_cavities', 'best_matched_cavities'])
 
     def execute(self, userdata):
         userdata.found_cavities = []
+        userdata.best_matched_cavities = []
         return 'succeeded'
 
 class ppt_wiggle_arm(smach.State):
