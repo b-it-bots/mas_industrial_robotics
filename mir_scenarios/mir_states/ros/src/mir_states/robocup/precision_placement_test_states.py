@@ -123,7 +123,7 @@ class select_object_to_place(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['object_selected','no_more_cavities', 'no_more_objects'],
-            input_keys=['rear_platform_occupied_poses', 'found_cavities'],
+            input_keys=['rear_platform_occupied_poses', 'cavity_pose', 'found_cavities'],
             output_keys=['selected_object','cavity_pose'])
 
     def execute(self, userdata):
