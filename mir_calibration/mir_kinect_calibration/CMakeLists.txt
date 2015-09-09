@@ -54,10 +54,7 @@ add_dependencies(transform_estimation
 
 ### TESTS
 if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED
-    COMPONENTS
-      roslaunch
-  )
+  find_package(roslaunch REQUIRED)
 
   roslaunch_add_file_check(ros/launch)
 endif()

@@ -26,10 +26,7 @@ catkin_package(
 
 ### TEST
 if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED
-    COMPONENTS
-      roslaunch
-  )
+  find_package(roslaunch REQUIRED)
 
   #roslaunch_add_file_check(robot.launch robot:=youbot-brsu-1)
   roslaunch_add_file_check(robots)
