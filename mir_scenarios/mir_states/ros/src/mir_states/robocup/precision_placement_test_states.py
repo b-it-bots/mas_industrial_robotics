@@ -158,7 +158,7 @@ class grasp_obj_for_hole_from_pltf(smach.State):
 
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
-        rospy.loginfo('userdata.selected_object: %s', userdata.selected_object)
+        #rospy.loginfo('userdata.selected_object: %s', userdata.selected_object)
 
         pltf_obj_pose = None
         for i in range(len(userdata.rear_platform_occupied_poses)):
@@ -193,7 +193,10 @@ class grasp_obj_for_hole_from_pltf(smach.State):
         print "plat_pose: ", pltf_obj_pose.platform_pose
         print "plat_name: ", pltf_obj_pose.obj.name
 
-        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go()
+
+        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose) + "_pre")
         manipulation.arm_command.go()
 
         manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose))
@@ -202,11 +205,10 @@ class grasp_obj_for_hole_from_pltf(smach.State):
         manipulation.gripper_command.set_named_target("close")
         manipulation.gripper_command.go()
 
-        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose) + "_pre")
         manipulation.arm_command.go()
 
         return 'object_grasped'
-
 
 class select_arm_position(smach.State):
     def __init__(self):
