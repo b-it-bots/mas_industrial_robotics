@@ -9,6 +9,8 @@ import mcr_perception_msgs.msg
 import mcr_perception_msgs.srv
 import mir_controller_msgs.srv
 
+import random
+
 
 class find_objects(smach.State):
 
@@ -70,32 +72,7 @@ class find_objects(smach.State):
         userdata.found_objects = self.object_list.objects
         return 'objects_found'
 
-class transform_object_poses(smach.State):
 
-    def __init__(self, frame_id=None):
-        smach.State.__init__(self,
-                             outcomes=['succeeded',
-                                       'no_frame_specified',
-                                       'tf_error'],
-                             input_keys=['found_objects'],
-                             output_keys=['found_objects'])
-        self.tf_listener = tf.TransformListener()
-        self.frame_id = frame_id
-
-    def execute(self, userdata):
-        if self.frame_id:
-            for obj in userdata.found_objects:
-                try:
-                    self.tf_listener.waitForTransform(
-                                    self.frame_id, obj.pose.header.frame_id,
-                                    obj.pose.header.stamp, rospy.Duration(0.1))
-                    obj.pose = self.tf_listener.transformPose(self.frame_id, obj.pose)
-                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                    rospy.logerr('Unable to transform %s -> %s' % (obj.pose.header.frame_id, self.frame_id))
-                    return 'tf_error'
-        else:
-            return 'no_frame_specified'
-        return 'succeeded'
 
 class do_visual_servoing(smach.State):
 
@@ -129,9 +106,9 @@ class do_visual_servoing(smach.State):
 
 
 class find_cavities(smach.State):
-    def __init__(self, frame_id=None):
+    def __init__(self):
         smach.State.__init__(self,
-            outcomes=['succeeded','not_all_cavities_found', 'timeout'],
+            outcomes=['succeeded', 'failed'],
             input_keys=['selected_objects', 'found_cavities'],
             output_keys=['found_cavities'])
 
@@ -140,8 +117,6 @@ class find_cavities(smach.State):
         self.pub_object_category = rospy.Publisher('/mcr_perception/cavity_template_publisher/input/object_name', std_msgs.msg.String)
         self.tf_listener = tf.TransformListener()
         self.cavity = None
-        self.frame_id = frame_id
-        self.matching_threshold = 0.1
 
     def cavity_cb(self, cavity):
         self.cavity = cavity
@@ -163,36 +138,61 @@ class find_cavities(smach.State):
                     break
 
                 if (rospy.Time.now() - start_time) > timeout:
-                    rospy.logerr('timeout of %f seconds exceeded for finding cavity' % float(timeout.to_sec()))
-                    return 'timeout'
+                    rospy.logwarn('timeout of %f seconds exceeded for finding cavity' % float(timeout.to_sec()))
+                    break
 
                 rospy.sleep(0.1)
 
-        if self.frame_id:
-            for cavity in local_found_cavities:
-                try:
-                    cavity.pose = self.tf_listener.transformPose(self.frame_id, cavity.pose)
-                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                    rospy.logerr('Unable to transform %s -> %s' % (cavity.pose.header.frame_id, self.frame_id))
+        if len(local_found_cavities) == 0:
+            return 'failed'
 
-        # if we find a better matched cavity, replace it
-        for cavity in local_found_cavities:
+        userdata.found_cavities = local_found_cavities
+
+        return 'succeeded'
+        
+class check_found_cavities(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['cavities_found','no_cavities_found'],
+            input_keys=['best_matched_cavities'])
+
+    def execute(self, userdata):
+
+        if len(userdata.best_matched_cavities) == 0:
+            return 'no_cavities_found'
+        else:
+            return 'cavities_found'
+
+class find_best_matched_cavities(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['succeeded', 'complete'],
+            input_keys=['best_matched_cavities', 'found_cavities'],
+            output_keys=['best_matched_cavities'])
+
+        self.matching_threshold = 0.1
+        self.loop_count = 0
+
+    def execute(self, userdata):
+
+        for cavity in userdata.found_cavities:
             exists = False
-            for idx,c in enumerate(userdata.found_cavities):
+            for idx,c in enumerate(userdata.best_matched_cavities):
                 if cavity.object_name == c.object_name:
                     if cavity.template_matching_error.matching_error < c.template_matching_error.matching_error:
-                        userdata.found_cavities[idx] = cavity
+                        userdata.best_matched_cavities[idx] = cavity
                         print "Found better cavity for ", cavity.object_name, ". Old: ", c.template_matching_error.matching_error, " New: ", cavity.template_matching_error.matching_error
                     exists = True
 
             if exists == False:
                 if cavity.template_matching_error.matching_error < self.matching_threshold:
-                    userdata.found_cavities.append(cavity)
+                    userdata.best_matched_cavities.append(cavity)
 
-        if len(userdata.found_cavities) == len(userdata.selected_objects):
-            return 'succeeded'
-        else:
-            return 'not_all_cavities_found'
+        if self.loop_count >= 2:
+            self.loop_count = 0
+            return 'complete'
+        self.loop_count += 1
+        return 'succeeded'
 
 
 
