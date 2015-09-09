@@ -10,6 +10,7 @@ import smach_ros
 import tf
 
 import std_msgs.msg
+import geometry_msgs.msg
 import mcr_perception_msgs.msg
 import moveit_msgs.msg
 import math
@@ -119,12 +120,17 @@ class select_objects_to_place(smach.State):
 
 
 # select one object to place based on recognized cavities
+# publish pose of the selected object/selected cavity
 class select_object_to_place(smach.State):
+    OBJECT_POSE_TOPIC='/mir_states/object_selector/object_pose'
+    
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['object_selected','no_more_cavities', 'no_more_objects'],
             input_keys=['rear_platform_occupied_poses', 'cavity_pose', 'found_cavities'],
             output_keys=['selected_object','cavity_pose'])
+
+        self.object_pose_pub = rospy.Publisher(self.OBJECT_POSE_TOPIC, geometry_msgs.msg.PoseStamped)
 
     def execute(self, userdata):
         if len(userdata.found_cavities) == 0:
@@ -136,6 +142,7 @@ class select_object_to_place(smach.State):
                     userdata.selected_object = userdata.rear_platform_occupied_poses[i].obj
                     userdata.cavity_pose = userdata.found_cavities[-1]
                     del userdata.found_cavities[-1]
+                    self.object_pose_pub.publish(userdata.cavity_pose.pose)
                     print "Selected %s to place" %userdata.rear_platform_occupied_poses[i].obj.name
                     return 'object_selected'
             return 'no_more_objects'
