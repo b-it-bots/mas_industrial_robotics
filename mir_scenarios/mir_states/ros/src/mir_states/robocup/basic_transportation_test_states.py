@@ -38,14 +38,16 @@ class Bunch:
          self.__dict__.update(kwds)
 
 class select_object_to_be_grasped(smach.State):
+    OBJECT_POSE_TOPIC='/mir_states/object_selector/object_pose'
+
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['obj_selected', 'no_obj_selected','no_more_free_poses_at_robot_platf'],
             input_keys=['recognized_objects', 'objects_to_be_grasped', 'object_to_grasp', 'rear_platform_free_poses','object_to_be_adjust_to'],
             output_keys=['object_to_grasp', 'object_to_be_adjust_to'])
+        self.object_pose_pub = rospy.Publisher(self.OBJECT_POSE_TOPIC, PoseStamped)
 
     def execute(self, userdata):
-
         if(len(userdata.rear_platform_free_poses) == 0):
             rospy.logerr("NO more free poses on robot rear platform")
             return 'no_more_free_poses_at_robot_platf'
@@ -56,9 +58,9 @@ class select_object_to_be_grasped(smach.State):
                 if rec_obj.name == obj_grasp:
                     userdata.object_to_grasp = rec_obj
                     userdata.object_to_be_adjust_to = rec_obj.pose
+                    self.object_pose_pub.publish(rec_obj.pose)
                     print "selected obj: ", userdata.object_to_grasp.name
                     return 'obj_selected'
-
         return 'no_obj_selected'
 
 class delete_from_recognized_objects(smach.State):
