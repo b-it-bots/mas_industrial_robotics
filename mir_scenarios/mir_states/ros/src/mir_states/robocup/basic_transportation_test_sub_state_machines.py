@@ -28,32 +28,34 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                       'lasttask',
                                                       'move_arm_to',
                                                       'move_base_by',
-						      'next_arm_pose_index',
+						                              'next_arm_pose_index',
                                                       'object_pose',
                                                       'object_to_be_adjust_to',
                                                       'object_to_grasp',
                                                       'objects_to_be_grasped',
+                                                      'prev_vs_result',
                                                       'rear_platform_free_poses',
                                                       'rear_platform_occupied_poses',
                                                       'recognized_objects',
                                                       'source_visits',
                                                       'task_list',
-						      'test',
+						                              'test',
                                                       'vscount'],
                                           output_keys=['base_pose_to_approach',
                                                        'found_objects',
                                                        'lasttask',
                                                        'move_arm_to',
                                                        'move_base_by',
-						       'next_arm_pose_index',
+						                               'next_arm_pose_index',
                                                        'object_to_be_adjust_to',
                                                        'object_to_grasp',
                                                        'objects_to_be_grasped',
+                                                       'prev_vs_result',
                                                        'rear_platform_free_poses',
                                                        'rear_platform_occupied_poses',
                                                        'source_visits',
                                                        'task_list',
-						       'test',
+						                               'test',
                                                        'vscount'])
 
         self.use_mockup = use_mockup
@@ -65,193 +67,181 @@ class sub_sm_go_and_pick(smach.StateMachine):
                              'no_more_task_for_given_type': 'no_more_task_for_given_type'})
 
             # required before any call to gns.approach_pose, moves arm within footprint
-            smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION_SAFE', gms.move_arm('out_of_view'),
+            smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION_SAFE', gms.move_arm('look_at_workspace_straight'),
                 transitions={'succeeded': 'MOVE_TO_SOURCE_LOCATION',
                              'failed': 'MOVE_TO_SOURCE_LOCATION_SAFE'})
 
             smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION', gns.approach_pose(),
-                transitions={'succeeded': 'PREPARE_FOR_PERCEPTION',
+                transitions={'succeeded': 'STOP_ALL_COMPONENTS_AT_START',
                              'failed': 'MOVE_TO_SOURCE_LOCATION'})
 
-            ### start of concurrent states
-            ### Adjusts_to_workspace, while moving arm safely to "out_of_view" aka look at platform.
-            ### Adds static walls to planning scene before arm motions
-            sm_con_prepare_for_perception = smach.Concurrence(outcomes=['succeeded', 'failed_to_adjust_base','concurrency_mapping_failure'],
-                                       default_outcome='concurrency_mapping_failure',
-                                       outcome_map={'succeeded': {'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE': 'succeeded',
-                                                                  'MOVE_ARM_OUT_OF_VIEW_SAFE': 'succeeded'},
-                                                    'failed_to_adjust_base': {'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE': 'failed'}})
-
-            with sm_con_prepare_for_perception:
-                sm_sub_move_arm_safe = smach.StateMachine(outcomes=['succeeded'])
-                with sm_sub_move_arm_safe:
-                    smach.StateMachine.add('ADD_WALLS_TO_PLANNING_SCENE', gms.update_static_elements_in_planning_scene("walls", "add"),
-                        transitions={'succeeded':'MOVE_ARM_OUT_OF_VIEW'})
-
-                    smach.StateMachine.add('MOVE_ARM_OUT_OF_VIEW', gms.move_arm('out_of_view'),
-                        transitions={'succeeded':'succeeded',
-                                     'failed':'MOVE_ARM_OUT_OF_VIEW'})
+            smach.StateMachine.add('STOP_ALL_COMPONENTS_AT_START', gbs.send_event([('/gripper_to_object_pose_error_calculator/event_in','e_stop'),
+                                                                          ('/mcr_common/relative_displacement_calculator/event_in','e_stop'),
+                                                                          ('/pregrasp_planner/event_in','e_stop'),
+                                                                          ('/mcr_navigation/relative_base_controller/event_in','e_stop'),
+                                                                          ('/planned_motion/event_in','e_stop')]),
+                transitions={'success':'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE'})
 
 
-                smach.Concurrence.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns.adjust_to_workspace(0.25))
-                smach.Concurrence.add('MOVE_ARM_OUT_OF_VIEW_SAFE', sm_sub_move_arm_safe)
+            smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE', gns.adjust_to_workspace(0.2),
+                transitions={'succeeded':'SELECT_NEXT_LOOK_POSE',
+                             'failed':'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE'})
 
-            smach.StateMachine.add('PREPARE_FOR_PERCEPTION', sm_con_prepare_for_perception, transitions={'succeeded': 'RECOGNIZE_OBJECTS',
-                                                                                  'failed_to_adjust_base': 'MOVE_TO_SOURCE_LOCATION_SAFE',
-                                                                                  'concurrency_mapping_failure': 'PREPARE_FOR_PERCEPTION'})
-            ### Done adjust_to_workspace and move arm to "out_of_view"
-            ### end of concurrent states
-
-            smach.StateMachine.add('RECOGNIZE_OBJECTS', gps.find_objects(retries=1),
-                transitions={'objects_found': 'TRANSFORM_OBJECTS',#'SELECT_OBJECT_TO_BE_GRASPED',
-                            'no_objects_found':'SELECT_NEXT_LOOK_POSE'},
-                remapping={'found_objects':'recognized_objects'})
-
-
-            smach.StateMachine.add('TRANSFORM_OBJECTS', gps.transform_object_poses(frame_id='/odom'),
-                transitions={'succeeded':'SELECT_OBJECT_TO_BE_GRASPED',
-                            'tf_error':'TRANSFORM_OBJECTS',
-                            'no_frame_specified':'TRANSFORM_OBJECTS'},
-                remapping={'found_objects':'recognized_objects'})
-
-            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right','look_at_workspace_left']),
+            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right_ppt', 'look_at_workspace_straight_ppt','look_at_workspace_left_ppt']),
                     transitions={'succeeded': 'LOOK_AROUND',
-		            'failed': 'RECOGNIZE_OBJECTS'})
+                    'failed': 'RECOGNIZE_OBJECTS'})
 
-
-    	    smach.StateMachine.add('LOOK_AROUND', gms.move_arm(),
-                transitions={'succeeded': 'RECOGNIZE_OBJECTS_LOOP',
+            smach.StateMachine.add('LOOK_AROUND', gms.move_arm(),
+                transitions={'succeeded': 'RECOGNIZE_OBJECTS',
                              'failed': 'LOOK_AROUND'})
 
+            smach.StateMachine.add('RECOGNIZE_OBJECTS', gps.find_objects(retries=1),
+                transitions={'objects_found': 'ACCUMULATE_RECOGNIZED_LISTS',
+                            'no_objects_found':'ACCUMULATE_RECOGNIZED_LISTS'},
+                remapping={'found_objects':'recognized_objects'})
 
-            #FIXME: Is there a loop reset?
-            # THIS STATE was in the previously different for BMT, BTT, but now is the same behaviour for both.
-            # Meaning, BMT could skip source pose. TODO: Ensure this doesn't exit the arena in BMT before grasping.
-            smach.StateMachine.add('RECOGNIZE_OBJECTS_LOOP', gbs.loop_for(2),
-                                      transitions={'loop': 'RECOGNIZE_OBJECTS',
-                                                   'continue': 'SKIP_SOURCE_POSE_SAFE'})
+            smach.StateMachine.add('ACCUMULATE_RECOGNIZED_LISTS', gps.accumulate_recognized_objects_list(),
+                transitions={'complete': 'SELECT_OBJECT_TO_BE_GRASPED',
+                             'merged':'SELECT_NEXT_LOOK_POSE'})
 
             smach.StateMachine.add('SELECT_OBJECT_TO_BE_GRASPED', btts.select_object_to_be_grasped(),
-                transitions={'obj_selected':'MOVE_ARM_TO_PREGRASP',#'PREPARE_FOR_GRASPING',
-                            'no_obj_selected':'SKIP_SOURCE_POSE_SAFE',
+                transitions={'obj_selected':'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT',
+                            'no_obj_selected':'SKIP_SOURCE_POSE',
                             'no_more_free_poses_at_robot_platf':'no_more_free_poses_at_robot_platf'})
 
-            smach.StateMachine.add('MOVE_ARM_TO_PREGRASP', gms.move_arm("pre_grasp"),
-                        transitions={'succeeded': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT',
-                                     'failed': 'MOVE_ARM_TO_PREGRASP'})
+            smach.StateMachine.add('COMPUTE_ARM_BASE_SHIFT_TO_OBJECT', gbs.send_event([('/pregrasp_planner/event_in','e_start'),
+                                                                                       ('/gripper_to_object_pose_error_calculator/event_in','e_start'),
+                                                                                       ('/mcr_common/relative_displacement_calculator/event_in','e_start')]),
+                transitions={'success':'WAIT_COMPUTE_ARM_BASE_SHIFT_TO_OBJECT'})
 
-            smach.StateMachine.add('COMPUTE_ARM_BASE_SHIFT_TO_OBJECT', btts.compute_arm_base_shift_to_object('/base_link', '/gripper_tip_link', offset_x=-0.03, offset_y=-0.02),
-                        transitions={'succeeded': 'MOVE_BASE_RELATIVE',
-                                      'tf_error': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT'},
-                                    remapping={'object_pose': 'object_to_grasp'})
+            smach.StateMachine.add('WAIT_COMPUTE_ARM_BASE_SHIFT_TO_OBJECT', gbs.wait_for_events([('/pregrasp_planner/event_out','e_success', True),
+                                                                                                 ('/gripper_to_object_pose_error_calculator/event_out','e_success', True),
+                                                                                                 ('/mcr_common/relative_displacement_calculator/event_out','e_done', True)]),
+                transitions={'success':'STOP_COMPUTE_ARM_BASE_SHIFT_TO_OBJECT',
+                             'timeout': 'STOP_COMPUTE_ARM_BASE_SHIFT_TO_OBJECT_WITH_FAILURE',
+                             'failure':'STOP_COMPUTE_ARM_BASE_SHIFT_TO_OBJECT_WITH_FAILURE'})
 
-            # TODO: COULD BE ANOTHER CONCURRENT STATE - AFTER approach has been well tested.
-            smach.StateMachine.add('MOVE_BASE_RELATIVE', gns.move_base_relative(),
-                        transitions={'succeeded': 'MOVE_ARM_RELATIVE',
-                                     'unreachable': 'SKIP_SOURCE_POSE_SAFE',
-                                     'timeout': 'MOVE_BASE_RELATIVE'})
+            smach.StateMachine.add('STOP_COMPUTE_ARM_BASE_SHIFT_TO_OBJECT', gbs.send_event([('/gripper_to_object_pose_error_calculator/event_in','e_stop'),
+                                                                                            ('/pregrasp_planner/event_in','e_stop'),
+                                                                                            ('/mcr_common/relative_displacement_calculator/event_in','e_stop')]),
+                transitions={'success':'MOVE_ARM_AND_BASE_TO_OBJECT'})
 
-            if self.use_visual_servoing:
-               smach.StateMachine.add('MOVE_ARM_RELATIVE', gms.move_arm(),
-                        transitions={'succeeded':'DO_VISUAL_SERVOING',
-                                     'failed': 'MOVE_ARM_RELATIVE'})
-            else:
-               smach.StateMachine.add('MOVE_ARM_RELATIVE', gms.move_arm(),
-                         transitions={'succeeded':'GRASP_OBJ',
-                                      'failed': 'MOVE_ARM_RELATIVE'})
-            # TODO: THIS REVERTS TO Original Style - visual servoing from pregrasp
-            #       THIS only happens after visual servoing has failed once.
-            # FIX in future, everything is already in /odom frame.
-            smach.StateMachine.add('MOVE_ARM_TO_PREGRASP_VS', gms.move_arm("pre_grasp"),
-                transitions={'succeeded': 'DO_VISUAL_SERVOING',
-                             'failed': 'MOVE_ARM_TO_PREGRASP'})
+            smach.StateMachine.add('STOP_COMPUTE_ARM_BASE_SHIFT_TO_OBJECT_WITH_FAILURE', gbs.send_event([('/gripper_to_object_pose_error_calculator/event_in','e_stop'),
+                                                                                            ('/pregrasp_planner/event_in','e_stop'),
+                                                                                            ('/mcr_common/relative_displacement_calculator/event_in','e_stop')]),
+                transitions={'success':'DELETE_FROM_RECOGNIZED_OBJECTS'})
 
-            smach.StateMachine.add('DO_VISUAL_SERVOING', gps.do_visual_servoing(),
-                transitions={'succeeded':'GRASP_OBJ',
-                            'failed':'MOVE_ARM_TO_PREGRASP_NVS',#'VISUAL_SERVOING_LOOP',
-                            'timeout':'MOVE_ARM_TO_PREGRASP_NVS',#'VISUAL_SERVOING_LOOP',
-                            'lost_object':'MOVE_ARM_TO_PREGRASP_NVS'#'VISUAL_SERVOING_LOOP'
-                             },
-                            remapping={'object_pose': 'object_to_grasp'})
+            smach.StateMachine.add('MOVE_ARM_AND_BASE_TO_OBJECT', gbs.send_event([('/mcr_navigation/relative_base_controller/event_in','e_start'),
+                                                                                  ('/planned_motion/event_in', 'e_start')]),
+                transitions={'success':'WAIT_ARM_AND_BASE_TO_OBJECT'})
 
-            smach.StateMachine.add('VISUAL_SERVOING_LOOP', btts.loop_for(max_loop_count=1),
-                                      transitions={'loop': 'HELP_VISUAL_SERVOING',
-                                                   'continue': 'MOVE_ARM_TO_PREGRASP_NVS'})
-            # TODO: is this still needed
-            smach.StateMachine.add('HELP_VISUAL_SERVOING', gns.adjust_to_workspace(0.12),
-                transitions={'succeeded':'MOVE_ARM_RELATIVE',#'MOVE_ARM_TO_PREGRASP_VS',
-                             'failed':'MOVE_ARM_RELATIVE'#'MOVE_ARM_TO_PREGRASP_VS'
-                            })
+            smach.StateMachine.add('WAIT_ARM_AND_BASE_TO_OBJECT', gbs.wait_for_events([('/mcr_navigation/relative_base_controller/event_out','e_done', True),
+                                                                                       ('/mcr_navigation/collision_velocity_filter/event_out','e_zero_velocities_forwarded', False),
+                                                                                       ('/planned_motion/event_out', 'e_success', True)]),
+                transitions={'success':'STOP_MOVE_ARM_BASE_TO_OBJECT',
+                             'timeout': 'STOP_MOVE_ARM_BASE_TO_OBJECT_WITH_FAILURE',
+                             'failure':'STOP_MOVE_ARM_BASE_TO_OBJECT_WITH_FAILURE'})
 
-            #hack to be fixed(later on):repeated state to skip visual servoing if it fails.
-            # NVS = No Visual Servoing
-            smach.StateMachine.add('MOVE_ARM_TO_PREGRASP_NVS', gms.move_arm("pre_grasp"),
-                        transitions={'succeeded': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT_NVS',
-                                     'failed': 'MOVE_ARM_TO_PREGRASP_NVS'})
+            smach.StateMachine.add('STOP_MOVE_ARM_BASE_TO_OBJECT', gbs.send_event([('/mcr_navigation/relative_base_controller/event_in','e_stop'),
+                                                                                   ('/planned_motion/event_in','e_stop')]),
+#                transitions={'success':'ALIGN_WITH_OBJECT_LOOP'}) # uncomment to use visual servoing
+                transitions={'success':'GRASP_OBJ'}) # comment out if using visual servoing
 
-            smach.StateMachine.add('COMPUTE_ARM_BASE_SHIFT_TO_OBJECT_NVS', btts.compute_arm_base_shift_to_object('/base_link', '/gripper_tip_link', offset_x=0.0, offset_y=-0.02),
-                        transitions={'succeeded': 'MOVE_BASE_RELATIVE_NVS',
-                                      'tf_error': 'COMPUTE_ARM_BASE_SHIFT_TO_OBJECT_NVS'},
-                                    remapping={'object_pose': 'object_to_grasp'})
+            smach.StateMachine.add('STOP_MOVE_ARM_BASE_TO_OBJECT_WITH_FAILURE', gbs.send_event([('/mcr_navigation/relative_base_controller/event_in','e_stop'),
+                                                                                                ('/planned_motion/event_in','e_stop')]),
+                transitions={'success':'DELETE_FROM_RECOGNIZED_OBJECTS'})
 
-            # TODO: COULD BE ANOTHER CONCURRENT STATE - AFTER approach has been well tested.
-            smach.StateMachine.add('MOVE_BASE_RELATIVE_NVS', gns.move_base_relative(),
-                        transitions={'succeeded': 'MOVE_ARM_RELATIVE_NVS',
-                                     'unreachable': 'SKIP_SOURCE_POSE_SAFE',
-                                     'timeout': 'MOVE_BASE_RELATIVE_NVS'})
+            smach.StateMachine.add('ALIGN_WITH_OBJECT_LOOP', gbs.loop_for_vs(1),
+                                      transitions={'loop': 'START_VISUAL_SERVOING',
+                                                   'continue': 'GRASP_OBJ'})
 
-            smach.StateMachine.add('MOVE_ARM_RELATIVE_NVS', gms.move_arm(),
-                         transitions={'succeeded':'GRASP_OBJ',
-                                      'failed': 'MOVE_ARM_RELATIVE_NVS'})
-            if (self.use_mockup):
-                    smach.StateMachine.add('GRASP_OBJ', gms.linear_motion(operation='grasp'),
-                        transitions={'succeeded':'ATTACH_OBJECT_TO_ROBOT',
-                                     'failed':'SKIP_SOURCE_POSE_SAFE'})
+            smach.StateMachine.add('START_VISUAL_SERVOING', gbs.send_event([('/mir_controllers/visual_servoing/event_in','e_start')]),
+                transitions={'success':'WAIT_VISUAL_SERVOING'})
 
-                    smach.StateMachine.add('ATTACH_OBJECT_TO_ROBOT', gms.update_robot_planning_scene("attach"),
-                        transitions={'succeeded':'REMOVE_OBJECT_FROM_MOCKUP'},
-                        remapping={'object': 'object_to_grasp'})
+            smach.StateMachine.add('WAIT_VISUAL_SERVOING', gbs.wait_for_events([('/mcr_monitoring/component_wise_pose_error_monitor/event_out','e_stop', True)], timeout_duration=30),
+                transitions={'success':'STOP_VISUAL_SERVOING',
+                             'timeout': 'STOP_VISUAL_SERVOING_WITH_FAILURE',
+                             'failure':'STOP_VISUAL_SERVOING_WITH_FAILURE'})
 
-                    smach.StateMachine.add("REMOVE_OBJECT_FROM_MOCKUP",
-                                           perception_mockup_util.remove_object_to_grasp_state(),
-                                           transitions={'success':'PLACE_OBJ_ON_REAR_PLATFORM'})
-            else:
-                    smach.StateMachine.add('GRASP_OBJ', gms.linear_motion(operation='grasp'),
-                        transitions={'succeeded':'ATTACH_OBJECT_TO_ROBOT',
-                                     'failed':'SKIP_SOURCE_POSE_SAFE'})
+            smach.StateMachine.add('STOP_VISUAL_SERVOING', gbs.send_event([('/mir_controllers/visual_servoing/event_in','e_stop')]),
+                transitions={'success':'SET_VISUAL_SERVOING_SUCCESS'})
 
-                    smach.StateMachine.add('ATTACH_OBJECT_TO_ROBOT', gms.update_robot_planning_scene("attach"),
-                        transitions={'succeeded':'PLACE_OBJ_ON_REAR_PLATFORM'},
-                        remapping={'object': 'object_to_grasp'})
+            smach.StateMachine.add('STOP_VISUAL_SERVOING_WITH_FAILURE', gbs.send_event([('/mir_controllers/visual_servoing/event_in','e_stop')]),
+                transitions={'success':'SET_VISUAL_SERVOING_FAILURE'})
+
+            smach.StateMachine.add('SET_VISUAL_SERVOING_SUCCESS', gbs.set_vs_status(status=True),
+                transitions={'success':'OPEN_GRIPPER_FOR_APPROACH_OBJECT'})
+
+            smach.StateMachine.add('SET_VISUAL_SERVOING_FAILURE', gbs.set_vs_status(status=False),
+                transitions={'success':'SELECT_OBJECT_TO_BE_GRASPED'})
+
+            smach.StateMachine.add('OPEN_GRIPPER_FOR_APPROACH_OBJECT', gms.control_gripper('open'),
+                transitions={'succeeded':'APPROACH_OBJECT'})
+
+            smach.StateMachine.add('APPROACH_OBJECT', gbs.send_event([('/guarded_approach_pose/coordinator/event_in', 'e_start')]),
+                transitions={'success':'WAIT_APPROACH_OBJECT'})
+
+            smach.StateMachine.add('WAIT_APPROACH_OBJECT', gbs.wait_for_events([('/guarded_approach_pose/coordinator/event_out','e_success', True)], timeout_duration=6),
+                transitions={'success':'STOP_APPROACH_OBJECT',
+                             'timeout': 'STOP_APPROACH_OBJECT',
+                             'failure':'STOP_APPROACH_OBJECT'})
+
+            smach.StateMachine.add('STOP_APPROACH_OBJECT', gbs.send_event([('/guarded_approach_pose/coordinator/event_in', 'e_stop')]),
+                transitions={'success':'CLOSE_GRIPPER'})
+
+            smach.StateMachine.add('CLOSE_GRIPPER', gms.control_gripper('close'),
+                transitions={'succeeded':'PRE_PLACE_OBJ_ON_REAR_PLATFORM'})
+
+            smach.StateMachine.add('GRASP_OBJ', gms.linear_motion(operation='grasp'),
+                transitions={'succeeded':'PRE_PLACE_OBJ_ON_REAR_PLATFORM',
+                             'failed':'DELETE_FROM_RECOGNIZED_OBJECTS'}) # TODO: this could loop
+
+            smach.StateMachine.add('GRASP_OBJ_VISUAL_SERVOING', gms.linear_motion(operation='grasp', offset_x=-0.05),
+                transitions={'succeeded':'PRE_PLACE_OBJ_ON_REAR_PLATFORM',
+                             'failed':'DELETE_FROM_RECOGNIZED_OBJECTS'}) # TODO: this could loop
+
+            smach.StateMachine.add('PRE_PLACE_OBJ_ON_REAR_PLATFORM', btts.pre_place_obj_on_rear_platform_btt(),
+                transitions={'succeeded':'VERIFY_GRASPED',
+                             'no_more_free_poses':'no_more_free_poses'})
+
+            smach.StateMachine.add('VERIFY_GRASPED', gbs.send_event([('/gripper_controller/grasp_monitor/event_in', 'e_trigger')]),
+                transitions={'success':'WAIT_FOR_VERIFY_GRASPED'})
+
+            smach.StateMachine.add('WAIT_FOR_VERIFY_GRASPED', gbs.wait_for_events([('/gripper_controller/grasp_monitor/event_out','e_object_grasped', True)], timeout_duration=5),
+                transitions={'success':'PLACE_OBJ_ON_REAR_PLATFORM',
+                             'timeout':'OPEN_GRIPPER_FOR_GRASP_FAILURE',
+                             'failure':'OPEN_GRIPPER_FOR_GRASP_FAILURE'})
+
+            smach.StateMachine.add('OPEN_GRIPPER_FOR_GRASP_FAILURE', gms.control_gripper('open'),
+                transitions={'succeeded':'DELETE_FROM_RECOGNIZED_OBJECTS'})
 
             # THESE ARE NEVER ENTERED?
             # It would mean we've grasped the object - and don't have somewhere to place it.
             # If we don't have somewhere to place it, we won't grasp in the first place?
             smach.StateMachine.add('PLACE_OBJ_ON_REAR_PLATFORM', btts.place_obj_on_rear_platform_btt(),
-                transitions={'succeeded':'DETACH_OBJECT_FROM_ROBOT',
-                             'no_more_free_poses':'NO_MORE_FREE_POSES_SAFE'})
-
-            smach.StateMachine.add('NO_MORE_FREE_POSES_SAFE',gms.move_arm('out_of_view'),
-                transitions={'succeeded':'no_more_free_poses',
-                             'failed':'NO_MORE_FREE_POSES_SAFE'})
-
-            smach.StateMachine.add('DETACH_OBJECT_FROM_ROBOT', gms.update_robot_planning_scene("load"),
-                transitions={'succeeded':'DELETE_FROM_RECOGNIZED_OBJECTS'},
-                remapping={'object': 'object_to_grasp'})
+                transitions={'succeeded':'DELETE_FROM_RECOGNIZED_OBJECTS',
+                             'no_more_free_poses':'no_more_free_poses'})
 
             smach.StateMachine.add('DELETE_FROM_RECOGNIZED_OBJECTS', btts.delete_from_recognized_objects(),
                 transitions={'succeeded':'SELECT_OBJECT_TO_BE_GRASPED'},
                 remapping={'object_to_delete': 'object_to_grasp'})
 
-            # MISC STATES
-            smach.StateMachine.add('SKIP_SOURCE_POSE_SAFE', gms.move_arm('out_of_view'),
+            smach.StateMachine.add('ADJUST_POSE_WRT_WORKSPACE_NEXT', gns.adjust_to_workspace(0.1),
+                transitions={'succeeded':'SELECT_OBJECT_TO_BE_GRASPED',
+                             'failed':'ADJUST_POSE_WRT_WORKSPACE_NEXT'})
+
+            smach.StateMachine.add('NO_MORE_FREE_POSES_SAFE',gms.move_arm('look_at_workspace_straight'),
+                transitions={'succeeded':'no_more_free_poses',
+                             'failed':'SKIP_SOURCE_POSE_SAFE'})
+
+		            # MISC STATES
+            smach.StateMachine.add('SKIP_SOURCE_POSE_SAFE', gms.move_arm('look_at_workspace_straight'),
                 transitions={'succeeded':'SKIP_SOURCE_POSE',
                              'failed':'SKIP_SOURCE_POSE_SAFE'})
 
             smach.StateMachine.add('SKIP_SOURCE_POSE', btts.skip_pose('source'),
                 transitions={'pose_skipped':'SELECT_SOURCE_SUBTASK',
                              'pose_skipped_but_platform_limit_reached':'pose_skipped_but_platform_limit_reached'})
-
 
 
 
