@@ -323,6 +323,23 @@ class place_object_in_configuration_btt(smach.State):
 
         return 'succeeded'
 
+class pre_place_obj_on_rear_platform_btt(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded', 'no_more_free_poses'],
+                                   input_keys=['rear_platform_free_poses'])
+
+    def execute(self, userdata):
+        if(len(userdata.rear_platform_free_poses) == 0):
+            rospy.logerr("NO more free poses on platform")
+            return 'no_more_free_poses'
+
+        pltf_pose = userdata.rear_platform_free_poses[-1]
+
+        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
+        manipulation.arm_command.go()
+        return 'succeeded'
+
 #FIXME: replace by generic state
 class place_obj_on_rear_platform_btt(smach.State):
 
