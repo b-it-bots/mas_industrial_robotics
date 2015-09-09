@@ -56,6 +56,8 @@ def main(no_refbox=False):
     SM.userdata.next_arm_pose_index = 0
     SM.userdata.last_grasped_obj = None
 
+    SM.userdata.prev_vs_result = None
+
     SM.userdata.rear_platform_free_poses = []
     SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_right'))
     SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_middle'))
@@ -108,11 +110,7 @@ def main(no_refbox=False):
 
         smach.StateMachine.add('PLACE_OBJECT_ON_WORKSTATION', btt_sms.sub_sm_place(),
                 transitions={'succeeded':'GO_TO_DESTINATION',
-                             'no_more_obj_for_this_workspace':'MOVE_ARM_TO_INIT'})  
-
-        smach.StateMachine.add('MOVE_ARM_TO_INIT', gms.move_arm("platform_intermediate"),
-            transitions={'succeeded':'CHECK_IF_PLTF_HAS_STILL_OBJS',
-                         'failed':'CHECK_IF_PLTF_HAS_STILL_OBJS'})
+                             'no_more_obj_for_this_workspace':'CHECK_IF_PLTF_HAS_STILL_OBJS'})
 
         smach.StateMachine.add('CHECK_IF_PLTF_HAS_STILL_OBJS', btts.check_if_platform_has_still_objects(),
             transitions={'still_objs_on_robot_pltf':'SKIP_DESTINATION_POSE',
