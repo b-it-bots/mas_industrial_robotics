@@ -8,7 +8,7 @@
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
 
 DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
-        action_server_(nh, "gripper_controller", false), joint_states_received_(false)
+    action_server_(nh, "gripper_controller", false), joint_states_received_(false)
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
     sub_dynamixel_motor_states_ = nh_.subscribe("dynamixel_motor_states", 10, &DynamixelGripperNode::jointStatesCallback, this);
@@ -33,7 +33,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     torque_srv.request.torque_limit = hard_torque_limit_;
 
     ros::service::waitForService(hard_torque_limit_srv_name_, ros::Duration(10.0));
-    while(!srv_client_torque.call(torque_srv))
+    while (!srv_client_torque.call(torque_srv))
     {
         ROS_ERROR_STREAM("Failed to call service: " << hard_torque_limit_srv_name_ << "! Will try again ...");
         sleep(1);
@@ -81,21 +81,21 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
     double set_pos = action_server_.acceptNewGoal()->command.position;
 
     // publish goal position
-    std_msgs::Float64 gripper_pos;   
+    std_msgs::Float64 gripper_pos;
     gripper_pos.data = set_pos;
     pub_dynamixel_command_.publish(gripper_pos);
-    
+
     // wait until position or max. torque is reached
-    while(ros::ok())
+    while (ros::ok())
     {
-        joint_states_received_ = false;       
-        while(!joint_states_received_ && ros::ok())
+        joint_states_received_ = false;
+        while (!joint_states_received_ && ros::ok())
         {
             ros::spinOnce();
             loop_rate.sleep();
         }
 
-        if(joint_states_->load >= soft_torque_limit_)
+        if (joint_states_->load >= soft_torque_limit_)
         {
             gripper_pos.data = joint_states_->current_pos;
             pub_dynamixel_command_.publish(gripper_pos);
@@ -105,16 +105,16 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
         }
 
         ROS_DEBUG_STREAM("Position difference: " << (joint_states_->current_pos - set_pos));
-        
-        if(fabs(joint_states_->current_pos - set_pos) < 0.05)
+
+        if (fabs(joint_states_->current_pos - set_pos) < 0.05)
         {
             ROS_INFO_STREAM("Position " << set_pos << " reached");
             break;
         }
     }
 
-    joint_states_received_ = false;       
-    while(!joint_states_received_ && ros::ok())
+    joint_states_received_ = false;
+    while (!joint_states_received_ && ros::ok())
     {
         ros::spinOnce();
         loop_rate.sleep();

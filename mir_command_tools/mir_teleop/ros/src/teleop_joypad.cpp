@@ -285,7 +285,7 @@ bool TeleOpJoypad::switchMotorsOnOff(std::string component_name, std::string sta
 bool TeleOpJoypad::reconnect()
 {
     std_srvs::Empty empty;
-    
+
     if (srv_reconnect.call(empty))
     {
         ROS_INFO_STREAM("Call to serivce: " << srv_reconnect.getService() << " successful.");
@@ -351,7 +351,7 @@ void TeleOpJoypad::checkArmJointLimits()
                 if (((current_joint_states_.position[j] < (arm_joint_limits_[i].min_position + soft_joint_limit_threshold_))
                         && (arm_vel_.velocities[j].value < 0))
                         || ((current_joint_states_.position[j] > (arm_joint_limits_[i].max_position - soft_joint_limit_threshold_))
-                                && (arm_vel_.velocities[j].value > 0)))
+                            && (arm_vel_.velocities[j].value > 0)))
                 {
                     //ROS_ERROR_STREAM("arm joint <<" << arm_joint_limits_[i].joint_name << ">> at soft joint limit: " << current_joint_states_.position[j] << " rad");
                     arm_vel_.velocities[i].value = 0.0;
@@ -364,7 +364,7 @@ void TeleOpJoypad::checkArmJointLimits()
 void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
 {
     is_one_arm_joint_button_pressed_ = (bool) command->buttons[button_index_arm_joint_1_2_] || (bool) command->buttons[button_index_arm_joint_3_4_]
-            || (bool) command->buttons[button_index_arm_joint_5_];
+                                       || (bool) command->buttons[button_index_arm_joint_5_];
 
     if ((bool) command->buttons[button_index_deadman_])
     {
@@ -464,7 +464,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
                 pub_arm_joint_vel_.publish(arm_vel_);
             }
 
-            if((bool) command->buttons[button_index_arm_joint_1_2_])
+            if ((bool) command->buttons[button_index_arm_joint_1_2_])
             {
                 arm_vel_.velocities[0].value = command->axes[axes_index_arm_joint_axes_1_] * arm_max_vel_ * speed_factor_ * (-1.0);
                 arm_vel_.velocities[1].value = command->axes[axes_index_arm_joint_axes_2_] * arm_max_vel_ * speed_factor_;
@@ -479,7 +479,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
         }
 
         if (button_arm_cart_pressed_prev_ && !((bool)command->buttons[button_index_arm_cart_]))
-            pub_arm_cart_vel_.publish(arm_cart_zero_vel_);  
+            pub_arm_cart_vel_.publish(arm_cart_zero_vel_);
         else if ((bool) command->buttons[button_index_arm_cart_])
             pub_arm_cart_vel_.publish(arm_cart_vel_);
         else if (!(bool) command->buttons[button_index_arm_cart_])
@@ -491,7 +491,7 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
             pub_arm_joint_vel_.publish(arm_vel_);
         }
 
-        if ( (bool) command->buttons[button_index_reconnect_left_] && (bool) command->buttons[button_index_reconnect_right_] )
+        if ((bool) command->buttons[button_index_reconnect_left_] && (bool) command->buttons[button_index_reconnect_right_])
         {
             this->reconnect();
         }

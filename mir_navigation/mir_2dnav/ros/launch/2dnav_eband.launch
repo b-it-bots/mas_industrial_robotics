@@ -33,6 +33,10 @@
 
         <!--- load planner parameters -->
         <rosparam file="$(find mir_2dnav)/ros/config/eband/base_local_planner_params.yaml" command="load" />
+
+        <!-- Remap for twist mux -->
+        <remap from="cmd_vel" to="/cmd_vel_prio_medium"/>
+        <remap from="~force_field_recovery/cmd_vel" to="/cmd_vel_prio_medium"/>
     </node>
 
 </launch>

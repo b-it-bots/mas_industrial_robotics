@@ -36,6 +36,7 @@ packagelist=(
     ros-indigo-pr2-msgs
     ros-indigo-ros
     ros-indigo-ros-controllers
+    ros-indigo-roslint
     ros-indigo-rqt-robot-dashboard
     ros-indigo-smach
     ros-indigo-srdfdom
