@@ -21,7 +21,6 @@ packagelist=(
     ros-indigo-hokuyo-node
     ros-indigo-joint-state-controller
     ros-indigo-joy
-    ros-indigo-roslint
     ros-indigo-map-server
     ros-indigo-move-base
     ros-indigo-moveit-core
