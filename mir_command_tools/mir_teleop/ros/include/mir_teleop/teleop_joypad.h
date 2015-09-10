@@ -31,10 +31,10 @@
 
 class TeleOpJoypad
 {
- public:
+public:
     TeleOpJoypad(ros::NodeHandle &nh);
 
- private:
+private:
     bool getJoypadConfigParameter();
     void getBaseParameter();
     bool getArmParameter();

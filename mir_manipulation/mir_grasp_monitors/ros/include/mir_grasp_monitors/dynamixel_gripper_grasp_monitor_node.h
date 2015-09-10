@@ -16,13 +16,13 @@
 class DynamixelGripperGraspMonitorNode
 {
 public:
-	DynamixelGripperGraspMonitorNode();
+    DynamixelGripperGraspMonitorNode();
     ~DynamixelGripperGraspMonitorNode();
 
     void update();
 
 private:
-    enum States{INIT, IDLE, RUN};
+    enum States {INIT, IDLE, RUN};
 
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void eventCallback(const std_msgs::String::ConstPtr &msg);
