@@ -99,7 +99,7 @@ class move_arm(smach.State):
 
         # plan and execute arm movement        
         error_code = arm_command.go(wait=self.blocking)
-
+        error_code = arm_command.go(wait=self.blocking)
         if error_code == moveit_msgs.msg.MoveItErrorCodes.SUCCESS:
             return 'succeeded'
         else:
@@ -131,20 +131,22 @@ class linear_motion(smach.State):
     Should probably be renamed in the future, or seperated into linear motion and grasping/releasing. 
     """
 
-    def __init__(self, operation='grasp'):
+    def __init__(self, operation='grasp', offset_x=0.0):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
         self.operation = operation
         self.result = None
         self.event_out = rospy.Publisher('/arm_relative_motion_controller/event_in', std_msgs.msg.String)
         rospy.Subscriber('/arm_relative_motion_controller/event_out', std_msgs.msg.String, self.event_cb)
+        self.offset_x = offset_x
         
 
     def execute(self, userdata):
+        rospy.set_param('/arm_relative_motion_controller/relative_distance_x', self.offset_x)
         self.result = None
 
         if self.operation == 'grasp': 
             gripper_command.set_named_target('open')
-            gripper_command.go()
+            gripper_command.go(wait=True)
         elif self.operation == 'release':
             pass # Don't do anything, assume the gripper is already closed
 
@@ -155,13 +157,13 @@ class linear_motion(smach.State):
 
         if self.result.data != 'e_success':
             return 'failed'
-
+        
         if self.operation == 'grasp':
             gripper_command.set_named_target('close')
-            gripper_command.go()
+            gripper_command.go(wait=True)
         elif self.operation == 'release':
             gripper_command.set_named_target('open')
-            gripper_command.go()
+            gripper_command.go(wait=True)
 
         return 'succeeded'
 
@@ -187,12 +189,13 @@ class place_object_in_configuration(smach.State):
         
         arm_command.set_named_target(cfg_goal_pose)
         arm_command.go()
+        arm_command.go()
         
         gripper_command.set_named_target("open")
         gripper_command.go()
         
-        arm_command.set_named_target("platform_intermediate")
-        arm_command.go()
+        #arm_command.set_named_target("platform_intermediate")
+        #arm_command.go()
                 
         return 'succeeded'
 
