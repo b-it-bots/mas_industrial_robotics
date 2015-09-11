@@ -15,8 +15,7 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
 {
     ros::NodeHandle nh("~");
 
-    nh.param("position_threshold", position_threshold_, 0.0);
-
+    nh.param("load_threshold", load_threshold_, 0.0);
     ROS_INFO_STREAM("\tload threshold parameter: " << load_threshold_);
 
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
