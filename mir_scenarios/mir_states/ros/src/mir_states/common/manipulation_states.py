@@ -99,7 +99,7 @@ class move_arm(smach.State):
 
         # plan and execute arm movement        
         error_code = arm_command.go(wait=self.blocking)
-
+        error_code = arm_command.go(wait=self.blocking)
         if error_code == moveit_msgs.msg.MoveItErrorCodes.SUCCESS:
             return 'succeeded'
         else:
@@ -131,20 +131,22 @@ class linear_motion(smach.State):
     Should probably be renamed in the future, or seperated into linear motion and grasping/releasing. 
     """
 
-    def __init__(self, operation='grasp'):
+    def __init__(self, operation='grasp', offset_x=0.0):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
         self.operation = operation
         self.result = None
         self.event_out = rospy.Publisher('/arm_relative_motion_controller/event_in', std_msgs.msg.String)
         rospy.Subscriber('/arm_relative_motion_controller/event_out', std_msgs.msg.String, self.event_cb)
+        self.offset_x = offset_x
         
 
     def execute(self, userdata):
+        rospy.set_param('/arm_relative_motion_controller/relative_distance_x', self.offset_x)
         self.result = None
 
         if self.operation == 'grasp': 
             gripper_command.set_named_target('open')
-            gripper_command.go()
+            gripper_command.go(wait=True)
         elif self.operation == 'release':
             pass # Don't do anything, assume the gripper is already closed
 
@@ -155,13 +157,13 @@ class linear_motion(smach.State):
 
         if self.result.data != 'e_success':
             return 'failed'
-
+        
         if self.operation == 'grasp':
             gripper_command.set_named_target('close')
-            gripper_command.go()
+            gripper_command.go(wait=True)
         elif self.operation == 'release':
             gripper_command.set_named_target('open')
-            gripper_command.go()
+            gripper_command.go(wait=True)
 
         return 'succeeded'
 
@@ -187,12 +189,13 @@ class place_object_in_configuration(smach.State):
         
         arm_command.set_named_target(cfg_goal_pose)
         arm_command.go()
+        arm_command.go()
         
         gripper_command.set_named_target("open")
         gripper_command.go()
         
-        arm_command.set_named_target("platform_intermediate")
-        arm_command.go()
+        #arm_command.set_named_target("platform_intermediate")
+        #arm_command.go()
                 
         return 'succeeded'
 
@@ -293,26 +296,24 @@ class select_arm_pose(smach.State):
     def __init__(self, pose_name_list=None):
         smach.State.__init__(self,
                              outcomes=['succeeded','failed'],
-			     input_keys=['next_arm_pose_index'],
+                 input_keys=['next_arm_pose_index'],
                              output_keys=['move_arm_to','next_arm_pose_index'])
         self.pose_name_list = pose_name_list
-	
+    
     def execute(self, userdata):
-	if type(userdata.next_arm_pose_index) is not int:
-	     userdata.next_arm_pose_index = 0
+        if type(userdata.next_arm_pose_index) is not int:
+             userdata.next_arm_pose_index = 0
 
-	if len(self.pose_name_list) <= 0:
-	    rospy.logerr("pose name list is empty")
-	    return 'failed'
+        if len(self.pose_name_list) <= 0:
+            rospy.logerr("pose name list is empty")
+            return 'failed'
 
-	if userdata.next_arm_pose_index >= len(self.pose_name_list):
-	    rospy.logerr("pose index out of range")
-	    return 'failed'
+        if userdata.next_arm_pose_index >= len(self.pose_name_list):
+            rospy.logerr("pose index out of range")
+            return 'failed'
 
-	userdata.move_arm_to = self.pose_name_list[userdata.next_arm_pose_index]
-	userdata.next_arm_pose_index += 1
-	userdata.next_arm_pose_index %= len(self.pose_name_list)
+        userdata.move_arm_to = self.pose_name_list[userdata.next_arm_pose_index]
+        userdata.next_arm_pose_index += 1
+        userdata.next_arm_pose_index %= len(self.pose_name_list)
 
-	return 'succeeded'	
-
-	
+        return 'succeeded'
