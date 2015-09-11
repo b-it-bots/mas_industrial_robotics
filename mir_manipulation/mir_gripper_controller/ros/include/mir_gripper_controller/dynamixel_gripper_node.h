@@ -1,12 +1,14 @@
 /*
+ * Copyright [2015] <Bonn-Rhein-Sieg University>
+ *
  * dynamixel_gripper_node.h
  *
  *  Created on: Apr 14, 2015
  *      Author: fred
  */
 
-#ifndef DYNAMIXEL_GRIPPER_NODE_H_
-#define DYNAMIXEL_GRIPPER_NODE_H_
+#ifndef MIR_GRIPPER_CONTROLLER_DYNAMIXEL_GRIPPER_NODE_H_
+#define MIR_GRIPPER_CONTROLLER_DYNAMIXEL_GRIPPER_NODE_H_
 
 #include <actionlib/server/simple_action_server.h>
 #include <control_msgs/GripperCommandAction.h>
@@ -22,7 +24,7 @@
 class DynamixelGripperNode
 {
 public:
-    DynamixelGripperNode(ros::NodeHandle &nh);
+    explicit DynamixelGripperNode(ros::NodeHandle &nh);
     ~DynamixelGripperNode();
 
 private:
@@ -57,5 +59,5 @@ private:
     int queue_size_;
 };
 
-#endif /* DYNAMIXEL_GRIPPER_NODE_H_ */
+#endif  // MIR_GRIPPER_CONTROLLER_DYNAMIXEL_GRIPPER_NODE_H_
 
