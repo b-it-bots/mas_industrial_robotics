@@ -6,6 +6,8 @@ import smach
 import smach_ros
 import commands
 import os
+import std_msgs.msg
+import copy
 
 import mir_states.common.manipulation_states as manipulation
 
