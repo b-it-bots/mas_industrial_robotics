@@ -76,8 +76,8 @@
         <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
         <remap from="~twist" to="/twist_controller/controlled_twist"/>
         <!-- Update velocities as required -->
-        <param name="max_velocity_x" type="double" value="0.018"/>
-        <param name="max_velocity_y" type="double" value="0.015"/>
+        <param name="max_velocity_x" type="double" value="0.015"/>
+        <param name="max_velocity_y" type="double" value="0.01"/>
         <param name="max_velocity_z" type="double" value="0.0"/>
         <param name="max_velocity_roll" type="double" value="0.0"/>
         <param name="max_velocity_pitch" type="double" value="0.0"/>
