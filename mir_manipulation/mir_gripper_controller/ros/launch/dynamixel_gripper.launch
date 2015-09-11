@@ -23,6 +23,9 @@
         
         <param name="hard_torque_limit_srv_name" type="string" value="/gripper_controller/set_torque_limit" />
         <param name="hard_torque_limit" type="double" value="1.0" />
+
+        <param name="position_threshold" type="double" value="0.05" />
+        <param name="queue_size" type="int" value="10" />
         
       </node>
     </group>

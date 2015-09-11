@@ -5,6 +5,9 @@
  *      Author: fred
  */
 
+#include <deque>
+#include <string>
+
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
 
 DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
@@ -25,6 +28,12 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     nh_prv.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
     ROS_INFO_STREAM("\tHard torque limit srv name: " << hard_torque_limit_srv_name_);
     ROS_INFO_STREAM("\tHard torque limit: " << hard_torque_limit_);
+
+    nh_prv.param<double>("position_threshold", position_threshold_, 0.05);
+    ROS_INFO_STREAM("\tPosition threshold: " << position_threshold_);
+
+    nh_prv.param<int>("queue_size", queue_size_, 10);
+    ROS_INFO_STREAM("\tQueue size: " << queue_size_);
 
     // set the hard torque limit
     dynamixel_controllers::SetTorqueLimit torque_srv;
@@ -73,6 +82,19 @@ void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState:
     pub_joint_states_.publish(joint_state);
 }
 
+double DynamixelGripperNode::getAverage(const std::deque<double> &queue)
+{
+    double average = 0.0;
+
+    for (size_t i = 0; i < queue.size(); i++)
+        average += queue.at(i);
+
+    average /= queue.size();
+
+    return average;
+}
+
+
 void DynamixelGripperNode::gripperCommandGoalCallback()
 {
     ros::Rate loop_rate(100);
@@ -84,6 +106,10 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
     std_msgs::Float64 gripper_pos;
     gripper_pos.data = set_pos;
     pub_dynamixel_command_.publish(gripper_pos);
+
+    // empty queue
+    prev_positions_.clear();
+    prev_velocities_.clear();
 
     // wait until position or max. torque is reached
     while (ros::ok())
@@ -106,10 +132,34 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
 
         ROS_DEBUG_STREAM("Position difference: " << (joint_states_->current_pos - set_pos));
 
-        if (fabs(joint_states_->current_pos - set_pos) < 0.05)
+        if (fabs(joint_states_->current_pos - set_pos) < position_threshold_)
         {
             ROS_INFO_STREAM("Position " << set_pos << " reached");
             break;
+        }
+
+        if (prev_positions_.size() < queue_size_)
+        {
+            prev_positions_.push_back(joint_states_->current_pos);
+            prev_velocities_.push_back(joint_states_->velocity);
+        }
+        else
+        {
+            prev_positions_.pop_front();
+            prev_positions_.push_back(joint_states_->current_pos);
+
+            prev_velocities_.pop_front();
+            prev_velocities_.push_back(joint_states_->velocity);
+
+            if ((fabs(getAverage(prev_positions_) - joint_states_->current_pos) < position_threshold_) &&
+                (getAverage(prev_velocities_) == joint_states_->velocity))
+            {
+                gripper_pos.data = joint_states_->current_pos;
+                pub_dynamixel_command_.publish(gripper_pos);
+                ROS_WARN_STREAM("Position does not change anymore");
+
+                break;
+            }
         }
     }
 
