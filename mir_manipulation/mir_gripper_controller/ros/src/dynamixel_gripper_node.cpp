@@ -121,7 +121,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
             loop_rate.sleep();
         }
 
-        if (joint_states_->load >= soft_torque_limit_)
+        if (joint_states_->load > soft_torque_limit_)
         {
             gripper_pos.data = joint_states_->current_pos;
             pub_dynamixel_command_.publish(gripper_pos);
