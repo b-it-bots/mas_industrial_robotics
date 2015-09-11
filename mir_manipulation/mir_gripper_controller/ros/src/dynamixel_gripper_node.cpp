@@ -17,7 +17,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
     sub_dynamixel_motor_states_ = nh_.subscribe("dynamixel_motor_states", 10,
-                                                &DynamixelGripperNode::jointStatesCallback, this);
+                                  &DynamixelGripperNode::jointStatesCallback, this);
 
     pub_joint_states_ = nh_.advertise < sensor_msgs::JointState > ("joint_state", 10);
 
@@ -157,7 +157,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
             prev_velocities_.push_back(joint_states_->velocity);
 
             if ((fabs(getAverage(prev_positions_) - joint_states_->current_pos) < position_threshold_) &&
-                (getAverage(prev_velocities_) == joint_states_->velocity))
+                    (getAverage(prev_velocities_) == joint_states_->velocity))
             {
                 gripper_pos.data = joint_states_->current_pos;
                 pub_dynamixel_command_.publish(gripper_pos);
