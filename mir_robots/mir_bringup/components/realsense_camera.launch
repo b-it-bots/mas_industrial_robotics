@@ -23,7 +23,7 @@
     x, y = 320.000000, 240.000000
     -->
     
-    <arg name="camera" default="camera" />
+    <arg name="camera" default="tower_cam3d" />
     <arg name="rgb_frame_id" default="$(arg camera)_rgb_optical_frame" />
     <arg name="depth_frame_id" default="$(arg camera)_depth_optical_frame" />
 
