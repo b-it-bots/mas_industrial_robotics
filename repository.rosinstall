@@ -35,7 +35,7 @@
 
 - git:
     local-name: youbot-manipulation
-    uri: https://github.com/svenschneider/youbot-manipulation.git
+    uri: https://github.com/mas-group/youbot-manipulation.git
     version: hydro
 
 - git:
