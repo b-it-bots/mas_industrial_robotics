@@ -9,6 +9,8 @@ import mcr_perception_msgs.msg
 import mcr_perception_msgs.srv
 import mir_controller_msgs.srv
 
+import random
+
 
 class find_objects(smach.State):
 
@@ -70,32 +72,7 @@ class find_objects(smach.State):
         userdata.found_objects = self.object_list.objects
         return 'objects_found'
 
-class transform_object_poses(smach.State):
 
-    def __init__(self, frame_id=None):
-        smach.State.__init__(self,
-                             outcomes=['succeeded',
-                                       'no_frame_specified',
-                                       'tf_error'],
-                             input_keys=['found_objects'],
-                             output_keys=['found_objects'])
-        self.tf_listener = tf.TransformListener()
-        self.frame_id = frame_id
-
-    def execute(self, userdata):
-        if self.frame_id:
-            for obj in userdata.found_objects:
-                try:
-                    self.tf_listener.waitForTransform(
-                                    self.frame_id, obj.pose.header.frame_id,
-                                    obj.pose.header.stamp, rospy.Duration(0.1))
-                    obj.pose = self.tf_listener.transformPose(self.frame_id, obj.pose)
-                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                    rospy.logerr('Unable to transform %s -> %s' % (obj.pose.header.frame_id, self.frame_id))
-                    return 'tf_error'
-        else:
-            return 'no_frame_specified'
-        return 'succeeded'
 
 class do_visual_servoing(smach.State):
 
@@ -127,60 +104,11 @@ class do_visual_servoing(smach.State):
             return 'lost_object'
 
 
-class find_holes(smach.State):
-    def __init__(self):
-        smach.State.__init__(self,
-            outcomes=['found_holes','found_no_holes','timeout'],
-            input_keys=['all_found_holes'],
-            output_keys=['all_found_holes'])
-
-        self.pub_find_holes_event = rospy.Publisher('/mcr_perception/hole_detection/event_in', std_msgs.msg.String, latch=True)
-        self.sub_find_holes_event = rospy.Subscriber('/mcr_perception/hole_detection/event_out', std_msgs.msg.String, self.hole_detection_event_cb)
-        self.sub_found_holes = rospy.Subscriber('/mcr_perception/hole_detection/detected_holes', mcr_perception_msgs.msg.ObjectList, self.found_hole_detection_cb)
-
-        self.hole_detection_event = None
-        self.all_found_holes = None
-
-    def hole_detection_event_cb(self, event):
-        self.hole_detection_event = event.data
-
-    def found_hole_detection_cb(self, msg):
-        self.all_found_holes = msg.objects
-
-    def execute(self, userdata):
-
-        self.hole_detection_event = None
-        self.all_found_holes = None
-
-        # publish event to start the movement
-        self.pub_find_holes_event.publish(std_msgs.msg.String('e_trigger'))
-
-        timeout = rospy.Duration.from_sec(5.0)  #wait for the done event max. 5 seconds
-        start_time = rospy.Time.now()
-        while not rospy.is_shutdown():
-
-            if self.hole_detection_event and self.hole_detection_event == 'e_done':
-                rospy.loginfo('got done event and detections from hole detection')
-                userdata.all_found_holes = self.all_found_holes
-
-                if (len(self.all_found_holes) > 0):
-                    return 'found_holes'
-                else:
-                    return 'found_no_holes'
-
-            if (rospy.Time.now() - start_time) > timeout:
-                rospy.logerr('timeout of %f seconds exceeded for relative base movement' % float(timeout.to_sec()))
-                return 'timeout'
-
-            rospy.sleep(0.1)
-
-        return 'found_no_holes'
-
 
 class find_cavities(smach.State):
-    def __init__(self, frame_id=None):
+    def __init__(self):
         smach.State.__init__(self,
-            outcomes=['succeeded','not_all_cavities_found', 'timeout'],
+            outcomes=['succeeded', 'failed'],
             input_keys=['selected_objects', 'found_cavities'],
             output_keys=['found_cavities'])
 
@@ -189,8 +117,6 @@ class find_cavities(smach.State):
         self.pub_object_category = rospy.Publisher('/mcr_perception/cavity_template_publisher/input/object_name', std_msgs.msg.String)
         self.tf_listener = tf.TransformListener()
         self.cavity = None
-        self.frame_id = frame_id
-        self.matching_threshold = 0.1
 
     def cavity_cb(self, cavity):
         self.cavity = cavity
@@ -212,33 +138,139 @@ class find_cavities(smach.State):
                     break
 
                 if (rospy.Time.now() - start_time) > timeout:
-                    rospy.logerr('timeout of %f seconds exceeded for finding cavity' % float(timeout.to_sec()))
-                    return 'timeout'
+                    rospy.logwarn('timeout of %f seconds exceeded for finding cavity' % float(timeout.to_sec()))
+                    break
 
                 rospy.sleep(0.1)
 
-        if self.frame_id:
-            for cavity in local_found_cavities:
-                try:
-                    cavity.pose = self.tf_listener.transformPose(self.frame_id, cavity.pose)
-                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                    rospy.logerr('Unable to transform %s -> %s' % (cavity.pose.header.frame_id, self.frame_id))
+        if len(local_found_cavities) == 0:
+            return 'failed'
 
-        # if we find a better matched cavity, replace it
-        for cavity in local_found_cavities:
+        userdata.found_cavities = local_found_cavities
+
+        return 'succeeded'
+        
+class check_found_cavities(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['cavities_found','no_cavities_found'],
+            input_keys=['best_matched_cavities'])
+
+    def execute(self, userdata):
+
+        if len(userdata.best_matched_cavities) == 0:
+            return 'no_cavities_found'
+        else:
+            return 'cavities_found'
+
+class find_best_matched_cavities(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['succeeded', 'complete'],
+            input_keys=['best_matched_cavities', 'found_cavities'],
+            output_keys=['best_matched_cavities'])
+
+        self.matching_threshold = 0.1
+        self.loop_count = 0
+
+    def execute(self, userdata):
+
+        for cavity in userdata.found_cavities:
             exists = False
-            for idx,c in enumerate(userdata.found_cavities):
+            for idx,c in enumerate(userdata.best_matched_cavities):
                 if cavity.object_name == c.object_name:
                     if cavity.template_matching_error.matching_error < c.template_matching_error.matching_error:
-                        userdata.found_cavities[idx] = cavity
+                        userdata.best_matched_cavities[idx] = cavity
                         print "Found better cavity for ", cavity.object_name, ". Old: ", c.template_matching_error.matching_error, " New: ", cavity.template_matching_error.matching_error
                     exists = True
 
             if exists == False:
                 if cavity.template_matching_error.matching_error < self.matching_threshold:
-                    userdata.found_cavities.append(cavity)
+                    userdata.best_matched_cavities.append(cavity)
 
-        if len(userdata.found_cavities) == len(userdata.selected_objects):
-            return 'succeeded'
-        else:
-            return 'not_all_cavities_found'
+        if self.loop_count >= 2:
+            self.loop_count = 0
+            return 'complete'
+        self.loop_count += 1
+        return 'succeeded'
+
+
+
+
+class accumulate_recognized_objects_list(smach.State):
+    def __init__(self, loop=3):
+        '''
+        Youbot views the workbench from different angles and finds the objects.
+        The function then accumulates the list together to remove any duplicates.
+        '''
+        smach.State.__init__( self,
+                outcomes=[ 'complete', 'merged'],
+                input_keys=['recognized_objects'],
+                output_keys=['recognized_objects'])
+
+        self.loop = loop        #Number of times the accumulate is called
+        self.loop_counter = 0
+
+        #List containing the union of all the recognized objects from different views
+        self.overall_recognized_objects = list()
+
+    def execute(self, userdata):
+        self.similarity_distance_threshold = 0.02
+        if not self.overall_recognized_objects and userdata.recognized_objects:
+            self.overall_recognized_objects = list(userdata.recognized_objects)
+        elif self.overall_recognized_objects and userdata.recognized_objects:
+            new_objects = list()
+            old_objects = list()
+            for recognized_object in userdata.recognized_objects:
+                duplicate_found  = False
+
+                for overall_object in self.overall_recognized_objects[:]:
+                    diff_x = abs(overall_object.pose.pose.position.x -
+                            recognized_object.pose.pose.position.x)
+                    diff_y = abs(overall_object.pose.pose.position.y - 
+                            recognized_object.pose.pose.position.y)
+                    diff_z = abs(overall_object.pose.pose.position.z - 
+                            recognized_object.pose.pose.position.z)
+                    if diff_x < self.similarity_distance_threshold and  \
+                            diff_y < self.similarity_distance_threshold and  \
+                            diff_z < self.similarity_distance_threshold:
+                                #Check for probability and add which duplicate to append
+                        if overall_object.probability < recognized_object.probability:
+                            # the new object has higher probability then
+                            duplicate_found  = False
+                            self.overall_recognized_objects.remove(overall_object)
+                        else :
+                            duplicate_found  = True
+
+                if duplicate_found == False:
+                    print "Adding object : ",recognized_object.name, " to list "
+                    new_objects.append(recognized_object)
+                    duplicate_found = True
+
+            self.overall_recognized_objects.extend(new_objects) 
+        userdata.recognized_objects = []
+
+
+
+        self.loop_counter = self.loop_counter + 1
+        if (self.loop_counter == self.loop):
+            #Accumulate has been called for n times.
+            # copying the local union list to userdata
+            userdata.recognized_objects = list(self.overall_recognized_objects)
+
+            #Reset counter and list
+            self.loop_counter = 0
+            self.overall_recognized_objects = list()
+
+            rospy.loginfo("(before shuffle) MERGED OBJECT LIST : %s" 
+                    % ([obj.name for obj in userdata.recognized_objects]) )
+            if userdata.recognized_objects:
+                random.shuffle(userdata.recognized_objects)
+            print "FINAL LIST : ", [obj.name for obj in userdata.recognized_objects]
+            rospy.loginfo("FINAL MERGED OBJECT LIST : %s" 
+                    % ([obj.name for obj in userdata.recognized_objects]) )
+            return 'complete'
+        else :
+            return 'merged'
+
+
