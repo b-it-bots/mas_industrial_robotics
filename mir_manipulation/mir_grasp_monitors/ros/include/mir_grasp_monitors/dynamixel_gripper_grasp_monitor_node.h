@@ -47,6 +47,8 @@ private:
     States current_state_;
 
     ros::Rate loop_rate_init_state_;
+
+    double load_threshold_;
 };
 
 #endif /* DYNAMIXEL_GRIPPER_GRASP_MONITOR_NODE_H_ */

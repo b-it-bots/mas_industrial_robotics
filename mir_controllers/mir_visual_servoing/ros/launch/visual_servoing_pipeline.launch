@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+
+    <node pkg="mcr_image_filter" type="image_filter_node" name="image_filter" ns="mcr_perception" output="screen" respawn="true">
+        <remap from="~input_image" to="/tower_cam3d/image/rgb_raw"/>
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <param name="loop_rate" type="int" value="30"/>
+    </node>
+
+    <node pkg="mcr_blob_detection" type="blob_detection_node" name="blob_detection" ns="mcr_perception" output="screen" respawn="true">
+        <remap from="~input_image" to="/mcr_perception/image_filter/filtered_image"/>
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <param name="loop_rate" type="int" value="30"/>
+    </node>
+
+    <node pkg="mcr_blob_tracking" type="blob_tracking_node" name="blob_tracking" ns="mcr_perception" output="screen" respawn="true">
+        <remap from="~input_image" to="/mcr_perception/image_filter/filtered_image"/>
+        <remap from="~blobs" to="/mcr_perception/blob_detection/blobs"/>
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <param name="loop_rate" type="int" value="30"/>
+    </node>
+
+    <node pkg="mcr_image_cartesian_mapper" type="image_cartesian_mapper_node" name="image_cartesian_mapper_1" ns="mcr_perception" output="screen" respawn="true">
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <remap from="~pose" to="/mcr_perception/blob_tracking/blob_pose"/>
+        <param name="loop_rate" type="int" value="30"/>
+        <param name="target_frame" type="string" value="base_link"/>
+        <param name="source_frame" type="string" value="tower_cam3d_rgb_optical_frame"/>
+        <!-- Update this as required -->
+        <param name="is_image_filter_enabled" type="bool" value="true"/>       
+        <rosparam command="load" file="$(find mcr_image_filter)/ros/config/image_filter_params.yaml"/>
+        <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml"/>
+    </node>
+
+    <!-- Update reference pose as required based on input image size and set is_image_filter_enabled to false in image_cartesian_mapper-->
+    <node pkg="rostopic" type="rostopic" name="visual_servoing_reference_pose_publisher" args="pub -r 30 /mcr_perception/blob_tracking/reference_pose geometry_msgs/Pose2D '{x: 320.0, y: 240.0, theta: 90.0}'" />
+    
+    <node pkg="mcr_image_cartesian_mapper" type="image_cartesian_mapper_node" name="image_cartesian_mapper_2" ns="mcr_perception" output="screen" respawn="true">
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <remap from="~pose" to="/mcr_perception/blob_tracking/reference_pose"/>
+        <param name="loop_rate" type="int" value="30"/>
+        <param name="target_frame" type="string" value="base_link"/>
+        <param name="source_frame" type="string" value="tower_cam3d_rgb_optical_frame"/>
+        <!-- Update image filtering enabled as required -->
+        <param name="is_image_filter_enabled" type="bool" value="false"/>
+        <rosparam command="load" file="$(find mcr_image_filter)/ros/config/image_filter_params.yaml"/>
+        <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml"/>
+    </node>
+
+    <node pkg="mcr_manipulation_measurers" type="component_wise_pose_error_calculator_node" name="component_wise_pose_error_calculator" output="screen">
+        <param name="loop_rate" type="double" value="40"/>
+        <remap from="~pose_1" to="/mcr_perception/image_cartesian_mapper_1/cartesian_pose"/>
+        <remap from="~pose_2" to="/mcr_perception/image_cartesian_mapper_2/cartesian_pose"/>
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+    </node>
+
+    <node pkg="mcr_twist_controller" type="twist_controller_node" name="twist_controller" output="screen">
+        <param name="loop_rate" type="double" value="40"/>
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <remap from="~pose_error" to="/component_wise_pose_error_calculator/pose_error"/>
+        <!-- Update gains as required -->
+        <!-- linear gains (negative values try to close the distance towards the pose -->
+        <param name="p_gain_x" type="double" value="-5"/>
+        <param name="p_gain_y" type="double" value="-5"/>
+        <param name="p_gain_z" type="double" value="0.0"/>
+        <!-- angular gains -->
+        <param name="p_gain_roll" type="double" value="0.0"/>
+        <param name="p_gain_pitch" type="double" value="0.0"/>
+        <param name="p_gain_yaw" type="double" value="0.0"/>
+    </node>
+
+    <node pkg="mcr_twist_limiter" type="twist_limiter_node" name="twist_limiter" output="screen">
+        <param name="loop_rate" type="double" value="40"/>
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <remap from="~twist" to="/twist_controller/controlled_twist"/>
+        <!-- Update velocities as required -->
+        <param name="max_velocity_x" type="double" value="0.015"/>
+        <param name="max_velocity_y" type="double" value="0.01"/>
+        <param name="max_velocity_z" type="double" value="0.0"/>
+        <param name="max_velocity_roll" type="double" value="0.0"/>
+        <param name="max_velocity_pitch" type="double" value="0.0"/>
+        <param name="max_velocity_yaw" type="double" value="0.0"/>
+    </node>
+
+    <node pkg="mcr_geometric_relation_monitors" type="component_wise_pose_error_monitor_node" name="component_wise_pose_error_monitor" ns="mcr_monitoring" output="screen" respawn="true">
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <!-- To test standalone with launch file, use this to map event out topic to send stop event to all other components in the pipeline -->
+        <!--remap from="~event_out" to="/mir_controllers/visual_servoing/event_in"/-->
+        <remap from="~pose_error" to="/component_wise_pose_error_calculator/pose_error"/>
+        <param name="loop_rate" type="int" value="60"/>
+        <param name="threshold_linear_x" type="double" value="0.05"/>
+        <param name="threshold_linear_y" type="double" value="0.015"/>
+        <param name="threshold_linear_z" type="double" value="50"/>
+        <param name="threshold_angular_x" type="double" value="50"/>
+        <param name="threshold_angular_y" type="double" value="50"/>
+        <param name="threshold_angular_z" type="double" value="50"/>
+    </node>
+
+    <node pkg="mcr_twist_demultiplexer" type="twist_demultiplexer_node" name="twist_demultiplexer" ns="mcr_controllers" output="screen" respawn="true">
+        <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
+        <remap from="~input_twist" to="/twist_limiter/limited_twist"/>
+        <remap from="~error_feedback" to="/mcr_monitoring/component_wise_pose_error_monitor/feedback"/>
+        <remap from="~arm_twist" to="/arm_1/arm_controller/cartesian_velocity_command"/>
+        <remap from="~base_twist" to="/cmd_vel"/>
+        <param name="arm_tf" type="string" value="/base_link"/>
+        <param name="loop_rate" type="int" value="200"/>
+        <param name="is_base_linear_x_enabled" type="bool" value="true"/>
+        <param name="is_base_linear_y_enabled" type="bool" value="false"/>
+        <param name="is_base_linear_z_enabled" type="bool" value="false"/>
+        <param name="is_base_angular_x_enabled" type="bool" value="false"/>
+        <param name="is_base_angular_y_enabled" type="bool" value="false"/>
+        <param name="is_base_angular_z_enabled" type="bool" value="false"/>
+        <param name="is_arm_linear_x_enabled" type="bool" value="false"/>
+        <param name="is_arm_linear_y_enabled" type="bool" value="true"/>
+        <param name="is_arm_linear_z_enabled" type="bool" value="false"/>
+        <param name="is_arm_angular_x_enabled" type="bool" value="false"/>
+        <param name="is_arm_angular_y_enabled" type="bool" value="false"/>
+        <param name="is_arm_angular_z_enabled" type="bool" value="false"/>
+        <param name="is_error_monitor_enabled" type="bool" value="true"/>
+    </node>
+
+</launch>

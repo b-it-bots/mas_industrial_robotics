@@ -8,6 +8,7 @@ find_package(catkin REQUIRED
     dynamixel_controllers
     dynamixel_msgs
     roscpp
+    roslint
     sensor_msgs
     std_msgs
 )
@@ -37,6 +38,8 @@ target_link_libraries(dynamixel_gripper_node
 
 
 ### TESTS
+roslint_cpp()
+
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
 

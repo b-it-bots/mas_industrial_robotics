@@ -2,11 +2,13 @@
 
 <launch>
 
+   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)" />
+
     <node pkg="dynamixel_controllers" type="controller_manager.py" name="controller_manager" output="screen" respawn="true" >
-      <rosparam command="load" file="$(find mir_gripper_controller)/ros/config/dynamixel_gripper/motors.yaml" />
+      <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/dynamixel_gripper/motors.yaml" />
     </node>
     
-    <rosparam command="load" file="$(find mir_gripper_controller)/ros/config/dynamixel_gripper/controllers.yaml" />    
+    <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/dynamixel_gripper/controllers.yaml" />    
     <node pkg="dynamixel_controllers" type="controller_spawner.py" name="controller_spawner"
             args="--manager=dxl_manager
                   --port=gripper_port
@@ -23,6 +25,9 @@
         
         <param name="hard_torque_limit_srv_name" type="string" value="/gripper_controller/set_torque_limit" />
         <param name="hard_torque_limit" type="double" value="1.0" />
+
+        <param name="position_threshold" type="double" value="0.05" />
+        <param name="queue_size" type="int" value="10" />
         
       </node>
     </group>

@@ -11,9 +11,12 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     joint_states_received_(false),
     event_in_received_(false),
     current_state_(INIT),
-    loop_rate_init_state_(ros::Rate(10.0))
+    loop_rate_init_state_(ros::Rate(100.0))
 {
     ros::NodeHandle nh("~");
+
+    nh.param("load_threshold", load_threshold_, 0.0);
+    ROS_INFO_STREAM("\tload threshold parameter: " << load_threshold_);
 
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
     sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
@@ -102,7 +105,9 @@ void DynamixelGripperGraspMonitorNode::run_state()
 
 bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
-    if (joint_states_->load > 0.0)
+    ROS_DEBUG_STREAM("cur. load: " << joint_states_->load << " load thresh: " << load_threshold_);
+
+    if (joint_states_->load > load_threshold_)
         return true;
 
     return false;

@@ -38,14 +38,16 @@ class Bunch:
          self.__dict__.update(kwds)
 
 class select_object_to_be_grasped(smach.State):
+    OBJECT_POSE_TOPIC='/mir_states/object_selector/object_pose'
+
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['obj_selected', 'no_obj_selected','no_more_free_poses_at_robot_platf'],
             input_keys=['recognized_objects', 'objects_to_be_grasped', 'object_to_grasp', 'rear_platform_free_poses','object_to_be_adjust_to'],
             output_keys=['object_to_grasp', 'object_to_be_adjust_to'])
+        self.object_pose_pub = rospy.Publisher(self.OBJECT_POSE_TOPIC, PoseStamped)
 
     def execute(self, userdata):
-
         if(len(userdata.rear_platform_free_poses) == 0):
             rospy.logerr("NO more free poses on robot rear platform")
             return 'no_more_free_poses_at_robot_platf'
@@ -56,9 +58,9 @@ class select_object_to_be_grasped(smach.State):
                 if rec_obj.name == obj_grasp:
                     userdata.object_to_grasp = rec_obj
                     userdata.object_to_be_adjust_to = rec_obj.pose
+                    self.object_pose_pub.publish(rec_obj.pose)
                     print "selected obj: ", userdata.object_to_grasp.name
                     return 'obj_selected'
-
         return 'no_obj_selected'
 
 class delete_from_recognized_objects(smach.State):
@@ -269,9 +271,6 @@ class grasp_obj_from_pltf_btt(smach.State):
         manipulation.gripper_command.set_named_target("close")
         manipulation.gripper_command.go()
 
-        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
-        manipulation.arm_command.go()
-
         return 'object_grasped'
 
 
@@ -302,6 +301,7 @@ class place_object_in_configuration_btt(smach.State):
 
         manipulation.arm_command.set_named_target(cfg_goal_pose)
         manipulation.arm_command.go()
+        manipulation.arm_command.go()
 
         manipulation.gripper_command.set_named_target("open")
         manipulation.gripper_command.go()
@@ -323,6 +323,23 @@ class place_object_in_configuration_btt(smach.State):
 
         return 'succeeded'
 
+class pre_place_obj_on_rear_platform_btt(smach.State):
+
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded', 'no_more_free_poses'],
+                                   input_keys=['rear_platform_free_poses'])
+
+    def execute(self, userdata):
+        if(len(userdata.rear_platform_free_poses) == 0):
+            rospy.logerr("NO more free poses on platform")
+            return 'no_more_free_poses'
+
+        pltf_pose = userdata.rear_platform_free_poses[-1]
+
+        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
+        manipulation.arm_command.go()
+        return 'succeeded'
+
 #FIXME: replace by generic state
 class place_obj_on_rear_platform_btt(smach.State):
 
@@ -342,9 +359,6 @@ class place_obj_on_rear_platform_btt(smach.State):
 
         # Removing pre poses (Do we need these poses?)
         pltf_pose = userdata.rear_platform_free_poses.pop();
-
-        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
-        manipulation.arm_command.go()
 
         manipulation.arm_command.set_named_target(pltf_pose.platform_pose)
         manipulation.arm_command.go()
@@ -368,9 +382,6 @@ class place_obj_on_rear_platform_btt(smach.State):
         userdata.rear_platform_occupied_poses.append(pltf_pose)
 
         print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
-
-        manipulation.arm_command.set_named_target(pltf_pose.platform_pose+"_pre")
-        manipulation.arm_command.go()
 
         return 'succeeded'
 
@@ -432,108 +443,6 @@ class skip_pose(smach.State):
         print_task_spec(userdata.task_list)
 
         return 'pose_skipped'
-
-class compute_arm_base_shift_to_object(smach.State):
-
-    def __init__(self, target_frame=None, source_frame=None, offset_x=0.0, offset_y=0.0):
-        smach.State.__init__(self,
-                             outcomes=['succeeded','tf_error'],
-                             input_keys=['object_pose','move_base_by','move_arm_to'],
-                             output_keys=['move_base_by', 'move_arm_to'])
-        self.tf_listener = tf.TransformListener()
-        self.source_frame = source_frame
-        self.target_frame = target_frame
-        self.br = tf.TransformBroadcaster()
-        self.offset_x = offset_x
-        self.offset_y = offset_y
-
-    def execute(self, userdata):
-        pose = userdata.object_pose.pose
-        rospy.sleep(3.0)
-        try:
-
-            t = self.tf_listener.getLatestCommonTime(self.target_frame,
-                                                     pose.header.frame_id)
-            pose.header.stamp = t
-
-            self.tf_listener.waitForTransform(
-                self.target_frame, pose.header.frame_id,
-                pose.header.stamp, rospy.Duration(0.1)
-            )
-
-            pose = self.tf_listener.transformPose(self.target_frame, pose)
-            print 'object to base position : ', pose.pose.position
-        except (tf.LookupException,
-                tf.ConnectivityException,
-                tf.ExtrapolationException) as e:
-            rospy.logerr('Tf error: %s' % str(e))
-            return 'tf_error'
-
-        try:
-            self.tf_listener.waitForTransform(
-                self.target_frame, self.source_frame,
-                rospy.Time(0), rospy.Duration(0.1)
-            )
-
-            (trans,rot) = self.tf_listener.lookupTransform(self.target_frame,
-                self.source_frame, rospy.Time(0))
-            print 'tooltip to base position: ', trans
-        except (tf.LookupException,
-                tf.ConnectivityException,
-                tf.ExtrapolationException) as e:
-            rospy.logerr('Tf error: %s' % str(e))
-            return 'tf_error'
-
-        '''
-        Computing base translation offset of the base to object.
-        Subtracting 5cm from x-shift to bring full object into camera view.
-        '''
-        if self.offset_x == 0.0:
-            rospy.set_param('/arm_relative_motion_controller/relative_distance_x', 0.0)
-        base_shift_x_direction = pose.pose.position.x - trans[0] + self.offset_x
-
-        base_shift_y_direction = pose.pose.position.y - trans[1] + self.offset_y
-
-        userdata.move_base_by = (base_shift_x_direction, base_shift_y_direction, 0.0)
-
-        '''
-        Computing rotation of last joint of the arm to object.
-        Pose must be transformed into base_link to select roll
-        as a reference angle of rotation.
-        '''
-        rotation_x = pose.pose.orientation.x
-
-        rotation_y = pose.pose.orientation.y
-
-        rotation_z = pose.pose.orientation.z
-
-        rotation_w = pose.pose.orientation.w
-
-        quat = [rotation_x, rotation_y, rotation_z, rotation_w]
-        quat90 = list(tf.transformations.quaternion_from_euler(0,math.pi/2,0))
-
-        '''
-        To avoid gimble lock problem because pitch is approx. -90 when
-        we convert original quaternion to euler angles. So, we perform a
-        rotation of 90 degrees and then convert to euler angles.
-        '''
-        rotated_quat = tf.transformations.quaternion_multiply(quat, quat90)
-        rpy = tf.transformations.euler_from_quaternion(rotated_quat)
-
-        rotation_angle = self.compute_rotation_angle(rpy[2])
-        joint_values = manipulation.arm_command.get_current_joint_values()
-        joint_values[4] = joint_values[4] + rotation_angle
-
-        print "move base by: ", userdata.move_base_by
-        print "rotate arm joint 5 by: ", rotation_angle
-        userdata.move_arm_to = joint_values
-        return 'succeeded'
-
-    def  compute_rotation_angle(self, rotation):
-        if(rotation < 0):
-          rotation = rotation + math.pi
-        rotation = rotation - (math.pi/2)
-        return rotation
 
 class loop_for(smach.State):
     '''
