@@ -67,7 +67,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                              'no_more_task_for_given_type': 'no_more_task_for_given_type'})
 
             # required before any call to gns.approach_pose, moves arm within footprint
-            smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION_SAFE', gms.move_arm('look_at_workspace_straight'),
+            smach.StateMachine.add('MOVE_TO_SOURCE_LOCATION_SAFE', gms.move_arm('look_at_workspace'),
                 transitions={'succeeded': 'MOVE_TO_SOURCE_LOCATION',
                              'failed': 'MOVE_TO_SOURCE_LOCATION_SAFE'})
 
@@ -87,7 +87,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                 transitions={'succeeded':'SELECT_NEXT_LOOK_POSE',
                              'failed':'ADJUST_POSE_WRT_WORKSPACE_AT_SOURCE'})
 
-            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right_ppt', 'look_at_workspace_straight_ppt','look_at_workspace_left_ppt']),
+            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right', 'look_at_workspace','look_at_workspace_left']),
                     transitions={'succeeded': 'LOOK_AROUND',
                     'failed': 'RECOGNIZE_OBJECTS'})
 
@@ -230,12 +230,12 @@ class sub_sm_go_and_pick(smach.StateMachine):
                 transitions={'succeeded':'SELECT_OBJECT_TO_BE_GRASPED',
                              'failed':'ADJUST_POSE_WRT_WORKSPACE_NEXT'})
 
-            smach.StateMachine.add('NO_MORE_FREE_POSES_SAFE',gms.move_arm('look_at_workspace_straight'),
+            smach.StateMachine.add('NO_MORE_FREE_POSES_SAFE',gms.move_arm('look_at_workspace'),
                 transitions={'succeeded':'no_more_free_poses',
                              'failed':'SKIP_SOURCE_POSE_SAFE'})
 
 		            # MISC STATES
-            smach.StateMachine.add('SKIP_SOURCE_POSE_SAFE', gms.move_arm('look_at_workspace_straight'),
+            smach.StateMachine.add('SKIP_SOURCE_POSE_SAFE', gms.move_arm('look_at_workspace'),
                 transitions={'succeeded':'SKIP_SOURCE_POSE',
                              'failed':'SKIP_SOURCE_POSE_SAFE'})
 
@@ -267,7 +267,7 @@ class sub_sm_go_to_destination(smach.StateMachine):
                 transitions={'success':'MOVE_TO_DESTINATION_LOCATION_SAFE',
                              'no_more_dest_tasks':'MOVE_TO_EXIT_SAFE'})
 
-            smach.StateMachine.add('MOVE_TO_DESTINATION_LOCATION_SAFE', gms.move_arm('look_at_workspace_straight'),
+            smach.StateMachine.add('MOVE_TO_DESTINATION_LOCATION_SAFE', gms.move_arm('look_at_workspace'),
                 transitions={'succeeded': 'MOVE_TO_DESTINATION_LOCATION',
                              'failed': 'MOVE_TO_DESTINATION_LOCATION_SAFE'})
 
@@ -279,7 +279,7 @@ class sub_sm_go_to_destination(smach.StateMachine):
                 transitions={'succeeded':'destination_reached',
                              'failed':'MOVE_TO_DESTINATION_LOCATION'})
 
-            smach.StateMachine.add('MOVE_TO_EXIT_SAFE', gms.move_arm('look_at_workspace_straight'),
+            smach.StateMachine.add('MOVE_TO_EXIT_SAFE', gms.move_arm('look_at_workspace'),
                 transitions={'succeeded': 'MOVE_TO_EXIT',
                              'failed': 'MOVE_TO_EXIT_SAFE'})
 
@@ -320,6 +320,6 @@ class sub_sm_place(smach.StateMachine):
                 transitions={'succeeded':'GRASP_OBJECT_FROM_PLTF',
                              'no_more_cfg_poses':'MOVE_ARM_INSIDE_BASE_BOUNDARIES'})
 
-            smach.StateMachine.add('MOVE_ARM_INSIDE_BASE_BOUNDARIES', gms.move_arm('look_at_workspace_straight'),
+            smach.StateMachine.add('MOVE_ARM_INSIDE_BASE_BOUNDARIES', gms.move_arm('look_at_workspace'),
                 transitions={'succeeded':'succeeded',
                              'failed':'MOVE_ARM_INSIDE_BASE_BOUNDARIES'})
