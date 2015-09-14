@@ -25,7 +25,6 @@
     <param name="/move_group/trajectory_execution/allowed_execution_duration_scaling" type="double" value="1.5"/>
  
     <include file="$(find mir_arm_relative_motion_control)/ros/launch/arm_relative_motion_controller.launch" />
-    <include file="$(find mir_pregrasp_planner)/ros/launch/pregrasp_planner_china.launch" />
 
     <node pkg="mcr_manipulation_measurers" type="component_wise_pose_error_calculator_trigger_node"
           name="gripper_to_object_pose_error_calculator" output="screen">
