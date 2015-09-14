@@ -35,42 +35,21 @@
         <joint name="arm_joint_4" value="3.426" />
         <joint name="arm_joint_5" value="2.9831" />
     </group_state>
-    <group_state name="look_at_workspace_straight" group="arm_1">
-        <joint name="arm_joint_1" value="2.205871" />
-        <joint name="arm_joint_2" value="0.742191" />
-        <joint name="arm_joint_3" value="-1.46711" />
-        <joint name="arm_joint_4" value="3.57044" />
-        <joint name="arm_joint_5" value="2.94911" />
-    </group_state>
-    <group_state name="look_at_workspace_right" group="arm_1">
-        <joint name="arm_joint_1" value="2.60306" />
-        <joint name="arm_joint_2" value="0.728366" />
-        <joint name="arm_joint_3" value="-1.28702" />
-        <joint name="arm_joint_4" value="3.26137" />
-        <joint name="arm_joint_5" value="2.97115" />
-    </group_state>
-    <group_state name="look_at_workspace_left" group="arm_1">
-        <joint name="arm_joint_1" value="1.84074" />
-        <joint name="arm_joint_2" value="0.728366" />
-        <joint name="arm_joint_3" value="-1.28702" />
-        <joint name="arm_joint_4" value="3.26137" />
-        <joint name="arm_joint_5" value="2.97115" />
-    </group_state>
-    <group_state name="look_at_workspace_straight_ppt" group="arm_1">
+    <group_state name="look_at_workspace" group="arm_1">
         <joint name="arm_joint_1" value="2.1532" />
         <joint name="arm_joint_2" value="0.5835" />
         <joint name="arm_joint_3" value="-1.007" />
         <joint name="arm_joint_4" value="3.3501" />
         <joint name="arm_joint_5" value="2.9142" />
     </group_state>
-    <group_state name="look_at_workspace_left_ppt" group="arm_1">
+    <group_state name="look_at_workspace_left" group="arm_1">
         <joint name="arm_joint_1" value="1.6851" />
         <joint name="arm_joint_2" value="1.044" />
         <joint name="arm_joint_3" value="-1.6268" />
         <joint name="arm_joint_4" value="3.48012" />
         <joint name="arm_joint_5" value="2.9135" />
     </group_state>
-    <group_state name="look_at_workspace_right_ppt" group="arm_1">
+    <group_state name="look_at_workspace_right" group="arm_1">
         <joint name="arm_joint_1" value="2.588" />
         <joint name="arm_joint_2" value="1.0874" />
         <joint name="arm_joint_3" value="-1.632" />
