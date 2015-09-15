@@ -11,12 +11,13 @@ find_package(catkin REQUIRED
     roslint
     sensor_msgs
     std_msgs
+    mcr_manipulation_msgs
 )
 
 catkin_package(
   CATKIN_DEPENDS
     dynamixel_controllers
-    mir_manipulation_msgs
+    mcr_manipulation_msgs
     rospy
     sensor_msgs
     brics_actuator

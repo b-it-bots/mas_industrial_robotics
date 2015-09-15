@@ -19,6 +19,9 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     sub_dynamixel_motor_states_ = nh_.subscribe("dynamixel_motor_states", 10,
                                   &DynamixelGripperNode::jointStatesCallback, this);
 
+    sub_gripper_command_ = nh_.subscribe("gripper_command", 10,
+            &DynamixelGripperNode::gripperCommandCallback, this);
+
     pub_joint_states_ = nh_.advertise < sensor_msgs::JointState > ("joint_state", 10);
 
     // read parameters
@@ -37,6 +40,12 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 
     nh_prv.param<int>("queue_size", queue_size_, 10);
     ROS_INFO_STREAM("\tQueue size: " << queue_size_);
+
+    nh_prv.param<double>("gripper_configuration_open", gripper_configuration_open_, 0.0);
+    ROS_INFO_STREAM("\tgripper configuration <open>: " << gripper_configuration_open_);
+
+    nh_prv.param<double>("gripper_configuration_close", gripper_configuration_close_, 1.0);
+    ROS_INFO_STREAM("\tgripper configuration <close>: " << gripper_configuration_close_);
 
     // set the hard torque limit
     dynamixel_controllers::SetTorqueLimit torque_srv;
@@ -84,6 +93,25 @@ void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState:
     joint_state.effort.push_back(msg->load);
 
     pub_joint_states_.publish(joint_state);
+}
+
+void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg)
+{
+    double set_pos = 0.0;
+
+    if (msg->command == mcr_manipulation_msgs::GripperCommand::OPEN)
+        set_pos = gripper_configuration_open_;
+    else if (msg->command == mcr_manipulation_msgs::GripperCommand::CLOSE)
+        set_pos = gripper_configuration_close_;
+    else
+    {
+        ROS_ERROR_STREAM("Unsupported gripper command: " << msg->command);
+        return;
+    }
+
+    std_msgs::Float64 gripper_pos;
+    gripper_pos.data = set_pos;
+    pub_dynamixel_command_.publish(gripper_pos);
 }
 
 double DynamixelGripperNode::getAverage(const std::deque<double> &queue)
