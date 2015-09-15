@@ -59,7 +59,7 @@ class sub_sm_place_in_holes(smach.StateMachine):
                 transitions={'succeeded': 'SELECT_NEXT_LOOK_POSE'})
 
             # CAVITY RECOGNITION PIPELINE
-            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right_ppt', 'look_at_workspace_straight_ppt', 'look_at_workspace_left_ppt']),
+            smach.StateMachine.add('SELECT_NEXT_LOOK_POSE', gms.select_arm_pose(['look_at_workspace_right', 'look_at_workspace', 'look_at_workspace_left']),
                     transitions={'succeeded': 'LOOK_AROUND',
                                 'failed': 'CHECK_FOUND_CAVITIES'})
 
@@ -173,7 +173,7 @@ class sub_sm_place_in_holes(smach.StateMachine):
                 transitions={'succeeded':'MOVE_ARM_TO_INTERMEDIATE_POSE',
                              'failed':'MOVE_ARM_TO_INTERMEDIATE_POSE'})
 
-            smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_POSE', gms.move_arm('look_at_workspace_straight_ppt'),
+            smach.StateMachine.add('MOVE_ARM_TO_INTERMEDIATE_POSE', gms.move_arm('look_at_workspace'),
                 transitions={'succeeded': 'SELECT_OBJECT_TO_PLACE',
                              'failed': 'MOVE_ARM_TO_INTERMEDIATE_POSE'})
             
