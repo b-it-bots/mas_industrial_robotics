@@ -31,9 +31,6 @@
 
     <!-- perception pipeline -->
     <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition_mockup.launch" />
- 
-    <!-- Visual Servoing -->
-    <include file="$(find mir_visual_servoing)/ros/launch/visual_servoing_mockup.launch"/>
 
 </launch>
 
