@@ -31,12 +31,12 @@
 - git:
     local-name: youbot_diagnostics
     uri: https://github.com/mas-group/youbot_diagnostics.git
-    version: hydro-devel
+    version: indigo-devel
 
 - git:
     local-name: youbot-manipulation
     uri: https://github.com/mas-group/youbot-manipulation.git
-    version: hydro
+    version: indigo
 
 - git:
     local-name: realsense_camera
