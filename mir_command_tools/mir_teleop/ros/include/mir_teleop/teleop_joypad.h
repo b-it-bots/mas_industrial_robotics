@@ -14,13 +14,13 @@
 #include <moveit_msgs/JointLimits.h>
 #include <dynamic_reconfigure/server.h>
 #include <brics_actuator/JointVelocities.h>
-#include <brics_actuator/JointPositions.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/JointState.h>
 #include <std_srvs/Empty.h>
+#include <mcr_manipulation_msgs/GripperCommand.h>
 
 #include <boost/units/systems/si.hpp>
 #include <boost/units/io.hpp>
@@ -38,7 +38,7 @@ private:
     bool getJoypadConfigParameter();
     void getBaseParameter();
     bool getArmParameter();
-    bool moveGripper(std::string joint_position_name);
+    bool moveGripper(int gripper_command);
     bool switchMotorsOnOff(std::string component_name, std::string state);
     bool reconnect();
 
@@ -108,7 +108,7 @@ private:
     ros::Publisher pub_base_cart_vel_;
     ros::Publisher pub_arm_joint_vel_;
     ros::Publisher pub_arm_cart_vel_;
-    ros::Publisher pub_gripper_position_;
+    ros::Publisher pub_gripper_command_;
 
     // Service clients
     ros::ServiceClient srv_arm_motors_on_;

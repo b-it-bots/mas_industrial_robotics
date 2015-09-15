@@ -11,6 +11,7 @@ find_package(catkin REQUIRED
     roscpp
     sensor_msgs
     std_srvs
+    mcr_manipulation_msgs
 )
 
 find_package(Boost REQUIRED)
@@ -30,6 +31,7 @@ catkin_package(
     moveit_msgs
     sensor_msgs
     std_srvs
+    mcr_manipulation_msgs
 )
 
 include_directories(

@@ -47,7 +47,7 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
     sub_joypad_ = nh_->subscribe < sensor_msgs::Joy > ("/joy", 1, &TeleOpJoypad::cbJoypad, this);
     pub_base_cart_vel_ = nh_->advertise < geometry_msgs::Twist > ("cmd_vel", 1);
     pub_arm_cart_vel_ = nh_->advertise < geometry_msgs::TwistStamped > ("/arm_1/arm_controller/cartesian_velocity_command", 1);
-    pub_gripper_position_ = nh_->advertise < brics_actuator::JointPositions > ("/arm_1/gripper_controller/position_command", 1);
+    pub_gripper_command_ = nh_->advertise < mcr_manipulation_msgs::GripperCommand > ("gripper_command", 1);
 
     srv_base_motors_on_ = nh_->serviceClient < std_srvs::Empty > ("/base/switchOnMotors");
     srv_base_motors_off_ = nh_->serviceClient < std_srvs::Empty > ("/base/switchOffMotors");
@@ -202,38 +202,13 @@ bool TeleOpJoypad::getArmParameter()
     return is_joint_space_ctrl_active_;
 }
 
-bool TeleOpJoypad::moveGripper(std::string joint_position_name)
+bool TeleOpJoypad::moveGripper(int gripper_command)
 {
-    brics_actuator::JointPositions pos;
-    XmlRpc::XmlRpcValue position_list;
-    std::string param_name = "/script_server/gripper_1/" + joint_position_name;
+    mcr_manipulation_msgs::GripperCommand command_msgs;
 
-    // get gripper values
-    if (!nh_->getParam(param_name, position_list))
-    {
-        ROS_ERROR_STREAM("Could not find parameter <<" << param_name << " on parameter server");
-        return false;
-    }
+    command_msgs.command = gripper_command;
 
-    ROS_ASSERT(position_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
-    ROS_ASSERT(position_list.size() == 1);
-    ROS_ASSERT(position_list[0].size() == 2);
-
-    // establish messgage
-    brics_actuator::JointValue gripper_left;
-    gripper_left.joint_uri = "gripper_finger_joint_l";
-    gripper_left.unit = "m";
-    gripper_left.value = static_cast<double>(position_list[0][0]);
-
-    brics_actuator::JointValue gripper_right;
-    gripper_right.joint_uri = "gripper_finger_joint_r";
-    gripper_right.unit = "m";
-    gripper_right.value = static_cast<double>(position_list[0][1]);
-
-    pos.positions.push_back(gripper_left);
-    pos.positions.push_back(gripper_right);
-
-    pub_gripper_position_.publish(pos);
+    pub_gripper_command_.publish(command_msgs);
 
     return true;
 }
@@ -377,12 +352,12 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr& command)
             if (button_gripper_active_)
             {
                 ROS_INFO("open gripper");
-                this->moveGripper("open");
+                this->moveGripper(mcr_manipulation_msgs::GripperCommand::OPEN);
             }
             else
             {
                 ROS_INFO("close gripper");
-                this->moveGripper("close");
+                this->moveGripper(mcr_manipulation_msgs::GripperCommand::CLOSE);
             }
         }
 
