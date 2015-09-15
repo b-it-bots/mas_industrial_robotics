@@ -1,12 +1,14 @@
 /*
+ * Copyright [2012] <Bonn-Rhein-Sieg University>
+ *
  * teleop_joypad.h
  *
  *  Created on: May 27, 2012
  *      Author: Frederik Hegger
  */
 
-#ifndef TELEOP_JOYPAD_H_
-#define TELEOP_JOYPAD_H_
+#ifndef MIR_TELEOP_TELEOP_JOYPAD_H_
+#define MIR_TELEOP_TELEOP_JOYPAD_H_
 
 #include <string>
 #include <vector>
@@ -32,7 +34,7 @@
 class TeleOpJoypad
 {
 public:
-    TeleOpJoypad(ros::NodeHandle &nh);
+    explicit TeleOpJoypad(ros::NodeHandle &nh);
 
 private:
     bool getJoypadConfigParameter();
@@ -143,4 +145,4 @@ private:
     int axes_index_arm_joint_axes_2_;
 };
 
-#endif /* TELEOP_JOYPAD_H_ */
+#endif  // MIR_TELEOP_TELEOP_JOYPAD_H_
