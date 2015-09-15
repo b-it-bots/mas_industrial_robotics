@@ -40,6 +40,7 @@ target_link_libraries(dynamixel_gripper_node
 
 ### TESTS
 roslint_cpp()
+roslint_python()
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
