@@ -12,6 +12,7 @@ find_package(catkin REQUIRED
     sensor_msgs
     std_srvs
     mcr_manipulation_msgs
+    roslint
 )
 
 find_package(Boost REQUIRED)
@@ -53,6 +54,8 @@ target_link_libraries(teleop_joypad_node
 
 
 ### TESTS
+roslint_cpp()
+
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
 
