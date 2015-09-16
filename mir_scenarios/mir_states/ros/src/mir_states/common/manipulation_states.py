@@ -153,7 +153,7 @@ class linear_motion(smach.State):
         # start the relative approach and wait for the result
         self.event_out.publish('e_start')
         while not self.result:
-            rospy.sleep(0.1)
+            rospy.sleep(0.01)
 
         if self.result.data != 'e_success':
             return 'failed'
