@@ -14,6 +14,7 @@
 #include <control_msgs/GripperCommandAction.h>
 #include <dynamixel_controllers/SetTorqueLimit.h>
 #include <dynamixel_msgs/JointState.h>
+#include <mcr_manipulation_msgs/GripperCommand.h>
 #include <limits.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
@@ -29,6 +30,7 @@ public:
 
 private:
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
+    void gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
     void gripperCommandGoalCallback();
 
     double getAverage(const std::deque<double> &queue);
@@ -38,6 +40,7 @@ private:
     ros::Publisher pub_dynamixel_command_;
     ros::Publisher pub_joint_states_;
     ros::Subscriber sub_dynamixel_motor_states_;
+    ros::Subscriber sub_gripper_command_;
 
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction> action_server_;
     control_msgs::GripperCommandFeedback gripper_feedback_;
@@ -57,6 +60,9 @@ private:
 
     double position_threshold_;
     int queue_size_;
+
+    double gripper_configuration_open_;
+    double gripper_configuration_close_;
 };
 
 #endif  // MIR_GRIPPER_CONTROLLER_DYNAMIXEL_GRIPPER_NODE_H_

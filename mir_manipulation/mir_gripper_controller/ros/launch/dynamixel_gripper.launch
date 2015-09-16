@@ -21,13 +21,16 @@
         <remap from="dynamixel_motor_states" to="/gripper_controller/state" />
         <remap from="joint_state" to="/joint_states" />
         
-        <param name="soft_torque_limit" type="double" value="0.8" />
+        <param name="soft_torque_limit" type="double" value="0.9" />
         
         <param name="hard_torque_limit_srv_name" type="string" value="/gripper_controller/set_torque_limit" />
         <param name="hard_torque_limit" type="double" value="1.0" />
 
         <param name="position_threshold" type="double" value="0.05" />
         <param name="queue_size" type="int" value="10" />
+        
+        <param name="gripper_configuration_open" type="double" value="0.0" />
+        <param name="gripper_configuration_close" type="double" value="1.7" />
         
       </node>
     </group>

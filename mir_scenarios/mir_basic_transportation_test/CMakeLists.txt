@@ -12,13 +12,17 @@ catkin_package(
     mir_base_placement
     mir_bringup
     mir_bringup_sim
-    mir_moveit_scene
     mir_states
-    mcr_object_recognition_bounding_box
     mir_visual_servoing
     rospy
     smach
     smach_ros
+    mir_arm_motions
+    mcr_object_recognition_mean_circle
+    mcr_manipulation_measurers
+    mcr_common_converters
+    mir_grasp_monitors
+    rostopic
 )
 
 

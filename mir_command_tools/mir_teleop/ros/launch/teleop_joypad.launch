@@ -2,6 +2,7 @@
 <launch>
   <arg name="joypad_cfg_file" default="$(find mir_teleop)/ros/config/logitech.yaml"/>
   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+  <arg name="gripper_command_topic" default="/arm_1/gripper_command" />
 
   <include file="$(find mir_hardware_config)/upload_param.launch">
     <arg name="robot" value="$(arg robot)"/>
@@ -17,8 +18,9 @@
 
   <!-- start youbot teleop node -->
   <node pkg="mir_teleop" type="teleop_joypad_node" name="mir_teleop_joypad" output="screen">
-    <!-- remap for twist mux -->
-    <remap from="~cmd_vel" to="/cmd_vel_prio_high" />
+    <remap from="~cmd_vel" to="/cmd_vel_prio_high" />    <!-- remap for twist mux -->
+    <remap from="~gripper_command" to="$(arg gripper_command_topic)" />
+    
     <rosparam command="load" file="$(arg joypad_cfg_file)"/>
     <rosparam command="load" file="$(find mir_hardware_config)/$(arg robot)/config/teleop.yaml"/>  
   </node>

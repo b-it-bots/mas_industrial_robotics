@@ -1,4 +1,6 @@
 /*
+ * Copyright [2011] <Bonn-Rhein-Sieg University>
+ *
  * teleop_joypad_node.cpp
  *
  *  Created on: Dec 15, 2011
