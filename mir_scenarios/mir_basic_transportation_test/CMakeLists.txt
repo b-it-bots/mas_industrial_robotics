@@ -7,11 +7,13 @@ catkin_package(
   CATKIN_DEPENDS
     mcr_gazebo_objects
     mcr_linear_regression
+    mcr_object_recognition_bounding_box
     mcr_relative_base_controller
     mir_2dnav
     mir_base_placement
     mir_bringup
     mir_bringup_sim
+    mir_moveit_scene
     mir_states
     mir_visual_servoing
     rospy
