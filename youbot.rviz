@@ -251,24 +251,24 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        tower_cam3d_depth_frame:
+        arm_cam3d_depth_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        tower_cam3d_depth_optical_frame:
+        arm_cam3d_depth_optical_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        tower_cam3d_frame:
+        arm_cam3d_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        tower_cam3d_rgb_frame:
+        arm_cam3d_rgb_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        tower_cam3d_rgb_optical_frame:
+        arm_cam3d_rgb_optical_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -408,13 +408,13 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.01
       Style: Points
-      Topic: /tower_cam3d/depth_registered/points
+      Topic: /arm_cam3d/depth_registered/points
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /tower_cam3d/ir/image_raw
+      Image Topic: /arm_cam3d/ir/image_raw
       Max Value: 1
       Median window: 5
       Min Value: 0

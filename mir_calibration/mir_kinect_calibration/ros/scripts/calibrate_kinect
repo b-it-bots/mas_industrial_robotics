@@ -11,7 +11,7 @@ NODE = 'calibrate_kinect'
 
 
 REFERENCE_FRAME = '/tower_link'
-TARGET_FRAME = '/tower_cam3d_frame'
+TARGET_FRAME = '/arm_cam3d_frame'
 GRIPPER_FRAME = '/gripper_palm_link'
 GRIPPER_OFFSET = [-0.0175, 0.000, 0.065]
 POSES = [[2.35724, 2.5844, -1.48809, 0.81208, 2.92343],
@@ -123,7 +123,7 @@ def estimate_transformation(p1, p2):
     return tuple(T)
 
 
-def print_xacro_properties(xyzrpy, prefix='cal_tower_cam3d'):
+def print_xacro_properties(xyzrpy, prefix='cal_arm_cam3d'):
     fmt = '<property name="%s_{k}" value="{v:.5f}"/>' % prefix
     pairs = zip(['x', 'y', 'z', 'roll', 'pitch', 'yaw'], xyzrpy)
     print '\n'.join([fmt.format(k=k, v=v) for k, v in pairs])
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     print 'Estimated position of the Kinect relative to %s:' % REFERENCE_FRAME
     print '  XYZ: %.5f %.5f %.5f' % t[0:3]
     print '  RPY: %.5f %.5f %.5f' % t[3:6]
-    print 'Copy-paste the following lines to tower_cam3d.urdf.xacro:'
+    print 'Copy-paste the following lines to arm_cam3d.urdf.xacro:'
     print_xacro_properties(t)
     arm.move_to('home')
     t1.shutdown()

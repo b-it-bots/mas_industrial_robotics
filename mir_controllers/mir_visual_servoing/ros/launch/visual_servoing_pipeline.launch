@@ -4,7 +4,7 @@
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
 
     <node pkg="mcr_image_filter" type="image_filter_node" name="image_filter" ns="mcr_perception" output="screen" respawn="true">
-        <remap from="~input_image" to="/tower_cam3d/image/rgb_raw"/>
+        <remap from="~input_image" to="/arm_cam3d/image/rgb_raw"/>
         <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
         <param name="loop_rate" type="int" value="30"/>
     </node>
@@ -27,7 +27,7 @@
         <remap from="~pose" to="/mcr_perception/blob_tracking/blob_pose"/>
         <param name="loop_rate" type="int" value="30"/>
         <param name="target_frame" type="string" value="base_link"/>
-        <param name="source_frame" type="string" value="tower_cam3d_rgb_optical_frame"/>
+        <param name="source_frame" type="string" value="arm_cam3d_rgb_optical_frame"/>
         <!-- Update this as required -->
         <param name="is_image_filter_enabled" type="bool" value="true"/>       
         <rosparam command="load" file="$(find mcr_image_filter)/ros/config/image_filter_params.yaml"/>
@@ -42,7 +42,7 @@
         <remap from="~pose" to="/mcr_perception/blob_tracking/reference_pose"/>
         <param name="loop_rate" type="int" value="30"/>
         <param name="target_frame" type="string" value="base_link"/>
-        <param name="source_frame" type="string" value="tower_cam3d_rgb_optical_frame"/>
+        <param name="source_frame" type="string" value="arm_cam3d_rgb_optical_frame"/>
         <!-- Update image filtering enabled as required -->
         <param name="is_image_filter_enabled" type="bool" value="false"/>
         <rosparam command="load" file="$(find mcr_image_filter)/ros/config/image_filter_params.yaml"/>
