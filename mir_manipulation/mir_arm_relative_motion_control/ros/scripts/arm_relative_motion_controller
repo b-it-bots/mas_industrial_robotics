@@ -186,9 +186,10 @@ if __name__=='__main__':
 
     rospy.init_node('arm_relative_motion_controller')
 
+    loop_rate = rospy.Rate(10)
     try:
         ArmRelativeMotionControl()
         while not rospy.is_shutdown():
-            rospy.sleep(0.5)
+            loop_rate.sleep()
     except rospy.ROSInterruptException:
         pass

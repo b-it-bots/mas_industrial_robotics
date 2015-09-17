@@ -56,7 +56,7 @@ class find_objects(smach.State):
                 elif (rospy.Time.now() - start_time) > timeout:
                     rospy.logerr('Timeout of %f seconds exceeded waiting for object_detector' % float(timeout.to_sec()))
                     break
-                rospy.sleep(0.1)
+                rospy.sleep(0.01)
 
             if not self.object_list or len(self.object_list.objects) <= 0:
                 rospy.loginfo('Found no objects')
@@ -141,7 +141,7 @@ class find_cavities(smach.State):
                     rospy.logwarn('timeout of %f seconds exceeded for finding cavity' % float(timeout.to_sec()))
                     break
 
-                rospy.sleep(0.1)
+                rospy.sleep(0.01)
 
         if len(local_found_cavities) == 0:
             return 'failed'
