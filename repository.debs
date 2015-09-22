@@ -30,6 +30,7 @@ packagelist=(
     ros-indigo-moveit-ros-move-group
     ros-indigo-moveit-setup-assistant
     ros-indigo-moveit-simple-controller-manager
+    ros-indigo-openni-launch
     ros-indigo-openni2-launch
     ros-indigo-pr2-dashboard-aggregator
     ros-indigo-pr2-description
