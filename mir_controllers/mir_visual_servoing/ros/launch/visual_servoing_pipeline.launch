@@ -4,7 +4,7 @@
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
 
     <node pkg="mcr_image_filter" type="image_filter_node" name="image_filter" ns="mcr_perception" output="screen" respawn="true">
-        <remap from="~input_image" to="/arm_cam3d/image/rgb_raw"/>
+        <remap from="~input_image" to="/arm_cam3d/rgb/image_raw"/>
         <remap from="~event_in" to="/mir_controllers/visual_servoing/event_in"/>
         <param name="loop_rate" type="int" value="30"/>
     </node>
