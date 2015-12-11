@@ -27,6 +27,8 @@
     <arg name="rgb_frame_id" default="$(arg camera)_rgb_optical_frame" />
     <arg name="depth_frame_id" default="$(arg camera)_depth_optical_frame" />
 
+    <arg name="rgb_frame_w" default="640" />
+    <arg name="rgb_frame_h" default="480" />
 
     <arg name="depth_unit" default="33.1" />
     <arg name="depth_scale" default="0.001" />
@@ -43,8 +45,8 @@
     <arg name="topic_depth_points_id" default="$(arg camera)/depth/points" />
     <arg name="topic_depth_registered_points_id" default="$(arg camera)/depth_registered/points" />
     
-    <arg name="topic_image_rgb_raw_id" default="$(arg camera)/image/rgb_raw" />
-    <arg name="topic_image_depth_raw_id" default="$(arg camera)/image/depth_raw" />
+    <arg name="topic_image_rgb_raw_id" default="$(arg camera)/rgb/image_raw" />
+    <arg name="topic_image_depth_raw_id" default="$(arg camera)/depth/image_raw" />
 
     <arg name="topic_image_infrared_raw_id" default="$(arg camera)/image/ir_raw" />
     
@@ -52,11 +54,15 @@
     <!-- debug depth unit -->
     <arg name="debug_depth_unit" default="false" />
 
-    
+    <arg name="rgb_camera_info_url" default="package://mir_default_robot_config/$(arg robot)/realsense_camera_calibration.yaml" />
+    <arg name="ir_camera_info_url" default="" />
 
     <node name="realsense_node" pkg="realsense_camera" type="realsense_camera_node" output="screen">
         <param name="rgb_frame_id" value="$(arg rgb_frame_id)" />
         <param name="depth_frame_id" value="$(arg depth_frame_id)" />
+
+        <param name="rgb_frame_w" value="$(arg rgb_frame_w)" />
+        <param name="rgb_frame_h" value="$(arg rgb_frame_h)" />
     
         <param name="depth_unit" value="$(arg depth_unit)" />
         <param name="depth_scale" value="$(arg depth_scale)" />
@@ -79,6 +85,9 @@
         <param name="topic_image_infrared_raw_id" value="$(arg topic_image_infrared_raw_id)" />
         
         <param name="debug_depth_unit" value="$(arg debug_depth_unit)" />
+
+        <param name="rgb_camera_info_url" value="$(arg rgb_camera_info_url)" />
+        <param name="ir_camera_info_url" value="$(arg ir_camera_info_url)" />
 
         <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml" />
 
