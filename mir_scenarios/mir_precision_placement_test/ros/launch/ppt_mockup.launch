@@ -10,9 +10,6 @@
     <arg name="sim" value="$(arg sim)"/>
   </include>
 
-  <!-- hole detection -->
-  <!--include file="$(find mcr_hole_detection)/ros/launch/hole_detection_mockup.launch" /-->
-
 </launch>
 
 

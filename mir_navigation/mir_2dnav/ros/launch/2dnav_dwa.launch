@@ -30,7 +30,7 @@
 
     <!-- Remap force field cmd_vel to twist mux cmd_vel -->
     <remap from="~cmd_vel" to="/cmd_vel_prio_medium"/>
-    
+    <remap from="~force_field_recovery/cmd_vel" to="/cmd_vel_prio_medium"/>
   </node>
 
 </launch>

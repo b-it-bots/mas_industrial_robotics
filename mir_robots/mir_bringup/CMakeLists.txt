@@ -11,7 +11,6 @@ catkin_package(
     mir_arm_cartesian_control
     mir_default_robot_config
     mir_gripper_controller
-    mir_gripper_services
     mir_hardware_config
     mir_teleop
     openni_launch
@@ -27,10 +26,7 @@ catkin_package(
 
 ### TEST
 if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED
-    COMPONENTS
-      roslaunch
-  )
+  find_package(roslaunch REQUIRED)
 
   #roslaunch_add_file_check(robot.launch robot:=youbot-brsu-1)
   roslaunch_add_file_check(robots)

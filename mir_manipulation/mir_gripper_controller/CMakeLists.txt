@@ -8,14 +8,16 @@ find_package(catkin REQUIRED
     dynamixel_controllers
     dynamixel_msgs
     roscpp
+    roslint
     sensor_msgs
     std_msgs
+    mcr_manipulation_msgs
 )
 
 catkin_package(
   CATKIN_DEPENDS
     dynamixel_controllers
-    mir_manipulation_msgs
+    mcr_manipulation_msgs
     rospy
     sensor_msgs
     brics_actuator
@@ -37,11 +39,11 @@ target_link_libraries(dynamixel_gripper_node
 
 
 ### TESTS
+roslint_cpp()
+roslint_python(ros/scripts/gripper_command_controller)
+
 if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED
-    COMPONENTS
-      roslaunch
-  )
+  find_package(roslaunch REQUIRED)
 
   roslaunch_add_file_check(ros/launch)
 endif()
@@ -68,12 +70,4 @@ install(
 install(DIRECTORY ros/include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
-)
-
-install(DIRECTORY ros/launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
-)
-
-install(DIRECTORY ros/config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/config
 )

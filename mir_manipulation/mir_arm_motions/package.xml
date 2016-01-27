@@ -4,7 +4,7 @@
   <version>0.1.0</version>
 
   <description>
-     The package provides launcher for mcr_arm_motions package 
+     Provides launcher for mcr_arm_motions package 
      to use planned motion component for arm motion execution.
   </description>
 
@@ -14,7 +14,9 @@
   <license>GPLv3</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roslaunch</build_depend>
+
   <run_depend>mcr_arm_motions</run_depend>
+
+  <test_depend>roslaunch</test_depend>  
 
 </package>

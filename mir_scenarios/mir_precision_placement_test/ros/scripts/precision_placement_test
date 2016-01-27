@@ -57,6 +57,8 @@ def main(no_refbox=False):
     SM.userdata.selected_objects = []
     SM.userdata.cavity_pose = None
 
+    SM.userdata.prev_vs_result = None 
+
 
     SM.userdata.rear_platform_free_poses = []
     SM.userdata.rear_platform_free_poses.append(btts.Bunch(obj=None, platform_pose='platform_right'))

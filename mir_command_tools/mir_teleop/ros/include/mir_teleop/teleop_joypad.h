@@ -1,12 +1,14 @@
 /*
+ * Copyright [2012] <Bonn-Rhein-Sieg University>
+ *
  * teleop_joypad.h
  *
  *  Created on: May 27, 2012
  *      Author: Frederik Hegger
  */
 
-#ifndef TELEOP_JOYPAD_H_
-#define TELEOP_JOYPAD_H_
+#ifndef MIR_TELEOP_TELEOP_JOYPAD_H_
+#define MIR_TELEOP_TELEOP_JOYPAD_H_
 
 #include <string>
 #include <vector>
@@ -14,13 +16,13 @@
 #include <moveit_msgs/JointLimits.h>
 #include <dynamic_reconfigure/server.h>
 #include <brics_actuator/JointVelocities.h>
-#include <brics_actuator/JointPositions.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/JointState.h>
 #include <std_srvs/Empty.h>
+#include <mcr_manipulation_msgs/GripperCommand.h>
 
 #include <boost/units/systems/si.hpp>
 #include <boost/units/io.hpp>
@@ -31,14 +33,14 @@
 
 class TeleOpJoypad
 {
- public:
-    TeleOpJoypad(ros::NodeHandle &nh);
+public:
+    explicit TeleOpJoypad(ros::NodeHandle &nh);
 
- private:
+private:
     bool getJoypadConfigParameter();
     void getBaseParameter();
     bool getArmParameter();
-    bool moveGripper(std::string joint_position_name);
+    bool moveGripper(int gripper_command);
     bool switchMotorsOnOff(std::string component_name, std::string state);
     bool reconnect();
 
@@ -108,7 +110,7 @@ class TeleOpJoypad
     ros::Publisher pub_base_cart_vel_;
     ros::Publisher pub_arm_joint_vel_;
     ros::Publisher pub_arm_cart_vel_;
-    ros::Publisher pub_gripper_position_;
+    ros::Publisher pub_gripper_command_;
 
     // Service clients
     ros::ServiceClient srv_arm_motors_on_;
@@ -143,4 +145,4 @@ class TeleOpJoypad
     int axes_index_arm_joint_axes_2_;
 };
 
-#endif /* TELEOP_JOYPAD_H_ */
+#endif  // MIR_TELEOP_TELEOP_JOYPAD_H_

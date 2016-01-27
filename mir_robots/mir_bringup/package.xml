@@ -12,14 +12,11 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roslaunch</build_depend>
-
   <run_depend>hokuyo_node</run_depend>
   <run_depend>mcr_default_env_config</run_depend>
   <run_depend>mcr_collision_velocity_filter</run_depend>
   <run_depend>mir_arm_cartesian_control</run_depend>
   <run_depend>mir_default_robot_config</run_depend>
-  <run_depend>mir_gripper_services</run_depend>
   <run_depend>mir_gripper_controller</run_depend>
   <run_depend>mir_hardware_config</run_depend>
   <run_depend>mir_teleop</run_depend>
@@ -35,5 +32,7 @@
   <run_depend>youbot_diagnostic_aggregator</run_depend>
   <run_depend>youbot_driver_ros_interface</run_depend>
   <run_depend>usb_cam</run_depend>
-  
+
+  <test_depend>roslaunch</test_depend>  
+
 </package>

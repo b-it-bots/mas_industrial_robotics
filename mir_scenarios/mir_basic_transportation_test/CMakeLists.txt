@@ -7,6 +7,7 @@ catkin_package(
   CATKIN_DEPENDS
     mcr_gazebo_objects
     mcr_linear_regression
+    mcr_object_recognition_bounding_box
     mcr_relative_base_controller
     mir_2dnav
     mir_base_placement
@@ -14,11 +15,16 @@ catkin_package(
     mir_bringup_sim
     mir_moveit_scene
     mir_states
-    mcr_object_recognition_bounding_box
     mir_visual_servoing
     rospy
     smach
     smach_ros
+    mir_arm_motions
+    mcr_object_recognition_mean_circle
+    mcr_manipulation_measurers
+    mcr_common_converters
+    mir_grasp_monitors
+    rostopic
 )
 
 

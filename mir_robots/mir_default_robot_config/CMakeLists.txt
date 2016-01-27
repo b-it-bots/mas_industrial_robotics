@@ -4,20 +4,9 @@ find_package(catkin REQUIRED)
 
 catkin_package()
 
-set(robot_list
-  youbot-brsu-1 
-  youbot-brsu-2 
-  youbot-brsu-3 
-  youbot-brsu-4
-)
-
-
 ### TESTS
 if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED
-    COMPONENTS
-      roslaunch
-  )
+  find_package(roslaunch REQUIRED)
 
   roslaunch_add_file_check(upload_param.launch robot:=youbot-brsu-1)
 endif()

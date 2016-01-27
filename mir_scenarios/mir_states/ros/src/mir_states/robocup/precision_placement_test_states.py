@@ -10,6 +10,7 @@ import smach_ros
 import tf
 
 import std_msgs.msg
+import geometry_msgs.msg
 import mcr_perception_msgs.msg
 import moveit_msgs.msg
 import math
@@ -119,12 +120,17 @@ class select_objects_to_place(smach.State):
 
 
 # select one object to place based on recognized cavities
+# publish pose of the selected object/selected cavity
 class select_object_to_place(smach.State):
+    OBJECT_POSE_TOPIC='/mir_states/object_selector/object_pose'
+    
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['object_selected','no_more_cavities', 'no_more_objects'],
-            input_keys=['rear_platform_occupied_poses', 'found_cavities'],
+            input_keys=['rear_platform_occupied_poses', 'cavity_pose', 'found_cavities'],
             output_keys=['selected_object','cavity_pose'])
+
+        self.object_pose_pub = rospy.Publisher(self.OBJECT_POSE_TOPIC, geometry_msgs.msg.PoseStamped)
 
     def execute(self, userdata):
         if len(userdata.found_cavities) == 0:
@@ -136,6 +142,7 @@ class select_object_to_place(smach.State):
                     userdata.selected_object = userdata.rear_platform_occupied_poses[i].obj
                     userdata.cavity_pose = userdata.found_cavities[-1]
                     del userdata.found_cavities[-1]
+                    self.object_pose_pub.publish(userdata.cavity_pose.pose)
                     print "Selected %s to place" %userdata.rear_platform_occupied_poses[i].obj.name
                     return 'object_selected'
             return 'no_more_objects'
@@ -151,7 +158,7 @@ class grasp_obj_for_hole_from_pltf(smach.State):
 
     def execute(self, userdata):
         btts.print_occupied_platf_poses(userdata.rear_platform_occupied_poses)
-        rospy.loginfo('userdata.selected_object: %s', userdata.selected_object)
+        #rospy.loginfo('userdata.selected_object: %s', userdata.selected_object)
 
         pltf_obj_pose = None
         for i in range(len(userdata.rear_platform_occupied_poses)):
@@ -186,7 +193,10 @@ class grasp_obj_for_hole_from_pltf(smach.State):
         print "plat_pose: ", pltf_obj_pose.platform_pose
         print "plat_name: ", pltf_obj_pose.obj.name
 
-        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+        manipulation.gripper_command.set_named_target("open")
+        manipulation.gripper_command.go()
+
+        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose) + "_pre")
         manipulation.arm_command.go()
 
         manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose))
@@ -195,11 +205,10 @@ class grasp_obj_for_hole_from_pltf(smach.State):
         manipulation.gripper_command.set_named_target("close")
         manipulation.gripper_command.go()
 
-        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose)+"_pre")
+        manipulation.arm_command.set_named_target(str(pltf_obj_pose.platform_pose) + "_pre")
         manipulation.arm_command.go()
 
         return 'object_grasped'
-
 
 class select_arm_position(smach.State):
     def __init__(self):
@@ -233,11 +242,12 @@ class clear_cavities(smach.State):
     def __init__(self):
         smach.State.__init__(self,
             outcomes=['succeeded'],
-            input_keys=['found_cavities'],
-            output_keys=['found_cavities'])
+            input_keys=['found_cavities', 'best_matched_cavities'],
+            output_keys=['found_cavities', 'best_matched_cavities'])
 
     def execute(self, userdata):
         userdata.found_cavities = []
+        userdata.best_matched_cavities = []
         return 'succeeded'
 
 class ppt_wiggle_arm(smach.State):

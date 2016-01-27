@@ -16,13 +16,13 @@
 class DynamixelGripperGraspMonitorNode
 {
 public:
-	DynamixelGripperGraspMonitorNode();
+    DynamixelGripperGraspMonitorNode();
     ~DynamixelGripperGraspMonitorNode();
 
     void update();
 
 private:
-    enum States{INIT, IDLE, RUN};
+    enum States {INIT, IDLE, RUN};
 
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void eventCallback(const std_msgs::String::ConstPtr &msg);
@@ -47,6 +47,8 @@ private:
     States current_state_;
 
     ros::Rate loop_rate_init_state_;
+
+    double load_threshold_;
 };
 
 #endif /* DYNAMIXEL_GRIPPER_GRASP_MONITOR_NODE_H_ */

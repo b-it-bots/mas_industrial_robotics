@@ -8,16 +8,19 @@
 #include <mir_grasp_monitors/dynamixel_gripper_grasp_monitor_node.h>
 
 DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
-	joint_states_received_(false),
-	event_in_received_(false),
-	current_state_(INIT),
-	loop_rate_init_state_(ros::Rate(10.0))
+    joint_states_received_(false),
+    event_in_received_(false),
+    current_state_(INIT),
+    loop_rate_init_state_(ros::Rate(100.0))
 {
-	ros::NodeHandle nh("~");
+    ros::NodeHandle nh("~");
 
-	pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
-	sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
-	sub_dynamixel_motor_states_ = nh.subscribe("dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
+    nh.param("load_threshold", load_threshold_, 0.0);
+    ROS_INFO_STREAM("\tload threshold parameter: " << load_threshold_);
+
+    pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
+    sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
+    sub_dynamixel_motor_states_ = nh.subscribe("dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
 }
 
 DynamixelGripperGraspMonitorNode::~DynamixelGripperGraspMonitorNode()
@@ -41,65 +44,73 @@ void DynamixelGripperGraspMonitorNode::eventCallback(const std_msgs::String::Con
 
 void DynamixelGripperGraspMonitorNode::update()
 {
-	checkForNewEvent();
+    checkForNewEvent();
 
-	switch(current_state_)
-	{
-		case INIT: init_state(); break;
-		case IDLE: idle_state(); break;
-		case RUN: run_state(); break;
-	}
+    switch (current_state_)
+    {
+    case INIT:
+        init_state();
+        break;
+    case IDLE:
+        idle_state();
+        break;
+    case RUN:
+        run_state();
+        break;
+    }
 }
 
 void DynamixelGripperGraspMonitorNode::checkForNewEvent()
 {
-	if(!event_in_received_)
-		return;
+    if (!event_in_received_)
+        return;
 
-	ROS_INFO_STREAM("Received event: " << event_in_.data);
+    ROS_INFO_STREAM("Received event: " << event_in_.data);
 
-	if(event_in_.data == "e_trigger")
-		current_state_ = IDLE;
-	else
-		ROS_ERROR_STREAM("Event not supported: " << event_in_.data);
+    if (event_in_.data == "e_trigger")
+        current_state_ = IDLE;
+    else
+        ROS_ERROR_STREAM("Event not supported: " << event_in_.data);
 
-	event_in_received_ = false;
+    event_in_received_ = false;
 }
 
 void DynamixelGripperGraspMonitorNode::init_state()
 {
-	loop_rate_init_state_.sleep();
+    loop_rate_init_state_.sleep();
 }
 
 void DynamixelGripperGraspMonitorNode::idle_state()
 {
-	// wait for incoming data
-	if(joint_states_received_)
-		current_state_ = RUN;
+    // wait for incoming data
+    if (joint_states_received_)
+        current_state_ = RUN;
 
-	joint_states_received_ = false;
+    joint_states_received_ = false;
 }
 
 void DynamixelGripperGraspMonitorNode::run_state()
 {
-	std_msgs::String event_out;
+    std_msgs::String event_out;
 
-	if(isObjectGrasped())
-		event_out.data = "e_object_grasped";
-	else
-		event_out.data = "e_object_not_grasped";
+    if (isObjectGrasped())
+        event_out.data = "e_object_grasped";
+    else
+        event_out.data = "e_object_not_grasped";
 
-	pub_event_.publish(event_out);
+    pub_event_.publish(event_out);
 
-	current_state_ = INIT;
+    current_state_ = INIT;
 }
 
 bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
-	if(joint_states_->load > 0.0)
-		return true;
+    ROS_DEBUG_STREAM("cur. load: " << joint_states_->load << " load thresh: " << load_threshold_);
 
-	return false;
+    if (joint_states_->load > load_threshold_)
+        return true;
+
+    return false;
 }
 
 int main(int argc, char **argv)
@@ -111,13 +122,13 @@ int main(int argc, char **argv)
 
     ros::Rate loop_rate(100);
 
-    while(ros::ok())
+    while (ros::ok())
     {
-    	ros::spinOnce();
+        ros::spinOnce();
 
-    	grasp_monitor.update();
+        grasp_monitor.update();
 
-    	loop_rate.sleep();
+        loop_rate.sleep();
     }
 
 

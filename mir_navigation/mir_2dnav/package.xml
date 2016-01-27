@@ -13,8 +13,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roslaunch</build_depend>
-
   <run_depend>actionlib</run_depend>
   <run_depend>amcl</run_depend>
   <run_depend>map_server</run_depend>
@@ -25,5 +23,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>topic_tools</run_depend>
+
+  <test_depend>roslaunch</test_depend>  
 
 </package>

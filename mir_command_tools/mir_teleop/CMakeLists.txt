@@ -11,6 +11,8 @@ find_package(catkin REQUIRED
     roscpp
     sensor_msgs
     std_srvs
+    mcr_manipulation_msgs
+    roslint
 )
 
 find_package(Boost REQUIRED)
@@ -30,6 +32,7 @@ catkin_package(
     moveit_msgs
     sensor_msgs
     std_srvs
+    mcr_manipulation_msgs
 )
 
 include_directories(
@@ -51,6 +54,8 @@ target_link_libraries(teleop_joypad_node
 
 
 ### TESTS
+roslint_cpp()
+
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
 

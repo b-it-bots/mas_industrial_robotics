@@ -13,24 +13,17 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>brics_actuator</build_depend>
-  <build_depend>cvblobs</build_depend>
-  <build_depend>cv_bridge</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>geometry_msgs</build_depend>  
-  <build_depend>image_transport</build_depend>
-  <build_depend>kdl_parser</build_depend>
-  <build_depend>mir_controller_msgs</build_depend>
-  <build_depend>moveit_msgs</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>roslaunch</build_depend>
+  <run_depend>mcr_image_filter</run_depend>
+  <run_depend>mcr_blob_detection</run_depend>
+  <run_depend>mcr_blob_tracking</run_depend>
+  <run_depend>mcr_image_cartesian_mapper</run_depend>
+  <run_depend>rostopic</run_depend>
+  <run_depend>mcr_manipulation_measurers</run_depend>
+  <run_depend>mcr_twist_limiter</run_depend>
+  <run_depend>mcr_geometric_relation_monitors</run_depend>
+  <run_depend>mcr_twist_demultiplexer</run_depend>
+  <run_depend>mcr_twist_controller</run_depend>
 
-  <run_depend>brics_actuator</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>geometry_msgs</run_depend>  
-  <run_depend>mir_controller_msgs</run_depend>
-  <run_depend>moveit_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
+  <test_depend>roslaunch</test_depend>
 
 </package>

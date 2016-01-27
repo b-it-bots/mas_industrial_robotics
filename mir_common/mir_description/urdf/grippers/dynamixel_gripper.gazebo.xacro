@@ -23,14 +23,6 @@
 			<turnGravityOff>false</turnGravityOff>
 			<selfCollide>true</selfCollide>
 		</gazebo>
-		
-		<controller:gazebo_ros_controller_manager name="gazebo_ros_controller_manager" plugin="libgazebo_ros_controller_manager.so">
-          <alwaysOn>true</alwaysOn>
-          <updateRate>1000.0</updateRate>
-          <robotNamespace></robotNamespace>
-          <robotParam>robot_description</robotParam>
-          <interface:audio name="gazebo_ros_controller_manager_dummy_iface" />
-     </controller:gazebo_ros_controller_manager>
 
 	</xacro:macro>
 

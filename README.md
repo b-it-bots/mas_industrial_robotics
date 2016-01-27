@@ -110,7 +110,7 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 
 ### At the Real Robot
 
-     roslaunch mir_bringup robot.launch (NOT YET WORKING WITH CATKIN AND HYDRO)
+     roslaunch mir_bringup robot.launch
      
 
 ## Test the base
