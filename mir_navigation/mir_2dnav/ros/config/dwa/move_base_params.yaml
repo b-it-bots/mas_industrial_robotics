@@ -12,13 +12,16 @@ recovery_behaviors:
     type: 'force_field_recovery/ForceFieldRecovery'
   - name: 'clear_costmap_recovery'
     type: 'clear_costmap_recovery/ClearCostmapRecovery'
-base_global_planner: global_planner/GlobalPlanner
-GlobalPlanner:
+base_global_planner: mcr_global_planner/GlobalPlannerWithOrientations
+GlobalPlannerWithOrientations:
     use_grid_path: False
     use_dijkstra: True
     allow_unknown: False
     default_tolerance: 0.0          #previous value: 0.2
     visualize_potential: True
-    use_quadratic: True)
-    use_grid_path: False)
+    use_quadratic: True
+    use_grid_path: False
     old_navfn_behavior: False
+    pose_distance: 0.05             # Minimum distance between poses
+    omni_poses: 20                  # Maximum omni poses to drive (2 times start and end, so max. poses in omni will be 40)
+
