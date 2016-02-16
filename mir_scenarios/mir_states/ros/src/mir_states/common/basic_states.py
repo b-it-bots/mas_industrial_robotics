@@ -279,3 +279,32 @@ class wait_for_open_door(smach.State):
 
         return 'succeeded'
 
+class set_named_config(smach.State):
+    def __init__(self, named_config):
+        smach.State.__init__(self, outcomes=['success', 'failure', 'timeout'])
+        self.named_config = named_config
+        self.config_name_pub = rospy.Publisher("/mcr_common/dynamic_reconfigure_client/configuration_name", std_msgs.msg.String)
+        self.event_in_pub = rospy.Publisher("/mcr_common/dynamic_reconfigure_client/event_in", std_msgs.msg.String)
+        self.event_out_sub = rospy.Subscriber("/mcr_common/dynamic_reconfigure_client/event_out", std_msgs.msg.String, self.event_cb)
+        self.event = None
+
+    def event_cb(self, msg):
+        self.event = msg.data
+
+    def execute(self, userdata):
+        self.event = None
+
+        self.config_name_pub.publish(self.named_config)
+        self.event_in_pub.publish("e_start")
+
+        timeout = rospy.Duration.from_sec(1.0)
+        rate = rospy.Rate(10)
+        start_time = rospy.Time.now()
+        while (rospy.Time.now() - start_time) < timeout:
+            if self.event:
+                if self.event == "e_success":
+                    return 'success'
+                else:
+                    return 'failure'
+            rate.sleep()
+        return 'timeout'
