@@ -22,3 +22,6 @@ GlobalPlannerWithOrientations:
     use_quadratic: True
     use_grid_path: False
     old_navfn_behavior: False
+    pose_distance: 0.05             # Minimum distance between poses
+    omni_poses: 20                  # Maximum omni poses to drive (2 times start and end, so max. poses in omni will be 40)
+
