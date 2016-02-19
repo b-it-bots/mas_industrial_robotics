@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.gazebo.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.transmission.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper_limits.urdf.xacro" />
+
+  <xacro:macro name="dynamixel_gripper_v2" params="parent name *origin">
+
+    <!-- joint between arm_5_link and dynamixel_palm_link -->
+    <joint name="${name}_palm_joint" type="fixed" >
+      <insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${name}_palm_link" />
+    </joint>
+
+    <link name="${name}_palm_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 -0.0275" rpy="0 ${M_PI/2} 0" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v2/motor_mount.dae" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="black" />
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 -0.0275" rpy="0 ${M_PI/2} 0" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v2/motor_mount.dae" scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+  </xacro:macro>
+
+</robot>
