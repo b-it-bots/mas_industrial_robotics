@@ -11,7 +11,7 @@
   <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
   <!-- youbot base and rear platform -->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform_v2.urdf.xacro" />
   <!-- youbot arm and gripper-->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
@@ -30,9 +30,9 @@
   <xacro:youbot_base name="base"/>
 
   <!-- Rear Platform -->
-  <xacro:rear_platform name="rear_platform" parent="base_link">
-    <origin xyz="-0.005 -0.175 0.051" rpy="0 0 0" />
-  </xacro:rear_platform>
+  <xacro:rear_platform_v2 name="rear_platform" parent="base_link">
+    <origin xyz="0.12 -0.175 ${0.021 + 0.0062 + 0.025 + 0.012}" rpy="0 0 0" />  <!-- ${alignment with base top + nut height + spacer height + slide height } -->
+  </xacro:rear_platform_v2>
 
   <!-- Arm Plate moving arm 8cm foward and 45 degree rotation -->
   <xacro:adapter_plate name="adapter_plate" parent="base_link" arm_angle="${-M_PI / 4}">
