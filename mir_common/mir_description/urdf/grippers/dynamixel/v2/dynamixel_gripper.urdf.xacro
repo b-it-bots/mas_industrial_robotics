@@ -45,11 +45,11 @@
     
     <!-- motors -->
     <xacro:dynamixel_motor_AX-12A name="${name}_motor_left" parent="${name}_motor_mount_link">
-      <origin xyz="0.0 0.034 0.021" rpy="0 0 0" />
+      <origin xyz="0.0 0.034 -0.009" rpy="0 0 0" />
     </xacro:dynamixel_motor_AX-12A>
     
     <xacro:dynamixel_motor_AX-12A name="${name}_motor_right" parent="${name}_motor_mount_link">
-      <origin xyz="0.0 -0.034 0.021" rpy="0 0 0" />
+      <origin xyz="0.0 -0.034 -0.009" rpy="0 0 0" />
     </xacro:dynamixel_motor_AX-12A>
     
     <!-- brackets -->
