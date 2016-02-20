@@ -5,25 +5,24 @@
   <!-- GDB Debug Option -->
   <arg name="debug" default="false" />
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
-  <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+  <arg     if="$(arg debug)" name="launch_prefix"
+	   value="gdb -x $(find mir_moveit_youbot_brsu_5)/launch/gdb_settings.gdb --ex run --args" />
 
   <!-- Verbose Mode Option -->
-  <arg name="info" default="$(arg debug)" />  
+  <arg name="info" default="$(arg debug)" />
   <arg unless="$(arg info)" name="command_args" value="" />
   <arg     if="$(arg info)" name="command_args" value="--debug" />
 
   <!-- move_group settings -->
-  <arg name="allow_trajectory_execution" default="true"/> 
+  <arg name="allow_trajectory_execution" default="true"/>
   <arg name="fake_execution" default="false"/>
   <arg name="max_safe_path_cost" default="1"/>
   <arg name="jiggle_fraction" default="0.05" />
   <arg name="publish_monitored_planning_scene" default="true"/>
 
-  <arg name="planner_pipeline" default="ompl" />
-
   <!-- Planning Functionality -->
   <include ns="move_group" file="$(find mir_moveit_youbot_brsu_5)/launch/planning_pipeline.launch.xml">
-    <arg name="pipeline" value="$(arg planner_pipeline)" />
+    <arg name="pipeline" value="ompl" />
   </include>
 
   <!-- Trajectory Execution Functionality -->
@@ -35,7 +34,7 @@
 
   <!-- Sensors Functionality -->
   <include ns="move_group" file="$(find mir_moveit_youbot_brsu_5)/launch/sensor_manager.launch.xml" if="$(arg allow_trajectory_execution)">
-    <arg name="moveit_sensor_manager" value="youbot" /> 
+    <arg name="moveit_sensor_manager" value="youbot" />
   </include>
 
   <!-- Start the actual move_group node/action server -->
@@ -57,6 +56,7 @@
 				      move_group/MoveGroupQueryPlannersService
 				      move_group/MoveGroupStateValidationService
 				      move_group/MoveGroupGetPlanningSceneService
+				      move_group/ClearOctomapService
 				      " />
 
     <!-- Publish the planning scene of the physical robot so that rviz plugin can know actual robot -->
@@ -65,5 +65,5 @@
     <param name="planning_scene_monitor/publish_state_updates" value="$(arg publish_monitored_planning_scene)" />
     <param name="planning_scene_monitor/publish_transforms_updates" value="$(arg publish_monitored_planning_scene)" />
   </node>
-  
+
 </launch>
