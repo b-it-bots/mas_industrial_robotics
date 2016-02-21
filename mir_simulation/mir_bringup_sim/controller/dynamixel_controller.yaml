@@ -1,0 +1,8 @@
+gripper_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - gripper_motor_left_joint
+    - gripper_motor_right_joint
+  gains:
+    gripper_motor_left_joint: {p: 1000.0, d: 1.0}
+    gripper_motor_right_joint: {p: 1000.0, d: 1.0}
