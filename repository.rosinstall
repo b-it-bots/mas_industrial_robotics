@@ -16,7 +16,7 @@
 - git:
     local-name: youbot_driver_ros_interface
     uri: https://github.com/mas-group/youbot_driver_ros_interface.git
-    version: hydro-devel
+    version: trajectory_controller_dirty_fix
 
 - git:
     local-name: youbot_description
