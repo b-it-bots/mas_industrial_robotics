@@ -454,4 +454,6 @@
     <disable_collisions link1="wheel_link_br" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="wheel_link_br" link2="wheel_link_fr" reason="Never" />
     <disable_collisions link1="wheel_link_fl" link2="wheel_link_fr" reason="Never" />
+    
+    <disable_collisions link1="gripper_finger_left_link" link2="gripper_finger_right_link" reason="Never" />
 </robot>
