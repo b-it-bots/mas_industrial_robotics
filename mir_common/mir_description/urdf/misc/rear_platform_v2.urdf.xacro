@@ -6,13 +6,14 @@
 
 	<xacro:macro name="rear_platform_v2" params="parent name *origin">
 
-		<joint name="${name}_joint" type="fixed" >
+        <!-- base plate -->
+		<joint name="${name}_base_joint" type="fixed" >
 			<insert_block name="origin" />
 			<parent link="${parent}" />
-			<child link="${name}_link" />
+			<child link="${name}_base_link" />
 		</joint>
 
-		<link name="${name}_link">
+		<link name="${name}_base_link">
 			<inertial>
 				<origin xyz="0 0 0" rpy="0 0 0"/>
 				<mass value="1"/>
@@ -22,14 +23,43 @@
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
-					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2.dae" scale="0.001 0.001 0.001" />
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_base.dae" scale="0.001 0.001 0.001" />
 				</geometry>
 			</visual>
 			
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
-					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_convex_hull.dae" scale="0.001 0.001 0.001" />
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_base_convex_hull.dae" scale="0.001 0.001 0.001" />
+				</geometry>
+			</collision>
+		</link>
+		
+		
+		<!-- fence -->
+		<joint name="${name}_fence_joint" type="fixed" >
+			<parent link="${name}_base_link" />
+			<child link="${name}_fence_link" />
+		</joint>
+
+		<link name="${name}_fence_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="1"/>
+				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_fence.dae" scale="0.001 0.001 0.001" />
+				</geometry>
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_fence_convex_hull.dae" scale="0.001 0.001 0.001" />
 				</geometry>
 			</collision>
 		</link>
