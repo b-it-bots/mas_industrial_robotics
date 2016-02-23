@@ -5,6 +5,7 @@ packagelist=(
     libcap2-bin
     libudev-dev
     libv4l-dev
+    python-catkin-tools
     python-pygraphviz
     python-rosinstall
     python-setuptools
