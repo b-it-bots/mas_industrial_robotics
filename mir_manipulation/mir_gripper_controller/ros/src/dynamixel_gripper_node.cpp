@@ -139,6 +139,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
     gripper_pos.data = set_pos;
     pub_dynamixel_command_.publish(gripper_pos);
 
+    /*
     // empty queue
     prev_positions_.clear();
     prev_velocities_.clear();
@@ -195,6 +196,7 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
             }
         }
     }
+    */
 
     joint_states_received_ = false;
     while (!joint_states_received_ && ros::ok())

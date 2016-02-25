@@ -29,8 +29,8 @@
         <param name="position_threshold" type="double" value="0.05" />
         <param name="queue_size" type="int" value="10" />
         
-        <param name="gripper_configuration_open" type="double" value="0.0" />
-        <param name="gripper_configuration_close" type="double" value="1.7" />
+        <param name="gripper_configuration_open" type="double" value="-0.25" />
+        <param name="gripper_configuration_close" type="double" value="0.43" />
         
       </node>
     </group>

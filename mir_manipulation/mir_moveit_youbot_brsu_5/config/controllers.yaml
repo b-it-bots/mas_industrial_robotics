@@ -10,8 +10,8 @@ controller_list:
       - arm_joint_4
       - arm_joint_5
   - name: arm_1/gripper_controller
-    action_ns: follow_joint_trajectory
-    type: FollowJointTrajectory
+    action_ns: /
+    type: GripperCommand
     default: true
     joints: 
       - gripper_motor_left_joint
