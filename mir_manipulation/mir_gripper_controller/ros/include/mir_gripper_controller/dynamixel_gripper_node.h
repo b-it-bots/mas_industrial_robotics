@@ -21,7 +21,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
-//#include <deque>
 #include <string>
 
 class DynamixelGripperNode
@@ -34,8 +33,6 @@ private:
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
     void gripperCommandGoalCallback();
-
-    //double getAverage(const std::deque<double> &queue);
 
     ros::NodeHandle nh_;
 
