@@ -7,7 +7,6 @@
  *      Author: Frederik Hegger
  */
 
-//#include <deque>
 #include <string>
 
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
@@ -27,19 +26,6 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     // read parameters
     ROS_INFO("Parameters:");
     ros::NodeHandle nh_prv("~");
-    //nh_prv.param("soft_torque_limit", soft_torque_limit_, 0.5);
-    //ROS_INFO_STREAM("\tSoft torque limit: " << soft_torque_limit_);
-
-    //nh_prv.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
-    //nh_prv.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
-    //ROS_INFO_STREAM("\tHard torque limit srv name: " << hard_torque_limit_srv_name_);
-    //ROS_INFO_STREAM("\tHard torque limit: " << hard_torque_limit_);
-
-    //nh_prv.param<double>("position_threshold", position_threshold_, 0.05);
-    //ROS_INFO_STREAM("\tPosition threshold: " << position_threshold_);
-
-    //nh_prv.param<int>("queue_size", queue_size_, 10);
-    //ROS_INFO_STREAM("\tQueue size: " << queue_size_);
     nh_prv.param<double>("torque_limit", torque_limit_, 1.0);
     nh_prv.param<std::string>("torque_limit_srv_name", torque_limit_srv_name_, "");
     ROS_INFO_STREAM("\tTorque limit: " << torque_limit_); 
@@ -148,20 +134,6 @@ void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::G
     pub_dynamixel_command_.publish(gripper_pos);
 }
 
-/*
-double DynamixelGripperNode::getAverage(const std::deque<double> &queue)
-{
-    double average = 0.0;
-
-    for (size_t i = 0; i < queue.size(); i++)
-        average += queue.at(i);
-
-    average /= queue.size();
-
-    return average;
-}
-*/
-
 void DynamixelGripperNode::gripperCommandGoalCallback()
 {
     ros::Rate loop_rate(100);
@@ -173,65 +145,6 @@ void DynamixelGripperNode::gripperCommandGoalCallback()
     std_msgs::Float64 gripper_pos;
     gripper_pos.data = set_pos;
     pub_dynamixel_command_.publish(gripper_pos);
-
-    /*
-    // empty queue
-    prev_positions_.clear();
-    prev_velocities_.clear();
-
-    // wait until position or max. torque is reached
-    while (ros::ok())
-    {
-        joint_states_received_ = false;
-        while (!joint_states_received_ && ros::ok())
-        {
-            ros::spinOnce();
-            loop_rate.sleep();
-        }
-
-        if (joint_states_->load > soft_torque_limit_)
-        {
-            gripper_pos.data = joint_states_->current_pos;
-            pub_dynamixel_command_.publish(gripper_pos);
-            ROS_WARN_STREAM("Torque soft limit reached (cur: " << joint_states_->load <<  ", limit: " <<
-                            soft_torque_limit_ <<  ")  " << set_pos << " reached");
-
-            break;
-        }
-
-        ROS_DEBUG_STREAM("Position difference: " << (joint_states_->current_pos - set_pos));
-
-        if (fabs(joint_states_->current_pos - set_pos) < position_threshold_)
-        {
-            ROS_INFO_STREAM("Position " << set_pos << " reached");
-            break;
-        }
-
-        if (prev_positions_.size() < queue_size_)
-        {
-            prev_positions_.push_back(joint_states_->current_pos);
-            prev_velocities_.push_back(joint_states_->velocity);
-        }
-        else
-        {
-            prev_positions_.pop_front();
-            prev_positions_.push_back(joint_states_->current_pos);
-
-            prev_velocities_.pop_front();
-            prev_velocities_.push_back(joint_states_->velocity);
-
-            if ((fabs(getAverage(prev_positions_) - joint_states_->current_pos) < position_threshold_) &&
-                    (getAverage(prev_velocities_) == joint_states_->velocity))
-            {
-                gripper_pos.data = joint_states_->current_pos;
-                pub_dynamixel_command_.publish(gripper_pos);
-                ROS_WARN_STREAM("Position does not change anymore");
-
-                break;
-            }
-        }
-    }
-    */
 
     joint_states_received_ = false;
     while (!joint_states_received_ && ros::ok())
