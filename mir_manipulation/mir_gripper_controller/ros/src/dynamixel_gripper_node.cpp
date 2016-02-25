@@ -7,7 +7,7 @@
  *      Author: Frederik Hegger
  */
 
-#include <deque>
+//#include <deque>
 #include <string>
 
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
@@ -27,19 +27,28 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     // read parameters
     ROS_INFO("Parameters:");
     ros::NodeHandle nh_prv("~");
-    nh_prv.param("soft_torque_limit", soft_torque_limit_, 0.5);
-    ROS_INFO_STREAM("\tSoft torque limit: " << soft_torque_limit_);
+    //nh_prv.param("soft_torque_limit", soft_torque_limit_, 0.5);
+    //ROS_INFO_STREAM("\tSoft torque limit: " << soft_torque_limit_);
 
-    nh_prv.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
-    nh_prv.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
-    ROS_INFO_STREAM("\tHard torque limit srv name: " << hard_torque_limit_srv_name_);
-    ROS_INFO_STREAM("\tHard torque limit: " << hard_torque_limit_);
+    //nh_prv.param<std::string>("hard_torque_limit_srv_name", hard_torque_limit_srv_name_, "set_torque_limit");
+    //nh_prv.param<double>("hard_torque_limit", hard_torque_limit_, 1.0);
+    //ROS_INFO_STREAM("\tHard torque limit srv name: " << hard_torque_limit_srv_name_);
+    //ROS_INFO_STREAM("\tHard torque limit: " << hard_torque_limit_);
 
-    nh_prv.param<double>("position_threshold", position_threshold_, 0.05);
-    ROS_INFO_STREAM("\tPosition threshold: " << position_threshold_);
+    //nh_prv.param<double>("position_threshold", position_threshold_, 0.05);
+    //ROS_INFO_STREAM("\tPosition threshold: " << position_threshold_);
 
-    nh_prv.param<int>("queue_size", queue_size_, 10);
-    ROS_INFO_STREAM("\tQueue size: " << queue_size_);
+    //nh_prv.param<int>("queue_size", queue_size_, 10);
+    //ROS_INFO_STREAM("\tQueue size: " << queue_size_);
+    nh_prv.param<double>("torque_limit", torque_limit_, 1.0);
+    nh_prv.param<std::string>("torque_limit_srv_name", torque_limit_srv_name_, "");
+    ROS_INFO_STREAM("\tTorque limit: " << torque_limit_); 
+    nh_prv.param<int>("compliance_margin", compliance_margin_, 4);
+    nh_prv.param<std::string>("compliance_margin_srv_name", compliance_margin_srv_name_, "");
+    ROS_INFO_STREAM("\tCompliance margin: " << compliance_margin_); 
+    nh_prv.param<int>("compliance_slope", compliance_slope_, 64);
+    nh_prv.param<std::string>("compliance_slope_srv_name", compliance_slope_srv_name_, "");
+    ROS_INFO_STREAM("\tCompliance slope: " << compliance_slope_);
 
     nh_prv.param<double>("gripper_configuration_open", gripper_configuration_open_, 0.0);
     ROS_INFO_STREAM("\tgripper configuration <open>: " << gripper_configuration_open_);
@@ -47,18 +56,43 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     nh_prv.param<double>("gripper_configuration_close", gripper_configuration_close_, 1.0);
     ROS_INFO_STREAM("\tgripper configuration <close>: " << gripper_configuration_close_);
 
-    // set the hard torque limit
+    // set the torque limit
     dynamixel_controllers::SetTorqueLimit torque_srv;
-    ros::ServiceClient srv_client_torque = nh_.serviceClient<dynamixel_controllers::SetTorqueLimit>(
-            hard_torque_limit_srv_name_);
+    ros::ServiceClient srv_client_torque = nh_.serviceClient<dynamixel_controllers::SetTorqueLimit>(torque_limit_srv_name_);
 
-    torque_srv.request.torque_limit = hard_torque_limit_;
+    torque_srv.request.torque_limit = torque_limit_;
 
-    ros::service::waitForService(hard_torque_limit_srv_name_, ros::Duration(10.0));
+    ros::service::waitForService(torque_limit_srv_name_, ros::Duration(10.0));
     while (!srv_client_torque.call(torque_srv))
     {
-        ROS_ERROR_STREAM("Failed to call service: " << hard_torque_limit_srv_name_ << "! Will try again ...");
-        sleep(1);
+        ROS_ERROR_STREAM("Failed to call service: " << torque_limit_srv_name_ << "! Will try again ...");
+        sleep(2);
+    }
+
+    // set the compliance margin
+    dynamixel_controllers::SetComplianceMargin compliance_margin_srv;
+    ros::ServiceClient srv_client_compliance_margin = nh_.serviceClient<dynamixel_controllers::SetComplianceMargin>(compliance_margin_srv_name_);
+
+    compliance_margin_srv.request.margin = compliance_margin_;
+
+    ros::service::waitForService(compliance_margin_srv_name_, ros::Duration(10.0));
+    while (!srv_client_compliance_margin.call(compliance_margin_srv))
+    {
+        ROS_ERROR_STREAM("Failed to call service: " << compliance_margin_srv_name_ << "! Will try again ...");
+        sleep(2);
+    }
+
+    // set the torque limit
+    dynamixel_controllers::SetComplianceSlope compliance_slope_srv;
+    ros::ServiceClient srv_client_compliance_slope = nh_.serviceClient<dynamixel_controllers::SetComplianceSlope>(compliance_slope_srv_name_);
+
+    compliance_slope_srv.request.slope = compliance_slope_;
+
+    ros::service::waitForService(compliance_slope_srv_name_, ros::Duration(10.0));
+    while (!srv_client_compliance_slope.call(compliance_slope_srv))
+    {
+        ROS_ERROR_STREAM("Failed to call service: " << compliance_slope_srv_name_ << "! Will try again ...");
+        sleep(2);
     }
 
     // start action server
@@ -82,12 +116,12 @@ void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState:
     sensor_msgs::JointState joint_state;
     joint_state.header.stamp = msg->header.stamp;
 
-    joint_state.name.push_back("gripper_finger_joint_r");
+    joint_state.name.push_back("gripper_motor_right_joint");
     joint_state.position.push_back(msg->current_pos);
     joint_state.velocity.push_back(msg->velocity);
     joint_state.effort.push_back(msg->load);
 
-    joint_state.name.push_back("gripper_finger_joint_l");
+    joint_state.name.push_back("gripper_motor_left_joint");
     joint_state.position.push_back(msg->current_pos);
     joint_state.velocity.push_back(msg->velocity);
     joint_state.effort.push_back(msg->load);
@@ -114,6 +148,7 @@ void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::G
     pub_dynamixel_command_.publish(gripper_pos);
 }
 
+/*
 double DynamixelGripperNode::getAverage(const std::deque<double> &queue)
 {
     double average = 0.0;
@@ -125,7 +160,7 @@ double DynamixelGripperNode::getAverage(const std::deque<double> &queue)
 
     return average;
 }
-
+*/
 
 void DynamixelGripperNode::gripperCommandGoalCallback()
 {
