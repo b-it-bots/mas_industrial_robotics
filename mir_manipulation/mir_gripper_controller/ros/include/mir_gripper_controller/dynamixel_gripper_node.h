@@ -12,6 +12,7 @@
 
 #include <actionlib/server/simple_action_server.h>
 #include <control_msgs/GripperCommandAction.h>
+#include <control_msgs/FollowJointTrajectoryAction.h>
 #include <dynamixel_controllers/SetTorqueLimit.h>
 #include <dynamixel_controllers/SetComplianceMargin.h>
 #include <dynamixel_controllers/SetComplianceSlope.h>
@@ -32,7 +33,10 @@ public:
 private:
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
-    void gripperCommandGoalCallback();
+    void followJointTrajectoryGoalCallback();
+    //void gripperCommandGoalCallback();
+    
+    void moveGripper(double position);
 
     ros::NodeHandle nh_;
 
@@ -41,9 +45,13 @@ private:
     ros::Subscriber sub_dynamixel_motor_states_;
     ros::Subscriber sub_gripper_command_;
 
-    actionlib::SimpleActionServer<control_msgs::GripperCommandAction> action_server_;
-    control_msgs::GripperCommandFeedback gripper_feedback_;
-    control_msgs::GripperCommandResult gripper_result_;
+    //actionlib::SimpleActionServer<control_msgs::GripperCommandAction> gripper_action_server_;
+    //control_msgs::GripperCommandFeedback gripper_feedback_;
+    //control_msgs::GripperCommandResult gripper_result_;
+    
+    actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> trajectory_action_server_;
+    control_msgs::FollowJointTrajectoryFeedback trajectory_feedback_;
+    control_msgs::FollowJointTrajectoryResult trajectory_result_;
 
     dynamixel_msgs::JointState::Ptr joint_states_;
     bool joint_states_received_;
