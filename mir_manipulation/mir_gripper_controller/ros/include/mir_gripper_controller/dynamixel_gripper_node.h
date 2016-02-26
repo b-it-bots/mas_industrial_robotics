@@ -34,7 +34,7 @@ private:
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
     void followJointTrajectoryGoalCallback();
-    //void gripperCommandGoalCallback();
+    void gripperCommandGoalCallback();
     
     void moveGripper(double position);
 
@@ -45,9 +45,9 @@ private:
     ros::Subscriber sub_dynamixel_motor_states_;
     ros::Subscriber sub_gripper_command_;
 
-    //actionlib::SimpleActionServer<control_msgs::GripperCommandAction> gripper_action_server_;
-    //control_msgs::GripperCommandFeedback gripper_feedback_;
-    //control_msgs::GripperCommandResult gripper_result_;
+    actionlib::SimpleActionServer<control_msgs::GripperCommandAction> gripper_action_server_;
+    control_msgs::GripperCommandFeedback gripper_feedback_;
+    control_msgs::GripperCommandResult gripper_result_;
     
     actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> trajectory_action_server_;
     control_msgs::FollowJointTrajectoryFeedback trajectory_feedback_;

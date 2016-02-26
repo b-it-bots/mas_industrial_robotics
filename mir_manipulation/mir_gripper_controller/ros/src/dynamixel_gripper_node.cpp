@@ -12,8 +12,8 @@
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
 
 DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
-    //gripper_action_server_(nh, "gripper_controller", false), 
-    trajectory_action_server_(nh, "gripper_controller", false), 
+    gripper_action_server_(nh, "gripper_controller/gripper_command", false), 
+    trajectory_action_server_(nh, "gripper_controller/follow_joint_trajectory", false), 
     joint_states_received_(false)
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
@@ -86,8 +86,8 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     // start action server
     trajectory_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::followJointTrajectoryGoalCallback, this));
     trajectory_action_server_.start();
-    //gripper_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
-    //gripper_action_server_.start();
+    gripper_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
+    gripper_action_server_.start();
 }
 
 DynamixelGripperNode::~DynamixelGripperNode()
@@ -153,24 +153,23 @@ void DynamixelGripperNode::moveGripper(double position)
         loop_rate.sleep();
     }
 
-    //gripper_result_.position = joint_states_->current_pos;
-    //gripper_result_.effort = joint_states_->load;
-    //gripper_result_.stalled = false;
-    //gripper_result_.reached_goal = true;
+    gripper_result_.position = joint_states_->current_pos;
+    gripper_result_.effort = joint_states_->load;
+    gripper_result_.stalled = false;
+    gripper_result_.reached_goal = true;
     
     trajectory_result_.error_code = trajectory_result_.SUCCESSFUL;
 
-    //gripper_action_server_.setSucceeded(gripper_result_);
+    gripper_action_server_.setSucceeded(gripper_result_);
     trajectory_action_server_.setSucceeded(trajectory_result_);
 }
 
-/*
 void DynamixelGripperNode::gripperCommandGoalCallback()
 {
     double set_pos = gripper_action_server_.acceptNewGoal()->command.position;
     moveGripper(set_pos);
 }
-*/
+
 void DynamixelGripperNode::followJointTrajectoryGoalCallback()
 {
     control_msgs::FollowJointTrajectoryGoal::ConstPtr goal = trajectory_action_server_.acceptNewGoal();
