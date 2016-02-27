@@ -4,9 +4,9 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_gripper.gazebo.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_gripper.transmission.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_limits.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v1/dynamixel_gripper.gazebo.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v1/dynamixel_gripper.transmission.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v1/dynamixel_limits.urdf.xacro" />
 
   <xacro:macro name="dynamixel_gripper" params="parent name *origin">
 
