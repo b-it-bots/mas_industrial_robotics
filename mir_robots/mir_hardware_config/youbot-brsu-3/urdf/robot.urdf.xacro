@@ -22,7 +22,7 @@
   <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />
   <!-- sensors -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
 
@@ -54,9 +54,9 @@
   </xacro:hokuyo_urg04_laser>
 
   <!-- 3D camera on arm --> <!-- NOTE: still called arm_cam3d due to legacy code -->
-  <xacro:realsense_camera name="arm_cam3d" parent="arm_link_5">
+  <xacro:intel_realsense_f200_camera name="arm_cam3d" parent="arm_link_5">
     <origin xyz="-0.055 0.03 0.02" rpy="-0.09 ${-M_PI / 2 + 0.15} -0.05" />
-  </xacro:realsense_camera>
+  </xacro:intel_realsense_f200_camera>
 
   <xacro:dynamixel_gripper name="gripper" parent="arm_link_5">
     <origin xyz="0 0 -0.02" rpy="0 0 0" />
