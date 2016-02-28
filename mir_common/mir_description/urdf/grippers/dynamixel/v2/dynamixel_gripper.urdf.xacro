@@ -44,11 +44,11 @@
     </link>
     
     <!-- motors -->
-    <xacro:dynamixel_motor_AX-12A name="${name}_motor_left" parent="${name}_motor_mount_link">
+    <xacro:dynamixel_motor_AX-12A name="${name}_motor_left" parent="${name}_motor_mount_link" motor_direction="1">
       <origin xyz="0.0 0.034 -0.009" rpy="0 0 0" />
     </xacro:dynamixel_motor_AX-12A>
     
-    <xacro:dynamixel_motor_AX-12A name="${name}_motor_right" parent="${name}_motor_mount_link">
+    <xacro:dynamixel_motor_AX-12A name="${name}_motor_right" parent="${name}_motor_mount_link" motor_direction="-1">
       <origin xyz="0.0 -0.034 -0.009" rpy="0 0 0" />
     </xacro:dynamixel_motor_AX-12A>
     
@@ -63,11 +63,11 @@
     
     <!-- finger mounts -->
     <xacro:festo_finger_mount name="${name}_finger_mount_left" parent="${name}_bracket_left_link">
-      <origin xyz="-0.014 -0.0125 0.026" rpy="0 0 0" />
+      <origin xyz="0.014 +0.0125 0.026" rpy="0 0 ${M_PI}" />
     </xacro:festo_finger_mount>
     
     <xacro:festo_finger_mount name="${name}_finger_mount_right" parent="${name}_bracket_right_link">
-      <origin xyz="0.014 0.0125 0.026" rpy="0 0 ${M_PI}" />
+      <origin xyz="-0.014 -0.0125 0.026" rpy="0 0 0" />
     </xacro:festo_finger_mount>
     
     <!-- fingers -->
