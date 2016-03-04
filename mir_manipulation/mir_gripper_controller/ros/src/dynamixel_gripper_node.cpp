@@ -8,12 +8,13 @@
  */
 
 #include <string>
+#include <vector>
 
 #include <mir_gripper_controller/dynamixel_gripper_node.h>
 
 DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
-    gripper_action_server_(nh, "gripper_controller/gripper_command", false), 
-    trajectory_action_server_(nh, "gripper_controller/follow_joint_trajectory", false), 
+    gripper_action_server_(nh, "gripper_controller/gripper_command", false),
+    trajectory_action_server_(nh, "gripper_controller/follow_joint_trajectory", false),
     joint_states_received_(false)
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
@@ -21,7 +22,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
                                   &DynamixelGripperNode::jointStatesCallback, this);
 
     sub_gripper_command_ = nh_.subscribe("gripper_command", 10,
-            &DynamixelGripperNode::gripperCommandCallback, this);
+                                         &DynamixelGripperNode::gripperCommandCallback, this);
 
     pub_joint_states_ = nh_.advertise < sensor_msgs::JointState > ("joint_state", 10);
 
@@ -30,10 +31,10 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     ros::NodeHandle nh_prv("~");
     nh_prv.param<double>("torque_limit", torque_limit_, 1.0);
     nh_prv.param<std::string>("torque_limit_srv_name", torque_limit_srv_name_, "");
-    ROS_INFO_STREAM("\tTorque limit: " << torque_limit_); 
+    ROS_INFO_STREAM("\tTorque limit: " << torque_limit_);
     nh_prv.param<int>("compliance_margin", compliance_margin_, 4);
     nh_prv.param<std::string>("compliance_margin_srv_name", compliance_margin_srv_name_, "");
-    ROS_INFO_STREAM("\tCompliance margin: " << compliance_margin_); 
+    ROS_INFO_STREAM("\tCompliance margin: " << compliance_margin_);
     nh_prv.param<int>("compliance_slope", compliance_slope_, 64);
     nh_prv.param<std::string>("compliance_slope_srv_name", compliance_slope_srv_name_, "");
     ROS_INFO_STREAM("\tCompliance slope: " << compliance_slope_);
@@ -46,7 +47,8 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 
     // set the torque limit
     dynamixel_controllers::SetTorqueLimit torque_srv;
-    ros::ServiceClient srv_client_torque = nh_.serviceClient<dynamixel_controllers::SetTorqueLimit>(torque_limit_srv_name_);
+    ros::ServiceClient srv_client_torque =
+            nh_.serviceClient<dynamixel_controllers::SetTorqueLimit>(torque_limit_srv_name_);
 
     torque_srv.request.torque_limit = torque_limit_;
 
@@ -59,7 +61,8 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 
     // set the compliance margin
     dynamixel_controllers::SetComplianceMargin compliance_margin_srv;
-    ros::ServiceClient srv_client_compliance_margin = nh_.serviceClient<dynamixel_controllers::SetComplianceMargin>(compliance_margin_srv_name_);
+    ros::ServiceClient srv_client_compliance_margin = nh_.serviceClient<dynamixel_controllers::SetComplianceMargin>
+            (compliance_margin_srv_name_);
 
     compliance_margin_srv.request.margin = compliance_margin_;
 
@@ -72,7 +75,8 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
 
     // set the torque limit
     dynamixel_controllers::SetComplianceSlope compliance_slope_srv;
-    ros::ServiceClient srv_client_compliance_slope = nh_.serviceClient<dynamixel_controllers::SetComplianceSlope>(compliance_slope_srv_name_);
+    ros::ServiceClient srv_client_compliance_slope = nh_.serviceClient<dynamixel_controllers::SetComplianceSlope>
+            (compliance_slope_srv_name_);
 
     compliance_slope_srv.request.slope = compliance_slope_;
 
@@ -84,7 +88,8 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     }
 
     // start action server
-    trajectory_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::followJointTrajectoryGoalCallback, this));
+    trajectory_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::followJointTrajectoryGoalCallback,
+            this));
     trajectory_action_server_.start();
     gripper_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
     gripper_action_server_.start();
@@ -124,9 +129,13 @@ void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::G
     double set_pos = 0.0;
 
     if (msg->command == mcr_manipulation_msgs::GripperCommand::OPEN)
+    {
         set_pos = gripper_configuration_open_;
+    }
     else if (msg->command == mcr_manipulation_msgs::GripperCommand::CLOSE)
+    {
         set_pos = gripper_configuration_close_;
+    }
     else
     {
         ROS_ERROR_STREAM("Unsupported gripper command: " << msg->command);
@@ -138,7 +147,7 @@ void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::G
     pub_dynamixel_command_.publish(gripper_pos);
 }
 
-void DynamixelGripperNode::moveGripper(double position) 
+void DynamixelGripperNode::moveGripper(double position)
 {
     ros::Rate loop_rate(100);
     // publish goal position
@@ -157,7 +166,7 @@ void DynamixelGripperNode::moveGripper(double position)
     gripper_result_.effort = joint_states_->load;
     gripper_result_.stalled = false;
     gripper_result_.reached_goal = true;
-    
+
     trajectory_result_.error_code = trajectory_result_.SUCCESSFUL;
 
     gripper_action_server_.setSucceeded(gripper_result_);

@@ -35,7 +35,7 @@ private:
     void gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
     void followJointTrajectoryGoalCallback();
     void gripperCommandGoalCallback();
-    
+
     void moveGripper(double position);
 
     ros::NodeHandle nh_;
@@ -48,7 +48,7 @@ private:
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction> gripper_action_server_;
     control_msgs::GripperCommandFeedback gripper_feedback_;
     control_msgs::GripperCommandResult gripper_result_;
-    
+
     actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> trajectory_action_server_;
     control_msgs::FollowJointTrajectoryFeedback trajectory_feedback_;
     control_msgs::FollowJointTrajectoryResult trajectory_result_;
