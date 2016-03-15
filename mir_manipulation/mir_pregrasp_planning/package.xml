@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_pregrasp_planning</name>
+  <version>0.1.0</version>
+  <description>
+    This package contains components to compute a *pre-grasp* pose, based on a target pose,
+    for the end effector of a robot's manipulator.
+  </description>
+  <license>GPLv3</license>
+
+  <maintainer email="jose.sanchez.loza@gmail.com">Jose Sanchez</maintainer>
+  <maintainer email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</maintainer>
+
+  <author email="jose.sanchez.loza@gmail.com">Jose Sanchez</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>roslint</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>mcr_pose_generation</run_depend>
+  <run_depend>mcr_pose_selection</run_depend>
+  <run_depend>mcr_manipulation_monitors</run_depend>
+  <run_depend>mcr_arm_motions</run_depend>
+  <run_depend>mcr_topic_tools</run_depend> 
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>visualization_msgs</run_depend>
+  <run_depend>mcr_manipulation_msgs</run_depend>
+  <run_depend>tf</run_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+</package>

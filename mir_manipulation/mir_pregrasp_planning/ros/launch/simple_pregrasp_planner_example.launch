@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- Note: example launch file. Do not modify! -->
+<launch>
+  <arg name="height_tolerance" default="0.15"/>
+  <arg name="min_distance_to_object" default="0.02"/>
+  <arg name="max_distance_to_object" default="0.06"/>
+
+  <node pkg="mir_pregrasp_planning" type="simple_pregrasp_planner_node"
+          name="simple_pregrasp_planner" output="screen">
+
+    <!-- Node cycle rate (in hz) -->
+    <param name="loop_rate" type="double" value="10.0"/>
+
+    <!-- Tolerance to decide whether an object should be re-oriented,
+        based on its height (in meters) -->
+    <param name="height_tolerance" type="double" value="$(arg height_tolerance)"/>
+
+    <!-- Closest distance the gripper should be to the object (in meters) -->
+    <param name="min_distance_to_object" type="double"
+            value="$(arg min_distance_to_object)"/>
+    <!-- Furthest distance the gripper should be to the object (in meters) -->
+    <param name="max_distance_to_object" type="double" 
+            value="$(arg max_distance_to_object)"/>
+  </node>
+</launch>

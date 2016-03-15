@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<!-- Note: this is a demo launch file for the youBot.-->
+<launch>
+  <!-- The following nodes are excluded from the group since they use move_group
+      from MoveIt!, which remaps the 'move_group' namespace to the group's namespace -->
+  <node pkg="mcr_pose_selection" type="reachability_pose_selector_trigger_node"
+          name="pregrasp_pipeline_pose_selector" output="screen">
+
+    <!-- the node cycle rate (in hz) -->
+    <param name="loop_rate" type="double" value="10.0"/>
+
+    <!-- MoveIt! node name -->
+    <param name="move_group" type="str" value="move_group"/>
+
+    <!-- Arm name to be used for giving commands-->
+    <param name="arm" type="str" value="arm_1"/>
+
+    <rosparam param="linear_offset">
+        - 0.00
+        - 0.00
+        - 0.00
+    </rosparam>
+
+    <remap from="~goal_pose_array"
+           to="/pregrasp_planner_pipeline/pose_generator/poses_list"/>
+  </node>
+
+  <node pkg="mcr_arm_motions" type="planned_motion_node"
+          name="move_arm_planned_motion" output="screen">
+
+    <!-- the cycle rate of the node (in hz) -->
+    <param name="~loop_rate"  type="double" value="10.0"/>
+
+    <param name="~move_group"  type="string" value="move_group"/>
+    <param name="~arm"  type="string" value="arm_1"/>
+
+    <remap from="~target_configuration"
+           to="/pregrasp_pipeline_pose_selector/joint_configuration"/>
+  </node>
+
+  <group ns="pregrasp_planner_pipeline">
+    <node pkg="mir_pregrasp_planning" type="simple_pregrasp_planner_node"
+            name="grasp_planner" output="screen">
+
+      <!-- the node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="10"/>
+
+      <!-- the tolerance to decide whether an object should be re-oriented,
+          based on its height (in meters) -->
+      <param name="height_tolerance" type="double" value="0.04"/>
+
+      <!-- Rotation offset to add to the reference_axis of the pose (in degrees) -->
+      <param name="rotation_offset" type="double" value="0.0"/>
+
+      <!-- Range of rotation allowed [0 - rotation_range] (in degrees). -->
+      <rosparam param="rotation_range">
+          - 270
+          - 90
+      </rosparam>
+
+      <!-- These params can be used to add an offset to the target pose
+          (e.g. to move the arm close to a target, but not the target itself) -->
+      <!-- Closest distance the gripper should be to the object (in meters) -->
+      <param name="min_distance_to_object" type="double" value="0.00"/>
+      <!-- Furthest distance the gripper should be to the object (in meters) -->
+      <!--param name="max_distance_to_object" type="double" value="0.04"/-->
+      <param name="max_distance_to_object" type="double" value="0.0"/>
+
+      <!-- Azimuth (in degrees) -->
+      <param name="min_azimuth" type="double" value="0.0"/>
+      <param name="max_azimuth" type="double" value="0.0"/>
+
+      <!-- Zenith (in degrees) -->
+      <param name="min_zenith" type="double" value="0.0"/>
+      <param name="max_zenith" type="double" value="0.0"/>
+
+      <!-- Wrist roll (in degrees) -->
+      <param name="min_roll" type="double" value="90.0"/>
+      <param name="max_roll" type="double" value="90.0"/>
+
+      <!-- Angular tolerance to check if an object is standing up (in degrees) -->
+      <param name="angular_tolerance" type="double" value="10.0"/>
+
+      <remap from="~pose_in" to="/mir_states/object_selector/object_pose"/>
+      <remap from="~grasp_type" to="/pregrasp_planner_pipeline/grasp_type"/>
+    </node>
+
+    <node pkg="mcr_pose_generation" type="pose_generator_node"
+            name="pose_generator" output="screen">
+
+      <rosparam command="load"
+                file="$(find mir_pregrasp_planning)/ros/config/gripper_configuration_matrix.yaml" />
+
+      <!-- the cycle rate of the node (in hz) -->
+      <param name="loop_rate"  type="double" value="10.0"/>
+
+      <!-- the sampling step for linear variables (in meters) -->
+      <param name="linear_step" type="double" value="0.01"/>
+
+      <!-- the sampling step for angular variables (in degrees) -->
+      <param name="angular_step" type="double" value="0.5"/>
+
+      <!-- the configuration matrix of the gripper to be used -->
+      <param name="gripper_config_matrix" type="str" value="youbot_dynamixel_gripper"/>
+
+      <remap from="~target_pose"
+             to="/pregrasp_planner_pipeline/grasp_planner/pose_out"/>
+      <remap from="~sampling_parameters"
+             to="/pregrasp_planner_pipeline/grasp_planner/sampling_parameters"/>
+    </node>
+
+    <node pkg="mir_pregrasp_planning" type="pregrasp_planner_pipeline_node"
+            name="coordinator" output="screen">
+
+      <!-- the node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="30.0"/>
+
+      <remap from="~event_in" to="/pregrasp_planner_pipeline/event_in"/>
+      <remap from="~event_out" to="/pregrasp_planner_pipeline/event_out"/>
+
+      <!-- To trigger components -->
+      <remap from="~start_pregrasp_planner"
+             to="/pregrasp_planner_pipeline/grasp_planner/event_in"/>
+      <remap from="~start_pose_generator"
+             to="/pregrasp_planner_pipeline/pose_generator/event_in"/>
+      <remap from="~start_pose_selector"
+             to="/pregrasp_pipeline_pose_selector/event_in"/>
+
+      <!-- To get feedback from components -->
+      <remap from="~pregrasp_planner_status"
+             to="/pregrasp_planner_pipeline/grasp_planner/event_out"/>
+      <remap from="~pose_generator_status"
+             to="/pregrasp_planner_pipeline/pose_generator/event_out"/>
+      <remap from="~pose_selector_status"
+             to="/pregrasp_pipeline_pose_selector/event_out"/>
+    </node>
+  </group>
+
+  <group ns="move_arm_planned">
+    <node pkg="mcr_topic_tools" type="brics_joints_to_joint_states_node"
+            name="topic_transformer">
+      <!-- the cycle rate of the node (in Hz) -->
+      <param name="loop_rate" type="double" value="10.0"/>
+
+      <remap from="~configuration_in"
+             to="/pregrasp_pipeline_pose_selector/joint_configuration"/>
+      <remap from="~configuration_out"
+             to="/move_arm_planned/joint_position_monitor/configuration"/>
+    </node>
+
+    <node pkg="mcr_manipulation_monitors" type="joint_position_monitors_node"
+            name="joint_position_monitor" output="screen">
+      <remap from="~joint_states" to="/joint_states"/>
+
+      <!-- the cycle rate of the node (in Hz) -->
+      <param name="loop_rate" value="10.0"/>
+
+      <!-- tolerance for the joint positions -->
+      <param name="epsilon" value="0.08"/>
+
+      <!-- a list of the joint names to check -->
+      <rosparam param="target_joint_names">
+          - 'arm_joint_1'
+          - 'arm_joint_2'
+          - 'arm_joint_3'
+          - 'arm_joint_4'
+          - 'arm_joint_5'
+      </rosparam>
+
+      <remap from="~joint_states" to="/joint_states"/>
+    </node>
+
+    <node pkg="mcr_arm_motions" type="planned_motion_with_feedback_node"
+            name="coordinator" output="screen">
+
+      <!-- the node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="30.0"/>
+
+      <remap from="~event_in" to="/move_arm_planned/event_in"/>
+      <remap from="~event_out" to="/move_arm_planned/event_out"/>
+
+      <!-- To trigger components -->
+      <remap from="~start_planned_motion"
+             to="/move_arm_planned_motion/event_in"/>
+      <remap from="~start_monitor"
+             to="/move_arm_planned/joint_position_monitor/event_in"/>
+
+      <!-- To get feedback from components -->
+      <remap from="~monitor_status"
+             to="/move_arm_planned/joint_position_monitor/event_out"/>
+    </node>
+  </group>
+</launch>
