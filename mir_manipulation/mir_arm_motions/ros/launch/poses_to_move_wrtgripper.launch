@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!-- Note: this is an example launch file, do not modify. -->
+<launch>
+  <arg name="reference_frame" default="gripper_tip_link"/>
+  <arg name="target_frame" default="gripper_tip_link"/>
+
+  <group ns="mir_manipulation/poses_to_move_wrtgripper">
+    <!-- Start pose -->
+    <node pkg="mcr_common_converters" type="transform_to_pose_converter_node"
+          name="move_wrtgripper_transform_to_pose_converter" output="screen">
+
+      <!-- Reference frame from which the pose is transformed -->
+      <param name="reference_frame" type="str" value="$(arg reference_frame)"/>
+      <!-- Target frame to which the pose is transformed -->
+      <param name="target_frame" type="str" value="$(arg target_frame)"/>
+
+      <!-- Cycle rate of the node (in Hz) -->
+      <param name="loop_rate" type="double" value="10.0"/>
+
+      <remap from="~converted_pose" to="/linear_motions/start_pose"/>
+    </node>
+
+    <!-- Goal pose -->
+    <node pkg="mcr_common_converters" type="pose_shifter_node"
+          name="move_wrtgripper_pose_shifter" output="screen">
+
+      <param name="reference_frame" type="string" value="base_link"/>
+
+      <remap from="~pose_in" to="/linear_motions/start_pose"/>
+      <remap from="~pose_out" to="/linear_motions/goal_pose"/>
+    </node>
+
+    <node pkg="mcr_common_converters" type="pose_shifter_pipeline_node"
+          name="move_wrtgripper_coordinator" output="screen">
+
+      <!-- the node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="30.0"/>
+
+      <remap from="~event_in" to="/mir_manipulation/poses_to_move_wrtgripper/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/poses_to_move_wrtgripper/event_out"/>
+
+      <!-- To trigger components -->
+      <remap from="~start_transformer"
+             to="/mir_manipulation/poses_to_move_wrtgripper/move_wrtgripper_transform_to_pose_converter/event_in"/>
+      <remap from="~start_pose_shifter"
+             to="/mir_manipulation/poses_to_move_wrtgripper/move_wrtgripper_pose_shifter/event_in"/>
+
+      <!-- To get feedback from components -->
+      <remap from="~pose_shifter_status"
+             to="/mir_manipulation/poses_to_move_wrtgripper/move_wrtgripper_pose_shifter/event_out"/>
+    </node>
+  </group>
+</launch>

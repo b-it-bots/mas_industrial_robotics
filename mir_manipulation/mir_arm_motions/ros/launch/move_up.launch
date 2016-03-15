@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<!-- Note: this is an example launch file, do not modify. -->
+<launch>
+  <arg name="linear_offset" default="[0.0, 0.0, 0.1]"/>
+  <arg name="reference_frame" default="base_link"/>
+  <arg name="target_frame" default="arm_link_5"/>
+
+  <group ns="mir_manipulation/poses_for_dmps">
+    <!-- Start pose -->
+    <node pkg="mcr_common_converters" type="transform_to_pose_converter_node"
+          name="transform_to_pose_converter" output="screen">
+
+      <!-- Reference frame from which the pose is transformed -->
+      <param name="reference_frame" type="str" value="$(arg reference_frame)"/>
+      <!-- Target frame to which the pose is transformed -->
+      <param name="target_frame" type="str" value="$(arg target_frame)"/>
+
+      <!-- Cycle rate of the node (in Hz) -->
+      <param name="loop_rate" type="double" value="10.0"/>
+
+      <remap from="~converted_pose" to="/mir_manipulation/dmp_generator/start_pose"/>
+    </node>
+
+    <!-- Goal pose -->
+    <node pkg="mcr_common_converters" type="pose_shifter_node"
+          name="pose_shifter" output="screen">
+
+      <!-- Linear offset in X, Y and Z (in meters) -->
+      <rosparam param="linear_offset" subst_value="True">$(arg linear_offset)</rosparam>
+
+       <remap from="~pose_in" to="/mir_manipulation/dmp_generator/start_pose"/>
+       <remap from="~pose_out" to="/mir_manipulation/dmp_generator/goal_pose"/>
+    </node>
+
+    <node pkg="mcr_common_converters" type="pose_shifter_pipeline_node"
+          name="coordinator" output="screen">
+
+      <!-- the node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="30.0"/>
+
+      <remap from="~event_in" to="/mir_manipulation/poses_for_dmps/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/poses_for_dmps/event_out"/>
+
+      <!-- To trigger components -->
+      <remap from="~start_transformer"
+             to="/mir_manipulation/poses_for_dmps/transform_to_pose_converter/event_in"/>
+      <remap from="~start_pose_shifter"
+             to="/mir_manipulation/poses_for_dmps/pose_shifter/event_in"/>
+
+      <!-- To get feedback from components -->
+      <remap from="~pose_shifter_status"
+             to="/mir_manipulation/poses_for_dmps/pose_shifter/event_out"/>
+    </node>
+    <!--todo: do a coordinator to handle all of this (compute both poses
+        and publish them) -->
+  </group>
+
+  <!-- DMP server -->
+  <include file="$(find dmp)/launch/dmp.launch" ns="mir_manipulation"/>
+
+  <node pkg="mcr_trajectory_generation" type="dmp_based_task_space_node"
+        name="dmp_generator" output="screen" ns="mir_manipulation">
+    <!-- Load configuration parameters -->
+    <rosparam command="load"
+            file="$(find mcr_trajectory_generation)/ros/config/task_space_examples.yaml" />
+
+    <!-- Type of motion to plan for -->
+    <param name="primitive_motion" type="str" value="straight_down"/>
+
+    <!-- Reference frame in which the pose array is specified -->
+    <param name="reference_frame" type="str" value="base_link"/>
+
+    <!--  Desired duration of the trajectory (scaled to the duration of the
+    demonstrated trajectory, e.g. a value of 2 will generate a plan twice as
+    long as the demonstrated one) -->
+    <param name="duration" type="double" value="1.0"/>
+  </node>
+
+  <node pkg="mcr_trajectory_generation" type="ik_trajectory_solver_node"
+        name="dmp_demo_ik_trajectory_solver" output="screen">
+    <!-- Move group for MoveIt! -->
+    <param name="move_group" type="str" value="move_group"/>
+
+    <!-- Name of the group to compute the inverse kinematics -->
+    <param name="arm" type="str" value="arm_1"/>
+
+    <!-- The reference frame for the trajectory -->
+    <param name="reference_frame" type="str" value="base_link"/>
+
+    <!-- Joint names of the arm -->
+    <rosparam param="joint_names">
+      - 'arm_joint_1'
+      - 'arm_joint_2'
+      - 'arm_joint_3'
+      - 'arm_joint_4'
+      - 'arm_joint_5'
+    </rosparam>
+
+    <remap from="~poses" to="/mir_manipulation/dmp_generator/trajectory"/>
+  </node>
+
+  <node pkg="mcr_trajectory_generation" type="trajectory_executor_node"
+        name="dmp_demo_trajectory_executor" output="screen">
+    <!-- Trajectory controller to be used to execute the trajectory. -->
+    <param name="trajectory_controller" type="str"
+           value="/arm_1/arm_controller/follow_joint_trajectory"/>
+
+    <remap from="~trajectory_in"
+           to="/mir_manipulation/dmp_trajectory_demo/trajectory_generator/trajectory_out"/>
+    <remap from="~trajectory_out"
+         to="/arm_1/arm_controller/follow_joint_trajectory/goal"/>
+  </node>
+
+  <group ns="mir_manipulation/dmp_trajectory_demo">
+    <node pkg="mcr_trajectory_generation" type="trajectory_generator_node"
+          name="trajectory_generator" output="screen">
+      <!-- Time scaling factor to control the duration of moving from point 1 to
+          # point 2 (in seconds). -->
+      <param name="scaling_factor" type="double" value="1.0"/>
+
+      <!-- Maximum joint velocity allowed. -->
+      <param name="max_velocity" type="str" value="1.5"/>
+
+      <!-- Maximum joint acceleration allowed. -->
+      <param name="max_acceleration" type="str" value="1.0"/>
+
+      <remap from="~trajectory_in" to="/dmp_demo_ik_trajectory_solver/trajectory"/>
+    </node>
+
+    <node pkg="mcr_trajectory_generation" type="dmp_trajectory_demo_node"
+          name="coordinator" output="screen">
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="30.0"/>
+
+      <remap from="~event_in" to="/mir_manipulation/dmp_trajectory_demo/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/dmp_trajectory_demo/event_out"/>
+
+      <!-- To trigger components -->
+      <remap from="~start_dmp_generator" to="/mir_manipulation/dmp_generator/event_in"/>
+      <remap from="~start_ik_solver" to="/dmp_demo_ik_trajectory_solver/event_in"/>
+      <remap from="~start_trajectory_generator"
+             to="/mir_manipulation/dmp_trajectory_demo/trajectory_generator/event_in"/>
+
+      <!-- To obtain feedback from components -->
+      <remap from="~dmp_generator_status" to="/mir_manipulation/dmp_generator/event_out"/>
+      <remap from="~ik_solver_status" to="/dmp_demo_ik_trajectory_solver/event_out"/>
+      <remap from="~trajectory_generator_status"
+             to="/mir_manipulation/dmp_trajectory_demo/trajectory_generator/event_out"/>
+    </node>
+  </group>
+</launch>
