@@ -6,7 +6,7 @@
     poses_to_move_X launch files -->
   <arg name="target_frame" default="arm_link_5"/>
 
-  <group ns="mir_manipulation/cartesian_controller_demo">
+  <group ns="mir_manipulation/cartesian_controller">
     <node pkg="mcr_common_converters" type="transform_to_pose_converter_node"
           name="pose_converter" output="screen">
       <!-- Node cycle rate (in hz) -->
@@ -30,8 +30,8 @@
       <remap from="~pose_out" to="/linear_motions/goal_pose_initial"/>
     </node>
 
-    <node pkg="mcr_manipulation_measurers" type="component_wise_pose_error_calculator_node" 
-            name="pose_error_calculator" output="screen">
+    <node pkg="mcr_manipulation_measurers" type="component_wise_pose_error_calculator_node"
+          name="pose_error_calculator" output="screen">
       <!-- Node cycle rate (in hz) -->
       <param name="loop_rate" type="double" value="20.0" />
 
@@ -52,7 +52,7 @@
       <param name="p_gain_y" type="double" value="0.5"/>
       <param name="p_gain_z" type="double" value="0.5"/>
 
-      <remap from="~pose_error" 
+      <remap from="~pose_error"
              to="/mir_manipulation/guarded_motion/pose_error_monitor/pose_error"/>
     </node>
 
@@ -63,7 +63,7 @@
       <param name="loop_rate" type="double" value="10.0"/>
 
       <remap from="~twist"
-             to="/mir_manipulation/cartesian_controller_demo/twist_controller/controlled_twist"/>
+             to="/mir_manipulation/cartesian_controller/twist_controller/controlled_twist"/>
     </node>
 
     <node pkg="mcr_guarded_approach_pose" type="approach_pose_distance_constrained_node"
@@ -71,26 +71,26 @@
       <!-- Node cycle rate (in hz) -->
       <param name="loop_rate" type="double" value="30.0"/>
 
-      <remap from="~event_in" 
-             to="/mir_manipulation/cartesian_controller_demo/event_in"/>
+      <remap from="~event_in"
+             to="/mir_manipulation/cartesian_controller/event_in"/>
       <remap from="~event_out"
-             to="/mir_manipulation/cartesian_controller_demo/event_out"/>
+             to="/mir_manipulation/cartesian_controller/event_out"/>
       <remap from="~motion_feedback"
              to="/mir_manipulation/guarded_motion/cartesian_motion/event_out"/>
 
       <!-- To trigger components -->
       <remap from="~start_pose_converter"
-             to="/mir_manipulation/cartesian_controller_demo/pose_converter/event_in"/>
+             to="/mir_manipulation/cartesian_controller/pose_converter/event_in"/>
       <remap from="~start_calculator"
-             to="/mir_manipulation/cartesian_controller_demo/pose_error_calculator/event_in"/>
+             to="/mir_manipulation/cartesian_controller/pose_error_calculator/event_in"/>
       <remap from="~start_twist_controller"
-             to="/mir_manipulation/cartesian_controller_demo/twist_controller/event_in"/>
+             to="/mir_manipulation/cartesian_controller/twist_controller/event_in"/>
       <remap from="~start_twist_limiter"
-             to="/mir_manipulation/cartesian_controller_demo/twist_limiter/event_in"/>
+             to="/mir_manipulation/cartesian_controller/twist_limiter/event_in"/>
       <remap from="~start_guarded_approach"
              to="/mir_manipulation/guarded_motion/distance_constrained/event_in"/>
     </node>
-</group>
+  </group>
 
   <group ns="mir_manipulation/guarded_motion">
     <node pkg="mcr_geometric_relation_monitors" type="component_wise_pose_error_monitor_node"
@@ -104,7 +104,7 @@
     </node>
 
     <node pkg="mcr_arm_motions" type="cartesian_motion_node"
-          name="cartesian_motion" output="screen">
+            name="cartesian_motion" output="screen">
 
       <!-- Node cycle rate (in hz) -->
       <param name="loop_rate" type="double" value="10.0" />
@@ -113,8 +113,9 @@
       <param name="motion_duration" type="double" value="4.0"/>
 
       <remap from="~desired_velocity"
-             to="/mir_manipulation/cartesian_controller_demo/twist_limiter/limited_twist"/>
-      <remap from="~velocity_command" to="/arm_1/arm_controller/cartesian_velocity_command"/>
+             to="/mir_manipulation/cartesian_controller/twist_limiter/limited_twist"/>
+      <remap from="~velocity_command"
+             to="/arm_1/arm_controller/cartesian_velocity_command"/>
     </node>
 
     <node pkg="mcr_guarded_approach_pose" type="distance_constrained_node"
@@ -136,7 +137,7 @@
       <remap from="~monitor_feedback"
              to="mir_manipulation/guarded_motion/pose_error_monitor/feedback"/>
       <remap from="~event_out"
-             to="/mir_manipulation/cartesian_controller_demo/event_in"/>
+             to="/mir_manipulation/cartesian_controller/event_in"/>
     </node>
   </group>
 </launch>

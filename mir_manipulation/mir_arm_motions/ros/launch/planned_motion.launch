@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <node pkg="mcr_arm_motions" type="planned_motion_node"
-            name="planned_motion"  output="screen" respawn="true">
+            name="planned_motion"  output="screen" respawn="true" ns="mir_manipulation">
 
         <!-- the cycle rate of the node (in hz) -->
         <param name="~loop_rate"  type="double" value="10.0"/>

@@ -76,6 +76,7 @@
     <param name="duration" type="double" value="1.0"/>
   </node>
 
+  <!-- Do not use namespace to avoid mismatch from Moveit! topics -->
   <node pkg="mcr_trajectory_generation" type="ik_trajectory_solver_node"
         name="dmp_demo_ik_trajectory_solver" output="screen">
     <!-- Move group for MoveIt! -->
@@ -100,18 +101,16 @@
   </node>
 
   <node pkg="mcr_trajectory_generation" type="trajectory_executor_node"
-        name="dmp_demo_trajectory_executor" output="screen">
+        name="dmp_demo_trajectory_executor" output="screen" ns="mir_manipulation">
     <!-- Trajectory controller to be used to execute the trajectory. -->
     <param name="trajectory_controller" type="str"
            value="/arm_1/arm_controller/follow_joint_trajectory"/>
 
     <remap from="~trajectory_in"
-           to="/mir_manipulation/dmp_trajectory_demo/trajectory_generator/trajectory_out"/>
-    <remap from="~trajectory_out"
-         to="/arm_1/arm_controller/follow_joint_trajectory/goal"/>
+           to="/mir_manipulation/dmp_trajectory/trajectory_generator/trajectory_out"/>
   </node>
 
-  <group ns="mir_manipulation/dmp_trajectory_demo">
+  <group ns="mir_manipulation/dmp_trajectory">
     <node pkg="mcr_trajectory_generation" type="trajectory_generator_node"
           name="trajectory_generator" output="screen">
       <!-- Time scaling factor to control the duration of moving from point 1 to
@@ -132,20 +131,20 @@
       <!-- Node cycle rate (in hz) -->
       <param name="loop_rate" type="double" value="30.0"/>
 
-      <remap from="~event_in" to="/mir_manipulation/dmp_trajectory_demo/event_in"/>
-      <remap from="~event_out" to="/mir_manipulation/dmp_trajectory_demo/event_out"/>
+      <remap from="~event_in" to="/mir_manipulation/dmp_trajectory/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/dmp_trajectory/event_out"/>
 
       <!-- To trigger components -->
       <remap from="~start_dmp_generator" to="/mir_manipulation/dmp_generator/event_in"/>
       <remap from="~start_ik_solver" to="/dmp_demo_ik_trajectory_solver/event_in"/>
       <remap from="~start_trajectory_generator"
-             to="/mir_manipulation/dmp_trajectory_demo/trajectory_generator/event_in"/>
+             to="/mir_manipulation/dmp_trajectory/trajectory_generator/event_in"/>
 
       <!-- To obtain feedback from components -->
       <remap from="~dmp_generator_status" to="/mir_manipulation/dmp_generator/event_out"/>
       <remap from="~ik_solver_status" to="/dmp_demo_ik_trajectory_solver/event_out"/>
       <remap from="~trajectory_generator_status"
-             to="/mir_manipulation/dmp_trajectory_demo/trajectory_generator/event_out"/>
+             to="/mir_manipulation/dmp_trajectory/trajectory_generator/event_out"/>
     </node>
   </group>
 </launch>

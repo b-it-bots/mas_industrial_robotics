@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <!-- Note: this is an example launch file, do not modify. -->
 <launch>
+  <!-- Do not use namespace to avoid mismatch from Moveit! topics -->
   <node pkg="mcr_trajectory_generation" type="ik_trajectory_solver_node"
-        name="linear_interpolator_demo_ik_trajectory_solver" output="screen">
+        name="linear_interpolator_ik_trajectory_solver" output="screen">
     <!-- Move group for MoveIt! -->
     <param name="move_group" type="str" value="move_group"/>
 
@@ -22,22 +23,20 @@
     </rosparam>
 
     <remap from="~poses" 
-           to="/mir_manipulation/linear_interpolator_demo/linear_interpolator/path"/>
+           to="/mir_manipulation/linear_interpolator/linear_interpolator/path"/>
   </node>
 
   <node pkg="mcr_trajectory_generation" type="trajectory_executor_node"
-        name="linear_interpolator_demo_trajectory_executor" output="screen" ns="mir_manipulation">
+        name="linear_interpolator_trajectory_executor" output="screen" ns="mir_manipulation">
     <!-- Trajectory controller to be used to execute the trajectory. -->
     <param name="trajectory_controller" type="str"
            value="/arm_1/arm_controller/follow_joint_trajectory"/>
 
     <remap from="~trajectory_in"
-           to="/mir_manipulation/linear_interpolator_demo/trajectory_generator/trajectory_out"/>
-    <remap from="~trajectory_out"
-         to="/arm_1/arm_controller/follow_joint_trajectory/goal"/>
+           to="/mir_manipulation/linear_interpolator/trajectory_generator/trajectory_out"/>
   </node>
 
-  <group ns="mir_manipulation/linear_interpolator_demo">
+  <group ns="mir_manipulation/linear_interpolator">
     <node pkg="mcr_trajectory_generation" type="linear_interpolator_node"
           name="linear_interpolator" output="screen">
 
@@ -67,7 +66,7 @@
       <param name="max_acceleration" type="str" value="1.0"/>
 
       <remap from="~trajectory_in"
-             to="/linear_interpolator_demo_ik_trajectory_solver/trajectory"/>
+             to="/linear_interpolator_ik_trajectory_solver/trajectory"/>
     </node>
 
     <node pkg="mcr_trajectory_generation" type="linear_interpolator_demo_node"
@@ -75,24 +74,24 @@
       <!-- Node cycle rate (in hz) -->
       <param name="loop_rate" type="double" value="30.0"/>
 
-      <remap from="~event_in" to="/mir_manipulation/linear_interpolator_demo/event_in"/>
-      <remap from="~event_out" to="/mir_manipulation/linear_interpolator_demo/event_out"/>
+       <remap from="~event_in" to="/mir_manipulation/linear_interpolator/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/linear_interpolator/event_out"/>
 
       <!-- To trigger components -->
       <remap from="~start_linear_interpolator"
-             to="/mir_manipulation/linear_interpolator_demo/linear_interpolator/event_in"/>
+             to="/mir_manipulation/linear_interpolator/linear_interpolator/event_in"/>
       <remap from="~start_ik_solver"
-             to="/linear_interpolator_demo_ik_trajectory_solver/event_in"/>
+             to="/linear_interpolator_ik_trajectory_solver/event_in"/>
       <remap from="~start_trajectory_generator"
-             to="/mir_manipulation/linear_interpolator_demo/trajectory_generator/event_in"/>
+             to="/mir_manipulation/linear_interpolator/trajectory_generator/event_in"/>
 
       <!-- To obtain feedback from components -->
       <remap from="~linear_interpolator_status"
-             to="/mir_manipulation/linear_interpolator_demo/linear_interpolator/event_out"/>
+             to="/mir_manipulation/linear_interpolator/linear_interpolator/event_out"/>
       <remap from="~ik_solver_status"
-             to="/linear_interpolator_demo_ik_trajectory_solver/event_out"/>
+             to="/linear_interpolator_ik_trajectory_solver/event_out"/>
       <remap from="~trajectory_generator_status"
-             to="/mir_manipulation/linear_interpolator_demo/trajectory_generator/event_out"/>
+             to="/mir_manipulation/linear_interpolator/trajectory_generator/event_out"/>
     </node>
   </group>
 </launch>
