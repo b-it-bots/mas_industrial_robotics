@@ -22,7 +22,7 @@
     </rosparam>
 
     <remap from="~goal_pose_array"
-           to="/pregrasp_planner_pipeline/pose_generator/poses_list"/>
+           to="/mir_manipulation/pregrasp_planner/pose_generator/poses_list"/>
   </node>
 
   <node pkg="mcr_arm_motions" type="planned_motion_node"
@@ -38,7 +38,7 @@
            to="/pregrasp_pipeline_pose_selector/joint_configuration"/>
   </node>
 
-  <group ns="pregrasp_planner_pipeline">
+  <group ns="mir_manipulation/pregrasp_planner">
     <node pkg="mir_pregrasp_planning" type="simple_pregrasp_planner_node"
             name="grasp_planner" output="screen">
 
@@ -82,7 +82,7 @@
       <param name="angular_tolerance" type="double" value="10.0"/>
 
       <remap from="~pose_in" to="/mir_states/object_selector/object_pose"/>
-      <remap from="~grasp_type" to="/pregrasp_planner_pipeline/grasp_type"/>
+      <remap from="~grasp_type" to="/mir_manipulation/pregrasp_planner/grasp_type"/>
     </node>
 
     <node pkg="mcr_pose_generation" type="pose_generator_node"
@@ -104,9 +104,9 @@
       <param name="gripper_config_matrix" type="str" value="youbot_dynamixel_gripper"/>
 
       <remap from="~target_pose"
-             to="/pregrasp_planner_pipeline/grasp_planner/pose_out"/>
+             to="/mir_manipulation/pregrasp_planner/grasp_planner/pose_out"/>
       <remap from="~sampling_parameters"
-             to="/pregrasp_planner_pipeline/grasp_planner/sampling_parameters"/>
+             to="/mir_manipulation/pregrasp_planner/grasp_planner/sampling_parameters"/>
     </node>
 
     <node pkg="mir_pregrasp_planning" type="pregrasp_planner_pipeline_node"
@@ -115,28 +115,28 @@
       <!-- the node cycle rate (in hz) -->
       <param name="loop_rate" type="double" value="30.0"/>
 
-      <remap from="~event_in" to="/pregrasp_planner_pipeline/event_in"/>
-      <remap from="~event_out" to="/pregrasp_planner_pipeline/event_out"/>
+      <remap from="~event_in" to="/mir_manipulation/pregrasp_planner/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/pregrasp_planner/event_out"/>
 
       <!-- To trigger components -->
       <remap from="~start_pregrasp_planner"
-             to="/pregrasp_planner_pipeline/grasp_planner/event_in"/>
+             to="/mir_manipulation/pregrasp_planner/grasp_planner/event_in"/>
       <remap from="~start_pose_generator"
-             to="/pregrasp_planner_pipeline/pose_generator/event_in"/>
+             to="/mir_manipulation/pregrasp_planner/pose_generator/event_in"/>
       <remap from="~start_pose_selector"
              to="/pregrasp_pipeline_pose_selector/event_in"/>
 
       <!-- To get feedback from components -->
       <remap from="~pregrasp_planner_status"
-             to="/pregrasp_planner_pipeline/grasp_planner/event_out"/>
+             to="/mir_manipulation/pregrasp_planner/grasp_planner/event_out"/>
       <remap from="~pose_generator_status"
-             to="/pregrasp_planner_pipeline/pose_generator/event_out"/>
+             to="/mir_manipulation/pregrasp_planner/pose_generator/event_out"/>
       <remap from="~pose_selector_status"
              to="/pregrasp_pipeline_pose_selector/event_out"/>
     </node>
   </group>
 
-  <group ns="move_arm_planned">
+  <group ns="mir_manipulation/move_arm_planned">
     <node pkg="mcr_topic_tools" type="brics_joints_to_joint_states_node"
             name="topic_transformer">
       <!-- the cycle rate of the node (in Hz) -->
@@ -145,7 +145,7 @@
       <remap from="~configuration_in"
              to="/pregrasp_pipeline_pose_selector/joint_configuration"/>
       <remap from="~configuration_out"
-             to="/move_arm_planned/joint_position_monitor/configuration"/>
+             to="/mir_manipulation/move_arm_planned/joint_position_monitor/configuration"/>
     </node>
 
     <node pkg="mcr_manipulation_monitors" type="joint_position_monitors_node"
@@ -176,17 +176,17 @@
       <!-- the node cycle rate (in hz) -->
       <param name="loop_rate" type="double" value="30.0"/>
 
-      <remap from="~event_in" to="/move_arm_planned/event_in"/>
-      <remap from="~event_out" to="/move_arm_planned/event_out"/>
+      <remap from="~event_in" to="/mir_manipulation/move_arm_planned/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/move_arm_planned/event_out"/>
 
       <!-- To trigger components -->
       <remap from="~start_planned_motion" to="/move_arm_planned_motion/event_in"/>
       <remap from="~start_monitor"
-             to="/move_arm_planned/joint_position_monitor/event_in"/>
+             to="/mir_manipulation/move_arm_planned/joint_position_monitor/event_in"/>
 
       <!-- To get feedback from components -->
       <remap from="~monitor_status"
-             to="/move_arm_planned/joint_position_monitor/event_out"/>
+             to="/mir_manipulation/move_arm_planned/joint_position_monitor/event_out"/>
     </node>
   </group>
 </launch>

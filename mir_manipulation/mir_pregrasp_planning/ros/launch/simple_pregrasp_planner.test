@@ -7,13 +7,13 @@
   </include>
 
   <test pkg="mir_pregrasp_planning" type="simple_pregrasp_planner_test.py"
-          test-name="test_simple_pregrasp_planner">
+          test-name="test_simple_pregrasp_planner" ns="mir_manipulation">
 
-    <remap from="~event_out" to="/simple_pregrasp_planner/event_in"/>
-    <remap from="~pose_in" to="/simple_pregrasp_planner/pose_in"/>
-    <remap from="~pose_out" to="/simple_pregrasp_planner/pose_out"/>
+    <remap from="~event_out" to="/mir_manipulation/simple_pregrasp_planner/event_in"/>
+    <remap from="~pose_in" to="/mir_manipulation/simple_pregrasp_planner/pose_in"/>
+    <remap from="~pose_out" to="/mir_manipulation/simple_pregrasp_planner/pose_out"/>
     <remap from="~sampling_parameters"
-           to="/simple_pregrasp_planner/sampling_parameters"/>
-    <remap from="~grasp_type" to="/simple_pregrasp_planner/grasp_type"/>
+           to="/mir_manipulation/simple_pregrasp_planner/sampling_parameters"/>
+    <remap from="~grasp_type" to="/mir_manipulation/simple_pregrasp_planner/grasp_type"/>
   </test>
 </launch>

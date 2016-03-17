@@ -15,11 +15,11 @@
   </include>
 
   <test pkg="mir_pregrasp_planning" type="pregrasp_planner_pipeline_test.py"
-          test-name="test_pregrasp_planner_pipeline">
+          test-name="test_pregrasp_planner_pipeline" ns="mir_manipulation">
 
-    <remap from="~event_out" to="/pregrasp_planner_pipeline/event_in"/>
-    <remap from="~pose_in" to="/pregrasp_planner_pipeline/target_pose"/>
-    <remap from="~configuration_out" to="/pregrasp_planner_pipeline/configuration_out"/>
-    <remap from="~selected_pose" to="/pregrasp_planner_pipeline/selected_pose"/>
+    <remap from="~event_out" to="/mir_manipulation/pregrasp_planner/event_in"/>
+    <remap from="~pose_in" to="/mir_manipulation/pregrasp_planner/target_pose"/>
+    <remap from="~configuration_out" to="/mir_manipulation/pregrasp_planner/configuration_out"/>
+    <remap from="~selected_pose" to="/mir_manipulation/pregrasp_planner/selected_pose"/>
   </test>
 </launch>

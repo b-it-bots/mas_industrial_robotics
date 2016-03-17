@@ -6,7 +6,7 @@
   <arg name="max_distance_to_object" default="0.06"/>
 
   <node pkg="mir_pregrasp_planning" type="simple_pregrasp_planner_node"
-          name="simple_pregrasp_planner" output="screen">
+          name="simple_pregrasp_planner" output="screen" ns="mir_manipulation">
 
     <!-- Node cycle rate (in hz) -->
     <param name="loop_rate" type="double" value="10.0"/>

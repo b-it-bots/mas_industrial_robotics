@@ -2,7 +2,7 @@
 <!-- Note: example launch file. Do not modify! -->
 <launch>
   <node pkg="mir_pregrasp_planning" type="pose_mock_up_gui_node"
-				  name="pose_mock_up_gui" output="screen">
+				  name="pose_mock_up_gui" output="screen" ns="mir_manipulation">
 
     <!-- the cycle rate of the node (in hz) -->
     <param name="loop_rate" type="double" value="10.0"/>
