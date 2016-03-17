@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <launch>
     <node pkg="mcr_arm_motions" type="planned_motion_node"
-            name="planned_motion"  output="screen">
+            name="planned_motion"  output="screen" respawn="true" ns="mir_manipulation">
 
         <!-- the cycle rate of the node (in hz) -->
-        <param name="~loop_rate"  type="double" value="10"/>
+        <param name="~loop_rate"  type="double" value="10.0"/>
         
-        <param name="~move_group"  type="string" value="move_group"/>
+        <param name="~move_group"  type="string" value="/move_group"/>
         <param name="~arm"  type="string" value="arm_1"/>
 
         <remap from="~target_configuration" to="/pregrasp_planner/joint_configuration_out"/>
