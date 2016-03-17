@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<!-- Note: this is an example launch file, do not modify. -->
+<launch>
+  <arg name="reference_frame" default="base_link"/>
+    <!-- TODO: or gripper_tip_link? But also it needs to be changed in the
+    poses_to_move_X launch files -->
+  <arg name="target_frame" default="gripper_tip_link"/>
+
+  <group ns="mir_manipulation/cartesian_controller">
+    <node pkg="mcr_common_converters" type="transform_to_pose_converter_node"
+          name="pose_converter" output="screen">
+      <!-- Node cycle rate (in hz) -->
+     <param name="loop_rate" type="double" value="10.0" />
+
+      <!-- Reference frame from which the pose is transformed -->
+      <param name="reference_frame" type="str" value="$(arg reference_frame)"/>
+      <!-- Target frame to which the pose is transformed -->
+      <param name="target_frame" type="str" value="$(arg target_frame)"/>
+
+      <remap from="~converted_pose" to="/linear_motions/end_effector_pose"/>
+    </node>
+
+     <node pkg="mcr_pose_generator" type="pose_publisher_node"
+            name="pose_publisher" output="screen">
+
+        <!-- the node cycle rate (in hz) -->
+        <param name="loop_rate" type="double" value="10.0"/>
+
+        <remap from="~pose_in" to="/linear_motions/goal_pose"/>
+        <remap from="~pose_out" to="/linear_motions/goal_pose_initial"/>
+    </node>
+
+    <node pkg="mcr_manipulation_measurers"
+          type="component_wise_pose_error_calculator_node" name="pose_error_calculator"
+          output="screen">
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="20.0" />
+
+      <remap from="~pose_1" to="/linear_motions/end_effector_pose"/>
+      <remap from="~pose_2" to="/linear_motions/goal_pose_initial"/>
+      <remap from="~pose_error"
+             to="/mir_manipulation/guarded_motion/pose_error_monitor/pose_error"/>
+    </node>
+
+    <node pkg="mcr_twist_controller" type="twist_controller_node"
+          name="twist_controller" output="screen">
+
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="10.0"/>
+
+      <!-- Proportional gains for the Cartesian linear velocities -->
+      <param name="p_gain_x" type="double" value="0.5"/>
+      <param name="p_gain_y" type="double" value="0.5"/>
+      <param name="p_gain_z" type="double" value="0.5"/>
+
+      <remap from="~pose_error"
+             to="/mir_manipulation/guarded_motion/pose_error_monitor/pose_error"/>
+    </node>
+
+    <node pkg="mcr_twist_limiter" type="twist_limiter_node"
+          name="twist_limiter" output="screen">
+
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="10.0"/>
+
+      <remap from="~twist"
+             to="/mir_manipulation/cartesian_controller/twist_controller/controlled_twist"/>
+    </node>
+
+    <node pkg="mcr_guarded_approach_pose" type="approach_pose_distance_constrained_node"
+          name="coordinator" output="screen">
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="30.0"/>
+
+      <remap from="~event_in" to="/mir_manipulation/cartesian_controller/event_in"/>
+      <remap from="~event_out" to="/mir_manipulation/cartesian_controller/event_out"/>
+      <remap from="~motion_feedback" to="/mir_manipulation/guarded_motion/cartesian_motion/event_out"/>
+
+      <!-- To trigger components -->
+      <remap from="~start_pose_converter"
+             to="/mir_manipulation/cartesian_controller/pose_converter/event_in"/>
+      <remap from="~start_calculator"
+             to="/mir_manipulation/cartesian_controller/pose_error_calculator/event_in"/>
+      <remap from="~start_twist_controller"
+             to="/mir_manipulation/cartesian_controller/twist_controller/event_in"/>
+      <remap from="~start_twist_limiter"
+             to="/mir_manipulation/cartesian_controller/twist_limiter/event_in"/>
+      <remap from="~start_guarded_approach"
+             to="/mir_manipulation/guarded_motion/distance_constrained/event_in"/>
+    </node>
+  </group>
+
+  <group ns="mir_manipulation/guarded_motion">
+    <node pkg="mcr_geometric_relation_monitors" type="component_wise_pose_error_monitor_node"
+          name="pose_error_monitor" output="screen" respawn="true">
+
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="20.0" />
+
+      <!-- Threshold for detecting if is within tolerance (in meters) -->
+      <param name="threshold_linear_z" type="double" value="0.01" />
+    </node>
+
+    <node pkg="mcr_arm_motions" type="cartesian_motion_node"
+          name="cartesian_motion" output="screen">
+
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="10.0" />
+
+      <!-- Duration of the arm motion (in seconds) -->
+      <param name="motion_duration" type="double" value="4.0"/>
+
+      <remap from="~desired_velocity"
+             to="/mir_manipulation/cartesian_controller/twist_limiter/limited_twist"/>
+      <remap from="~velocity_command"
+             to="/arm_1/arm_controller/cartesian_velocity_command"/>
+    </node>
+
+    <node pkg="mcr_guarded_approach_pose" type="distance_constrained_node"
+          name="distance_constrained" output="screen">
+
+      <!-- Node cycle rate (in hz) -->
+      <param name="loop_rate" type="double" value="25.0"/>
+
+      <!-- Elements of a component-wise pose error to be checked if they are
+      within tolerance (e.g. this checks the linear tolerance on the Z axis -->
+      <rosparam param="desired_tolerances">
+        - 'linear_z'
+      </rosparam>
+
+      <remap from="~start_monitor"
+             to="/mir_manipulation/guarded_motion/pose_error_monitor/event_in"/>
+      <remap from="~start_cartesian_motion"
+             to="/mir_manipulation/guarded_motion/cartesian_motion/event_in"/>
+      <remap from="~monitor_feedback"
+             to="/mir_manipulation/guarded_motion/pose_error_monitor/feedback"/>
+      <remap from="~event_out"
+             to="/mir_manipulation/cartesian_controller/event_in"/>
+    </node>
+  </group>
+</launch>
