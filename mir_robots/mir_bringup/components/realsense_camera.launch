@@ -11,10 +11,10 @@
         <arg name="camera" value="$(arg camera)" />
         <arg name="rgb_frame_w" value="640" />
         <arg name="rgb_frame_h" value="480" />
-        <arg name="rgb_camera_info_url" default="package://mir_default_robot_config/$(arg robot)/realsense_camera_calibration.yaml" />
-        <arg name="ir_camera_info_url" default="" />
-        <arg name="realsense_camera_type" default="$(arg realsense_camera_type)" />
-	<arg name="publish_frames" default="$(arg publish_frames)" />
+        <arg name="rgb_camera_info_url" value="package://mir_default_robot_config/$(arg robot)/realsense_camera_calibration.yaml" />
+        <arg name="ir_camera_info_url" value="" />
+        <arg name="realsense_camera_type" value="$(arg realsense_camera_type)" />
+        <arg name="publish_frames" value="$(arg publish_frames)" />
         <arg name="depth_scale" value="0.0045" />    
     </include>
 
