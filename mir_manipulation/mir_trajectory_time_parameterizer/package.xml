@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+    <name>mir_trajectory_time_parameterizer</name>
+
+    <version>0.1.0</version>
+
+    <description>
+    	This package provides launching and configuration to 
+        use mcr_trajectory_time_parameterizer package.
+    </description>
+
+    <maintainer email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</maintainer>
+
+    <license>GPLv3</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <run_depend> mcr_trajectory_time_parameterizer</run_depend>
+
+    <test_depend>roslaunch</test_depend>
+</package>
