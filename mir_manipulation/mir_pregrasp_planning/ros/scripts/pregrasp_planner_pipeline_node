@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import mir_pregrasp_planning_ros.pregrasp_planner_pipeline
+
+if __name__ == '__main__':
+    mir_pregrasp_planning_ros.pregrasp_planner_pipeline.main()

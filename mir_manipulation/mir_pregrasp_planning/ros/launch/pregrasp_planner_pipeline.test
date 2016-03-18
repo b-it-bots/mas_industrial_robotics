@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+
+  <!-- Launch robot -->
+  <include file="$(find mir_bringup_sim)/robot.launch">
+    <arg name="robot_env" default="empty-world"/>
+  </include>
+
+  <!-- Launch MoveIt! -->
+  <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch"/>
+
+  <include file="$(find mir_pregrasp_planning)/ros/launch/pregrasp_planner_pipeline_example.launch">
+    <arg name="gui" default="False"/>
+  </include>
+
+  <test pkg="mir_pregrasp_planning" type="pregrasp_planner_pipeline_test.py"
+          test-name="test_pregrasp_planner_pipeline" ns="mir_manipulation">
+
+    <remap from="~event_out" to="/mir_manipulation/pregrasp_planner/event_in"/>
+    <remap from="~pose_in" to="/mir_manipulation/pregrasp_planner/target_pose"/>
+    <remap from="~configuration_out" to="/mir_manipulation/pregrasp_planner/configuration_out"/>
+    <remap from="~selected_pose" to="/mir_manipulation/pregrasp_planner/selected_pose"/>
+  </test>
+</launch>
