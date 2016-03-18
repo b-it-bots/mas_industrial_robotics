@@ -5,7 +5,8 @@
     <arg name="camera" default="arm_cam3d" />
     <arg name="realsense_camera_type" default="Intel(R) RealSense(TM) 3D Camer" />
     <arg name="publish_frames" default="true" />
- 
+    <arg name="depth_scale" default="0.001" />
+     
     <include file="$(find realsense_camera)/launch/realsense_camera.launch">
         <arg name="camera" value="$(arg camera)" />
         <arg name="rgb_frame_w" value="640" />
@@ -14,6 +15,7 @@
         <arg name="ir_camera_info_url" default="" />
         <arg name="realsense_camera_type" default="$(arg realsense_camera_type)" />
 	<arg name="publish_frames" default="$(arg publish_frames)" />
+        <arg name="depth_scale" value="0.0045" />    
     </include>
 
 </launch>
