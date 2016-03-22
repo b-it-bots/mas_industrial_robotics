@@ -95,7 +95,6 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     gripper_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
     gripper_action_server_.start();
 
-
     moveGripper(gripper_configuration_open_);
     moveGripper(gripper_configuration_close_);
     moveGripper(gripper_configuration_open_);
@@ -148,9 +147,6 @@ void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::G
         return;
     }
 
-    // std_msgs::Float64 gripper_pos;
-    // gripper_pos.data = set_pos;
-    // pub_dynamixel_command_.publish(gripper_pos);
     moveGripper(set_pos);
 }
 
@@ -162,6 +158,7 @@ void DynamixelGripperNode::moveGripper(double position)
     gripper_pos.data = position;
     pub_dynamixel_command_.publish(gripper_pos);
     joint_states_received_ = false;
+    // wait a small amount of time for motors to start moving
     wait_duration_.sleep();
 
     while (ros::ok())
