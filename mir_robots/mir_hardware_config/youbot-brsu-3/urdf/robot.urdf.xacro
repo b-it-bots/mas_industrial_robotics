@@ -15,7 +15,7 @@
   <!-- youbot arm and gripper-->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel_gripper.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v1/dynamixel_gripper.urdf.xacro" />
   <!-- controller manager -->
   <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
   <!-- materials for visualization -->
