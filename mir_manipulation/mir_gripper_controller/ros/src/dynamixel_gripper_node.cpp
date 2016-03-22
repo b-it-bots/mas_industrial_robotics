@@ -15,7 +15,8 @@
 DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     gripper_action_server_(nh, "gripper_controller/gripper_command", false),
     trajectory_action_server_(nh, "gripper_controller/follow_joint_trajectory", false),
-    joint_states_received_(false)
+    joint_states_received_(false),
+    wait_duration_(0.2)
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
     sub_dynamixel_motor_states_ = nh_.subscribe("dynamixel_motor_states", 10,
@@ -93,6 +94,11 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     trajectory_action_server_.start();
     gripper_action_server_.registerGoalCallback(boost::bind(&DynamixelGripperNode::gripperCommandGoalCallback, this));
     gripper_action_server_.start();
+
+
+    moveGripper(gripper_configuration_open_);
+    moveGripper(gripper_configuration_close_);
+    moveGripper(gripper_configuration_open_);
 }
 
 DynamixelGripperNode::~DynamixelGripperNode()
@@ -105,7 +111,6 @@ DynamixelGripperNode::~DynamixelGripperNode()
 void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg)
 {
     joint_states_ = msg;
-    joint_states_received_ = true;
 
     // publish dynamixel joint states as sensor_msgs joint states
     sensor_msgs::JointState joint_state;
@@ -122,6 +127,7 @@ void DynamixelGripperNode::jointStatesCallback(const dynamixel_msgs::JointState:
     joint_state.effort.push_back(msg->load);
 
     pub_joint_states_.publish(joint_state);
+    joint_states_received_ = true;
 }
 
 void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg)
@@ -142,9 +148,10 @@ void DynamixelGripperNode::gripperCommandCallback(const mcr_manipulation_msgs::G
         return;
     }
 
-    std_msgs::Float64 gripper_pos;
-    gripper_pos.data = set_pos;
-    pub_dynamixel_command_.publish(gripper_pos);
+    // std_msgs::Float64 gripper_pos;
+    // gripper_pos.data = set_pos;
+    // pub_dynamixel_command_.publish(gripper_pos);
+    moveGripper(set_pos);
 }
 
 void DynamixelGripperNode::moveGripper(double position)
@@ -154,13 +161,23 @@ void DynamixelGripperNode::moveGripper(double position)
     std_msgs::Float64 gripper_pos;
     gripper_pos.data = position;
     pub_dynamixel_command_.publish(gripper_pos);
-
     joint_states_received_ = false;
-    while (!joint_states_received_ && ros::ok())
+    wait_duration_.sleep();
+
+    while (ros::ok())
     {
-        ros::spinOnce();
-        loop_rate.sleep();
+        while (!joint_states_received_ && ros::ok())
+        {
+            ros::spinOnce();
+            loop_rate.sleep();
+        }
+        joint_states_received_ = false;
+        if (!joint_states_->is_moving)
+        {
+            break;
+        }
     }
+    ROS_INFO_STREAM("Gripper stopped moving, publishing result");
 
     gripper_result_.position = joint_states_->current_pos;
     gripper_result_.effort = joint_states_->load;
@@ -168,15 +185,13 @@ void DynamixelGripperNode::moveGripper(double position)
     gripper_result_.reached_goal = true;
 
     trajectory_result_.error_code = trajectory_result_.SUCCESSFUL;
-
-    gripper_action_server_.setSucceeded(gripper_result_);
-    trajectory_action_server_.setSucceeded(trajectory_result_);
 }
 
 void DynamixelGripperNode::gripperCommandGoalCallback()
 {
     double set_pos = gripper_action_server_.acceptNewGoal()->command.position;
     moveGripper(set_pos);
+    gripper_action_server_.setSucceeded(gripper_result_);
 }
 
 void DynamixelGripperNode::followJointTrajectoryGoalCallback()
@@ -186,6 +201,7 @@ void DynamixelGripperNode::followJointTrajectoryGoalCallback()
     const trajectory_msgs::JointTrajectoryPoint *point = &points->back();
     double set_pos = point->positions.back();
     moveGripper(set_pos);
+    trajectory_action_server_.setSucceeded(trajectory_result_);
 }
 
 int main(int argc, char **argv)
