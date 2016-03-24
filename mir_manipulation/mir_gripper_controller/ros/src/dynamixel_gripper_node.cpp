@@ -16,7 +16,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     gripper_action_server_(nh, "gripper_controller/gripper_command", false),
     trajectory_action_server_(nh, "gripper_controller/follow_joint_trajectory", false),
     joint_states_received_(false),
-    wait_duration_(0.2)
+    wait_duration_(0.05)
 {
     pub_dynamixel_command_ = nh_.advertise < std_msgs::Float64 > ("dynamixel_command", 1);
     sub_dynamixel_motor_states_ = nh_.subscribe("dynamixel_motor_states", 10,
