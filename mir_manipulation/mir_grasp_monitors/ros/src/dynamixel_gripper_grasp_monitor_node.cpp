@@ -11,7 +11,10 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     joint_states_received_(false),
     event_in_received_(false),
     current_state_(INIT),
-    loop_rate_init_state_(ros::Rate(100.0))
+    loop_rate_init_state_(ros::Rate(100.0)),
+    serial_port_("/dev/youbot/gripper_monitor", 9600, serial::Timeout::simpleTimeout(1000)),
+    serial_available_(false),
+    serial_threshold_(0.5)
 {
     ros::NodeHandle nh("~");
 
@@ -46,6 +49,14 @@ void DynamixelGripperGraspMonitorNode::update()
 {
     checkForNewEvent();
 
+    if(serial_port_.available()) {
+        serial_available_ = true;
+        uint8_t val;
+        serial_port_.read(&val, 1);
+        serial_value_ = (double) val / 255.0;
+        // ROS_WARN("UART VALUE: %#04x", serial_value_);
+    }
+
     switch (current_state_)
     {
     case INIT:
@@ -56,6 +67,7 @@ void DynamixelGripperGraspMonitorNode::update()
         break;
     case RUN:
         run_state();
+        serial_available_ = false;
         break;
     }
 }
@@ -83,10 +95,10 @@ void DynamixelGripperGraspMonitorNode::init_state()
 void DynamixelGripperGraspMonitorNode::idle_state()
 {
     // wait for incoming data
-    if (joint_states_received_)
+    // if (joint_states_received_)
         current_state_ = RUN;
 
-    joint_states_received_ = false;
+    // joint_states_received_ = false;
 }
 
 void DynamixelGripperGraspMonitorNode::run_state()
@@ -107,9 +119,10 @@ bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
     ROS_DEBUG_STREAM("cur. load: " << joint_states_->load << " load thresh: " << load_threshold_);
 
-    if (joint_states_->load > load_threshold_)
+    //if (joint_states_->load > load_threshold_)
+    //    return true;
+    if (serial_value_ < serial_threshold_)
         return true;
-
     return false;
 }
 

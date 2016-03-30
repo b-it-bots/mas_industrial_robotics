@@ -6,6 +6,7 @@ find_package(catkin REQUIRED
     dynamixel_msgs
     roscpp
     std_msgs
+    serial
 )
 
 catkin_package(
@@ -15,6 +16,7 @@ catkin_package(
     rospy
     sensor_msgs
     std_msgs
+    serial
 )
 
 include_directories(

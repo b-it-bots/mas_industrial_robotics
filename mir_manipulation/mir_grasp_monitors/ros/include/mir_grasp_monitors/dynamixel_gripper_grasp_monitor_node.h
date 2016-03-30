@@ -11,7 +11,7 @@
 #include <dynamixel_msgs/JointState.h>
 #include <ros/ros.h>
 #include <std_msgs/String.h>
-
+#include <serial/serial.h>
 
 class DynamixelGripperGraspMonitorNode
 {
@@ -49,6 +49,11 @@ private:
     ros::Rate loop_rate_init_state_;
 
     double load_threshold_;
+
+    serial::Serial serial_port_;
+    bool serial_available_;
+    double serial_value_;
+    double serial_threshold_;
 };
 
 #endif /* DYNAMIXEL_GRIPPER_GRASP_MONITOR_NODE_H_ */
