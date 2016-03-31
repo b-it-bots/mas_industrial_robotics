@@ -55,9 +55,9 @@ sudo apt-get install -y ${packagelist[@]}
 rosinstall .. /opt/ros/indigo repository.rosinstall
 
 ### install dependencies of BRSU repositories
-dependent_repositories=('mas_common_robotics' 'mas_third_party_software')
+dependent_repositories=$(grep -r "local-name:" repository.rosinstall  | cut -d":" -f 2 | sed -r 's/\s+//g')
 for i in $dependent_repositories
 do
     cd ../$i
-    ./repository.debs
+    if [ -f repository.debs ]; then ./repository.debs ; fi
 done
