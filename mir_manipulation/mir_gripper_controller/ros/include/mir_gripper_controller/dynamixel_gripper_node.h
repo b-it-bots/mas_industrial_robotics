@@ -31,6 +31,8 @@ public:
     ~DynamixelGripperNode();
 
 private:
+    ros::Duration wait_duration_;
+
     void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
     void gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
     void followJointTrajectoryGoalCallback();
