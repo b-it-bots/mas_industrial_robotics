@@ -32,7 +32,7 @@ class TestPregraspPlannerPipeline(unittest.TestCase):
             '~event_out', std_msgs.msg.String, latch=True, queue_size=1
         )
         self.pose_in = rospy.Publisher(
-            '~pose_in', geometry_msgs.msg.PoseStamped, queue_size=1
+            '~pose_in', geometry_msgs.msg.PoseStamped, latch=True, queue_size=1
         )
 
         # subscribers
