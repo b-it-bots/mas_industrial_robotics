@@ -13,6 +13,20 @@ void adc_init(void) {
     SETBIT1(ADCSRA, ADEN);
 }
 
+void adc_select_0(void) {
+    SETBIT0(ADMUX, MUX3);
+    SETBIT0(ADMUX, MUX2);
+    SETBIT0(ADMUX, MUX1);
+    SETBIT0(ADMUX, MUX0);
+}
+
+void adc_select_1(void) {
+    SETBIT0(ADMUX, MUX3);
+    SETBIT0(ADMUX, MUX2);
+    SETBIT0(ADMUX, MUX1);
+    SETBIT1(ADMUX, MUX0);
+}
+
 void adc_start(void) {
     SETBIT1(ADCSRA, ADSC);
 }
@@ -21,7 +35,7 @@ char adc_running(void) {
     return GETBIT(ADCSRA, ADSC);
 }
 
-char adc_value(void) {
+uint8_t adc_value(void) {
     return ADCH;
 }
 
