@@ -15,7 +15,17 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>dmp</run_depend>
   <run_depend>mcr_arm_motions</run_depend>
+  <run_depend>mcr_common_converters</run_depend>
+  <run_depend>mcr_geometric_relation_monitors</run_depend>
+  <run_depend>mcr_guarded_approach_pose</run_depend>
+  <run_depend>mcr_manipulation_measurers</run_depend>
+  <run_depend>mcr_pose_generator</run_depend>
+  <run_depend>mir_pregrasp_planning</run_depend>
+  <run_depend>mcr_trajectory_generation</run_depend>
+  <run_depend>mcr_twist_controller</run_depend>
+  <run_depend>mcr_twist_limiter</run_depend>
 
   <test_depend>roslaunch</test_depend>  
 
