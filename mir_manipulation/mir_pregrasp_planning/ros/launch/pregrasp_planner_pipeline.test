@@ -12,7 +12,7 @@
   <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch"/>
 
   <include file="$(find mir_pregrasp_planning)/ros/launch/pregrasp_planner_pipeline_example.launch">
-    <arg name="gui" value="False"/>
+    <arg name="gui" value="false"/>
   </include>
 
   <test pkg="mir_pregrasp_planning" type="pregrasp_planner_pipeline_test.py"

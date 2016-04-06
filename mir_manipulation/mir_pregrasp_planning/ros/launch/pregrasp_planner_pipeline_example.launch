@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Note: example launch file. Do not modify! -->
 <launch>
-  <arg name="gui" default="True" />
+  <arg name="gui" default="true" />
 
   <!-- The following nodes are excluded from the group since they use move_group
   from MoveIt!, which remaps the 'move_group' namespace to the group's namespace -->
