@@ -30,7 +30,7 @@ build:
     - source $CI_PROJECT_DIR/devel/setup.bash
     - catkin_make tests
     - catkin_make roslint
-    - catkin_lint --strict src/
+    - catkin_lint --strict --ignore CRITICAL_VAR_APPEND,LINK_DIRECTORY,ENV_VAR,AMBIGUOUS_BUILD_INCLUDE src/
     - catkin_make install
     - catkin_make run_tests
     - catkin_test_results
