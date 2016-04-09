@@ -27,7 +27,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI}" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel_gripper_core_assembly.dae" scale="0.01 0.01 0.01" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v1/dynamixel_gripper_core_assembly.dae" scale="0.01 0.01 0.01" />
         </geometry>
         <material name="White" />
       </visual>
@@ -35,7 +35,7 @@
       <collision>
         <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI}" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel_gripper_core_assembly_convexhull.dae" scale="0.01 0.01 0.01" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v1/dynamixel_gripper_core_assembly_convexhull.dae" scale="0.01 0.01 0.01" />
         </geometry>
       </collision>
     </link>
@@ -134,7 +134,7 @@
       <visual>
         <origin xyz="-0.0125 0 0" rpy="0 0 ${-M_PI/2}" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_l.dae" scale="0.01 0.01 0.01" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v1/dynamixel_small_finger_assembly_l.dae" scale="0.01 0.01 0.01" />
         </geometry>
         <material name="White" />
       </visual>
@@ -142,7 +142,7 @@
       <collision>
         <origin xyz="-0.0125 0 0" rpy="0 0 ${-M_PI/2}" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_l_convexhull.dae" scale="0.01 0.01 0.01" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v1/dynamixel_small_finger_assembly_l_convexhull.dae" scale="0.01 0.01 0.01" />
         </geometry>
       </collision>
     </link>
@@ -163,7 +163,7 @@
       <visual>
         <origin xyz="0.0125 0 0" rpy="0 0 ${M_PI/2}" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_r.dae" scale="0.01 0.01 0.01" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v1/dynamixel_small_finger_assembly_r.dae" scale="0.01 0.01 0.01" />
         </geometry>
         <material name="White" />
       </visual>
@@ -171,7 +171,7 @@
       <collision>
         <origin xyz="0.0125 0 0" rpy="0 0 ${M_PI/2}" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel_small_finger_assembly_r_convexhull.dae" scale="0.01 0.01 0.01" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v1/dynamixel_small_finger_assembly_r_convexhull.dae" scale="0.01 0.01 0.01" />
         </geometry>
       </collision>
     </link>
