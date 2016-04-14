@@ -40,7 +40,7 @@
 
 - git:
     local-name: realsense_camera
-    uri: gitgate@mas.b-it-center.de:mas-group/mas_industrial_robotics.git
+    uri: gitgate@mas.b-it-center.de:mas-group/realsense_camera.git
     version: master
 
 - git:
