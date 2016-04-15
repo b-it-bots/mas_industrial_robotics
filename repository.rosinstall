@@ -11,7 +11,7 @@
 - git:
     local-name: youbot_driver
     uri: https://github.com/mas-group/youbot_driver.git
-    version: hydro-devel
+    version: indigo-devel
 
 - git:
     local-name: youbot_driver_ros_interface
