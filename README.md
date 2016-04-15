@@ -105,10 +105,6 @@ The ROBOT_ENV variable can be used to switch between different environments. The
 In a new terminal you can open the Gazebo GUI to see the environment and the robot
 
      rosrun gazebo_ros gzclient
-     
-Note: By default, the physics of the Gazebo simulator is paused. To enable physics, either press "play" button in the Gazebo GUI or call the following service:
-    
-     rosservice call /gazebo/unpause_physics
 
 ### At the Real Robot
 
