@@ -6,6 +6,7 @@ find_package(catkin REQUIRED)
 catkin_package(
   CATKIN_DEPENDS
     gmapping
+    cob_scan_unifier
 )
 
 ### TESTS
