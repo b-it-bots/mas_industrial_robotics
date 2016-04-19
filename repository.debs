@@ -17,6 +17,7 @@ packagelist=(
     python-zmq
     ros-indigo-amcl
     ros-indigo-clear-costmap-recovery
+    ros-indigo-cob-scan-unifier
     ros-indigo-cob-srvs
     ros-indigo-dwa-local-planner
     ros-indigo-dynamixel-controllers

@@ -1,8 +1,17 @@
 <?xml version="1.0"?>
 <launch>
+
+	<!-- run scan unifier -->
+  	<node pkg="cob_scan_unifier" type="scan_unifier_node" name="scan_unifier" output="log">
+  		<rosparam param="input_scans">["/scan_front","/scan_rear"]</rosparam>
+  		<param name="loop_rate" value="20.0"/>
+    		<remap from="scan_unified" to="/scan_unified"/>
+  	</node>
+
+
 	<!-- launch gmapping -->
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
-		<remap from="scan" to="scan_front"/>
+		<remap from="scan" to="/scan_unified"/>
 		<param name="base_frame" value="base_footprint"/>
 		<param name="map_frame" value="map"/>
 		<param name="odom_frame" value="odom"/>
