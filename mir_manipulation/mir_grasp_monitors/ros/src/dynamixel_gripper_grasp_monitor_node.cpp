@@ -12,22 +12,37 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     event_in_received_(false),
     current_state_(INIT),
     loop_rate_init_state_(ros::Rate(100.0)),
-    serial_port_("/dev/youbot/gripper_monitor", 9600, serial::Timeout::simpleTimeout(1000)),
-    serial_available_(false),
-    serial_threshold_(0.5)
+    serial_port_(NULL),
+    serial_available_(false)
 {
     ros::NodeHandle nh("~");
 
     nh.param("load_threshold", load_threshold_, 0.0);
-    ROS_INFO_STREAM("\tload threshold parameter: " << load_threshold_);
+    nh.param("serial_enabled", serial_enabled_, true);
+    nh.param("serial_value_count", serial_value_count_, 2);
+    nh.param("serial_threshold", serial_threshold_, 0.5);
+    nh.param("serial_device", serial_device_, std::string("/dev/youbot/gripper_monitor"));
+    nh.param("serial_baudrate", serial_baudrate_, 9600);
+    nh.param("serial_timeout", serial_timeout_, 100);
 
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
     sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
     sub_dynamixel_motor_states_ = nh.subscribe("dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
+    if(serial_enabled_) {
+        serial_buffer_ = (uint8_t *) malloc(sizeof(uint8_t) * serial_value_count_);
+        serial_values_ = (double *) malloc(sizeof(double) * serial_value_count_);
+    }
 }
 
 DynamixelGripperGraspMonitorNode::~DynamixelGripperGraspMonitorNode()
 {
+    if(serial_port_) {
+        if(serial_port_->isOpen())
+            serial_port_->close();
+        delete serial_port_;
+    }
+    delete serial_buffer_;
+    delete serial_values_;
     pub_event_.shutdown();
     sub_event_.shutdown();
     sub_dynamixel_motor_states_.shutdown();
@@ -49,13 +64,7 @@ void DynamixelGripperGraspMonitorNode::update()
 {
     checkForNewEvent();
 
-    if(serial_port_.available()) {
-        serial_available_ = true;
-        uint8_t val;
-        serial_port_.read(&val, 1);
-        serial_value_ = (double) val / 255.0;
-        // ROS_WARN("UART VALUE: %#04x", serial_value_);
-    }
+    poll_serial();
 
     switch (current_state_)
     {
@@ -67,8 +76,33 @@ void DynamixelGripperGraspMonitorNode::update()
         break;
     case RUN:
         run_state();
-        serial_available_ = false;
         break;
+    }
+}
+
+void DynamixelGripperGraspMonitorNode::poll_serial()
+{
+    if(!serial_enabled_)
+        return;
+    try {
+        if(!serial_port_)
+            serial_port_ = new serial::Serial(serial_device_, serial_baudrate_, serial::Timeout::simpleTimeout(serial_timeout_));
+        if(!serial_port_->isOpen())
+            serial_port_->open();
+        if(serial_port_->available() < serial_value_count_)
+            return;
+        serial_port_->read(serial_buffer_, serial_value_count_);
+        for(size_t i = 0; i < serial_value_count_; i++) {
+            serial_values_[i] = (double) serial_buffer_[i] / 255.0;
+        }
+        serial_available_ = true;
+    } catch (serial::IOException e) {
+        serial_available_ = false;
+        ROS_WARN("Serial communication failed");
+        if(serial_port_) {
+            delete serial_port_;
+        }
+        serial_port_ = NULL;
     }
 }
 
@@ -121,8 +155,10 @@ bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 
     //if (joint_states_->load > load_threshold_)
     //    return true;
-    if (serial_value_ < serial_threshold_)
-        return true;
+    for(size_t i = 0; i < serial_value_count_; i++) {
+        if(serial_values_[i] < serial_threshold_)
+            return true;
+    }
     return false;
 }
 

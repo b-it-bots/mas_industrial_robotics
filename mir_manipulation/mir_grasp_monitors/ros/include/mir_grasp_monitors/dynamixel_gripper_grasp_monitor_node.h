@@ -32,6 +32,8 @@ private:
     void idle_state();
     void run_state();
 
+    void poll_serial();
+
     bool isObjectGrasped();
 
     ros::Publisher pub_event_;
@@ -50,10 +52,16 @@ private:
 
     double load_threshold_;
 
-    serial::Serial serial_port_;
-    bool serial_available_;
-    double serial_value_;
+    bool serial_enabled_;
+    std::string serial_device_;
+    int serial_baudrate_;
+    int serial_timeout_;;
+    int serial_value_count_;
     double serial_threshold_;
+    serial::Serial *serial_port_;
+    bool serial_available_;
+    uint8_t *serial_buffer_;
+    double *serial_values_;
 };
 
 #endif /* DYNAMIXEL_GRIPPER_GRASP_MONITOR_NODE_H_ */
