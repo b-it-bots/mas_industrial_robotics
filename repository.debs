@@ -47,6 +47,7 @@ packagelist=(
     ros-indigo-ros-controllers
     ros-indigo-roslint
     ros-indigo-rqt-robot-dashboard
+    ros-indigo-serial
     ros-indigo-smach
     ros-indigo-srdfdom
     ros-indigo-twist-mux
