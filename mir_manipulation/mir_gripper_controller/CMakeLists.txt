@@ -7,20 +7,20 @@ find_package(catkin REQUIRED
     control_msgs
     dynamixel_controllers
     dynamixel_msgs
+    mcr_manipulation_msgs
     roscpp
     roslint
     sensor_msgs
     std_msgs
-    mcr_manipulation_msgs
 )
 
 catkin_package(
   CATKIN_DEPENDS
+    brics_actuator
     dynamixel_controllers
     mcr_manipulation_msgs
     rospy
     sensor_msgs
-    brics_actuator
 )
 
 include_directories(

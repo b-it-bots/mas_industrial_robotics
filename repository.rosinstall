@@ -11,7 +11,7 @@
 - git:
     local-name: youbot_driver
     uri: https://github.com/mas-group/youbot_driver.git
-    version: hydro-devel
+    version: indigo-devel
 
 - git:
     local-name: youbot_driver_ros_interface
@@ -40,7 +40,7 @@
 
 - git:
     local-name: realsense_camera
-    uri: https://github.com/mas-group/realsense_camera.git
+    uri: gitgate@mas.b-it-center.de:mas-group/realsense_camera.git
     version: master
 
 - git:
