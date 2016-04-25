@@ -163,9 +163,10 @@ bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
         ROS_WARN("ERROR");
         return true;
     }
-    if(use_serial_threshold_ > joint_states_->current_pos) {
+    if(use_serial_threshold_ < joint_states_->current_pos) {
         ROS_WARN("USE_SERIAL");
         for(size_t i = 0; i < serial_value_count_; i++) {
+            ROS_WARN("Value %d: %f", i, serial_values_[i]);
             if(serial_values_[i] < serial_threshold_)
                 return true;
         }
