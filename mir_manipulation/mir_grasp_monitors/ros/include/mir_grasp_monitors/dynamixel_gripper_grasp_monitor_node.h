@@ -51,6 +51,8 @@ private:
     ros::Rate loop_rate_init_state_;
 
     double load_threshold_;
+    double error_threshold_;
+    double use_serial_threshold_;
 
     bool serial_enabled_;
     std::string serial_device_;

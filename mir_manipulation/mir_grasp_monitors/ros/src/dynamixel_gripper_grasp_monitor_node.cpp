@@ -17,7 +17,9 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
 {
     ros::NodeHandle nh("~");
 
-    nh.param("load_threshold", load_threshold_, 0.0);
+    nh.param("load_threshold", load_threshold_, 0.3);
+    nh.param("error_threshold", error_threshold_, 0.1);
+    nh.param("use_serial_threshold", use_serial_threshold_, 0.28);
     nh.param("serial_enabled", serial_enabled_, true);
     nh.param("serial_value_count", serial_value_count_, 2);
     nh.param("serial_threshold", serial_threshold_, 0.5);
@@ -129,10 +131,10 @@ void DynamixelGripperGraspMonitorNode::init_state()
 void DynamixelGripperGraspMonitorNode::idle_state()
 {
     // wait for incoming data
-    // if (joint_states_received_)
+    if (joint_states_received_)
         current_state_ = RUN;
 
-    // joint_states_received_ = false;
+    joint_states_received_ = false;
 }
 
 void DynamixelGripperGraspMonitorNode::run_state()
@@ -151,13 +153,22 @@ void DynamixelGripperGraspMonitorNode::run_state()
 
 bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
-    ROS_DEBUG_STREAM("cur. load: " << joint_states_->load << " load thresh: " << load_threshold_);
+    // ROS_DEBUG_STREAM("cur. load: " << joint_states_->load << " load thresh: " << load_threshold_);
 
-    //if (joint_states_->load > load_threshold_)
-    //    return true;
-    for(size_t i = 0; i < serial_value_count_; i++) {
-        if(serial_values_[i] < serial_threshold_)
-            return true;
+    if (joint_states_->load > load_threshold_) {
+        ROS_WARN("LOAD");
+        return true;
+    }
+    if (abs(joint_states_->error) > error_threshold_) {
+        ROS_WARN("ERROR");
+        return true;
+    }
+    if(use_serial_threshold_ > joint_states_->current_pos) {
+        ROS_WARN("USE_SERIAL");
+        for(size_t i = 0; i < serial_value_count_; i++) {
+            if(serial_values_[i] < serial_threshold_)
+                return true;
+        }
     }
     return false;
 }
