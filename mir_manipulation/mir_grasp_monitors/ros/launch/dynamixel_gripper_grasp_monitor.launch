@@ -5,7 +5,24 @@
     <node pkg="mir_grasp_monitors" type="dynamixel_gripper_grasp_monitor_node" name="grasp_monitor" output="screen" >
       <remap from="~dynamixel_motor_states" to="/gripper_controller/state" />	
       
-      <param name="load_threshold" type="double" value="0.01" />
+      <!-- If load is bigger than load_threshold an object is grasped -->
+      <param name="load_threshold" type="double" value="0.3" />
+      <!-- If position error is bigger than error_threshold an object is grasped -->
+      <param name="error_threshold" type="double" value="0.1" />
+      <!-- If position is bigger than use_serial_threshold arduino grasp test is used -->
+      <param name="use_serial_threshold" type="double" value="0.28" />
+      <!-- Use arduino grasp monitor -->
+      <param name="serial_enabled" type="bool" value="true" />
+      <!-- arduino sensor count -->
+      <param name="serial_value_count" type="int" value="2" />
+      <!-- If one serial value is smaller than serial_threshold an object is grasped -->
+      <param name="serial_threshold" type="double" value="0.5" />
+      <!-- device to use -->
+      <param name="serial_device" type="string" value="/dev/youbot/gripper_monitor" />
+      <!-- baudrate to use -->
+      <param name="serial_baudrate" type="int" value="9600" />
+      <!-- timeout to use -->
+      <param name="serial_timeout" type="int" value="100" />
     </node>
     
   </group>
