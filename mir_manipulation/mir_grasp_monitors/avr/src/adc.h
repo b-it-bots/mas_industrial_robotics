@@ -5,8 +5,7 @@ void adc_init(void);
 void adc_start(void);
 char adc_running(void);
 uint8_t adc_value(void);
-void adc_select_0(void);
-void adc_select_1(void);
-
+void adc_select(uint8_t pin);
+uint8_t adc_read(uint8_t pin);
 #endif
 
