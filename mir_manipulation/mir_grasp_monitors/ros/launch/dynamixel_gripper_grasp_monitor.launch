@@ -6,7 +6,7 @@
       <remap from="~dynamixel_motor_states" to="/gripper_controller/state" />	
       
       <!-- If load is bigger than load_threshold an object is grasped -->
-      <param name="load_threshold" type="double" value="0.3" />
+      <param name="load_threshold" type="double" value="0.20" />
       <!-- If position error (goal and current motor pos difference) 
            is bigger than error_threshold an object is grasped -->
       <param name="error_threshold" type="double" value="0.1" />

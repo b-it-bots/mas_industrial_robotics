@@ -161,10 +161,16 @@ void DynamixelGripperGraspMonitorNode::run_state()
 
 bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
-    if (joint_states_->load > load_threshold_) {
+    ROS_WARN("load:     %f, threshold %f", std::abs(joint_states_->load), load_threshold_);
+    ROS_WARN("error:    %f, threshold %f", std::abs(joint_states_->error), error_threshold_);
+    ROS_WARN("position: %f", joint_states_->current_pos);
+    for(size_t i = 0; i < serial_value_count_; i++) {
+        ROS_WARN("value %d: %f", i, serial_values_[i]);
+    }
+    if (std::abs(joint_states_->load) > load_threshold_) {
         return true;
     }
-    if (abs(joint_states_->error) > error_threshold_) {
+    if (std::abs(joint_states_->error) > error_threshold_) {
         return true;
     }
     if(serial_enabled_ && use_serial_threshold_ < joint_states_->current_pos) {
