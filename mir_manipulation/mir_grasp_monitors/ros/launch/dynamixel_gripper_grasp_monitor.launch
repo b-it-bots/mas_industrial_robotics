@@ -7,7 +7,8 @@
       
       <!-- If load is bigger than load_threshold an object is grasped -->
       <param name="load_threshold" type="double" value="0.3" />
-      <!-- If position error is bigger than error_threshold an object is grasped -->
+      <!-- If position error (goal and current motor pos difference) 
+           is bigger than error_threshold an object is grasped -->
       <param name="error_threshold" type="double" value="0.1" />
       <!-- If position is bigger than use_serial_threshold arduino grasp test is used -->
       <param name="use_serial_threshold" type="double" value="0.28" />

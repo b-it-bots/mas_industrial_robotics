@@ -30,6 +30,7 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
     sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
     sub_dynamixel_motor_states_ = nh.subscribe("dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
+
     if(serial_enabled_) {
         serial_buffer_ = (uint8_t *) malloc(sizeof(uint8_t) * serial_value_count_);
         serial_values_ = (double *) malloc(sizeof(double) * serial_value_count_);
@@ -43,8 +44,12 @@ DynamixelGripperGraspMonitorNode::~DynamixelGripperGraspMonitorNode()
             serial_port_->close();
         delete serial_port_;
     }
-    delete serial_buffer_;
-    delete serial_values_;
+
+    if(serial_enabled_) {
+        delete serial_buffer_;
+        delete serial_values_;
+    }
+
     pub_event_.shutdown();
     sub_event_.shutdown();
     sub_dynamixel_motor_states_.shutdown();
@@ -86,6 +91,7 @@ void DynamixelGripperGraspMonitorNode::poll_serial()
 {
     if(!serial_enabled_)
         return;
+
     try {
         if(!serial_port_)
             serial_port_ = new serial::Serial(serial_device_, serial_baudrate_, serial::Timeout::simpleTimeout(serial_timeout_));
@@ -93,7 +99,9 @@ void DynamixelGripperGraspMonitorNode::poll_serial()
             serial_port_->open();
         if(serial_port_->available() < serial_value_count_)
             return;
+
         serial_port_->read(serial_buffer_, serial_value_count_);
+
         for(size_t i = 0; i < serial_value_count_; i++) {
             serial_values_[i] = (double) serial_buffer_[i] / 255.0;
         }
