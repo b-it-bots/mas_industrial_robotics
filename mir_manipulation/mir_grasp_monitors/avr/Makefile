@@ -8,7 +8,7 @@
 MCU = atmega328p
 FORMAT = ihex
 TARGET = main
-SRC = $(TARGET).c
+SRC = src/$(TARGET).c
 ASRC =  
 OPT = s
 
@@ -125,8 +125,8 @@ LST = $(ASRC:.S=.lst) $(SRC:.c=.lst)
 
 # Combine all necessary flags and optional flags.
 # Add target processor to flags.
-ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS)
-ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
+ALL_CFLAGS = -mmcu=$(MCU) -Iinclude $(CFLAGS)
+ALL_ASFLAGS = -mmcu=$(MCU) -Iinclude -x assembler-with-cpp $(ASFLAGS)
 
 
 # Default target.
