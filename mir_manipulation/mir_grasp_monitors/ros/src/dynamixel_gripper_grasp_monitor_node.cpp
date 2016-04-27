@@ -19,7 +19,7 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
 
     nh.param("load_threshold", load_threshold_, 0.3);
     nh.param("position_error_threshold", position_error_threshold_, 0.1);
-    nh.param("use_serial_threshold", use_serial_threshold_, 0.28);
+    nh.param("serial_activation_position_threshold", serial_activation_position_threshold_, 0.28);
     nh.param("serial_enabled", serial_enabled_, true);
     nh.param("serial_value_count", serial_value_count_, 2);
     nh.param("serial_value_threshold", serial_value_threshold_, 0.5);
@@ -163,7 +163,7 @@ bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
     ROS_DEBUG("load:     %f, threshold: %f", std::abs(joint_states_->load), load_threshold_);
     ROS_DEBUG("position error: %f, threshold: %f", std::abs(joint_states_->error), position_error_threshold_);
-    ROS_DEBUG("position: %f, use serial threshold: %f", joint_states_->current_pos, use_serial_threshold_);
+    ROS_DEBUG("position: %f, use serial threshold: %f", joint_states_->current_pos, serial_activation_position_threshold_);
     ROS_DEBUG("serial value threshold: %f", serial_value_threshold_);
     for(size_t i = 0; i < serial_value_count_; i++) {
         ROS_DEBUG("serial value %d: %f", i, serial_values_[i]);
@@ -174,7 +174,7 @@ bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
     if (std::abs(joint_states_->error) > position_error_threshold_) {
         return true;
     }
-    if(serial_enabled_ && use_serial_threshold_ < joint_states_->current_pos) {
+    if(serial_enabled_ && serial_activation_position_threshold_ < joint_states_->current_pos) {
         for(size_t i = 0; i < serial_value_count_; i++) {
             if(serial_values_[i] < serial_value_threshold_)
                 return true;

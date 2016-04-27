@@ -52,7 +52,7 @@ private:
 
     double load_threshold_;
     double position_error_threshold_;
-    double use_serial_threshold_;
+    double serial_activation_position_threshold_;
 
     bool serial_enabled_;
     std::string serial_device_;

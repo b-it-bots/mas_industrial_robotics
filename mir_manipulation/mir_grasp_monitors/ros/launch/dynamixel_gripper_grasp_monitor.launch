@@ -11,12 +11,12 @@
            is bigger than error_threshold an object is grasped -->
       <param name="position_error_threshold" type="double" value="0.1" />
       <!-- If position is bigger than use_serial_threshold arduino grasp test is used -->
-      <param name="use_serial_threshold" type="double" value="0.28" />
+      <param name="serial_activation_position_threshold" type="double" value="0.28" />
       <!-- Use arduino grasp monitor -->
       <param name="serial_enabled" type="bool" value="true" />
       <!-- arduino sensor count -->
       <param name="serial_value_count" type="int" value="2" />
-      <!-- If one serial value is smaller than serial_threshold an object is grasped -->
+      <!-- If one serial value is smaller than serial_threshold an object is grasped (0.0 to 1.0) -->
       <param name="serial_value_threshold" type="double" value="0.5" />
       <!-- device to use -->
       <param name="serial_device" type="string" value="/dev/youbot/gripper_monitor" />
