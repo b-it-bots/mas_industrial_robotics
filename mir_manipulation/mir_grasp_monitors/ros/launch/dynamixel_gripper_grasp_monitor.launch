@@ -1,30 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-
-  <group ns="gripper_controller">
-    <node pkg="mir_grasp_monitors" type="dynamixel_gripper_grasp_monitor_node" name="grasp_monitor" output="screen" >
-      <remap from="~dynamixel_motor_states" to="/gripper_controller/state" />	
-      
-      <!-- If load is bigger than load_threshold an object is grasped -->
-      <param name="load_threshold" type="double" value="0.20" />
-      <!-- If position error (goal and current motor pos difference) 
-           is bigger than error_threshold an object is grasped -->
-      <param name="position_error_threshold" type="double" value="0.1" />
-      <!-- If position is bigger than use_serial_threshold arduino grasp test is used -->
-      <param name="serial_activation_position_threshold" type="double" value="0.28" />
-      <!-- Use arduino grasp monitor -->
-      <param name="serial_enabled" type="bool" value="true" />
-      <!-- arduino sensor count -->
-      <param name="serial_value_count" type="int" value="2" />
-      <!-- If one serial value is smaller than serial_threshold an object is grasped (0.0 to 1.0) -->
-      <param name="serial_value_threshold" type="double" value="0.5" />
-      <!-- device to use -->
-      <param name="serial_device" type="string" value="/dev/youbot/gripper_monitor" />
-      <!-- baudrate to use -->
-      <param name="serial_baudrate" type="int" value="9600" />
-      <!-- timeout to use in milliseconds -->
-      <param name="serial_timeout" type="int" value="100" />
-    </node>
-    
-  </group>
+    <group ns="gripper_controller">
+        <node pkg="mir_grasp_monitors" type="dynamixel_gripper_grasp_monitor_node" name="grasp_monitor" output="screen" >
+            <remap from="~dynamixel_motor_states" to="/gripper_controller/state" />	
+            <rosparam command="load" file="$(find mir_grasp_monitors)/ros/config/dynamixel_gripper_grasp_monitor.yaml"/>
+        </node>
+    </group>
 </launch>

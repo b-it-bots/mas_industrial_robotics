@@ -19,13 +19,13 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
 
     nh.param("load_threshold", load_threshold_, 0.3);
     nh.param("position_error_threshold", position_error_threshold_, 0.1);
-    nh.param("serial_activation_position_threshold", serial_activation_position_threshold_, 0.28);
-    nh.param("serial_enabled", serial_enabled_, true);
-    nh.param("serial_value_count", serial_value_count_, 2);
-    nh.param("serial_value_threshold", serial_value_threshold_, 0.5);
-    nh.param("serial_device", serial_device_, std::string("/dev/youbot/gripper_monitor"));
-    nh.param("serial_baudrate", serial_baudrate_, 9600);
-    nh.param("serial_timeout", serial_timeout_, 100);
+    nh.param("serial/activation_position_threshold", serial_activation_position_threshold_, 0.28);
+    nh.param("serial/enabled", serial_enabled_, true);
+    nh.param("serial/value_count", serial_value_count_, 2);
+    nh.param("serial/value_threshold", serial_value_threshold_, 0.5);
+    nh.param("serial/device", serial_device_, std::string("/dev/youbot/gripper_monitor"));
+    nh.param("serial/baudrate", serial_baudrate_, 9600);
+    nh.param("serial/timeout", serial_timeout_, 100);
 
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
     sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
