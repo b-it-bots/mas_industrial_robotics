@@ -18,11 +18,11 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     ros::NodeHandle nh("~");
 
     nh.param("load_threshold", load_threshold_, 0.3);
-    nh.param("error_threshold", error_threshold_, 0.1);
+    nh.param("position_error_threshold", position_error_threshold_, 0.1);
     nh.param("use_serial_threshold", use_serial_threshold_, 0.28);
     nh.param("serial_enabled", serial_enabled_, true);
     nh.param("serial_value_count", serial_value_count_, 2);
-    nh.param("serial_threshold", serial_threshold_, 0.5);
+    nh.param("serial_value_threshold", serial_value_threshold_, 0.5);
     nh.param("serial_device", serial_device_, std::string("/dev/youbot/gripper_monitor"));
     nh.param("serial_baudrate", serial_baudrate_, 9600);
     nh.param("serial_timeout", serial_timeout_, 100);
@@ -108,7 +108,7 @@ void DynamixelGripperGraspMonitorNode::poll_serial()
         serial_available_ = true;
     } catch (serial::IOException e) {
         serial_available_ = false;
-        ROS_WARN("Serial communication failed");
+        ROS_ERROR("Serial communication failed");
         if(serial_port_) {
             delete serial_port_;
         }
@@ -161,21 +161,22 @@ void DynamixelGripperGraspMonitorNode::run_state()
 
 bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
-    ROS_WARN("load:     %f, threshold %f", std::abs(joint_states_->load), load_threshold_);
-    ROS_WARN("error:    %f, threshold %f", std::abs(joint_states_->error), error_threshold_);
-    ROS_WARN("position: %f", joint_states_->current_pos);
+    ROS_DEBUG("load:     %f, threshold: %f", std::abs(joint_states_->load), load_threshold_);
+    ROS_DEBUG("position error: %f, threshold: %f", std::abs(joint_states_->error), position_error_threshold_);
+    ROS_DEBUG("position: %f, use serial threshold: %f", joint_states_->current_pos, use_serial_threshold_);
+    ROS_DEBUG("serial value threshold: %f", serial_value_threshold_);
     for(size_t i = 0; i < serial_value_count_; i++) {
-        ROS_WARN("value %d: %f", i, serial_values_[i]);
+        ROS_DEBUG("serial value %d: %f", i, serial_values_[i]);
     }
     if (std::abs(joint_states_->load) > load_threshold_) {
         return true;
     }
-    if (std::abs(joint_states_->error) > error_threshold_) {
+    if (std::abs(joint_states_->error) > position_error_threshold_) {
         return true;
     }
     if(serial_enabled_ && use_serial_threshold_ < joint_states_->current_pos) {
         for(size_t i = 0; i < serial_value_count_; i++) {
-            if(serial_values_[i] < serial_threshold_)
+            if(serial_values_[i] < serial_value_threshold_)
                 return true;
         }
     }

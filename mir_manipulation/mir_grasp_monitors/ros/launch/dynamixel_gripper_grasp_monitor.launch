@@ -9,7 +9,7 @@
       <param name="load_threshold" type="double" value="0.20" />
       <!-- If position error (goal and current motor pos difference) 
            is bigger than error_threshold an object is grasped -->
-      <param name="error_threshold" type="double" value="0.1" />
+      <param name="position_error_threshold" type="double" value="0.1" />
       <!-- If position is bigger than use_serial_threshold arduino grasp test is used -->
       <param name="use_serial_threshold" type="double" value="0.28" />
       <!-- Use arduino grasp monitor -->
@@ -17,12 +17,12 @@
       <!-- arduino sensor count -->
       <param name="serial_value_count" type="int" value="2" />
       <!-- If one serial value is smaller than serial_threshold an object is grasped -->
-      <param name="serial_threshold" type="double" value="0.5" />
+      <param name="serial_value_threshold" type="double" value="0.5" />
       <!-- device to use -->
       <param name="serial_device" type="string" value="/dev/youbot/gripper_monitor" />
       <!-- baudrate to use -->
       <param name="serial_baudrate" type="int" value="9600" />
-      <!-- timeout to use -->
+      <!-- timeout to use in milliseconds -->
       <param name="serial_timeout" type="int" value="100" />
     </node>
     

@@ -51,7 +51,7 @@ private:
     ros::Rate loop_rate_init_state_;
 
     double load_threshold_;
-    double error_threshold_;
+    double position_error_threshold_;
     double use_serial_threshold_;
 
     bool serial_enabled_;
@@ -59,7 +59,7 @@ private:
     int serial_baudrate_;
     int serial_timeout_;;
     int serial_value_count_;
-    double serial_threshold_;
+    double serial_value_threshold_;
     serial::Serial *serial_port_;
     bool serial_available_;
     uint8_t *serial_buffer_;
