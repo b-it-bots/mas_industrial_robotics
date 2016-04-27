@@ -11,20 +11,45 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     joint_states_received_(false),
     event_in_received_(false),
     current_state_(INIT),
-    loop_rate_init_state_(ros::Rate(100.0))
+    loop_rate_init_state_(ros::Rate(100.0)),
+    serial_port_(NULL),
+    serial_available_(false)
 {
     ros::NodeHandle nh("~");
 
-    nh.param("load_threshold", load_threshold_, 0.0);
-    ROS_INFO_STREAM("\tload threshold parameter: " << load_threshold_);
+    nh.param("load_threshold", load_threshold_, 0.3);
+    nh.param("position_error_threshold", position_error_threshold_, 0.1);
+    nh.param("serial/activation_position_threshold", serial_activation_position_threshold_, 0.28);
+    nh.param("serial/enabled", serial_enabled_, true);
+    nh.param("serial/value_count", serial_value_count_, 2);
+    nh.param("serial/value_threshold", serial_value_threshold_, 0.5);
+    nh.param("serial/device", serial_device_, std::string("/dev/youbot/gripper_monitor"));
+    nh.param("serial/baudrate", serial_baudrate_, 9600);
+    nh.param("serial/timeout", serial_timeout_, 100);
 
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
     sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
     sub_dynamixel_motor_states_ = nh.subscribe("dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
+
+    if(serial_enabled_) {
+        serial_buffer_ = (uint8_t *) malloc(sizeof(uint8_t) * serial_value_count_);
+        serial_values_ = (double *) malloc(sizeof(double) * serial_value_count_);
+    }
 }
 
 DynamixelGripperGraspMonitorNode::~DynamixelGripperGraspMonitorNode()
 {
+    if(serial_port_) {
+        if(serial_port_->isOpen())
+            serial_port_->close();
+        delete serial_port_;
+    }
+
+    if(serial_enabled_) {
+        delete serial_buffer_;
+        delete serial_values_;
+    }
+
     pub_event_.shutdown();
     sub_event_.shutdown();
     sub_dynamixel_motor_states_.shutdown();
@@ -46,6 +71,8 @@ void DynamixelGripperGraspMonitorNode::update()
 {
     checkForNewEvent();
 
+    poll_serial();
+
     switch (current_state_)
     {
     case INIT:
@@ -57,6 +84,35 @@ void DynamixelGripperGraspMonitorNode::update()
     case RUN:
         run_state();
         break;
+    }
+}
+
+void DynamixelGripperGraspMonitorNode::poll_serial()
+{
+    if(!serial_enabled_)
+        return;
+
+    try {
+        if(!serial_port_)
+            serial_port_ = new serial::Serial(serial_device_, serial_baudrate_, serial::Timeout::simpleTimeout(serial_timeout_));
+        if(!serial_port_->isOpen())
+            serial_port_->open();
+        if(serial_port_->available() < serial_value_count_)
+            return;
+
+        serial_port_->read(serial_buffer_, serial_value_count_);
+
+        for(size_t i = 0; i < serial_value_count_; i++) {
+            serial_values_[i] = (double) serial_buffer_[i] / 255.0;
+        }
+        serial_available_ = true;
+    } catch (serial::IOException e) {
+        serial_available_ = false;
+        ROS_ERROR("Serial communication failed");
+        if(serial_port_) {
+            delete serial_port_;
+        }
+        serial_port_ = NULL;
     }
 }
 
@@ -105,11 +161,25 @@ void DynamixelGripperGraspMonitorNode::run_state()
 
 bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
-    ROS_DEBUG_STREAM("cur. load: " << joint_states_->load << " load thresh: " << load_threshold_);
-
-    if (joint_states_->load > load_threshold_)
+    ROS_DEBUG("load:     %f, threshold: %f", std::abs(joint_states_->load), load_threshold_);
+    ROS_DEBUG("position error: %f, threshold: %f", std::abs(joint_states_->error), position_error_threshold_);
+    ROS_DEBUG("position: %f, use serial threshold: %f", joint_states_->current_pos, serial_activation_position_threshold_);
+    ROS_DEBUG("serial value threshold: %f", serial_value_threshold_);
+    for(size_t i = 0; i < serial_value_count_; i++) {
+        ROS_DEBUG("serial value %d: %f", i, serial_values_[i]);
+    }
+    if (std::abs(joint_states_->load) > load_threshold_) {
         return true;
-
+    }
+    if (std::abs(joint_states_->error) > position_error_threshold_) {
+        return true;
+    }
+    if(serial_enabled_ && serial_activation_position_threshold_ < joint_states_->current_pos) {
+        for(size_t i = 0; i < serial_value_count_; i++) {
+            if(serial_values_[i] < serial_value_threshold_)
+                return true;
+        }
+    }
     return false;
 }
 
