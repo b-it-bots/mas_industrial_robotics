@@ -20,6 +20,7 @@
   <run_depend>smach_ros</run_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>mcr_states</run_depend>
 
 </package>
 

@@ -9,6 +9,7 @@ catkin_package(
   CATKIN_DEPENDS
     actionlib
     geometry_msgs
+    mcr_states
     mir_base_placement
     move_base_msgs
     rospy
