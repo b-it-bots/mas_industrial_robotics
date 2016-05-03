@@ -8,7 +8,7 @@ import smach_ros
 import mir_states.common.navigation_states as gns
 import mir_states.common.manipulation_states as gms
 import mir_states.common.perception_states as gps
-import mir_states.common.basic_states as gbs
+import mcr_states.common.basic_states as gbs
 
 #import robocup specific states
 import mir_states.robocup.basic_transportation_test_states as btts
