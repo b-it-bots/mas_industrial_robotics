@@ -5,10 +5,11 @@ import smach
 import smach_ros
 
 # import of generic states
-import mir_states.common.basic_states as gbs
+import mcr_states.common.basic_states as gbs
+import mir_states.common.basic_states as mir_gbs
 import mir_states.common.navigation_states as gns
 import mir_states.common.manipulation_states as gms
-import mir_states.common.perception_states as gps
+import mcr_states.common.perception_states as gps
 import mir_states.common.perception_mockup_util as perception_mockup_util
 
 #import robocup specific states
@@ -151,7 +152,7 @@ class sub_sm_go_and_pick(smach.StateMachine):
                                                                                                 ('/planned_motion/event_in','e_stop')]),
                 transitions={'success':'DELETE_FROM_RECOGNIZED_OBJECTS'})
 
-            smach.StateMachine.add('ALIGN_WITH_OBJECT_LOOP', gbs.loop_for_vs(1),
+            smach.StateMachine.add('ALIGN_WITH_OBJECT_LOOP', mir_gbs.loop_for_vs(1),
                                       transitions={'loop': 'START_VISUAL_SERVOING',
                                                    'continue': 'GRASP_OBJ'})
 
@@ -169,10 +170,10 @@ class sub_sm_go_and_pick(smach.StateMachine):
             smach.StateMachine.add('STOP_VISUAL_SERVOING_WITH_FAILURE', gbs.send_event([('/mir_controllers/visual_servoing/event_in','e_stop')]),
                 transitions={'success':'SET_VISUAL_SERVOING_FAILURE'})
 
-            smach.StateMachine.add('SET_VISUAL_SERVOING_SUCCESS', gbs.set_vs_status(status=True),
+            smach.StateMachine.add('SET_VISUAL_SERVOING_SUCCESS', mir_gbs.set_vs_status(status=True),
                 transitions={'success':'OPEN_GRIPPER_FOR_APPROACH_OBJECT'})
 
-            smach.StateMachine.add('SET_VISUAL_SERVOING_FAILURE', gbs.set_vs_status(status=False),
+            smach.StateMachine.add('SET_VISUAL_SERVOING_FAILURE', mir_gbs.set_vs_status(status=False),
                 transitions={'success':'SELECT_OBJECT_TO_BE_GRASPED'})
 
             smach.StateMachine.add('OPEN_GRIPPER_FOR_APPROACH_OBJECT', gms.control_gripper('open'),
