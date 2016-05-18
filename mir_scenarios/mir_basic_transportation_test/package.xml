@@ -15,7 +15,7 @@
   <run_depend>mcr_gazebo_objects</run_depend>
   <run_depend>mcr_linear_regression</run_depend>
   <run_depend>mcr_object_recognition_bounding_box</run_depend>
-  <run_depend>mcr_relative_base_controller</run_depend>
+  <run_depend>mcr_twist_synchronizer</run_depend>
   <run_depend>mir_2dnav</run_depend>
   <run_depend>mir_arm_relative_motion_control</run_depend>
   <run_depend>mir_base_placement</run_depend>

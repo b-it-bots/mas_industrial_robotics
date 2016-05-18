@@ -55,12 +55,12 @@
     <!-- base placement -->
     <include file="$(find mir_base_placement)/ros/launch/base_placement.launch"/>
 
-    <!-- relative base controller -->
+    <!-- direct base controller -->
     <include file="$(find mcr_common_converters)/ros/launch/relative_displacement_calculator.launch">
         <arg name="pose_error_topic" value="/gripper_to_object_pose_error_calculator/pose_error" />
         <arg name="pose_topic" value="/mcr_navigation/relative_base_controller/command" />
     </include>
-    <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller.launch"/>
+    <include file="$(find mcr_twist_synchronizer)/ros/launch/twist_synchronizer.launch"/>
 
     <!-- perception pipeline -->
     <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" >

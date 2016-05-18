@@ -27,7 +27,7 @@
     <include file="$(find mir_base_placement)/ros/launch/base_placement_mockup.launch" />
     
     <!-- relative base controller -->
-    <include file="$(find mcr_relative_base_controller)/ros/launch/relative_base_controller_mockup.launch" />
+    <!--include file="$(find mcr_twist_synchronizer)/ros/launch/twist_synchronizer_mockup.launch" /-->
 
     <!-- perception pipeline -->
     <include file="$(find mcr_object_recognition_bounding_box)/ros/launch/object_recognition_mockup.launch" />

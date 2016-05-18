@@ -8,7 +8,7 @@ catkin_package(
     mcr_gazebo_objects
     mcr_linear_regression
     mcr_object_recognition_bounding_box
-    mcr_relative_base_controller
+    mcr_twist_synchronizer
     mir_2dnav
     mir_base_placement
     mir_bringup
