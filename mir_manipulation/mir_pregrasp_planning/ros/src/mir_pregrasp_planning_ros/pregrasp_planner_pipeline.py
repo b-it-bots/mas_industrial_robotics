@@ -10,7 +10,7 @@ joint configuration to reach that valid pose.
 It uses the following nodes:
   * (mir_pregrasp_planning) `simple_pregrasp_planner`.
   * (mcr_pose_generation) `pose_generator`.
-  * (mcr_pose_selection) `reachability_pose_selector`.
+  * (mcr_manipulation_pose_selector) `reachability_pose_selector`.
 
 The component serves as a configurator/coordinator, i.e. it sets the required
 parameters for all the components and starts/stops them accordingly.

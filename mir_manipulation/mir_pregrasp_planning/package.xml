@@ -22,7 +22,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>mcr_pose_generation</run_depend>
-  <run_depend>mcr_pose_selection</run_depend>
+  <run_depend>mcr_manipulation_pose_selector</run_depend>
   <run_depend>mcr_manipulation_monitors</run_depend>
   <run_depend>mcr_arm_motions</run_depend>
   <run_depend>mcr_topic_tools</run_depend> 
