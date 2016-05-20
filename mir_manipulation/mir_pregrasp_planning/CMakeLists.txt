@@ -23,7 +23,7 @@ catkin_package(
     rospy
     dynamic_reconfigure
     mcr_pose_generation
-    mcr_pose_selection
+    mcr_manipulation_pose_selector
     mcr_manipulation_monitors
     mcr_arm_motions
     mcr_topic_tools

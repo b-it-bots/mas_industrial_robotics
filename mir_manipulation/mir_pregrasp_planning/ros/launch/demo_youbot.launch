@@ -3,7 +3,7 @@
 <launch>
   <!-- The following nodes are excluded from the group since they use move_group
       from MoveIt!, which remaps the 'move_group' namespace to the group's namespace -->
-  <node pkg="mcr_pose_selection" type="reachability_pose_selector_trigger_node"
+  <node pkg="mcr_manipulation_pose_selector" type="reachability_pose_selector_trigger_node"
           name="pregrasp_pipeline_pose_selector" output="screen">
 
     <!-- the node cycle rate (in hz) -->
