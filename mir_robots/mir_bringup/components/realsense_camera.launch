@@ -3,19 +3,19 @@
 
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="camera" default="arm_cam3d" />
-    <arg name="realsense_camera_type" default="Intel(R) RealSense(TM) 3D Camer" />
+    <arg name="realsense_camera_type" default="Intel(R) RealSense(TM) Camera S" />
     <arg name="publish_frames" default="true" />
     <arg name="depth_scale" default="0.001" />
      
     <include file="$(find realsense_camera)/launch/realsense_camera.launch">
         <arg name="camera" value="$(arg camera)" />
-        <arg name="rgb_frame_w" value="640" />
-        <arg name="rgb_frame_h" value="480" />
-        <arg name="rgb_camera_info_url" value="package://mir_default_robot_config/$(arg robot)/realsense_camera_calibration.yaml" />
-        <arg name="ir_camera_info_url" value="" />
+        <arg name="rgb_frame_w" value="1280" />
+        <arg name="rgb_frame_h" value="720" />
         <arg name="realsense_camera_type" value="$(arg realsense_camera_type)" />
         <arg name="publish_frames" value="$(arg publish_frames)" />
         <arg name="depth_scale" value="0.0045" />    
+        <arg name="rgb_camera_info_url" value="package://realsense_camera/config/sr300_rgb_calibration.yaml" />
+        <arg name="ir_camera_info_url" value="package://realsense_camera/config/sr300_ir_calibration.yaml" />
     </include>
 
 </launch>
