@@ -21,7 +21,7 @@
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>xacro</run_depend>
   <run_depend>mir_hardware_config</run_depend>
-  <run_depend>youbot_arm_kinematics_moveit</run_depend>
+
 
   <buildtool_depend>catkin</buildtool_depend>
   
