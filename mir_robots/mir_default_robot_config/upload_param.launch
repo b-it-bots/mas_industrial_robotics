@@ -3,6 +3,4 @@
 
   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
 
-  <rosparam command="load" ns="/script_server/gripper_1" file="$(find mir_default_robot_config)/$(arg robot)/gripper_joint_configurations.yaml"/>
-	
 </launch>

@@ -31,7 +31,7 @@
         <!-- Update this as required -->
         <param name="is_image_filter_enabled" type="bool" value="true"/>       
         <rosparam command="load" file="$(find mcr_image_filter)/ros/config/image_filter_params.yaml"/>
-        <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml"/>
+        <!--rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml"/-->
     </node>
 
     <!-- Update reference pose as required based on input image size and set is_image_filter_enabled to false in image_cartesian_mapper-->
@@ -46,7 +46,7 @@
         <!-- Update image filtering enabled as required -->
         <param name="is_image_filter_enabled" type="bool" value="false"/>
         <rosparam command="load" file="$(find mcr_image_filter)/ros/config/image_filter_params.yaml"/>
-        <rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml"/>
+        <!--rosparam command="load" file="$(find mir_default_robot_config)/$(arg robot)/realsense_camera_calibration.yaml"/-->
     </node>
 
     <node pkg="mcr_manipulation_measurers" type="component_wise_pose_error_calculator_node" name="component_wise_pose_error_calculator" output="screen">
