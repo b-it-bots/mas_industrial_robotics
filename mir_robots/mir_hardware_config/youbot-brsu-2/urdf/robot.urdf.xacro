@@ -60,7 +60,7 @@
 
   <!-- camera mount for Intel RealSense F200 -->
   <xacro:intel_f200_camera_mount name="camera_mount" parent="gripper_motor_mount_link">
-    <origin xyz="-0.00375 -0.0007 0.012" rpy="-0.05 -0.04 0" />
+    <origin xyz="-0.00375 -0.0007 0.012" rpy="-0.03 -0.04 0" />
   </xacro:intel_f200_camera_mount>
 
   <!-- 3D camera on arm -->
