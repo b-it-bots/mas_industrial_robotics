@@ -56,7 +56,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     ros::service::waitForService(torque_limit_srv_name_, ros::Duration(10.0));
     while (!srv_client_torque.call(torque_srv))
     {
-        ROS_ERROR_STREAM("Failed to call service: " << torque_limit_srv_name_ << "! Will try again ...");
+        ROS_WARN_STREAM("Failed to call service: " << torque_limit_srv_name_ << "! Will try again ...");
         sleep(2);
     }
 
@@ -70,7 +70,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     ros::service::waitForService(compliance_margin_srv_name_, ros::Duration(10.0));
     while (!srv_client_compliance_margin.call(compliance_margin_srv))
     {
-        ROS_ERROR_STREAM("Failed to call service: " << compliance_margin_srv_name_ << "! Will try again ...");
+        ROS_WARN_STREAM("Failed to call service: " << compliance_margin_srv_name_ << "! Will try again ...");
         sleep(2);
     }
 
@@ -84,7 +84,7 @@ DynamixelGripperNode::DynamixelGripperNode(ros::NodeHandle &nh) :
     ros::service::waitForService(compliance_slope_srv_name_, ros::Duration(10.0));
     while (!srv_client_compliance_slope.call(compliance_slope_srv))
     {
-        ROS_ERROR_STREAM("Failed to call service: " << compliance_slope_srv_name_ << "! Will try again ...");
+        ROS_WARN_STREAM("Failed to call service: " << compliance_slope_srv_name_ << "! Will try again ...");
         sleep(2);
     }
 
