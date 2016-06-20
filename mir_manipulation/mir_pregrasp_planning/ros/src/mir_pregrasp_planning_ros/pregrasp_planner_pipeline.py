@@ -57,6 +57,7 @@ class PregraspPlannerPipeline(object):
         # params
         self.started_components = False
         self.event = None
+        self.pose_transformer_status = None
         self.pregrasp_planner_status = None
         self.pose_generator_status = None
         self.pose_selector_status = None
@@ -66,6 +67,9 @@ class PregraspPlannerPipeline(object):
 
         # publishers
         self.event_out = rospy.Publisher("~event_out", std_msgs.msg.String, queue_size=1)
+        self.start_pose_transformer = rospy.Publisher(
+            '~start_pose_transformer', std_msgs.msg.String, latch=True, queue_size=1
+        )
         self.start_pregrasp_planner = rospy.Publisher(
             '~start_pregrasp_planner', std_msgs.msg.String, latch=True, queue_size=1
         )
@@ -78,6 +82,9 @@ class PregraspPlannerPipeline(object):
 
         # subscribers
         rospy.Subscriber("~event_in", std_msgs.msg.String, self.event_in_cb)
+        rospy.Subscriber(
+            "~pose_transformer_status", std_msgs.msg.String, self.pose_transformer_status_cb
+        )
         rospy.Subscriber(
             "~pregrasp_planner_status", std_msgs.msg.String, self.grasp_planner_status_cb
         )
@@ -94,6 +101,13 @@ class PregraspPlannerPipeline(object):
 
         """
         self.event = msg.data
+
+    def pose_transformer_status_cb(self, msg):
+        """
+        Obtains the status of the pose transformer (as an event).
+
+        """
+        self.pose_transformer_status = msg.data
 
     def grasp_planner_status_cb(self, msg):
         """
@@ -164,7 +178,8 @@ class PregraspPlannerPipeline(object):
             return 'INIT'
         if self.pregrasp_planner_status == 'e_failure' \
             or self.pose_generator_status == 'e_failure' \
-                or self.pose_selector_status == 'e_failure':
+                or self.pose_selector_status == 'e_failure'\
+                or self.pose_transformer_status == 'e_failure':
             status = 'e_failure'
             self.event_out.publish(status)
             self.reset_component_data(status)
@@ -186,12 +201,14 @@ class PregraspPlannerPipeline(object):
 
         """
         if event == 'e_stopped' or event == 'e_failure' or event == 'e_success':
+            self.start_pose_transformer.publish('e_stop')
             self.start_pregrasp_planner.publish('e_stop')
             self.start_pose_generator.publish('e_stop')
             self.start_pose_selector.publish('e_stop')
             self.started_components = False
 
         if event == 'e_start' and not self.started_components:
+            self.start_pose_transformer.publish('e_start')
             self.start_pregrasp_planner.publish('e_start')
             self.start_pose_generator.publish('e_start')
             self.start_pose_selector.publish('e_start')

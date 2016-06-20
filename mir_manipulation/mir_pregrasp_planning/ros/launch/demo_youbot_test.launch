@@ -39,6 +39,24 @@
   </node>
 
   <group ns="mir_manipulation/pregrasp_planner_pipeline">
+    <node pkg="mcr_manipulation_measurers" type="pose_transformer_node"
+              name="pose_transformer" output="screen">
+
+      <!-- the cycle rate of the node (in Hz) -->
+      <param name="loop_rate" type="double" value="10.0"/>
+
+      <param name="wait_for_transform" type="double" value="0.1"/>
+
+      <!-- Reference frame to transform target pose -->
+      <param name="target_frame" type="str" value="base_link"/>
+
+      <!-- Flag to use node in trigger mode -->
+      <param name="trigger" type="boolean" value="false"/>
+
+      <!-- Pose in (geometry_msgs/PoseStamped) -->
+      <remap from="~pose_in" to="/mir_manipulation/pregrasp_planner_pipeline/target_pose" />
+    </node>
+
     <node pkg="mir_pregrasp_planning" type="simple_pregrasp_planner_node"
             name="grasp_planner" output="screen">
 
@@ -65,7 +83,7 @@
       <!-- Furthest distance the gripper should be to the object (in meters) -->
       <param name="max_distance_to_object" type="double" value="0.0"/>
 
-      <remap from="~pose_in" to="/mir_manipulation/pregrasp_planner_pipeline/target_pose"/>
+      <remap from="~pose_in" to="pose_transformer/transformed_pose"/>
     </node>
 
     <node pkg="mcr_pose_generation" type="pose_generator_node"
@@ -102,6 +120,7 @@
       <remap from="~event_out" to="/mir_manipulation/pregrasp_planner_pipeline/event_out"/>
 
       <!-- To trigger components -->
+      <remap from="~start_pose_transformer" to="pose_transformer/event_in"/>
       <remap from="~start_pregrasp_planner"
              to="/mir_manipulation/pregrasp_planner_pipeline/grasp_planner/event_in"/>
       <remap from="~start_pose_generator"
@@ -110,6 +129,7 @@
              to="/pregrasp_pipeline_pose_selector/event_in"/>
 
       <!-- To get feedback from components -->
+      <remap from="~pose_transformer_status" to="pose_transformer/event_out"/>
       <remap from="~pregrasp_planner_status"
              to="/mir_manipulation/pregrasp_planner_pipeline/grasp_planner/event_out"/>
       <remap from="~pose_generator_status"
