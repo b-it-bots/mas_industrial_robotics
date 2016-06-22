@@ -309,7 +309,7 @@ class select_arm_pose(smach.State):
             return 'failed'
 
         if userdata.next_arm_pose_index >= len(self.pose_name_list):
-            rospy.info("[manipulation states] All poses covered ending loop")
+            rospy.loginfo("[manipulation states] All poses covered ending loop")
             return 'failed'
 
         userdata.move_arm_to = self.pose_name_list[userdata.next_arm_pose_index]
