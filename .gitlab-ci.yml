@@ -32,5 +32,5 @@ build:
     - catkin_make roslint
     - catkin_lint --strict --ignore CRITICAL_VAR_APPEND,LINK_DIRECTORY,ENV_VAR,AMBIGUOUS_BUILD_INCLUDE src/
     - catkin_make install
-    - catkin_make run_tests
-    - catkin_test_results
+#    - catkin_make run_tests
+#    - catkin_test_results
