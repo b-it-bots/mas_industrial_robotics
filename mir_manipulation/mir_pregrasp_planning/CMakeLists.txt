@@ -32,6 +32,7 @@ catkin_package(
     visualization_msgs
     mcr_manipulation_msgs
     tf
+    mcr_manipulation_measurers
 )
 
 ### TESTS

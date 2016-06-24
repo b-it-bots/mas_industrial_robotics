@@ -295,7 +295,7 @@ class select_arm_pose(smach.State):
 
     def __init__(self, pose_name_list=None):
         smach.State.__init__(self,
-                             outcomes=['succeeded','failed'],
+                             outcomes=['succeeded','failed','completed'],
                  input_keys=['next_arm_pose_index'],
                              output_keys=['move_arm_to','next_arm_pose_index'])
         self.pose_name_list = pose_name_list
@@ -309,11 +309,11 @@ class select_arm_pose(smach.State):
             return 'failed'
 
         if userdata.next_arm_pose_index >= len(self.pose_name_list):
-            rospy.logerr("pose index out of range")
-            return 'failed'
+            rospy.loginfo("[manipulation states] All poses covered ending loop")
+            userdata.next_arm_pose_index = 0
+            return 'completed'
 
         userdata.move_arm_to = self.pose_name_list[userdata.next_arm_pose_index]
         userdata.next_arm_pose_index += 1
-        userdata.next_arm_pose_index %= len(self.pose_name_list)
 
         return 'succeeded'
