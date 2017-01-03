@@ -57,6 +57,7 @@ packagelist=(
 
 ### install debian packages listed in array above
 if [ $INSTALL_PACKAGES != false ]; then
+    sudo apt-get update
     sudo apt-get install -y ${packagelist[@]}
 fi
 
