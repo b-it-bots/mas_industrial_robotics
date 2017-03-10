@@ -2,6 +2,7 @@
 <launch>
 
   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+  <arg name="is_camera_required" default="true" />
 
   <!-- upload robot description and params (joint configurations) -->
   <include file="$(find mir_hardware_config)/upload_param.launch">
@@ -16,6 +17,8 @@
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen" />
 
   <!-- start robot-specific launch file -->
-  <include file="$(find mir_bringup)/robots/$(arg robot).launch" />
+  <include file="$(find mir_bringup)/robots/$(arg robot).launch" >
+    <arg name="is_camera_required" value="$(arg is_camera_required)" />
+  </include>
 
 </launch>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find realsense_camera)/launch/realsense_sr300_camera.launch">
+        <arg name="camera" value="arm_cam3d" />
+        <arg name="publish_frames" value="false" />
+    </include>
+</launch>
