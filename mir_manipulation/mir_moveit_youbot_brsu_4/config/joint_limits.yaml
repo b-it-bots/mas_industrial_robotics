@@ -2,19 +2,29 @@
 # Specific joint properties can be changed with the keys [max_position, min_position, max_velocity, max_acceleration]
 # Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
 joint_limits:
-  arm_joint_3:
+  arm_joint_1:
     has_velocity_limits: true
-    max_velocity: 1.57079632679
+    max_velocity: 1.5707
     has_acceleration_limits: true
-    max_acceleration: 1.571
+    max_acceleration: 1.5707
   arm_joint_2:
     has_velocity_limits: true
-    max_velocity: 1.57079632679
+    max_velocity: 0.8
     has_acceleration_limits: true
-    max_acceleration: 1.571
+    max_acceleration: 0.8 # default 1.5707
+  arm_joint_3:
+    has_velocity_limits: true
+    max_velocity: 1.0
+    has_acceleration_limits: true
+    max_acceleration: 1.0 # default 1.5707
   arm_joint_4:
     has_velocity_limits: true
-    max_velocity: 1.57079632679
+    max_velocity: 1.5707
+    has_acceleration_limits: true
+    max_acceleration: 1.571
+  arm_joint_5:
+    has_velocity_limits: true
+    max_velocity: 1.5707
     has_acceleration_limits: true
     max_acceleration: 1.571
   gripper_motor_left_joint:
@@ -22,16 +32,6 @@ joint_limits:
     max_velocity: 6.178465545
     has_acceleration_limits: true
     max_acceleration: 1.5
-  arm_joint_5:
-    has_velocity_limits: true
-    max_velocity: 1.57079632679
-    has_acceleration_limits: true
-    max_acceleration: 1.571
-  arm_joint_1:
-    has_velocity_limits: true
-    max_velocity: 1.57079632679
-    has_acceleration_limits: true
-    max_acceleration: 1.571
   gripper_motor_right_joint:
     has_velocity_limits: true
     max_velocity: 6.178465545
