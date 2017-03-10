@@ -1,56 +1,283 @@
 #!/usr/bin/python
 
-
 import sys
-
-# ROS imports
+import atwork_ros_msgs.msg
 import rospy
+
 import smach
 import smach_ros
+import math
+import std_msgs.msg
+import dynamixel_msgs.msg
+# import of generic states
+# generic states
+import mir_states.common.basic_states as gbs_o
+import mir_states.common.navigation_states as gns_o
+import mir_states.common.manipulation_states as gms_o
+import mir_states.common.perception_states as gps_o
+import mir_states_common.robocup.referee_box_communication as rbc
 
-# Generic state imports
-import mir_states.common.basic_states as gbs
-
-# RoboCup state imports
+import mir_states.robocup.basic_transportation_test_states as btts
 import mir_states.robocup.referee_box_states as refbox
 
+#### IMPORT SOME NEW STATES!! ###
+import mir_states.common.basic_states as gbs
+
+import mir_states.common.perception_mockup_util as perception_mockup_util
+from mcr_perception_msgs.msg import ObjectList, Object
+
+class my_pause(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded'])
+
+    def execute(self, userdata):
+        rospy.sleep(2.0)
+        #rospy.logerror("I HAVE SLEPT")
+        return 'succeeded'
+
+class wait_for_object(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+        self.result = None
+        self.img_editor = rospy.Publisher('/mcr_perception/edit_image/event_in',std_msgs.msg.String)
+        self.event_out = rospy.Publisher('/mcr_perception/background_change_detection/event_in', std_msgs.msg.String)
+
+        rospy.Subscriber('/mcr_perception/background_change_detection/event_out', std_msgs.msg.String, self.event_cb)
+
+    def execute(self, userdata):
+        self.result = None
+        self.img_editor.publish('e_start')
+        rospy.loginfo('published')
+        ### TODO CHANGE THIS
+        rospy.sleep(1)
+        self.event_out.publish('e_start')
+        rospy.sleep(1)
+        while not self.result:
+            rospy.sleep(0.1)
+        self.img_editor.publish('e_stop')
+        self.event_out.publish('e_stop')
+
+        if self.result.data != 'e_change':
+            return 'failed'
+        return 'succeeded'
+
+    def event_cb(self, msg):
+        self.result = msg
+
+
+class for_testing(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+
+    def execute(self, userdata):
+        #TODO TIMING
+        rospy.logerr("THERE IS SOMETHING NOT FINISHED")
+        rospy.sleep(1.0)
+        if True:
+            return 'succeeded'
+        else:
+            return 'failed'
+
+class cbt_release(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded'])
+
+    def execute(self, userdata):
+        #TODO TIMING
+        gms_o.gripper_command.set_named_target("open")
+        gms_o.gripper_command.go()
+        rospy.sleep(3.0)
+        return 'succeeded'
+
+
+class cbt_grasp(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded'])
+
+    def execute(self, userdata):
+        #TODO TIMING
+        #gms_o.control_gripper("close")
+        #rospy.sleep(1)
+        gms_o.gripper_command.set_named_target("close")
+        gms_o.gripper_command.go()
+        rospy.sleep(1.0)
+        return 'succeeded'
+
+class cbt_grasp_relese(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded'])
+
+    def execute(self, userdata):
+        #TODO TIMING
+        #gms_o.control_gripper("close")
+        #rospy.sleep(3.5)
+        gms_o.gripper_command.set_named_target("open")
+        gms_o.gripper_command.go()
+        rospy.sleep(0.5)
+        return 'succeeded'
+
+class get_cbt_task(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,
+            outcomes=['task_received'])
+
+        rospy.Subscriber("/robot_example_ros/task_info", atwork_ros_msgs.msg.TaskInfo, self.refboxcb)
+        self.is_refbox_start_recieved = False
+
+    def refboxcb(self, msg):
+        self.is_refbox_start_recieved = True
+
+    def execute(self, userdata):
+        rospy.loginfo("Waiting for task")
+        while not rospy.is_shutdown():
+            if (self.is_refbox_start_recieved):
+                break
+            rospy.sleep(1.0)
+        return "task_received"
+
+class check_gripper_joint_values(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
+        self.result = None
+        self.val = False
+        rospy.Subscriber('/gripper_controller/state',dynamixel_msgs.msg.JointState, self.event_cb)
+    def execute(self, userdata):
+        self.val = True
+        while not self.result:
+           rospy.sleep(0.1)
+        if self.result.current_pos > 2.5:
+            return 'failed'
+        return 'succeeded'
+
+    def event_cb(self, msg):
+        if self.val:
+            self.result = msg
+            print self.result.current_pos
+        self.val = False
+
 # main
-def main(no_refbox=False):
+def main(simulation=False):
+    print "Starting node"
+    rospy.init_node('basic_conveyor_test')
 
-    rospy.init_node('conveyor_belt_test')
+    print "Starting StateMachine"
+    SM = smach.StateMachine(outcomes=['done'])
 
-    SM = smach.StateMachine(outcomes=['overall_done'])
-
-    SM.userdata.task_list = []
-    SM.userdata.no_refbox = no_refbox
-    SM.userdata.test = "CBT"
-       
     # open the container
+
+    use_mockup=False
+
     with SM:
-        
-        smach.StateMachine.add('INIT_ROBOT', gbs.init_robot(),
-            transitions={'succeeded':'GET_TASK'})
+        smach.StateMachine.add('OPEN_GRIPPER',  cbt_grasp_relese(),
+            transitions={'succeeded': 'ARM_TO_CONVEYOR_VIEW'})
 
-        smach.StateMachine.add('GET_TASK', refbox.get_task(),
-            transitions={'task_received':'overall_done',
-                         'wrong_task':'GET_TASK',
-                         'wrong_task_format':'GET_TASK'})
+        smach.StateMachine.add('ARM_TO_CONVEYOR_VIEW', gms_o.move_arm(
+           # [2.2187, 1.85767, -1.5741, 3.2046, 1.3840]),
+           # [2.19647672522, 2.1781809757, -1.77540825632 ,3.10630504597, 4.40075183871]),
+           [2.20925454919, 1.98791323601 ,-1.38040010402 ,2.87320772063, 4.35358370112]),
+           transitions={'succeeded': 'WAIT_FOR_OBJECT',
+                        'failed': 'ARM_TO_CONVEYOR_VIEW'})
 
-       
-       
+        #smach.StateMachine.add('INIT_ROBOT', gbs_o.init_robot(),
+            #transitions={'succeeded':'GET_TASK'})
+           # transitions={'succeeded':'ARM_TO_CONVEYOR_VIEW'})
+
+        '''
+        smach.StateMachine.add('GET_TASK', get_cbt_task(),
+            transitions={'task_received': 'MOVE_TO_CONVEYOR'})
+
+
+        if use_mockup:
+            smach.StateMachine.add('MOVE_TO_CONVEYOR', for_testing(),
+                transitions={'succeeded': 'ARM_TO_CONVEYOR_VIEW',
+                            'failed': 'ARM_TO_CONVEYOR_VIEW'})
+
+        else:
+            # THE FAILED TRANSITION IS WRONG
+            smach.StateMachine.add('MOVE_TO_CONVEYOR', gns_o.approach_pose("CB01"),
+                transitions={'succeeded': 'GO_TO_GRASP_POSE',
+                            'failed': 'ARM_TO_CONVEYOR_VIEW'})
+        '''
+        #smach.StateMachine.add('ARM_TO_CONVEYOR_VIEW', gms_o.move_arm("pre_grasp"),
+
+        #smach.StateMachine.add('PAUSE', my_pause(),
+        #   transitions={'succeeded': 'WAIT_FOR_OBJECT'})
+
+        #TODO
+        smach.StateMachine.add('WAIT_FOR_OBJECT', wait_for_object(),
+            transitions={'succeeded': 'CBT_GRASP',
+                        'failed': 'WAIT_FOR_OBJECT'})
+
+        #smach.StateMachine.add('GO_TO_GRASP_POSE', gms_o.move_arm(
+         #   #[2.2186, 2.01376, -1.5741, 3.0410, 1.3842]),
+          #  [2.21078506868 ,2.19248931916, -1.77215670793 ,3.0796457562, 4.38099520321]),
+           # transitions={'succeeded': 'CBT_GRASP',
+                #        'failed': 'WAIT_FOR_OBJECT'})
+
+        #smach.StateMachine.add('ARM_TO_GRASP', gms_o.move_arm("grasp_cbt"),
+        #    transitions={'succeeded': 'CBT_GRASP',
+        #                'failed': 'ARM_TO_GRASP'})
+
+        smach.StateMachine.add('CBT_GRASP', cbt_grasp(),
+            transitions={'succeeded': 'ARM_TO_PLACING_POSE_2'})
+
+        #smach.StateMachine.add('ARM_TO_INTERMEDIATE_POSE', gms_o.move_arm("pre_grasp"),
+         #   transitions={'succeeded': 'ARM_TO_PLACING_POSE_2',
+          #                'failed' : 'ARM_TO_PLACING_POSE_2'})
+           # transitions={'succeeded': 'ARM_TO_PLACING_POSE',
+           #            'failed': 'ARM_TO_PLACING_POSE'})
+
+        #smach.StateMachine.add('CHECK_GRIPPER_JOINT_VALUES', check_gripper_joint_values(),
+         #   transitions={'succeeded': 'ARM_TO_PLACING_POSE_2',
+          #                'failed' : 'OPEN_GRIPPER'})
+           # transitions={'succeeded': 'ARM_TO_PLACING_POSE',
+           #            'failed': 'ARM_TO_PLACING_POSE'})
+
+
+
+
+           # transitions={'succeeded': 'ARM_TO_PLACING_POSE',
+           #            'failed': 'ARM_TO_PLACING_POSE'}
+
+        smach.StateMachine.add('ARM_TO_PLACING_POSE_2', gms_o.move_arm("platform_middle"),
+            transitions={'succeeded': 'OPEN_GRIPPER',
+                        'failed': 'ARM_TO_PLACING_POSE_2'})
+        #smach.StateMachine.add('ARM_TO_REAR_PLATFORM', gms_o.move_arm("platform_left"),
+        #    transitions={'succeeded': 'OPEN_GRIPPER',
+        #                'failed': 'ARM_TO_REAR_PLATFORM'})
+        #smach.StateMachine.add('OPEN_GRIPPER', cbt_release(),
+        #    transitions={'succeeded': 'ARM_DONE'})
+
+        #smach.StateMachine.add('ARM_DONE', gms_o.move_arm("platform_intermediate"),
+        #    transitions={'succeeded': 'MOVE_TO_EXIT',
+        #                'failed': 'ARM_DONE'})
+        #if use_mockup:
+        #    smach.StateMachine.add('MOVE_TO_EXIT', for_testing(),
+        #        transitions={'succeeded': 'done',
+        #                   'failed': 'done'})
+        #else:
+        #    smach.StateMachine.add('MOVE_TO_EXIT', gns_o.approach_pose("EXIT"),
+        #        transitions={'succeeded':'done',
+        #                'failed':'MOVE_TO_EXIT'})
+
+
     # Start SMACH viewer
-    smach_viewer = smach_ros.IntrospectionServer('CONVEYOR_BELT_TEST', SM, 'CONVEYOR_BELT_TEST')
+    smach_viewer = smach_ros.IntrospectionServer('CONVEYOR_BELT_TEST', SM, '/SM_ROOT')
     smach_viewer.start()
 
     result = SM.execute()
 
-    # stop SMACH viewer
-    while (result is None):
-        rospy.spin()
-    rospy.loginfo('conveyor belt test is done.')
-    
-    # smach_thread.stop()
+    while not rospy.is_shutdown():
+        if result is None:
+            rospy.spin_once()
+            print("span once")
+        else:
+            rospy.loginfo('CONVEYOR_BELT_TEST test is Done.')
+            break
+
     smach_viewer.stop()
+    print ("exit")
+
 
 if __name__ == '__main__':
-    main(sys.argv[-1] == '--no-refbox')
+    main(sys.argv[-1] == '--simulation')
