@@ -2,6 +2,7 @@
 <launch>
 
   <arg name="robot" value="$(optenv ROBOT youbot-brsu-4)" />
+  <arg name="is_camera_required" default="true" />
 
   <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
 
@@ -29,10 +30,9 @@
   <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />
   <include file="$(find mir_gripper_controller)/ros/launch/dynamixel_gripper.launch" />
 
-  <include file="$(find realsense_camera)/launch/realsense_sr300_camera.launch">
-    <arg name="camera" value="arm_cam3d" />
-    <arg name="publish_frames" value="false" />
-  </include>
+  <group if="$(arg is_camera_required)" >
+    <include file="$(find mir_bringup)/components/realsense_camera.launch"/>
+  </group>
 
   <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />

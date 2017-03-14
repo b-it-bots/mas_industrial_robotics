@@ -28,6 +28,13 @@
         <joint name="arm_joint_4" value="3.35851" />
         <joint name="arm_joint_5" value="2.92728" />
     </group_state>
+    <group_state name="navigation" group="arm_1">
+        <joint name="arm_joint_1" value="2.12012" />
+        <joint name="arm_joint_2" value="0.07604" />
+        <joint name="arm_joint_3" value="-1.53235" />
+        <joint name="arm_joint_4" value="3.35216" />
+       <joint name="arm_joint_5" value="2.93816" />
+    </group_state>
     <group_state name="camera_calibration_elbow" group="arm_1">
         <joint name="arm_joint_1" value="5.30383" />
         <joint name="arm_joint_2" value="0.069407" />
@@ -35,33 +42,40 @@
         <joint name="arm_joint_4" value="3.426" />
         <joint name="arm_joint_5" value="2.9831" />
     </group_state>
-    <group_state name="look_at_workspace" group="arm_1">
-        <joint name="arm_joint_1" value="2.1532" />
-        <joint name="arm_joint_2" value="0.5835" />
-        <joint name="arm_joint_3" value="-1.007" />
-        <joint name="arm_joint_4" value="3.3501" />
-        <joint name="arm_joint_5" value="2.9142" />
+    <group_state name="barrier_tape" group="arm_1">
+        <joint name="arm_joint_1" value="2.15302" />
+        <joint name="arm_joint_2" value="0.05784" />
+        <joint name="arm_joint_3" value="-0.66304" />
+        <joint name="arm_joint_4" value="3.20453" />
+        <joint name="arm_joint_5" value="2.93822" />
     </group_state>
-    <group_state name="look_at_workspace_left" group="arm_1">
-        <joint name="arm_joint_1" value="1.6851" />
-        <joint name="arm_joint_2" value="1.044" />
-        <joint name="arm_joint_3" value="-1.6268" />
-        <joint name="arm_joint_4" value="3.48012" />
-        <joint name="arm_joint_5" value="2.9135" />
+    <group_state name="look_at_workspace" group="arm_1">
+        <joint name="arm_joint_1" value="2.1789" />
+        <joint name="arm_joint_2" value="0.8910" />
+        <joint name="arm_joint_3" value="-1.007" />
+        <joint name="arm_joint_4" value="3.3485" />
+        <joint name="arm_joint_5" value="2.9141" />
+    </group_state>
+     <group_state name="look_at_workspace_left" group="arm_1">
+        <joint name="arm_joint_1" value="1.6655" />
+        <joint name="arm_joint_2" value="0.8557" />
+        <joint name="arm_joint_3" value="-1.007" />
+        <joint name="arm_joint_4" value="3.3485" />
+        <joint name="arm_joint_5" value="2.9141" />
     </group_state>
     <group_state name="look_straight_at_workspace_left" group="arm_1">
          <joint name="arm_joint_1" value="1.8458" />
-         <joint name="arm_joint_2" value="0.5835" />
-         <joint name="arm_joint_3" value="-1.007" />
-         <joint name="arm_joint_4" value="3.35" />
-         <joint name="arm_joint_5" value="2.59" />
+         <joint name="arm_joint_2" value="0.6961" />
+         <joint name="arm_joint_3" value="-1.006" />
+         <joint name="arm_joint_4" value="3.3718" />
+         <joint name="arm_joint_5" value="2.5899" />
     </group_state>
     <group_state name="look_at_workspace_right" group="arm_1">
-        <joint name="arm_joint_1" value="2.588" />
-        <joint name="arm_joint_2" value="1.0874" />
-        <joint name="arm_joint_3" value="-1.632" />
-        <joint name="arm_joint_4" value="3.48012" />
-        <joint name="arm_joint_5" value="2.9135" />
+         <joint name="arm_joint_1" value="2.6948" />
+         <joint name="arm_joint_2" value="0.8557" />
+         <joint name="arm_joint_3" value="-1.007" />
+         <joint name="arm_joint_4" value="3.3485" />
+         <joint name="arm_joint_5" value="2.9141" />
     </group_state>
    <group_state name="look_straight_at_workspace_right" group="arm_1">
         <joint name="arm_joint_1" value="2.6171" />
@@ -92,11 +106,11 @@
         <joint name="arm_joint_5" value="2.93075" />
     </group_state>
     <group_state name="platform_middle" group="arm_1">
-        <joint name="arm_joint_1" value="2.1404" />
-        <joint name="arm_joint_2" value="0.6366" />
-        <joint name="arm_joint_3" value="-3.628" />
-        <joint name="arm_joint_4" value="0.3174" />
-        <joint name="arm_joint_5" value="2.9493" />
+        <joint name="arm_joint_1" value="2.1302" />
+        <joint name="arm_joint_2" value="0.6290" />
+        <joint name="arm_joint_3" value="-3.8445" />
+        <joint name="arm_joint_4" value="0.92749" />
+        <joint name="arm_joint_5" value="2.9531" />
     </group_state>
     <group_state name="platform_middle_pre" group="arm_1">
         <joint name="arm_joint_1" value="2.13374" />
@@ -114,7 +128,7 @@
     </group_state>
     <group_state name="platform_left" group="arm_1">
         <joint name="arm_joint_1" value="2.471" />
-        <joint name="arm_joint_2" value="0.5519" />
+        <joint name="arm_joint_2" value="0.5207" />
         <joint name="arm_joint_3" value="-3.4836" />
         <joint name="arm_joint_4" value="0.2853" />
         <joint name="arm_joint_5" value="3.2877" />
@@ -128,7 +142,7 @@
     </group_state>
     <group_state name="platform_right" group="arm_1">
         <joint name="arm_joint_1" value="1.8139" />
-        <joint name="arm_joint_2" value="0.5608" />
+        <joint name="arm_joint_2" value="0.5266" />
         <joint name="arm_joint_3" value="-3.497" />
         <joint name="arm_joint_4" value="0.2875" />
         <joint name="arm_joint_5" value="2.5359" />
@@ -261,14 +275,14 @@
     </group_state>
     <group_state name="10cm/pose1" group="arm_1">
         <joint name="arm_joint_1" value="2.5499" />
-        <joint name="arm_joint_2" value="2.3507" />
+        <joint name="arm_joint_2" value="2.3957" />
         <joint name="arm_joint_3" value="-2.02188" />
         <joint name="arm_joint_4" value="2.5551" />
         <joint name="arm_joint_5" value="3.07064" />
     </group_state>
     <group_state name="10cm/pose2" group="arm_1">
         <joint name="arm_joint_1" value="2.2235" />
-        <joint name="arm_joint_2" value="2.3507" />
+        <joint name="arm_joint_2" value="2.3957" />
         <joint name="arm_joint_3" value="-2.02188" />
         <joint name="arm_joint_4" value="2.5551" />
         <joint name="arm_joint_5" value="3.07064" />
@@ -282,49 +296,49 @@
     </group_state>
     <group_state name="10cm/pose4" group="arm_1">
         <joint name="arm_joint_1" value="1.9105" />
-        <joint name="arm_joint_2" value="2.1021" />
+        <joint name="arm_joint_2" value="2.1321" />
         <joint name="arm_joint_3" value="-1.7093" />
         <joint name="arm_joint_4" value="2.8688" />
         <joint name="arm_joint_5" value="3.0660" />
     </group_state>
     <group_state name="10cm/pose5" group="arm_1">
-        <joint name="arm_joint_1" value="2.2919" />
-        <joint name="arm_joint_2" value="2.1347" />
+        <joint name="arm_joint_1" value="2.2005" />
+        <joint name="arm_joint_2" value="2.1321" />
         <joint name="arm_joint_3" value="-1.7093" />
-        <joint name="arm_joint_4" value="2.7843" />
-        <joint name="arm_joint_5" value="3.1366" />
+        <joint name="arm_joint_4" value="2.8688" />
+        <joint name="arm_joint_5" value="3.0660" />
     </group_state>
     <group_state name="5cm/pose1" group="arm_1">
         <joint name="arm_joint_1" value="2.5498" />
-        <joint name="arm_joint_2" value="2.47602" />
+        <joint name="arm_joint_2" value="2.51416" />
         <joint name="arm_joint_3" value="-2.02188" />
         <joint name="arm_joint_4" value="2.5551" />
         <joint name="arm_joint_5" value="3.07064" />
     </group_state>
     <group_state name="5cm/pose2" group="arm_1">
         <joint name="arm_joint_1" value="2.2257" />
-        <joint name="arm_joint_2" value="2.47602" />
+        <joint name="arm_joint_2" value="2.5141" />
         <joint name="arm_joint_3" value="-2.02188" />
         <joint name="arm_joint_4" value="2.5551" />
         <joint name="arm_joint_5" value="3.07064" />
     </group_state>
     <group_state name="5cm/pose3" group="arm_1">
         <joint name="arm_joint_1" value="1.8978" />
-        <joint name="arm_joint_2" value="2.47602" />
+        <joint name="arm_joint_2" value="2.5141" />
         <joint name="arm_joint_3" value="-2.02188" />
         <joint name="arm_joint_4" value="2.5551" />
         <joint name="arm_joint_5" value="3.07064" />
     </group_state>
     <group_state name="5cm/pose4" group="arm_1">
         <joint name="arm_joint_1" value="1.91050" />
-        <joint name="arm_joint_2" value="2.10207" />
+        <joint name="arm_joint_2" value="2.17340" />
         <joint name="arm_joint_3" value="-1.44558" />
         <joint name="arm_joint_4" value="2.8635" />
         <joint name="arm_joint_5" value="3.06599" />
     </group_state>
     <group_state name="5cm/pose5" group="arm_1">
         <joint name="arm_joint_1" value="2.4713" />
-        <joint name="arm_joint_2" value="2.10207" />
+        <joint name="arm_joint_2" value="2.17340" />
         <joint name="arm_joint_3" value="-1.44558" />
         <joint name="arm_joint_4" value="2.8635" />
         <joint name="arm_joint_5" value="3.06599" />
@@ -333,36 +347,85 @@
         <joint name="arm_joint_1" value="2.54987" />
         <joint name="arm_joint_2" value="2.53667" />
         <joint name="arm_joint_3" value="-1.74559" />
-        <joint name="arm_joint_4" value="2.1723" />
+        <joint name="arm_joint_4" value="2.31269" />
         <joint name="arm_joint_5" value="3.07225" />
     </group_state>
     <group_state name="0cm/pose2" group="arm_1">
         <joint name="arm_joint_1" value="2.20431" />
         <joint name="arm_joint_2" value="2.53667" />
         <joint name="arm_joint_3" value="-1.74559" />
-        <joint name="arm_joint_4" value="2.1723" />
+        <joint name="arm_joint_4" value="2.31269" />
         <joint name="arm_joint_5" value="3.07225" />
     </group_state>
     <group_state name="0cm/pose3" group="arm_1">
         <joint name="arm_joint_1" value="1.9247" />
         <joint name="arm_joint_2" value="2.53667" />
         <joint name="arm_joint_3" value="-1.74559" />
-        <joint name="arm_joint_4" value="2.1723" />
+        <joint name="arm_joint_4" value="2.31269" />
         <joint name="arm_joint_5" value="3.07225" />
     </group_state>
     <group_state name="0cm/pose4" group="arm_1">
         <joint name="arm_joint_1" value="2.0608" />
-        <joint name="arm_joint_2" value="2.23831" />
+        <joint name="arm_joint_2" value="2.3011" />
         <joint name="arm_joint_3" value="-1.36676" />
         <joint name="arm_joint_4" value="2.585198" />
         <joint name="arm_joint_5" value="3.07345" />
     </group_state>
     <group_state name="0cm/pose5" group="arm_1">
         <joint name="arm_joint_1" value="2.4356" />
-        <joint name="arm_joint_2" value="2.23831" />
+        <joint name="arm_joint_2" value="2.3011" />
         <joint name="arm_joint_3" value="-1.36676" />
         <joint name="arm_joint_4" value="2.585198" />
         <joint name="arm_joint_5" value="3.07345" />
+    </group_state>
+    <group_state name="50cm/shelf1" group="arm_1">
+        <joint name="arm_joint_1" value="2.1123" />
+        <joint name="arm_joint_2" value="1.3443" />
+        <joint name="arm_joint_3" value="-1.7462" />
+        <joint name="arm_joint_4" value="2.60" />
+        <joint name="arm_joint_5" value="2.9383" />
+    </group_state>
+    <group_state name="50cm/shelf2" group="arm_1">
+        <joint name="arm_joint_1" value="2.1123" />
+        <joint name="arm_joint_2" value="1.3443" />
+        <joint name="arm_joint_3" value="-1.7462" />
+        <joint name="arm_joint_4" value="2.60" />
+        <joint name="arm_joint_5" value="2.9383" />
+    </group_state>
+    <group_state name="15cm/pose1" group="arm_1">
+        <joint name="arm_joint_1" value="2.5499" />
+        <joint name="arm_joint_2" value="2.26034" />
+        <joint name="arm_joint_3" value="-2.0218" />
+        <joint name="arm_joint_4" value="2.5551" />
+        <joint name="arm_joint_5" value="3.07064" />
+    </group_state>
+    <group_state name="15cm/pose2" group="arm_1">
+        <joint name="arm_joint_1" value="2.2235" />
+        <joint name="arm_joint_2" value="2.26034" />
+        <joint name="arm_joint_3" value="-2.02188" />
+        <joint name="arm_joint_4" value="2.5551" />
+        <joint name="arm_joint_5" value="3.07064" />
+    </group_state>
+    <group_state name="15cm/pose3" group="arm_1">
+        <joint name="arm_joint_1" value="2.00000" />
+        <joint name="arm_joint_2" value="2.26034" />
+        <joint name="arm_joint_3" value="-2.02188" />
+        <joint name="arm_joint_4" value="2.5551" />
+        <joint name="arm_joint_5" value="3.07064" />
+    </group_state>
+    <group_state name="15cm/pose4" group="arm_1">
+        <joint name="arm_joint_1" value="1.9090" />
+        <joint name="arm_joint_2" value="1.8551" />
+        <joint name="arm_joint_3" value="-1.64966" />
+        <joint name="arm_joint_4" value="3.14070" />
+        <joint name="arm_joint_5" value="3.0660" />
+    </group_state>
+    <group_state name="15cm/pose5" group="arm_1">
+        <joint name="arm_joint_1" value="2.0090" />
+        <joint name="arm_joint_2" value="1.8551" />
+        <joint name="arm_joint_3" value="-1.64966" />
+        <joint name="arm_joint_4" value="3.14070" />
+        <joint name="arm_joint_5" value="3.0660" />
     </group_state>
     <group_state name="close" group="arm_1_gripper">
         <joint name="gripper_motor_left_joint" value="0.43" />
@@ -372,11 +435,16 @@
         <joint name="gripper_motor_left_joint" value="-0.25" />
         <joint name="gripper_motor_right_joint" value="-0.25" />
     </group_state>
+    <group_state name="open_wide" group="arm_1_gripper">
+        <joint name="gripper_motor_left_joint" value="-1.5" />
+        <joint name="gripper_motor_right_joint" value="-1.5" />
+    </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="arm_1_gripper" parent_link="arm_link_5" group="arm_1_gripper" parent_group="arm_1" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="odom" type="fixed" parent_frame="odom" child_link="base_footprint" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="gripper_finger_right_link" link2="gripper_finger_left_link" reason="Never" />
     <disable_collisions link1="adapter_plate_link" link2="arm_link_0" reason="Adjacent" />
     <disable_collisions link1="adapter_plate_link" link2="arm_link_1" reason="Never" />
     <disable_collisions link1="adapter_plate_link" link2="arm_link_2" reason="Never" />
@@ -456,7 +524,6 @@
     <disable_collisions link1="arm_link_3" link2="gripper_motor_left_base_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="gripper_motor_mount_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="gripper_motor_right_base_link" reason="Never" />
-    <disable_collisions link1="arm_link_3" link2="rear_platform_fence_link" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="wheel_link_fl" reason="Never" />
@@ -476,6 +543,7 @@
     <disable_collisions link1="arm_link_4" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="arm_link_4" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="base_footprint" reason="Never" />
+    <disable_collisions link1="arm_link_5" link2="base_laser_front_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="camera_mount_link" reason="Never" />
     <disable_collisions link1="arm_link_5" link2="gripper_bracket_left_link" reason="Never" />
@@ -490,8 +558,10 @@
     <disable_collisions link1="base_footprint" link2="base_laser_front_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_laser_rear_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="base_link" reason="Adjacent" />
-    <disable_collisions link1="base_footprint" link2="gripper_bracket_left_link" reason="Never" />
+    <disable_collisions link1="base_footprint" link2="camera_mount_link" reason="Never" />
+    <disable_collisions link1="base_footprint" link2="gripper_bracket_right_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="gripper_finger_left_link" reason="Never" />
+    <disable_collisions link1="base_footprint" link2="gripper_finger_mount_left_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="gripper_finger_mount_right_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="gripper_finger_right_link" reason="Never" />
     <disable_collisions link1="base_footprint" link2="gripper_motor_mount_link" reason="Never" />
@@ -556,7 +626,6 @@
     <disable_collisions link1="gripper_bracket_right_link" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="gripper_bracket_right_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="gripper_finger_left_link" link2="gripper_finger_mount_left_link" reason="Adjacent" />
-    <disable_collisions link1="gripper_finger_left_link" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="gripper_finger_mount_left_link" link2="gripper_motor_right_base_link" reason="Never" />
     <disable_collisions link1="gripper_finger_mount_left_link" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="gripper_finger_mount_left_link" link2="wheel_link_br" reason="Never" />
@@ -564,7 +633,7 @@
     <disable_collisions link1="gripper_finger_mount_right_link" link2="gripper_motor_left_base_link" reason="Never" />
     <disable_collisions link1="gripper_finger_mount_right_link" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="gripper_finger_mount_right_link" link2="wheel_link_br" reason="Never" />
-    <disable_collisions link1="gripper_finger_right_link" link2="wheel_link_br" reason="Never" />
+    <disable_collisions link1="gripper_finger_right_link" link2="wheel_link_bl" reason="Never" />
     <disable_collisions link1="gripper_motor_left_base_link" link2="gripper_motor_mount_link" reason="Adjacent" />
     <disable_collisions link1="gripper_motor_left_base_link" link2="gripper_motor_right_base_link" reason="Never" />
     <disable_collisions link1="gripper_motor_left_base_link" link2="wheel_link_bl" reason="Never" />
