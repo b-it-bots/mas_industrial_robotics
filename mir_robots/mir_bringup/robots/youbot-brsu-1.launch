@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="robot" value="$(optenv ROBOT youbot-brsu-1)" />	
-	
+  <arg name="robot" value="$(optenv ROBOT youbot-brsu-1)" />
+  <arg name="is_camera_required" default="true" />
+
   <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
 
   <include file="$(find mir_bringup)/components/base_front_hokuyo_node.launch">
@@ -32,10 +33,8 @@
   <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />	
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
-  <!-- cameras -->
-  <include file="$(find realsense_camera)/launch/realsense_sr300_camera.launch">
-    <arg name="camera" value="arm_cam3d" />
-    <arg name="publish_frames" value="false" />
-  </include>
+  <group if="$(arg is_camera_required)" >
+    <include file="$(find mir_bringup)/components/realsense_camera.launch"/>
+  </group>
 
 </launch>
