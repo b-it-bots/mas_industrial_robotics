@@ -84,7 +84,7 @@ public:
         ros::param::param<double>("~lin_d", lin_d, 0.0);
 
         double ang_p;
-        ros::param::param<double>("~ang_p", ang_p, 0.5);
+        ros::param::param<double>("~ang_p", ang_p, 4);
         double ang_i;
         ros::param::param<double>("~ang_i", ang_i, 0.0);
         double ang_d;
@@ -92,15 +92,15 @@ public:
 
         double error_angle = -b;
         double error_lin = (a - target_distance);
-
+        
         //angular velocity calculation
         error_angle_int += error_angle;
         error_angle_int = std::min(std::max(error_angle_int, -0.1), 0.1);
         error_angle_d = error_angle - last_error_angular;
         last_error_angular = error_angle;
 
-        cmd.angular.z = error_angle * ang_p + error_angle_int * ang_i + error_angle_d * ang_d;
-
+        cmd.angular.z = (-1)*(error_angle * ang_p + error_angle_int * ang_i + error_angle_d * ang_d);
+         
         //linear velocity calculation
         error_lin_int += error_lin;
         error_lin_int = std::min(std::max(error_lin_int, -0.1), 0.1);
@@ -200,11 +200,11 @@ public:
 
                 //std::cout << "cmd x:" << cmd.linear.x << ", y: "  << cmd.linear.y << ", z: " << cmd.angular.z << std::endl;
 
-                double error = fabs(srv.response.b) + fabs(srv.response.a - target_distance);
+                double error = fabs(srv.response.a - target_distance);
 
                 // std::cout << "current error: " << error << std::endl;
 
-                if (error < error_tolerance)
+                if ((error < 0.04) and (fabs(srv.response.b)<0.04))
                 {
 
                     ROS_DEBUG("Point reached");

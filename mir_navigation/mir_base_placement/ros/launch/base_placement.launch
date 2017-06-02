@@ -12,7 +12,7 @@
   	<param name="max_linear_velocity" value="0.18" />
   	<param name="max_angular_velocity" value="0.18" />
   	<param name="lin_p" value="0.5" />
-  	<param name="ang_p" value="0.5" />
+  	<param name="ang_p" value="1.5" />
   	<param name="lin_d" value="0.05" />
   	<param name="ang_d" value="0.05" />
   	<param name="error_tolerance" value="0.04" />
