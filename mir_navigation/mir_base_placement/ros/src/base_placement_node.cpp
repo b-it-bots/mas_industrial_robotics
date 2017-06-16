@@ -205,7 +205,7 @@ public:
                 //std::cout << "cmd x:" << cmd.linear.x << ", y: "  << cmd.linear.y << ", z: " << cmd.angular.z << std::endl;
 
                 double translation_error = fabs(srv.response.a - target_distance);
-                double angular_error = fabs(srv.response.b)
+                double angular_error = fabs(srv.response.b);
                 // std::cout << "current error: " << error << std::endl;
 
                 if ((translation_error < translation_error_tolerance) and (angular_error < angular_error_tolerance))
