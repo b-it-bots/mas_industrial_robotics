@@ -23,7 +23,7 @@ int main(int argc, char **argv)
         goal.goal.distance = atof(argv[1]);
     }
     else
-        goal.goal.distance = 0.25;
+        goal.goal.distance = 0.07;
 
     ac.sendGoal(goal.goal);
 
@@ -47,6 +47,3 @@ int main(int argc, char **argv)
     //exit
     return 0;
 }
-
-
-
