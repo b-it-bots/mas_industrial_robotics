@@ -208,7 +208,7 @@ public:
                 double angular_error = fabs(srv.response.b)
                 // std::cout << "current error: " << error << std::endl;
 
-                if ((translation_error < translation_error_tolerance) and (angular_error<angular_error_tolerance))
+                if ((translation_error < translation_error_tolerance) and (angular_error < angular_error_tolerance))
                 {
 
                     ROS_DEBUG("Point reached");
