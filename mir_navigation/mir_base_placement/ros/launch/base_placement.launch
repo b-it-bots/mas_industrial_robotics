@@ -7,7 +7,7 @@
 
   <node pkg="mir_base_placement" type="base_placement_node" name="base_placement" ns="mir_navigation" respawn="false" output="screen">
   	<param name="cmd_vel_topic" value="/cmd_vel_prio_low" />
-  	<param name="linear_regression_service" value="/scan_front_linearregression" />  	
+  	<param name="linear_regression_service" value="/scan_front_linearregression" />
   	<param name="laser_axis" value="+x" />
   	<param name="max_linear_velocity" value="0.18" />
   	<param name="max_angular_velocity" value="0.18" />
@@ -15,7 +15,8 @@
   	<param name="ang_p" value="1.5" />
   	<param name="lin_d" value="0.05" />
   	<param name="ang_d" value="0.05" />
-  	<param name="error_tolerance" value="0.04" />
+    <param name="translation_error_tolerance" value="0.04" />
+    <param name="angular_error_tolerance" value="0.04" /> 
   </node>
 
 </launch>

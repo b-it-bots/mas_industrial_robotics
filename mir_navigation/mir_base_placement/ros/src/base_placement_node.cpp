@@ -84,7 +84,7 @@ public:
         ros::param::param<double>("~lin_d", lin_d, 0.0);
 
         double ang_p;
-        ros::param::param<double>("~ang_p", ang_p, 4);
+        ros::param::param<double>("~ang_p", ang_p, 0.5);
         double ang_i;
         ros::param::param<double>("~ang_i", ang_i, 0.0);
         double ang_d;
@@ -92,7 +92,7 @@ public:
 
         double error_angle = -b;
         double error_lin = (a - target_distance);
-        
+
         //angular velocity calculation
         error_angle_int += error_angle;
         error_angle_int = std::min(std::max(error_angle_int, -0.1), 0.1);
@@ -100,7 +100,7 @@ public:
         last_error_angular = error_angle;
 
         cmd.angular.z = (-1)*(error_angle * ang_p + error_angle_int * ang_i + error_angle_d * ang_d);
-         
+
         //linear velocity calculation
         error_lin_int += error_lin;
         error_lin_int = std::min(std::max(error_lin_int, -0.1), 0.1);
@@ -184,7 +184,11 @@ public:
         error_lin_d = 0.0;
         last_error_angular = 0.0;
         last_error_lin = 0.0;
-        ros::param::param<double>("~error_tolerance", error_tolerance, 0.02);
+
+        double translation_error_tolerance = 0.0;
+        double angular_error_tolerance = 0.0;
+        ros::param::param<double>("~translation_error_tolerance", translation_error_tolerance, 0.04);
+        ros::param::param<double>("~angular_error_tolerance", angular_error_tolerance, 0.04);
 
         while (true)
         {
@@ -200,11 +204,11 @@ public:
 
                 //std::cout << "cmd x:" << cmd.linear.x << ", y: "  << cmd.linear.y << ", z: " << cmd.angular.z << std::endl;
 
-                double error = fabs(srv.response.a - target_distance);
-
+                double translation_error = fabs(srv.response.a - target_distance);
+                double angular_error = fabs(srv.response.b)
                 // std::cout << "current error: " << error << std::endl;
 
-                if ((error < 0.04) and (fabs(srv.response.b)<0.04))
+                if ((translation_error < translation_error_tolerance) and (angular_error<angular_error_tolerance))
                 {
 
                     ROS_DEBUG("Point reached");
@@ -269,4 +273,3 @@ int main(int argc, char** argv)
     }
     return 0;
 }
-
