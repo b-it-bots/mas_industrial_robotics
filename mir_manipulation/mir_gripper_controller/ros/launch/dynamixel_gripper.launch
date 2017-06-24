@@ -23,9 +23,9 @@
        
         <param name="torque_limit" type="double" value="1.0" />
         <param name="torque_limit_srv_name" type="string" value="/gripper_controller/set_torque_limit" />
-        <param name="compliance_margin" type="int" value="8" />
+        <param name="compliance_margin" type="int" value="4" />
         <param name="compliance_margin_srv_name" type="string" value="/gripper_controller/set_compliance_margin" />
-        <param name="compliance_slope" type="int" value="128" />
+        <param name="compliance_slope" type="int" value="64" />
         <param name="compliance_slope_srv_name" type="string" value="/gripper_controller/set_compliance_slope" />
 
         <param name="gripper_configuration_open" type="double" value="-0.17" />

@@ -428,8 +428,8 @@
         <joint name="arm_joint_5" value="3.0660" />
     </group_state>
     <group_state name="close" group="arm_1_gripper">
-        <joint name="gripper_motor_left_joint" value="0.43" />
-        <joint name="gripper_motor_right_joint" value="0.43" />
+        <joint name="gripper_motor_left_joint" value="0.35" />
+        <joint name="gripper_motor_right_joint" value="0.35" />
     </group_state>
     <group_state name="open" group="arm_1_gripper">
         <joint name="gripper_motor_left_joint" value="-0.25" />
