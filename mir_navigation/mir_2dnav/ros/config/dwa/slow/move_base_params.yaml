@@ -1,0 +1,28 @@
+recovery_behavior_enabled: true     #default : true
+controller_frequency: 10.0          #default : 20.0
+controller_patience: 2.0            #default : 15.0, fast params: 5.0
+planner_patience: 2.0               #default : 5.0
+planner_frequency: 0.2              #default : 0.0
+clearing_radius: 0.6                #default : not found
+clearing_rotation_allowed: false    #default : true
+oscillation_distance: 2.0           #default : 0.5
+shutdown_costmaps: false            #default : false
+recovery_behaviors:
+  - name: 'force_field_recovery'
+    type: 'force_field_recovery/ForceFieldRecovery'
+  - name: 'clear_costmap_recovery'
+    type: 'clear_costmap_recovery/ClearCostmapRecovery'
+base_global_planner: mcr_global_planner/GlobalPlannerWithOrientations
+GlobalPlannerWithOrientations:
+    use_grid_path: False
+    use_dijkstra: True
+    allow_unknown: False
+    default_tolerance: 0.0          #previous value: 0.2
+    visualize_potential: True
+    use_quadratic: True
+    use_grid_path: False
+    old_navfn_behavior: False
+    # Only for global planner with orientations:
+    min_pose_distance: 0.05             # Minimum distance between poses
+    max_omni_poses: 20                  # Maximum omni poses to drive (2 times start and end, so max. poses in omni will be 40)
+
