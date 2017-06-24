@@ -9,6 +9,6 @@
     <!-- Reference frame of the published pose -->
     <param name="reference_frame" type="str" value="base_link"/>
 
-    <remap from="~mock_up_pose" to="/mir_states/object_selector/object_pose"/>
+    <remap from="~mock_up_pose" to="/mcr_perception/object_selector/output/object_pose"/>
   </node>
 </launch>
