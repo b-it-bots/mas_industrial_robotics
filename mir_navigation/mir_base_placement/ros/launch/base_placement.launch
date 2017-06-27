@@ -11,12 +11,14 @@
   	<param name="laser_axis" value="+x" />
   	<param name="max_linear_velocity" value="0.18" />
   	<param name="max_angular_velocity" value="0.18" />
-  	<param name="lin_p" value="0.5" />
-  	<param name="ang_p" value="1.3" />
-  	<param name="lin_d" value="0.05" />
-  	<param name="ang_d" value="0.05" />
+    <param name="lin_p" value="0.5" />
+    <param name="ang_p" value="0.8" />
+    <param name="lin_i" value="0.0" />
+    <param name="ang_i" value="0.0" />
+    <param name="lin_d" value="0.05" />
+    <param name="ang_d" value="0.05" />
     <param name="translation_error_tolerance" value="0.04" />
-    <param name="angular_error_tolerance" value="0.02" />
+    <param name="angular_error_tolerance" value="0.03" />
   </node>
 
 </launch>
