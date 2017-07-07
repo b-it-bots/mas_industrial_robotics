@@ -1,5 +1,0 @@
-port: /dev/youbot/hokuyo_front
-frame_id: /base_laser_front_link
-min_ang: -1.57
-max_ang: 1.57
-
