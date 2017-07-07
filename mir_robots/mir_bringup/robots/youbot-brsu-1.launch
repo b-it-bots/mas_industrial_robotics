@@ -34,7 +34,7 @@
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
   <group if="$(arg is_camera_required)" >
-    <include file="$(find mir_bringup)/components/realsense_camera.launch"/>
+    <include file="$(find mir_bringup)/components/realsense_camera_dorabot.launch"/>
   </group>
 
 </launch>
