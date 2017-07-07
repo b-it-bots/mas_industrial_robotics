@@ -49,6 +49,13 @@
         <joint name="arm_joint_4" value="3.20453" />
         <joint name="arm_joint_5" value="2.93822" />
     </group_state>
+    <group_state name="barrier_tape_back" group="arm_1">
+        <joint name="arm_joint_1" value="5.33172" />
+        <joint name="arm_joint_2" value="0.57492" />
+        <joint name="arm_joint_3" value="-0.65916" />
+        <joint name="arm_joint_4" value="2.51869" />
+        <joint name="arm_joint_5" value="2.99889" />
+    </group_state>
     <group_state name="look_at_workspace" group="arm_1">
         <joint name="arm_joint_1" value="2.1789" />
         <joint name="arm_joint_2" value="0.8910" />
