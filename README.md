@@ -50,29 +50,29 @@ In order to understand at least the different core components of ROS, you have t
 ## Set up a catkin workspace
 
     source /opt/ros/indigo/setup.bash
-    mkdir -p ~/catkin_ws/src; cd ~/catkin_ws/src
+    mkdir -p ~/indigo/src; cd ~/indigo/src
     catkin_init_workspace
     catkin build
     
 ## Clone and compile the MAS industrial robotics software
 First of all you have to clone the repository.
 
-    cd ~/catkin_ws/src;
+    cd ~/indigo/src;
     git clone gitgate@mas.b-it-center.de:mas-group/mas_industrial_robotics.git
 
 Then go on with installing further external dependencies:
-       
-    cd ~/catkin_ws/src/mas_industrial_robotics
+
+    cd ~/indigo/src/mas_industrial_robotics
     ./repository.debs
-    
-    source ~/catkin_ws/devel/setup.bash
+
+    source ~/indigo/devel/setup.bash
 
 The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
 
 
 And finally compile the repository:
 
-    cd ~/catkin_ws
+    cd ~/indigo
     catkin build
 
 
@@ -133,4 +133,5 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 
      
 
-Click on the menu bar "File -> Open Config", navigate to "~/catkin_ws/src/mas_industrial_robotics" and select the "youbot.rviz" file.
+
+Click on the menu bar "File -> Open Config", navigate to "~/indigo/src/mas_industrial_robotics" and select the "youbot.rviz" file.
