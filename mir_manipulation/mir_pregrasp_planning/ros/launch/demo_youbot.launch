@@ -54,7 +54,7 @@
       <param name="trigger" type="boolean" value="false"/>
 
       <!-- Pose in (geometry_msgs/PoseStamped) -->
-      <remap from="~pose_in" to="/mir_states/object_selector/object_pose" />
+      <remap from="~pose_in" to="/mcr_perception/object_selector/output/object_pose" />
     </node>
 
     <node pkg="mir_pregrasp_planning" type="simple_pregrasp_planner_node"
