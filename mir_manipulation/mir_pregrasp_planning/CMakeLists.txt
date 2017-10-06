@@ -56,5 +56,6 @@ install(PROGRAMS
   ros/scripts/pose_mock_up_gui_node
   ros/scripts/pregrasp_planner_pipeline_node
   ros/scripts/simple_pregrasp_planner_node
+  ros/config/SamplingAngleParams.cfg
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
