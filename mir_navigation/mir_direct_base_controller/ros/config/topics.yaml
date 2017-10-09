@@ -1,0 +1,4 @@
+1.direct_base_controller:
+    event_in_topic: /mcr_navigation/direct_base_controller/coordinator/event_in
+    event_in_strings: [e_start, e_stop]
+    event_out_topic: /mcr_navigation/direct_base_controller/coordinator/event_out

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_direct_base_controller</name>
+  <version>0.1.0</version>
+  <description>
+    This package provides launch files for running the direct base controller on the youbot
+  </description>
+
+  <maintainer email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</maintainer>
+
+  <author email="santosh.thoduka@smail.inf.h-brs.de">Santosh Thoduka</author>
+
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>roslint</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>mcr_monitoring_msgs</build_depend>
+  
+  
+  <run_depend>rospy</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>mcr_monitoring_msgs</run_depend>
+  <run_depend>mcr_geometric_relation_monitors</run_depend>
+  <run_depend>mcr_common_converters</run_depend>
+  <run_depend>mcr_twist_controller</run_depend>
+  <run_depend>mcr_twist_limiter</run_depend>
+  <run_depend>mcr_twist_synchronizer</run_depend>
+  <run_depend>mcr_manipulation_measurers</run_depend>
+  <run_depend>mir_pregrasp_planning</run_depend>
+  <run_depend>mcr_event_gui</run_depend>
+  <run_depend>mcr_direct_base_controller</run_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+
+</package>

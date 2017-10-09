@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- Note: example launch file. Do not modify! -->
+<launch>
+  <node pkg="mir_pregrasp_planning" type="pose_mock_up_gui_node"
+				  name="pose_mock_up_gui" output="screen" ns="mir_manipulation">
+
+    <!-- the cycle rate of the node (in hz) -->
+    <param name="loop_rate" type="double" value="10.0"/>
+    <param name="reference_frame" type="str" value="odom"/>
+
+    <remap from="~mock_up_pose" to="/mcr_navigation/direct_base_controller/input_pose"/>
+  </node>
+</launch>
