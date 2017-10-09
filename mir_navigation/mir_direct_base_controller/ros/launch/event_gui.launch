@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Note: example launch file. Do not modify! -->
 <launch>
-  <arg name="config_file" default="$(find mcr_direct_base_controller)/ros/config/topics.yaml" />
+  <arg name="config_file" default="$(find mir_direct_base_controller)/ros/config/topics.yaml" />
   <node pkg="mcr_event_gui" type="event_gui_node"
         name="$(anon event_gui)" ns="mcr_tools" output="screen">
     <param name="config_file" type="str" value="$(arg config_file)"/>
