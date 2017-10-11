@@ -17,6 +17,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>topic_tools</run_depend>
   <run_depend>mcr_monitoring_msgs</run_depend>
   <run_depend>mcr_geometric_relation_monitors</run_depend>
   <run_depend>mcr_common_converters</run_depend>
