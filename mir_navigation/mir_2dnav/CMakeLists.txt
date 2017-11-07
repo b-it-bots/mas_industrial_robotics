@@ -21,3 +21,7 @@ install(DIRECTORY ros/config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/config
 )
 
+install(PROGRAMS
+    ros/mockup/move_base_node_mockup
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
