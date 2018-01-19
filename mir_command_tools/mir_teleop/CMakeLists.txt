@@ -75,3 +75,7 @@ install(DIRECTORY ros/launch/
 install(DIRECTORY ros/config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/config
 )
+install(PROGRAMS
+  ros/config/TeleopJoypad.cfg
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/config
+)
