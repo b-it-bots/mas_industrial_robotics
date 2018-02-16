@@ -1,7 +1,7 @@
 - git:
     local-name: mas_common_robotics
     uri: gitgate@mas.b-it-center.de:mas-group/mas_common_robotics.git
-    version: indigo
+    version: kinetic
 
 - git:
     local-name: mas_third_party_software
