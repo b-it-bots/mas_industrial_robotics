@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+
+  <!-- start the hokuyo node -->
+  <node type="urg_node" pkg="urg_node" name="hokuyo_front_node">  
+    <rosparam command="load" file="$(find mir_hardware_config)/$(arg robot)/config/laser_front_urg.yaml"/>
+    <remap from="/scan" to="/scan_front"/>
+  </node>
+
+</launch>
