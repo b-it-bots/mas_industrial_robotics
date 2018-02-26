@@ -78,6 +78,11 @@ And finally compile the repository:
 
 If no errors appear everything is ready to use. Great job!
 
+### Common errors
+* `/home/robocup/ros/kinetic/robocup/src/realsense_camera/src/realsense_camera.cpp:31:60: fatal error: realsense_camera_dorabot/RealsenseCameraConfig.h: No such file or directory `
+    - This is because of dynamic configure 
+    - Solution : run catkin build once more
+
 
 ### Setting the Environment Variables
 #### ROBOT variable
