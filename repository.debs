@@ -26,9 +26,10 @@ packagelist=(
     ros-kinetic-gazebo-ros-control
     ros-kinetic-gazebo-plugins
     ros-kinetic-gmapping
-    ros-kinetic-hokuyo-node
+    ros-kinetic-urg-node
     ros-kinetic-joint-state-controller
     ros-kinetic-joy
+    ros-kinetic-serial
     ros-kinetic-map-server
     ros-kinetic-move-base
     ros-kinetic-moveit-core

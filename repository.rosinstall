@@ -4,11 +4,6 @@
     version: kinetic
 
 - git:
-    local-name: mas_third_party_software
-    uri: gitgate@mas.b-it-center.de:mas-group/mas_third_party_software.git
-    version: indigo
-
-- git:
     local-name: youbot_driver
     uri: https://github.com/mas-group/youbot_driver.git
     version: indigo-devel
@@ -47,3 +42,8 @@
     local-name: dynamixel_motor
     uri: https://github.com/mas-group/dynamixel_motor.git
     version: master
+
+- git:
+    local-name: unmerged_packages_for_testing
+    uri: gitgate@mas.b-it-center.de:mas-group/unmerged_packages_for_testing.git
+    version: kinetic

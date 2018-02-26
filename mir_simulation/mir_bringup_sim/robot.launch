@@ -8,7 +8,7 @@
   <arg name="use_sim_time" default="true"/>
   <arg name="gui" default="false"/>
 
-  <arg name="init_pos_x" default="0.0"/>
+  <arg name="init_pos_x" default="-2.0"/>
   <arg name="init_pos_y" default="0.0"/>
   <arg name="init_pos_z" default="0.08"/>
 
@@ -25,7 +25,7 @@
   </include>
 
   <!-- upload robot description -->
-  <param name="robot_description" command="$(find xacro)/xacro.py $(find mir_hardware_config)/$(arg robot)/urdf/robot.urdf.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mir_hardware_config)/$(arg robot)/urdf/robot.urdf.xacro" />
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_robot" respawn="false" output="screen"
     args="-param robot_description
           -urdf
@@ -37,6 +37,11 @@
 
   <!-- launch joint state controller -->
   <include file="$(find youbot_gazebo_control)/launch/joint_state_controller.launch" />
+
+  <!-- launch joint state controller -->
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
+    <param name="publish_frequency" type="double" value="100.0" />
+  </node>
 
   <!-- launch robot state controller -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">

@@ -2,19 +2,19 @@
 <robot>
 
   <!-- Pose of PMD (arm_cam3d) relative to ? -->
-  <property name="cal_arm_cam3d_x" value="0.0"/>
-  <property name="cal_arm_cam3d_y" value="-0.025"/>
-  <property name="cal_arm_cam3d_z" value="-0.015"/>
-  <property name="cal_arm_cam3d_roll" value="0.0"/>
-  <property name="cal_arm_cam3d_pitch" value="${-M_PI}"/>
-  <property name="cal_arm_cam3d_yaw" value="0.0"/>
+  <xacro:property name="cal_arm_cam3d_x" value="0.0"/>
+  <xacro:property name="cal_arm_cam3d_y" value="-0.025"/>
+  <xacro:property name="cal_arm_cam3d_z" value="-0.015"/>
+  <xacro:property name="cal_arm_cam3d_roll" value="0.0"/>
+  <xacro:property name="cal_arm_cam3d_pitch" value="${-M_PI}"/>
+  <xacro:property name="cal_arm_cam3d_yaw" value="0.0"/>
 
    <!-- Pose of Kinect (arm_cam3d) relative to tower_link -->
-  <property name="cal_arm_cam3d_x" value="0.097"/>
-  <property name="cal_arm_cam3d_y" value="-0.001"/>
-  <property name="cal_arm_cam3d_z" value="0.469"/>
-  <property name="cal_arm_cam3d_roll" value="0.037"/>
-  <property name="cal_arm_cam3d_pitch" value="0.329"/>
-  <property name="cal_arm_cam3d_yaw" value="-0.028"/>
+  <xacro:property name="cal_arm_cam3d_x" value="0.097"/>
+  <xacro:property name="cal_arm_cam3d_y" value="-0.001"/>
+  <xacro:property name="cal_arm_cam3d_z" value="0.469"/>
+  <xacro:property name="cal_arm_cam3d_roll" value="0.037"/>
+  <xacro:property name="cal_arm_cam3d_pitch" value="0.329"/>
+  <xacro:property name="cal_arm_cam3d_yaw" value="-0.028"/>
 
 </robot>
