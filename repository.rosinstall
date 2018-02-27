@@ -31,7 +31,7 @@
 - git:
     local-name: youbot-manipulation
     uri: https://github.com/mas-group/youbot-manipulation.git
-    version: indigo
+    version: kinetic
 
 - git:
     local-name: realsense_camera
