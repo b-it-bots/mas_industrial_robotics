@@ -1,12 +1,12 @@
 - git:
     local-name: mas_common_robotics
-    uri: gitgate@mas.b-it-center.de:mas-group/mas_common_robotics.git
+    uri: git@github.com:b-it-bots/mas_common_robotics.git
     version: indigo
 
 - git:
-    local-name: mas_third_party_software
-    uri: gitgate@mas.b-it-center.de:mas-group/mas_third_party_software.git
-    version: indigo
+    local-name: mercury_planner
+    uri: git@github.com:b-it-bots/mercury_planner.git
+    version: master
 
 - git:
     local-name: youbot_driver
