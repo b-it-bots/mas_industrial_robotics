@@ -10,7 +10,7 @@ import geometry_msgs.msg
 import std_msgs.msg
 import geometry_msgs.msg
 import brics_actuator.msg
-
+import re
 
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
@@ -164,6 +164,42 @@ class control_gripper(smach.State):
                break
 
         return 'succeeded'
+
+
+class move_arm_and_gripper(smach.State):
+
+    def __init__(self, conf, target=None, blocking=True, tolerance=None, timeout=10.0):
+        smach.State.__init__(self,
+                             outcomes=['succeeded', 'failed'],
+                             input_keys=['move_arm_to'])
+
+        joint_names = ['arm_joint_1', 'arm_joint_2', 'arm_joint_3', 'arm_joint_4', 'arm_joint_5']
+        self.arm_moveit_client  = MoveitClient('/arm_', target, timeout, joint_names)
+        self.pub = rospy.Publisher("/gripper_controller/command", std_msgs.msg.Float64,     queue_size=1)  
+        self.conf = conf
+        #self.sub = rospy.Subsriber("/gripper_controller/state", JointState    , state_cb)                                 
+
+    def get_targets(self, group_name):
+        text = rospy.get_param('/robot_description_semantic')
+        pattern = "group_state[ \\\\\n\r\f\v\t]*name=\"" + self.conf + "\"[ \\\\\n\r\f\v\t]*group=\"arm_1_gripper\">[ \\\\\n\r\f\v\t]*<joint[ \\\\\n\r\f\v\t]*name=\"gripper_motor_left_joint\"[ \\\\\n\r\f\v\t]*value=\""
+
+        match = re.search(pattern,text)
+        str = ""
+        i = 0
+        while (text[match.end() + i] != '\"'):
+            str += text[match.end() + i]
+            i += 1
+        angle = float(str)
+        return (angle)
+
+    def execute(self, userdata): 
+        angle = self.get_targets('arm_1_gripper')
+        data = std_msgs.msg.Float64() 
+        data.data = angle
+        self.pub.publish(data)
+        return self.arm_moveit_client.execute(userdata)
+
+
 
 class linear_motion(smach.State):
 
