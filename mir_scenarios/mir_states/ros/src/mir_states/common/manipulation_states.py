@@ -170,6 +170,7 @@ class move_arm_and_gripper(smach.State):
 
     """
     Author : Abhishek Padalkar
+
     This states moves the arm and gripper in parallel. 
     It send gripper command directly on cotroller toipc.
     Without waiting for the gripper motion to complete, it initiates arm motion with move_group. 
@@ -181,7 +182,6 @@ class move_arm_and_gripper(smach.State):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_arm_to'])
-
         joint_names = ['arm_joint_1', 'arm_joint_2', 'arm_joint_3', 'arm_joint_4', 'arm_joint_5']
         self.arm_moveit_client  = MoveitClient('/arm_', target, timeout, joint_names)
         self.pub = rospy.Publisher("/gripper_controller/command", std_msgs.msg.Float64,     queue_size=1)  
@@ -189,10 +189,9 @@ class move_arm_and_gripper(smach.State):
 
     def get_targets(self, group_name):
         text = rospy.get_param('/robot_description_semantic')
-
         "Following code searches and extracts gripper configurations in youbot.srdf"
-        pattern = "group_state[ \\\\\n\r\f\v\t]*name=\"" + self.conf + "\"[ \\\\\n\r\f\v\t]*group=\"arm_1_gripper\">[ \\\\\n\r\f\v\t]*<joint[ \\\\\n\r\f\v\t]*name=\"gripper_motor_left_joint\"[ \\\\\n\r\f\v\t]*value=\""
-
+        pattern = "group_state[ \\\\\n\r\f\v\t]*name=\"" + self.conf + \
+        "\"[ \\\\\n\r\f\v\t]*group=\"arm_1_gripper\">[ \\\\\n\r\f\v\t]*<joint[ \\\\\n\r\f\v\t]*name=\"gripper_motor_left_joint\"[ \\\\\n\r\f\v\t]*value=\""
         match = re.search(pattern,text)
         str = ""
         i = 0
