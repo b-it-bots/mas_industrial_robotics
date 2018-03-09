@@ -2,6 +2,9 @@
   <!-- By default we do not overwrite the URDF. Change the following to true to change the default behavior -->
   <arg name="load_robot_description" default="false"/>
 
+  <!-- Joint limits (regular or fast) -->
+  <arg name="joint_limit_fast" default="false"/>
+
   <!-- The name of the parameter under which the URDF is loaded -->
   <arg name="robot_description" default="robot_description"/>
 
@@ -12,8 +15,13 @@
   <param name="$(arg robot_description)_semantic" textfile="$(find mir_moveit_youbot_brsu_4)/config/youbot.srdf" />
   
   <!-- Load updated joint limits (override information from URDF) -->
-  <group ns="$(arg robot_description)_planning">
+  <group unless="$(arg joint_limit_fast)" ns="$(arg robot_description)_planning">
     <rosparam command="load" file="$(find mir_moveit_youbot_brsu_4)/config/joint_limits.yaml"/>
+  </group>
+
+  <!-- Load joint limits fast (override information from above joint_limits.yaml file) -->
+  <group if="$(arg joint_limit_fast)" ns="$(arg robot_description)_planning">
+    <rosparam command="load" file="$(find mir_moveit_youbot_brsu_4)/config/joint_limits_fast.yaml"/>
   </group>
 
   <!-- Load default settings for kinematics; these settings are overridden by settings in a node's namespace -->
