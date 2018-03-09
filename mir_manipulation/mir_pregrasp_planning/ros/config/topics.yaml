@@ -6,3 +6,11 @@
     event_in_topic: /mir_manipulation/move_arm_planned/event_in
     event_in_strings: [e_start, e_stop]
     event_out_topic: /mir_manipulation/move_arm_planned/event_out
+3.pregrasp_planner:
+    event_in_topic: /pregrasp_planner_node/event_in
+    event_in_strings: [e_start, e_stop]
+    event_out_topic: /pregrasp_planner_node/event_out
+4.planned_arm_motion:
+    event_in_topic: /move_arm_planned_motion/event_in
+    event_in_strings: [e_start, e_stop]
+    event_out_topic: /move_arm_planned_motion/event_out
