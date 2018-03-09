@@ -3,6 +3,7 @@
 
   <arg name="robot" value="$(optenv ROBOT youbot-brsu-4)" />
   <arg name="is_camera_required" default="true" />
+  <arg name="is_camera_intel" default="true" />
 
   <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
 
@@ -15,8 +16,8 @@
   </include>
 
   <include file="$(find mcr_collision_velocity_filter)/ros/launch/collision_velocity_filter.launch" >
-  	<arg name="footprint_file" value="$(find mir_hardware_config)/$(arg robot)/config/base_footprint_rectangular.yaml" />
-  	<arg name="scan_topics" value="[/scan_front, /scan_rear]" />
+    <arg name="footprint_file" value="$(find mir_hardware_config)/$(arg robot)/config/base_footprint_rectangular.yaml" />
+    <arg name="scan_topics" value="[/scan_front, /scan_rear]" />
     <arg name="cmd_vel_out" value="/cmd_vel_prio_low" />
     <arg name="cmd_vel_in" value="/cmd_vel_safe" />
   </include>
@@ -31,7 +32,14 @@
   <include file="$(find mir_gripper_controller)/ros/launch/dynamixel_gripper.launch" />
 
   <group if="$(arg is_camera_required)" >
-    <include file="$(find mir_bringup)/components/realsense_camera_dorabot.launch"/>
+    <group if="$(arg is_camera_intel)" >
+        <include file="$(find mir_realsense_camera_watchdog)/ros/launch/realsense_camera_watchdog.launch"/>
+    </group>
+    <group unless="$(arg is_camera_intel)" >
+       <include file="$(find mir_bringup)/components/openni2.launch">
+          <arg name="publish_tf" value="false"/>
+        </include>
+    </group>
   </group>
 
   <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />
