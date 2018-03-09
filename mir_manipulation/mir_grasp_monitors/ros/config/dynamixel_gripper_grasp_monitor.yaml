@@ -1,21 +1,4 @@
-# If load is bigger than load_threshold an object is grasped
-load_threshold: 0.20
 # If position error (goal and current motor pos difference) 
 # is bigger than error_threshold an object is grasped
-position_error_threshold: 0.1
-serial:
-    # If position is bigger than use_serial_threshold arduino grasp test is used
-    activation_position_threshold: 0.28
-    # Use arduino grasp monitor
-    enabled: true
-    # arduino sensor count
-    value_count: 2
-    # If one serial value is smaller than serial_threshold an object is grasped (0.0 to 1.0)
-    value_threshold: 0.5
-    # device to use
-    device: /dev/youbot/gripper_monitor
-    # baudrate to use
-    baudrate: 9600
-    # timeout to use in milliseconds
-    timeout: 100
+position_error_threshold: 0.06
 
