@@ -26,4 +26,4 @@ laser_scanner_rear: {sensor_frame: base_laser_rear_link, data_type: LaserScan, t
 ## default clearing : false
 ## default min_obstacle_height : 0.0
 ## default max_obstacle_height: 2.0
-laser_scanner_barrier: {sensor_frame: base_laser_front_link, data_type: LaserScan, topic: /barrier_tape/scan, observation_persistence: 300.0,  marking: true, clearing: true, min_obstacle_height: -0.5, max_obstacle_height: 2.0}
+laser_scanner_barrier: {sensor_frame: base_laser_front_link, data_type: LaserScan, topic: /barrier_tape/scan, observation_persistence: 600.0,  marking: true, clearing: true, min_obstacle_height: -0.5, max_obstacle_height: 2.0}

@@ -11,48 +11,49 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     joint_states_received_(false),
     event_in_received_(false),
     current_state_(INIT),
-    loop_rate_init_state_(ros::Rate(100.0)),
-    serial_port_(NULL),
-    serial_available_(false)
+    loop_rate_init_state_(ros::Rate(100.0))
 {
     ros::NodeHandle nh("~");
-
-    nh.param("load_threshold", load_threshold_, 0.3);
     nh.param("position_error_threshold", position_error_threshold_, 0.1);
-    nh.param("serial/activation_position_threshold", serial_activation_position_threshold_, 0.28);
-    nh.param("serial/enabled", serial_enabled_, true);
-    nh.param("serial/value_count", serial_value_count_, 2);
-    nh.param("serial/value_threshold", serial_value_threshold_, 0.5);
-    nh.param("serial/device", serial_device_, std::string("/dev/youbot/gripper_monitor"));
-    nh.param("serial/baudrate", serial_baudrate_, 9600);
-    nh.param("serial/timeout", serial_timeout_, 100);
-
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
     sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
     sub_dynamixel_motor_states_ = nh.subscribe("dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
+    sub_object_name_ = nh.subscribe("object_name", 10, &DynamixelGripperGraspMonitorNode::objectNameCallback, this);
 
-    if(serial_enabled_) {
-        serial_buffer_ = (uint8_t *) malloc(sizeof(uint8_t) * serial_value_count_);
-        serial_values_ = (double *) malloc(sizeof(double) * serial_value_count_);
-    }
+
+
+    //addThreshold("bearing", position_error_threshold_ );
+    //addThreshold("distance_tube", position_error_threshold_);
+    addThreshold("bearing_box", position_error_threshold_);
+    addThreshold("motor", position_error_threshold_);
+    addThreshold("s40_40_g", position_error_threshold_);
+    addThreshold("s40_40_b", position_error_threshold_);
+    addThreshold("m30", position_error_threshold_);
+    //addThreshold("m20", position_error_threshold_);
+    //addThreshold("r20", position_error_threshold_);
+
 }
+
 
 DynamixelGripperGraspMonitorNode::~DynamixelGripperGraspMonitorNode()
 {
-    if(serial_port_) {
-        if(serial_port_->isOpen())
-            serial_port_->close();
-        delete serial_port_;
-    }
-
-    if(serial_enabled_) {
-        delete serial_buffer_;
-        delete serial_values_;
-    }
-
     pub_event_.shutdown();
     sub_event_.shutdown();
     sub_dynamixel_motor_states_.shutdown();
+}
+
+void DynamixelGripperGraspMonitorNode::addThreshold(std::string str, float f) {
+   object_threshold_map[str] = f;
+   for(int i = 0;i<100;i++) {
+       std::ostringstream stringStream1;
+       stringStream1 << str << "-" << std::setfill('0') << std::setw(2) << i;
+       std::string id1 = stringStream1.str();
+       object_threshold_map[id1] = f;
+       std::ostringstream stringStream2;
+       stringStream2 << str << "_" << std::setfill('0') << std::setw(2) << i;
+       std::string id2 = stringStream2.str();
+       object_threshold_map[id2] = f;
+   }
 }
 
 void DynamixelGripperGraspMonitorNode::jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg)
@@ -67,11 +68,15 @@ void DynamixelGripperGraspMonitorNode::eventCallback(const std_msgs::String::Con
     event_in_received_ = true;
 }
 
+void DynamixelGripperGraspMonitorNode::objectNameCallback(const std_msgs::String::ConstPtr &msg){
+    object_name_ = msg->data;
+    std::transform(object_name_.begin(), object_name_.end(), object_name_.begin(), tolower);
+    ROS_DEBUG("object_name: %s", object_name_.c_str());
+}
+
 void DynamixelGripperGraspMonitorNode::update()
 {
     checkForNewEvent();
-
-    poll_serial();
 
     switch (current_state_)
     {
@@ -84,35 +89,6 @@ void DynamixelGripperGraspMonitorNode::update()
     case RUN:
         run_state();
         break;
-    }
-}
-
-void DynamixelGripperGraspMonitorNode::poll_serial()
-{
-    if(!serial_enabled_)
-        return;
-
-    try {
-        if(!serial_port_)
-            serial_port_ = new serial::Serial(serial_device_, serial_baudrate_, serial::Timeout::simpleTimeout(serial_timeout_));
-        if(!serial_port_->isOpen())
-            serial_port_->open();
-        if(serial_port_->available() < serial_value_count_)
-            return;
-
-        serial_port_->read(serial_buffer_, serial_value_count_);
-
-        for(size_t i = 0; i < serial_value_count_; i++) {
-            serial_values_[i] = (double) serial_buffer_[i] / 255.0;
-        }
-        serial_available_ = true;
-    } catch (serial::IOException e) {
-        serial_available_ = false;
-        ROS_ERROR("Serial communication failed");
-        if(serial_port_) {
-            delete serial_port_;
-        }
-        serial_port_ = NULL;
     }
 }
 
@@ -161,26 +137,15 @@ void DynamixelGripperGraspMonitorNode::run_state()
 
 bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
 {
-    ROS_DEBUG("load:     %f, threshold: %f", std::abs(joint_states_->load), load_threshold_);
-    ROS_DEBUG("position error: %f, threshold: %f", std::abs(joint_states_->error), position_error_threshold_);
-    ROS_DEBUG("position: %f, use serial threshold: %f", joint_states_->current_pos, serial_activation_position_threshold_);
-    ROS_DEBUG("serial value threshold: %f", serial_value_threshold_);
-    for(size_t i = 0; i < serial_value_count_; i++) {
-        ROS_DEBUG("serial value %d: %f", i, serial_values_[i]);
+    if(object_threshold_map.find(object_name_) == object_threshold_map.end()){
+      return true;
     }
-    if (std::abs(joint_states_->load) > load_threshold_) {
+    ROS_INFO("object: %s, position error: %f, threshold: %f", object_name_.c_str(), std::abs(joint_states_->error), object_threshold_map[object_name_]);
+    if (std::abs(joint_states_->error) >= object_threshold_map[object_name_]) {
         return true;
-    }
-    if (std::abs(joint_states_->error) > position_error_threshold_) {
-        return true;
-    }
-    if(serial_enabled_ && serial_activation_position_threshold_ < joint_states_->current_pos) {
-        for(size_t i = 0; i < serial_value_count_; i++) {
-            if(serial_values_[i] < serial_value_threshold_)
-                return true;
-        }
     }
     return false;
+
 }
 
 int main(int argc, char **argv)

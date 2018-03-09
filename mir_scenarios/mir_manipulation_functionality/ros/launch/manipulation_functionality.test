@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Node to test -->
+  <include file="$(find mir_manipulation_functionality)/ros/launch/manipulation_functionality.launch">
+  </include>
+  <node pkg="mir_manipulation_functionality" type="manipulation_functionality"
+        name="manipulation_functionality" output="screen"/>
+
+  <test pkg="mir_manipulation_functionality" type="manipulation_functionality_test.py"
+        test-name="test_manipulation_functionality">
+
+    <remap from="~benchmark_state" to="/robot_example_ros/benchmark_state"/>
+    <remap from="~component_output" to="/robot_example_ros/benchmark_feedback"/>
+    <remap from="~event_out" to="/manipulation_functionality/event_in"/>
+    <remap from="~logging_output" to="/rockin/notification"/>
+    <remap from="~event_in" to="/manipulation_functionality/event_out"/>
+  </test>
+</launch>
