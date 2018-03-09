@@ -3,6 +3,7 @@
     <group ns="gripper_controller">
         <node pkg="mir_grasp_monitors" type="dynamixel_gripper_grasp_monitor_node" name="grasp_monitor" output="screen" >
             <remap from="~dynamixel_motor_states" to="/gripper_controller/state" />	
+            <remap from="~object_name" to="/mcr_perception/object_selector/input/object_name"/>
             <rosparam command="load" file="$(find mir_grasp_monitors)/ros/config/dynamixel_gripper_grasp_monitor.yaml"/>
         </node>
     </group>
