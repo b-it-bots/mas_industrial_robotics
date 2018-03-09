@@ -1,6 +1,6 @@
 - git:
     local-name: mas_common_robotics
-    uri: gitgate@mas.b-it-center.de:mas-group/mas_common_robotics.git
+    uri: git@github.com:b-it-bots/mas_common_robotics.git
     version: kinetic
 
 - git:
@@ -35,7 +35,7 @@
 
 - git:
     local-name: realsense_camera
-    uri: gitgate@mas.b-it-center.de:mas-group/realsense_camera.git
+    uri: git@github.com:b-it-bots/realsense_camera.git
     version: master
 
 - git:
@@ -45,5 +45,5 @@
 
 - git:
     local-name: unmerged_packages_for_testing
-    uri: gitgate@mas.b-it-center.de:mas-group/unmerged_packages_for_testing.git
+    uri: git@github.com:b-it-bots/unmerged_packages_for_testing.git
     version: kinetic
