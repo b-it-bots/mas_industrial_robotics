@@ -53,7 +53,8 @@ import mir_pregrasp_planning_ros.simple_pregrasp_planner_utils as pregrasp_plann
 import mcr_pose_generation_ros.pose_generator_class
 import mcr_manipulation_pose_selector_ros.reachability_pose_selector_class
 import mcr_manipulation_msgs.msg
-
+from dynamic_reconfigure.server import Server
+import mir_pregrasp_planning.cfg.SamplingAngleParamsConfig as SamplingAngleParamsConfig
 
 
 class PregraspPlannerPipeline(object):
@@ -98,7 +99,10 @@ class PregraspPlannerPipeline(object):
         # linear offset for the X, Y and Z axis.
         self.linear_offset = rospy.get_param('~linear_offset', None)
 
+        # Dynamic reconguration server for SamplingAngleParams
+        dynamic_reconfig_srv = Server(SamplingAngleParamsConfig, self.dynamic_reconfig_cb)
 
+        """
         # somewhere
         self.min_azimuth = -3.0
         self.max_azimuth = 3.0
@@ -106,6 +110,7 @@ class PregraspPlannerPipeline(object):
         self.max_zenith = 3.0
         self.min_roll = 0.0
         self.max_roll = 0.0
+        """
 
         # pose generator
         self.gripper = rospy.get_param('~gripper_config_matrix', None)
@@ -147,10 +152,21 @@ class PregraspPlannerPipeline(object):
             "~joint_configuration", brics_actuator.msg.JointPositions, queue_size=1
         )
 
+    def dynamic_reconfig_cb(self,config,level):
+        """
+        Dynamic reconfiguration callback function
+        """
+        self.min_azimuth = config.min_azimuth
+        self.max_azimuth = config.max_azimuth
+        self.min_zenith = config.min_zenith
+        self.max_zenith = config.max_zenith
+        self.min_roll = config.min_roll
+        self.max_roll = config.max_roll
+        return config
+
     def event_in_cb(self, msg):
         """
         Obtains an event for the component.
-
         """
         self.event = msg.data
 
