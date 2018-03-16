@@ -62,7 +62,7 @@ First of all you have to clone the repository.
 
 Then go on with installing further external dependencies:
 
-    cd ~/indigo/src/mas_industrial_robotics
+    cd ~/kinetic/src/mas_industrial_robotics
     ./repository.debs
 
     source ~/kinetic/devel/setup.bash
