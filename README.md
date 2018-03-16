@@ -1,7 +1,7 @@
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
-- ROS Indigo: Ubuntu 14.04
+- ROS Kinetic: Ubuntu 16.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -34,7 +34,7 @@ If you have never worked with git before, we recommend to go through the followi
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
 
 
-- ROS Indigo - http://wiki.ros.org/indigo/Installation/Ubuntu
+- ROS Kinetic - http://wiki.ros.org/kinetic/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
   
@@ -49,30 +49,30 @@ In order to understand at least the different core components of ROS, you have t
 
 ## Set up a catkin workspace
 
-    source /opt/ros/indigo/setup.bash
-    mkdir -p ~/indigo/src; cd ~/indigo/src
+    source /opt/ros/kinetic/setup.bash
+    mkdir -p ~/kinetic/src; cd ~/kinetic/src
     catkin_init_workspace
     catkin build
     
 ## Clone and compile the MAS industrial robotics software
 First of all you have to clone the repository.
 
-    cd ~/indigo/src;
-    git clone gitgate@mas.b-it-center.de:mas-group/mas_industrial_robotics.git
+    cd ~/kinetic/src;
+    git clone git@github.com:b-it-bots/mas_industrial_robotics.git
 
 Then go on with installing further external dependencies:
 
     cd ~/indigo/src/mas_industrial_robotics
     ./repository.debs
 
-    source ~/indigo/devel/setup.bash
+    source ~/kinetic/devel/setup.bash
 
 The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
 
 
 And finally compile the repository:
 
-    cd ~/indigo
+    cd ~/kinetic
     catkin build
 
 
@@ -90,8 +90,11 @@ With the ROBOT variable you can choose which hardware configuration should be lo
 
 #### ROBOT_ENV Variable
 The ROBOT_ENV variable can be used to switch between different environments. The following line will add the variable to your .bashrc:
-
+#### Real robot
      echo "export ROBOT_ENV=brsu-c025" >> ~/.bashrc
+     source ~/.bashrc
+#### Simulation
+     echo "export ROBOT_ENV=brsu-c025-sim" >> ~/.bashrc
      source ~/.bashrc
 
 
@@ -104,7 +107,7 @@ The ROBOT_ENV variable can be used to switch between different environments. The
      
 In a new terminal you can open the Gazebo GUI to see the environment and the robot
 
-     rosrun gazebo_ros gzclient
+	     rosrun gazebo_ros gzclient
 
 ### At the Real Robot
 
