@@ -102,16 +102,6 @@ class PregraspPlannerPipeline(object):
         # Dynamic reconguration server for SamplingAngleParams
         dynamic_reconfig_srv = Server(SamplingAngleParamsConfig, self.dynamic_reconfig_cb)
 
-        """
-        # somewhere
-        self.min_azimuth = -3.0
-        self.max_azimuth = 3.0
-        self.min_zenith = -3.0
-        self.max_zenith = 3.0
-        self.min_roll = 0.0
-        self.max_roll = 0.0
-        """
-
         # pose generator
         self.gripper = rospy.get_param('~gripper_config_matrix', None)
         assert self.gripper is not None, "Gripper config matrix must be specified."
@@ -156,12 +146,21 @@ class PregraspPlannerPipeline(object):
         """
         Dynamic reconfiguration callback function
         """
-        self.min_azimuth = config.min_azimuth
-        self.max_azimuth = config.max_azimuth
-        self.min_zenith = config.min_zenith
-        self.max_zenith = config.max_zenith
-        self.min_roll = config.min_roll
-        self.max_roll = config.max_roll
+        self.pose_generator.set_min_azimuth(math.radians(config.min_azimuth))
+        self.pose_generator.set_max_azimuth(math.radians(config.max_azimuth))
+        self.pose_generator.set_min_zenith(math.radians(config.min_zenith))
+        self.pose_generator.set_max_zenith(math.radians(config.max_zenith))
+        self.pose_generator.set_min_roll(math.radians(config.min_roll))
+        self.pose_generator.set_max_roll(math.radians(config.max_roll))
+        self.pose_generator.set_linear_step(config.linear_step)
+        self.pose_generator.set_angular_step(config.angular_step)
+        self.pose_generator.set_min_distance_to_object(config.min_distance_to_object)
+        self.pose_generator.set_max_distance_to_object(config.max_distance_to_object)
+        self.pose_generator.set_max_samples(config.max_samples)
+        self.pose_generator.set_gripper_config_matrix(config.gripper_config_matrix)
+        self.pose_generator.set_min_height(config.min_height)
+        self.pose_generator.set_max_height(config.max_height)
+
         return config
 
     def event_in_cb(self, msg):
@@ -241,7 +240,7 @@ class PregraspPlannerPipeline(object):
             self.reset_component_data()
             return 'INIT'
 
-        transformed_pose = self.pose_transformer.get_transformed_pose(self.pose_in, self.target_frame);
+        transformed_pose = self.pose_transformer.get_transformed_pose(self.pose_in, self.target_frame)
         if not transformed_pose:
             rospy.logerr("Unable to transform pose to {0}".format(self.target_frame))
             status = 'e_failure'
@@ -262,18 +261,7 @@ class PregraspPlannerPipeline(object):
         else:
             grasp_type = 'side_grasp'
 
-        sampling_parameters = mcr_manipulation_msgs.msg.SphericalSamplerParameters()
-        sampling_parameters.radial_distance.minimum = self.min_distance_to_object
-        sampling_parameters.radial_distance.maximum = self.max_distance_to_object
-        sampling_parameters.azimuth.minimum = math.radians(self.min_azimuth)
-        sampling_parameters.azimuth.maximum = math.radians(self.max_azimuth)
-        sampling_parameters.zenith.minimum = math.radians(self.min_zenith)
-        sampling_parameters.zenith.maximum = math.radians(self.max_zenith)
-        sampling_parameters.yaw.minimum = math.radians(self.min_roll)
-        sampling_parameters.yaw.maximum = math.radians(self.max_roll)
-        print sampling_parameters
-
-        pose_samples = self.pose_generator.calculate_poses_list(modified_pose, sampling_parameters)
+        pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
         print pose_samples
         reachable_pose, reachable_configuration = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, self.linear_offset)
 
