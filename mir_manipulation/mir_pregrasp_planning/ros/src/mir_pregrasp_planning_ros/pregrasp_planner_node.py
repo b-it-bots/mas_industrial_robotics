@@ -68,7 +68,7 @@ class PregraspPlannerPipeline(object):
         self.pose_in = None
 
         # node cycle rate (in hz)
-        self.loop_rate = rospy.Rate(rospy.get_param('~loop_rate', 10.0))
+        self.loop_rate = 10.0
         # pose transformer
         self.target_frame = rospy.get_param('~target_frame', 'base_link')
 
