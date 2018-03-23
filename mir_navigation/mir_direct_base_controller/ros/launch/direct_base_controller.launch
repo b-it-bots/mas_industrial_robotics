@@ -2,62 +2,39 @@
 <!-- Note: this is a launch file to tune this component for different tasks. -->
 <launch>
     <arg name="cmd_vel_out" default="/cmd_vel" />
-    
     <group ns="mcr_navigation/direct_base_controller">
-            
-        <node pkg="mcr_common_converters" type="transform_to_pose_converter_node" name="pose_converter" output="screen">
-        
-            <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100.0"/>
+        <node pkg="mcr_direct_base_controller" type="direct_base_controller_coordinator_node" name="coordinator" output="screen">
+            <remap from="~pose_error" to="coordinator/pose_error" />
+            <remap from="~pose_error_monitor_event_in" to="pose_error_monitor/event_in" />
 
-            <param name="reference_frame" type="str" value="odom"/>
-            <param name="target_frame" type="str" value="base_link"/>
-        </node>
-        
-        <node pkg="mcr_manipulation_measurers" type="component_wise_pose_error_calculator_node" name="pose_error_calculator" output="screen">
-
-            <remap from="~pose_1" to="pose_converter/converted_pose" />
+            <remap from="~twist_synchronizer_event_in" to="twist_synchronizer/event_in" />
             <remap from="~pose_2" to="/mcr_navigation/direct_base_controller/input_pose" />
 
-            <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100"/>
-        </node>
-    
-    
-        <node pkg="mcr_geometric_relation_monitors" type="component_wise_pose_error_monitor_node" name="pose_error_monitor" output="screen">
+            <remap from="~pose_monitor_feedback" to="pose_error_monitor/feedback" />
+            <remap from="~twist" to="$(arg cmd_vel_out)" />
 
-            <remap from="~pose_error" to="pose_error_calculator/pose_error" />
-
-            <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100.0" />
-
-            <!--todo: check if also for the other dimensions is required...-->
-            <!-- the threshold for detecting if is within tolerance (in meters) -->
-            <param name="threshold_linear_x" type="double" value="0.005" />
-            <param name="threshold_linear_y" type="double" value="0.005" />
-        </node>
-
-        <node pkg="mcr_twist_controller" type="twist_controller_node" name="twist_controller" output="screen">
-
-            <remap from="~pose_error" to="pose_error_calculator/pose_error" />
+            <remap from="~pose_error" to="coordinator/pose_error" />
 
             <!-- the cycle rate of the node (in Hz) -->
             <param name="loop_rate" type="double" value="100.0"/>
 
+            <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
+            <param name="angular_synchronization" type="bool" value="true"/>
+
+            <!-- ############# Parameters for transform_to_pose_converter_node ########### -->
+            <param name="wait_for_transform" type="double" value="0.1"/>
+            <param name="reference_frame" type="str" value="odom"/>
+            <param name="target_frame" type="str" value="base_link"/>
+            <!-- ############# Parameters for transform_to_pose_converter_node ########### -->
+
+            <!-- ############# Parameters for twist_controller ########### -->
             <!-- proportional gains for the Cartesian linear velocities-->
             <param name="p_gain_x" type="double" value="1.4"/>
             <param name="p_gain_y" type="double" value="1.4"/>
             <param name="p_gain_yaw" type="double" value="1.2"/>
-        </node>
+            <!-- ############# Parameters for twist_controller ########### -->
 
-
-        <node pkg="mcr_twist_limiter" type="twist_limiter_node" name="twist_limiter" output="screen">
-
-	    <remap from="~twist" to ="twist_controller/controlled_twist" />
-
-            <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100.0"/>
-
+            <!-- ############# Parameters for twist_limiter ########### -->
             <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
             <param name="max_velocity_x" type="double" value="0.6"/>
             <param name="max_velocity_y" type="double" value="0.6"/>
@@ -66,46 +43,13 @@
             <!-- Maximum angular velocities around the axes X, Y and Z (in radians/second) -->
             <param name="max_velocity_roll" type="double" value="0.0"/>
             <param name="max_velocity_pitch" type="double" value="0.0"/>
-            <param name="max_velocity_yaw" type="double" value="0.6"/>  
+            <param name="max_velocity_yaw" type="double" value="0.6"/>
+            <!-- ############# Parameters for twist_limiter ########### -->
+
+            <!-- ############# Parameters for pose_monitor ########### -->
+            <param name="threshold_linear_x" type="double" value="0.005" />
+            <param name="threshold_linear_y" type="double" value="0.005" />
+
         </node>
-
-        <node pkg="mcr_twist_synchronizer" type="twist_synchronizer_node" name="twist_synchronizer" output="screen">
-
-            <remap from="~twist" to="twist_limiter/limited_twist" />
-            <remap from="~pose_error" to="pose_error_calculator/pose_error" />
-            <!--remap from="~synchronized_twist" to="/cmd_vel_prio_low" /-->
-
-            <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100.0"/>
-
-            <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
-            <param name="angular_synchronization" type="bool" value="true"/>
-   
-        </node>
-
-        <node pkg="topic_tools" type="transform" name="twist_transform" output="screen"
-              args="/mcr_navigation/direct_base_controller/twist_synchronizer/synchronized_twist $(arg cmd_vel_out) geometry_msgs/Twist 'm.twist' --wait-for-start" />
-
-        <node pkg="mcr_direct_base_controller" type="direct_base_controller_coordinator_node" name="coordinator" output="screen">
-
-            <remap from="~pose_converter_event_in" to="pose_converter/event_in" />
-            <remap from="~pose_error_calculator_event_in" to="pose_error_calculator/event_in" />
-            <remap from="~pose_error_monitor_event_in" to="pose_error_monitor/event_in" />
-            <remap from="~twist_controller_event_in" to="twist_controller/event_in" />
-            <remap from="~twist_limiter_event_in" to="twist_limiter/event_in" />
-            <remap from="~twist_synchronizer_event_in" to="twist_synchronizer/event_in" />
-            
-            <remap from="~pose_monitor_feedback" to="pose_error_monitor/feedback" />
-            <remap from="~twist" to="$(arg cmd_vel_out)" />
-
-            <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100.0"/>
-
-            <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
-            <param name="angular_synchronization" type="bool" value="true"/>
-   
-        </node>
-
     </group>
-    
 </launch>
