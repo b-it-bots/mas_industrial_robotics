@@ -15,7 +15,7 @@ include_directories(
 catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
-  ros/config/SamplingAngleParams.cfg
+  ros/config/PregraspPlannerParams.cfg
 )
 
 catkin_package(
@@ -33,6 +33,7 @@ catkin_package(
     mcr_manipulation_msgs
     tf
     mcr_manipulation_measurers
+    mcr_common_converters
 )
 
 ### TESTS
@@ -56,6 +57,6 @@ install(PROGRAMS
   ros/scripts/pose_mock_up_gui_node
   ros/scripts/pregrasp_planner_pipeline_node
   ros/scripts/simple_pregrasp_planner_node
-  ros/config/SamplingAngleParams.cfg
+  ros/config/PregraspPlannerParams.cfg
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
