@@ -130,6 +130,9 @@ class PregraspPlannerPipeline(object):
         self.event_out = rospy.Publisher("~event_out", std_msgs.msg.String, queue_size=1)
         self.grasp_type = rospy.Publisher('~grasp_type', std_msgs.msg.String, queue_size=1)
         self.event_out = rospy.Publisher('~event_out', std_msgs.msg.String, queue_size=1)
+        self.pose_samples_pub = rospy.Publisher(
+            "~pose_samples", geometry_msgs.msg.PoseArray, queue_size=1
+        )
         self.selected_pose = rospy.Publisher(
             "~selected_pose", geometry_msgs.msg.PoseStamped, queue_size=1
         )
@@ -281,6 +284,7 @@ class PregraspPlannerPipeline(object):
             grasp_type = 'side_grasp'
 
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
+        self.pose_samples_pub.publish(pose_samples)
         reachable_pose, brics_joint_config, joint_config = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, self.linear_offset)
 
         if not reachable_pose:
