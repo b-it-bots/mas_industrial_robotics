@@ -16,7 +16,7 @@
 - git:
     local-name: youbot_description
     uri: https://github.com/mas-group/youbot_description.git
-    version: indigo-devel
+    version: kinetic-devel
 
 - git:
     local-name: youbot_simulation
