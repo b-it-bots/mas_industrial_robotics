@@ -83,7 +83,7 @@ If no errors appear everything is ready to use. Great job!
 #### ROBOT variable
 With the ROBOT variable you can choose which hardware configuration should be loaded when starting the robot. The following line will add the variable to your .bashrc:
 
-     echo "export ROBOT=youbot-brsu-2" >> ~/.bashrc
+     echo "export ROBOT=youbot-brsu-1" >> ~/.bashrc
      source ~/.bashrc
 
 
