@@ -5,18 +5,19 @@ import smach
 import smach_ros
 import math
 import tf
-
+import rospkg
 import geometry_msgs.msg
 import std_msgs.msg
 import geometry_msgs.msg
 import brics_actuator.msg
-
-
+import re, os
+import moveit_commander
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 
 from mcr_perception_msgs.msg import ObjectList, Object
 
+import mcr_arm_motions.trajectory_extractor as extractor
 
 class Bunch:
     def __init__(self, **kwds):
@@ -138,15 +139,42 @@ class move_arm(smach.State):
     def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
-                             input_keys=['move_arm_to'])
+                             input_keys=['move_arm_from',
+                                        'move_arm_to', 
+                                        'plan_motion'])
 
         joint_names = ['arm_joint_1', 'arm_joint_2', 'arm_joint_3', 'arm_joint_4', 'arm_joint_5']
         self.arm_moveit_client  = MoveitClient('/arm_', target, timeout, joint_names)
 
+        # Set up MoveIt! commander
+        self.moveit_commander = moveit_commander.MoveGroupCommander('arm_1')
+
+        #Get path where trajectory is saved
+        rospack = rospkg.RosPack()
+        self.file_path = os.path.join(rospack.get_path('mcr_moveit_client'),'ros/config/saved_trajectories')
+
     def execute(self, userdata):
+        rospy.loginfo("Plan desired arm motion: " + str(userdata.plan_motion))
 
-        return self.arm_moveit_client.execute(userdata)
+        if userdata.plan_motion:
+            return self.arm_moveit_client.execute(userdata)
 
+        else: 
+            rospy.loginfo("State is: " + str(userdata.move_arm_from))
+            rospy.loginfo("Target is: " + str(userdata.move_arm_to))
+
+            preplanned_trajectory = extractor.extract_trajectory(userdata.move_arm_from,
+                                                                userdata.move_arm_to,
+                                                                self.file_path)
+            execution_result = self.moveit_commander.execute(preplanned_trajectory)
+
+            if execution_result:
+                rospy.loginfo("Preplanned trajectory executed!")
+                return 'succeeded'
+            else:
+                rospy.logerr('Unable to execute preplanned trajectory!')
+                return 'failed'
+            
 class control_gripper(smach.State):
 
     def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0):
@@ -164,7 +192,6 @@ class control_gripper(smach.State):
                break
 
         return 'succeeded'
-
 
 
 class move_arm_and_gripper(smach.State):
@@ -208,8 +235,6 @@ class move_arm_and_gripper(smach.State):
         data.data = angle
         self.pub.publish(data)
         return self.arm_moveit_client.execute(userdata)
-
-
 
 class linear_motion(smach.State):
 
