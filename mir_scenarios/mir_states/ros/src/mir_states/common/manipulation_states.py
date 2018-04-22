@@ -154,7 +154,7 @@ class move_arm(smach.State):
         self.file_path = os.path.join(rospack.get_path('mcr_moveit_client'),'ros/config/saved_trajectories')
 
     def execute(self, userdata):
-        rospy.loginfo("Plan desired arm motion: " + str(userdata.plan_motion))
+        rospy.loginfo("Re-plan desired arm motion: " + str(userdata.plan_motion))
 
         if userdata.plan_motion:
             return self.arm_moveit_client.execute(userdata)
