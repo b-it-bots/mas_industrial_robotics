@@ -5,6 +5,7 @@ import smach
 import smach_ros
 import math
 import tf
+import re
 
 import geometry_msgs.msg
 import std_msgs.msg

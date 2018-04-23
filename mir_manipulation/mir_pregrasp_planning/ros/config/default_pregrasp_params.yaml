@@ -1,7 +1,7 @@
-min_azimuth: -3.0
-max_azimuth: 3.0
-min_zenith: -15.0
-max_zenith: 3.0
+min_azimuth: 0.0
+max_azimuth: 0.0
+min_zenith: 0.0
+max_zenith: 0.0
 min_roll: 0.0
 max_roll: 0.0
 linear_step: 0.01
