@@ -16,7 +16,8 @@
             <remap from="~pose_error" to="coordinator/pose_error" />
 
             <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100.0"/>
+            <param name="loop_rate" type="double" value="5.0"/>
+            <param name="idle_loop_rate" type="double" value="1.0"/>
 
             <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
             <param name="angular_synchronization" type="bool" value="true"/>
