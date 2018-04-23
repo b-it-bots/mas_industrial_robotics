@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Note: this is a launch file to tune this component for different tasks. -->
 <launch>
-    <arg name="cmd_vel_out" default="/cmd_vel" />
+    <arg name="cmd_vel_out" default="/cmd_vel_safe" />
     <group ns="mcr_navigation/direct_base_controller">
         <node pkg="mcr_direct_base_controller" type="direct_base_controller_coordinator_node" name="coordinator" output="screen">
             <remap from="~pose_error" to="coordinator/pose_error" />
@@ -16,7 +16,8 @@
             <remap from="~pose_error" to="coordinator/pose_error" />
 
             <!-- the cycle rate of the node (in Hz) -->
-            <param name="loop_rate" type="double" value="100.0"/>
+            <param name="loop_rate" type="double" value="5.0"/>
+            <param name="idle_loop_rate" type="double" value="1.0"/>
 
             <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
             <param name="angular_synchronization" type="bool" value="true"/>

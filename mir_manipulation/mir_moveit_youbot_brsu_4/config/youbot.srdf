@@ -44,11 +44,11 @@
     </group_state>
     <!-- initial configuration for curve tracing /line tracing -->
     <group_state name="line_tracing_init" group="arm_1">
-        <joint name="arm_joint_1" value="2.18324" />
-        <joint name="arm_joint_2" value="2.13903" />
-        <joint name="arm_joint_3" value="-1.37035" />
-        <joint name="arm_joint_4" value="2.70799" />
-        <joint name="arm_joint_5" value="2.89715" />
+        <joint name="arm_joint_1" value="2.16794" />
+        <joint name="arm_joint_2" value="1.75604" />
+        <joint name="arm_joint_3" value="-1.17156" />
+        <joint name="arm_joint_4" value="2.91757" />
+        <joint name="arm_joint_5" value="2.88263" />
     </group_state>
     <!-- far range pose, good for arm -->
      <group_state name="barrier_tape" group="arm_1">
@@ -540,6 +540,7 @@
     <disable_collisions link1="arm_link_1" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_1" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="arm_link_1" link2="wheel_link_fr" reason="Never" />
+    <disable_collisions link1="arm_link_1" link2="arm_cam3d_camera" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="arm_link_3" reason="Adjacent" />
     <disable_collisions link1="arm_link_2" link2="base_footprint" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="base_laser_front_link" reason="Never" />
@@ -551,6 +552,7 @@
     <disable_collisions link1="arm_link_2" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="wheel_link_fr" reason="Never" />
+    <disable_collisions link1="arm_link_2" link2="arm_cam3d_camera" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="arm_link_4" reason="Adjacent" />
     <disable_collisions link1="arm_link_3" link2="arm_link_5" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="base_footprint" reason="Never" />
