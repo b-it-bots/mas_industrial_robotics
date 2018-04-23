@@ -71,7 +71,7 @@
    <xacro:asus_xtion_camera name="arm_cam3d" parent="gripper_motor_mount_link" tilt="-0.0">
        <!--origin xyz="-0.01 -0.012 0.05" rpy="0 ${M_PI/2 - 0.25} 0.00" /-->
        <!--<origin xyz="0.016 0 0.01" rpy="0 ${M_PI/2 - 0} -0.09" />  -->
-       <origin xyz="0.05 -0.00 0.015" rpy="0 ${M_PI/2 - 0.001} -0.00" />  
+       <origin xyz="0.05 -0.00 0.015" rpy="0 ${M_PI/2 - 0.02} -0.00" />  
    </xacro:asus_xtion_camera>
   
 </robot>
