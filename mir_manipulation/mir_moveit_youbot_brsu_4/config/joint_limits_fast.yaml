@@ -9,9 +9,9 @@ joint_limits:
     max_acceleration: 1.5707
   arm_joint_2:
     has_velocity_limits: true
-    max_velocity: 1.309
+    max_velocity: 1.5707
     has_acceleration_limits: true
-    max_acceleration: 1.2
+    max_acceleration: 1.5707
   arm_joint_3:
     has_velocity_limits: true
     max_velocity: 1.5707
