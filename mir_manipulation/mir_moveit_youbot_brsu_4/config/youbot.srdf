@@ -540,6 +540,7 @@
     <disable_collisions link1="arm_link_1" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_1" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="arm_link_1" link2="wheel_link_fr" reason="Never" />
+    <disable_collisions link1="arm_link_1" link2="arm_cam3d_camera" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="arm_link_3" reason="Adjacent" />
     <disable_collisions link1="arm_link_2" link2="base_footprint" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="base_laser_front_link" reason="Never" />
@@ -551,6 +552,7 @@
     <disable_collisions link1="arm_link_2" link2="wheel_link_br" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="arm_link_2" link2="wheel_link_fr" reason="Never" />
+    <disable_collisions link1="arm_link_2" link2="arm_cam3d_camera" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="arm_link_4" reason="Adjacent" />
     <disable_collisions link1="arm_link_3" link2="arm_link_5" reason="Never" />
     <disable_collisions link1="arm_link_3" link2="base_footprint" reason="Never" />
