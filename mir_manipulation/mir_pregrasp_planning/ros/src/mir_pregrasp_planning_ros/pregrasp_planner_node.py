@@ -159,7 +159,7 @@ class PregraspPlannerPipeline(object):
         self.pose_generator.set_min_roll(math.radians(config.min_roll))
         self.pose_generator.set_max_roll(math.radians(config.max_roll))
         self.pose_generator.set_linear_step(config.linear_step)
-        self.pose_generator.set_angular_step(config.angular_step)
+        self.pose_generator.set_angular_step(math.radians(config.angular_step))
         self.pose_generator.set_min_distance_to_object(config.min_distance_to_object)
         self.pose_generator.set_max_distance_to_object(config.max_distance_to_object)
         self.pose_generator.set_max_samples(config.max_samples)
