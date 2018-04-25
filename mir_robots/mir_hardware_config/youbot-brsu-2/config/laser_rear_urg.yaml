@@ -1,0 +1,5 @@
+serial_port: /dev/youbot/hokuyo_rear
+frame_id: /base_laser_rear_link
+angle_min: -1.57
+angle_max: 1.57
+
