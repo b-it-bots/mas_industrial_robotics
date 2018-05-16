@@ -99,9 +99,7 @@ class PregraspPlannerPipeline(object):
         # linear offset for the X, Y and Z axis.
         self.linear_offset = rospy.get_param('~linear_offset', None)
 
-        # Dynamic reconguration server for SamplingAngleParams
-        dynamic_reconfig_srv = Server(SamplingAngleParamsConfig, self.dynamic_reconfig_cb)
-
+       
         # pose generator
         self.gripper = rospy.get_param('~gripper_config_matrix', None)
         assert self.gripper is not None, "Gripper config matrix must be specified."
@@ -142,6 +140,12 @@ class PregraspPlannerPipeline(object):
             "~joint_configuration", brics_actuator.msg.JointPositions, queue_size=1
         )
 
+         # Dynamic reconguration server for SamplingAngleParams
+        dynamic_reconfig_srv = Server(SamplingAngleParamsConfig, self.dynamic_reconfig_cb)
+
+
+
+
     def dynamic_reconfig_cb(self,config,level):
         """
         Dynamic reconfiguration callback function
@@ -159,8 +163,7 @@ class PregraspPlannerPipeline(object):
         self.pose_generator.set_max_samples(config.max_samples)
         self.pose_generator.set_gripper_config_matrix(config.gripper_config_matrix)
         self.pose_generator.set_min_height(config.min_height)
-        self.pose_generator.set_max_height(config.max_height)
-
+        self.pose_generator.set_max_height(config.max_height)        
         return config
 
     def event_in_cb(self, msg):
