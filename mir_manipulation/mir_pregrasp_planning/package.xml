@@ -8,10 +8,14 @@
   </description>
   <license>GPLv3</license>
 
-  <maintainer email="jose.sanchez.loza@gmail.com">Jose Sanchez</maintainer>
-  <maintainer email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</maintainer>
+  <maintainer email="abhishek.padalkar@smail.inf.h-brs.de">Abhishek Padalkdar</maintainer>
 
   <author email="jose.sanchez.loza@gmail.com">Jose Sanchez</author>
+  <author email="debaraj.barua@smail.inf.h-brs.de">Debaraj Barua</author>
+  <author email="senthilkumar.sockalingam@smail.inf.h-brs.de">Senthilkumar Sockalingam Kathiresan</author>
+  <author email="vladimir.krasin@smail.inf.h-brs.de">Vladimir Krasin</author>
+  <author email="duy-khoi.tran@smail.inf.h-brs.de">Duy Khoi Tran</author>
+  <author email="abhishek.padalkar@smail.inf.h-brs.de">Abhishek Padalkdar</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -32,6 +36,7 @@
   <run_depend>mcr_manipulation_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>mcr_manipulation_measurers</run_depend>
+  <run_depend>mcr_common_converters</run_depend>
   <run_depend>mcr_event_gui</run_depend>
 
   <test_depend>roslaunch</test_depend>

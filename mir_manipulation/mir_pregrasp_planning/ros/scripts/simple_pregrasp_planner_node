@@ -1,6 +1,0 @@
-#!/usr/bin/env python
-
-import mir_pregrasp_planning_ros.simple_pregrasp_planner
-
-if __name__ == '__main__':
-    mir_pregrasp_planning_ros.simple_pregrasp_planner.main()
