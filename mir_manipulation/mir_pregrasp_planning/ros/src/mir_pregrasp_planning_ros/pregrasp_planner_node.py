@@ -48,11 +48,11 @@ import rospy
 import std_msgs.msg
 import geometry_msgs.msg
 import brics_actuator.msg
-import mcr_manipulation_measurers_ros.pose_transformer_class
+import mcr_manipulation_measurers_ros.pose_transformer
 import mcr_common_converters_ros.joint_configuration_shifter
 import mir_pregrasp_planning_ros.simple_pregrasp_planner_utils as pregrasp_planner_utils
-import mcr_pose_generation_ros.pose_generator_class
-import mcr_manipulation_pose_selector_ros.reachability_pose_selector_class
+import mcr_pose_generation_ros.pose_generator
+import mcr_manipulation_pose_selector_ros.reachability_pose_selector
 import mcr_manipulation_msgs.msg
 from dynamic_reconfigure.server import Server
 import mir_pregrasp_planning.cfg.PregraspPlannerParamsConfig as PregraspPlannerParamsConfig
@@ -115,9 +115,9 @@ class PregraspPlannerPipeline(object):
         self.max_samples = None
 
 
-        self.pose_transformer = mcr_manipulation_measurers_ros.pose_transformer_class.PoseTransformer()
-        self.pose_generator = mcr_pose_generation_ros.pose_generator_class.PoseGenerator()
-        self.reachability_pose_selector = mcr_manipulation_pose_selector_ros.reachability_pose_selector_class.PoseSelector()
+        self.pose_transformer = mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
+        self.pose_generator = mcr_pose_generation_ros.pose_generator.PoseGenerator()
+        self.reachability_pose_selector = mcr_manipulation_pose_selector_ros.reachability_pose_selector.PoseSelector()
         self.joint_config_shifter = mcr_common_converters_ros.joint_configuration_shifter.JointConfigurationShifter(None)
 
         self.pose_generator.set_gripper_config_matrix(self.gripper_config_matrix)

@@ -39,8 +39,7 @@ catkin_package(
 ### TESTS
 roslint_python(
   ros/scripts/pose_mock_up_gui_node
-  ros/scripts/pregrasp_planner_pipeline_node
-  ros/scripts/simple_pregrasp_planner_node
+  ros/scripts/pregrasp_planner_node
 )
 
 if(CATKIN_ENABLE_TESTING)
@@ -48,15 +47,12 @@ if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
 
   roslaunch_add_file_check(ros/launch)
-  add_rostest(ros/launch/simple_pregrasp_planner.test)
-  add_rostest(ros/launch/pregrasp_planner_pipeline.test)
   catkin_add_nosetests(ros/test/simple_pregrasp_planner_unittest.py)
 endif()
 
 install(PROGRAMS
   ros/scripts/pose_mock_up_gui_node
-  ros/scripts/pregrasp_planner_pipeline_node
-  ros/scripts/simple_pregrasp_planner_node
+  ros/scripts/pregrasp_planner_node
   ros/config/PregraspPlannerParams.cfg
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

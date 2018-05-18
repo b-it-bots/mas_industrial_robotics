@@ -177,8 +177,8 @@ def publish_pose():
     transparency = rospy.get_param('~transparency', 0.5)
 
     # publishers
-    pub_pose = rospy.Publisher('~mock_up_pose', geometry_msgs.msg.PoseStamped)
-    pub_pose_marker = rospy.Publisher('~mock_up_pose_marker', visualization_msgs.msg.Marker)
+    pub_pose = rospy.Publisher('~mock_up_pose', geometry_msgs.msg.PoseStamped, queue_size=1)
+    pub_pose_marker = rospy.Publisher('~mock_up_pose_marker', visualization_msgs.msg.Marker, queue_size=1)
 
     pose.header.stamp = rospy.Time.now()
     pose.header.frame_id = reference_frame
