@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!-- Note: this is a demo launch file for the youBot.-->
+<launch>
+
+  <include file="$(find mir_pregrasp_planning)/ros/launch/pregrasp_planner.launch" />
+
+  <node pkg="mcr_arm_motions" type="planned_motion_node_combined"
+          name="move_arm_planned_motion" output="screen">
+
+    <!-- the cycle rate of the node (in hz) -->
+    <param name="~loop_rate"  type="double" value="10.0"/>
+
+    <param name="~move_group"  type="string" value="move_group"/>
+    <param name="~arm"  type="string" value="arm_1"/>
+
+    <!-- tolerance for the joint positions -->
+    <param name="epsilon" value="0.08"/>
+
+    <!-- a list of the joint names to check -->
+    <rosparam param="target_joint_names">
+        - 'arm_joint_1'
+        - 'arm_joint_2'
+        - 'arm_joint_3'
+        - 'arm_joint_4'
+        - 'arm_joint_5'
+    </rosparam>
+
+    <remap from="~target_configuration"
+           to="/pregrasp_planner_node/joint_configuration"/>
+    <remap from="~joint_states" to="/joint_states"/>
+  </node>
+
+</launch>
