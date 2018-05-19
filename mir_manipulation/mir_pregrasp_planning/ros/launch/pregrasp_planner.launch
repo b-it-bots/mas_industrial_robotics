@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- Note: this is a demo launch file for the youBot.-->
+<launch>
+  <!-- The following nodes are excluded from the group since they use move_group
+      from MoveIt!, which remaps the 'move_group' namespace to the group's namespace -->
+  <node pkg="mir_pregrasp_planning" type="pregrasp_planner_node"
+          name="pregrasp_planner_node" output="screen">
+
+    <!-- Pose in (geometry_msgs/PoseStamped) -->
+    <remap from="~pose_in" to="/mcr_perception/object_selector/output/object_pose" />
+    <rosparam command="load"
+                file="$(find mir_pregrasp_planning)/ros/config/gripper_configuration_matrix.yaml" />
+    <rosparam command="load"
+                file="$(find mir_pregrasp_planning)/ros/config/default_pregrasp_params.yaml" />
+
+  </node>
+
+</launch>
