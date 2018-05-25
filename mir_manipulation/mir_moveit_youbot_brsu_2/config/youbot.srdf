@@ -280,6 +280,20 @@
         <joint name="arm_joint_4" value="3.52223" />
         <joint name="arm_joint_5" value="2.9871" />
     </group_state>
+    <group_state name="shelf_intermediate" group="arm_1">
+        <joint name="arm_joint_1" value="3.72859" />
+        <joint name="arm_joint_2" value="0.08773" />
+        <joint name="arm_joint_3" value="-1.48411" />
+        <joint name="arm_joint_4" value="3.35214" />
+        <joint name="arm_joint_5" value="2.95699" />
+    </group_state>
+    <group_state name="shelf_pre_grasp" group="arm_1">
+        <joint name="arm_joint_1" value="2.22067" />
+        <joint name="arm_joint_2" value="1.03067" />
+        <joint name="arm_joint_3" value="-0.92142" />
+        <joint name="arm_joint_4" value="3.14951" />
+        <joint name="arm_joint_5" value="2.90371" />
+    </group_state>
     <group_state name="10cm/pose1" group="arm_1">
         <joint name="arm_joint_1" value="2.5499" />
         <joint name="arm_joint_2" value="2.3957" />
