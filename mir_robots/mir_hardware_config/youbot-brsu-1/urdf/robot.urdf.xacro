@@ -15,7 +15,10 @@
   <!-- youbot arm and gripper-->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v1/dynamixel_gripper.urdf.xacro" />
+  <!-- youbot gripper -->
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_gripper/gripper.urdf.xacro" />
+ 
+  
   <!-- controller manager -->
   <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
   <!-- materials for visualization -->
@@ -53,12 +56,8 @@
      <origin xyz="-0.3 0.0 -0.03" rpy="0 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
 
-  <!-- 3D camera on arm --> <!-- NOTE: still called arm_cam3d due to legacy code -->
-  <xacro:intel_realsense_f200_camera name="arm_cam3d" parent="arm_link_5">
-    <origin xyz="-0.075 0.024 0.04" rpy="0 ${-M_PI / 2} 0" />
-  </xacro:intel_realsense_f200_camera>
-
-  <xacro:dynamixel_gripper name="gripper" parent="arm_link_5">
-    <origin xyz="0 0 -0.02" rpy="0 0 0" />
-  </xacro:dynamixel_gripper>
+  <xacro:youbot_gripper name="gripper" parent="arm_link_5">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:youbot_gripper>
+  
 </robot>
