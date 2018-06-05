@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="cmd_vel_out" default="/cmd_vel" />
+    <arg name="cmd_vel_out" default="/cmd_vel_prio_medium" />
     <group ns="mcr_navigation/direct_base_controller">
         <node pkg="mcr_direct_base_controller" type="direct_base_controller_coordinator_node" name="coordinator" output="screen">
             <remap from="~target_pose" to="/mcr_navigation/direct_base_controller/input_pose" />
