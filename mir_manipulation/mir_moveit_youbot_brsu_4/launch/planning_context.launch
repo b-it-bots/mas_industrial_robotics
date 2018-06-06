@@ -3,7 +3,7 @@
   <arg name="load_robot_description" default="false"/>
 
   <!-- Joint limits (regular or fast) -->
-  <arg name="joint_limit_fast" default="false"/>
+  <arg name="joint_limit_fast" default="true"/>
 
   <!-- The name of the parameter under which the URDF is loaded -->
   <arg name="robot_description" default="robot_description"/>
