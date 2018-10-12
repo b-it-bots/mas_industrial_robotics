@@ -9,7 +9,7 @@ import mcr_states.common.basic_states as gbs
 import mir_states.common.basic_states as mir_gbs
 import mir_states.common.navigation_states as gns
 import mir_states.common.manipulation_states as gms
-import mcr_states.common.perception_states as gps
+import mcr_perception_states.common.perception_states as gps
 import mir_states.common.perception_mockup_util as perception_mockup_util
 
 #import robocup specific states

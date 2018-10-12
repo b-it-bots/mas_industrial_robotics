@@ -3,10 +3,10 @@
   <name>mir_states</name>
   <version>0.0.1</version>
   <description>SMACH states</description>
-  
+
   <author email="alexander@dal.ca">Alex Moriarty</author>
   <maintainer email="robotics@h-brs.de">B-IT-Bots Robotics Team</maintainer>
-  
+
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
@@ -21,7 +21,6 @@
   <run_depend>std_srvs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>mcr_states</run_depend>
+  <run_depend>mcr_perception_states</run_depend>
 
 </package>
-
-
