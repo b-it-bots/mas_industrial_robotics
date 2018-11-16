@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Node to test -->
+  <include file="$(find mir_object_perception_functionality)/ros/launch/object_perception_functionality.launch">
+  </include>
+  <node pkg="mir_object_perception_functionality" type="object_perception_functionality"
+        name="object_perception_functionality" output="screen"/>
+
+  <test pkg="mir_object_perception_functionality" type="object_perception_functionality_test.py"
+        test-name="test_object_perception_functionality">
+
+    <remap from="~benchmark_state" to="/robot_example_ros/benchmark_state"/>
+    <remap from="~component_output" to="/robot_example_ros/benchmark_feedback"/>
+    <remap from="~event_out" to="/object_perception_functionality/event_in"/>
+    <remap from="~logging_output" to="/rockin/notification"/>
+    <remap from="~event_in" to="/object_perception_functionality/event_out"/>
+  </test>
+</launch>
