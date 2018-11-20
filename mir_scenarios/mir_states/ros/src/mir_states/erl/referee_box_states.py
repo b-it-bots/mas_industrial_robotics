@@ -5,7 +5,8 @@ import tf
 
 import std_msgs.msg
 import sensor_msgs.msg
-import at_work_robot_example_ros.msg
+#import atwork_ros_msgs.msg
+import atwork_ros_msgs.msg
 import mcr_perception_msgs.msg
 
 
@@ -36,7 +37,7 @@ class get_benchmark_state(smach.State):
             output_keys=['benchmark_state'])
 
         self.state_sub = rospy.Subscriber("/robot_example_ros/benchmark_state",
-                            at_work_robot_example_ros.msg.BenchmarkState, self.benchmark_state_cb, queue_size=1)
+                            atwork_ros_msgs.msg.BenchmarkState, self.benchmark_state_cb, queue_size=1)
         self.bm_state = None
 
     def benchmark_state_cb(self, benchmarkstate):
@@ -60,26 +61,26 @@ class get_benchmark_state(smach.State):
             break
 
         userdata.benchmark_state = self.bm_state
-        if (self.bm_state.state.data == at_work_robot_example_ros.msg.BenchmarkState.RUNNING):
-            if (self.bm_state.phase.data == at_work_robot_example_ros.msg.BenchmarkState.CALIBRATION):
+        if (self.bm_state.state.data == atwork_ros_msgs.msg.BenchmarkState.RUNNING):
+            if (self.bm_state.phase.data == atwork_ros_msgs.msg.BenchmarkState.CALIBRATION):
                 rospy.loginfo("STATE: running_calibration")
                 return "running_calibration"
-            elif (self.bm_state.phase.data == at_work_robot_example_ros.msg.BenchmarkState.PREPARATION):
+            elif (self.bm_state.phase.data == atwork_ros_msgs.msg.BenchmarkState.PREPARATION):
                 rospy.loginfo("STATE: running_preparation")
                 return "running_preparation"
-            elif (self.bm_state.phase.data == at_work_robot_example_ros.msg.BenchmarkState.EXECUTION):
+            elif (self.bm_state.phase.data == atwork_ros_msgs.msg.BenchmarkState.EXECUTION):
                 rospy.loginfo("STATE: running_execution")
                 return "running_execution"
             else:
                 return 'running'
-        elif (self.bm_state.state.data == at_work_robot_example_ros.msg.BenchmarkState.PAUSED):
+        elif (self.bm_state.state.data == atwork_ros_msgs.msg.BenchmarkState.PAUSED):
             rospy.loginfo("STATE: paused")
             return 'paused'
-        elif (self.bm_state.state.data == at_work_robot_example_ros.msg.BenchmarkState.STOPPED):
+        elif (self.bm_state.state.data == atwork_ros_msgs.msg.BenchmarkState.STOPPED):
             rospy.loginfo("STATE: stopped")
             return 'stopped'
-        elif (self.bm_state.state.data == at_work_robot_example_ros.msg.BenchmarkState.FINISHED):
-            if (self.bm_state.phase.data == at_work_robot_example_ros.msg.BenchmarkState.EXECUTION):
+        elif (self.bm_state.state.data == atwork_ros_msgs.msg.BenchmarkState.FINISHED):
+            if (self.bm_state.phase.data == atwork_ros_msgs.msg.BenchmarkState.EXECUTION):
                 rospy.loginfo("STATE: finished_execution")
                 return "finished_execution"
             else:
@@ -94,17 +95,17 @@ class send_refbox_logging_status(smach.State):
                                 input_keys=['logging_status'])
 
         self.logging_status_pub = rospy.Publisher("/robot_example_ros/logging_status",
-                                            at_work_robot_example_ros.msg.LoggingStatus)
+                                            atwork_ros_msgs.msg.LoggingStatus)
 
     def execute(self, userdata):
-        msg = at_work_robot_example_ros.msg.LoggingStatus()
+        msg = atwork_ros_msgs.msg.LoggingStatus()
         msg.is_logging.data = userdata.logging_status
 
         self.logging_status_pub.publish(msg)
         rospy.loginfo("Published benchmark logging status")
         return 'done'
 
-
+# TODO save all object names and classes to a txt file
 class send_benchmark_feedback_fbm1(smach.State):
     def __init__(self):
         smach.State.__init__(self,
@@ -113,14 +114,14 @@ class send_benchmark_feedback_fbm1(smach.State):
                         'benchmark_state'])
 
         self.benchmark_pub = rospy.Publisher("/robot_example_ros/benchmark_feedback",
-                                at_work_robot_example_ros.msg.BenchmarkFeedback)
+                                atwork_ros_msgs.msg.BenchmarkFeedback)
         self.logging_pub = rospy.Publisher("/rockin/notification", std_msgs.msg.String)
         self.containers = ["EM-01", "EM-02"]
         self.bearing_boxes = ["AX-01", "AX-16"]
         self.transmission_parts = ["AX-02", "AX-09", "AX-03"]
 
     def execute(self, userdata):
-        msg = at_work_robot_example_ros.msg.BenchmarkFeedback()
+        msg = atwork_ros_msgs.msg.BenchmarkFeedback()
         msg.phase_to_terminate.data = userdata.benchmark_state.phase.data
         log_msg = std_msgs.msg.String()
         print "userdata.recognized_objects ", userdata.recognized_objects
@@ -161,7 +162,7 @@ class send_benchmark_feedback_fbm2(smach.State):
                         'benchmark_state'])
 
         self.benchmark_pub = rospy.Publisher("/robot_example_ros/benchmark_feedback",
-                                    at_work_robot_example_ros.msg.BenchmarkFeedback)
+                                    atwork_ros_msgs.msg.BenchmarkFeedback)
         self.containers = ["EM-01", "EM-02"]
         self.bearing_boxes = ["BEARING_BOX"]
         self.transmission_parts = ["BEARING", "MOTOR", "AXIS"]
@@ -178,15 +179,15 @@ class send_benchmark_feedback_fbm2(smach.State):
         self.grasp = msg
 
     def execute(self, userdata):
-        msg = at_work_robot_example_ros.msg.BenchmarkFeedback()
+        msg = atwork_ros_msgs.msg.BenchmarkFeedback()
         if self.phase_to_term == 'prep':
-            msg.phase_to_terminate.data = at_work_robot_example_ros.msg.BenchmarkState.PREPARATION
+            msg.phase_to_terminate.data = atwork_ros_msgs.msg.BenchmarkState.PREPARATION
             self.benchmark_pub.publish(msg)
             self.obj = None
             self.grasp = None
             return 'done'
         elif self.phase_to_term == 'exec':
-            msg.phase_to_terminate.data = at_work_robot_example_ros.msg.BenchmarkState.EXECUTION
+            msg.phase_to_terminate.data = atwork_ros_msgs.msg.BenchmarkState.EXECUTION
             log_msg = std_msgs.msg.String()
             print("phase to terminate: EXECUTION")
             if self.obj:
@@ -235,11 +236,11 @@ class send_benchmark_feedback_fbm3(smach.State):
             input_keys=['benchmark_state'])
 
         self.benchmark_pub = rospy.Publisher("/robot_example_ros/benchmark_feedback",
-                                            at_work_robot_example_ros.msg.BenchmarkFeedback)
+                                            atwork_ros_msgs.msg.BenchmarkFeedback)
 
         self.state_sub = rospy.Subscriber(
                             "/robot_example_ros/benchmark_state",
-                            at_work_robot_example_ros.msg.BenchmarkState,
+                            atwork_ros_msgs.msg.BenchmarkState,
                             self.benchmark_state_cb,
                             queue_size=1)
         self.bm_state = None
@@ -255,7 +256,7 @@ class send_benchmark_feedback_fbm3(smach.State):
         '''
         send feedback msg to terminate phase.
         '''
-        msg = at_work_robot_example_ros.msg.BenchmarkFeedback()
+        msg = atwork_ros_msgs.msg.BenchmarkFeedback()
         msg.phase_to_terminate.data = userdata.benchmark_state.phase.data
         self.benchmark_pub.publish(msg)
 
@@ -287,13 +288,13 @@ class send_benchmark_feedback_plate_drilling(smach.State):
                         'after_drilling'])
 
         self.benchmark_pub = rospy.Publisher("/robot_example_ros/benchmark_feedback",
-                                at_work_robot_example_ros.msg.BenchmarkFeedback)
+                                atwork_ros_msgs.msg.BenchmarkFeedback)
 
     def execute(self, userdata):
         if userdata.after_receiving is None and userdata.after_drilling is None:
             rospy.logwarn('[send_benchmark_feedback_platedrilling] Invalid feedback data')
             return 'failure'
-        msg = at_work_robot_example_ros.msg.BenchmarkFeedback()
+        msg = atwork_ros_msgs.msg.BenchmarkFeedback()
         msg.phase_to_terminate.data = msg.EXECUTION
         if userdata.after_receiving:
             msg.plate_state_after_receiving.data = userdata.after_receiving
@@ -313,13 +314,13 @@ class send_benchmark_feedback_force_fitting(smach.State):
                         'container_id'])
 
         self.benchmark_pub = rospy.Publisher("/robot_example_ros/benchmark_feedback",
-                                at_work_robot_example_ros.msg.BenchmarkFeedback)
+                                atwork_ros_msgs.msg.BenchmarkFeedback)
 
     def execute(self, userdata):
         if userdata.assembly_aid_tray_id is None or userdata.container_id is None:
             rospy.logwarn('[send_benchmark_feedback_platedrilling] Invalid feedback data')
             return 'failure'
-        msg = at_work_robot_example_ros.msg.BenchmarkFeedback()
+        msg = atwork_ros_msgs.msg.BenchmarkFeedback()
         msg.phase_to_terminate.data = msg.EXECUTION
         msg.assembly_aid_tray_id = userdata.assembly_aid_tray_id
         msg.contianer_id = userdata.contianer_id
@@ -337,9 +338,9 @@ class conveyor_belt_command(smach.State):
             outcomes=['done', 'timeout'])
 
         self.conveyor_belt_command_pub = rospy.Publisher("/robot_example_ros/conveyor_belt_command",
-                                                at_work_robot_example_ros.msg.TriggeredConveyorBeltCommand)
+                                                atwork_ros_msgs.msg.TriggeredConveyorBeltCommand)
         self.conveyor_belt_status_sub = rospy.Subscriber("/robot_example_ros/conveyor_belt_status",
-                                                at_work_robot_example_ros.msg.TriggeredConveyorBeltStatus, self.status_cb)
+                                                atwork_ros_msgs.msg.TriggeredConveyorBeltStatus, self.status_cb)
         self.timeout = rospy.Duration.from_sec(timeout)
         self.command = command
         self.status_msg = None
@@ -362,13 +363,13 @@ class conveyor_belt_command(smach.State):
             return 'timeout'
 
         # create command with incremented cycle
-        msg = at_work_robot_example_ros.msg.TriggeredConveyorBeltCommand()
+        msg = atwork_ros_msgs.msg.TriggeredConveyorBeltCommand()
         msg.next_cycle.data = self.status_msg.cycle.data + 1
-        msg.command.data = at_work_robot_example_ros.msg.TriggeredConveyorBeltCommand.START
+        msg.command.data = atwork_ros_msgs.msg.TriggeredConveyorBeltCommand.START
 
         start_time = rospy.Time.now()
         # publish until status message cycle changes (increments by one)
-        while self.status_msg.state.data != at_work_robot_example_ros.msg.TriggeredConveyorBeltStatus.START or \
+        while self.status_msg.state.data != atwork_ros_msgs.msg.TriggeredConveyorBeltStatus.START or \
                 self.status_msg.cycle.data != msg.next_cycle.data:
             self.conveyor_belt_command_pub.publish(msg)
             loop_rate.sleep()
@@ -388,9 +389,9 @@ class drilling_machine_command(smach.State):
             outcomes=['done', 'timeout'])
 
         self.drilling_machine_command_pub = rospy.Publisher("/robot_example_ros/drilling_machine_command",
-                                                at_work_robot_example_ros.msg.DrillingMachineCommand)
+                                                atwork_ros_msgs.msg.DrillingMachineCommand)
         self.drilling_machine_status_sub = rospy.Subscriber("/robot_example_ros/drill_machine_status",
-                                                at_work_robot_example_ros.msg.DrillingMachineStatus, self.status_cb)
+                                                atwork_ros_msgs.msg.DrillingMachineStatus, self.status_cb)
         self.timeout = rospy.Duration.from_sec(timeout)
         self.start_time = None
         self.command = command
@@ -410,14 +411,14 @@ class drilling_machine_command(smach.State):
     def execute(self, userdata):
         self.status_msg = None
 
-        msg = at_work_robot_example_ros.msg.DrillingMachineCommand()
+        msg = atwork_ros_msgs.msg.DrillingMachineCommand()
         expected_state = None
         if self.command == "move_up":
-            msg.command.data = at_work_robot_example_ros.msg.DrillingMachineCommand.MOVE_UP
-            expected_state = at_work_robot_example_ros.msg.DrillingMachineStatus.AT_TOP
+            msg.command.data = atwork_ros_msgs.msg.DrillingMachineCommand.MOVE_UP
+            expected_state = atwork_ros_msgs.msg.DrillingMachineStatus.AT_TOP
         elif self.command == "move_down":
-            msg.command.data = at_work_robot_example_ros.msg.DrillingMachineCommand.MOVE_DOWN
-            expected_state = at_work_robot_example_ros.msg.DrillingMachineStatus.AT_BOTTOM
+            msg.command.data = atwork_ros_msgs.msg.DrillingMachineCommand.MOVE_DOWN
+            expected_state = atwork_ros_msgs.msg.DrillingMachineStatus.AT_BOTTOM
 
         self.start_time = rospy.Time.now()
         #check if the data has received
