@@ -55,10 +55,10 @@ def main(no_refbox=False):
 
             smach.StateMachine.add('WAIT_FOR_BENCHMARK_MESSAGE_PREP', erl_refbox.get_benchmark_state(),
                 transitions={'running':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
-                             'running_calibration':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             #'running_calibration':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
                              #'running_preparation':'RUN_OBJECT_RECOGNITION', # look_at_workspace
                              'running_preparation':'LOOK_AT_WORKSPACE', # look_at_workspace
-                             'running_execution':'LOG_END_EFFECTOR_POSE',
+                             #'running_execution':'LOG_END_EFFECTOR_POSE',
                              'paused':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
                              'finished': 'done',
                              'finished_execution': 'done',
@@ -77,7 +77,7 @@ def main(no_refbox=False):
 
             smach.StateMachine.add('WAIT_FOR_BENCHMARK_MESSAGE_EXEC', erl_refbox.get_benchmark_state(),
                 transitions={'running':'SEND_BENCHMARK_FEEDBACK_PREP',
-                             'running_calibration':'SEND_BENCHMARK_FEEDBACK_PREP',
+                             #'running_calibration':'SEND_BENCHMARK_FEEDBACK_PREP',
                              'running_preparation':'SEND_BENCHMARK_FEEDBACK_PREP',
                              'running_execution':'OPEN_GRIPPER',
                              'paused':'SEND_BENCHMARK_FEEDBACK_PREP',
@@ -108,7 +108,7 @@ def main(no_refbox=False):
             
             smach.StateMachine.add('WAIT_FOR_NEXT_BENCHMARK_MESSAGE', erl_refbox.get_benchmark_state(),
                 transitions={'running':'SEND_BENCHMARK_FEEDBACK',
-                             'running_calibration':'SEND_BENCHMARK_FEEDBACK',
+                             #'running_calibration':'SEND_BENCHMARK_FEEDBACK',
                              'running_preparation':'SEND_BENCHMARK_FEEDBACK',
                              'running_execution':'SEND_BENCHMARK_FEEDBACK',
                              'paused':'RESET_BASE_TO_CENTER',
