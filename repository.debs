@@ -15,45 +15,45 @@ packagelist=(
     python-rosinstall
     python-setuptools
     python-zmq
-    ros-kinetic-amcl
-    ros-kinetic-clear-costmap-recovery
-    ros-kinetic-cob-scan-unifier
-    ros-kinetic-cob-srvs
-    ros-kinetic-dwa-local-planner
-    ros-kinetic-dynamixel-controllers
-    ros-kinetic-dynamixel-msgs
-    ros-kinetic-eband-local-planner
-    ros-kinetic-gazebo-ros-control
-    ros-kinetic-gazebo-plugins
-    ros-kinetic-gmapping
-    ros-kinetic-urg-node
-    ros-kinetic-joint-state-controller
-    ros-kinetic-joy
-    ros-kinetic-serial
-    ros-kinetic-map-server
-    ros-kinetic-move-base
-    ros-kinetic-moveit-core
-    ros-kinetic-moveit-commander
-    ros-kinetic-moveit-msgs
-    ros-kinetic-moveit-planners
-    ros-kinetic-moveit-ros-move-group
-    ros-kinetic-moveit-setup-assistant
-    ros-kinetic-moveit-simple-controller-manager
-    ros-kinetic-openni-launch
-    ros-kinetic-openni2-launch
-    ros-kinetic-pr2-dashboard-aggregator
-    ros-kinetic-pr2-description
-    ros-kinetic-pr2-msgs
-    ros-kinetic-ros
-    ros-kinetic-ros-controllers
-    ros-kinetic-roslint
-    ros-kinetic-rqt-robot-dashboard
-    ros-kinetic-serial
-    ros-kinetic-smach
-    ros-kinetic-srdfdom
-    ros-kinetic-twist-mux
-    ros-kinetic-usb-cam
-    ros-kinetic-global-planner
+    ros-melodic-amcl
+    ros-melodic-kinetic-clear-costmap-recovery
+    ros-melodic-cob-scan-unifier
+    ros-melodic-cob-srvs
+    ros-melodic-dwa-local-planner
+    ros-melodic-dynamixel-controllers
+    ros-melodic-dynamixel-msgs
+    ros-melodic-eband-local-planner
+    ros-melodic-gazebo-ros-control
+    ros-melodic-gazebo-plugins
+    ros-melodic-gmapping
+    ros-melodic-urg-node
+    ros-melodic-joint-state-controller
+    ros-melodic-joy
+    ros-melodic-serial
+    ros-melodic-map-server
+    ros-melodic-move-base
+    ros-melodic-moveit-core
+    ros-melodic-moveit-commander
+    ros-melodic-moveit-msgs
+    ros-melodic-moveit-planners
+    ros-melodic-moveit-ros-move-group
+    ros-melodic-moveit-setup-assistant
+    ros-melodic-moveit-simple-controller-manager
+    ros-melodic-openni-launch
+    ros-melodic-openni2-launch
+    ros-melodic-pr2-dashboard-aggregator
+    ros-melodic-pr2-description
+    ros-melodic-pr2-msgs
+    ros-melodic-ros
+    ros-melodic-ros-controllers
+    ros-melodic-roslint
+    ros-melodic-rqt-robot-dashboard
+    ros-melodic-serial
+    ros-melodic-smach
+    ros-melodic-srdfdom
+    ros-melodic-twist-mux
+    ros-melodic-usb-cam
+    ros-melodic-global-planner
 )
 
 ### install debian packages listed in array above
@@ -63,7 +63,7 @@ if [ $INSTALL_PACKAGES != false ]; then
 fi
 
 ### install further repositories
-rosinstall .. /opt/ros/kinetic repository.rosinstall
+rosinstall .. /opt/ros/melodic repository.rosinstall
 
 ### install dependencies of BRSU repositories
 dependent_repositories=$(grep -r "local-name:" repository.rosinstall  | cut -d":" -f 2 | sed -r 's/\s+//g')
