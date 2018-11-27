@@ -16,7 +16,7 @@ packagelist=(
     python-setuptools
     python-zmq
     ros-melodic-amcl
-    ros-melodic-kinetic-clear-costmap-recovery
+    ros-melodic-clear-costmap-recovery
     ros-melodic-cob-scan-unifier
     ros-melodic-cob-srvs
     ros-melodic-dwa-local-planner
@@ -29,7 +29,6 @@ packagelist=(
     ros-melodic-urg-node
     ros-melodic-joint-state-controller
     ros-melodic-joy
-    ros-melodic-serial
     ros-melodic-map-server
     ros-melodic-move-base
     ros-melodic-moveit-core
@@ -48,7 +47,6 @@ packagelist=(
     ros-melodic-ros-controllers
     ros-melodic-roslint
     ros-melodic-rqt-robot-dashboard
-    ros-melodic-serial
     ros-melodic-smach
     ros-melodic-srdfdom
     ros-melodic-twist-mux
