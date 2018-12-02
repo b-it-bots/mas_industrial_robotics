@@ -9,7 +9,7 @@
   </include>
     
   <!-- visualize navigation goals -->
-  <node pkg="mcr_navigation_tools" type="navigation_goals_as_marker" name="navigation_goals_as_marker" ns="mcr_navigation"/>
+  <include file="$(find mcr_navigation_tools)/ros/launch/pose_visualiser.launch" />
 
   <!-- map server -->
   <arg name="map" default="$(find mcr_default_env_config)/$(arg robot_env)/map.yaml" />
