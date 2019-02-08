@@ -5,7 +5,7 @@
 
   <!-- navigation goals/orientations -->
   <include file="$(find mcr_default_env_config)/upload_param.launch">
-    <arg name="robot_env" default="$(arg robot_env)"/>
+    <arg name="robot_env" value="$(arg robot_env)"/>
   </include>
     
   <!-- visualize navigation goals -->

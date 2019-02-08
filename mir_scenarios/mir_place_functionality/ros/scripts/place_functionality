@@ -35,11 +35,11 @@ class wait_for(smach.State):
 
 def main(no_refbox=False):
 
-    rospy.init_node('manipulation_functionality_benchmark')
+    rospy.init_node('place_functionality_benchmark')
 
     SM = smach.StateMachine(outcomes=['done'])
 
-    SM.userdata.test = "FBM2"
+    SM.userdata.test = "FBM3"
 
     SM.userdata.recognized_objects = []
 
@@ -54,6 +54,8 @@ def main(no_refbox=False):
 
     SM.userdata.base_increments = 0
     SM.userdata.move_base_by = None
+
+
 
     use_mockup = False
 
@@ -81,7 +83,7 @@ def main(no_refbox=False):
                 transitions={'succeeded': 'SEND_BENCHMARK_FEEDBACK_PREP',
                              'failed': 'BARRIER_TAPE'})
 
-            smach.StateMachine.add('SEND_BENCHMARK_FEEDBACK_PREP', erl_refbox.send_benchmark_feedback_fbm2(phase='prep'),
+            smach.StateMachine.add('SEND_BENCHMARK_FEEDBACK_PREP', erl_refbox.send_benchmark_feedback_fbm3(phase='prep'),
                 transitions={'done':'WAIT_FOR_BENCHMARK_MESSAGE_EXEC'})
 
             smach.StateMachine.add('WAIT_FOR_BENCHMARK_MESSAGE_EXEC', erl_refbox.get_benchmark_state(),
@@ -90,7 +92,6 @@ def main(no_refbox=False):
                              'running_preparation':'SEND_BENCHMARK_FEEDBACK_PREP',
                              'running_execution':'LOG_END_EFFECTOR_POSE',
                              'paused':'SEND_BENCHMARK_FEEDBACK_PREP',
-                             
                              'finished': 'done',
                              'finished_execution': 'done',
                              'stopped': 'SEND_BENCHMARK_FEEDBACK_PREP'})
@@ -101,11 +102,11 @@ def main(no_refbox=False):
             smach.StateMachine.add('LOOK_AT_WORKSPACE', gms.move_arm('look_at_workspace_from_far'),
                 transitions={'succeeded': 'OPEN_GRIPPER',
                              'failed': 'LOOK_AT_WORKSPACE'})
-
+            
             smach.StateMachine.add('OPEN_GRIPPER', gms.control_gripper('open'),
                 transitions={'succeeded':'WAIT_FOR_SECONDS'})
 
-            # wait for 1 sec
+            # wait for 3 sec
             smach.StateMachine.add('WAIT_FOR_SECONDS', wait_for(3),
                 transitions={'succeeded': 'RUN_OBJECT_RECOGNITION'})
             
@@ -113,35 +114,32 @@ def main(no_refbox=False):
                 transitions={'success':'PICKUP_OBJECT',
                              'failed':'RUN_OBJECT_RECOGNITION'})
 
-            smach.StateMachine.add('PICKUP_OBJECT', skills.pick_object(),
+            smach.StateMachine.add('PICKUP_OBJECT', skills.insert_object('platform_middle','unknown'),
                 transitions={'success':'SEND_BENCHMARK_FEEDBACK',
-                             'failed':'PICKUP_OBJECT'})
+                             'failed':'SEND_BENCHMARK_FEEDBACK'})
 
-            smach.StateMachine.add('SEND_BENCHMARK_FEEDBACK', erl_refbox.send_benchmark_feedback_fbm2(phase='exec'),
+            smach.StateMachine.add('SEND_BENCHMARK_FEEDBACK', erl_refbox.send_benchmark_feedback_fbm3(phase='exec'),
                 transitions={'done':'WAIT_FOR_NEXT_BENCHMARK_MESSAGE'})
 
             smach.StateMachine.add('WAIT_FOR_NEXT_BENCHMARK_MESSAGE', erl_refbox.get_benchmark_state(),
                 transitions={'running':'SEND_BENCHMARK_FEEDBACK',
                              'running_calibration':'SEND_BENCHMARK_FEEDBACK',
-                             'running_preparation':'WAIT_FOR_SOMETIMES',
+                             'running_preparation':'RESET_BASE_TO_CENTER',
                              'running_execution':'SEND_BENCHMARK_FEEDBACK',
-                             'paused':'WAIT_FOR_SOMETIMES',
+                             'paused':'RESET_BASE_TO_CENTER',
                              'finished': 'done',
                              'finished_execution': 'SLEEP_BEFORE_FINISH',
-                             'stopped': 'WAIT_FOR_SOMETIMES' 
+                             'stopped': 'RESET_BASE_TO_CENTER' 
                              })
 
             smach.StateMachine.add('SLEEP_BEFORE_FINISH', gbs.send_event([('/mcr_tools/rosbag_recorder/event_in','e_stop')]),
-                transitions={'success':'WAIT_FOR_SOMETIMES'})
+                transitions={'success':'RESET_BASE_TO_CENTER'})
 
-            # wait for 1 sec
-            smach.StateMachine.add('WAIT_FOR_SOMETIMES', wait_for(1),
-                transitions={'succeeded': 'PLACE_OBJECT_AND_RESET'})
-    
+            '''
             smach.StateMachine.add('PLACE_OBJECT_AND_RESET', skills.place_object('WS06'),
                 transitions={'success':'RESET_BASE_TO_CENTER',
                              'failed':'RESET_BASE_TO_CENTER'})
-
+            '''
             smach.StateMachine.add('RESET_BASE_TO_CENTER', skills.move_base('WS06'),
                 transitions={'success':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
                              'failed':'WAIT_FOR_BENCHMARK_MESSAGE_PREP'})
@@ -149,17 +147,17 @@ def main(no_refbox=False):
             
             smach.StateMachine.add('PLACE_RESET_AND_STOP', gbs.send_event([('/mcr_tools/rosbag_recorder/event_in','e_stop')]),
                 transitions={'success':'STOP_LOGGING'})
-            
+                
 
             smach.StateMachine.add('STOP_LOGGING', gbs.send_event([('/mcr_tools/rosbag_recorder/event_in','e_stop')]),
                 transitions={'success':'done'})
- 
+     
 
     def event_in_cb(data):
         if data.data == "e_trigger":
-            smach_viewer = smach_ros.IntrospectionServer('FMB2', SM, 'FBM2')
+            smach_viewer = smach_ros.IntrospectionServer('FMB3', SM, 'FBM3')
             smach_viewer.start()
-            rospy.loginfo('Received [manipulation_functionality benchmark] request.')
+            rospy.loginfo('Received [place_functionality benchmark] request.')
             outcome = SM.execute()
             rospy.loginfo('outcome: %s', outcome)
             if outcome == 'done':

@@ -92,3 +92,22 @@ class move_base(smach.State):
             return 'success'
         else:
             return 'failed'
+
+class insert_object(smach.State):
+    def __init__(self, robot_platform, container):
+        smach.State.__init__(self,
+                              outcomes=['success', 'failed'])
+        self.insert_object_client =  actionlib.SimpleActionClient('insert_object_server', InsertObjectAction)
+        self.insert_object_client.wait_for_server()
+        self.goal = InsertObjectGoal()
+        self.goal.robot_platform = robot_platform
+        self.goal.hole = container
+
+    def execute(self, userdata):
+        self.insert_object_client.send_goal(self.goal)
+        self.insert_object_client.wait_for_result(rospy.Duration.from_sec(int(30.0)))
+        result = self.insert_object_client.get_result()
+        if(result):
+            return 'success'
+        else:
+            return 'failed'
