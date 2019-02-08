@@ -3,6 +3,9 @@ import smach
 import sys
 import tf
 
+import pandas as pd
+import glob
+
 import std_msgs.msg
 import sensor_msgs.msg
 #import atwork_ros_msgs.msg
@@ -107,50 +110,101 @@ class send_refbox_logging_status(smach.State):
 
 # TODO save all object names and classes to a txt file
 class send_benchmark_feedback_fbm1(smach.State):
-    def __init__(self):
+    def __init__(self, phase='exec'):
         smach.State.__init__(self,
             outcomes=['done'],
             input_keys=['recognized_objects',
+                        'is_object_grasped',
+                        'end_effector_pose',
                         'benchmark_state'])
 
         self.benchmark_pub = rospy.Publisher("/robot_example_ros/benchmark_feedback",
-                                atwork_ros_msgs.msg.BenchmarkFeedback)
-        self.logging_pub = rospy.Publisher("/rockin/notification", std_msgs.msg.String)
-        self.containers = ["EM-01", "EM-02"]
-        self.bearing_boxes = ["AX-01", "AX-16"]
-        self.transmission_parts = ["AX-02", "AX-09", "AX-03"]
+                                    atwork_ros_msgs.msg.BenchmarkFeedback)
+        self.components = ["BEARING_BOX", "BEARING", "MOTOR", "AXIS", "DISTANCE_TUBE"]
+        self.profiles = ["F20_20_G", "F20_20_B", "S40_40_G", "S40_40_B", "M20_100"]
+        self.plastics = ["R20"]
+        self.nuts = ["M20", "M30"]
+        self.prefer_rgb = ["F20_20_G", "F20_20_B", "S40_40_G", "S40_40_B", "R20"]
+        self.prefer_pcl = ["F20_20_G", "F20_20_B", "S40_40_G", "S40_40_B"]
+        self.degrade_conf = 0.7
+        self.phase_to_term = phase
+        self.obj_sub = rospy.Subscriber('/mcr_perception/object_list_merger/output_object_list', mcr_perception_msgs.msg.ObjectList, self.callback, queue_size=1)
+        self.grasp_sub = rospy.Subscriber('/gripper_controller/grasp_monitor/event_out', std_msgs.msg.String, self.grasp_callback, queue_size=1)
+        self.obj = None
+        self.grasp = None
+        self.dataset = ParserDataset()
+
+    def callback(self, msg):
+        #print "callback ", msg.objects
+        self.obj = msg
+
+    def grasp_callback(self, msg):
+        self.grasp = msg
 
     def execute(self, userdata):
         msg = atwork_ros_msgs.msg.BenchmarkFeedback()
-        msg.phase_to_terminate.data = userdata.benchmark_state.phase.data
-        log_msg = std_msgs.msg.String()
-        print "userdata.recognized_objects ", userdata.recognized_objects
-        if len(userdata.recognized_objects) > 0:
-            best_obj = userdata.recognized_objects[0]
-            for o in userdata.recognized_objects:
-                if o.probability > best_obj.probability:
-                    best_obj = o
-            obj = best_obj
-            print "best obj: ", obj
-            msg.object_instance_name.data = obj.name
-            if obj.name in self.containers:
-                msg.object_class_name.data = "Containers"
-            elif obj.name in self.bearing_boxes:
-                msg.object_class_name.data = "Bearing Boxes"
-            elif obj.name in self.transmission_parts:
-                msg.object_class_name.data = "Transmission Parts"
+        if self.phase_to_term == 'prep':
+            msg.phase_to_terminate.data = atwork_ros_msgs.msg.BenchmarkState.PREPARATION
+            self.benchmark_pub.publish(msg)
+            self.obj = None
+            self.grasp = None
+            return 'done'
+        elif self.phase_to_term == 'exec':
+            msg.phase_to_terminate.data = atwork_ros_msgs.msg.BenchmarkState.EXECUTION
+            log_msg = std_msgs.msg.String()
+            print("phase to terminate: EXECUTION")
+            if self.obj != None:
+                obj = None
+                for tmp_obj in self.obj.objects:
+                    # choose the first 2D object
+                    if tmp_obj.database_id > 99:
+                        if obj is None:
+                            obj = tmp_obj
+                        elif obj.probability < tmp_obj.probability:
+                            obj = tmp_obj
+                    if tmp_obj.name in self.prefer_pcl:
+                        if tmp_obj.database_id < 99:
+                            obj = tmp_obj
 
-            msg.object_pose = obj.pose.pose
-        else:
-            msg.object_instance_name.data = ""
-            msg.object_class_name.data = ""
-        log_msg.data = convert_msg_to_log(msg)
+                if obj is None:
+                    obj = self.obj.objects[0]
+                                        
+                '''
+                if len(self.obj.objects) > 1:
+                    probabs = {}
+                    # Update probabilities
+                    for tmp_obj in self.obj.objects:
+                        if tmp_obj.database_id > 99 and tmp_obj.name in self.prefer_rgb:
+                            probabs.update({tmp_obj.name:tmp_ob.probability * self.degrade_probab})
+                '''
+                print("object exists", obj.name)
+                msg.object_instance_name.data = obj.name
+                obj_dict = self.dataset.load_files()
+                msg.object_class_name.data = obj_dict[obj.name]
 
-        self.logging_pub.publish(log_msg)
+                '''
+                if obj.name in self.components:
+                    msg.object_class_name.data = "Component"
+                elif obj.name in self.profiles:
+                    msg.object_class_name.data = "Profile"
+                elif obj.name in self.nuts:
+                    msg.object_class_name.data = "Nut"
+                elif obj.name in self.plastics:
+                    msg.object_class_name.data = "Plastic"
+                '''
+                    
+            else:
+                print("object empty")
+                msg.object_instance_name.data = ""
+                msg.object_class_name.data = ""
+                msg.grasp_notification.data = False
+            if userdata.end_effector_pose:
+                msg.end_effector_pose = userdata.end_effector_pose.pose
+            print ("message is ", msg)
+
         self.benchmark_pub.publish(msg)
-        rospy.loginfo("Published benchmark feedback")
+        rospy.loginfo("Published benchmark feedback - FBM1")
         return 'done'
-
 
 class send_benchmark_feedback_fbm2(smach.State):
     def __init__(self, phase='exec'):
@@ -171,6 +225,8 @@ class send_benchmark_feedback_fbm2(smach.State):
         self.grasp_sub = rospy.Subscriber('/gripper_controller/grasp_monitor/event_out', std_msgs.msg.String, self.grasp_callback, queue_size=1)
         self.obj = None
         self.grasp = None
+	# load object dataset from excel
+	self.dataset = ParserDataset()
 
     def callback(self, msg):
         self.obj = msg
@@ -190,9 +246,16 @@ class send_benchmark_feedback_fbm2(smach.State):
             msg.phase_to_terminate.data = atwork_ros_msgs.msg.BenchmarkState.EXECUTION
             log_msg = std_msgs.msg.String()
             print("phase to terminate: EXECUTION")
-            if self.obj:
-                print("object exists")
+
+
+            if self.obj != None:
                 obj = self.obj
+                print("object exists", obj.name)
+                #msg.object_instance_name.data = obj.name
+		
+		#obj.name = self.dataset.load_files[obj.name]
+			
+		'''
                 if obj.name == 'CONTAINER_BOX_BLUE' or obj.name == 'CONTAINER_BOX_RED':
                     obj.name = 'EM-02'
                 if obj.name == 'M20' or obj.name == 'DISTANCE_TUBE':
@@ -203,14 +266,20 @@ class send_benchmark_feedback_fbm2(smach.State):
                     obj.name = 'AXIS'
                 if obj.name == 'S40_40_G':
                     obj.name = 'BEARING_BOX'
+		'''
+                obj_dict = self.dataset.load_files()
                 msg.object_instance_name.data = obj.name
+		msg.object_class_name.data = obj_dict[obj.name]
+
+		'''
                 if obj.name in self.containers:
                     msg.object_class_name.data = "Containers"
                 elif obj.name in self.bearing_boxes:
                     msg.object_class_name.data = "Bearing Boxes"
                 elif obj.name in self.transmission_parts:
                     msg.object_class_name.data = "Transmission Parts"
-                
+                '''
+
                 if self.grasp:
                     if self.grasp.data == 'e_object_grasped':
                        msg.grasp_notification.data = True
@@ -230,55 +299,39 @@ class send_benchmark_feedback_fbm2(smach.State):
         return 'done'
 
 class send_benchmark_feedback_fbm3(smach.State):
-    def __init__(self):
+    def __init__(self, phase='prep'):
         smach.State.__init__(self,
-            outcomes=['success', 'failure', 'timeout'],
-            input_keys=['benchmark_state'])
+            outcomes=['done'],
+            input_keys=['recognized_objects',
+                        'is_object_grasped',
+                        'end_effector_pose',
+                        'benchmark_state'])
+
 
         self.benchmark_pub = rospy.Publisher("/robot_example_ros/benchmark_feedback",
                                             atwork_ros_msgs.msg.BenchmarkFeedback)
+        self.phase_to_term = phase
 
-        self.state_sub = rospy.Subscriber(
-                            "/robot_example_ros/benchmark_state",
-                            atwork_ros_msgs.msg.BenchmarkState,
-                            self.benchmark_state_cb,
-                            queue_size=1)
         self.bm_state = None
 
-    def benchmark_state_cb(self, benchmarkstate):
-        self.bm_state = benchmarkstate
-
     def execute(self, userdata):
-        if userdata.benchmark_state is None:
-            rospy.logwarn('[send_benchmark_feedback_fbm3] Invalid feedback data')
-            return 'failure'
 
         '''
         send feedback msg to terminate phase.
         '''
         msg = atwork_ros_msgs.msg.BenchmarkFeedback()
-        msg.phase_to_terminate.data = userdata.benchmark_state.phase.data
-        self.benchmark_pub.publish(msg)
 
-        self.bm_state = None
-        rospy.logdebug("Asking for benchmark state or phase change")
-        timeout = rospy.Duration.from_sec(1.0)
-        start_time = rospy.Time.now()
+        if self.phase_to_term == 'prep':
+            msg.phase_to_terminate.data = atwork_ros_msgs.msg.BenchmarkState.PREPARATION
+            self.benchmark_pub.publish(msg)
 
-        while(True):
-            if self.bm_state is None:
-                if (rospy.Time.now() - start_time) > timeout:
-                    rospy.logerr("Timed out waiting for benchmark state change")
-                    return 'timeout'
-                rospy.sleep(0.1)
-                continue
-            break
+        elif self.phase_to_term == 'exec':
+            msg.phase_to_terminate.data = atwork_ros_msgs.msg.BenchmarkState.EXECUTION
+            msg.grasp_notification.data = True
+            self.benchmark_pub.publish(msg)
+            print("phase to terminate: EXECUTION")
 
-        if self.bm_state.phase.data != userdata.benchmark_state.phase.data or \
-            self.bm_state.state.data != userdata.benchmark_state.state.data:
-            return 'success'
-
-        return 'timeout'
+        return 'done'
 
 class send_benchmark_feedback_plate_drilling(smach.State):
     def __init__(self):
@@ -559,3 +612,4 @@ def get_basic_transportation_task(transportation_task):
         task_list.append(goal_tasklist)
 
     return task_list
+
