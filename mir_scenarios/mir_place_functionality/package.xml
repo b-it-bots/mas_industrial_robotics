@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_place_functionality</name>
+  <version>0.0.1</version>
+  <description>state machine for the RoCKIn@Work Manipulation Functionality Benchmark</description>
+
+  <maintainer email="santosh.thoduka@gmail.com">Santosh Thoduka</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="santosh.thoduka@gmail.com">Santosh Thoduka</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>mir_bringup</run_depend>
+  <run_depend>mir_bringup_sim</run_depend>
+  <run_depend>mir_moveit_scene</run_depend>
+  <run_depend>mir_moveit_youbot</run_depend>
+  <run_depend>mir_states</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>smach</run_depend>
+  <run_depend>smach_ros</run_depend>
+  <run_depend>mcr_object_recognition_mean_circle</run_depend>
+  <run_depend>mcr_common_converters</run_depend>
+  <run_depend>mir_arm_motions</run_depend>
+  <run_depend>mcr_trajectory_generation</run_depend>
+  <run_depend>rostopic</run_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+
+</package>
