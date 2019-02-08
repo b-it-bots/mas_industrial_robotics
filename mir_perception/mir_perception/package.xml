@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_perception</name>
+  <version>0.0.1</version>
+  <description>perception related packages</description>
+
+  <license>GPLv3</license>
+
+  <author email="santosh.thoduka@h-brs.de">Frederik Hegger</author>
+
+  <maintainer email="santosh.thoduka@h-brs.de">Frederik Hegger</maintainer>
+  <maintainer email="deebul.nair@h-brs.de">Sven Schneider</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>
