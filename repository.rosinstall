@@ -1,7 +1,7 @@
 - git:
     local-name: mas_common_robotics
     uri: git@github.com:b-it-bots/mas_common_robotics.git
-    version: kinetic
+    version: melodic
 
 - git:
     local-name: youbot_driver
@@ -41,4 +41,4 @@
 - git:
     local-name: unmerged_packages_for_testing
     uri: git@github.com:b-it-bots/unmerged_packages_for_testing.git
-    version: kinetic
+    version: melodic
