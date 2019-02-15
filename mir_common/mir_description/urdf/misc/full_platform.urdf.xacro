@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://ros.org/wiki/xacro">
+
+	
+	
+	<xacro:macro name="full_platform" params="parent name arm_angle *origin">
+
+		<!-- joint between arm_7_link and sdh_palm_link -->
+		<joint name="${name}_joint" type="fixed" >
+			<xacro:insert_block name="origin" />
+			<parent link="${parent}" />
+			<child link="${name}_link" />
+		</joint>
+
+		<link name="${name}_link">
+			<inertial>
+				<origin xyz="-0.0 -0.0 0" rpy="0 0 0"/>
+				<mass value="1.5"/>
+				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="-0.0 0.0 0" rpy="0 0 0" />
+				<geometry>
+					<box size="0.6 0.396 0.005" />
+					<!--mesh filename="package://mir_description/meshes/misc/full_platform.dae"/-->
+				</geometry>
+				<material name="DarkGrey"/>
+			</visual>
+			
+			<collision>
+				<origin xyz="-0.0 0.0 0" rpy="0 0 0" />
+				<geometry>
+					<box size="0.6 0.396 0.005" />
+				</geometry>
+			</collision>
+		</link>
+
+		<joint name="${name}_arm_root" type="fixed" >
+			<origin xyz="0.20225 0.100 0" rpy="0 0 ${arm_angle}" />
+			<parent link="${name}_link" />
+			<child link="${name}_arm_root_link" />
+		</joint>
+		<link name="${name}_arm_root_link" />
+		<!-- extensions -->
+		
+	
+	</xacro:macro>
+
+</robot>
