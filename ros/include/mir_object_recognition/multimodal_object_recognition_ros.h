@@ -27,6 +27,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/common/common.h>
+#include <pcl/common/transforms.h>
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -173,6 +174,8 @@ class MultimodalObjectRecognitionROS
                                                        const mcr_perception_msgs::ObjectList& image_list,
                                                        mcr_perception_msgs::ObjectList& final_list);
         
+        geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud);
+
     public:
         void update();
         // These should be handled in algorithm_provider_impl

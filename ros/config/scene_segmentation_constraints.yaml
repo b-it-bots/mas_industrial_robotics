@@ -1,12 +1,12 @@
 # reasonable parameters to find planes of @Work workspaces
 scene_segmentation:
-    voxel_leaf_size: 0.009
+    voxel_leaf_size: 0.0025
     voxel_filter_field_name: z
-    voxel_filter_limit_min: -0.10
-    voxel_filter_limit_max: 0.25
+    voxel_filter_limit_min: -0.15
+    voxel_filter_limit_max: 0.3
     passthrough_filter_field_name: z
-    passthrough_filter_limit_min: -0.01
-    passthrough_filter_limit_max: 0.8
+    passthrough_filter_limit_min: 0.0
+    passthrough_filter_limit_max: 0.4
     normal_radius_search: 0.03
     sac_max_iterations: 1000
     sac_distance_threshold: 0.01

@@ -11,6 +11,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <pcl/common/transforms.h>
+
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -25,7 +27,7 @@
 #include <mcr_perception_msgs/BoundingBoxList.h>
 #include <sensor_msgs/RegionOfInterest.h>
 #include <geometry_msgs/PoseArray.h>
-
+#include <mir_object_recognition/SceneSegmentationConfig.h>
 
 MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle nh, 
                                  mcr::visualization::BoundingBoxVisualizer bounding_box_visualizer,
@@ -125,7 +127,7 @@ void MultimodalObjectRecognitionROS::recognizedImageCallback(const mcr_perceptio
 
 void MultimodalObjectRecognitionROS::update()
 {
-    if (pointcloud_msg_received_count_ > 0)
+    if (pointcloud_msg_received_count_ > 1)
     {
         pointcloud_msg_received_ = false;
         pointcloud_msg_received_count_ = 0;
@@ -179,6 +181,13 @@ void MultimodalObjectRecognitionROS::preprocessCloud()
     
     //recognize Cloud and image
     recognizeCloudAndImage(cloud, image_msg);
+    // Reset cloud accumulation
+    pointcloud_segmentation_->reset_cloud_accumulation();
+    // pub e_done
+    std_msgs::String event_out;
+    event_out.data = "e_done";
+    pub_event_out_.publish(event_out);
+
 }
 
 
@@ -188,6 +197,7 @@ void MultimodalObjectRecognitionROS::segmentCloud(const pcl::PointCloud<pcl::Poi
 {
     pointcloud_segmentation_->add_cloud_accumulation(cloud);
     pointcloud_segmentation_->segment_cloud(object_list, clusters);
+    std::cout<<"Done segmentation"<<std::endl;
 }
 
 void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, 
@@ -290,8 +300,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
             ROS_ERROR("No message received from both RGB and PCL recognizer. ");
             return; //If not recevied in timeout secs return
         }
-        std::cout<<"[RGB]: "<<received_recognized_image_list_flag_<<std::endl;
-        std::cout<<"[PCL]: "<<received_recognized_cloud_list_flag_<<std::endl;
     }
     std::cout<<"Cloud list: "<< recognized_cloud_list_.objects.size()<<std::endl;
     std::cout<<"Image list: "<< recognized_image_list_.objects.size()<<std::endl;
@@ -342,25 +350,20 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
             // Solution find diagional, and make a threshold
             // Cannot compute 3d bbox for small outlier bbox
             double len_diag = sqrt(powf(((roi_2d.width + roi_2d.width) >> 1), 2));
-            std::cout<<"Diagonal: "<<len_diag<<std::endl;
-            std::cout<<"Normal: "<<normal<<std::endl;
             if (len_diag > 21 && len_diag < 200)
             {
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_object_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
-                std::cout<<"Converting 2D region proposal to 3D"<<std::endl;
                 get3DObject(roi_2d, cloud, pcl_object_cluster);
-                std::cout<<"PCL size: "<<pcl_object_cluster->height<<", "<<pcl_object_cluster->width<<std::endl;
                 pcl::PointXYZRGB minPt_2d, maxPt_2d;
                 pcl::getMinMax3D(*pcl_object_cluster, minPt_2d, maxPt_2d);
-                std::cout<<"Min Max 2dcloud: "<<minPt_2d.z<<", "<<maxPt_2d.z<<std::endl;
 
                 clusters_2d.push_back(pcl_object_cluster);
 
-                mas_perception_libs::BoundingBox bbox;
-                std::cout<<"Calculating 3D BBox given 3D cloud cluster"<<std::endl;
-                pointcloud_segmentation_->get3DBoundingBox(pcl_object_cluster, normal, bbox, bounding_boxes.bounding_boxes[i]);
-                std::cout<<"Calculating pose given 3D BBox"<<std::endl;
-                geometry_msgs::PoseStamped pose = pointcloud_segmentation_->getPose(bbox);
+                //mas_perception_libs::BoundingBox bbox;
+                //pointcloud_segmentation_->get3DBoundingBox(pcl_object_cluster, normal, bbox, bounding_boxes.bounding_boxes[i]);
+                //geometry_msgs::PoseStamped pose = pointcloud_segmentation_->getPose(bbox);
+                
+                geometry_msgs::PoseStamped pose = estimatePose(pcl_object_cluster);
 
                 // Transform pose
                 std::string frame_id = cloud->header.frame_id;
@@ -474,19 +477,21 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
     //combineObjectList(cloud_object_list, final_image_list, final_object_list);
     // if (received_image_list)
     // {
-    //     cloud_object_list.objects.insert(cloud_object_list.objects.end(), final_image_list.objects.begin(), final_image_list.objects.end());
+    recognized_cloud_list_.objects.insert(recognized_cloud_list_.objects.end(), final_image_list.objects.begin(), final_image_list.objects.end());
     // }
     std::cout<<"Final list: "<< final_object_list.objects.size()<<std::endl;
 
 
     // TODO: remove cloud before publish
     // TODO: Edit object_list merger to receive a single list containing 3d and rgb
-    pub_object_list_.publish(final_object_list);
+    //pub_object_list_.publish(final_object_list);
+    pub_object_list_.publish(recognized_cloud_list_);
     //pub_object_list_.publish(final_image_list);
     //Resetting the flag for next message
     received_recognized_image_list_flag_ = false;
     received_recognized_cloud_list_flag_ = false;
     sub_cloud_.shutdown();
+
 }
 
 void MultimodalObjectRecognitionROS::combineObjectList(const mcr_perception_msgs::ObjectList& cloud_list, 
@@ -536,8 +541,6 @@ void MultimodalObjectRecognitionROS::get3DObject(const sensor_msgs::RegionOfInte
     if (roi.width+pixel_loc_tolerance < ordered_cloud->width) min_x = min_x + pixel_loc_tolerance;
     if (roi.height+pixel_loc_tolerance < ordered_cloud->height) min_y = min_y + pixel_loc_tolerance;
     
-    std::cout<<"PCL size: "<<ordered_cloud->height<<", "<<ordered_cloud->width<<std::endl;
-    std::cout<<min_x<<", "<<min_y<<", "<<max_x<<", "<<max_y<<std::endl;
     std::vector<cv::Point> pixel_loc;
 
     for (int i=min_x; i<max_x; i++)
@@ -572,6 +575,94 @@ void MultimodalObjectRecognitionROS::get3DObject(const sensor_msgs::RegionOfInte
         sor.filter(*pcl_object);
         //pcl_objects.push_back(pcl_object);
     }
+}
+
+geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud)
+{
+		//pcl::PCLPointCloud2::Ptr pcl_input_cloud(new pcl::PCLPointCloud2);
+
+		//pcl_conversions::toPCL(*pointcloud_msg_, *pcl_input_cloud);
+
+
+		Eigen::Vector4f centroid;
+		pcl::compute3DCentroid(*xyz_input_cloud, centroid);
+
+		Eigen::Matrix3f covariance;
+		pcl::computeCovarianceMatrixNormalized(*xyz_input_cloud, centroid, covariance);
+
+		Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
+		Eigen::Matrix3f eigen_vectors = eigen_solver.eigenvectors();
+
+		// swap largest and second largest eigenvector so that y-axis aligns with largest eigenvector and z with the second largest
+		eigen_vectors.col(0).swap(eigen_vectors.col(2));
+		eigen_vectors.col(1) = eigen_vectors.col(2).cross(eigen_vectors.col(0));
+
+		Eigen::Matrix4f eigen_vector_transform(Eigen::Matrix4f::Identity());
+		eigen_vector_transform.block<3, 3>(0, 0) = eigen_vectors.transpose();
+		eigen_vector_transform.block<3, 1>(0, 3) = -(eigen_vector_transform.block<3, 3>(0, 0) * centroid.head<3>());
+
+		// transform cloud to eigenvector space
+		pcl::PointCloud<pcl::PointXYZRGB> transformed_cloud;
+		pcl::transformPointCloud(*xyz_input_cloud, transformed_cloud, eigen_vector_transform);
+
+		// find mean diagonal
+		pcl::PointXYZRGB min_point, max_point;
+		pcl::getMinMax3D(transformed_cloud, min_point, max_point);
+		Eigen::Vector3f mean_diag = (max_point.getVector3fMap() + min_point.getVector3fMap()) / 2.0;
+
+		// orientation and position of bounding box of cloud
+		Eigen::Quaternionf orientation(eigen_vectors);
+		Eigen::Vector3f position = eigen_vectors * mean_diag + centroid.head<3>();
+
+		geometry_msgs::PoseStamped pose_stamped;
+		pose_stamped.pose.position.x = position(0);
+		pose_stamped.pose.position.y = position(1);
+		pose_stamped.pose.position.z = position(2);
+		pose_stamped.pose.orientation.w = orientation.w();
+		pose_stamped.pose.orientation.x = orientation.x();
+		pose_stamped.pose.orientation.y = orientation.y();
+		pose_stamped.pose.orientation.z = orientation.z();
+		pose_stamped.header = pointcloud_msg_->header;
+
+		//Converting to baselink or provided link
+		//geometry_msgs::PoseStamped pose_in_baselink_stamped;
+		//try
+		//{
+		//		listener_.waitForTransform(target_frame_, pose_stamped.header.frame_id, pose_stamped.header.stamp, ros::Duration(3.0));
+		//		listener_.transformPose(target_frame_, pose_stamped, pose_in_baselink_stamped);
+		//}
+		//catch (tf::TransformException ex)
+		//{
+		//		ROS_ERROR("%s", ex.what());
+		//}
+
+		/*
+		if (yaw < 0)
+				yaw = 6.28 + yaw; // if negative make it positive
+		std::cout<< "Yaw of the pose : "<<yaw<<std::endl;
+		if (((yaw > 5.49) && (yaw < 0.785)) || ((yaw > 2.35) && (yaw < 3.92)))
+				yaw = 0;
+		else if (((yaw > 0.785) && (yaw < 2.35)) || ((yaw > 3.92) && (yaw < 5.49)))
+				yaw = 1.57;
+		*/
+
+		/*
+		 * fix pitch and roll to 0 for horizontal platforms
+		 
+		*/
+		//tf::Quaternion temp;
+		//tf::quaternionMsgToTF(pose_in_baselink_stamped.pose.orientation, temp);
+		//tf::Matrix3x3 m(temp);
+		//double roll, pitch, yaw;
+		//m.getRPY(roll, pitch, yaw);
+
+		//pose_in_baselink_stamped.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw);
+		//pose_in_baselink_stamped.pose.position.z += offset_in_z_;
+
+		//output_pose_array.header = pose_in_baselink_stamped.header;
+		//output_pose_array.poses.push_back(pose_in_baselink_stamped.pose);
+    
+		return pose_stamped;
 }
 
 void MultimodalObjectRecognitionROS::segmentObjects(const sensor_msgs::ImageConstPtr &image, 
@@ -755,10 +846,8 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
     pointcloud_segmentation_->scene_segmentation_.setClusterParams(config.cluster_tolerance, config.cluster_min_size, config.cluster_max_size,
             config.cluster_min_height, config.cluster_max_height, config.cluster_max_length,
             config.cluster_min_distance_to_polygon);
-    std::cout<<"============================"<<std::endl;
-    std::cout<<"Normal radiuse "<<config.normal_radius_search<<std::endl;
-    std::cout<<"Voxel leaf "<<config.voxel_leaf_size<<std::endl;
     pointcloud_segmentation_->object_height_above_workspace_ = config.object_height_above_workspace;
+    // TODO: print all param here, to check they get updated
 }
 
 
