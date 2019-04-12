@@ -103,7 +103,7 @@ class ObjectRecognizer():
                     bboxes, probs, classes, labels = self.model.infer_one_image(cv_image)
                     for i in range(len(classes)):
                         result = Object()
-                        result.label = class_label[labels[i]]
+                        result.name = class_label[labels[i]]
                         result.probability = probs[i]
                         roi = RegionOfInterest()
                         bbox = self.model.bbox_transform(bboxes[i])

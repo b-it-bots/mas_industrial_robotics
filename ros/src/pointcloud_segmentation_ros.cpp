@@ -100,7 +100,7 @@ void PointcloudSegmentationROS::segment_cloud(mcr_perception_msgs::ObjectList &o
         //ros_clusters.push_back(ros_cloud);
         // Assign unknown for every object by default then recognize it later
         object_list.objects[i].pointcloud = ros_cloud;
-        object_list.objects[i].label = "unknown";
+        object_list.objects[i].name = "unknown";
         object_list.objects[i].probability = 0.0;
 
         //TODO: add tranform pose to utils 
@@ -155,7 +155,7 @@ void PointcloudSegmentationROS::segment_cloud(mcr_perception_msgs::ObjectList &o
     {
         for (int i=0; i<object_list.objects.size(); i++)
         {
-            object_list.objects[i].label = srv.response.name[i];
+            object_list.objects[i].name = srv.response.name[i];
             object_list.objects[i].probability = srv.response.probability[i];
         }
     }

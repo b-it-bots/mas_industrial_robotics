@@ -328,7 +328,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
         std::cout<<"Image size: "<<cv_image->image.rows<<", "<<cv_image->image.cols<<std::endl;
         for (int i=0; i<recognized_image_list_.objects.size();i++)
         {
-            std::cout<<"Class: "<<recognized_image_list_.objects[i].label<<std::endl;
+            std::cout<<"Class: "<<recognized_image_list_.objects[i].name<<std::endl;
             mcr_perception_msgs::Object object = recognized_image_list_.objects[i];
             //Get ROI
             sensor_msgs::RegionOfInterest roi_2d = object.roi;
@@ -400,7 +400,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
                 }
 
                 //object_list.objects[i].pointcloud = ros_cloud;
-                final_image_list.objects[i].label = recognized_image_list_.objects[i].label;
+                final_image_list.objects[i].name = recognized_image_list_.objects[i].name;
                 final_image_list.objects[i].probability = recognized_image_list_.objects[i].probability;
                 final_image_list.objects[i].database_id = rgb_object_id_;
                 rgb_object_id_++;
@@ -433,7 +433,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
             else
             {
                 std::cout<<"DECOY"<<std::endl;
-                final_image_list.objects[i].label = "DECOY";
+                final_image_list.objects[i].name = "DECOY";
             }
             //pose.header.stamp = now;
             // TODO: Transform pose to base_link, see scene_segmentation
@@ -463,12 +463,12 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
     for (int i=0; i<recognized_cloud_list_.objects.size();i++)
     {
         final_object_list.objects[i] = recognized_cloud_list_.objects[i];
-        std::cout<<"PCL Label: "<<final_object_list.objects[i].label<<std::endl;
+        std::cout<<"PCL Label: "<<final_object_list.objects[i].name<<std::endl;
     }
     for (int i=0; i<final_image_list.objects.size();i++)
     {
         final_object_list.objects[i] = final_image_list.objects[i];
-        std::cout<<"RGB Label: "<<final_object_list.objects[i].label<<std::endl;
+        std::cout<<"RGB Label: "<<final_object_list.objects[i].name<<std::endl;
     }
     //final_object_list.objects = cloud_object_list.objects;
     //combineObjectList(cloud_object_list, final_image_list, final_object_list);

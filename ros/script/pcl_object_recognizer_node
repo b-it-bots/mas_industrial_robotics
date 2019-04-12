@@ -46,7 +46,7 @@ class MeanCircleObjectRecognizer():
                 features = calculate_feature_vector(xyzhsv, True)
                 features = np.reshape(features, (1,-1))
                 label, probability = self.classifier.classify(features)
-                object.label = label
+                object.name = label
                 object.probability = probability
             self.pub.publish(result_object_list)
 
