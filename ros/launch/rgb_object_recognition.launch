@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="net" default="detection" />
+    <arg name="classifier" default="squeezeDet" />
+    <arg name="dataset_type" default="atwork_combined" />
+
+    <group ns="mir_perception">
+        <node pkg="mir_object_recognition" type="squeezedet_node.py" name="squeezedet" output="screen" 
+              respawn="false" ns="multimodal_object_recognition/recognizer/rgb">
+          <param name="net" value="$(arg net)" type="str" />
+          <param name="classifier" value="$(arg classifier)" type="str" />
+          <param name="dataset_type" value="$(arg dataset_type)" type="str" />
+          <remap from="~input/images" to="/mir_perception/multimodal_object_recognition/recognizer/rgb/input/images" />
+          <remap from="~output/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/rgb/output/object_list"/>
+        </node>
+    </group>
+</launch>

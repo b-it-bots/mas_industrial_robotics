@@ -1,0 +1,104 @@
+#!/usr/bin/env python
+
+PACKAGE = 'mir_object_recognition'
+NODE = 'pcl_object_recognizer'
+SERVICE = '~recognize_object/mean_circle'
+#TOPIC_PREFIX = '/mcr_perception/multimodal_object_recognition/recognizer/pcl'
+
+import roslib
+import rospy
+
+import sys
+from os.path import join
+import numpy as np
+
+# Import helper class for loading trained network
+from pcl_classifiers.svm_classifier import SVMObjectClassifier
+from pcl_classifiers.features import calculate_feature_vector
+
+from mcr_perception_msgs.srv import RecognizeObject
+from mcr_perception_msgs.srv import RecognizeObjectResponse
+from mcr_perception_msgs.msg import ObjectList
+
+import sensor_msgs.point_cloud2
+import struct
+import colorsys
+
+class MeanCircleObjectRecognizer():
+
+    def __init__(self, classifier_name):
+        self.classifier = self.load_classifier(classifier_name)
+        # Service
+        self.s = rospy.Service(SERVICE, RecognizeObject, self.recognize_object_service_cb)
+        rospy.loginfo('Started [%s] service.' % SERVICE)
+        # Subscriber
+        self.sub = rospy.Subscriber("input/object_list",ObjectList, self.recognize_object_topic_cb)
+        # Publisher
+        self.pub = rospy.Publisher("output/object_list",ObjectList, queue_size=1)
+
+    def recognize_object_topic_cb(self, object_data):
+        if object_data.objects:
+            rospy.loginfo("%d clouds received ", len(object_data.objects))
+            result_object_list = ObjectList()
+            result_object_list = object_data.objects
+            for object in result_object_list:
+                xyzhsv = self.convert_to_xyzhsv(object.pointcloud)
+                features = calculate_feature_vector(xyzhsv, True)
+                features = np.reshape(features, (1,-1))
+                label, probability = self.classifier.classify(features)
+                object.label = label
+                object.probability = probability
+            self.pub.publish(result_object_list)
+
+    def recognize_object_service_cb(self, request):
+        rospy.loginfo('Received [%s] request.' % SERVICE)
+        clouds = request.cloud
+        names = []
+        probabilities = []
+        for cloud in clouds:
+            xyzhsv = self.convert_to_xyzhsv(cloud)
+            features = calculate_feature_vector(xyzhsv, True)
+            label, probability = self.classifier.classify(features)
+            names.append(label)
+            probabilities.append(probability)
+        
+        resp = RecognizeObjectResponse()
+        resp.name = names
+        resp.probability = probabilities
+        return resp
+
+    # copied from python-pcl
+    def float_to_rgb(self, p_rgb):
+        # rgb = *reinterpret_cast<int*>(&p.rgb)
+        rgb_bytes = struct.pack('f', p_rgb)
+        rgb = struct.unpack('I', rgb_bytes)[0]
+        r = (rgb >> 16) & 0x0000ff
+        g = (rgb >> 8)  & 0x0000ff
+        b = (rgb)       & 0x0000ff
+        return (r/255.0),(g/255.0),(b/255.0)
+
+    def load_classifier(self, classifier_name):
+        cfg_folder = join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config')
+        return SVMObjectClassifier.load(join(cfg_folder, classifier_name, 'classifier.pkl'),
+                                        join(cfg_folder, classifier_name, 'label_encoder.pkl'))
+
+    def convert_to_xyzhsv(self, pc):
+        # Generator for x,y,z,rgb fields from pointcloud
+        xyzrgb_gen = sensor_msgs.point_cloud2.read_points(pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
+
+        # convert generator to list of lists then numpy array
+        xyzrgb = [list(elem) for elem in list(xyzrgb_gen)]
+        xyzrgb = np.array(xyzrgb)
+        rgb = xyzrgb[:,3][np.newaxis].T
+        hsv = np.array([list(colorsys.rgb_to_hsv(*self.float_to_rgb(i))) for i in rgb])
+        xyzhsv = np.hstack([xyzrgb[:,0:3], hsv])
+
+        return xyzhsv
+    
+
+
+if __name__ == '__main__':
+    rospy.init_node(NODE)
+    classifier_name = rospy.get_param("~classifier")
+    object_recognizer = MeanCircleObjectRecognizer(classifier_name)
+    rospy.spin()
