@@ -94,6 +94,7 @@ void PointcloudSegmentationROS::segment_cloud(mcr_perception_msgs::ObjectList &o
         convertBoundingBox(boxes[i], bounding_boxes.bounding_boxes[i]);
 
         sensor_msgs::PointCloud2 ros_cloud;
+        ros_cloud.header.frame_id = frame_id_;
         pcl::PCLPointCloud2 pc2;
         pcl::toPCLPointCloud2(*clusters[i], pc2);
         pcl_conversions::fromPCL(pc2, ros_cloud);
@@ -200,8 +201,8 @@ void PointcloudSegmentationROS::findPlane()
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
     PointCloud::Ptr debug = scene_segmentation_.findPlane(cloud, hull, coefficients, workspace_height);
     debug->header.frame_id = cloud->header.frame_id;
-    std_msgs::Float64 workspace_height_msg;
-    workspace_height_msg.data = workspace_height;
+    //std_msgs::Float64 workspace_height_msg;
+    //workspace_height_msg.data = workspace_height;
     //pub_workspace_height_.publish(workspace_height_msg);
     //pub_debug_.publish(*debug);
 }
