@@ -127,7 +127,7 @@ void MultimodalObjectRecognitionROS::recognizedImageCallback(const mcr_perceptio
 
 void MultimodalObjectRecognitionROS::update()
 {
-    if (pointcloud_msg_received_count_ > 1)
+    if (pointcloud_msg_received_count_ > 2)
     {
         pointcloud_msg_received_ = false;
         pointcloud_msg_received_count_ = 0;
@@ -207,6 +207,11 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
     std::vector<PointCloud::Ptr> clusters;
     segmentCloud(cloud, cloud_object_list, clusters);
     cluster_visualizer_pcl_.publish<PointT>(clusters, target_frame_id_);
+    
+    std_msgs::Float64 workspace_height_msg;
+    workspace_height_msg.data = pointcloud_segmentation_->workspace_height_;
+    pub_workspace_height_.publish(workspace_height_msg);
+
     // Publish pose
     geometry_msgs::PoseArray pcl_object_poses;
     pcl_object_poses.poses.resize(cloud_object_list.objects.size());
@@ -217,6 +222,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
         pcl_object_poses.poses[i] = cloud_object_list.objects[i].pose.pose;
     }
     pub_pcl_object_pose_array_.publish(pcl_object_poses);
+
 
     // Compute normal to generate parallel BBOX with the plane
     const Eigen::Vector3f normal(pointcloud_segmentation_->scene_segmentation_.coefficients_->values[0], 
@@ -456,8 +462,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
             pub_rgb_object_pose_array_.publish(rgb_object_pose_array);
         //}
     }
-    std::cout<<"Cloud list: "<< cloud_object_list.objects.size()<<std::endl;
-    std::cout<<"Image list: "<< final_image_list.objects.size()<<std::endl;
 
     // TODO: handle EXCEPTION here (REMEMBER IT WILL KILL THIS NODE)
     // Merge cloud_list and image_ist
@@ -665,6 +669,57 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::estimatePose(const pc
 		return pose_stamped;
 }
 
+geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::adjustObjectPose(mcr_perception_msgs::ObjectList &object_list)
+{
+    for (int i=0; i<object_list.objects.size(); i++)
+    {    
+        tf::Quaternion q(
+                object_list.objects[i].pose.pose.orientation.x,
+                object_list.objects[i].pose.pose.orientation.y,
+                object_list.objects[i].pose.pose.orientation.z,
+                object_list.objects[i].pose.pose.orientation.w);
+        tf::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+        double change_in_pitch = 0.0;
+        if (object_list.objects[i].name == "M30" || 
+                object_list.objects[i].name == "M20" ||
+                object_list.objects[i].name == "DISTANCE_TUBE"  ||
+                object_list.objects[i].name == "CONTAINER_BOX_RED"  ||
+                object_list.objects[i].name == "CONTAINER_BOX_BLUE"  ||
+                object_list.objects[i].name == "BEARING") 
+        {
+                yaw = 0.0;
+        }
+
+        if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
+                object_list.objects[i].name == "CONTAINER_BOX_BLUE")
+        {
+                object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->workspace_height_ + 0.05 ;
+                change_in_pitch = -M_PI / 6.0;
+        }
+        tf::Quaternion q2 = tf::createQuaternionFromRPY(0.0, change_in_pitch , yaw);
+        object_list.objects[i].pose.pose.orientation.x = q2.x();
+        object_list.objects[i].pose.pose.orientation.y = q2.y();
+        object_list.objects[i].pose.pose.orientation.z = q2.z();
+        object_list.objects[i].pose.pose.orientation.w = q2.w();
+
+        //double height_above_workspace = 0.015;
+        //nh_.param<double>("/mcr_perception/scene_segmentation/object_height_above_workspace", height_above_workspace, $
+        if (pointcloud_segmentation_->workspace_height_ != -1000.0)
+        {
+                object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->workspace_height_ + pointcloud_segmentation_->object_height_above_workspace_;
+        }
+        if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
+                object_list.objects[i].name == "CONTAINER_BOX_BLUE")
+        {
+                object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->workspace_height_ + 0.08 ;
+        }
+    }
+
+
+}
+
 void MultimodalObjectRecognitionROS::segmentObjects(const sensor_msgs::ImageConstPtr &image, 
                                                     cv::Mat &segmented_objects_mask)
 {
@@ -815,19 +870,19 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
     {
         //add_to_octree_ = true;
         sub_cloud_ = nh_.subscribe("input", 1, &MultimodalObjectRecognitionROS::pointcloudCallback, this);
-        event_out.data = "e_started";
+        //event_out.data = "e_started";
     }
     else if (msg->data == "e_stop")
     {
         sub_cloud_.shutdown();
         pointcloud_segmentation_->reset_cloud_accumulation();
         event_out.data = "e_stopped";
+        pub_event_out_.publish(event_out);
     }
     else
     {
         return;
     }
-    pub_event_out_.publish(event_out);
 }
 
 void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level)

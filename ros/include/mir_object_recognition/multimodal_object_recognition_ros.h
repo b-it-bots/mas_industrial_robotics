@@ -146,6 +146,10 @@ class MultimodalObjectRecognitionROS
         // Parameters
         bool debug_mode_;
 
+        // Dynamic parameter
+        double pcl_object_height_above_workspace;
+        double rgb_object_height_above_workspace;
+
     private:
         //void setConfig();
         void pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg);
@@ -176,6 +180,7 @@ class MultimodalObjectRecognitionROS
         
         geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud);
 
+        geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::adjustObjectPose(mcr_perception_msgs::ObjectList &object_list);
     public:
         void update();
         // These should be handled in algorithm_provider_impl
