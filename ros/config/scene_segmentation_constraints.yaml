@@ -3,10 +3,10 @@ scene_segmentation:
     voxel_leaf_size: 0.0025
     voxel_filter_field_name: z
     voxel_filter_limit_min: -0.15
-    voxel_filter_limit_max: 0.3
+    voxel_filter_limit_max: 0.25
     passthrough_filter_field_name: z
     passthrough_filter_limit_min: 0.0
-    passthrough_filter_limit_max: 0.4
+    passthrough_filter_limit_max: 0.8
     normal_radius_search: 0.03
     sac_max_iterations: 1000
     sac_distance_threshold: 0.01
@@ -14,7 +14,7 @@ scene_segmentation:
     sac_eps_angle: 0.09
     sac_normal_distance_weight: 0.05
     prism_min_height: 0.01
-    prism_max_height: 0.10
+    prism_max_height: 0.1
     outlier_radius_search: 0.03
     outlier_min_neighbors: 20
     cluster_tolerance: 0.02
