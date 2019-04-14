@@ -85,6 +85,7 @@ class MultimodalObjectRecognitionROS
 
     private:
         ros::Subscriber sub_cloud_;
+        ros::Subscriber sub_image_;
         ros::Subscriber sub_event_in_;
         ros::Publisher pub_event_out_;
 
@@ -121,11 +122,16 @@ class MultimodalObjectRecognitionROS
         typedef std::auto_ptr<ImageRecognitionROS> ImageRecognitionUPtr;
         ImageRecognitionUPtr image_recognition_;
 
+        // Used to store pointcloud and image received from callback
         sensor_msgs::PointCloud2::Ptr pointcloud_msg_;
+        sensor_msgs::ImageConstPtr image_msg_;
 
-        // Flag for pointcloud subscription
+        // Flags for pointcloud and image subscription
         bool pointcloud_msg_received_;
+        bool image_msg_received_;
         int pointcloud_msg_received_count_;
+        int image_msg_received_count_;
+        
         int rgb_object_id_;
         
         // Flags for object recognition
@@ -147,12 +153,13 @@ class MultimodalObjectRecognitionROS
         bool debug_mode_;
 
         // Dynamic parameter
-        double pcl_object_height_above_workspace;
-        double rgb_object_height_above_workspace;
+        double pcl_object_height_above_workspace_;
+        double rgb_object_height_above_workspace_;
 
     private:
         //void setConfig();
         void pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg);
+        void imageCallback(const sensor_msgs::ImageConstPtr &msg);
         void eventCallback(const std_msgs::String::ConstPtr &msg);
         void configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level);
 
@@ -180,7 +187,12 @@ class MultimodalObjectRecognitionROS
         
         geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud);
 
-        geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::adjustObjectPose(mcr_perception_msgs::ObjectList &object_list);
+        geometry_msgs::PoseStamped adjustObjectPose(mcr_perception_msgs::ObjectList &object_list);
+        // Update object pose for axis and bolt
+        void updateObjectPose(mcr_perception_msgs::ObjectList &combined_object_list);
+
+        void updateContainerPose(mcr_perception_msgs::ObjectList &object_list);
+
     public:
         void update();
         // These should be handled in algorithm_provider_impl
