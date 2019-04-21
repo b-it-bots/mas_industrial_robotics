@@ -143,11 +143,11 @@ class MultimodalObjectRecognitionROS
         mcr_perception_msgs::ObjectList recognized_cloud_list_;
 
         // Visualization
-        mcr::visualization::BoundingBoxVisualizer bounding_box_visualizer_;
-        mcr::visualization::ClusteredPointCloudVisualizer cluster_visualizer_;
-        mcr::visualization::LabelVisualizer label_visualizer_;
-
+        mcr::visualization::BoundingBoxVisualizer bounding_box_visualizer_pcl_;
+        mcr::visualization::ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
         mcr::visualization::ClusteredPointCloudVisualizer cluster_visualizer_pcl_;
+        mcr::visualization::LabelVisualizer label_visualizer_rgb_;
+        mcr::visualization::LabelVisualizer label_visualizer_pcl_;
 
         // Parameters
         bool debug_mode_;
