@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cPickle as pickle
+import pickle
 import numpy as np
 
 
@@ -18,20 +18,21 @@ class SVMObjectClassifier:
 
     def save(self, classifier_name, label_encoder_name):
         with open(classifier_name, 'wb') as f:
-            pickle.dump(self.classifier, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.classifier, f, protocol=2)
         with open(label_encoder_name, 'wb') as f:
-            pickle.dump([self.label_encoder, self.mean, self.std], f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump([self.label_encoder, self.mean, self.std], f, protocol=2)
 
     def classify(self, feature_vector):
-        feature_vector -= np.array(self.mean)
-        feature_vector /= self.std
+        #feature_vector -= np.array(self.mean)
+        #feature_vector /= self.std
         probabilities = self.classifier.predict_proba(feature_vector)[0]
         max_index = np.argmax(probabilities)
-        cls = self.classifier.classes_[max_index]
+        cls = [self.classifier.classes_[max_index]]
         return self.label_encoder.inverse_transform(cls), probabilities[max_index]
 
     @classmethod
     def load(cls, classifier_name, label_encoder_name):
+        print "Classifier name: ", classifier_name
         with open(classifier_name, 'rb') as f:
             classifier = pickle.load(f)
         with open(label_encoder_name, 'rb') as f:
