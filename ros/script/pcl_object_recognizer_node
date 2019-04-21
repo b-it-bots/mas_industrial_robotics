@@ -5,6 +5,7 @@ NODE = 'pcl_object_recognizer'
 SERVICE = '~recognize_object/mean_circle'
 #TOPIC_PREFIX = '/mcr_perception/multimodal_object_recognition/recognizer/pcl'
 
+import glob
 import roslib
 import rospy
 
@@ -14,7 +15,8 @@ import numpy as np
 
 # Import helper class for loading trained network
 from pcl_classifiers.svm_classifier import SVMObjectClassifier
-from pcl_classifiers.features import calculate_feature_vector
+from pcl_classifiers.features import calculate_feature_vector, calculate_maxrdd_fv_features
+import pcl_classifiers.utils as utils
 
 from mcr_perception_msgs.srv import RecognizeObject
 from mcr_perception_msgs.srv import RecognizeObjectResponse
@@ -26,8 +28,8 @@ import colorsys
 
 class MeanCircleObjectRecognizer():
 
-    def __init__(self, classifier_name):
-        self.classifier = self.load_classifier(classifier_name)
+    def __init__(self, classifier_name, dataset_type, variance=0.04, mc_feature=False):
+        self.classifier = self.load_classifier(dataset_type)
         # Service
         self.s = rospy.Service(SERVICE, RecognizeObject, self.recognize_object_service_cb)
         rospy.loginfo('Started [%s] service.' % SERVICE)
@@ -35,6 +37,15 @@ class MeanCircleObjectRecognizer():
         self.sub = rospy.Subscriber("input/object_list",ObjectList, self.recognize_object_topic_cb)
         # Publisher
         self.pub = rospy.Publisher("output/object_list",ObjectList, queue_size=1)
+        
+        self.classifier_name = classifier_name
+        self.dataset_type = dataset_type
+        self.mc_feature = mc_feature
+        self.gmm = None
+        if self.classifier_name == "fisher_vector":
+            n_gaussian = int(''.join(filter(str.isdigit, self.dataset_type)))
+            self.gmm = utils.get_3d_grid_gmm(subdivisions=[n_gaussian, n_gaussian, n_gaussian], variance=variance)
+        
 
     def recognize_object_topic_cb(self, object_data):
         if object_data.objects:
@@ -43,10 +54,14 @@ class MeanCircleObjectRecognizer():
             result_object_list = object_data.objects
             for object in result_object_list:
                 xyzhsv = self.convert_to_xyzhsv(object.pointcloud)
-                features = calculate_feature_vector(xyzhsv, True)
+                #features = calculate_feature_vector(xyzhsv, True)
+                if self.classifier_name == 'mean_circle':
+                    features = calculate_feature_vector(xyzhsv, enable_color=True)
+                else:
+                    features = calculate_maxrdd_fv_features(xyzhsv, self.gmm, self.dataset_type, mean_circle=self.mc_feature)
                 features = np.reshape(features, (1,-1))
                 label, probability = self.classifier.classify(features)
-                object.name = label
+                object.name = label[0]
                 object.probability = probability
             self.pub.publish(result_object_list)
 
@@ -100,5 +115,6 @@ class MeanCircleObjectRecognizer():
 if __name__ == '__main__':
     rospy.init_node(NODE)
     classifier_name = rospy.get_param("~classifier")
-    object_recognizer = MeanCircleObjectRecognizer(classifier_name)
+    dataset_type = rospy.get_param("~dataset_type")
+    object_recognizer = MeanCircleObjectRecognizer(classifier_name, dataset_type)
     rospy.spin()
