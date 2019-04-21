@@ -3,12 +3,14 @@
 
   <arg name="input_pointcloud_topic" default="/arm_cam3d/depth_registered/points" />
   <arg name="target_frame" default="odom" />
-  <arg name="classifier" default="asus-nagoya" />
+  <arg name="classifier" default="fisher_vector" />
+  <arg name="dataset_type" default="fv_3" />
 
   <group ns="mir_perception">
     <node pkg="mir_object_recognition" type="pcl_object_recognizer_node" name="pcl_object_recognizer" output="screen" 
           respawn="false" ns="multimodal_object_recognition/recognizer/pcl">
       <param name="classifier" value="$(arg classifier)" type="str" />
+      <param name="dataset_type" value="$(arg dataset_type)" type="str" />
       <remap from="~input/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/pcl/input/object_list" />
       <remap from="~output/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/pcl/output/object_list"/>
     </node>
