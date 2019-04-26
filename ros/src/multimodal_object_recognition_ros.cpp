@@ -497,6 +497,21 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
         updateObjectPose(combined_object_list);
         //updateContainerPose(combined_object_list);
         
+        // Rename CONTAINER_RED AND BLUE TO CONTAINER_BOX_BLUE 
+        for (int i=0; i<combined_object_list.objects.size(); i++)
+        {
+            sensor_msgs::PointCloud2 empty_ros_cloud;
+            combined_object_list.objects[i].pointcloud = empty_ros_cloud;
+            if (combined_object_list.objects[i].name == "BLUE_CONTAINER")
+            {
+                combined_object_list.objects[i].name = "CONTAINER_BOX_BLUE";
+            }
+            else if (combined_object_list.objects[i].name == "RED_CONTAINER")
+            {
+                combined_object_list.objects[i].name = "CONTAINER_BOX_RED";
+            }
+        }
+        
         // Publish object list to object list merger
         pub_object_list_.publish(combined_object_list);
         /* //Resetting the flag for next message */
