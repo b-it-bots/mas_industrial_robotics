@@ -26,3 +26,5 @@ scene_segmentation:
     cluster_min_distance_to_polygon: 0.04
     octree_resolution: 0.0025
     object_height_above_workspace: 0.052
+    rgb_container_height: 0.15
+    rgb_bbox_tolerance: 2
