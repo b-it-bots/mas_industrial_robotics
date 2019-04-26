@@ -46,6 +46,9 @@
 #include <mcr_scene_segmentation/bounding_box_visualizer.h>
 #include <mcr_scene_segmentation/label_visualizer.h>
 
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 //#include <mir_object_recognition/clustered_point_cloud_visualizer.h>
 //#include <mir_object_recognition/bounding_box_visualizer.h>
 //#include <mir_object_recognition/label_visualizer.h>
@@ -77,10 +80,7 @@ class MultimodalObjectRecognitionROS
         };
 
     public:
-        MultimodalObjectRecognitionROS(ros::NodeHandle nh,
-                                        mcr::visualization::BoundingBoxVisualizer bounding_box_visualizer,
-                                        mcr::visualization::ClusteredPointCloudVisualizer cluster_visualizer_,
-                                        mcr::visualization::LabelVisualizer label_visualizer_);
+        MultimodalObjectRecognitionROS(ros::NodeHandle nh);
         virtual ~MultimodalObjectRecognitionROS();
 
     private:
@@ -106,6 +106,14 @@ class MultimodalObjectRecognitionROS
         ros::Publisher pub_pcl_object_pose_array_;
         ros::Publisher pub_rgb_object_pose_array_;
 
+        // Synchronize callback for image and pointclouds
+        message_filters::Subscriber<sensor_msgs::Image> *image_sub_;
+        message_filters::Subscriber<sensor_msgs::PointCloud2> *cloud_sub_;
+        typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::PointCloud2> msgSyncPolicy;
+        message_filters::Synchronizer<msgSyncPolicy> *msg_sync_;
+        void synchronizeCallback(const sensor_msgs::ImageConstPtr &image, 
+                                            const sensor_msgs::PointCloud2ConstPtr &cloud);
+
         // Recognize Clouds and Image callback
         void recognizedImageCallback(const mcr_perception_msgs::ObjectList &msg);
         void recognizedCloudCallback(const mcr_perception_msgs::ObjectList &msg);
@@ -123,7 +131,7 @@ class MultimodalObjectRecognitionROS
         ImageRecognitionUPtr image_recognition_;
 
         // Used to store pointcloud and image received from callback
-        sensor_msgs::PointCloud2::Ptr pointcloud_msg_;
+        sensor_msgs::PointCloud2ConstPtr pointcloud_msg_;
         sensor_msgs::ImageConstPtr image_msg_;
 
         // Flags for pointcloud and image subscription
@@ -155,6 +163,8 @@ class MultimodalObjectRecognitionROS
         // Dynamic parameter
         double pcl_object_height_above_workspace_;
         double rgb_object_height_above_workspace_;
+        double rgb_container_height_;
+        int rgb_bbox_tolerance_;
 
     private:
         //void setConfig();
@@ -191,7 +201,7 @@ class MultimodalObjectRecognitionROS
         // Update object pose for axis and bolt
         void updateObjectPose(mcr_perception_msgs::ObjectList &combined_object_list);
 
-        void updateContainerPose(mcr_perception_msgs::ObjectList &object_list);
+        void updateContainerPose(mcr_perception_msgs::Object &container_object);
 
     public:
         void update();
