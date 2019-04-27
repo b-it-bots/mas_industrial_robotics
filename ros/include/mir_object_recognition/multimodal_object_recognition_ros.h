@@ -164,7 +164,9 @@ class MultimodalObjectRecognitionROS
         double pcl_object_height_above_workspace_;
         double rgb_object_height_above_workspace_;
         double rgb_container_height_;
-        int rgb_bbox_tolerance_;
+        int rgb_bbox_size_adjustment_;
+        int rgb_bbox_min_diag_;
+        int rgb_bbox_max_diag_;
 
     private:
         //void setConfig();
