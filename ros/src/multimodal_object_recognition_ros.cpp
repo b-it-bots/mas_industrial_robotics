@@ -40,8 +40,10 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     received_recognized_cloud_list_flag_(false),
     received_recognized_image_list_flag_(false),
     rgb_object_id_(100),
-    rgb_container_height_(0.10),
-    rgb_bbox_tolerance_(2),
+    rgb_container_height_(0.05),
+    rgb_bbox_size_adjustment_(2),
+    rgb_bbox_min_diag_(21),
+    rgb_bbox_max_diag_(250),
     bounding_box_visualizer_pcl_("bounding_boxes", mcr::visualization::Color(mcr::visualization::Color::SALMON)),
     cluster_visualizer_rgb_("tabletop_cluster_rgb"),
     cluster_visualizer_pcl_("tabletop_cluster_pcl"),
@@ -411,7 +413,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
             // NOTE: Remove large 2d misdetected bbox (misdetection)
             // Solution find diagional, and make a threshold
             double len_diag = sqrt(powf(((roi_2d.width + roi_2d.width) >> 1), 2));
-            if (len_diag > 21 && len_diag < 250)
+            if (len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_)
             {
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_object_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
                 get3DObject(roi_2d, cloud, pcl_object_cluster);
@@ -488,18 +490,19 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
         combined_object_list.objects.insert(combined_object_list.objects.end(), 
                                         final_image_list.objects.begin(),
                                         final_image_list.objects.end());
+    }
 
-        // TODO: remove cloud before publish
-        // TODO: Edit object_list merger to receive a single list containing 3d and rgb
-        //pub_object_list_.publish(final_object_list);
+    if (combined_object_list.objects.size() > 0)
+    {
+        // Adjust RPY
         adjustObjectPose(combined_object_list);
         // update AXIS, BOLT and CONTAINER POSE
         updateObjectPose(combined_object_list);
-        //updateContainerPose(combined_object_list);
-        
-        // Rename CONTAINER_RED AND BLUE TO CONTAINER_BOX_BLUE 
+        // Rename RED_CONTAINER TO CONTAINER_BOX_BLUE 
+        // HEY REFBOX, CHANGE YOUR MESSANGE AS IN RULEBOOK, FOLLOW RULEBOOK
         for (int i=0; i<combined_object_list.objects.size(); i++)
         {
+            // Empty cloud
             sensor_msgs::PointCloud2 empty_ros_cloud;
             combined_object_list.objects[i].pointcloud = empty_ros_cloud;
             if (combined_object_list.objects[i].name == "BLUE_CONTAINER")
@@ -511,12 +514,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
                 combined_object_list.objects[i].name = "CONTAINER_BOX_RED";
             }
         }
-        
         // Publish object list to object list merger
         pub_object_list_.publish(combined_object_list);
-        /* //Resetting the flag for next message */
-        /* received_recognized_image_list_flag_ = false; */
-        /* received_recognized_cloud_list_flag_ = false; */
     }
     else
     {
@@ -666,10 +665,10 @@ void MultimodalObjectRecognitionROS::get3DObject(const sensor_msgs::RegionOfInte
     int max_x = roi.x_offset + roi.width;
     int max_y = roi.y_offset + roi.height;
     // Add BBox tolerance
-    if (roi.x_offset > rgb_bbox_tolerance_) min_x = min_x - rgb_bbox_tolerance_;
-    if (roi.y_offset > rgb_bbox_tolerance_) min_y = min_y - rgb_bbox_tolerance_;
-    if (roi.width+rgb_bbox_tolerance_ < ordered_cloud->width) min_x = min_x + rgb_bbox_tolerance_;
-    if (roi.height+rgb_bbox_tolerance_ < ordered_cloud->height) min_y = min_y + rgb_bbox_tolerance_;
+    if (roi.x_offset > rgb_bbox_size_adjustment_) min_x = min_x - rgb_bbox_size_adjustment_;
+    if (roi.y_offset > rgb_bbox_size_adjustment_) min_y = min_y - rgb_bbox_size_adjustment_;
+    if (roi.width+rgb_bbox_size_adjustment_ < ordered_cloud->width) min_x = min_x + rgb_bbox_size_adjustment_;
+    if (roi.height+rgb_bbox_size_adjustment_ < ordered_cloud->height) min_y = min_y + rgb_bbox_size_adjustment_;
     
     std::vector<cv::Point> pixel_loc;
 
@@ -895,7 +894,7 @@ void MultimodalObjectRecognitionROS::updateContainerPose(mcr_perception_msgs::Ob
 
     container_object.pose.pose.position.x = centroid[0];
     container_object.pose.pose.position.y = centroid[1];
-    container_object.pose.pose.position.z = max_pt.z + rgb_bbox_tolerance_;
+    container_object.pose.pose.position.z = max_pt.z + rgb_container_height_;
 }
 
 void MultimodalObjectRecognitionROS::segmentObjects(const sensor_msgs::ImageConstPtr &image, 
@@ -1084,7 +1083,9 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
             config.cluster_min_distance_to_polygon);
     pointcloud_segmentation_->object_height_above_workspace_ = config.object_height_above_workspace;
     rgb_container_height_ = config.rgb_container_height;
-    rgb_bbox_tolerance_ = config.rgb_bbox_tolerance;
+    rgb_bbox_size_adjustment_ = config.rgb_bbox_size_adjustment;
+    rgb_bbox_min_diag_ = config.rgb_bbox_min_diag;
+    rgb_bbox_max_diag_ = config.rgb_bbox_max_diag;
 }
 
 
