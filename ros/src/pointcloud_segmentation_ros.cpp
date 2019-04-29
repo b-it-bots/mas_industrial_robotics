@@ -32,12 +32,10 @@
 #include <std_msgs/Float32.h>
 
 PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh): nh_(nh),
-    add_to_octree_(false), object_id_(0), debug_mode_(false), dataset_collection_(false)
+    add_to_octree_(false), object_id_(0), debug_mode_(false)
 {    
     nh_.param("octree_resolution", octree_resolution_, 0.0025);
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
-    nh_.param<std::string>("logdir", logdir_, "/tmp/");
-
 }
 
 PointcloudSegmentationROS::~PointcloudSegmentationROS()
@@ -115,39 +113,39 @@ void PointcloudSegmentationROS::segment_cloud(mcr_perception_msgs::ObjectList &o
     }
 }
 
-void PointcloudSegmentationROS::savePcd(const PointCloud::ConstPtr &pointcloud, std::string obj_name)
-{
-    std::stringstream filename; // stringstream used for the conversion
-    ros::Time time_now = ros::Time::now();
-    filename.str(""); //clearing the stringstream
-    if (debug_mode_)
-    {
-        filename << logdir_ << obj_name << "_" << time_now <<".pcd";
-    }
-    else
-    {
-        filename << logdir_ <<"pcd_" << time_now <<".pcd";
-    }
-    ROS_INFO_STREAM("Saving pointcloud to " << logdir_);
-    pcl::io::savePCDFileASCII (filename.str(), *pointcloud);
-}
+/* void PointcloudSegmentationROS::savePcd(const PointCloud::ConstPtr &pointcloud, std::string obj_name) */
+/* { */
+/*     std::stringstream filename; // stringstream used for the conversion */
+/*     ros::Time time_now = ros::Time::now(); */
+/*     filename.str(""); //clearing the stringstream */
+/*     if (debug_mode_) */
+/*     { */
+/*         filename << logdir_ << obj_name << "_" << time_now <<".pcd"; */
+/*     } */
+/*     else */
+/*     { */
+/*         filename << logdir_ <<"pcd_" << time_now <<".pcd"; */
+/*     } */
+/*     ROS_INFO_STREAM("Saving pointcloud to " << logdir_); */
+/*     pcl::io::savePCDFileASCII (filename.str(), *pointcloud); */
+/* } */
 
-void PointcloudSegmentationROS::findPlane()
-{
-    PointCloud::Ptr cloud(new PointCloud);
-    cloud->header.frame_id = frame_id_;
-    cloud_accumulation_->getAccumulatedCloud(*cloud);
+/* void PointcloudSegmentationROS::findPlane() */
+/* { */
+/*     PointCloud::Ptr cloud(new PointCloud); */
+/*     cloud->header.frame_id = frame_id_; */
+/*     cloud_accumulation_->getAccumulatedCloud(*cloud); */
 
-    double workspace_height;
-    PointCloud::Ptr hull(new PointCloud);
-    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
-    PointCloud::Ptr debug = scene_segmentation_.findPlane(cloud, hull, coefficients, workspace_height);
-    debug->header.frame_id = cloud->header.frame_id;
-    //std_msgs::Float64 workspace_height_msg;
-    //workspace_height_msg.data = workspace_height;
-    //pub_workspace_height_.publish(workspace_height_msg);
-    //pub_debug_.publish(*debug);
-}
+/*     double workspace_height; */
+/*     PointCloud::Ptr hull(new PointCloud); */
+/*     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients); */
+/*     PointCloud::Ptr debug = scene_segmentation_.findPlane(cloud, hull, coefficients, workspace_height); */
+/*     debug->header.frame_id = cloud->header.frame_id; */
+/*     //std_msgs::Float64 workspace_height_msg; */
+/*     //workspace_height_msg.data = workspace_height; */
+/*     //pub_workspace_height_.publish(workspace_height_msg); */
+/*     //pub_debug_.publish(*debug); */
+/* } */
 
 geometry_msgs::PoseStamped PointcloudSegmentationROS::getPose(const BoundingBox &box)
 {

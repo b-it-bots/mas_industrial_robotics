@@ -133,6 +133,7 @@ class MultimodalObjectRecognitionROS
         // Used to store pointcloud and image received from callback
         sensor_msgs::PointCloud2ConstPtr pointcloud_msg_;
         sensor_msgs::ImageConstPtr image_msg_;
+        PointCloud::Ptr cloud_;
 
         // Flags for pointcloud and image subscription
         bool pointcloud_msg_received_;
@@ -179,8 +180,9 @@ class MultimodalObjectRecognitionROS
                             mcr_perception_msgs::ObjectList &object_list,
                             std::vector<PointCloud::Ptr> &clusters);
 
-        void recognizeCloudAndImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, 
-                                 const sensor_msgs::ImageConstPtr &msg);
+        void recognizeCloudAndImage();
+        /* void recognizeCloudAndImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, */ 
+        /*                          const sensor_msgs::ImageConstPtr &msg); */
 
         void recognizeImage(const sensor_msgs::ImageConstPtr &msg);
         void publishImagesForRecognition(const sensor_msgs::ImageConstPtr &msg);
