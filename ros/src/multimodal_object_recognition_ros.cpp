@@ -202,6 +202,8 @@ void MultimodalObjectRecognitionROS::update()
         // Reset received recognized cloud and image
         received_recognized_cloud_list_flag_ = false;
         received_recognized_image_list_flag_ = false;
+
+        pointcloud_segmentation_ = PointcloudSegmentationUPtr(new PointcloudSegmentationROS(nh_));
     }
 }
 
@@ -238,11 +240,13 @@ void MultimodalObjectRecognitionROS::preprocessCloud()
     // pcl_conversions::moveFromPCL(pcl_image, *image_msg);
     
     // Convert to pcl::Pointcloud for segmentation
-    PointCloud::Ptr cloud(new PointCloud);
-    pcl::fromPCLPointCloud2(*pc2, *cloud);
+    /* PointCloud::Ptr cloud(new PointCloud); */
+    cloud_ = PointCloud::Ptr(new PointCloud); 
+    pcl::fromPCLPointCloud2(*pc2, *cloud_);
     
     //recognize Cloud and image
-    recognizeCloudAndImage(cloud, image_msg_);
+    /* recognizeCloudAndImage(cloud, image_msg_); */
+    recognizeCloudAndImage();
     // Reset cloud accumulation
     pointcloud_segmentation_->reset_cloud_accumulation();
 
@@ -266,13 +270,20 @@ void MultimodalObjectRecognitionROS::segmentCloud(const pcl::PointCloud<pcl::Poi
     pointcloud_segmentation_->segment_cloud(object_list, clusters);
 }
 
-void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, 
-                                 const sensor_msgs::ImageConstPtr &image)
+void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 {
+    // Check clouds is not empty
+    /* if (cloud_->points.size() == 0) */
+    /* { */
+    /*     ROS_WARN("Pointcloud is empty"); */
+    /*     return; */
+    /* } */
     mcr_perception_msgs::ObjectList cloud_object_list;
     std::vector<PointCloud::Ptr> clusters_3d;
-    segmentCloud(cloud, cloud_object_list, clusters_3d);
-    
+    /* pointcloud_segmentation_->add_cloud_accumulation(cloud_); */
+    /* pointcloud_segmentation_->segment_cloud(cloud_object_list, clusters_3d); */
+    segmentCloud(cloud_,cloud_object_list, clusters_3d);
+ 
     std_msgs::Float64 workspace_height_msg;
     workspace_height_msg.data = pointcloud_segmentation_->workspace_height_;
     pub_workspace_height_.publish(workspace_height_msg);
@@ -291,36 +302,36 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
 
     // Use semantic_segmentation
     bool use_semantic_segmentation = false;
-    if (use_semantic_segmentation)
-    {   
-        cv::Mat segmented_objects_mask;
-        segmentObjects(image, segmented_objects_mask);
-        // Detect objects based on the segmented mask
-        cv::Mat debug_image;
-        std::vector <cv::Mat>  object_images;
-        std::vector <float>  object_areas;
-        std::vector<std::vector<cv::Point> > object_roi_points;
-        std::vector<cv::Point> object_center_points;
-        ROS_INFO_STREAM("Starting object extraction");
-        cv_bridge::CvImagePtr cv_image;
-        try
-        {
-            cv_image = cv_bridge::toCvCopy(*image, sensor_msgs::image_encodings::BGR8);
-        }
-        catch (cv_bridge::Exception& e)
-        {
-            ROS_ERROR("cv_bridge exception: %s", e.what());
-            return;
-        }
-        getCroppedImages(cv_image->image, segmented_objects_mask,debug_image,
-                        object_images, object_areas, object_roi_points, object_center_points);
-        ROS_INFO_STREAM("DONE OBJECT EXTRACTION");
+    /* if (use_semantic_segmentation) */
+    /* { */   
+    /*     cv::Mat segmented_objects_mask; */
+    /*     segmentObjects(image_msg_, segmented_objects_mask); */
+    /*     // Detect objects based on the segmented mask */
+    /*     cv::Mat debug_image; */
+    /*     std::vector <cv::Mat>  object_images; */
+    /*     std::vector <float>  object_areas; */
+    /*     std::vector<std::vector<cv::Point> > object_roi_points; */
+    /*     std::vector<cv::Point> object_center_points; */
+    /*     ROS_INFO_STREAM("Starting object extraction"); */
+    /*     cv_bridge::CvImagePtr cv_image; */
+    /*     try */
+    /*     { */
+    /*         cv_image = cv_bridge::toCvCopy(*image_msg_, sensor_msgs::image_encodings::BGR8); */
+    /*     } */
+    /*     catch (cv_bridge::Exception& e) */
+    /*     { */
+    /*         ROS_ERROR("cv_bridge exception: %s", e.what()); */
+    /*         return; */
+    /*     } */
+    /*     getCroppedImages(cv_image->image, segmented_objects_mask,debug_image, */
+    /*                     object_images, object_areas, object_roi_points, object_center_points); */
+    /*     ROS_INFO_STREAM("DONE OBJECT EXTRACTION"); */
 
-    }
+    /* } */
     // Pub Image to recognizer
     mcr_perception_msgs::ImageList image_list;
     image_list.images.resize(1);
-    image_list.images[0] = *image;
+    image_list.images[0] = *image_msg_;
     pub_image_to_recognizer_.publish(image_list);
     ROS_INFO("Waiting for message from SSD MobileNet recognition");
     //loop till you received the message from the 3d and rgb recognition
@@ -379,14 +390,14 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
     mcr_perception_msgs::ObjectList final_image_list;
     mcr_perception_msgs::BoundingBoxList bounding_boxes;
     std::vector<PointCloud::Ptr> clusters_2d;
-
+    
     bool done_recognizing_image = false;
     if (recognized_image_list_.objects.size() > 0)
     {
         cv_bridge::CvImagePtr cv_image;
         try
         {
-            cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
+            cv_image = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
         }
         catch (cv_bridge::Exception& e)
         {
@@ -416,7 +427,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
             if (len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_)
             {
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_object_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
-                get3DObject(roi_2d, cloud, pcl_object_cluster);
+                get3DObject(roi_2d, cloud_, pcl_object_cluster);
                 sensor_msgs::PointCloud2 ros_pc2;
                 pcl::PCLPointCloud2::Ptr pc2(new pcl::PCLPointCloud2);
                 pcl::toPCLPointCloud2(*pcl_object_cluster, *pc2);
@@ -429,7 +440,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
                 // Get pose
                 geometry_msgs::PoseStamped pose = estimatePose(pcl_object_cluster);
                 // Transform pose
-                std::string frame_id = cloud->header.frame_id;
+                std::string frame_id = cloud_->header.frame_id;
                 pose.header.stamp = ros::Time::now();
                 pose.header.frame_id = frame_id;
                 std::string target_frame_id;
@@ -473,7 +484,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
                 std::cout<<"[RGB] DECOY"<<std::endl;
                 final_image_list.objects[i].name = "DECOY";
                 geometry_msgs::PoseStamped pose;
-                pose.header.frame_id = cloud->header.frame_id;
+                pose.header.frame_id = cloud_->header.frame_id;
                 pose.pose.position.x = 0.0;
                 pose.pose.position.y = 0.0;
                 pose.pose.position.z = 0.0;
@@ -611,6 +622,16 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage(const pcl::PointClou
         }
 
     }
+
+    // clear all objects
+    combined_object_list.objects.clear();
+    cloud_object_list.objects.clear();
+    combined_object_list.objects.clear();
+    final_image_list.objects.clear();
+    bounding_boxes.bounding_boxes.clear();
+    clusters_2d.clear();
+    clusters_3d.clear();
+
 }
 
 void MultimodalObjectRecognitionROS::updateObjectPose(mcr_perception_msgs::ObjectList &combined_object_list)
