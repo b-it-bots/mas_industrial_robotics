@@ -91,6 +91,7 @@ class PointcloudSegmentationROS
         double object_height_above_workspace_;
         std::string frame_id_;
         double workspace_height_;
+        Eigen::Vector3f getPlaneNormal();
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_POINTCLOUD_SEGMENTATION_ROS_H

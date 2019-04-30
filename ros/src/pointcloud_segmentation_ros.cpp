@@ -201,3 +201,12 @@ void PointcloudSegmentationROS::get3DBoundingBox(const pcl::PointCloud<pcl::Poin
     bbox = BoundingBox::create(cloud->points, normal);
     convertBoundingBox(bbox, bounding_box_msg);
 }
+
+Eigen::Vector3f PointcloudSegmentationROS::getPlaneNormal()
+{
+    Eigen::Vector3f normal(scene_segmentation_.normal_[0],
+                            scene_segmentation_.normal_[1],
+                            scene_segmentation_.normal_[2]);
+    return normal;
+}
+
