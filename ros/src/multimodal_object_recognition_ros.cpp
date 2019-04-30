@@ -271,18 +271,12 @@ void MultimodalObjectRecognitionROS::segmentCloud(const pcl::PointCloud<pcl::Poi
 
 void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 {
-    // Check clouds is not empty
-    /* if (cloud_->points.size() == 0) */
-    /* { */
-    /*     ROS_WARN("Pointcloud is empty"); */
-    /*     return; */
-    /* } */
     mcr_perception_msgs::ObjectList cloud_object_list;
     std::vector<PointCloud::Ptr> clusters_3d;
+    
     pointcloud_segmentation_->add_cloud_accumulation(cloud_);
     pointcloud_segmentation_->segment_cloud(cloud_object_list, clusters_3d);
     //segmentCloud(cloud_,cloud_object_list, clusters_3d);
- 
     std_msgs::Float64 workspace_height_msg;
     workspace_height_msg.data = pointcloud_segmentation_->workspace_height_;
     pub_workspace_height_.publish(workspace_height_msg);
@@ -291,99 +285,93 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     const Eigen::Vector3f normal(pointcloud_segmentation_->scene_segmentation_.coefficients_->values[0], 
                                  pointcloud_segmentation_->scene_segmentation_.coefficients_->values[1], 
                                  pointcloud_segmentation_->scene_segmentation_.coefficients_->values[2]);
+    //const Eigen::Vector3f normal = pointcloud_segmentation_->getPlaneNormal();
+
     //Publish cluster for recognition
-    ROS_INFO_STREAM("Publishing clouds for recognition");
-    ROS_INFO_STREAM("Using ... for recognition");
-    pub_cloud_to_recognizer_.publish(cloud_object_list);
-    //publish rgb for recognition
-    ROS_INFO_STREAM("Publishing images for recognition");
-    ROS_INFO_STREAM("Using ... for recognition");
-
-    // Use semantic_segmentation
-    bool use_semantic_segmentation = false;
-    /* if (use_semantic_segmentation) */
-    /* { */   
-    /*     cv::Mat segmented_objects_mask; */
-    /*     segmentObjects(image_msg_, segmented_objects_mask); */
-    /*     // Detect objects based on the segmented mask */
-    /*     cv::Mat debug_image; */
-    /*     std::vector <cv::Mat>  object_images; */
-    /*     std::vector <float>  object_areas; */
-    /*     std::vector<std::vector<cv::Point> > object_roi_points; */
-    /*     std::vector<cv::Point> object_center_points; */
-    /*     ROS_INFO_STREAM("Starting object extraction"); */
-    /*     cv_bridge::CvImagePtr cv_image; */
-    /*     try */
-    /*     { */
-    /*         cv_image = cv_bridge::toCvCopy(*image_msg_, sensor_msgs::image_encodings::BGR8); */
-    /*     } */
-    /*     catch (cv_bridge::Exception& e) */
-    /*     { */
-    /*         ROS_ERROR("cv_bridge exception: %s", e.what()); */
-    /*         return; */
-    /*     } */
-    /*     getCroppedImages(cv_image->image, segmented_objects_mask,debug_image, */
-    /*                     object_images, object_areas, object_roi_points, object_center_points); */
-    /*     ROS_INFO_STREAM("DONE OBJECT EXTRACTION"); */
-
-    /* } */
+    if (cloud_object_list.objects.size() > 0)
+    {
+        ROS_INFO_STREAM("Publishing clouds for recognition");
+        ROS_INFO_STREAM("Using ... for recognition");
+        pub_cloud_to_recognizer_.publish(cloud_object_list);
+    }
+    
     // Pub Image to recognizer
     mcr_perception_msgs::ImageList image_list;
     image_list.images.resize(1);
     image_list.images[0] = *image_msg_;
-    pub_image_to_recognizer_.publish(image_list);
-    ROS_INFO("Waiting for message from SSD MobileNet recognition");
+    if (image_list.images.size() > 0)
+    {
+        ROS_INFO_STREAM("Publishing images for recognition");
+        ROS_INFO_STREAM("Using ... for recognition");
+        pub_image_to_recognizer_.publish(image_list);
+    }
+    ROS_INFO("Waiting for message from Cloud and Imahe recognizer");
+    // TODO: HANDLE MALLOC ERROR WHEN SPINNING
     //loop till you received the message from the 3d and rgb recognition
-    int loop_rate_hz = 30;
-    int timeout_wait = 8; //secs
-    ros::Rate loop_rate(loop_rate_hz);
-    int loop_rate_count = 0;
-
     // TODO: Wait for recognize image to come
     // Why wait for image and not cloud recognition?
     // It's because rgb is slower to recognize
-    //bool received_cloud_image_list = false;
-    bool received_cloud_list = false;
-    bool received_image_list = false;
-    //while((!received_image_list) && (!received_cloud_list))
-    while(!received_image_list)
+    int loop_rate_hz = 30;
+    int timeout_wait = 2; //secs
+    ros::Rate loop_rate(loop_rate_hz);
+    int loop_rate_count = 0;
+    if (cloud_object_list.objects.size() > 0)
     {
-        loop_rate.sleep();
-        loop_rate_count += 1;
-        ros::spinOnce();
-        if (received_recognized_image_list_flag_ == true)
+        while(!received_recognized_cloud_list_flag_)
         {
-            received_image_list = true;
-            ROS_INFO_STREAM("[RGB] Received object_list from rgb recognizer");
-            ROS_INFO_STREAM("[RGB] Received objects: "<<recognized_image_list_.objects.size());
-        }
-        if (received_recognized_cloud_list_flag_ == true)
-        {
-            received_cloud_list = true;
-            ROS_INFO_STREAM("[PCL] Received object_list from pcl recognizer");
-            ROS_INFO_STREAM("[PCL] Received objects: "<<recognized_cloud_list_.objects.size());
-        }
-        if (loop_rate_count > loop_rate_hz * timeout_wait)
-        {
-            ROS_ERROR("No message received from both RGB and PCL recognizer. ");
-            return; //If not recevied in timeout secs return
+            ROS_INFO_STREAM("["<<loop_rate_count<<"] [PCL] Waiting message from PCL recognizer node");
+            loop_rate_count += 1;
+            ros::spinOnce();
+            loop_rate.sleep();
+            if (received_recognized_cloud_list_flag_ == true)
+            {
+                ROS_INFO_STREAM("[PCL] Received object_list from pcl recognizer");
+                ROS_INFO_STREAM("[PCL] Received objects: "<<recognized_cloud_list_.objects.size());
+            }
+            if (loop_rate_count > loop_rate_hz * timeout_wait)
+            {
+                received_recognized_cloud_list_flag_ = false;
+                ROS_ERROR("[PCL] No message received from PCL recognizer. ");
+                break;
+            }
         }
     }
+    loop_rate_count = 0;
+    timeout_wait = 3; //secs
+    if (image_list.images.size() > 0)
+    {
+        while(!received_recognized_image_list_flag_)
+        {
+            ROS_INFO_STREAM("["<<loop_rate_count<<"] [RGB] Waiting message from RGB recognizer node");
+            loop_rate_count += 1;
+            ros::spinOnce();
+            loop_rate.sleep();
+            if (received_recognized_image_list_flag_ == true)
+            {
+                ROS_INFO_STREAM("[RGB] Received object_list from rgb recognizer");
+                ROS_INFO_STREAM("[RGB] Received objects: "<<recognized_image_list_.objects.size());
+            }
+            if (loop_rate_count > loop_rate_hz * timeout_wait)
+            {
+                received_recognized_image_list_flag_ = false;
+                ROS_ERROR("[RGB] No message received from RGB recognizer. ");
+                //break;
+                // Break only causes pointer error, machine readable error
+                return;
+            }
+        }
+    }
+
     received_recognized_image_list_flag_ = false;
     received_recognized_cloud_list_flag_ = false;
-    // TODO: Handle empty objects here
-    // Postprocess RGB List
-    // 1. Generate 3d object
     
     // Merge recognized_cloud_list and final_image_ist
     mcr_perception_msgs::ObjectList combined_object_list;
-    bool done_recognizing_cloud = false;
     if (recognized_cloud_list_.objects.size() > 0)
     {
         combined_object_list.objects.insert(combined_object_list.objects.end(), 
                                         recognized_cloud_list_.objects.begin(),
                                         recognized_cloud_list_.objects.end());
-        done_recognizing_cloud = true;
     }
 
     mcr_perception_msgs::ObjectList final_image_list;
@@ -621,16 +609,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         }
 
     }
-
-    // clear all objects
-    combined_object_list.objects.clear();
-    cloud_object_list.objects.clear();
-    combined_object_list.objects.clear();
-    final_image_list.objects.clear();
-    bounding_boxes.bounding_boxes.clear();
-    clusters_2d.clear();
-    clusters_3d.clear();
-
 }
 
 void MultimodalObjectRecognitionROS::updateObjectPose(mcr_perception_msgs::ObjectList &combined_object_list)
