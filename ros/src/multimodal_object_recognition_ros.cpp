@@ -203,7 +203,6 @@ void MultimodalObjectRecognitionROS::update()
         received_recognized_cloud_list_flag_ = false;
         received_recognized_image_list_flag_ = false;
 
-        pointcloud_segmentation_ = PointcloudSegmentationUPtr(new PointcloudSegmentationROS(nh_));
     }
 }
 
@@ -280,9 +279,9 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     /* } */
     mcr_perception_msgs::ObjectList cloud_object_list;
     std::vector<PointCloud::Ptr> clusters_3d;
-    /* pointcloud_segmentation_->add_cloud_accumulation(cloud_); */
-    /* pointcloud_segmentation_->segment_cloud(cloud_object_list, clusters_3d); */
-    segmentCloud(cloud_,cloud_object_list, clusters_3d);
+    pointcloud_segmentation_->add_cloud_accumulation(cloud_);
+    pointcloud_segmentation_->segment_cloud(cloud_object_list, clusters_3d);
+    //segmentCloud(cloud_,cloud_object_list, clusters_3d);
  
     std_msgs::Float64 workspace_height_msg;
     workspace_height_msg.data = pointcloud_segmentation_->workspace_height_;
