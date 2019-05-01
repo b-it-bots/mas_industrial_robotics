@@ -4,12 +4,12 @@ gripper_controller:
         module: joint_position_controller_dual_motor
         type: JointPositionControllerDual
     joint_name: gripper_joint
-    joint_speed: 7.5
+    joint_speed: 1.17
     motor_master:
         id: 1
-        init: 512
+        init: 1985
         min: 0
-        max: 1023
+        max: 4095
     motor_slave:
         id: 2
         calbration_offset: 0
