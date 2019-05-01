@@ -288,7 +288,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     //const Eigen::Vector3f normal = pointcloud_segmentation_->getPlaneNormal();
 
     //Publish cluster for recognition
-    if (cloud_object_list.objects.size() > 0)
+    if (!cloud_object_list.objects.empty())
     {
         ROS_INFO_STREAM("Publishing clouds for recognition");
         ROS_INFO_STREAM("Using ... for recognition");
@@ -299,7 +299,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     mcr_perception_msgs::ImageList image_list;
     image_list.images.resize(1);
     image_list.images[0] = *image_msg_;
-    if (image_list.images.size() > 0)
+    if (!image_list.images.empty())
     {
         ROS_INFO_STREAM("Publishing images for recognition");
         ROS_INFO_STREAM("Using ... for recognition");
@@ -336,6 +336,16 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             }
         }
     }
+
+    // Merge recognized_cloud_list and final_image_list
+    mcr_perception_msgs::ObjectList combined_object_list;
+    if (recognized_cloud_list_.objects.empty())
+    {
+        combined_object_list.objects.insert(combined_object_list.objects.end(), 
+                                        recognized_cloud_list_.objects.begin(),
+                                        recognized_cloud_list_.objects.end());
+    }
+
     loop_rate_count = 0;
     timeout_wait = 3; //secs
     if (image_list.images.size() > 0)
@@ -355,24 +365,28 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             {
                 received_recognized_image_list_flag_ = false;
                 ROS_ERROR("[RGB] No message received from RGB recognizer. ");
-                //break;
+                //Publish recognized objects from 3D
+                if (!combined_object_list.objects.empty())
+                {
+                    ROS_INFO_STREAM("Publishing PCL objects only");
+                    // Adjust RPY and update container pose
+                    adjustObjectPose(combined_object_list);
+                    // update AXIS, BOLT
+                    updateObjectPose(combined_object_list);
+                    publishObjectList(combined_object_list);
+                }
+                else
+                {
+                    ROS_WARN("No objects to publish");
+                }
                 // Break only causes pointer error, machine readable error
                 return;
             }
         }
     }
-
-    received_recognized_image_list_flag_ = false;
+    // Reset recognition callback flags
     received_recognized_cloud_list_flag_ = false;
-    
-    // Merge recognized_cloud_list and final_image_ist
-    mcr_perception_msgs::ObjectList combined_object_list;
-    if (recognized_cloud_list_.objects.size() > 0)
-    {
-        combined_object_list.objects.insert(combined_object_list.objects.end(), 
-                                        recognized_cloud_list_.objects.begin(),
-                                        recognized_cloud_list_.objects.end());
-    }
+    received_recognized_image_list_flag_ = false;
 
     mcr_perception_msgs::ObjectList final_image_list;
     mcr_perception_msgs::BoundingBoxList bounding_boxes;
@@ -490,33 +504,17 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                                         final_image_list.objects.end());
     }
 
-    if (combined_object_list.objects.size() > 0)
+    if (!combined_object_list.objects.empty())
     {
-        // Adjust RPY
+        // Adjust RPY and update container pose
         adjustObjectPose(combined_object_list);
-        // update AXIS, BOLT and CONTAINER POSE
+        // update AXIS, BOLT
         updateObjectPose(combined_object_list);
-        // Rename RED_CONTAINER TO CONTAINER_BOX_BLUE 
-        // HEY REFBOX, CHANGE YOUR MESSANGE AS IN RULEBOOK, FOLLOW RULEBOOK
-        for (int i=0; i<combined_object_list.objects.size(); i++)
-        {
-            // Empty cloud
-            sensor_msgs::PointCloud2 empty_ros_cloud;
-            combined_object_list.objects[i].pointcloud = empty_ros_cloud;
-            if (combined_object_list.objects[i].name == "BLUE_CONTAINER")
-            {
-                combined_object_list.objects[i].name = "CONTAINER_BOX_BLUE";
-            }
-            else if (combined_object_list.objects[i].name == "RED_CONTAINER")
-            {
-                combined_object_list.objects[i].name = "CONTAINER_BOX_RED";
-            }
-        }
-        // Publish object list to object list merger
-        pub_object_list_.publish(combined_object_list);
+        publishObjectList(combined_object_list);
     }
     else
     {
+        ROS_WARN("No objects to publish");
         return;
     }
     
@@ -556,8 +554,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             {
                 if (combined_object_list.objects[i].database_id < 99)
                 {
-                    /* mas_perception_libs::BoundingBox bbox; */
-                    /* pointcloud_segmentation_->get3DBoundingBox(clusters_3d[pcl_count],  normal, bbox, bounding_boxes.bounding_boxes[i]); */
                     std::cout<<"PCL Class: "<<combined_object_list.objects[i].name<<std::endl;
                     pcl_object_pose_array.poses[pcl_count] = combined_object_list.objects[i].pose.pose;
                     pcl_labels.push_back(combined_object_list.objects[i].name);
@@ -609,6 +605,27 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         }
 
     }
+}
+
+void MultimodalObjectRecognitionROS::publishObjectList(mcr_perception_msgs::ObjectList &object_list)
+{
+    for (int i=0; i<object_list.objects.size(); i++)
+    {
+        // Empty cloud
+        sensor_msgs::PointCloud2 empty_ros_cloud;
+        object_list.objects[i].pointcloud = empty_ros_cloud;
+        // Rename container to match refbox naming
+        if (object_list.objects[i].name == "BLUE_CONTAINER")
+        {
+            object_list.objects[i].name = "CONTAINER_BOX_BLUE";
+        }
+        else if (object_list.objects[i].name == "RED_CONTAINER")
+        {
+            object_list.objects[i].name = "CONTAINER_BOX_RED";
+        }
+    }
+    // Publish object list to object list merger
+    pub_object_list_.publish(object_list);
 }
 
 void MultimodalObjectRecognitionROS::updateObjectPose(mcr_perception_msgs::ObjectList &combined_object_list)
