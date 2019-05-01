@@ -207,6 +207,8 @@ class MultimodalObjectRecognitionROS
 
         void updateContainerPose(mcr_perception_msgs::Object &container_object);
 
+        void publishObjectList(mcr_perception_msgs::ObjectList &object_list);
+
     public:
         void update();
         // These should be handled in algorithm_provider_impl
