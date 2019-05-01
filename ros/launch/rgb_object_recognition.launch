@@ -2,7 +2,7 @@
 <launch>
     <arg name="net" default="detection" />
     <arg name="classifier" default="squeezeDet" />
-    <arg name="dataset_type" default="atwork_combined" />
+    <arg name="dataset_type" default="atwork_go19" />
 
     <group ns="mir_perception">
         <node pkg="mir_object_recognition" type="squeezedet_node.py" name="squeezedet" output="screen" 
