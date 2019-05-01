@@ -43,19 +43,28 @@ def kitti_squeezeDet_config():
 
   mc.ANCHOR_BOX            = set_anchors(mc)
   mc.ANCHORS               = len(mc.ANCHOR_BOX)
-  mc.ANCHOR_PER_GRID       = 9
+  #mc.ANCHOR_PER_GRID       = 9
+  mc.ANCHOR_PER_GRID       = 7
 
   return mc
 
 def set_anchors(mc):
-  H, W, B = 30, 40, 9
+  H, W, B = 30, 40, 7
   anchor_shapes = np.reshape(
       [np.array(
-          [[  197.,  237.], [ 77., 111.], [ 156.,  140.],
-           [ 262.,  129.], [  48.,  51.], [ 99., 218.],
-           [ 325., 228.], [  135., 76.], [  256.,  345.]])] * H * W,
+          [[  155.,  188.], [ 101., 129.], [ 273.,  127.],
+           [ 104.,  254.], [  252.,  281.], [ 168., 113.],
+           [ 57., 58.]])] * H * W,
       (H, W, B, 2)
   )
+  # H, W, B = 30, 40, 9
+  # anchor_shapes = np.reshape(
+  #     [np.array(
+  #         [[  197.,  237.], [ 77., 111.], [ 156.,  140.],
+  #         [ 262.,  129.], [  48.,  51.], [ 99., 218.],
+  #         [ 325., 228.], [  135., 76.], [  256.,  345.]])] * H * W,
+  #     (H, W, B, 2)
+  # )
   center_x = np.reshape(
       np.transpose(
           np.reshape(
