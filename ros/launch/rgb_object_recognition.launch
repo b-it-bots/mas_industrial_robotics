@@ -2,7 +2,6 @@
 <launch>
     <arg name="net" default="detection" />
     <arg name="classifier" default="squeezeDet" />
-    <!-- <arg name="dataset_type" default="atwork_go19" /> -->
     <arg name="dataset_type" default="atwork_magdeburg" />
 
     <group ns="mir_perception">
