@@ -99,6 +99,11 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     nh_.param<std::string>("target_frame_id", target_frame_id_, "base_link");
     //rgb_object_id_ = 100;
     
+    // Pub pcl debug, used to compare pcl before and after filter
+    pub_pcl_debug_in_ = nh_.advertise<sensor_msgs::PointCloud2>("output/rgb/debug/rgb_obj_cluster_in", 1);
+    pub_pcl_debug_out_ = nh_.advertise<sensor_msgs::PointCloud2>("output/rgb/debug/rgb_obj_cluster_out", 1);
+
+    
 }
 
 MultimodalObjectRecognitionROS::~MultimodalObjectRecognitionROS()
@@ -155,6 +160,8 @@ void MultimodalObjectRecognitionROS::recognizedCloudCallback(const mcr_perceptio
     ROS_INFO("Received recognized cloud callback ");
     if (!received_recognized_cloud_list_flag_)
     {
+        std::cout<<"Insde cloud cb"<<std::endl;
+        std::cout<<"Insde cloud cb"<<received_recognized_cloud_list_flag_ <<std::endl;
         recognized_cloud_list_ = msg;
         received_recognized_cloud_list_flag_ = true;
     }
@@ -339,7 +346,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
     // Merge recognized_cloud_list and final_image_list
     mcr_perception_msgs::ObjectList combined_object_list;
-    if (recognized_cloud_list_.objects.empty())
+    if (!recognized_cloud_list_.objects.empty())
     {
         combined_object_list.objects.insert(combined_object_list.objects.end(), 
                                         recognized_cloud_list_.objects.begin(),
@@ -429,6 +436,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             {
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_object_cluster(new pcl::PointCloud<pcl::PointXYZRGB>);
                 get3DObject(roi_2d, cloud_, pcl_object_cluster);
+                pcl_object_cluster->header.frame_id = cloud_->header.frame_id;
+
                 sensor_msgs::PointCloud2 ros_pc2;
                 pcl::PCLPointCloud2::Ptr pc2(new pcl::PCLPointCloud2);
                 pcl::toPCLPointCloud2(*pcl_object_cluster, *pc2);
@@ -439,12 +448,13 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
                 clusters_2d.push_back(pcl_object_cluster);
                 // Get pose
-                geometry_msgs::PoseStamped pose = estimatePose(pcl_object_cluster);
+                geometry_msgs::PoseStamped pose = estimatePose(pcl_object_cluster, recognized_image_list_.objects[i].name);
                 // Transform pose
                 std::string frame_id = cloud_->header.frame_id;
                 pose.header.stamp = ros::Time::now();
                 pose.header.frame_id = frame_id;
                 std::string target_frame_id;
+                geometry_msgs::PoseStamped pose_transformed;
                 if (nh_.hasParam("target_frame_id"))
                 {
                     nh_.param("target_frame_id", target_frame_id, frame_id);
@@ -456,7 +466,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                             transform_listener_.getLatestCommonTime(frame_id, target_frame_id, common_time, NULL);
                             pose.header.stamp = common_time;
                             transform_listener_.waitForTransform(target_frame_id, frame_id, common_time, ros::Duration(0.1));
-                            geometry_msgs::PoseStamped pose_transformed;
                             transform_listener_.transformPose(target_frame_id, pose, pose_transformed);
                             final_image_list.objects[i].pose = pose_transformed;
                         }
@@ -476,9 +485,25 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 {
                     final_image_list.objects[i].pose = pose;
                 }
-                final_image_list.objects[i].name = recognized_image_list_.objects[i].name;
                 final_image_list.objects[i].probability = recognized_image_list_.objects[i].probability;
                 final_image_list.objects[i].database_id = rgb_object_id_;
+                /* double base_link_distance_to_laser = 0.370; //30cm */
+                /* double max_object_x_pose_from_base_link = 0.970; */
+                /* double current_object_x_pose = pose_transformed.pose.position.x; */
+                /* if (current_object_x_pose < rgb_base_link_to_laser_distance_ || */
+                /*         current_object_x_pose > rgb_max_object_pose_x_to_base_link_ ) */
+                /* { */
+                /*     std::cout<<"#########Filtering: "<<recognized_image_list_.objects[i].name<<std::endl; */
+                /*     std::cout<<"Pose:  "<<pose_transformed.pose.position.x<<std::endl; */
+                /*     /1* std::cout<<"X:  "<<pose.header.frame_id<<std::endl; *1/ */
+                    
+                /*     final_image_list.objects[i].name = "DECOY"; */
+                    
+                /* } */
+                /* else */
+                /* { */
+                    final_image_list.objects[i].name = recognized_image_list_.objects[i].name;
+                /* } */
             }
             else
             {
@@ -486,9 +511,9 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 final_image_list.objects[i].name = "DECOY";
                 geometry_msgs::PoseStamped pose;
                 pose.header.frame_id = cloud_->header.frame_id;
-                pose.pose.position.x = 0.0;
-                pose.pose.position.y = 0.0;
-                pose.pose.position.z = 0.0;
+                pose.pose.position.x = 10.0;
+                pose.pose.position.y = 10.0;
+                pose.pose.position.z = 10.0;
                 pose.pose.orientation.x = 0.0;
                 pose.pose.orientation.y = 0.0;
                 pose.pose.orientation.z = 0.0;
@@ -506,6 +531,24 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
     if (!combined_object_list.objects.empty())
     {
+        for (int i=0; i<combined_object_list.objects.size(); i++)
+        {
+            double current_object_x_pose = combined_object_list.objects[i].pose.pose.position.x;
+            if (current_object_x_pose < rgb_base_link_to_laser_distance_ ||
+                    current_object_x_pose > rgb_max_object_pose_x_to_base_link_ )
+            {
+                std::cout<<"#########Filtering: "<<combined_object_list.objects[i].name<<std::endl;
+                std::cout<<"base link to lase: "<<rgb_base_link_to_laser_distance_<<std::endl;
+                std::cout<<"rgb max object pose to baselink: "<<rgb_max_object_pose_x_to_base_link_<<std::endl;
+                std::cout<<"Pose:  "<<current_object_x_pose<<std::endl;
+                
+                combined_object_list.objects[i].name = "DECOY";
+                
+            }
+            std::cout<<"[RGB] Object: "<<combined_object_list.objects[i].name<<std::endl;
+            std::cout<<"Pose:  "<<current_object_x_pose<<std::endl;
+
+        }
         // Adjust RPY and update container pose
         adjustObjectPose(combined_object_list);
         // update AXIS, BOLT
@@ -586,15 +629,17 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             {
                 if (combined_object_list.objects[i].database_id > 99)
                 {
-                    std::cout<<"RGB Class: "<<combined_object_list.objects[i].name<<std::endl;
+                    std::cout<<"[RGB] Class: "<<combined_object_list.objects[i].name<<std::endl;
                     rgb_object_pose_array.poses[rgb_count] = combined_object_list.objects[i].pose.pose;
                     rgb_labels.push_back(combined_object_list.objects[i].name);
+                    std::cout<<"[RGB] Pose: "<<combined_object_list.objects[i].pose.pose.position.x<<", "<<combined_object_list.objects[i].pose.pose.position.y<<", "<<combined_object_list.objects[i].pose.pose.position.z<<std::endl;
                     rgb_count ++;
                 }
             }
 
             if (rgb_object_pose_array.poses.size() > 0)
             {
+                std::cout<<"[RGB] pose array size: "<<rgb_object_pose_array.poses.size()<<std::endl;
                 pub_rgb_object_pose_array_.publish(rgb_object_pose_array);
             }
             if ((rgb_labels.size() == rgb_object_pose_array.poses.size()) && 
@@ -717,13 +762,76 @@ void MultimodalObjectRecognitionROS::get3DObject(const sensor_msgs::RegionOfInte
     }
 }
 
-geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud)
+geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, std::string name)
 {
+    // If is not object name is not m20, m30, bearing, distance tube,
+    // do passtrhough to filter
+    // TODO: Pose zero after filter
+    bool use_filter = false;
+    pcl::PointCloud<pcl::PointXYZRGB> filtered_cloud;
+    if (use_filter)
+    {
+        // With filter, remove points belonging to plane for long objects
+        if (name == "M30" || 
+            name == "M20" ||
+            name == "DISTANCE_TUBE" ||
+            name == "BEARING") 
+        {
+            filtered_cloud = *xyz_input_cloud;
+        }
+        else
+        {
+            std::cout<<"cloud: "<<xyz_input_cloud->width<<", "<<xyz_input_cloud->height<<std::endl;
+            sensor_msgs::PointCloud2 ros_pc2_in;
+            pcl::PCLPointCloud2::Ptr pc2(new pcl::PCLPointCloud2);
+            pcl::toPCLPointCloud2(*xyz_input_cloud, *pc2);
+            pcl_conversions::fromPCL(*pc2, ros_pc2_in);
+            ros_pc2_in.header.frame_id = target_frame_id_;
+            ros_pc2_in.header.stamp = ros::Time::now();
+            pub_pcl_debug_in_.publish(ros_pc2_in);
+
+            pcl::PointCloud<pcl::PointXYZRGB> filtered_cloud;
+            pcl::PassThrough<PointT> pass_through;
+            pass_through.setFilterFieldName("z");
+            pcl::PointXYZRGB min_pt;
+            pcl::PointXYZRGB max_pt;
+            pcl::getMinMax3D(*xyz_input_cloud, min_pt, max_pt);
+            ROS_INFO_STREAM("Min and max z before filter: "<<min_pt.z<<", "<<max_pt.z);
+            double limit_min = min_pt.z + 0.0060;
+            double limit_max = max_pt.z;
+            pass_through.setFilterLimits(limit_min, limit_max);
+
+            pass_through.setInputCloud(xyz_input_cloud);
+            pass_through.filter(filtered_cloud);
+
+            std::cout<<"passthrough filter "<<filtered_cloud.width<<", "<<filtered_cloud.height<<std::endl;
+            for (int i=0; i<filtered_cloud.points.size();i++)
+            {
+                std::cout<<filtered_cloud.points[i].x<<", "<<filtered_cloud.points[i].y<<","<<filtered_cloud.points[i].z<<std::endl;
+            }
+            sensor_msgs::PointCloud2 ros_pc2_out;
+            pcl::PCLPointCloud2::Ptr pc2_out(new pcl::PCLPointCloud2);
+            pcl::toPCLPointCloud2(filtered_cloud, *pc2_out);
+            pcl_conversions::fromPCL(*pc2_out, ros_pc2_out);
+            ros_pc2_out.header.frame_id = target_frame_id_;
+            ros_pc2_out.header.stamp = ros::Time::now();
+            pub_pcl_debug_out_.publish(ros_pc2_out);
+        }
+    }
+    else
+    {
+        // Without filter
+        filtered_cloud = *xyz_input_cloud;
+    }
+
+    /* pcl::PointCloud<pcl::PointXYZRGB> filtered_cloud; */
+    /* filtered_cloud = *xyz_input_cloud; */
+    
     Eigen::Vector4f centroid;
-    pcl::compute3DCentroid(*xyz_input_cloud, centroid);
+    pcl::compute3DCentroid(filtered_cloud, centroid);
 
     Eigen::Matrix3f covariance;
-    pcl::computeCovarianceMatrixNormalized(*xyz_input_cloud, centroid, covariance);
+    pcl::computeCovarianceMatrixNormalized(filtered_cloud, centroid, covariance);
 
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
     Eigen::Matrix3f eigen_vectors = eigen_solver.eigenvectors();
@@ -738,7 +846,7 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::estimatePose(const pc
 
     // transform cloud to eigenvector space
     pcl::PointCloud<pcl::PointXYZRGB> transformed_cloud;
-    pcl::transformPointCloud(*xyz_input_cloud, transformed_cloud, eigen_vector_transform);
+    pcl::transformPointCloud(filtered_cloud, transformed_cloud, eigen_vector_transform);
 
     // find mean diagonal
     pcl::PointXYZRGB min_point, max_point;
@@ -758,6 +866,51 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::estimatePose(const pc
     pose_stamped.pose.orientation.y = orientation.y();
     pose_stamped.pose.orientation.z = orientation.z();
     pose_stamped.header = pointcloud_msg_->header;
+
+
+    //Converting to baselink or provided link
+    std::string frame_id = pointcloud_msg_->header.frame_id; 
+    std::string target_frame_id;
+    nh_.param<std::string>("target_frame_id", target_frame_id, "base_link_static");
+    geometry_msgs::PoseStamped transformed_pose;
+    try
+    {
+        ros::Time common_time;
+        transform_listener_.getLatestCommonTime(frame_id, target_frame_id, common_time, NULL);
+        pose_stamped.header.stamp = common_time;
+        transform_listener_.waitForTransform(target_frame_id, frame_id, common_time, ros::Duration(0.1));
+        transform_listener_.transformPose(target_frame_id, pose_stamped, transformed_pose);
+    }
+    catch (tf::TransformException ex)
+    {
+        ROS_ERROR("[RGB] Failed to transformed:  %s", ex.what());
+    }
+
+    /*
+    if (yaw < 0)
+        yaw = 6.28 + yaw; // if negative make it positive
+    std::cout<< "Yaw of the pose : "<<yaw<<std::endl;
+    if (((yaw > 5.49) && (yaw < 0.785)) || ((yaw > 2.35) && (yaw < 3.92)))
+        yaw = 0;
+    else if (((yaw > 0.785) && (yaw < 2.35)) || ((yaw > 3.92) && (yaw < 5.49)))
+        yaw = 1.57;
+    */
+
+    /*
+     * fix pitch and roll to 0 for horizontal platforms
+     
+    */
+    tf::Quaternion temp;
+    tf::quaternionMsgToTF(pose_stamped.pose.orientation, temp);
+    tf::Matrix3x3 m(temp);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+
+
+    transformed_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw);
+    /* transformed_pose.pose.position.z += offset_in_z_; */
+    pose_stamped.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw);
+    std::cout<<"[RGB] pose estimate "<<transformed_pose.pose.position.x<<", "<<transformed_pose.pose.position.y<<", "<<transformed_pose.pose.position.z<<std::endl;;
 
     return pose_stamped;
 }
@@ -1058,7 +1211,7 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
     if (msg->data == "e_start")
     {
         /* sub_cloud_ = nh_.subscribe("input_cloud_topic", 1, &MultimodalObjectRecognitionROS::pointcloudCallback, this); */
-        sub_image_ = nh_.subscribe("input_image_topic", 1, &MultimodalObjectRecognitionROS::imageCallback, this);
+        /* sub_image_ = nh_.subscribe("input_image_topic", 1, &MultimodalObjectRecognitionROS::imageCallback, this); */
 
         // Synchronize callback
         image_sub_ = new message_filters::Subscriber<sensor_msgs::Image> (nh_, "input_image_topic", 1);
@@ -1101,6 +1254,10 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
     rgb_bbox_size_adjustment_ = config.rgb_bbox_size_adjustment;
     rgb_bbox_min_diag_ = config.rgb_bbox_min_diag;
     rgb_bbox_max_diag_ = config.rgb_bbox_max_diag;
+    rgb_cluster_filter_limit_min_ = config.rgb_cluster_filter_limit_min;
+    rgb_cluster_filter_limit_max_ = config.rgb_cluster_filter_limit_max;
+    rgb_base_link_to_laser_distance_ = config.rgb_base_link_to_laser_distance;
+    rgb_max_object_pose_x_to_base_link_= config.rgb_max_object_pose_x_to_base_link;
 }
 
 
