@@ -13,12 +13,12 @@ import glob
 import numpy as np
 import tensorflow as tf
 
-from mir_object_recognition.config import *
-from mir_object_recognition.nets import *
+from rgb_object_recognition.config import *
+from rgb_object_recognition.nets import *
 BASE_DIR = os.path.dirname(os.path.abspath('__file__'))
 sys.path.append(BASE_DIR)  
 
-CHECKPOINT = '/home/emha/ros_catkin_ws/src/b-it-bots/unmerged_packages_for_testing/perception/mir_object_recognition/common/src/mir_object_recognition/log/model.ckpt'
+CHECKPOINT = '/home/emha/ros_catkin_ws/src/b-it-bots/unmerged_packages_for_testing/perception/mir_object_recognition/common/src/rgb_object_recognition/log/model.ckpt'
 MODE = 'image'
 INPUT_PATH = './data/sample.png'
 OUT_DIR = './data/out/'

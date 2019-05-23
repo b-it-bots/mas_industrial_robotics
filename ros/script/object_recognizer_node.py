@@ -68,11 +68,13 @@ from sensor_msgs.msg import Image, RegionOfInterest
 import struct
 import colorsys
 
-from mir_object_recognition.squeezedet import squeezeDet
+from rgb_object_recognition.squeezedet import squeezeDet
+from rgb_object_recognition.ssdlite_mobilenet import SSDLiteMobilenet
+from rgb_object_recognition.utils import util
 #from rgb_classifiers.squeezeDet.squeezedet import squeezeDet
 
 class ObjectRecognizer():
-    def __init__(self, model_dir, net='detection',model_name='squeezeDet', debug_mode=False):
+    def __init__(self, model_dir, net='detection', model_name='squeezeDet', debug_mode=False):
         self.cvbridge = CvBridge()
         self.debug = debug_mode
         self.pub_debug = rospy.Publisher("/mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image", Image, queue_size=1)
@@ -85,8 +87,9 @@ class ObjectRecognizer():
             if self.model_name == 'squeezeDet':
                 self.model = squeezeDet(model_dir)
                 print ("Using Squeezedet")
-            elif self.model_name == 'SSD_MobileNet':
-                print "TODO: SSD_MobileNet"
+            elif self.model_name == 'SSDLiteMobilenet':
+                self.model = SSDLiteMobilenet(model_dir)
+                print ('Using SSDLiteMobilenet')
         elif self.net == 'classification':
            print "TODO: MobileNet"
         
@@ -106,7 +109,7 @@ class ObjectRecognizer():
                         result.name = class_label[labels[i]]
                         result.probability = probs[i]
                         roi = RegionOfInterest()
-                        bbox = self.model.bbox_transform(bboxes[i])
+                        bbox = util.bbox_transform(bboxes[i])
                         roi.x_offset = int(bbox[0])
                         roi.y_offset = int(bbox[1])
                         roi.width = int(bbox[2] - bbox[0])

@@ -4,6 +4,7 @@
 
 import numpy as np
 import time
+import cv2
 import tensorflow as tf
 
 def iou(box1, box2):
@@ -194,6 +195,27 @@ def bbox_transform_inv(bbox):
     out_box[3]  = height
 
   return out_box
+
+def _draw_box(im, box_list, label_list, color=(0,255,0), cdict=None, form='center'):
+    assert form == 'center' or form == 'diagonal', \
+        'bounding box format not accepted: {}.'.format(form)
+    for bbox, label in zip(box_list, label_list):
+      if form == 'center':
+        bbox = bbox_transform(bbox)
+
+      xmin, ymin, xmax, ymax = [int(b) for b in bbox]
+
+      l = label.split(':')[0] # text before "CLASS: (PROB)"
+      if cdict and l in cdict:
+        c = cdict[l]
+      else:
+        c = color
+
+      # draw box
+      cv2.rectangle(im, (xmin, ymin), (xmax, ymax), c, 1)
+      # draw label
+      font = cv2.FONT_HERSHEY_SIMPLEX
+      cv2.putText(im, label, (xmin, ymax), font, 0.3, c, 1)
 
 class Timer(object):
   def __init__(self):

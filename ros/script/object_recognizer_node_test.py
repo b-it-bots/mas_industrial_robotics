@@ -23,7 +23,7 @@ from sensor_msgs.msg import Image
 import struct
 import colorsys
 
-from mir_object_recognition.squeezedet import squeezeDet
+from rgb_object_recognition.squeezedet import squeezeDet
 # def detect_obj(img):
 #     print "Waiting"
     

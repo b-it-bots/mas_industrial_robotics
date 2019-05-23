@@ -13,8 +13,8 @@ import glob
 import numpy as np
 import tensorflow as tf
 
-from mir_object_recognition.config import *
-from mir_object_recognition.nets import *
+from rgb_object_recognition.config import *
+from rgb_object_recognition.nets import *
 BASE_DIR = os.path.dirname(os.path.abspath('__file__'))
 sys.path.append(BASE_DIR)
 
