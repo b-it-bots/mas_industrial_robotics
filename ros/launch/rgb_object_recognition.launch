@@ -2,7 +2,6 @@
 <launch>
     <arg name="net" default="detection" />
     <arg name="classifier" default="squeezeDet" />
-    <arg name="dataset_type" default="atwork_go19" />
     <!--
     <arg name="classifier" default="squeezeDet" />
     <arg name="dataset_type" default="atwork_go19" />
@@ -12,6 +11,7 @@
     <group ns="mir_perception">
         <node pkg="mir_object_recognition" type="object_recognizer_node.py" name="obj_recognizer" output="screen" 
               respawn="false" ns="multimodal_object_recognition/recognizer/rgb">
+          <arg name="dataset_type" default="atwork_magdeburg" />
           <param name="net" value="$(arg net)" type="str" />
           <param name="classifier" value="$(arg classifier)" type="str" />
           <param name="dataset_type" value="$(arg dataset_type)" type="str" />

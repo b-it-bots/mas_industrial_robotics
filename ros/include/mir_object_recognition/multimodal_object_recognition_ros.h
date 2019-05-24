@@ -106,6 +106,9 @@ class MultimodalObjectRecognitionROS
         ros::Publisher pub_pcl_object_pose_array_;
         ros::Publisher pub_rgb_object_pose_array_;
 
+        ros::Publisher pub_pcl_debug_in_;
+        ros::Publisher pub_pcl_debug_out_;
+
         // Synchronize callback for image and pointclouds
         message_filters::Subscriber<sensor_msgs::Image> *image_sub_;
         message_filters::Subscriber<sensor_msgs::PointCloud2> *cloud_sub_;
@@ -168,6 +171,10 @@ class MultimodalObjectRecognitionROS
         int rgb_bbox_size_adjustment_;
         int rgb_bbox_min_diag_;
         int rgb_bbox_max_diag_;
+        int rgb_cluster_filter_limit_min_;
+        int rgb_cluster_filter_limit_max_;
+        double rgb_base_link_to_laser_distance_;
+        double rgb_max_object_pose_x_to_base_link_;
 
     private:
         //void setConfig();
@@ -199,7 +206,7 @@ class MultimodalObjectRecognitionROS
                                                        const mcr_perception_msgs::ObjectList& image_list,
                                                        mcr_perception_msgs::ObjectList& final_list);
         
-        geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud);
+        geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, std::string name);
 
         geometry_msgs::PoseStamped adjustObjectPose(mcr_perception_msgs::ObjectList &object_list);
         // Update object pose for axis and bolt

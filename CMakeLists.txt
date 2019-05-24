@@ -3,7 +3,7 @@ project(mir_object_recognition)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11
-  -O3
+    #-O3
 )
 
 find_package(catkin REQUIRED COMPONENTS
@@ -33,7 +33,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS
     ros/include
-    common/include
+    #common/include
   LIBRARIES
     #scene_segmentation
     mcr_segmentation

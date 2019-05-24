@@ -29,4 +29,8 @@ scene_segmentation:
     rgb_container_height: 0.0335
     rgb_bbox_size_adjustment: 2
     rgb_bbox_min_diag: 21
-    rgb_bbox_max_diag: 250
+    rgb_bbox_max_diag: 175
+    rgb_cluster_filter_limit_min: 0.009
+    rgb_cluster_filter_limit_max: 0.35
+    rgb_base_link_to_laser_distance: 0.350
+    rgb_max_object_pose_x_to_base_link: 0.650
