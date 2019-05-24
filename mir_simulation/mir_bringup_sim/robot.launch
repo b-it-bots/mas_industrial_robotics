@@ -36,7 +36,7 @@
   </node>
 
   <!-- launch joint state controller -->
-  <!--  <include file="$(find youbot_gazebo_control)/launch/joint_state_controller.launch" /> -->
+   <include file="$(find youbot_gazebo_control)/launch/joint_state_controller.launch" />
 
   <!-- launch robot state controller -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
