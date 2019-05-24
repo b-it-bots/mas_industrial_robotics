@@ -4,10 +4,10 @@
  * Author: Mohammad Wasil, Santosh Thoduka
  *
  */
-#include <mcr_perception_msgs/BoundingBox.h>
-#include <mcr_perception_msgs/BoundingBoxList.h>
-#include <mcr_perception_msgs/ObjectList.h>
-#include <mcr_perception_msgs/RecognizeObject.h>
+#include <mas_perception_msgs/BoundingBox.h>
+#include <mas_perception_msgs/BoundingBoxList.h>
+#include <mas_perception_msgs/ObjectList.h>
+#include <mas_perception_msgs/RecognizeObject.h>
 #include "mcr_scene_segmentation/impl/helpers.hpp"
 #include <mas_perception_libs/bounding_box.h>
 
@@ -42,7 +42,7 @@ PointcloudSegmentationROS::~PointcloudSegmentationROS()
 {
 }
 
-void PointcloudSegmentationROS::segment_cloud(mcr_perception_msgs::ObjectList &object_list, 
+void PointcloudSegmentationROS::segment_cloud(mas_perception_msgs::ObjectList &object_list, 
                                               std::vector<PointCloud::Ptr> &clusters)
 {
     PointCloud::Ptr cloud(new PointCloud);
@@ -196,7 +196,7 @@ void PointcloudSegmentationROS::add_cloud_accumulation(const pcl::PointCloud<pcl
 void PointcloudSegmentationROS::get3DBoundingBox(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud, 
                                                 const Eigen::Vector3f& normal, 
                                                 BoundingBox &bbox,
-                                                mcr_perception_msgs::BoundingBox& bounding_box_msg)
+                                                mas_perception_msgs::BoundingBox& bounding_box_msg)
 {
     bbox = BoundingBox::create(cloud->points, normal);
     convertBoundingBox(bbox, bounding_box_msg);
@@ -204,9 +204,9 @@ void PointcloudSegmentationROS::get3DBoundingBox(const pcl::PointCloud<pcl::Poin
 
 Eigen::Vector3f PointcloudSegmentationROS::getPlaneNormal()
 {
-    Eigen::Vector3f normal(scene_segmentation_.normal_[0],
-                            scene_segmentation_.normal_[1],
-                            scene_segmentation_.normal_[2]);
+    Eigen::Vector3f normal(scene_segmentation_.coefficients_[0],
+                            scene_segmentation_.coefficients_[1],
+                            scene_segmentation_.coefficients_[2]);
     return normal;
 }
 
