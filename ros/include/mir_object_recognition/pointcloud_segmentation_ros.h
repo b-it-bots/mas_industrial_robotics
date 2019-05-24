@@ -16,7 +16,7 @@
 #include "mcr_scene_segmentation/cloud_accumulation.h"
 #include <mcr_scene_segmentation/scene_segmentation.h>
 
-#include <mcr_perception_msgs/ObjectList.h>
+#include <mas_perception_msgs/ObjectList.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <mcr_scene_segmentation/SceneSegmentationConfig.h>
@@ -78,12 +78,12 @@ class PointcloudSegmentationROS
     public:
         void reset_cloud_accumulation();
         void add_cloud_accumulation(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud);
-        void segment_cloud(mcr_perception_msgs::ObjectList &obj_list,
+        void segment_cloud(mas_perception_msgs::ObjectList &obj_list,
                             std::vector<PointCloud::Ptr> &clusters);
         void get3DBoundingBox(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud, 
                                                 const Eigen::Vector3f& normal, 
                                                 mas_perception_libs::BoundingBox &bbox,  
-                                                mcr_perception_msgs::BoundingBox& bounding_box_msg);
+                                                mas_perception_msgs::BoundingBox& bounding_box_msg);
         geometry_msgs::PoseStamped getPose(const mas_perception_libs::BoundingBox &box);
     
     public:
