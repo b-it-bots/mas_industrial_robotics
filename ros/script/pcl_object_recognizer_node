@@ -18,9 +18,9 @@ from pcl_classifiers.svm_classifier import SVMObjectClassifier
 from pcl_classifiers.features import calculate_feature_vector, calculate_maxrdd_fv_features
 import pcl_classifiers.utils as utils
 
-from mcr_perception_msgs.srv import RecognizeObject
-from mcr_perception_msgs.srv import RecognizeObjectResponse
-from mcr_perception_msgs.msg import ObjectList
+from mas_perception_msgs.srv import RecognizeObject
+from mas_perception_msgs.srv import RecognizeObjectResponse
+from mas_perception_msgs.msg import ObjectList
 
 import sensor_msgs.point_cloud2
 import struct

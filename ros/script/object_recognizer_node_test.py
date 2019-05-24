@@ -12,12 +12,12 @@ import pickle
 import numpy as np
 import time
 
-from mcr_perception_msgs.srv import RecognizeImage
-from mcr_perception_msgs.srv import RecognizeImageResponse
-from mcr_perception_msgs.msg import ImageList
-from mcr_perception_msgs.srv import GetSegmentedImage
-from mcr_perception_msgs.srv import GetSegmentedImageResponse
-from mcr_perception_msgs.srv import GetSegmentedImageRequest
+from mas_perception_msgs.srv import RecognizeImage
+from mas_perception_msgs.srv import RecognizeImageResponse
+from mas_perception_msgs.msg import ImageList
+from mas_perception_msgs.srv import GetSegmentedImage
+from mas_perception_msgs.srv import GetSegmentedImageResponse
+from mas_perception_msgs.srv import GetSegmentedImageRequest
 from sensor_msgs.msg import Image
 
 import struct

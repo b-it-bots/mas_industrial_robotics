@@ -18,7 +18,7 @@
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
   <build_depend>mas_perception_libs</build_depend>
-  <build_depend>mcr_perception_msgs</build_depend>
+  <build_depend>mas_perception_msgs</build_depend>
   <build_depend>mcr_algorithms</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>visualization_msgs</build_depend>
@@ -36,7 +36,7 @@
   <exec_depend>rospy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>tf</exec_depend>
-  <exec_depend>mcr_perception_msgs</exec_depend>
+  <exec_depend>mas_perception_msgs</exec_depend>
   <exec_depend>visualization_msgs</exec_depend>
 
   <test_depend>roslaunch</test_depend>

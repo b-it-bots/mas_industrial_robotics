@@ -9,7 +9,7 @@ add_compile_options(-std=c++11
 find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     dynamic_reconfigure
-    mcr_perception_msgs
+    mas_perception_msgs
     mas_perception_libs
     mcr_scene_segmentation
     pcl_ros
@@ -38,7 +38,7 @@ catkin_package(
     #scene_segmentation
     mcr_segmentation
   CATKIN_DEPENDS
-    mcr_perception_msgs
+    mas_perception_msgs
     visualization_msgs
 )
 

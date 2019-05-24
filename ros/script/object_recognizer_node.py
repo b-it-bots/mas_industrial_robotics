@@ -58,11 +58,11 @@ import pickle
 import numpy as np
 import time
 
-from mcr_perception_msgs.srv import RecognizeImage
-from mcr_perception_msgs.srv import RecognizeImageResponse
-from mcr_perception_msgs.msg import ImageList, ObjectList, Object
-from mcr_perception_msgs.srv import GetSegmentedImage
-from mcr_perception_msgs.srv import GetSegmentedImageResponse
+from mas_perception_msgs.srv import RecognizeImage
+from mas_perception_msgs.srv import RecognizeImageResponse
+from mas_perception_msgs.msg import ImageList, ObjectList, Object
+from mas_perception_msgs.srv import GetSegmentedImage
+from mas_perception_msgs.srv import GetSegmentedImageResponse
 from sensor_msgs.msg import Image, RegionOfInterest
 
 import struct
@@ -71,7 +71,6 @@ import colorsys
 from rgb_object_recognition.squeezedet import squeezeDet
 from rgb_object_recognition.ssdlite_mobilenet import SSDLiteMobilenet
 from rgb_object_recognition.utils import util
-#from rgb_classifiers.squeezeDet.squeezedet import squeezeDet
 
 class ObjectRecognizer():
     def __init__(self, model_dir, net='detection', model_name='squeezeDet', debug_mode=False):
