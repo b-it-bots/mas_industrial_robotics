@@ -217,6 +217,15 @@ def _draw_box(im, box_list, label_list, color=(0,255,0), cdict=None, form='cente
       font = cv2.FONT_HERSHEY_SIMPLEX
       cv2.putText(im, label, (xmin, ymax), font, 0.3, c, 1)
 
+def draw_box_on_img(img, final_boxes, final_probs, final_labels, cls2clr):
+      # Draw boxes
+      _draw_box(
+          img, final_boxes,
+          [label + ': (%.2f)'% prob \
+              for label, prob in zip(final_labels, final_probs)],
+          cdict=cls2clr,
+      )
+
 class Timer(object):
   def __init__(self):
     self.total_time   = 0.0

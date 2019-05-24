@@ -126,7 +126,9 @@ class ObjectRecognizer():
                         debug_img = cv_image
                         debug_img = debug_img.astype(np.float32, copy=False)
                         debug_img = cv2.resize(debug_img, (self.model.image_width, self.model.image_height))
-                        self.model.draw_box_on_img(debug_img, bboxes, probs, classes, cls2clr)
+                        # Get display labels
+                        class_labels = [class_label[label] for label in labels]
+                        util.draw_box_on_img(debug_img, bboxes, probs, class_labels, cls2clr)
                         self.publish_debug_img(debug_img)
 
                 except CvBridgeError as e:
@@ -135,13 +137,12 @@ class ObjectRecognizer():
 
             elif self.net == 'classification':
                 print "TODO: MobileNet"
-
-            
-
+                
     def publish_debug_img(self, debug_img):
         debug_img = np.array(debug_img, dtype=np.uint8)
         debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
         self.pub_debug.publish(debug_img)
+
 
 if __name__ == '__main__':
     rospy.init_node(NODE)
