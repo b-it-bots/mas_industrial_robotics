@@ -28,7 +28,7 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
     addThreshold("motor", position_error_threshold_);
     addThreshold("s40_40_g", position_error_threshold_);
     addThreshold("s40_40_b", position_error_threshold_);
-    addThreshold("m30", position_error_threshold_);
+    //addThreshold("m30", position_error_threshold_);
     //addThreshold("m20", position_error_threshold_);
     //addThreshold("r20", position_error_threshold_);
 
