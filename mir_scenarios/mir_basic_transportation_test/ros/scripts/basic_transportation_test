@@ -23,7 +23,7 @@ import mir_states.robocup.referee_box_states as refbox
 
 
 import mir_states.common.perception_mockup_util as perception_mockup_util
-from mcr_perception_msgs.msg import ObjectList, Object
+from mas_perception_msgs.msg import ObjectList, Object
 
 # main
 def main(no_refbox=False):

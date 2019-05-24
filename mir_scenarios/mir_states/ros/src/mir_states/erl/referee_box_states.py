@@ -10,7 +10,7 @@ import std_msgs.msg
 import sensor_msgs.msg
 #import atwork_ros_msgs.msg
 import atwork_ros_msgs.msg
-import mcr_perception_msgs.msg
+import mas_perception_msgs.msg
 
 
 def convert_msg_to_log(msg):
@@ -128,7 +128,7 @@ class send_benchmark_feedback_fbm1(smach.State):
         self.prefer_pcl = ["F20_20_G", "F20_20_B", "S40_40_G", "S40_40_B"]
         self.degrade_conf = 0.7
         self.phase_to_term = phase
-        self.obj_sub = rospy.Subscriber('/mcr_perception/object_list_merger/output_object_list', mcr_perception_msgs.msg.ObjectList, self.callback, queue_size=1)
+        self.obj_sub = rospy.Subscriber('/mcr_perception/object_list_merger/output_object_list', mas_perception_msgs.msg.ObjectList, self.callback, queue_size=1)
         self.grasp_sub = rospy.Subscriber('/gripper_controller/grasp_monitor/event_out', std_msgs.msg.String, self.grasp_callback, queue_size=1)
         self.obj = None
         self.grasp = None
@@ -221,7 +221,7 @@ class send_benchmark_feedback_fbm2(smach.State):
         self.bearing_boxes = ["BEARING_BOX"]
         self.transmission_parts = ["BEARING", "MOTOR", "AXIS"]
         self.phase_to_term = phase
-        self.obj_sub = rospy.Subscriber('/mcr_perception/object_selector/output/object', mcr_perception_msgs.msg.Object, self.callback, queue_size=1)
+        self.obj_sub = rospy.Subscriber('/mcr_perception/object_selector/output/object', mas_perception_msgs.msg.Object, self.callback, queue_size=1)
         self.grasp_sub = rospy.Subscriber('/gripper_controller/grasp_monitor/event_out', std_msgs.msg.String, self.grasp_callback, queue_size=1)
         self.obj = None
         self.grasp = None
