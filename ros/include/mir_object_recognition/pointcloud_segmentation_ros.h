@@ -66,9 +66,9 @@ class PointcloudSegmentationROS
         bool add_to_octree_;
         int object_id_;
         double octree_resolution_;
-        bool dataset_collection_;
-        bool debug_mode_;
-        std::string logdir_;
+
+        Eigen::Vector4f model_coefficients_;
+        double workspace_height_;
 
     private:
         void findPlane();
@@ -90,8 +90,8 @@ class PointcloudSegmentationROS
         SceneSegmentation scene_segmentation_;
         double object_height_above_workspace_;
         std::string frame_id_;
-        double workspace_height_;
         Eigen::Vector3f getPlaneNormal();
+        double getWorkspaceHeight();
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_POINTCLOUD_SEGMENTATION_ROS_H

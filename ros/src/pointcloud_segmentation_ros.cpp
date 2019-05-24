@@ -32,7 +32,7 @@
 #include <std_msgs/Float32.h>
 
 PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh): nh_(nh),
-    add_to_octree_(false), object_id_(0), debug_mode_(false)
+    add_to_octree_(false), object_id_(0)
 {    
     nh_.param("octree_resolution", octree_resolution_, 0.0025);
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
@@ -49,9 +49,7 @@ void PointcloudSegmentationROS::segment_cloud(mas_perception_msgs::ObjectList &o
     cloud_accumulation_->getAccumulatedCloud(*cloud);
     
     std::vector<BoundingBox> boxes;
-
-    std::cout<<"Start segmenting cloud size "<<cloud->width<<", "<<cloud->height<<std::endl;
-    PointCloud::Ptr debug = scene_segmentation_.segment_scene(cloud, clusters, boxes, workspace_height_);
+    PointCloud::Ptr debug = scene_segmentation_.segment_scene(cloud, clusters, boxes, model_coefficients_, workspace_height_);
     debug->header.frame_id = "base_link";
 
     object_list.objects.resize(boxes.size());
@@ -112,23 +110,6 @@ void PointcloudSegmentationROS::segment_cloud(mas_perception_msgs::ObjectList &o
         object_id_++;
     }
 }
-
-/* void PointcloudSegmentationROS::savePcd(const PointCloud::ConstPtr &pointcloud, std::string obj_name) */
-/* { */
-/*     std::stringstream filename; // stringstream used for the conversion */
-/*     ros::Time time_now = ros::Time::now(); */
-/*     filename.str(""); //clearing the stringstream */
-/*     if (debug_mode_) */
-/*     { */
-/*         filename << logdir_ << obj_name << "_" << time_now <<".pcd"; */
-/*     } */
-/*     else */
-/*     { */
-/*         filename << logdir_ <<"pcd_" << time_now <<".pcd"; */
-/*     } */
-/*     ROS_INFO_STREAM("Saving pointcloud to " << logdir_); */
-/*     pcl::io::savePCDFileASCII (filename.str(), *pointcloud); */
-/* } */
 
 /* void PointcloudSegmentationROS::findPlane() */
 /* { */
@@ -204,9 +185,13 @@ void PointcloudSegmentationROS::get3DBoundingBox(const pcl::PointCloud<pcl::Poin
 
 Eigen::Vector3f PointcloudSegmentationROS::getPlaneNormal()
 {
-    Eigen::Vector3f normal(scene_segmentation_.coefficients_[0],
-                            scene_segmentation_.coefficients_[1],
-                            scene_segmentation_.coefficients_[2]);
+    Eigen::Vector3f normal(model_coefficients_[0],
+                           model_coefficients_[1],
+                           model_coefficients_[2]);
     return normal;
 }
 
+double PointcloudSegmentationROS::getWorkspaceHeight()
+{
+    return workspace_height_;
+}
