@@ -277,15 +277,6 @@ void MultimodalObjectRecognitionROS::preprocessCloud()
     }
 }
 
-
-void MultimodalObjectRecognitionROS::segmentCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud,
-                                                mas_perception_msgs::ObjectList &object_list,
-                                                std::vector<PointCloud::Ptr> &clusters)
-{
-    pointcloud_segmentation_->add_cloud_accumulation(cloud);
-    pointcloud_segmentation_->segment_cloud(object_list, clusters);
-}
-
 void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 {
     mas_perception_msgs::ObjectList cloud_object_list;
@@ -293,16 +284,13 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     
     pointcloud_segmentation_->add_cloud_accumulation(cloud_);
     pointcloud_segmentation_->segment_cloud(cloud_object_list, clusters_3d);
-    //segmentCloud(cloud_,cloud_object_list, clusters_3d);
+
     std_msgs::Float64 workspace_height_msg;
-    workspace_height_msg.data = pointcloud_segmentation_->workspace_height_;
+    workspace_height_msg.data = pointcloud_segmentation_->getWorkspaceHeight();
     pub_workspace_height_.publish(workspace_height_msg);
 
     // Compute normal to generate parallel BBOX with the plane
-    const Eigen::Vector3f normal(pointcloud_segmentation_->scene_segmentation_.coefficients_[0], 
-                                 pointcloud_segmentation_->scene_segmentation_.coefficients_[1], 
-                                 pointcloud_segmentation_->scene_segmentation_.coefficients_[2]);
-    //const Eigen::Vector3f normal = pointcloud_segmentation_->getPlaneNormal();
+    const Eigen::Vector3f normal = pointcloud_segmentation_->getPlaneNormal();
 
     //Publish cluster for recognition
     if (!cloud_object_list.objects.empty())
@@ -497,23 +485,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 }
                 final_image_list.objects[i].probability = recognized_image_list_.objects[i].probability;
                 final_image_list.objects[i].database_id = rgb_object_id_;
-                /* double base_link_distance_to_laser = 0.370; //30cm */
-                /* double max_object_x_pose_from_base_link = 0.970; */
-                /* double current_object_x_pose = pose_transformed.pose.position.x; */
-                /* if (current_object_x_pose < rgb_base_link_to_laser_distance_ || */
-                /*         current_object_x_pose > rgb_max_object_pose_x_to_base_link_ ) */
-                /* { */
-                /*     std::cout<<"#########Filtering: "<<recognized_image_list_.objects[i].name<<std::endl; */
-                /*     std::cout<<"Pose:  "<<pose_transformed.pose.position.x<<std::endl; */
-                /*     /1* std::cout<<"X:  "<<pose.header.frame_id<<std::endl; *1/ */
-                    
-                /*     final_image_list.objects[i].name = "DECOY"; */
-                    
-                /* } */
-                /* else */
-                /* { */
-                    final_image_list.objects[i].name = recognized_image_list_.objects[i].name;
-                /* } */
+                final_image_list.objects[i].name = recognized_image_list_.objects[i].name;
             }
             else
             {
@@ -950,7 +922,7 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::adjustObjectPose(mas_
 
         if (object_list.objects[i].name == "RED_CONTAINER" || object_list.objects[i].name == "BLUE_CONTAINER")
         {
-            object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->workspace_height_ + 0.05 ;
+            object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight() + 0.05 ;
             /* change_in_pitch = -M_PI / 6.0; */
         }
         tf::Quaternion q2 = tf::createQuaternionFromRPY(0.0, change_in_pitch , yaw);
@@ -959,14 +931,14 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::adjustObjectPose(mas_
         object_list.objects[i].pose.pose.orientation.z = q2.z();
         object_list.objects[i].pose.pose.orientation.w = q2.w();
 
-        if (pointcloud_segmentation_->workspace_height_ != -1000.0)
+        if (pointcloud_segmentation_->getWorkspaceHeight() != -1000.0)
         {
-            object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->workspace_height_ + 
+            object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight() + 
                                                     pointcloud_segmentation_->object_height_above_workspace_;
         }
         if (object_list.objects[i].name == "RED_CONTAINER" || object_list.objects[i].name == "BLUE_CONTAINER")
         {
-            object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->workspace_height_ + 0.08 ;
+            object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight() + 0.08 ;
             if (object_list.objects[i].database_id > 100)
             {
                 updateContainerPose(object_list.objects[i]);

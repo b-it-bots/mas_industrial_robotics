@@ -49,16 +49,6 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-//#include <mir_object_recognition/clustered_point_cloud_visualizer.h>
-//#include <mir_object_recognition/bounding_box_visualizer.h>
-//#include <mir_object_recognition/label_visualizer.h>
-
-//#include <mas_perception_libs/bounding_box.h>
-
-// using mcr::visualization::BoundingBoxVisualizer;
-// using mcr::visualization::ClusteredPointCloudVisualizer;
-// using mcr::visualization::LabelVisualizer;
-// using mcr::visualization::Color;
 
 /**
  * This node subscribes to ...
@@ -182,10 +172,6 @@ class MultimodalObjectRecognitionROS
         void imageCallback(const sensor_msgs::ImageConstPtr &msg);
         void eventCallback(const std_msgs::String::ConstPtr &msg);
         void configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level);
-
-        void segmentCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud,
-                            mas_perception_msgs::ObjectList &object_list,
-                            std::vector<PointCloud::Ptr> &clusters);
 
         void recognizeCloudAndImage();
         /* void recognizeCloudAndImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, */ 
