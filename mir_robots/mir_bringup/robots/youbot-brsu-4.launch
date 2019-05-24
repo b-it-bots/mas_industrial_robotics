@@ -43,4 +43,6 @@
   <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
+  <node pkg="mir_debug_leds" type="debug_leds.py" name="debug_leds" output="screen"/>
+
 </launch>
