@@ -1218,10 +1218,13 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
 void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level)
 {
     CloudFilterParams cloudFilterParams;
+    
     cloudFilterParams.mPassThroughLimitMinX = static_cast<float>(config.passthrough_limit_min_x);
     cloudFilterParams.mPassThroughLimitMaxX = static_cast<float>(config.passthrough_limit_max_x);
+    
     cloudFilterParams.mPassThroughLimitMinY = static_cast<float>(config.passthrough_limit_min_y);
     cloudFilterParams.mPassThroughLimitMaxY = static_cast<float>(config.passthrough_limit_max_y);
+        
     cloudFilterParams.mVoxelLimitMinZ = static_cast<float>(config.voxel_limit_min_z);
     cloudFilterParams.mVoxelLimitMaxZ = static_cast<float>(config.voxel_limit_max_z);
     cloudFilterParams.mVoxelLeafSize = static_cast<float>(config.voxel_leaf_size);
