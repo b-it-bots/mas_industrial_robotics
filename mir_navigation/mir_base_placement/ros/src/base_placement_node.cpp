@@ -5,12 +5,12 @@
 #include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
 
-#include <mcr_perception_msgs/BaseScanLinearRegression.h>
+#include <mas_perception_msgs/BaseScanLinearRegression.h>
 #include <mir_navigation_msgs/OrientToBaseAction.h>
 
 //#include "mir_base_placement/laser_scan_linear_regression.h"
 
-using namespace mcr_perception_msgs;
+using namespace mas_perception_msgs;
 using namespace mir_navigation_msgs;
 
 class OrientToLaserReadingAction

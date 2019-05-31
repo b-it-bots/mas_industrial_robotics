@@ -22,7 +22,7 @@ import mir_states.common.perception_mockup_util as perception_mockup_util
 
 import mir_states.common.action_states as skills
 
-from mcr_perception_msgs.msg import ObjectList, Object
+from mas_perception_msgs.msg import ObjectList, Object
 
 def main(no_refbox=False):
 
