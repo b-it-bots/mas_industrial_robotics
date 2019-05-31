@@ -15,7 +15,7 @@ import re
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 
-from mcr_perception_msgs.msg import ObjectList, Object
+from mas_perception_msgs.msg import ObjectList, Object
 
 
 class Bunch:
