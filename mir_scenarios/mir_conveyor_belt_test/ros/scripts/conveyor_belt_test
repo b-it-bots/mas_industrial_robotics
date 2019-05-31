@@ -26,7 +26,7 @@ from mir_yb_action_msgs.msg import MoveBaseSafeAction, MoveBaseSafeGoal
 import mir_states.common.basic_states as gbs
 
 import mir_states.common.perception_mockup_util as perception_mockup_util
-from mcr_perception_msgs.msg import ObjectList, Object
+from mas_perception_msgs.msg import ObjectList, Object
 from mir_yb_action_msgs.msg import StageObjectAction, StageObjectGoal
 
 from  mcr_manipulation_msgs.msg import GripperCommand
