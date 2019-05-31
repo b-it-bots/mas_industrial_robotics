@@ -5,7 +5,7 @@ import smach
 import std_msgs.msg
 import tf
 
-import mcr_perception_msgs.msg
+import mas_perception_msgs.msg
 import mir_controller_msgs.srv
 
 
@@ -47,7 +47,7 @@ class find_cavities(smach.State):
             input_keys=['selected_objects', 'found_cavities'],
             output_keys=['found_cavities'])
 
-        self.sub_cavity = rospy.Subscriber('/mcr_perception/cavity_message_builder/output/cavity', mcr_perception_msgs.msg.Cavity, self.cavity_cb)
+        self.sub_cavity = rospy.Subscriber('/mcr_perception/cavity_message_builder/output/cavity', mas_perception_msgs.msg.Cavity, self.cavity_cb)
         self.pub_contour_finder_event = rospy.Publisher('/mcr_perception/contour_finder/input/event_in', std_msgs.msg.String)
         self.pub_object_category = rospy.Publisher('/mcr_perception/cavity_template_publisher/input/object_name', std_msgs.msg.String)
         self.tf_listener = tf.TransformListener()
