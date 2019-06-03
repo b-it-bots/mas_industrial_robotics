@@ -72,7 +72,9 @@
    <xacro:asus_xtion_camera name="arm_cam3d" parent="camera_mount_link">
        <!--origin xyz="-0.01 -0.012 0.05" rpy="0 ${M_PI/2 - 0.25} 0.00" /-->
        <!--origin xyz="0.016 0 0.01" rpy="0 ${M_PI/2 - 0} -0.09" />  -->
-       <origin xyz="0.025 -0.010 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" />  
+       <origin xyz="0.025 -0.013 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" />  
+       <!-- <origin xyz="0.022 -0.0 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
+       <!-- <origin xyz="0.025 -0.010 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
        <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->  
    </xacro:asus_xtion_camera>
   
