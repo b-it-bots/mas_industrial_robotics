@@ -7,7 +7,7 @@ import tensorflow as tf
 import time
 import zipfile
 
-#from rgb_object_recognition.utils import label_map_util
+from rgb_object_recognition.utils import util
 
 
 class SSDLiteMobilenet():
@@ -15,9 +15,9 @@ class SSDLiteMobilenet():
     # Path to frozen detection graph. This is the actual model that is used for the object detection.
     self.PATH_TO_FROZEN_GRAPH = os.path.join(checkpoint_dir, 'frozen_inference_graph.pb')
     # List of the strings that is used to add correct label for each box.
-    PATH_TO_LABELS = os.path.join(checkpoint_dir, 'atwork_label_map.txt')
+    PATH_TO_LABELS = os.path.join(checkpoint_dir, 'atwork_label_map.json')
 
-    self.cat_idx = [] #label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS)
+    self.cat_idx = util.category_index_from_label_map(PATH_TO_LABELS)
 
     detection_graph = tf.Graph()
     with detection_graph.as_default():
