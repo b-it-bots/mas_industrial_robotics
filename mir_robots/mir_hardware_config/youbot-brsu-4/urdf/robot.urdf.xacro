@@ -25,6 +25,7 @@
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/_d435.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/asus_xtion_camera_mount.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
@@ -62,7 +63,7 @@
 
   <!-- camera mount for Intel RealSense F200 -->
   <xacro:asus_xtion_camera_mount  name="camera_mount" parent="gripper_motor_mount_link">
-      <origin xyz="0.035 -0.00 0.0" rpy="0 0.025 ${M_PI/2} " />
+      <origin xyz="0.020 -0.00 0.0" rpy="0 0.025 ${M_PI/2} " />
   </xacro:asus_xtion_camera_mount>
 
   <!-- 3D camera on arm -->
@@ -72,8 +73,16 @@
    <xacro:asus_xtion_camera name="arm_cam3d" parent="camera_mount_link">
        <!--origin xyz="-0.01 -0.012 0.05" rpy="0 ${M_PI/2 - 0.25} 0.00" /-->
        <!--origin xyz="0.016 0 0.01" rpy="0 ${M_PI/2 - 0} -0.09" />  -->
-   <origin xyz="0.010 -0.022 0.017" rpy="0 ${M_PI/2 - 0.18} -${M_PI/2}" />  
+       <origin xyz="0.025 -0.013 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" />  
+       <!-- <origin xyz="0.022 -0.0 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
+       <!-- <origin xyz="0.025 -0.010 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
        <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->  
    </xacro:asus_xtion_camera>
   
+   <xacro:sensor_d435  parent="base_link">
+       <!--origin xyz="-0.01 -0.012 0.05" rpy="0 ${M_PI/2 - 0.25} 0.00" /-->
+       <!--origin xyz="0.016 0 0.01" rpy="0 ${M_PI/2 - 0} -0.09" />  -->
+       <origin xyz="-0.263 0.0 0.0875" rpy="0.0 0.61 ${M_PI}" />  
+       <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->  
+   </xacro:sensor_d435>
 </robot>

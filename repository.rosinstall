@@ -34,14 +34,19 @@
     version: kinetic
 
 - git:
-    local-name: realsense_camera
-    uri: git@github.com:b-it-bots/realsense_camera.git
-    version: master
-
-- git:
     local-name: dynamixel_motor
     uri: https://github.com/mas-group/dynamixel_motor.git
     version: master
+
+- git:
+    local-name: mas_navigation
+    uri: git@github.com:b-it-bots/mas_navigation.git
+    version: kinetic
+
+- git:
+    local-name: mas_perception
+    uri: git@github.com:b-it-bots/mas_perception.git
+    version: kinetic
 
 - git:
     local-name: unmerged_packages_for_testing

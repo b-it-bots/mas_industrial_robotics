@@ -26,7 +26,7 @@ import std_msgs.msg
 import geometry_msgs.msg
 import shape_msgs.msg
 import moveit_msgs.msg
-import mcr_perception_msgs.msg
+import mas_perception_msgs.msg
 import tf
 
 class GraspedObjectAttacher(object):
@@ -54,7 +54,7 @@ class GraspedObjectAttacher(object):
 
         # subscriber
         rospy.Subscriber('~event_in', std_msgs.msg.String, self.event_in_cb)
-        rospy.Subscriber('~object_list', mcr_perception_msgs.msg.ObjectList,
+        rospy.Subscriber('~object_list', mas_perception_msgs.msg.ObjectList,
             self.object_list_cb)
         rospy.Subscriber('~object_name', std_msgs.msg.String,
             self.object_name_cb)

@@ -1,0 +1,14 @@
+Object Name,Class
+BEARING_BOX,component
+BEARING,component
+F20_20_G,Profile
+F20_20_B,Profile
+S40_40_G,Profile
+S40_40_B,Profile
+M20_100,Profile
+R20,Plastic
+MOTOR,component
+AXIS,component
+DISTANCE_TUBE,component
+M20,Nut
+M30,Nut

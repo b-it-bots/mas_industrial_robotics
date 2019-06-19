@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+    <arg name="object_perception_target_frame" default="/base_link_static"/>
+    <arg name="base_cmd_topic" default="/cmd_vel_safe"/>
+    <arg name="use_mokeup_pose" default="false"/>
+
+    <arg name="refbox" default="true" />
+    <!-- for ERL benchmarking -->
+    <arg name="logging" default="true" />
+
+    <!-- if set to true, clouds will be accumulated with three views
+         and object recognition is run only once -->
+    <arg name="perceive_with_cloud_accumulation" default="true"/>
+    <!-- if set to true, base motions are used to get two/three views of workspace
+         otherwise arm motions are used to get three views of workspace -->
+    <arg name="perceive_with_base_motions" default="false"/>
+    <!-- should move base align with a workspace? -->
+    <arg name="align_with_workspace" default="false"/>
+
+    <!-- moveit! -->
+    <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch">
+       <arg name="planner_pipeline" value="interpolation" />
+    </include>
+    <param name="/move_group/trajectory_execution/allowed_execution_duration_scaling" type="double" value="1.5"/>
+    <!-- by setting this parameter we disable checking that the first point in the trajectory is the current state -->
+    <param name="/move_group/trajectory_execution/allowed_start_tolerance" type="double" value="0.0"/>
+
+    <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" />
+ <!-- navigation -->
+   <!-- move_base with dwa approach -->
+    <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
+
+    <!-- move_base action lib wrapper -->
+    <include file="$(find mir_move_base_safe)/ros/launch/move_base.launch" />
+
+    <!-- direct relative controller -->
+    <include file="$(find mir_move_base_safe)/ros/launch/direct_base_controller.launch"/>
+    <include file="$(find mir_base_placement)/ros/launch/base_placement.launch" />
+
+  <!-- manipulation -->
+
+    <!-- grasp monitoring NOT TESTED -->
+    <include file="$(find mir_grasp_monitors)/ros/launch/dynamixel_gripper_grasp_monitor.launch" />
+    <!--include file="$(find mir_gripper_state_monitor)/ros/launch/gripper_state_monitor.launch" /-->
+    <!--include file="$(find mir_grasp_monitors)/ros/launch/optocoupler_grasp_monitor.launch" /-->
+
+    <!-- arm workspace restrictor NOT WORKING CURRENTLY-->
+    <!--include file="$(find mir_moveit_scene)/ros/launch/arm_workspace_restricter.launch" /-->
+
+    <!-- whole body control which also includes pregrasp planner
+       it automatically selects wbc pipeline/pregrasp planner pipeline.(see wbc pickup object server for help-->
+    <include file="$(find mir_pick_object)/ros/launch/demo_youbot_whole_body_control.launch" >
+      <arg name="static_transform_frame" value="$(arg object_perception_target_frame)" />
+      <arg name="use_mokeup_pose" value="$(arg use_mokeup_pose)" />
+      <arg name="pose_in" value="/mcr_perception/object_selector/output/object_pose" />
+      <arg name="cmd_vel_out" value="$(arg base_cmd_topic)" />
+    </include>
+
+    <!-- dynamic reconfigure from code, receive string and params and does the request NOT TESTED -->
+    <include file="$(find mcr_dynamic_reconfigure_client)/ros/launch/dynamic_reconfigure_client.launch">
+        <arg name="config_file" value="$(find mir_yb_actions)/ros/config/yb_manipulation_params.yaml" />
+    </include>
+
+  <!-- perception -->
+    <!-- barrier tape detection -->
+    <include file="$(find mcr_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch" />
+
+    <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" >
+      <arg name="target_frame" value="$(arg object_perception_target_frame)" />
+      <arg name="classifier" value="fbm2_classifier" />
+      <arg name="use_cloud_accumulator" value="$(arg perceive_with_cloud_accumulation)" />
+    </include>
+
+    <!-- Object list merger -->
+    <include file="$(find mcr_object_detection)/ros/launch/object_list_merger.launch"/>
+
+    <include file="$(find mcr_perception_selectors)/ros/launch/object_selector.launch">
+       <arg name="input_topic" value="/mcr_perception/object_list_merger/output_object_list" />
+       <arg name="selection_type" value="1" />
+    </include>
+
+    <!-- pose selector for placing objects -->
+    <include file="$(find mir_place_pose_selector)/ros/launch/place_pose_selector.launch"/>
+
+    <!-- RGB image recognition finder -->
+    <include file="$(find mcr_multimodal_object_identification)/ros/launch/multimodal_object_identification.launch"/>
+
+    <!-- youbot actions (action lib) : move base safe, perceive, pick, stage, unstage, insert -->
+    <include file="$(find mir_yb_actions)/ros/launch/run_action_servers.launch">
+        <arg name="use_mokeup_pose" value="$(arg use_mokeup_pose)" />
+        <arg name="perceive_with_cloud_accumulation" value="$(arg perceive_with_cloud_accumulation)" />
+        <arg name="perceive_with_base_motions" value="$(arg perceive_with_base_motions)" />
+        <arg name="align_with_workspace" value="$(arg align_with_workspace)" />
+    </include>
+
+    <group if="$(arg refbox)" >
+        <include file="$(find at_work_robot_example_ros)/ros/launch/robot_example_ros.launch"/>
+    </group>
+
+    <group if="$(arg logging)" >
+        <include file="$(find mir_manipulation_functionality)/ros/launch/logging.launch" />
+    </group>
+    
+</launch>

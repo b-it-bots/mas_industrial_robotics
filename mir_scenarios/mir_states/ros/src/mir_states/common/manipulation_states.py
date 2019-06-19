@@ -15,7 +15,7 @@ import re
 from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 
-from mcr_perception_msgs.msg import ObjectList, Object
+from mas_perception_msgs.msg import ObjectList, Object
 
 
 class Bunch:
@@ -67,7 +67,7 @@ class MoveitClient:
     def event_cb(self, msg):
         self.client_event = msg.data
 
-    def execute(self, userdata):
+    def execute(self, userdata, blocking=True):
         target = self.move_arm_to or userdata.move_arm_to
 
         # do it twice because it probably fails the first time
@@ -107,7 +107,7 @@ class MoveitClient:
             rate = rospy.Rate(10)
             start_time = rospy.Time.now()
             redo = False
-            while True:
+            while blocking:
               if (rospy.Time.now() - start_time) > timeout:
                   rospy.loginfo("Moveit " + self.moveit_group + "client node response timeout.")
                   break
@@ -117,6 +117,9 @@ class MoveitClient:
                   else:
                       return 'failed'
               rate.sleep()
+            
+            if not blocking:
+                return 'succeeded'
 
         return 'failed'
 
@@ -139,13 +142,28 @@ class move_arm(smach.State):
         smach.State.__init__(self,
                              outcomes=['succeeded', 'failed'],
                              input_keys=['move_arm_to'])
-
         joint_names = ['arm_joint_1', 'arm_joint_2', 'arm_joint_3', 'arm_joint_4', 'arm_joint_5']
         self.arm_moveit_client  = MoveitClient('/arm_', target, timeout, joint_names)
-
+        self.blocking = blocking
     def execute(self, userdata):
+        return self.arm_moveit_client.execute(userdata, self.blocking)
 
-        return self.arm_moveit_client.execute(userdata)
+class check_move_group_feedback(smach.State):
+
+    def __init__(self, timeout=10.0):
+        smach.State.__init__(self, outcomes=['succeeded, waiting, failed'])
+        self.move_group_status_sub('/move_group/status', self.status_cb)
+        self.status = 1
+    def status_cb(self, msg):
+        self.status = status
+
+    def execute(self):
+        if self.status == 3:
+            return "succeeded"
+        elif self.status == 1:
+            return "waiting"
+        else :
+            return "failed"
 
 class control_gripper(smach.State):
 

@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+
+import sys
+
+import rospy
+
+import smach
+import smach_ros
+import math
+
+import geometry_msgs.msg
+import std_msgs.msg
+
+import mcr_states.common.basic_states as gbs
+import mir_states.common.navigation_states as gns
+import mir_states.erl.referee_box_states as erl_refbox
+import mir_states.erl.manipulation_functionality_states as mfs
+import mir_states.erl.manipulation_functionality_sub_state_machines as mf_ssm
+import mir_states.common.perception_states as gps
+import mir_states.common.manipulation_states as gms
+import mir_states.common.perception_mockup_util as perception_mockup_util
+
+import mir_states.common.action_states as skills
+
+from mas_perception_msgs.msg import ObjectList, Object
+
+class wait_for(smach.State):  
+    def __init__(self, sleep_time): 
+        smach.State.__init__(self, outcomes=['succeeded']) 
+        self.sleep_time = sleep_time 
+    def execute(self, userdata): 
+        rospy.sleep(self.sleep_time) 
+        return 'succeeded' 
+
+def main(no_refbox=False):
+
+    rospy.init_node('object_perception_functionality_benchmark')
+
+    SM = smach.StateMachine(outcomes=['done'])
+
+    SM.userdata.test = "FBM1"
+
+    SM.userdata.recognized_objects = []
+
+    SM.userdata.found_objects = 0
+
+    SM.userdata.benchmark_feedback = None
+    SM.userdata.benchmark_state = None
+
+    SM.userdata.is_object_grasped = None
+
+    SM.userdata.end_effector_pose = None
+
+    SM.userdata.base_increments = 0
+    SM.userdata.move_base_by = None
+
+    use_mockup = False
+
+    with SM:
+        if not use_mockup:
+
+            smach.StateMachine.add('WAIT_FOR_BENCHMARK_MESSAGE_PREP', erl_refbox.get_benchmark_state(),
+                transitions={'running':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'running_calibration':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'running_preparation':'LOOK_AWAY_FROM_SHELF', 
+                             'running_execution':'LOOK_AWAY_FROM_SHELF',
+                             'paused':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'finished': 'done',
+                             'finished_execution': 'done',
+                             'stopped': 'WAIT_FOR_BENCHMARK_MESSAGE_PREP'})
+
+            # look at workspace from far
+            smach.StateMachine.add('LOOK_AWAY_FROM_SHELF', gms.move_arm('look_away_from_shelf'),
+                transitions={'succeeded': 'WAIT_FOR_SECONDS',
+                                'failed': 'LOOK_AWAY_FROM_SHELF'})
+            # wait for 1 sec
+            smach.StateMachine.add('WAIT_FOR_SECONDS', wait_for(3),
+                transitions={'succeeded': 'SEND_BENCHMARK_FEEDBACK_PREP'})
+
+            # Send to refbox prep was done
+            smach.StateMachine.add('SEND_BENCHMARK_FEEDBACK_PREP', erl_refbox.send_benchmark_feedback_fbm1(phase='prep'),
+                transitions={'done':'WAIT_FOR_BENCHMARK_MESSAGE_EXEC'})
+
+            smach.StateMachine.add('WAIT_FOR_BENCHMARK_MESSAGE_EXEC', erl_refbox.get_benchmark_state(),
+                transitions={'running':'SEND_BENCHMARK_FEEDBACK_PREP',
+                             'running_calibration':'SEND_BENCHMARK_FEEDBACK_PREP',
+                             'running_preparation':'SEND_BENCHMARK_FEEDBACK_PREP',
+                             'running_execution':'LOOK_AT_SHELF_FROM_FAR',
+                             'paused':'SEND_BENCHMARK_FEEDBACK_PREP',
+                             'finished': 'done',
+                             'finished_execution': 'done',
+                             'stopped': 'SEND_BENCHMARK_FEEDBACK_PREP'})
+
+            smach.StateMachine.add('LOOK_AT_SHELF_FROM_FAR', gms.move_arm('look_at_shelf_from_far'),
+                transitions={'succeeded': 'WAIT_FOR_CAMERA',
+                             'failed': 'LOOK_AT_SHELF_FROM_FAR'})
+            # wait for 3 sec
+            smach.StateMachine.add('WAIT_FOR_CAMERA', wait_for(3),
+                transitions={'succeeded': 'OPEN_GRIPPER'})
+            
+            smach.StateMachine.add('OPEN_GRIPPER', gms.control_gripper('open'),
+                transitions={'succeeded':'RUN_OBJECT_RECOGNITION'})
+
+            smach.StateMachine.add('RUN_OBJECT_RECOGNITION', skills.perceive_location(),
+                transitions={'success':'CLOSE_GRIPPER',
+                             'failed':'RUN_OBJECT_RECOGNITION'})
+
+            smach.StateMachine.add('CLOSE_GRIPPER', gms.control_gripper('close'),
+                transitions={'succeeded':'SEND_BENCHMARK_FEEDBACK'})            
+            
+            # Send feedback to referee
+            smach.StateMachine.add('SEND_BENCHMARK_FEEDBACK', erl_refbox.send_benchmark_feedback_fbm1(phase='exec'),
+                transitions={'done':'WAIT_FOR_NEXT_BENCHMARK_MESSAGE'})
+            
+            smach.StateMachine.add('WAIT_FOR_NEXT_BENCHMARK_MESSAGE', erl_refbox.get_benchmark_state(),
+                transitions={'running':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'running_calibration':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'running_preparation':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'running_execution':'SEND_BENCHMARK_FEEDBACK',
+                             'paused':'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'finished': 'done',
+                             'finished_execution': 'WAIT_FOR_BENCHMARK_MESSAGE_PREP',
+                             'stopped': 'WAIT_FOR_BENCHMARK_MESSAGE_PREP'
+                             })
+    
+    def event_in_cb(data):
+        if data.data == "e_trigger":
+            smach_viewer = smach_ros.IntrospectionServer('FMB1', SM, 'FBM1')
+            smach_viewer.start()
+            rospy.loginfo('Received [object_perception_functionality benchmark] request.')
+            outcome = SM.execute()
+            rospy.loginfo('outcome: %s', outcome)
+            if outcome == 'done':
+                event_out_pub.publish("e_done")
+            else:
+                event_out_pub.publish("e_failed")
+            smach_viewer.stop()
+
+    event_in_sub = rospy.Subscriber('~event_in', std_msgs.msg.String, event_in_cb, queue_size=1)
+    event_out_pub = rospy.Publisher('~event_out', std_msgs.msg.String)
+    rospy.loginfo('Started [object_perception_functionality_benchmark] node.')
+    outcome = SM.execute()
+    rospy.spin()
+
+if __name__ == '__main__':
+    main()
