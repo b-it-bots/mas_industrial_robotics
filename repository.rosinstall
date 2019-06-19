@@ -47,3 +47,13 @@
     local-name: unmerged_packages_for_testing
     uri: git@github.com:b-it-bots/unmerged_packages_for_testing.git
     version: kinetic
+
+- git:
+    local-name: mas_perception
+    uri: git@github.com:b-it-bots/mas_perception.git
+    version: kinetic
+
+- git:
+    local-name: mas_navigation
+    uri: git@github.com:b-it-bots/mas_navigation.git
+    version: kinetic
