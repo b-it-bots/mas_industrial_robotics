@@ -1,0 +1,7 @@
+/rockin/grasping_pose
+/rockin/gripper_pose
+/rockin/arm_joints
+/rockin/rgb/camera_info
+/rockin/depth/camera_info
+/rockin/depth/pointcloud
+/tf

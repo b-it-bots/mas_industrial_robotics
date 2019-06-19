@@ -26,7 +26,7 @@ from mir_yb_action_msgs.msg import MoveBaseSafeAction, MoveBaseSafeGoal
 import mir_states.common.basic_states as gbs
 
 import mir_states.common.perception_mockup_util as perception_mockup_util
-from mcr_perception_msgs.msg import ObjectList, Object
+from mas_perception_msgs.msg import ObjectList, Object
 from mir_yb_action_msgs.msg import StageObjectAction, StageObjectGoal
 
 from  mcr_manipulation_msgs.msg import GripperCommand
@@ -84,11 +84,16 @@ class place_object(smach.State):
 class my_pause(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded'])
+        rospy.Subscriber("/rtt/caliberate_object_delay", std_msgs.msg.Float64, self.delay_cb)
+        self.sleep_time = 0.0
+
+    def delay_cb(self, msg):
+        self.sleep_time = msg.data
 
     def execute(self, userdata):
-        sleep_time =  0.05 + 0.3*random.random()
-        rospy.sleep(sleep_time)
-        rospy.loginfo("I HAVE SLEPT %f", sleep_time)
+        
+        rospy.sleep(self.sleep_time)
+        rospy.loginfo("I HAVE SLEPT %f", self.sleep_time)
         return 'succeeded'
 
 class wait_for_object(smach.State):
@@ -101,6 +106,7 @@ class wait_for_object(smach.State):
         rospy.Subscriber('/mcr_perception/background_change_detection/event_out', std_msgs.msg.String, self.event_cb)
 
     def execute(self, userdata):
+        i = raw_input("Enter to start ")
         self.result = None
         self.img_editor.publish('e_start')
         rospy.loginfo('published')
@@ -225,7 +231,7 @@ def main(simulation=False):
 
     # open the container
 
-    use_mockup=False
+    use_mockup=True
 
     with SM:
 
@@ -237,10 +243,10 @@ def main(simulation=False):
             #transitions={'succeeded':'GET_TASK'})
            # transitions={'succeeded':'ARM_TO_CONVEYOR_VIEW'})
         
-       
+        """
         smach.StateMachine.add('GET_TASK', get_cbt_task(),
             transitions={'task_received': 'MOVE_TO_CONVEYOR'})
-        
+        """
         
         if use_mockup:
             smach.StateMachine.add('MOVE_TO_CONVEYOR', for_testing(),
@@ -266,7 +272,7 @@ def main(simulation=False):
         smach.StateMachine.add('OPEN_GRIPPER',  gms_o.control_gripper('open_wide'),
             transitions={'succeeded': 'ARM_TO_CONVEYOR_VIEW'})
         
-        smach.StateMachine.add('OPEN_NARROW',  gms_o.control_gripper('open'),                                     
+        smach.StateMachine.add('OPEN_NARROW',  gms_o.control_gripper('open_wide'),                                     
                     transitions={'succeeded': 'ARM_TO_CONVEYOR_VIEW'})
         
         smach.StateMachine.add('ARM_TO_CONVEYOR_VIEW', gms_o.move_arm(

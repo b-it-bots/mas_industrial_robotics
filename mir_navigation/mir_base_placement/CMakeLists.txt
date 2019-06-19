@@ -5,7 +5,7 @@ find_package(catkin REQUIRED
   COMPONENTS
     actionlib
     geometry_msgs
-    mcr_perception_msgs
+    mas_perception_msgs
     mir_navigation_msgs
     roscpp
     sensor_msgs
@@ -14,7 +14,7 @@ find_package(catkin REQUIRED
 catkin_package(
   CATKIN_DEPENDS
     geometry_msgs
-    mcr_perception_msgs
+    mas_perception_msgs
     mir_navigation_msgs
     sensor_msgs
 )
