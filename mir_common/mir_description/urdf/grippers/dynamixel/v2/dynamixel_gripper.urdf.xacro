@@ -29,14 +29,14 @@
       </inertial>
 
       <visual>
-        <origin xyz="0 0 -0.0275" rpy="0 ${M_PI/2} 0" />
+        <origin xyz="0 0 0.0" rpy="0 ${M_PI/2} 0" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v2/dynamixel_motor_mount.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v3/dynamixel_intel_camera_combined.stl" scale="0.001 0.001 0.001" />
         </geometry>
       </visual>
 
       <collision>
-        <origin xyz="0 0 -0.0275" rpy="0 ${M_PI/2} 0" />
+        <origin xyz="0 0 -0.0" rpy="0 ${M_PI/2} 0" />
         <geometry>
           <mesh filename="package://mir_description/meshes/grippers/dynamixel/v2/dynamixel_motor_mount_convex_hull.dae" scale="0.001 0.001 0.001" />
         </geometry>
