@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Barrier tape detection node-->
-  <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection" ns="mir_perception" output="screen" respawn="true">
+    <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection" ns="mir_perception/front_camera" output="screen" respawn="true">
     <remap from="~input_rgb_image" to="/arm_cam3d/rgb/image_raw"/>
     <remap from="~input_pointcloud" to="/arm_cam3d/depth_registered/points"/>
     <remap from="~camera_info" to="/arm_cam3d/rgb/camera_info"/>
@@ -9,10 +9,10 @@
     <param name="target_frame" value="map"/>
   </node>
 
-  <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection_back" ns="mir_perception" output="screen" respawn="true">
-    <remap from="~input_rgb_image" to="/back_cam/rgb/image_raw"/>
-    <remap from="~input_pointcloud" to="/back_cam/depth_registered/points"/>
-    <remap from="~camera_info" to="/back_cam/rgb/camera_info"/>
+  <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection" ns="mir_perception/back_camera" output="screen" respawn="true">
+    <remap from="~input_rgb_image" to="/camera/color/image_raw"/>
+    <remap from="~input_pointcloud" to="/camera/depth/color/points"/>
+    <remap from="~camera_info" to="/camera/color/camera_info"/>
     <param name="loop_rate" type="int" value="30" />
     <param name="target_frame" value="map"/>
   </node>
