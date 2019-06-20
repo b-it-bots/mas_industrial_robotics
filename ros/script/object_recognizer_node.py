@@ -86,7 +86,7 @@ class ObjectRecognizer():
             if self.model_name == 'squeezeDet':
                 self.model = squeezeDet(model_dir)
                 print ("Using Squeezedet")
-            elif self.model_name == 'SSDLiteMobilenet':
+            elif self.model_name == 'ssdLiteMobilenet':
                 self.model = SSDLiteMobilenet(model_dir)
                 print ('Using SSDLiteMobilenet')
         elif self.net == 'classification':
