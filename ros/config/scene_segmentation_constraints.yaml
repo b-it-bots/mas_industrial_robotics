@@ -34,3 +34,4 @@ scene_segmentation:
     rgb_cluster_filter_limit_max: 0.35
     rgb_base_link_to_laser_distance: 0.350
     rgb_max_object_pose_x_to_base_link: 0.650
+    rgb_min_bbox_z: 0.03
