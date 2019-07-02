@@ -165,6 +165,7 @@ class MultimodalObjectRecognitionROS
         int rgb_cluster_filter_limit_max_;
         double rgb_base_link_to_laser_distance_;
         double rgb_max_object_pose_x_to_base_link_;
+        double rgb_min_bbox_z_;
 
     private:
         //void setConfig();
@@ -194,7 +195,7 @@ class MultimodalObjectRecognitionROS
         
         geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, std::string name);
 
-        geometry_msgs::PoseStamped adjustObjectPose(mas_perception_msgs::ObjectList &object_list);
+        adjustObjectPose(mas_perception_msgs::ObjectList &object_list);
         // Update object pose for axis and bolt
         void updateObjectPose(mas_perception_msgs::ObjectList &combined_object_list);
 
