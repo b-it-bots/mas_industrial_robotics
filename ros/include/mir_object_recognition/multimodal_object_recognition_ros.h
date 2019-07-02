@@ -167,6 +167,9 @@ class MultimodalObjectRecognitionROS
         double rgb_max_object_pose_x_to_base_link_;
         double rgb_min_bbox_z_;
 
+         // logdir for saving debug image
+        std::string logdir_;
+
     private:
         //void setConfig();
         void pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg);
@@ -202,6 +205,8 @@ class MultimodalObjectRecognitionROS
         void updateContainerPose(mas_perception_msgs::Object &container_object);
 
         void publishObjectList(mas_perception_msgs::ObjectList &object_list);
+
+        void saveDebugImage(const cv_bridge::CvImagePtr &cv_image_ptr);
 
     public:
         void update();

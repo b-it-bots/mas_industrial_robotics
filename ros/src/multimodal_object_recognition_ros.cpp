@@ -114,6 +114,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     pub_pcl_debug_in_ = nh_.advertise<sensor_msgs::PointCloud2>("output/rgb/debug/rgb_obj_cluster_in", 1);
     pub_pcl_debug_out_ = nh_.advertise<sensor_msgs::PointCloud2>("output/rgb/debug/rgb_obj_cluster_out", 1);
 
+    nh_.param<std::string>("logdir", logdir_, "/tmp/");
     
 }
 
@@ -384,9 +385,10 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     std::vector<PointCloud::Ptr> clusters_2d;
     
     bool done_recognizing_image = false;
+
+    cv_bridge::CvImagePtr cv_image;
     if (recognized_image_list_.objects.size() > 0)
     {
-        cv_bridge::CvImagePtr cv_image;
         try
         {
             cv_image = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
@@ -411,6 +413,20 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             {
                 std::cout<<"Region of Interest: cx, cy, width, height"<<std::endl;
                 std::cout<<roi_2d.x_offset<<", "<<roi_2d.y_offset<<", "<<roi_2d.width<<", "<<roi_2d.height<<std::endl;
+                
+                cv::Point pt1;
+                cv::Point pt2;
+
+                pt1.x = roi_2d.x_offset;
+                pt1.y = roi_2d.y_offset;
+                pt2.x = roi_2d.x_offset + roi_2d.width;
+                pt2.y = roi_2d.y_offset + roi_2d.height;
+
+                // draw bbox
+                cv::rectangle(cv_image->image, pt1, pt2, cv::Scalar(0,255,0), 1, 8, 0);
+                // add label
+                cv::putText(cv_image->image, object.name, cv::Point(pt1.x, pt2.y), 
+                            cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(0,255,0), 1);
             }
             // TODO: Create Get pose in _utils.cpp
             // NOTE: Remove large 2d misdetected bbox (misdetection)
@@ -655,7 +671,10 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
             }
         }
-
+        if (!image_list.images.empty())
+        {
+            saveDebugImage(cv_image);
+        }
     }
 }
 
@@ -1239,6 +1258,32 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
     {
         return;
     }
+}
+
+void MultimodalObjectRecognitionROS::saveDebugImage(const cv_bridge::CvImagePtr &cv_image_ptr)
+{
+    std::stringstream filename; // stringstream used for the conversion
+    ros::Time time_now = ros::Time::now();
+
+    // save image
+    filename.str("");
+    filename << logdir_ << time_now << "_bbox_rgb" <<".jpg";
+    cv::imwrite(filename.str(), cv_image_ptr->image);
+
+    cv_bridge::CvImagePtr raw_cv_image;
+    try
+    {
+        raw_cv_image = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+        return;
+    }
+    filename.str("");
+    filename << logdir_ << time_now << "_raw_rgb" <<".jpg";
+    cv::imwrite(filename.str(), raw_cv_image->image);
+
 }
 
 void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level)
