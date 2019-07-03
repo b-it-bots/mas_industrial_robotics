@@ -435,11 +435,15 @@ def calculate_maxrdd_fv_features(pointcloud, gmm, feature_extraction, mean_circl
     # Use color feature
     pcl_color = pointcloud[:,3:6]
     pcl_color = normalize_pointcloud(pcl_color)
+    pcl_color = utils.scale_to_unit_sphere(pcl_color)
     pcl_color = np.expand_dims(pcl_color, 0)
     fv_color = utils.get_3DmFV(pcl_color, gmm.weights_, gmm.means_, np.sqrt(gmm.covariances_))
     
     # Point feature
-    pointcloud = np.expand_dims(pointcloud[:,0:3], 0)
+    pointcloud = pointcloud[:,0:3]
+    pointcloud = normalize_pointcloud(pointcloud)
+    pointcloud = utils.scale_to_unit_sphere(pointcloud)
+    pointcloud = np.expand_dims(pointcloud, 0)
     fv = utils.get_3DmFV(pointcloud, gmm.weights_, gmm.means_, np.sqrt(gmm.covariances_))
     fv = np.concatenate([fv_color, fv])
     fv = fv.flatten()
