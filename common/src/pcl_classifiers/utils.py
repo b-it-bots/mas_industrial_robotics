@@ -436,7 +436,15 @@ def get_3dmfv_per_batch(points_list, w, mu, sigma, normalize=True, whiten_points
         
     return fv_list
 
-  
+def scale_to_unit_sphere(points):
+    centroid = np.mean(points, axis=0)
+    points = points - centroid
+    scale = np.max(np.sqrt(np.sum(points**2, axis=1)))
+    if scale > 0.0:
+        points = points / scale
+
+    return points  
+    
 # if __name__ == "__main__":
 
 #     model_idx = 0
