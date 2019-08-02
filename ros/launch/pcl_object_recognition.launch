@@ -3,10 +3,10 @@
 
   <arg name="input_pointcloud_topic" default="/arm_cam3d/depth_registered/points" />
   <arg name="target_frame" default="odom" />
-  <!-- <arg name="classifier" default="fisher_vector" /> -->
-  <!-- <arg name="dataset_type" default="fv_3" /> -->
-  <arg name="classifier" default="mean_circle" />
-  <arg name="dataset_type" default="mc" />
+  <arg name="classifier" default="fisher_vector" />
+  <arg name="dataset_type" default="msc_fv_2" />
+  <!-- <arg name="classifier" default="mean_circle" /> -->
+  <!-- <arg name="dataset_type" default="mc" /> -->
 
   <group ns="mir_perception">
     <node pkg="mir_object_recognition" type="pcl_object_recognizer_node" name="pcl_object_recognizer" output="screen" 
