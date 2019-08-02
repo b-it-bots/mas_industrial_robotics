@@ -444,7 +444,7 @@ def scale_to_unit_sphere(points):
         points = points / scale
 
     return points  
-  
+
 # if __name__ == "__main__":
 
 #     model_idx = 0
