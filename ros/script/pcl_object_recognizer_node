@@ -28,7 +28,7 @@ import colorsys
 
 class MeanCircleObjectRecognizer():
 
-    def __init__(self, classifier_name, dataset_type, variance=0.04, mc_feature=False):
+    def __init__(self, classifier_name, dataset_type, variance=0.05, mc_feature=True):
         self.classifier = self.load_classifier(dataset_type)
         # Service
         self.s = rospy.Service(SERVICE, RecognizeObject, self.recognize_object_service_cb)
