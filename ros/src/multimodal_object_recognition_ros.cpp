@@ -450,32 +450,32 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 float obj_height = max_pt.z - pointcloud_segmentation_->getWorkspaceHeight();
                 std::cout<<"obj height: "<<obj_height<<std::endl;
                 
-                if ((recognized_image_list_.objects[i].name == "S40_40_B" || 
-                    recognized_image_list_.objects[i].name == "S40_40_G" ||
-                    recognized_image_list_.objects[i].name == "F20_20_B" ||
-                    recognized_image_list_.objects[i].name == "F20_20_G" ||
-                    recognized_image_list_.objects[i].name == "M30" ||
-                    recognized_image_list_.objects[i].name == "MOTOR" ||
-                    recognized_image_list_.objects[i].name == "R20" ) &&
-                    obj_height <= rgb_min_bbox_z_ ) 
-                {
-                    std::cout<<"[RGB] DECOY BBOX: "<<recognized_image_list_.objects[i].name<<", height: "<<obj_height<<std::endl;
-                    final_image_list.objects[i].name = "DECOY";
-                    geometry_msgs::PoseStamped pose;
-                    pose.header.frame_id = cloud_->header.frame_id;
-                    pose.pose.position.x = 10.0;
-                    pose.pose.position.y = 10.0;
-                    pose.pose.position.z = 10.0;
-                    pose.pose.orientation.x = 0.0;
-                    pose.pose.orientation.y = 0.0;
-                    pose.pose.orientation.z = 0.0;
-                    pose.pose.orientation.w = 1.0;
-                    final_image_list.objects[i].pose = pose;
-                    final_image_list.objects[i].probability = 0.0;
-                    final_image_list.objects[i].database_id = rgb_object_id_;
-                }
-                else
-                {
+                /* if ((recognized_image_list_.objects[i].name == "S40_40_B" || */ 
+                /*     recognized_image_list_.objects[i].name == "S40_40_G" || */
+                /*     recognized_image_list_.objects[i].name == "F20_20_B" || */
+                /*     recognized_image_list_.objects[i].name == "F20_20_G" || */
+                /*     recognized_image_list_.objects[i].name == "M30" || */
+                /*     recognized_image_list_.objects[i].name == "MOTOR" || */
+                /*     recognized_image_list_.objects[i].name == "R20" ) && */
+                /*     obj_height <= rgb_min_bbox_z_ ) */ 
+                /* { */
+                /*     std::cout<<"[RGB] DECOY BBOX: "<<recognized_image_list_.objects[i].name<<", height: "<<obj_height<<std::endl; */
+                /*     final_image_list.objects[i].name = "DECOY"; */
+                /*     geometry_msgs::PoseStamped pose; */
+                /*     pose.header.frame_id = cloud_->header.frame_id; */
+                /*     pose.pose.position.x = 10.0; */
+                /*     pose.pose.position.y = 10.0; */
+                /*     pose.pose.position.z = 10.0; */
+                /*     pose.pose.orientation.x = 0.0; */
+                /*     pose.pose.orientation.y = 0.0; */
+                /*     pose.pose.orientation.z = 0.0; */
+                /*     pose.pose.orientation.w = 1.0; */
+                /*     final_image_list.objects[i].pose = pose; */
+                /*     final_image_list.objects[i].probability = 0.0; */
+                /*     final_image_list.objects[i].database_id = rgb_object_id_; */
+                /* } */
+                /* else */
+                /* { */
                     sensor_msgs::PointCloud2 ros_pc2;
                     pcl::PCLPointCloud2::Ptr pc2(new pcl::PCLPointCloud2);
                     pcl::toPCLPointCloud2(*pcl_object_cluster, *pc2);
@@ -506,27 +506,31 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                                 transform_listener_.waitForTransform(target_frame_id, frame_id, common_time, ros::Duration(0.1));
                                 transform_listener_.transformPose(target_frame_id, pose, pose_transformed);
                                 final_image_list.objects[i].pose = pose_transformed;
+                                /* final_image_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight(); */
                             }
                             catch(tf::LookupException& ex)
                             {
                                 ROS_WARN("Failed to transform pose: (%s)", ex.what());
                                 pose.header.stamp = ros::Time::now();
                                 final_image_list.objects[i].pose = pose;
+                                /* final_image_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight(); */
                             }
                         }
                         else
                         {
                             final_image_list.objects[i].pose = pose;
+                            /* final_image_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight(); */
                         }
                     }             
                     else
                     {
                         final_image_list.objects[i].pose = pose;
+                        /* final_image_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight(); */
                     }
                     final_image_list.objects[i].probability = recognized_image_list_.objects[i].probability;
                     final_image_list.objects[i].database_id = rgb_object_id_;
                     final_image_list.objects[i].name = recognized_image_list_.objects[i].name;
-                }
+                /* } */
             }
             else
             {
@@ -558,7 +562,9 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         {
             double current_object_x_pose = combined_object_list.objects[i].pose.pose.position.x;
             if (current_object_x_pose < rgb_base_link_to_laser_distance_ ||
-                    current_object_x_pose > rgb_max_object_pose_x_to_base_link_ )
+                current_object_x_pose > rgb_max_object_pose_x_to_base_link_)
+                /* combined_object_list.objects[i].pose.pose.position.z < pointcloud_segmentation_ */
+                /* ->object_height_above_workspace_ - 0.05) */
             {
                 std::cout<<"#########Filtering: "<<combined_object_list.objects[i].name<<std::endl;
                 std::cout<<"base link to laser: "<<rgb_base_link_to_laser_distance_<<std::endl;
@@ -570,7 +576,9 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             }
             std::cout<<"[RGB] Object: "<<combined_object_list.objects[i].name<<std::endl;
             std::cout<<"Pose:  "<<current_object_x_pose<<std::endl;
-
+            
+            std::cout<<"Plane height: "<<pointcloud_segmentation_->object_height_above_workspace_<<std::endl;
+            std::cout<<"Object height: "<<combined_object_list.objects[i].pose.pose.position.z<<std::endl;
         }
         // Adjust RPY and update container pose
         adjustObjectPose(combined_object_list);
@@ -671,10 +679,10 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
             }
         }
-        if (!image_list.images.empty())
-        {
-            saveDebugImage(cv_image);
-        }
+        /* if (!image_list.images.empty()) */
+        /* { */
+        /*     saveDebugImage(cv_image); */
+        /* } */
     }
 }
 
@@ -887,6 +895,7 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionROS::estimatePose(const pc
     pose_stamped.pose.position.x = position(0);
     pose_stamped.pose.position.y = position(1);
     pose_stamped.pose.position.z = position(2);
+    /* pose_stamped.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight(); */
     pose_stamped.pose.orientation.w = orientation.w();
     pose_stamped.pose.orientation.x = orientation.x();
     pose_stamped.pose.orientation.y = orientation.y();
