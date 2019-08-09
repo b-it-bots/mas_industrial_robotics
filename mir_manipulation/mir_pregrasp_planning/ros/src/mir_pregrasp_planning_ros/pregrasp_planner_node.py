@@ -176,6 +176,9 @@ class PregraspPlannerPipeline(object):
         self.joint_offset = [config.joint_1_offset, config.joint_2_offset, \
                              config.joint_3_offset, config.joint_4_offset, \
                              config.joint_5_offset]
+        self.joint_offset_side_grasp = [config.joint_1_offset_side_grasp, config.joint_2_offset_side_grasp, \
+                                         config.joint_3_offset_side_grasp, config.joint_4_offset_side_grasp, \
+                                         config.joint_5_offset_side_grasp]
         self.rotation_range = [config.rotation_range_min, config.rotation_range_max]
         return config
 
@@ -283,6 +286,7 @@ class PregraspPlannerPipeline(object):
         else:
             grasp_type = 'side_grasp'
 
+        self.grasp_type.publish(grasp_type)
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
         self.pose_samples_pub.publish(pose_samples)
         reachable_pose, brics_joint_config, joint_config = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, self.linear_offset)
@@ -300,7 +304,10 @@ class PregraspPlannerPipeline(object):
         # if we want to reach a pre-pregrasp pose (specified by joint offsets)
         # before reaching the final pose, generate a waypoint list
         if abs(max(self.joint_offset, key=abs)) > 0 and self.generate_pregrasp_waypoint:
-            pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(joint_config, self.joint_offset)
+            if grasp_type == 'side_grasp':
+                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(joint_config, self.joint_offset_side_grasp)
+            elif grasp_type == 'top_grasp':
+                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(joint_config, self.joint_offset)
             pregrasp_msg = std_msgs.msg.Float64MultiArray()
             pregrasp_msg.data = pregrasp_waypoint
             grasp_msg = std_msgs.msg.Float64MultiArray()
