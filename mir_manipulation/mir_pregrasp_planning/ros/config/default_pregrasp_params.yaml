@@ -25,6 +25,11 @@ joint_2_offset: -0.6
 joint_3_offset: 0.3
 joint_4_offset: 0.0
 joint_5_offset: 0.0
+joint_1_offset_side_grasp: 0.0
+joint_2_offset_side_grasp: 0.0
+joint_3_offset_side_grasp: 0.453
+joint_4_offset_side_grasp: -0.367
+joint_5_offset_side_grasp: 0.0
 rotation_range_min: 270.0
 rotation_range_max: 90.0
 loop_rate: 10.0
