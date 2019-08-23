@@ -20,6 +20,9 @@
       <child link="${name}_motor_mount_link" />
     </joint>
 
+    <material name="black">
+        <color rgba="0 0 0 1"/>
+    </material>
     <!-- motor mount -->
     <link name="${name}_motor_mount_link">
       <inertial>
@@ -29,14 +32,15 @@
       </inertial>
 
       <visual>
-        <origin xyz="0 0 -0.0275" rpy="0 ${M_PI/2} 0" />
+        <origin xyz="-0.029 -0.046 0.0185" rpy="0 ${M_PI/2} 0" />
         <geometry>
           <mesh filename="package://mir_description/meshes/grippers/dynamixel/d435_center/dynamixel_motor_mount.stl" scale="0.001 0.001 0.001" />
         </geometry>
+        <material name="black"/>
       </visual>
 
       <collision>
-        <origin xyz="0 0 -0.0275" rpy="0 ${M_PI/2} 0" />
+        <origin xyz="-0.029 -0.046 0.0185" rpy="0 ${M_PI/2} 0" />
         <geometry>
           <mesh filename="package://mir_description/meshes/grippers/dynamixel/d435_center/dynamixel_motor_mount_convex_hull.dae" scale="0.001 0.001 0.001" />
         </geometry>
