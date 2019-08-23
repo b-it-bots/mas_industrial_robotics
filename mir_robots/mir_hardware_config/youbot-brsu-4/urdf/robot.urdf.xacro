@@ -15,7 +15,8 @@
   <!-- youbot arm and gripper-->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
-  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.urdf.xacro" />
+  <!-- <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.urdf.xacro" /> -->
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/d435_center/dynamixel_gripper.urdf.xacro" />
   <!-- controller manager -->
   <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
   <!-- materials for visualization -->
@@ -23,9 +24,9 @@
   <!-- sensors -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
+  <!--xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/-->
   <xacro:include filename="$(find mir_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
-  <xacro:include filename="$(find mir_description)/urdf/sensors/_d435.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/d435.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/asus_xtion_camera_mount.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
@@ -57,32 +58,33 @@
      <origin xyz="-0.3 0.0 -0.035" rpy="${M_PI} 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
 
-  <xacro:dynamixel_gripper_v2 name="gripper" parent="arm_link_5">
+  <xacro:dynamixel_gripper_d435_center name="gripper" parent="arm_link_5">
     <origin xyz="0.003 0 0.0052" rpy="0 0 0" />
-  </xacro:dynamixel_gripper_v2>
+  </xacro:dynamixel_gripper_d435_center>
 
   <!-- camera mount for Intel RealSense F200 -->
-  <xacro:asus_xtion_camera_mount  name="camera_mount" parent="gripper_motor_mount_link">
+  <!-- xacro:asus_xtion_camera_mount  name="camera_mount" parent="gripper_motor_mount_link">
       <origin xyz="0.020 -0.00 0.0" rpy="0 0.025 ${M_PI/2} " />
-  </xacro:asus_xtion_camera_mount>
+  </xacro:asus_xtion_camera_mount -->
 
   <!-- 3D camera on arm -->
   <!-- xacro:intel_realsense_f200_camera name="arm_cam3d" parent="camera_mount_link">
     <origin xyz="-0.05 -0.01 0.03" rpy="0.0 -${M_PI/2 - 0.03} 0.0" />
   </xacro:intel_realsense_f200_camera -->
-   <xacro:asus_xtion_camera name="arm_cam3d" parent="camera_mount_link">
+  <!-- <xacro:asus_xtion_camera name="arm_cam3d" parent="camera_mount_link"--> 
        <!--origin xyz="-0.01 -0.012 0.05" rpy="0 ${M_PI/2 - 0.25} 0.00" /-->
        <!--origin xyz="0.016 0 0.01" rpy="0 ${M_PI/2 - 0} -0.09" />  -->
-       <origin xyz="0.025 -0.012 0.013" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" />  
+  <!--     <origin xyz="0.025 -0.012 0.013" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /-->  
        <!-- <origin xyz="0.022 -0.0 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
        <!-- <origin xyz="0.025 -0.010 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
        <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->  
-   </xacro:asus_xtion_camera>
+  <!-- </xacro:asus_xtion_camera-->
   
-   <xacro:sensor_d435  parent="base_link">
-       <!--origin xyz="-0.01 -0.012 0.05" rpy="0 ${M_PI/2 - 0.25} 0.00" /-->
-       <!--origin xyz="0.016 0 0.01" rpy="0 ${M_PI/2 - 0} -0.09" />  -->
+   <xacro:sensor_d435  name="d435_back" parent="base_link">
        <origin xyz="-0.263 0.0 0.0875" rpy="0.0 0.61 ${M_PI}" />  
-       <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->  
+   </xacro:sensor_d435>
+
+   <xacro:sensor_d435  name="d435_arm" parent="arm_link_5">
+       <origin xyz="0.0 0.0 -0.005" rpy="0.0 ${-M_PI / 2} ${-M_PI / 2}" />  
    </xacro:sensor_d435>
 </robot>
