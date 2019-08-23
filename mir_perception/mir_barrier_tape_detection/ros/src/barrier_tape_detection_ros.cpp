@@ -248,6 +248,7 @@ void BarrierTapeDetectionRos::convertPointCloudToXYZImage(cv::Mat &output_xyz_im
         index++;
     }
     xyz_frame.copyTo(output_xyz_image);
+    delete xyz_frame_buffer;
 }
 
 int main(int argc, char** argv)
