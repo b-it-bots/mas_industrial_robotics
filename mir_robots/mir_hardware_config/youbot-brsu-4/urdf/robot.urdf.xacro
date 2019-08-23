@@ -62,6 +62,7 @@
     <origin xyz="0.003 0 0.0052" rpy="0 0 0" />
   </xacro:dynamixel_gripper_d435_center>
 
+
   <!-- camera mount for Intel RealSense F200 -->
   <!-- xacro:asus_xtion_camera_mount  name="camera_mount" parent="gripper_motor_mount_link">
       <origin xyz="0.020 -0.00 0.0" rpy="0 0.025 ${M_PI/2} " />
