@@ -42,7 +42,7 @@
       <collision>
         <origin xyz="-0.029 -0.046 0.0185" rpy="0 ${M_PI/2} 0" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel/d435_center/dynamixel_motor_mount_convex_hull.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/d435_center/dynamixel_motor_mount.stl" scale="0.001 0.001 0.001" />
         </geometry>
       </collision>
     </link>
