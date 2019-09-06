@@ -420,6 +420,13 @@
         <joint name="arm_joint_4" value="3.14951" />
         <joint name="arm_joint_5" value="2.90371" />
     </group_state>
+    <group_state name="shelf_post_grasp" group="arm_1">
+        <joint name="arm_joint_1" value="2.22067" />
+        <joint name="arm_joint_2" value="2.02567" />
+        <joint name="arm_joint_3" value="-0.16342" />
+        <joint name="arm_joint_4" value="0.20051" />
+        <joint name="arm_joint_5" value="2.90571" />
+    </group_state>
     <!-- <group_state name="after_shelf" group="arm_1"> -->
     <!--     <joint name="arm_joint_1" value="2.73031" /> -->
     <!--     <joint name="arm_joint_2" value="0.96731" /> -->
