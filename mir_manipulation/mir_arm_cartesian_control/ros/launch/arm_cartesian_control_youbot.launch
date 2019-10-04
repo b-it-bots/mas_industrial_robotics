@@ -2,7 +2,7 @@
 <launch>
     <node pkg="mcr_arm_cartesian_control" type="arm_cartesian_control" ns="mir_manipulation" name="mcr_arm_cartesian_control" output="screen" respawn="false">
       <param name="root_name" value="arm_link_0"/>
-      <param name="tip_name" value="arm_link_5"/>
+      <param name="tip_name" value="gripper_static_grasp_link"/>
       <remap from="~joint_velocity_command" to="/arm_1/arm_controller/velocity_command"/>
       <remap from="~cartesian_velocity_command" to="/arm_1/arm_controller/cartesian_velocity_command"/>
     </node>
