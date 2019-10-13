@@ -3,7 +3,9 @@
 
   <arg name="robot" value="$(optenv ROBOT youbot-brsu-arm)" />
 
-  <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
+  <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch">
+    <arg name="youBotHasBase" value="false"/>
+  </include>
 
   <include file="$(find mir_teleop)/ros/launch/teleop_joypad.launch">
     <arg name="robot" value="$(arg robot)"/>
