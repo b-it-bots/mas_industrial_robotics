@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="robot" value="$(optenv ROBOT youbot-brsu-arm)" />
+
+  <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
+
+  <include file="$(find mir_teleop)/ros/launch/teleop_joypad.launch">
+    <arg name="robot" value="$(arg robot)"/>
+  </include>
+
+  <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />	
+
+</launch>
