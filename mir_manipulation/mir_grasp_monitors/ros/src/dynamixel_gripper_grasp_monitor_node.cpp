@@ -15,6 +15,7 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode() :
 {
     ros::NodeHandle nh("~");
     nh.param("position_error_threshold", position_error_threshold_, 0.1);
+    nh.param("load_threshold", load_threshold_, 0.15);
     pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
     sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
     sub_dynamixel_motor_states_ = nh.subscribe("dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
@@ -140,8 +141,11 @@ bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
     if(object_threshold_map.find(object_name_) == object_threshold_map.end()){
       return true;
     }
-    ROS_INFO("object: %s, position error: %f, threshold: %f", object_name_.c_str(), std::abs(joint_states_->error), object_threshold_map[object_name_]);
-    if (std::abs(joint_states_->error) >= object_threshold_map[object_name_]) {
+
+    ROS_INFO("[GRASP_MONITOR] Position Error Values: %f, Position Threshold: %f", std::abs(joint_states_->error), object_threshold_map[object_name_]);
+    ROS_INFO("[GRASP_MONITOR] Load Values: %f, Load Threshold: %f", std::abs(joint_states_->load), load_threshold_);
+
+    if ((std::abs(joint_states_->error) >= object_threshold_map[object_name_]) and (std::abs(joint_states_->load) >= load_threshold_)) {
         return true;
     }
     return false;
