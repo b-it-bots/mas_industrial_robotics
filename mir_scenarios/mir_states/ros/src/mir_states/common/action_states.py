@@ -4,6 +4,7 @@ import rospy
 from actionlib import SimpleActionClient
 import smach
 
+from mir_yb_actions.utils import Utils
 from actionlib_msgs.msg import GoalStatus
 from mir_yb_action_msgs.msg import GenericExecuteAction, GenericExecuteGoal
 from diagnostic_msgs.msg import KeyValue
@@ -113,14 +114,25 @@ class stage_object(smach.State):
             return 'failed'
 
 class unstage_object(smach.State):
-    def __init__(self, platform):
-        smach.State.__init__(self, outcomes=['success', 'failed'])
+    def __init__(self, platform=None):
+        smach.State.__init__(self, outcomes=['success', 'failed'],
+                                   input_keys=['goal'])
         self.place_client = SimpleActionClient('unstage_object_server', GenericExecuteAction)
         self.place_client.wait_for_server()
         self.goal = GenericExecuteGoal()
-        self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
+        if platform is not None:
+            self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
 
     def execute(self, userdata):
+        # initialise platform in goal if not already initialised
+        current_platform = Utils.get_value_of(self.goal.parameters, 'platform')
+        if current_platform is None:
+            platform = Utils.get_value_of(userdata.goal.parameters, 'platform')
+            if platform is None:
+                rospy.logwarn('Platform not provided. Using default')
+                platform = 'platform_middle'
+            self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
+
         self.place_client.send_goal(self.goal)
         self.place_client.wait_for_result(rospy.Duration.from_sec(15.0))
         state = self.place_client.get_state()
