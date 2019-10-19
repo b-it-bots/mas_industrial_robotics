@@ -97,14 +97,24 @@ class insert_object(smach.State):
             return 'failed'
 
 class stage_object(smach.State):
-    def __init__(self, platform):
+    def __init__(self, platform=None):
         smach.State.__init__(self, outcomes=['success', 'failed'])
         self.place_client = SimpleActionClient('stage_object_server', GenericExecuteAction)
         self.place_client.wait_for_server()
         self.goal = GenericExecuteGoal()
-        self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
+        if platform is not None:
+            self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
 
     def execute(self, userdata):
+        # initialise platform in goal if not already initialised
+        current_platform = Utils.get_value_of(self.goal.parameters, 'platform')
+        if current_platform is None:
+            platform = Utils.get_value_of(userdata.goal.parameters, 'platform')
+            if platform is None:
+                rospy.logwarn('Platform not provided. Using default')
+                platform = 'platform_middle'
+            self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
+
         self.place_client.send_goal(self.goal)
         self.place_client.wait_for_result(rospy.Duration.from_sec(15.0))
         state = self.place_client.get_state()
