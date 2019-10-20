@@ -4,9 +4,9 @@ import rospy
 from actionlib import SimpleActionClient
 import smach
 
-from mir_yb_actions.utils import Utils
+from mir_actions.utils import Utils
 from actionlib_msgs.msg import GoalStatus
-from mir_yb_action_msgs.msg import GenericExecuteAction, GenericExecuteGoal
+from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteGoal
 from diagnostic_msgs.msg import KeyValue
 
 class place_object(smach.State):
