@@ -44,16 +44,16 @@ inside the respective directories
 ### Testing
 1. We need the Knowledge base service running to test the loading of knowledge
    base
-```roslaunch mcr_pddl_problem_generator
+```roslaunch mir_pddl_problem_generator
 rosplan_knowledge_base_example.launch```
 currently this node is available in the
-[unmerged_packages_for_testing](https://mas.b-it-center.de/gitgate/dnair2s/unmerged_packages_for_testing/tree/master/task_planning/mcr_pddl_problem_generator)
+[unmerged_packages_for_testing](https://mas.b-it-center.de/gitgate/dnair2s/unmerged_packages_for_testing/tree/master/task_planning/mir_pddl_problem_generator)
 
 Domain used is
 [here](https://mas.b-it-center.de/gitgate/dnair2s/unmerged_packages_for_testing/blob/master/task_planning/mir_knowledge/common/pddl/general_domain/domain.pddl) 
 
 Before running the test the file has to be copied to the
-mcr_pddl_problem_generator/ros/test/example_domain folder.
+mir_pddl_problem_generator/ros/test/example_domain folder.
 
 2. For testing navigation we need the navigation action server
 ```roslaunch mir_move_base_safe move_base.launch```

@@ -2,13 +2,12 @@ cmake_minimum_required(VERSION 2.8.3)
 project(mcr_knowledge)
 
 find_package(catkin REQUIRED COMPONENTS
-    mercury_planner
 )
 
 catkin_python_setup()
 
 catkin_package(
-    CATKIN_DEPENDS mercury_planner
+    CATKIN_DEPENDS 
 )
 
 ### TESTS

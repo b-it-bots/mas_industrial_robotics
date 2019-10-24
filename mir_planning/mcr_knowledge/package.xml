@@ -12,12 +12,9 @@
 
     <buildtool_depend>catkin</buildtool_depend>
     
-    <build_depend>mercury_planner</build_depend>
-    
     <run_depend>mongodb_store</run_depend>
     <run_depend>mongodb_store_msgs</run_depend>
     <run_depend>rosplan_knowledge_base</run_depend>
-    <run_depend>mercury_planner</run_depend>
 
     <test_depend>roslaunch</test_depend>
 </package>

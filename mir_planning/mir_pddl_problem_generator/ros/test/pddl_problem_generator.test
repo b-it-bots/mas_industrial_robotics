@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <!-- ROSPlan Semantic Knowledge base ! upload and query semantic information : instances, facts or goals -->
+    <include file="$(find mir_pddl_problem_generator)/ros/launch/rosplan_knowledge_base_example.launch" />
+
+    <!-- automatic PDDL problem generator node from knowledge base snapshot -->
+    <include file="$(find mir_pddl_problem_generator)/ros/launch/pddl_problem_generator_example.launch" />
+
+    <!--test pkg="mir_pddl_problem_generator" type="pddl_problem_generator_test" test-name="pddl_problem_generator_test" >
+        <remap from="~event_in" to="/mir_pddl_problem_generator/pddl_problem_generator_test/event_in" />
+        <remap from="~event_out" to="/mir_pddl_problem_generator/pddl_problem_generator_test/event_out" />
+    </test-->
+
+</launch>

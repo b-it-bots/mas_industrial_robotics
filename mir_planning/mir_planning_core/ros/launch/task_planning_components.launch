@@ -15,7 +15,7 @@
     <arg name="problem_path" default="$(arg base_path)/problems/p1.pddl" />
 
     <!-- rosplan knowledge base -->
-    <include file="$(find mcr_pddl_problem_generator)/ros/launch/rosplan_knowledge_base_example.launch">
+    <include file="$(find mir_pddl_problem_generator)/ros/launch/rosplan_knowledge_base_example.launch">
         <arg name="base_path" value="$(arg base_path)" />
         <arg name="domain_path" value="$(arg domain_path)" />
         <arg name="database_path" value="$(arg database_path)" />
@@ -33,7 +33,7 @@
     <include file="$(find mir_knowledge_base_analyzer)/ros/launch/knowledge_base_queries.launch"/>
 
     <!-- automatic pddl problem generation from kb snapshot -->
-    <node pkg="mcr_pddl_problem_generator" type="pddl_problem_generator_node" name="pddl_problem_generator_node" output="screen" ns="task_planning" >
+    <node pkg="mir_pddl_problem_generator" type="pddl_problem_generator_node" name="pddl_problem_generator_node" output="screen" ns="task_planning" >
         <param name="domain_path" value="$(arg domain_path)" />
         <param name="problem_path" value="$(arg problem_path)" />
         <param name="max_goals" value="3" />

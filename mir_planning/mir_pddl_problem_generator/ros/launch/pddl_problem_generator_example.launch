@@ -3,7 +3,7 @@
 
     <!-- NOTE : This is an example launch file, please do not modify! -->
 
-    <arg name="base_path" default="$(find mcr_pddl_problem_generator)/ros/test/example_domain" />
+    <arg name="base_path" default="$(find mir_pddl_problem_generator)/ros/test/example_domain" />
     <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
     <arg name="problem_path" default="$(arg base_path)/problems/p01.pddl" />
     <arg name="cost_required" default="true" />
@@ -12,7 +12,7 @@
     <arg name="max_goals" default="4" />
 
     <!-- automatic PDDL problem generator node from knowledge base snapshot -->
-    <node pkg="mcr_pddl_problem_generator" type="pddl_problem_generator_node" name="pddl_problem_generator_node" output="screen" ns="mcr_pddl_problem_generator" >
+    <node pkg="mir_pddl_problem_generator" type="pddl_problem_generator_node" name="pddl_problem_generator_node" output="screen" ns="mir_pddl_problem_generator" >
         <param name="domain_path" value="$(arg domain_path)" />
         <param name="problem_path" value="$(arg problem_path)" />
         <param name="max_goals" value="$(arg max_goals)" />
