@@ -120,7 +120,7 @@ void PlannerExecutor::announceAction(std::string action_name,
                                      std::vector<diagnostic_msgs::KeyValue> params)
 {
     /* announce action with text */
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl << std::endl << std::endl << std::endl;
     ROS_INFO("Executing action \"%s\"", action_name.c_str());
     ROS_INFO("Parameters :");
     for (diagnostic_msgs::KeyValue kw: params) {

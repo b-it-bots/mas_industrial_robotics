@@ -24,7 +24,7 @@
     <!-- instrinsic knowledge -->
     <!-- to upload knowledge which will not come from referee box, such as yb intrinsic knowledge, object affordances, etc -->
     <!-- mir_knowedge upload_knowledge : parses minimum_problem.pddl and uploads instances to kb -->
-    <node pkg="mcr_knowledge" type="upload_knowledge" name="upload_knowledge" output="screen" args="$(arg pddl_problem)"/>
+    <node pkg="mir_knowledge" type="upload_knowledge" name="upload_knowledge" output="screen" args="$(arg pddl_problem)"/>
 
     <!-- mir_knowledge_base_analyzer knowledge_base_analyzer : tells if there are new goals or changes in facts by queries to kb -->
     <include file="$(find mir_knowledge_base_analyzer)/ros/launch/knowledge_base_analyzer.launch"/>

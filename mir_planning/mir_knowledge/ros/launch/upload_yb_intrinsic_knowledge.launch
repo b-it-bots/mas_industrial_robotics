@@ -8,7 +8,7 @@
     <arg name="pddl_problem" default="minimum_required_facts" />
 
     <!-- upload knowledge to the knowledge base from PDDL problem definition -->
-    <node   pkg="mcr_knowledge" type="upload_knowledge" name="upload_knowledge" 
+    <node   pkg="mir_knowledge" type="upload_knowledge" name="upload_knowledge" 
         output="screen" args="$(arg domain_path)/problems/$(arg pddl_problem).pddl"/>
 
 </launch>

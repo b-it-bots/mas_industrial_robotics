@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-    <!-- upload knowledge to the knowledge base from PDDL problem definition -->
-    <node   pkg="mcr_knowledge" type="upload_knowledge" name="upload_knowledge"
-        output="screen" args="$(arg pddl_problem)"/>
-</launch>

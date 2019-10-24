@@ -9,7 +9,7 @@ import sys
 import mercury_planner.pddl as pddl
 
 # create dictionary out of pddl vector
-import mcr_knowledge.update_knowledge_utils as utils
+import mir_knowledge.update_knowledge_utils as utils
 
 # for rosplan service calls
 from rosplan_knowledge_msgs.srv import KnowledgeUpdateService
@@ -219,7 +219,7 @@ def getPddlProblem():
             rospy.logerr('Could not open .pddl file !')
     else:
         rospy.logerr('No argument received!')
-        rospy.logwarn('Usage : rosrun mcr_knowledge upload_knowledge.py path_to_pddl_problem_file/problem.ppdl')
+        rospy.logwarn('Usage : rosrun mir_knowledge upload_knowledge.py path_to_pddl_problem_file/problem.ppdl')
         rospy.logwarn('This node is recommended to be launched by using the launchfile provided in this package, are you doing that?')
     return pddl_problem
 
