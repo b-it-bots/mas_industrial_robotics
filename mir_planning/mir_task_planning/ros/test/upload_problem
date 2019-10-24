@@ -14,7 +14,7 @@ import os.path
 import rospy
 
 import mercury_planner.pddl as pddl
-import mcr_knowledge_ros.upload_knowledge as uk
+import mir_knowledge_ros.upload_knowledge as uk
 
 if __name__ == '__main__':
 

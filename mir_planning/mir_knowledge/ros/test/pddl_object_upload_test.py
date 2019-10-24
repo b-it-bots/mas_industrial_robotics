@@ -4,12 +4,12 @@
 Test unit for the functions used in upload_knowledge.py
 """
 
-PKG = 'mcr_knowledge'
+PKG = 'mir_knowledge'
 
 import unittest
 import rosunit
-import mcr_knowledge.update_knowledge_utils as utils
-import mcr_knowledge_ros.upload_knowledge as upload_knowledge
+import mir_knowledge.update_knowledge_utils as utils
+import mir_knowledge_ros.upload_knowledge as upload_knowledge
 
 class TestPddlObjectUpload(unittest.TestCase):
     def test_parse_objects(self):
