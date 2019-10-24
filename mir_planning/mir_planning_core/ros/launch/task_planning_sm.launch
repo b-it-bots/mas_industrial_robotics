@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="domain" default="general_domain" />
+    <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
+    <arg name="domain_file" default="$(arg base_path)/domain.pddl" />
+    <arg name="problem_file" default="$(arg base_path)/problems/p1.pddl" />
+    <!-- current options for planner are "mercury" and "lama" -->
+    <arg name="planner" default="lama" />
+
+    <node pkg="mir_planning_core" type="planning_coordinator_sm.py" name="skynet" output="screen" >
+        <param name="domain_file" type="str" value="$(arg domain_file)" />
+        <param name="problem_file" type="str" value="$(arg problem_file)" />
+        <param name="planner" type="str" value="$(arg planner)" />
+    </node>
+
+</launch>

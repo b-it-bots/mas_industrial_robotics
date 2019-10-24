@@ -1,0 +1,9 @@
+# goal definition
+diagnostic_msgs/KeyValue[] parameters
+---
+# result definition
+diagnostic_msgs/KeyValue[] results
+---
+# feedback
+string current_state
+string text

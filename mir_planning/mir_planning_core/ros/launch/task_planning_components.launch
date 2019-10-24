@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- knowledge base args, they are reused by other components as well -->
+    <!--arg name="domain" default="robocup_domain" /-->
+    <arg name="domain" default="general_domain" />
+    <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
+    <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
+    <arg name="database_path" default="$(find mir_knowledge)/common/mongoDB" />
+
+    <!-- upload domain args - pddl problem that will be loaded as instrinsic knowledge -->
+    <arg name="pddl_problem" default="$(arg base_path)/minimum_required_facts.pddl" />
+
+    <!-- pddl problem gen - path for the pddl problem generator to save the created file, and for the planner to make plan -->
+    <arg name="problem_path" default="$(arg base_path)/problems/p1.pddl" />
+
+    <!-- rosplan knowledge base -->
+    <include file="$(find mcr_pddl_problem_generator)/ros/launch/rosplan_knowledge_base_example.launch">
+        <arg name="base_path" value="$(arg base_path)" />
+        <arg name="domain_path" value="$(arg domain_path)" />
+        <arg name="database_path" value="$(arg database_path)" />
+    </include>
+
+    <!-- instrinsic knowledge -->
+    <!-- to upload knowledge which will not come from referee box, such as yb intrinsic knowledge, object affordances, etc -->
+    <!-- mir_knowedge upload_knowledge : parses minimum_problem.pddl and uploads instances to kb -->
+    <node pkg="mcr_knowledge" type="upload_knowledge" name="upload_knowledge" output="screen" args="$(arg pddl_problem)"/>
+
+    <!-- mir_knowledge_base_analyzer knowledge_base_analyzer : tells if there are new goals or changes in facts by queries to kb -->
+    <include file="$(find mir_knowledge_base_analyzer)/ros/launch/knowledge_base_analyzer.launch"/>
+
+    <!-- mir_knowledge_base_analyzer knowledge_base_analyzer : lets you query specific things from the knowledge base -->
+    <include file="$(find mir_knowledge_base_analyzer)/ros/launch/knowledge_base_queries.launch"/>
+
+    <!-- automatic pddl problem generation from kb snapshot -->
+    <node pkg="mcr_pddl_problem_generator" type="pddl_problem_generator_node" name="pddl_problem_generator_node" output="screen" ns="task_planning" >
+        <param name="domain_path" value="$(arg domain_path)" />
+        <param name="problem_path" value="$(arg problem_path)" />
+        <param name="max_goals" value="3" />
+    </node>
+
+    <!-- mir_task_planning (planners wrapped with ros action server) -->
+    <include file="$(find mir_task_planning)/ros/launch/task_planner.launch"/>
+
+    <!-- planner executor, listens to action dispatch msgs and executes the plan, reports failure if some action fails and aborts -->
+    <include file="$(find mir_planner_executor)/ros/launch/planner_executor.launch"/>
+
+</launch>

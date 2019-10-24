@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+"""
+This is a test script which uploads knowledge from a pddl problem file to knowledge
+base. This mimics getting data from refbox, parsing that data and upload that data
+to knowledge base.
+"""
+
+from __future__ import print_function
+
+NODE = 'upload_problem'
+
+import os.path
+import rospy
+
+import mercury_planner.pddl as pddl
+import mcr_knowledge_ros.upload_knowledge as uk
+
+if __name__ == '__main__':
+
+    rospy.init_node(NODE)
+    problem_file_name = rospy.get_param('~problem_file_name', None)
+    file_path = rospy.get_param('~file_path', None)
+
+    problem_file = os.path.join(file_path, problem_file_name)
+
+    if not os.path.exists(problem_file):
+        rospy.logfatal('Either domain file or problem file does not exist. Exiting.')
+        sys.exit(1)
+
+    # read pddl file
+    pddl_problem = pddl.pddl_file.parse_pddl_file('problem', problem_file)
+
+    # upload information to knowledge base
+    # instances
+    uk.upload_knowledge(pddl_problem[3])
+    # facts
+    uk.upload_knowledge(pddl_problem[4])
+    # goals
+    uk.upload_knowledge(pddl_problem[5])

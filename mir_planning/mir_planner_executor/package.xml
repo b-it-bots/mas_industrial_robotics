@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_planner_executor</name>
+  <version>1.0.0</version>
+  <description>
+    Reads a plan, comming from a planner and executes each action in order.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <author email="torsten.jandt@smail.inf.h-brs.de">Torsten Jandt</author>
+  <maintainer email="torsten.jandt@smail.inf.h-brs.de">Torsten Jandt</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>actionlib</build_depend>
+  <build_depend>actionlib_msgs</build_depend>
+  <build_depend>rosplan_planning_system</build_depend>
+  <build_depend>mir_planning_msgs</build_depend>
+  <build_depend>mir_audio_receiver</build_depend>
+  <run_depend>actionlib</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
+  <run_depend>rosplan_knowledge_base</run_depend>
+  <run_depend>rosplan_planning_system</run_depend>
+  <run_depend>mir_planning_msgs</run_depend>
+  <run_depend>mir_audio_receiver</run_depend>
+
+
+
+</package>

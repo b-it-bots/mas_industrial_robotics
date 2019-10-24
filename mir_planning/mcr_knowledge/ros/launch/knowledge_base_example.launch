@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- NOTE : This is an example launch file, please do not modify! -->
+
+    <!-- Semantic Knowledge base ! upload and query semantic information : instances, facts or goals -->
+
+    <arg name="domain" default="example_domain" />
+    <arg name="base_path" default="$(find mcr_knowledge)/common/pddl/$(arg domain)" />
+    <arg name="database_path" default="$(find mcr_knowledge)/common/mongoDB" />
+    <arg name="mongodb_host" default="localhost" />
+
+    <include file="$(find mcr_pddl_problem_generator)/ros/launch/rosplan_knowledge_base_example.launch">
+        <arg name="base_path" value="$(arg base_path)" />
+        <arg name="database_path" value="$(arg database_path)" />
+        <arg name="mongodb_host" value="$(arg mongodb_host)" />
+    </include>
+
+</launch>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- run planner executor -->
+    <node pkg="mir_planner_executor" type="planner_executor" name="planner_executor" output="screen"  ns="task_planning" />
+
+</launch>
