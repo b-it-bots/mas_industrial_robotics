@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mir_planning_msgs</name>
+  <version>1.0.0</version>
+  <description>
+    Messages, Services and Actions for planning modules in mas industrial robotics
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <author email="torsten.jandt@smail.inf.h-brs.de">Torsten Jandt</author>
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+
+  <maintainer email="torsten.jandt@smail.inf.h-brs.de">Torsten Jandt</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>actionlib_msgs</depend>
+  <depend>actionlib</depend>
+
+  <build_depend>rosplan_knowledge_msgs</build_depend>
+  <build_depend>rosplan_dispatch_msgs</build_depend>
+
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>rosplan_knowledge_msgs</exec_depend>
+  <exec_depend>rosplan_dispatch_msgs</exec_depend>
+
+</package>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find mir_refbox_parser)/ros/launch/refbox_parser.launch"/>
+    <!-- launch the knowledge base here include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch"/-->
+
+    <test pkg="mir_refbox_parser" type="refbox_parser_test.py"
+            test-name="test_refbox_communication">
+        <remap from="~refbox" to="/refbox_parser/refbox"/>
+        <remap from="~event_out" to="/refbox_parser/event_out"/>
+        <remap from="~event_in" to="/refbox_parser/event_in"/>
+    </test>
+</launch>

@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="mir_planner_executor" type="planner_executor_mockup" name="planner_executor_mockup" output="screen" />
+    <node pkg="mir_planner_executor" type="planner_executor_test" name="planner_executor_test" output="screen" />
+</launch>

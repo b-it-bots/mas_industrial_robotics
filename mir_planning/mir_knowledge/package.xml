@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+    <name>mir_knowledge</name>
+    <version>1.0.0</version>
+    <description>Stores semantic knowledge about the industrial domain</description>
+
+    <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+    <license>GPLv3</license>
+
+    <author email="olima_84@yahoo.com">Oscar Lima</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <test_depend>roslaunch</test_depend>
+</package>
+

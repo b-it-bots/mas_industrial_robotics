@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="problem_file_name" default="test_problem.pddl" />
+    <arg name="file_path" default="$(find mir_task_planning)/common/pddl" />
+
+    <group ns="mir_task_planning">
+
+        <node pkg="mir_task_planning" type="upload_problem" name="upload_problem" output="screen" >
+
+            <param name="problem_file_name" value="$(arg problem_file_name)" type="str" />
+            <param name="file_path" value="$(arg file_path)" type="str" />
+        </node>
+
+    </group>
+
+</launch>

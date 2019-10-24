@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find mir_basic_navigation_test)/ros/launch/logging.launch">
+      <arg name="topics" default="$(find mir_planning_bringup)/ros/config/logging_topics.yaml" />
+  </include>
+
+  <!-- rockin/depth/pointcloud -->
+  <node pkg="topic_tools" type="throttle" name="pointcloud_remap" args="messages /mcr_perception/cloud_accumulator/output 2 /rockin/depth/pointcloud" output="screen" />
+
+  <!-- rockin/rgb/camera_info -->
+  <node pkg="topic_tools" type="throttle" name="camera_info_remap" args="messages /arm_cam3d/rgb/camera_info 10 /rockin/rgb/camera_info" output="screen" />
+
+  <!-- rockin/depth/camera_info -->
+  <node pkg="topic_tools" type="throttle" name="depth_camera_info_remap" args="messages /arm_cam3d/depth/camera_info 10 /rockin/depth/camera_info" output="screen" />
+
+</launch>

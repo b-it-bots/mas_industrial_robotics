@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- youbot domain : btt, ppt, cbt, etc... -->
+    <arg name="domain" default="general_domain" />
+
+    <!-- Semantic knowledge base, stores objects, instances and goals -->
+    <include file="$(find mcr_knowledge)/ros/launch/knowledge_base.launch">
+        <arg name="domain_path" value="$(find mir_knowledge)/common/pddl/$(arg domain)" />
+    </include>
+
+</launch>

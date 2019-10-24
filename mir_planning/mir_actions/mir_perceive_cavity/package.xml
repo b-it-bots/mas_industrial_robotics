@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_perceive_cavity</name>
+  <version>1.0.0</version>
+  <description>
+    Assumes that the robot is in front of a platform, then triggers base placement component
+    moves the arm to look_at_workspace and triggers cavity recognition pipeline.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="deebul.nair@smail.inf.h-brs.de">Deebul Nair</author>
+  <maintainer email="deebul.nair@smail.inf.h-brs.de">Deebul Nair</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
