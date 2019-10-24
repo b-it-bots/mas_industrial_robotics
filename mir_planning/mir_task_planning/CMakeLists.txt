@@ -3,8 +3,6 @@ project(mir_task_planning)
 
 find_package(catkin REQUIRED
   COMPONENTS
-  actionlib_msgs
-  actionlib
   mir_planning_msgs
 )
 

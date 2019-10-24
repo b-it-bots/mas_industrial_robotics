@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-    <name>mcr_pddl_problem_generator</name>
+    <name>mir_pddl_problem_generator</name>
     <version>1.0.0</version>
     <description>
         Generates automatically PDDL problem definition from

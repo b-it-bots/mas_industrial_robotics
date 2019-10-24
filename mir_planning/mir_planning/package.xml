@@ -13,6 +13,17 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <exec_depend>mir_task_planning</exec_depend>
+  <exec_depend>mir_planner_executor</exec_depend>
+  <exec_depend>mir_planning_bringup</exec_depend>
+  <exec_depend>mir_planning_core</exec_depend>
+  <exec_depend>mir_planning_msgs</exec_depend>
+  <exec_depend>mir_knowledge_base_analyzer</exec_depend>
+  <exec_depend>mir_refbox_parser</exec_depend>
+  <exec_depend>mir_actions</exec_depend>
+  <exec_depend>mir_knowledge</exec_depend>
+  <exec_depend>mir_pddl_problem_generator</exec_depend>
+
   <export>
     <metapackage/>
   </export>

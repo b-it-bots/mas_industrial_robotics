@@ -8,12 +8,12 @@
  *
  */
 
-#ifndef MCR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
-#define MCR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
+#ifndef MIR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
+#define MIR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
 
 #include <ros/ros.h>
 #include <rosplan_planning_system/PlanningEnvironment.h>
-#include <mcr_pddl_problem_generator/pddl_problem_generator.h>
+#include <mir_pddl_problem_generator/pddl_problem_generator.h>
 #include <std_msgs/String.h>
 #include <string>
 #include <boost/filesystem.hpp>
@@ -54,5 +54,5 @@ class PDDLProblemGeneratorNode
         // Parses the domain and gets its attributes
         KCL_rosplan::PlanningEnvironment environment_;
 };
-#endif  // MCR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
+#endif  // MIR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
 

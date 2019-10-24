@@ -7,7 +7,7 @@
  *
  */
 
-#include <mcr_pddl_generator_node/pddl_problem_generator_node.h>
+#include <mir_pddl_generator_node/pddl_problem_generator_node.h>
 #include <string>
 
 PDDLProblemGeneratorNode::PDDLProblemGeneratorNode() : nh_("~"), is_event_in_received_(false)
