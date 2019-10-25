@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+    <name>mir_pddl_problem_generator</name>
+    <version>1.0.0</version>
+    <description>
+        Generates automatically PDDL problem definition from
+        knowledge base snapshot.
+    </description>
+
+    <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+    <license>GPLv3</license>
+
+    <author email="olima_84@yahoo.com">Oscar Lima</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>roscpp</build_depend>
+    <build_depend>std_msgs</build_depend>
+    <build_depend>rosplan_planning_system</build_depend>
+    <build_depend>roslint</build_depend>
+
+    <run_depend>roscpp</run_depend>
+    <run_depend>std_msgs</run_depend>
+    <run_depend>rosplan_planning_system</run_depend>
+    <run_depend>mongodb_store</run_depend>
+    <run_depend>rosplan_knowledge_base</run_depend>
+
+    <test_depend>roslaunch</test_depend>
+    <test_depend>rostest</test_depend>
+</package>

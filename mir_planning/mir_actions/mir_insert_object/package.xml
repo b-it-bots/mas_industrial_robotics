@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_insert_object</name>
+  <version>1.0.0</version>
+  <description>
+    Behavior insert object based on state machines wrapped by actionlib server
+    Assumes that yb is having an object in its hand then looks for a container, moves
+    the arm on top of that container, then executes linear motion down, opens gripper
+    then linear motion up then moves the arm back to idle or HOLD position
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

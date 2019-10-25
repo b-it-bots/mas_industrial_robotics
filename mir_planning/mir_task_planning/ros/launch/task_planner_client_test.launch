@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="domain_file_name" default="domain.pddl" />
+    <arg name="problem_file_name" default="smaller_problem.pddl" />
+    <arg name="file_path" default="$(find mir_task_planning)/common/pddl" />
+
+    <group ns="mir_task_planning">
+
+        <node pkg="mir_task_planning" type="task_planner_client" name="task_planner_client_test" output="screen" >
+
+            <param name="domain_file_name" value="$(arg domain_file_name)" type="str" />
+            <param name="problem_file_name" value="$(arg problem_file_name)" type="str" />
+            <param name="file_path" value="$(arg file_path)" type="str" />
+        </node>
+
+    </group>
+
+</launch>

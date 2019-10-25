@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- NOTE : This is an example launch file, please do not modify! -->
+
+    <!-- ROSPlan Semantic Knowledge base ! upload and query semantic information : instances, facts or goals -->
+
+    <arg name="base_path" default="$(find mir_pddl_problem_generator)/ros/test/example_domain" />
+    <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
+    <arg name="database_path" default="$(find mir_pddl_problem_generator)/ros/test/mongoDB" />
+    <arg name="mongodb_host" default="localhost" />
+    <arg name="mongodb_port" default="27019" />    <!-- Do not use ubuntu default mongodb port : 27017-->
+
+    <!-- scene database (MongoDB) -->
+    <node pkg="mongodb_store" type="mongodb_server.py" name="mongodb_server" output="screen" >
+        <param name="master" value="false"/>
+        <param name="host" value="$(arg mongodb_host)" />
+        <param name="port" value="$(arg mongodb_port)" />
+        <param name="database_path" value="$(arg database_path)" />
+    </node>
+
+    <!-- scene database messages (MongoDB) -->
+    <param name="mongodb_host" type="str" value="$(arg mongodb_host)" />
+    <param name="mongodb_port" type="int" value="$(arg mongodb_port)" />
+    <node pkg="mongodb_store" type="message_store_node.py" name="message_store_node" output="screen" />
+
+    <!-- rosplan knowledge base interface-->
+    <param name="domain_path" value="$(arg domain_path)" />
+    <node pkg="rosplan_knowledge_base" type="knowledgeBase" name="rosplan_knowledge_base" output="screen" required="true" />
+
+</launch>

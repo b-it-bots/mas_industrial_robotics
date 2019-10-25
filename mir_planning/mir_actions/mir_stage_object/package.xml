@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_stage_object</name>
+  <version>1.0.0</version>
+  <description>
+    Assumes that the robot has ab object on its gripper, then moves the arm towards
+    specified robot platform (middle, left or right) then opens the gripper (to store the object
+    on yb platform) then moves the arm back to idle position
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
