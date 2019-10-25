@@ -1,0 +1,16 @@
+# goal definition
+
+# option for mode
+# NORMAL: run the planner till the time runs out (timeout configured in mir_task_planning)
+# FAST: run the planner as soon as first plan is generated or time runs out
+uint8 NORMAL=0
+uint8 FAST=1
+
+string planner
+string domain_file
+string problem_file
+uint8 mode
+---
+# result definition
+rosplan_dispatch_msgs/CompletePlan plan
+---

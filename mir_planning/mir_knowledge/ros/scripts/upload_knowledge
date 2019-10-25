@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import mir_knowledge_ros.upload_knowledge
+
+if __name__ == '__main__':
+    mir_knowledge_ros.upload_knowledge.main()
