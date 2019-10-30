@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>mcr_move_base</name>
+  <name>mir_move_base</name>
   <version>0.1.0</version>
   <description>
   This package moves the base of a robot to a target pose.

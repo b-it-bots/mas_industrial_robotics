@@ -1,6 +1,0 @@
-#!/usr/bin/env python
-
-import mcr_move_base_ros.move_base
-
-if __name__ == '__main__':
-    mcr_move_base_ros.move_base.main()

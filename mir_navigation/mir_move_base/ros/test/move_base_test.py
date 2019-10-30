@@ -10,7 +10,7 @@ import rostest
 import std_msgs.msg
 import geometry_msgs.msg
 
-PKG = 'mcr_move_base'
+PKG = 'mir_move_base'
 
 
 class TestMoveBase(unittest.TestCase):
