@@ -13,8 +13,11 @@ or enable the USE_SETCAP flag in the cmake file and recompile again.
 <launch>
 
   <!-- Set relevant parameters. -->
-  <param name="youBotHasBase" type="bool" value="true"/>
-  <param name="youBotHasArms" type="bool" value="true"/> 
+  <arg name="youBotHasBase"  default="true"/>
+  <arg name="youBotHasArms"  default="true"/> 
+
+  <param name="youBotHasBase" type="bool" value="$(arg youBotHasBase)"/>
+  <param name="youBotHasArms" type="bool" value="$(arg youBotHasArms)"/> 
 
   <param name="youBotDriverCycleFrequencyInHz" type="double" value="50.0"/>
   <param name="youBotDriverGripperReadingsCycleFrequencyInHz" type="double" value="0.5" />
