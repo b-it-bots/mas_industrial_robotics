@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
+  <arg name="is_camera_required" default="true" />
+  <arg name="is_camera_intel" default="true" />
   <arg name="robot" value="$(optenv ROBOT youbot-brsu-arm)" />
 
   <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch">
