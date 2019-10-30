@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mcr_move_base)
+project(mir_move_base)
 
 find_package(catkin REQUIRED
   COMPONENTS
