@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_move_base</name>
+  <version>0.1.0</version>
+  <description>
+  This package moves the base of a robot to a target pose.
+  </description>
+  <license>GPLv3</license>
+
+  <maintainer email="jose.sanchez.loza@gmail.com">Jose Sanchez</maintainer>
+  <author email="jose.sanchez.loza@gmail.com">Jose Sanchez</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>roslint</build_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>move_base_msgs</run_depend>
+  <run_depend>actionlib</run_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+</package>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+
+  <!-- Launch robot -->
+  <include file="$(find mir_bringup_sim)/robot.launch">
+    <arg name="robot_env" default="empty-world"/>
+  </include>
+
+  <!-- Launch 2DNav -->
+  <include file="$(find mir_2dnav)/ros/launch/2dnav.launch"/>
+
+  <include file="$(find mir_move_base)/ros/launch/move_base_example.launch"/>
+
+  <test pkg="mir_move_base" type="move_base_test.py" test-name="test_move_baser">
+
+    <remap from="~event_out" to="/move_base_wrapper/event_in"/>
+    <remap from="~pose_in" to="/move_base_wrapper/pose_in"/>
+    <remap from="~component_output" to="/move_base_wrapper/event_out"/>
+  </test>
+</launch>
