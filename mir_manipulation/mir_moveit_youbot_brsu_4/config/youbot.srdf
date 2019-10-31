@@ -46,10 +46,10 @@
     <!-- far range pose, good for arm -->
      <group_state name="barrier_tape" group="arm_1">
         <joint name="arm_joint_1" value="2.2127" />
-        <joint name="arm_joint_2" value="0.1213" />
-        <joint name="arm_joint_3" value="-0.5406" />
-        <joint name="arm_joint_4" value="0.08" />
-        <joint name="arm_joint_5" value="2.9455" />
+        <joint name="arm_joint_2" value="0.1321" />
+        <joint name="arm_joint_3" value="-0.7443" />
+        <joint name="arm_joint_4" value="3.3394" />
+        <joint name="arm_joint_5" value="1.3566" />
     </group_state>
 
     <!-- used for looking at tilted platform -->
@@ -210,19 +210,19 @@
         <joint name="arm_joint_5" value="1.345" />
     </group_state>
     <group_state name="look_at_workspace_from_near_left" group="arm_1">
-        <joint name="arm_joint_1" value="1.3044" />
-        <joint name="arm_joint_2" value="0.0755" />
-        <joint name="arm_joint_3" value="-0.790" />
-        <joint name="arm_joint_4" value="3.38438" />
-        <joint name="arm_joint_5" value="2.94476" />
+        <joint name="arm_joint_1" value="1.4703" />
+        <joint name="arm_joint_2" value="0.4803" />
+        <joint name="arm_joint_3" value="-0.6987" />
+        <joint name="arm_joint_4" value="3.09598" />
+        <joint name="arm_joint_5" value="0.6047" />
     </group_state>
 
     <group_state name="look_at_workspace_from_near_right" group="arm_1">
-        <joint name="arm_joint_1" value="2.8637" />
-        <joint name="arm_joint_2" value="0.0755" />
-        <joint name="arm_joint_3" value="-0.790" />
-        <joint name="arm_joint_4" value="3.38438" />
-        <joint name="arm_joint_5" value="2.94476" />
+        <joint name="arm_joint_1" value="2.7882" />
+        <joint name="arm_joint_2" value="0.4803" />
+        <joint name="arm_joint_3" value="-0.6987" />
+        <joint name="arm_joint_4" value="3.09598" />
+        <joint name="arm_joint_5" value="2.02064" />
     </group_state>
 
     <group_state name="cartesian_pre_grasp" group="arm_1">
