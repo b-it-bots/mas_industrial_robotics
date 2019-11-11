@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="mir_perceive_aruco_cube" type="perceive_aruco_cube" name="perceive_aruco_cube" output="screen"> 
+        <remap from="~input_rgb_image" to="/arm_cam3d/rgb/image_raw"/> 
+        <remap from="~input_pointcloud" to="/arm_cam3d/depth_registered/points"/> 
+        <param name="target_frame" value="map"/> 
+    </node> 
+</launch>
