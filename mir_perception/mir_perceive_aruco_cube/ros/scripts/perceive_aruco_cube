@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+import rospy
+import cv2
+import numpy as np
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+
+class ArucoCubePerceiver(object):
+
+    def __init__(self):
+        self.bridge = CvBridge()
+        self.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+        self.image_sub = rospy.Subscriber("/arm_cam3d/rgb/image_raw",
+                                          Image,
+                                          self.image_cb)
+        self.listening = True
+
+    def image_cb(self, msg):
+        if not self.listening:
+            return
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+            return
+
+        corners = self._get_best_aruco_marker_corners(cv_image)
+        if corners is None:
+            return
+        print(corners)
+        for corner in corners:
+            cv2.circle(cv_image, tuple(corner), 20, (0, 0, 255), 4)
+
+        cv2.imshow("Image window", cv_image)
+        cv2.waitKey(1)
+        self.listening = False
+
+    def _get_best_aruco_marker_corners(self, img):
+        corners_set, ids, rejectedImgPoints = cv2.aruco.detectMarkers(img, self.aruco_dict)
+        if ids is None:
+            return None
+        variances = [np.var((np.squeeze(corner_set))) for corner_set in corners_set]
+        max_variance_index = variances.index(max(variances))
+        best_corners = np.squeeze(corners_set[max_variance_index])
+        return best_corners
+
+
+if __name__ == '__main__':
+    rospy.init_node('image_converter')
+    ACP = ArucoCubePerceiver()
+    rospy.spin()
+    cv2.destroyAllWindows()
+    print("Exiting.")
