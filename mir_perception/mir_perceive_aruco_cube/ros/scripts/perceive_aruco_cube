@@ -43,9 +43,7 @@ class ArucoCubePerceiver(object):
         corners = self._get_best_aruco_marker_corners(cv_image)
         if corners is None:
             return
-        print(corners)
-        for corner in corners:
-            cv2.circle(cv_image, tuple(corner), 20, (0, 0, 255), 4)
+        rospy.loginfo("Aruco corners in image frame\n" + str(corners))
 
         trans = None
         try:
@@ -54,9 +52,9 @@ class ArucoCubePerceiver(object):
                                                     pc_msg.header.stamp,
                                                     rospy.Duration(5.0))
         except Exception as e:
-            print(str(e))
+            rospy.logerr(str(e))
         if trans is None:
-            print("could not transform")
+            rospy.logerr("Could not find a transform.")
             return
         transformed_pc = do_transform_cloud(pc_msg, trans)
         height, width = pc_msg.height, pc_msg.width
@@ -66,53 +64,69 @@ class ArucoCubePerceiver(object):
             point_vector = ArucoCubePerceiver.get_point_at(pc, corner[1], corner[0], height, width)
             polygon.points.append(Point(x=point_vector[0], y=point_vector[1], z=point_vector[2]))
 
-        # center
-        center = Point()
-        for point in polygon.points:
-            center.x += point.x
-            center.y += point.y
-            center.z += point.z
-        center.x /= len(polygon.points)
-        center.y /= len(polygon.points)
-        center.z /= len(polygon.points)
+        cube_center = self.get_cube_center_from_side_polygon(polygon, trans)
+
+        # for visualisation
+        polygon_stamped = PolygonStamped(polygon=polygon)
+        polygon_stamped.header.stamp = rospy.Time.now()
+        polygon_stamped.header.frame_id = self.target_frame
+        self.debug_polygon_pub.publish(polygon_stamped)
+        point_stamped = PointStamped(point=cube_center)
+        point_stamped.header.stamp = rospy.Time.now()
+        point_stamped.header.frame_id = self.target_frame
+        self.debug_point_pub.publish(point_stamped)
+
+        self.listening = False
+
+    def get_cube_center_from_side_polygon(self, polygon, trans):
+        """Calculate the center of the cube from a polygon representing one side
+        of that cube
+
+        1. Find the normal to plane formed by the 3 out of the 4 given points
+	2. Find the center of the square by calculating the average of all 4 points
+	3. Find any point on the line passing through the center and parallel to
+	   normal to the plane with equation `new_point = center + some_factor*normal`
+	4. Find the side of the square by finding distance between any 2 adjacent
+	   points on the square and lets call it `d`
+	5. Find the length of the normal vector and lets call it `l`
+	6. Find value of `some_factor` with equation `d / (l * 2)`
+	7. Find both the points with equation from 3
+	8. Find the point furthest from camera frame
+
+
+        :polygon: geometry_msgs/Polygon
+        :trans: geometry_msgs/Transformation
+        :returns: geometry_msgs/Point
+
+        """
+        # center of square
+        sq_center = Point(x=sum([point.x for point in polygon.points])/len(polygon.points),
+                          y=sum([point.y for point in polygon.points])/len(polygon.points),
+                          z=sum([point.z for point in polygon.points])/len(polygon.points))
 
         side_length = ArucoCubePerceiver.calculate_dist(polygon.points[0], polygon.points[1])
+
+        # find normal vector of the plane formed by the polygon
         np_corners = []
         for point in polygon.points:
             np_corners.append(np.array([point.x, point.y, point.z]))
-        v1 = np_corners[-1] - np_corners[0]
-        v2 = np_corners[1] - np_corners[0]
-        cp = np.cross(v1, v2)
-        print(cp)
-        a, b, c = cp
+        a, b, c = np.cross(np_corners[-1] - np_corners[0], np_corners[1] - np_corners[0])
+
+        # find optimal factor to be mul with normal vector such that the point is
+        # side_length/2 meters away from sq_center
         normal_length = (a**2 + b**2 + c**2)**0.5
         lamda = side_length / (normal_length * 2)
-        possible_cube_center = [Point(x=center.x + lamda*a, y=center.y + lamda*b, z=center.z + lamda*c),
-                                Point(x=center.x - lamda*a, y=center.y - lamda*b, z=center.z - lamda*c)]
-        # cube_center = possible_cube_center[1]
+        possible_cube_center = [Point(x=sq_center.x + lamda*a, y=sq_center.y + lamda*b, z=sq_center.z + lamda*c),
+                                Point(x=sq_center.x - lamda*a, y=sq_center.y - lamda*b, z=sq_center.z - lamda*c)]
+
+        # get the point furthest from camera (assumption: pointcloud was received in camera frame)
         camera_point = Point(x=trans.transform.translation.x,
                              y=trans.transform.translation.y,
                              z=trans.transform.translation.z)
         distances = [ArucoCubePerceiver.calculate_dist(camera_point, p) for p in possible_cube_center]
         cube_center_index = distances.index(max(distances))
         cube_center = possible_cube_center[cube_center_index]
-        print(trans.transform.translation)
-        # test_polygon = Polygon(points=[center, cube_center])
-
-        # for visualisation
-        polygon_stamped = PolygonStamped(polygon=polygon)
-        # polygon_stamped = PolygonStamped(polygon=test_polygon)
-        polygon_stamped.header.stamp = rospy.Time.now()
-        polygon_stamped.header.frame_id = self.target_frame
-        print(polygon_stamped)
-        self.debug_polygon_pub.publish(polygon_stamped)
-        point_stamped = PointStamped(point=cube_center)
-        point_stamped.header.stamp = rospy.Time.now()
-        point_stamped.header.frame_id = self.target_frame
-        print(point_stamped)
-        self.debug_point_pub.publish(point_stamped)
-
-        self.listening = False
+        return cube_center
 
     @staticmethod
     def calculate_dist(p1, p2):
