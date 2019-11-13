@@ -3,26 +3,39 @@ from __future__ import print_function
 
 import rospy
 import cv2
+import pcl
+import tf
+from tf2_ros import Buffer, TransformListener
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 import numpy as np
-from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, PointCloud2
+from geometry_msgs.msg import Point, PointStamped, Polygon, PolygonStamped
+import sensor_msgs.point_cloud2 as pc2
 from cv_bridge import CvBridge, CvBridgeError
+from message_filters import ApproximateTimeSynchronizer, Subscriber
 
 class ArucoCubePerceiver(object):
 
     def __init__(self):
         self.bridge = CvBridge()
         self.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
-        self.image_sub = rospy.Subscriber("/arm_cam3d/rgb/image_raw",
-                                          Image,
-                                          self.image_cb)
+        self.target_frame = rospy.get_param('~target_frame', 'base_link')
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer)
+        self.tf_br = tf.TransformBroadcaster()
+        self.debug_polygon_pub = rospy.Publisher('/polygon_debug_topic', PolygonStamped, queue_size=1)
+        self.debug_point_pub = rospy.Publisher('/point_debug_topic', PointStamped, queue_size=1)
+        self.image_sub = Subscriber("~input_rgb_image", Image)
+        self.pc_sub = Subscriber("~input_pointcloud", PointCloud2)
+        self.ats = ApproximateTimeSynchronizer([self.image_sub, self.pc_sub], queue_size = 5, slop=0.000001)
+        self.ats.registerCallback(self.synchronized_msg_cb)
         self.listening = True
 
-    def image_cb(self, msg):
+    def synchronized_msg_cb(self, img_msg, pc_msg):
         if not self.listening:
             return
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(img_msg, "bgr8")
         except CvBridgeError as e:
             print(e)
             return
@@ -34,9 +47,100 @@ class ArucoCubePerceiver(object):
         for corner in corners:
             cv2.circle(cv_image, tuple(corner), 20, (0, 0, 255), 4)
 
-        cv2.imshow("Image window", cv_image)
-        cv2.waitKey(1)
+        trans = None
+        try:
+            trans = self.tf_buffer.lookup_transform(self.target_frame,
+                                                    pc_msg.header.frame_id,
+                                                    pc_msg.header.stamp,
+                                                    rospy.Duration(5.0))
+        except Exception as e:
+            print(str(e))
+        if trans is None:
+            print("could not transform")
+            return
+        transformed_pc = do_transform_cloud(pc_msg, trans)
+        height, width = pc_msg.height, pc_msg.width
+        pc = self.ros_to_pcl(transformed_pc)
+        polygon = Polygon()
+        for corner in corners:
+            point_vector = ArucoCubePerceiver.get_point_at(pc, corner[1], corner[0], height, width)
+            polygon.points.append(Point(x=point_vector[0], y=point_vector[1], z=point_vector[2]))
+
+        # center
+        center = Point()
+        for point in polygon.points:
+            center.x += point.x
+            center.y += point.y
+            center.z += point.z
+        center.x /= len(polygon.points)
+        center.y /= len(polygon.points)
+        center.z /= len(polygon.points)
+
+        side_length = ArucoCubePerceiver.calculate_dist(polygon.points[0], polygon.points[1])
+        np_corners = []
+        for point in polygon.points:
+            np_corners.append(np.array([point.x, point.y, point.z]))
+        v1 = np_corners[-1] - np_corners[0]
+        v2 = np_corners[1] - np_corners[0]
+        cp = np.cross(v1, v2)
+        print(cp)
+        a, b, c = cp
+        normal_length = (a**2 + b**2 + c**2)**0.5
+        lamda = side_length / (normal_length * 2)
+        possible_cube_center = [Point(x=center.x + lamda*a, y=center.y + lamda*b, z=center.z + lamda*c),
+                                Point(x=center.x - lamda*a, y=center.y - lamda*b, z=center.z - lamda*c)]
+        # cube_center = possible_cube_center[1]
+        camera_point = Point(x=trans.transform.translation.x,
+                             y=trans.transform.translation.y,
+                             z=trans.transform.translation.z)
+        distances = [ArucoCubePerceiver.calculate_dist(camera_point, p) for p in possible_cube_center]
+        cube_center_index = distances.index(max(distances))
+        cube_center = possible_cube_center[cube_center_index]
+        print(trans.transform.translation)
+        # test_polygon = Polygon(points=[center, cube_center])
+
+        # for visualisation
+        polygon_stamped = PolygonStamped(polygon=polygon)
+        # polygon_stamped = PolygonStamped(polygon=test_polygon)
+        polygon_stamped.header.stamp = rospy.Time.now()
+        polygon_stamped.header.frame_id = self.target_frame
+        print(polygon_stamped)
+        self.debug_polygon_pub.publish(polygon_stamped)
+        point_stamped = PointStamped(point=cube_center)
+        point_stamped.header.stamp = rospy.Time.now()
+        point_stamped.header.frame_id = self.target_frame
+        print(point_stamped)
+        self.debug_point_pub.publish(point_stamped)
+
         self.listening = False
+
+    @staticmethod
+    def calculate_dist(p1, p2):
+        """Calculate the distance between 2 points
+        :p1: geometry_msgs/Point
+        :p2: geometry_msgs/Point
+        :returns: float
+
+        """
+        return ((p1.x - p2.x)**2 + (p1.y - p2.y)**2 + (p1.z - p2.z)**2)**0.5
+
+    @staticmethod
+    def get_point_at(pc, row, col, height, width):
+        ind = row*width + col
+        if ind > width*height:
+            return None
+        return pc[ind][:3]
+
+    def ros_to_pcl(self, pc_msg):
+        points_list = []
+
+        for data in pc2.read_points(pc_msg, skip_nans=False):
+            points_list.append([data[0], data[1], data[2], data[3]])
+
+        pcl_data = pcl.PointCloud_PointXYZRGB()
+        pcl_data.from_list(points_list)
+
+        return pcl_data 
 
     def _get_best_aruco_marker_corners(self, img):
         corners_set, ids, rejectedImgPoints = cv2.aruco.detectMarkers(img, self.aruco_dict)
@@ -52,5 +156,5 @@ if __name__ == '__main__':
     rospy.init_node('image_converter')
     ACP = ArucoCubePerceiver()
     rospy.spin()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
     print("Exiting.")
