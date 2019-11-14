@@ -1,9 +1,9 @@
 ## mir_perceive_aruco_cube
 
 Detects aruco cube and publishes its pose.
-This package is meant to use as a mock perceive instead of a real perceive. This
-might help in integrating the rest of the pipeline when perception is not yet
-ready.
+This package is meant to be used as mock perceive instead of real perceive. This
+might help in integrating the rest of the pipeline (pick, place, etc) when actual
+perception is not yet ready.
 
 Input: raw image and point cloud
 Output: geometry_msgs/PoseStamped
