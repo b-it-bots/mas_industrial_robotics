@@ -7,42 +7,63 @@ import pcl
 import math
 import tf
 import numpy as np
-from tf2_ros import Buffer, TransformListener
-from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
-from sensor_msgs.msg import Image, PointCloud2
-from geometry_msgs.msg import Point, PointStamped, Polygon, PolygonStamped, Quaternion, PoseStamped
 import sensor_msgs.point_cloud2 as pc2
+
+from tf2_ros import Buffer, TransformListener
 from cv_bridge import CvBridge, CvBridgeError
 from message_filters import ApproximateTimeSynchronizer, Subscriber
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+
+from sensor_msgs.msg import Image, PointCloud2
+from geometry_msgs.msg import Point, PointStamped, Polygon, PolygonStamped, Quaternion, PoseStamped
+from std_msgs.msg import String
 
 class ArucoCubePerceiver(object):
 
     def __init__(self):
+        # class variables
         self.bridge = CvBridge()
         self.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
-        self.target_frame = rospy.get_param('~target_frame', 'base_link')
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer)
         self.tf_br = tf.TransformBroadcaster()
+        self.listening = False
+        self.retry = 0
+
+        # ros parameters
+        self.target_frame = rospy.get_param('~target_frame', 'base_link')
+        self.retry_threshold = rospy.get_param('~retry_attempts', 3)
+
+        # publishers
         self.debug_polygon_pub = rospy.Publisher('/polygon_debug_topic', PolygonStamped, queue_size=1)
         self.output_pose_pub = rospy.Publisher('~output_pose', PoseStamped, queue_size=1)
+        self.event_out_pub = rospy.Publisher('~event_out', String, queue_size=1)
+
+        # subscribers
+        self.event_in_sub = rospy.Subscriber('~event_in', String, self.event_in_cb)
         self.image_sub = Subscriber("~input_rgb_image", Image)
         self.pc_sub = Subscriber("~input_pointcloud", PointCloud2)
         self.ats = ApproximateTimeSynchronizer([self.image_sub, self.pc_sub], queue_size = 5, slop=0.000001)
         self.ats.registerCallback(self.synchronized_msg_cb)
-        self.listening = True
+
+    def event_in_cb(self, msg):
+        self.listening = msg.data == 'e_start'
+        print(self.listening)
 
     def synchronized_msg_cb(self, img_msg, pc_msg):
         if not self.listening:
             return
+
         try:
             cv_image = self.bridge.imgmsg_to_cv2(img_msg, "bgr8")
         except CvBridgeError as e:
             print(e)
+            self.check_failure()
             return
 
         corners = self._get_best_aruco_marker_corners(cv_image)
         if corners is None:
+            self.check_failure()
             return
         rospy.loginfo("Aruco corners in image frame\n" + str(corners))
 
@@ -56,6 +77,7 @@ class ArucoCubePerceiver(object):
             rospy.logerr(str(e))
         if trans is None:
             rospy.logerr("Could not find a transform.")
+            self.check_failure()
             return
         transformed_pc = do_transform_cloud(pc_msg, trans)
         height, width = pc_msg.height, pc_msg.width
@@ -65,30 +87,57 @@ class ArucoCubePerceiver(object):
             point_vector = ArucoCubePerceiver.get_point_at(pc, corner[1], corner[0], height, width)
             polygon.points.append(Point(x=point_vector[0], y=point_vector[1], z=point_vector[2]))
 
-        cube_center = self.get_cube_center_from_side_polygon(polygon, trans)
-
         # for visualisation
         polygon_stamped = PolygonStamped(polygon=polygon)
         polygon_stamped.header.stamp = rospy.Time.now()
         polygon_stamped.header.frame_id = self.target_frame
         self.debug_polygon_pub.publish(polygon_stamped)
 
-        p1 = np.array([polygon.points[0].x, polygon.points[0].y, polygon.points[0].z])
-        p2 = np.array([polygon.points[1].x, polygon.points[1].y, polygon.points[1].z])
-        vec = p2 - p1
-        roll = math.atan2(vec[2], vec[1])
-        pitch = math.atan2(vec[2], vec[0])
-        yaw = math.atan2(vec[1], vec[0])
-        print(roll, pitch, yaw)
+        cube_center = self.get_cube_center_from_side_polygon(polygon, trans)
+        cube_orientation = ArucoCubePerceiver.get_quat_from_2_points(polygon.points[0], polygon.points[1])
 
         pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
         pose.header.frame_id = self.target_frame
         pose.pose.position = cube_center
-        pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(roll, pitch, yaw))
+        pose.pose.orientation = cube_orientation
+        rospy.loginfo(pose)
         self.output_pose_pub.publish(pose)
 
         self.listening = False
+        self.retry = 0
+        self.event_out_pub.publish(String(data='e_success'))
+
+    def check_failure(self):
+        """Check the number of retry attempts and if it exceeded threshold then publish
+        e_failure on event out topic and turn off listening
+        :returns: None
+
+        """
+        if self.retry > self.retry_threshold:
+            self.event_out_pub.publish(String(data='e_failure'))
+            self.listening = False
+            self.retry = 0
+        else:
+            self.retry += 1
+
+    @staticmethod
+    def get_quat_from_2_points(point1, point2):
+        """Calculate quaternion from a vector formed by 2 points
+
+        :point1: geometry_msgs.Point
+        :point2: geometry_msgs.Point
+        :returns: geometry_msgs.Quaternion
+
+        """
+        p1 = np.array([point1.x, point1.y, point1.z])
+        p2 = np.array([point2.x, point2.y, point2.z])
+        vec = p2 - p1
+        roll = math.atan2(vec[2], vec[1])
+        pitch = math.atan2(vec[2], vec[0])
+        yaw = math.atan2(vec[1], vec[0])
+        print("rpy:", roll, pitch, yaw)
+        return Quaternion(*tf.transformations.quaternion_from_euler(roll, pitch, yaw))
 
     def get_cube_center_from_side_polygon(self, polygon, trans):
         """Calculate the center of the cube from a polygon representing one side
@@ -152,12 +201,29 @@ class ArucoCubePerceiver(object):
 
     @staticmethod
     def get_point_at(pc, row, col, height, width):
+        """ Returns a point located at row and col in a matrix of size height x width
+        which is flattened into a one dimensional vector
+
+        :pc: pcl.PointCloud
+        :row: int
+        :col: int
+        :height: int
+        :width: int
+        :returns: tuple of 3 floats
+
+        """
         ind = row*width + col
         if ind > width*height:
             return None
         return pc[ind][:3]
 
     def ros_to_pcl(self, pc_msg):
+        """ Convert sensor_msgs.PointCloud2 to pcl.PointCloud_PointXYZRGB
+
+        :pc_msg: sensor_msgs.PointCloud2
+        :returns: pcl.PointCloud_PointXYZRGB
+
+        """
         points_list = []
 
         for data in pc2.read_points(pc_msg, skip_nans=False):
@@ -169,6 +235,14 @@ class ArucoCubePerceiver(object):
         return pcl_data 
 
     def _get_best_aruco_marker_corners(self, img):
+        """ Detect aruco markers in image and return the corners of a marker.
+        If multiple markers are detected, then it returns the corners of the marker
+        with highest surface area in image
+
+        :img: cv2.Image
+        :returns: np.array of shape 4x2
+
+        """
         corners_set, ids, rejectedImgPoints = cv2.aruco.detectMarkers(img, self.aruco_dict)
         if ids is None:
             return None
