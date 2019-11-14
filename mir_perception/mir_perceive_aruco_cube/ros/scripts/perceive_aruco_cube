@@ -4,12 +4,13 @@ from __future__ import print_function
 import rospy
 import cv2
 import pcl
+import math
 import tf
+import numpy as np
 from tf2_ros import Buffer, TransformListener
 from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
-import numpy as np
 from sensor_msgs.msg import Image, PointCloud2
-from geometry_msgs.msg import Point, PointStamped, Polygon, PolygonStamped
+from geometry_msgs.msg import Point, PointStamped, Polygon, PolygonStamped, Quaternion, PoseStamped
 import sensor_msgs.point_cloud2 as pc2
 from cv_bridge import CvBridge, CvBridgeError
 from message_filters import ApproximateTimeSynchronizer, Subscriber
@@ -24,7 +25,7 @@ class ArucoCubePerceiver(object):
         self.tf_listener = TransformListener(self.tf_buffer)
         self.tf_br = tf.TransformBroadcaster()
         self.debug_polygon_pub = rospy.Publisher('/polygon_debug_topic', PolygonStamped, queue_size=1)
-        self.debug_point_pub = rospy.Publisher('/point_debug_topic', PointStamped, queue_size=1)
+        self.output_pose_pub = rospy.Publisher('~output_pose', PoseStamped, queue_size=1)
         self.image_sub = Subscriber("~input_rgb_image", Image)
         self.pc_sub = Subscriber("~input_pointcloud", PointCloud2)
         self.ats = ApproximateTimeSynchronizer([self.image_sub, self.pc_sub], queue_size = 5, slop=0.000001)
@@ -71,10 +72,21 @@ class ArucoCubePerceiver(object):
         polygon_stamped.header.stamp = rospy.Time.now()
         polygon_stamped.header.frame_id = self.target_frame
         self.debug_polygon_pub.publish(polygon_stamped)
-        point_stamped = PointStamped(point=cube_center)
-        point_stamped.header.stamp = rospy.Time.now()
-        point_stamped.header.frame_id = self.target_frame
-        self.debug_point_pub.publish(point_stamped)
+
+        p1 = np.array([polygon.points[0].x, polygon.points[0].y, polygon.points[0].z])
+        p2 = np.array([polygon.points[1].x, polygon.points[1].y, polygon.points[1].z])
+        vec = p2 - p1
+        roll = math.atan2(vec[2], vec[1])
+        pitch = math.atan2(vec[2], vec[0])
+        yaw = math.atan2(vec[1], vec[0])
+        print(roll, pitch, yaw)
+
+        pose = PoseStamped()
+        pose.header.stamp = rospy.Time.now()
+        pose.header.frame_id = self.target_frame
+        pose.pose.position = cube_center
+        pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(roll, pitch, yaw))
+        self.output_pose_pub.publish(pose)
 
         self.listening = False
 
