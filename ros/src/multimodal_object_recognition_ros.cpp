@@ -656,7 +656,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             rgb_object_pose_array.poses.resize(final_image_list.objects.size());
             std::vector<std::string> rgb_labels;
             int rgb_count = 0;
-            for (int i=0; i<final_image_list.objects.size(); i++)
+            for (int i=0; i<combined_object_list.objects.size(); i++)
             {
                 if (combined_object_list.objects[i].database_id > 99)
                 {
