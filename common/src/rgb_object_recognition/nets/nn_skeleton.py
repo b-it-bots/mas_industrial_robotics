@@ -14,7 +14,6 @@ from easydict import EasyDict as edict
 import numpy as np
 import tensorflow as tf
 
-
 def _add_loss_summaries(total_loss):
   """Add summaries for losses
   Generates loss summaries for visualizing the performance of the network.
