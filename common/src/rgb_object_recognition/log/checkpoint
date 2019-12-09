@@ -1,6 +1,0 @@
-model_checkpoint_path: "/home/mwasil2s/log-train/train/model.ckpt-142500"
-all_model_checkpoint_paths: "/home/mwasil2s/log-train/train/model.ckpt-140500"
-all_model_checkpoint_paths: "/home/mwasil2s/log-train/train/model.ckpt-141000"
-all_model_checkpoint_paths: "/home/mwasil2s/log-train/train/model.ckpt-141500"
-all_model_checkpoint_paths: "/home/mwasil2s/log-train/train/model.ckpt-142000"
-all_model_checkpoint_paths: "/home/mwasil2s/log-train/train/model.ckpt-142500"
