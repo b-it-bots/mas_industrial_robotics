@@ -64,7 +64,7 @@ class PointcloudSegmentationROS
         CloudAccumulation::UPtr cloud_accumulation_;
 
         bool add_to_octree_;
-        int object_id_;
+        int pcl_object_id_;
         double octree_resolution_;
 
         Eigen::Vector4f model_coefficients_;
@@ -92,6 +92,7 @@ class PointcloudSegmentationROS
         std::string frame_id_;
         Eigen::Vector3f getPlaneNormal();
         double getWorkspaceHeight();
+        void resetPclObjectId();
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_POINTCLOUD_SEGMENTATION_ROS_H
