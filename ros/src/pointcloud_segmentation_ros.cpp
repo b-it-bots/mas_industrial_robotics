@@ -17,7 +17,7 @@
 #include <pcl/common/centroid.h>
 #include <pcl_ros/transforms.h>
 #include <pcl/io/pcd_io.h>
-#include "pcl_ros/point_cloud.h"
+#include <pcl_ros/point_cloud.h>
 
 #include <Eigen/Dense>
 #include <std_msgs/Float64.h>
@@ -31,8 +31,10 @@
 #include <std_msgs/String.h>
 #include <std_msgs/Float32.h>
 
-PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh): nh_(nh),
-    add_to_octree_(false), object_id_(0)
+PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh): 
+    nh_(nh),
+    add_to_octree_(false), 
+    pcl_object_id_(0)
 {    
     nh_.param("octree_resolution", octree_resolution_, 0.0025);
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
@@ -106,27 +108,10 @@ void PointcloudSegmentationROS::segment_cloud(mas_perception_msgs::ObjectList &o
             object_list.objects[i].pose = pose;
         }
 
-        object_list.objects[i].database_id = object_id_;
-        object_id_++;
+        object_list.objects[i].database_id = pcl_object_id_;
+        pcl_object_id_++;
     }
 }
-
-/* void PointcloudSegmentationROS::findPlane() */
-/* { */
-/*     PointCloud::Ptr cloud(new PointCloud); */
-/*     cloud->header.frame_id = frame_id_; */
-/*     cloud_accumulation_->getAccumulatedCloud(*cloud); */
-
-/*     double workspace_height; */
-/*     PointCloud::Ptr hull(new PointCloud); */
-/*     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients); */
-/*     PointCloud::Ptr debug = scene_segmentation_.findPlane(cloud, hull, coefficients, workspace_height); */
-/*     debug->header.frame_id = cloud->header.frame_id; */
-/*     //std_msgs::Float64 workspace_height_msg; */
-/*     //workspace_height_msg.data = workspace_height; */
-/*     //pub_workspace_height_.publish(workspace_height_msg); */
-/*     //pub_debug_.publish(*debug); */
-/* } */
 
 geometry_msgs::PoseStamped PointcloudSegmentationROS::getPose(const BoundingBox &box)
 {
@@ -175,9 +160,8 @@ void PointcloudSegmentationROS::add_cloud_accumulation(const pcl::PointCloud<pcl
 }
 
 void PointcloudSegmentationROS::get3DBoundingBox(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud, 
-                                                const Eigen::Vector3f& normal, 
-                                                BoundingBox &bbox,
-                                                mas_perception_msgs::BoundingBox& bounding_box_msg)
+                                                 const Eigen::Vector3f& normal, BoundingBox &bbox,
+                                                 mas_perception_msgs::BoundingBox& bounding_box_msg)
 {
     bbox = BoundingBox::create(cloud->points, normal);
     convertBoundingBox(bbox, bounding_box_msg);
@@ -194,4 +178,9 @@ Eigen::Vector3f PointcloudSegmentationROS::getPlaneNormal()
 double PointcloudSegmentationROS::getWorkspaceHeight()
 {
     return workspace_height_;
+}
+
+void PointcloudSegmentationROS::resetPclObjectId()
+{
+    pcl_object_id_ = 0;
 }
