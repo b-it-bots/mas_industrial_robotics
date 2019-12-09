@@ -18,16 +18,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/point_types.h>
 #include <pcl/PCLPointCloud2.h>
-#include <pcl/common/centroid.h>
 #include <pcl_ros/transforms.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl/filters/statistical_outlier_removal.h>
-#include <pcl/common/common.h>
-#include <pcl/common/transforms.h>
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -38,7 +31,6 @@
 #include <mir_object_recognition/SceneSegmentationConfig.h>
 
 #include <mir_object_recognition/pointcloud_segmentation_ros.h>
-#include <mir_object_recognition/image_recognition_ros.h>
 #include <mas_perception_msgs/GetSegmentedImage.h>
 #include <sensor_msgs/RegionOfInterest.h>
 
@@ -50,6 +42,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include <mir_object_recognition/multimodal_object_recognition_utils.h>
 /**
  * This node subscribes to ...
  * Inputs:
@@ -74,10 +67,9 @@ class MultimodalObjectRecognitionROS
         virtual ~MultimodalObjectRecognitionROS();
 
     private:
-        ros::Subscriber sub_cloud_;
-        ros::Subscriber sub_image_;
         ros::Subscriber sub_event_in_;
         ros::Publisher pub_event_out_;
+        ros::Subscriber sub_cloud_;
 
         tf::TransformListener transform_listener_;
 
@@ -120,8 +112,8 @@ class MultimodalObjectRecognitionROS
         
         typedef std::auto_ptr<PointcloudSegmentationROS> PointcloudSegmentationUPtr;
         PointcloudSegmentationUPtr pointcloud_segmentation_;
-        typedef std::auto_ptr<ImageRecognitionROS> ImageRecognitionUPtr;
-        ImageRecognitionUPtr image_recognition_;
+        typedef std::auto_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsUPtr;
+        MultimodalObjectRecognitionUtilsUPtr mm_object_recognition_utils_;
 
         // Used to store pointcloud and image received from callback
         sensor_msgs::PointCloud2ConstPtr pointcloud_msg_;
@@ -129,8 +121,6 @@ class MultimodalObjectRecognitionROS
         PointCloud::Ptr cloud_;
 
         // Flags for pointcloud and image subscription
-        bool pointcloud_msg_received_;
-        bool image_msg_received_;
         int pointcloud_msg_received_count_;
         int image_msg_received_count_;
         
@@ -172,11 +162,12 @@ class MultimodalObjectRecognitionROS
 
     private:
         //void setConfig();
-        void pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg);
-        void imageCallback(const sensor_msgs::ImageConstPtr &msg);
         void eventCallback(const std_msgs::String::ConstPtr &msg);
         void configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level);
-
+        
+        void transformCloud();
+        void segmentPointcloud(mas_perception_msgs::ObjectList &object_list, 
+                               std::vector<PointCloud::Ptr> &clusters);
         void recognizeCloudAndImage();
         /* void recognizeCloudAndImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, */ 
         /*                          const sensor_msgs::ImageConstPtr &msg); */
@@ -184,25 +175,13 @@ class MultimodalObjectRecognitionROS
         void recognizeImage(const sensor_msgs::ImageConstPtr &msg);
         void publishImagesForRecognition(const sensor_msgs::ImageConstPtr &msg);
 
-        void preprocessCloud();
-
         void get3DObject(const sensor_msgs::RegionOfInterest &roi, 
-                        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ordered_cloud,
-                        pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pcl_object);
-
-        double getMatch(const cv::Rect2d& r1, const cv::Rect2d& r2);
-
-        void MultimodalObjectRecognitionROS::combineObjectList(const mas_perception_msgs::ObjectList& cloud_list, 
-                                                       const mas_perception_msgs::ObjectList& image_list,
-                                                       mas_perception_msgs::ObjectList& final_list);
+                         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ordered_cloud,
+                         pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pcl_object);
         
         geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, std::string name);
 
-        adjustObjectPose(mas_perception_msgs::ObjectList &object_list);
-        // Update object pose for axis and bolt
-        void updateObjectPose(mas_perception_msgs::ObjectList &combined_object_list);
-
-        void updateContainerPose(mas_perception_msgs::Object &container_object);
+        void adjustObjectPose(mas_perception_msgs::ObjectList &object_list);
 
         void publishObjectList(mas_perception_msgs::ObjectList &object_list);
 
@@ -216,17 +195,6 @@ class MultimodalObjectRecognitionROS
 
     // Move this to image_recognition_ros_utils
     private:
-        void segmentObjects(const sensor_msgs::ImageConstPtr &image, 
-                            cv::Mat &segmented_objects_mask);
-
-        void getCroppedImages(const cv::Mat &input_image,
-                            const cv::Mat &input_segmented_objects_image,
-                            cv::Mat &output_debug_image,
-                            std::vector<cv::Mat> &output_cropped_object_images,
-                            std::vector<float> &output_object_areas,
-                            std::vector<std::vector<cv::Point> > &output_roi_points,
-                            std::vector<cv::Point> &output_center_of_objects);
-        void pointsOnRectangle(cv::Rect rect, std::vector<cv::Point> &output_points);
         /**
          * Object segmentation
          */
