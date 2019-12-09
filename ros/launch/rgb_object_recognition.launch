@@ -5,7 +5,7 @@
     <arg name="dataset_type" default="atwork_sydney" />
 
     <group ns="mir_perception">
-        <node pkg="mir_object_recognition" type="object_recognizer_node.py" name="obj_recognizer" output="screen" 
+        <node pkg="mir_object_recognition" type="rgb_object_recognizer_node" name="obj_recognizer" output="screen" 
               respawn="false" ns="multimodal_object_recognition/recognizer/rgb">
           <param name="net" value="$(arg net)" type="str" />
           <param name="classifier" value="$(arg classifier)" type="str" />
