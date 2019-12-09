@@ -48,6 +48,9 @@ class_label = {
 
 import os
 import sys
+import struct
+import colorsys
+
 import roslib
 import rospy
 
@@ -58,19 +61,13 @@ import pickle
 import numpy as np
 import time
 
-from mas_perception_msgs.srv import RecognizeImage
-from mas_perception_msgs.srv import RecognizeImageResponse
+from mas_perception_msgs.srv import RecognizeImage, RecognizeImageResponse
 from mas_perception_msgs.msg import ImageList, ObjectList, Object
-from mas_perception_msgs.srv import GetSegmentedImage
-from mas_perception_msgs.srv import GetSegmentedImageResponse
 from sensor_msgs.msg import Image, RegionOfInterest
 
-import struct
-import colorsys
-
-from rgb_object_recognition.squeezedet import squeezeDet
-from rgb_object_recognition.ssdlite_mobilenet import SSDLiteMobilenet
-from rgb_object_recognition.utils import util
+from rgb_object_recognition import squeezeDet
+from rgb_object_recognition import SSDLiteMobilenet
+from rgb_object_recognition import util
 
 class ObjectRecognizer():
     def __init__(self, model_dir, net='detection', model_name='squeezeDet', debug_mode=False):
@@ -85,14 +82,10 @@ class ObjectRecognizer():
         if self.net == 'detection':
             if self.model_name == 'squeezeDet':
                 self.model = squeezeDet(model_dir)
-                print ("Using Squeezedet")
             elif self.model_name == 'ssdLiteMobilenet':
                 self.model = SSDLiteMobilenet(model_dir)
-                print ('Using SSDLiteMobilenet')
         elif self.net == 'classification':
            print "TODO: MobileNet"
-        
-        rospy.loginfo("RGB Recognizer is ready using [%s : %s]", self.net, self.model_name)
 
     def image_recognition_cb(self, img_msg):
         if img_msg.images:
@@ -128,6 +121,7 @@ class ObjectRecognizer():
                         # Get display labels
                         class_labels = [class_label[label] for label in labels]
                         util.draw_box_on_img(debug_img, bboxes, probs, class_labels, cls2clr)
+                        # publish bbox and label
                         self.publish_debug_img(debug_img)
 
                 except CvBridgeError as e:
@@ -152,6 +146,7 @@ if __name__ == '__main__':
     classifier_name = rospy.get_param("~classifier")
     dataset_type = rospy.get_param("~dataset_type")
     dataset_dir = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config', classifier_name, dataset_type)
+    rospy.logwarn("RGB Recognizer is ready using %s : %s , dataset: %s ", net, classifier_name, dataset_type)
 
     while not rospy.is_shutdown():
         object_recognizer = ObjectRecognizer(model_dir=dataset_dir, net=net, model_name=classifier_name, debug_mode=True)
