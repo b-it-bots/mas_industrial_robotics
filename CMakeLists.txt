@@ -33,9 +33,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS
     ros/include
-    #common/include
   LIBRARIES
-    #scene_segmentation
     mcr_segmentation
   CATKIN_DEPENDS
     mas_perception_msgs
@@ -54,10 +52,10 @@ add_definitions(-fpermissive)
 
 ### EXECUTABLES ###############################################
 add_executable(multimodal_object_recognition
-  ros/src/image_recognition_ros.cpp
   ros/src/pointcloud_segmentation_ros.cpp
   ros/src/multimodal_object_recognition_ros.cpp
   ros/src/multimodal_object_recognition_node.cpp
+  ros/src/multimodal_object_recognition_utils.cpp
 )
 add_dependencies(multimodal_object_recognition
   ${catkin_EXPORTED_TARGETS} 
@@ -72,8 +70,8 @@ roslint_cpp()
 
 ### INSTALLS
 install(PROGRAMS
-  ros/scripts/squeezedet_node.py
   ros/scripts/pcl_object_recognizer_node
+  ros/scripts/rgb_object_recognizer_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
