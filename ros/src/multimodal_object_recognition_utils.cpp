@@ -4,8 +4,13 @@
 
 #include <mir_object_recognition/multimodal_object_recognition_utils.h>
 
-MultimodalObjectRecognitionUtils::MultimodalObjectRecognitionUtils()
+MultimodalObjectRecognitionUtils::MultimodalObjectRecognitionUtils(boost::shared_ptr<tf::TransformListener> tf_listener):
+    tf_listener_(tf_listener)
 {    
+    if (!tf_listener_)
+    {
+      ROS_ERROR_THROTTLE(2.0, "[MultimodalObjectRecognitionUtils]: TF listener not initialized.");
+    }
 }
 
 MultimodalObjectRecognitionUtils::~MultimodalObjectRecognitionUtils()
@@ -222,21 +227,44 @@ void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::O
         object.pose.pose.position.y = centroid[1]; 
     }
 }
-/*
-void MultimodalObjectRecognitionUtils::saveDebugImage(const cv_bridge::CvImagePtr &cv_image_ptr)
+
+void MultimodalObjectRecognitionUtils::transformPose(std::string &source_frame, std::string &target_frame, 
+                                            geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &transformed_pose)
 {
+    try
+    {
+        ros::Time common_time;
+        tf_listener_->getLatestCommonTime(source_frame, target_frame, common_time, NULL);
+        pose.header.stamp = common_time;
+        tf_listener_->waitForTransform(target_frame, source_frame, common_time, ros::Duration(0.1));
+        tf_listener_->transformPose(target_frame, pose, transformed_pose);
+    }
+    catch(tf::LookupException& ex)
+    {
+        ROS_WARN("Failed to transform pose: (%s)", ex.what());
+        transformed_pose = pose;
+    }
+
+}
+
+
+void MultimodalObjectRecognitionUtils::saveDebugImage(const cv_bridge::CvImagePtr &cv_image_bbox_ptr, 
+                                                      const sensor_msgs::ImageConstPtr &raw_image,
+                                                      std::string logdir)
+{
+    ROS_WARN_STREAM("Saving raw image and bbox information");
     std::stringstream filename; // stringstream used for the conversion
     ros::Time time_now = ros::Time::now();
 
     // save image
     filename.str("");
-    filename << logdir_ << time_now << "_bbox_rgb" <<".jpg";
-    cv::imwrite(filename.str(), cv_image_ptr->image);
+    filename << logdir << time_now << "_bbox_rgb" <<".jpg";
+    cv::imwrite(filename.str(), cv_image_bbox_ptr->image);
 
     cv_bridge::CvImagePtr raw_cv_image;
     try
     {
-        raw_cv_image = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
+        raw_cv_image = cv_bridge::toCvCopy(raw_image, sensor_msgs::image_encodings::BGR8);
     }
     catch (cv_bridge::Exception& e)
     {
@@ -244,8 +272,7 @@ void MultimodalObjectRecognitionUtils::saveDebugImage(const cv_bridge::CvImagePt
         return;
     }
     filename.str("");
-    filename << logdir_ << time_now << "_raw_rgb" <<".jpg";
+    filename << logdir << time_now << "_raw_rgb" <<".jpg";
     cv::imwrite(filename.str(), raw_cv_image->image);
 
 }
-*/
