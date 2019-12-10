@@ -53,7 +53,6 @@ add_definitions(-fpermissive)
 ### EXECUTABLES ###############################################
 add_executable(multimodal_object_recognition
   ros/src/pointcloud_segmentation_ros.cpp
-  ros/src/multimodal_object_recognition_ros.cpp
   ros/src/multimodal_object_recognition_node.cpp
   ros/src/multimodal_object_recognition_utils.cpp
 )
