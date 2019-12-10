@@ -24,6 +24,8 @@
 
 #include <mas_perception_libs/bounding_box.h>
 
+#include <mir_object_recognition/multimodal_object_recognition_utils.h>
+
 //using mas_perception_libs::BoundingBox;
 
 /**
@@ -50,7 +52,7 @@
 class PointcloudSegmentationROS
 {
     public:
-        PointcloudSegmentationROS(ros::NodeHandle nh_sub);
+        PointcloudSegmentationROS(ros::NodeHandle nh, boost::shared_ptr<tf::TransformListener> tf_listener=nullptr);
         virtual ~PointcloudSegmentationROS();
     
     private:
@@ -59,7 +61,7 @@ class PointcloudSegmentationROS
         ros::ServiceClient recognize_service;
         std::string object_recognizer_service_name_;
 
-        tf::TransformListener transform_listener_;
+        boost::shared_ptr<tf::TransformListener> tf_listener_;
 
         CloudAccumulation::UPtr cloud_accumulation_;
 
@@ -85,6 +87,9 @@ class PointcloudSegmentationROS
                                                 mas_perception_libs::BoundingBox &bbox,  
                                                 mas_perception_msgs::BoundingBox& bounding_box_msg);
         geometry_msgs::PoseStamped getPose(const mas_perception_libs::BoundingBox &box);
+
+        void transformPose(std::string &source_frame, std::string &target_frame, 
+                            geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &transformed_pose);
     
     public:
         SceneSegmentation scene_segmentation_;

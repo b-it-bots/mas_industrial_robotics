@@ -58,9 +58,10 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     label_visualizer_pcl_("pcl_labels", Color(Color::TEAL))
     
 {
-    pointcloud_segmentation_ = PointcloudSegmentationUPtr(new PointcloudSegmentationROS(nh_));
-    mm_object_recognition_utils_ = MultimodalObjectRecognitionUtilsUPtr(new MultimodalObjectRecognitionUtils());
-
+    tf_listener_.reset(new tf::TransformListener);
+    pointcloud_segmentation_ = PointcloudSegmentationUPtr(new PointcloudSegmentationROS(nh_, tf_listener_));
+    mm_object_recognition_utils_ = MultimodalObjectRecognitionUtilsUPtr(new MultimodalObjectRecognitionUtils(tf_listener_));
+    
     dynamic_reconfigure::Server<mir_object_recognition::SceneSegmentationConfig>::CallbackType f =
                             boost::bind(&MultimodalObjectRecognitionROS::configCallback, this, _1, _2);
     server_.setCallback(f);
@@ -112,7 +113,7 @@ void MultimodalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::Imag
 {    
     if (pointcloud_msg_received_count_ < 1)
     {
-        ROS_INFO("[multimodal_object_recognition_ros] Received 3 messages");
+        ROS_INFO("[multimodal_object_recognition_ros] Received enough messages");
         pointcloud_msg_ = cloud;
         pointcloud_msg_received_count_ += 1;
 
@@ -143,10 +144,9 @@ void MultimodalObjectRecognitionROS::recognizedImageCallback(const mas_perceptio
 
 void MultimodalObjectRecognitionROS::update()
 {
-    //ROS_DEBUG_STREAM("update function called");
     if (pointcloud_msg_received_count_ > 0 && image_msg_received_count_ > 0)
     {
-        ROS_WARN_STREAM("Received enough images and pointclouds");
+        ROS_WARN("Received %d images and pointclouds", pointcloud_msg_received_count_);
         // Reset msg received flag
         pointcloud_msg_received_count_ = 0;
         image_msg_received_count_ = 0;
@@ -154,7 +154,6 @@ void MultimodalObjectRecognitionROS::update()
         image_sub_->unsubscribe();
         cloud_sub_->unsubscribe();
 
-        //Preprocess cloud
         ROS_WARN_STREAM("Starting multimodal object recognition");
         double start_time = ros::Time::now().toSec();
         recognizeCloudAndImage();
@@ -190,11 +189,11 @@ void MultimodalObjectRecognitionROS::transformCloud()
     try
     {
         ros::Time common_time;
-        transform_listener_.getLatestCommonTime(target_frame_id, pointcloud_msg_->header.frame_id, common_time, NULL);
+        tf_listener_->getLatestCommonTime(target_frame_id, pointcloud_msg_->header.frame_id, common_time, NULL);
         pointcloud_msg_->header.stamp = common_time;
-        transform_listener_.waitForTransform(target_frame_id, pointcloud_msg_->header.frame_id,
+        tf_listener_->waitForTransform(target_frame_id, pointcloud_msg_->header.frame_id,
                                                 ros::Time::now(), ros::Duration(1.0));
-        pcl_ros::transformPointCloud(target_frame_id, *pointcloud_msg_, msg_transformed, transform_listener_);
+        pcl_ros::transformPointCloud(target_frame_id, *pointcloud_msg_, msg_transformed, *tf_listener_);
     }
     catch (tf::TransformException &ex)
     {
@@ -235,9 +234,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     std::vector<PointCloud::Ptr> clusters_3d;
 
     segmentPointcloud(cloud_object_list, clusters_3d);
-    
-    // Compute normal to generate parallel BBOX to the plane
-    const Eigen::Vector3f normal = pointcloud_segmentation_->getPlaneNormal();
 
     //Publish cluster for recognition
     if (!cloud_object_list.objects.empty())
@@ -257,9 +253,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     }
     ROS_INFO_STREAM("Waiting for message from Cloud and Image recognizer");
     //loop till you received the message from the 3d and rgb recognition
-    // TODO: Wait for recognize image to come
-    // Why wait for image and not cloud recognition?
-    // It's because rgb is slower to recognize
     int loop_rate_hz = 30;
     int timeout_wait = 2; //secs
     ros::Rate loop_rate(loop_rate_hz);
@@ -274,8 +267,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             loop_rate.sleep();
             if (received_recognized_cloud_list_flag_ == true)
             {
-                ROS_INFO_STREAM("[PCL] Received object_list from pcl recognizer");
-                ROS_INFO_STREAM("[PCL] Received objects: "<<recognized_cloud_list_.objects.size());
+                ROS_WARN("[PCL] Received %d objects from pcl recognizer", recognized_cloud_list_.objects.size());
             }
             if (loop_rate_count > loop_rate_hz * timeout_wait)
             {
@@ -286,7 +278,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         }
     }
 
-    // Merge recognized_cloud_list and final_image_list
+    // Merge recognized_cloud_list and rgb_object_list
     mas_perception_msgs::ObjectList combined_object_list;
     if (!recognized_cloud_list_.objects.empty())
     {
@@ -307,8 +299,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             loop_rate.sleep();
             if (received_recognized_image_list_flag_ == true)
             {
-                ROS_INFO_STREAM("[RGB] Received object_list from rgb recognizer");
-                ROS_INFO_STREAM("[RGB] Received objects: "<<recognized_image_list_.objects.size());
+                ROS_WARN("[RGB] Received %d objects from rgb recognizer", recognized_image_list_.objects.size());
             }
             if (loop_rate_count > loop_rate_hz * timeout_wait)
             {
@@ -322,7 +313,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     received_recognized_cloud_list_flag_ = false;
     received_recognized_image_list_flag_ = false;
 
-    mas_perception_msgs::ObjectList final_image_list;
+    mas_perception_msgs::ObjectList rgb_object_list;
     mas_perception_msgs::BoundingBoxList bounding_boxes;
     std::vector<PointCloud::Ptr> clusters_2d;
     
@@ -340,7 +331,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         }
         
         bounding_boxes.bounding_boxes.resize(recognized_image_list_.objects.size());
-        final_image_list.objects.resize(recognized_image_list_.objects.size());
+        rgb_object_list.objects.resize(recognized_image_list_.objects.size());
 
         for (int i=0; i<recognized_image_list_.objects.size();i++)
         {
@@ -351,9 +342,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
             if (debug_mode_)
             {
-                std::cout<<"Region of Interest: cx, cy, width, height"<<std::endl;
-                std::cout<<roi_2d.x_offset<<", "<<roi_2d.y_offset<<", "<<roi_2d.width<<", "<<roi_2d.height<<std::endl;
-                
                 cv::Point pt1;
                 cv::Point pt2;
 
@@ -368,8 +356,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 cv::putText(cv_image->image, object.name, cv::Point(pt1.x, pt2.y), 
                             cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(0,255,0), 1);
             }
-            // NOTE: Remove large 2d misdetected bbox (misdetection)
-            // Solution find diagional, and make a threshold
+            // Remove large 2d misdetected bbox (misdetection)
             double len_diag = sqrt(powf(((roi_2d.width + roi_2d.width) >> 1), 2));
             if (len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_)
             {
@@ -389,7 +376,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 pcl_conversions::fromPCL(*pc2, ros_pc2);
                 ros_pc2.header.frame_id = target_frame_id_;
                 ros_pc2.header.stamp = ros::Time::now();
-                final_image_list.objects[i].pointcloud = ros_pc2;
+                rgb_object_list.objects[i].pointcloud = ros_pc2;
 
                 clusters_2d.push_back(pcl_object_cluster);
                 // Get pose
@@ -400,64 +387,29 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 std::string frame_id = cloud_->header.frame_id;
                 pose.header.stamp = ros::Time::now();
                 pose.header.frame_id = frame_id;
-                std::string target_frame_id;
-                geometry_msgs::PoseStamped pose_transformed;
-                if (nh_.hasParam("target_frame_id"))
-                {
-                    nh_.param("target_frame_id", target_frame_id, frame_id);
-                    if (target_frame_id != frame_id)
-                    {
-                        try
-                        {
-                            ros::Time common_time;
-                            transform_listener_.getLatestCommonTime(frame_id, target_frame_id, common_time, NULL);
-                            pose.header.stamp = common_time;
-                            transform_listener_.waitForTransform(target_frame_id, frame_id, common_time, ros::Duration(0.1));
-                            transform_listener_.transformPose(target_frame_id, pose, pose_transformed);
-                            final_image_list.objects[i].pose = pose_transformed;
-                        }
-                        catch(tf::LookupException& ex)
-                        {
-                            ROS_WARN("Failed to transform pose: (%s)", ex.what());
-                            pose.header.stamp = ros::Time::now();
-                            final_image_list.objects[i].pose = pose;
-                        }
-                    }
-                    else
-                    {
-                        final_image_list.objects[i].pose = pose;
-                    }
-                }             
+                if (frame_id != target_frame_id_)
+                {   
+                    mm_object_recognition_utils_->transformPose(frame_id, target_frame_id_, pose, rgb_object_list.objects[i].pose);
+                }
                 else
                 {
-                    final_image_list.objects[i].pose = pose;
+                    rgb_object_list.objects[i].pose = pose;
                 }
-                final_image_list.objects[i].probability = recognized_image_list_.objects[i].probability;
-                final_image_list.objects[i].database_id = rgb_object_id_;
-                final_image_list.objects[i].name = recognized_image_list_.objects[i].name;
+                rgb_object_list.objects[i].probability = recognized_image_list_.objects[i].probability;
+                rgb_object_list.objects[i].database_id = rgb_object_id_;
+                rgb_object_list.objects[i].name = recognized_image_list_.objects[i].name;
             }
             else
             {
                 std::cout<<"[RGB] DECOY"<<std::endl;
-                final_image_list.objects[i].name = "DECOY";
-                // geometry_msgs::PoseStamped pose;
-                // pose.header.frame_id = cloud_->header.frame_id;
-                // pose.pose.position.x = 10.0;
-                // pose.pose.position.y = 10.0;
-                // pose.pose.position.z = 10.0;
-                // pose.pose.orientation.x = 0.0;
-                // pose.pose.orientation.y = 0.0;
-                // pose.pose.orientation.z = 0.0;
-                // pose.pose.orientation.w = 1.0;
-                // final_image_list.objects[i].pose = pose;
-                // final_image_list.objects[i].probability = 0.0;
-                final_image_list.objects[i].database_id = rgb_object_id_;
+                rgb_object_list.objects[i].name = "DECOY";
+                rgb_object_list.objects[i].database_id = rgb_object_id_;
             }
             rgb_object_id_++;
         }
         combined_object_list.objects.insert(combined_object_list.objects.end(), 
-                                        final_image_list.objects.begin(),
-                                        final_image_list.objects.end());
+                                        rgb_object_list.objects.begin(),
+                                        rgb_object_list.objects.end());
     }
 
     if (!combined_object_list.objects.empty())
@@ -494,96 +446,99 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     if (debug_mode_)
     {
         ROS_WARN_STREAM("Debug mode: publishing object information");
-        std::cout<<"Cloud list: "<< recognized_cloud_list_.objects.size()<<std::endl;
-        std::cout<<"Image list: "<< recognized_image_list_.objects.size()<<std::endl;
-
-        ROS_INFO_STREAM("Combined object list: "<< combined_object_list.objects.size());
-        // Bounding boxes
-        if (recognized_cloud_list_.objects.size() > 0)
-        {
-            if (clusters_3d.size() > 0)
-            {
-                mas_perception_msgs::BoundingBoxList bounding_boxes;
-                cluster_visualizer_pcl_.publish<PointT>(clusters_3d, target_frame_id_);
-                bounding_boxes.bounding_boxes.resize(clusters_3d.size());
-                for (int i=0; i<clusters_3d.size(); i++)
-                {
-                    mas_perception_libs::BoundingBox bbox;
-                    pointcloud_segmentation_->get3DBoundingBox(clusters_3d[i], normal, bbox, bounding_boxes.bounding_boxes[i]);
-                }
-                if (bounding_boxes.bounding_boxes.size() > 0)
-                {
-                    bounding_box_visualizer_pcl_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
-                }
-            }
-            // PCL Pose array for debug mode only
-            geometry_msgs::PoseArray pcl_object_pose_array;
-            pcl_object_pose_array.header.frame_id = target_frame_id_;
-            pcl_object_pose_array.header.stamp = ros::Time::now();
-            pcl_object_pose_array.poses.resize(recognized_cloud_list_.objects.size());
-            std::vector<std::string> pcl_labels;
-            int pcl_count = 0;
-            for (int i=0; i<combined_object_list.objects.size(); i++)
-            {
-                if (combined_object_list.objects[i].database_id < 99)
-                {
-                    std::cout<<"PCL Class: "<<combined_object_list.objects[i].name<<std::endl;
-                    pcl_object_pose_array.poses[pcl_count] = combined_object_list.objects[i].pose.pose;
-                    pcl_labels.push_back(combined_object_list.objects[i].name);
-                    pcl_count ++;
-                }
-            }
-            if (pcl_object_pose_array.poses.size() > 0)
-            {
-                pub_pcl_object_pose_array_.publish(pcl_object_pose_array);
-            }
-            if ((pcl_labels.size() == pcl_object_pose_array.poses.size()) &&
-                    (pcl_labels.size() > 0) && (pcl_object_pose_array.poses.size() > 0))
-            {
-                label_visualizer_pcl_.publish(pcl_labels, pcl_object_pose_array);
-            }
-        }
-        if (clusters_2d.size() > 0)
-        {
-            std::cout<<"RGB FINAL: "<<final_image_list.objects.size()<<std::endl;
-            cluster_visualizer_rgb_.publish<PointT>(clusters_2d, target_frame_id_);
-            // RGB Pose array for debug mode only
-            geometry_msgs::PoseArray rgb_object_pose_array;
-            rgb_object_pose_array.header.frame_id = target_frame_id_;
-            rgb_object_pose_array.header.stamp = ros::Time::now();
-            rgb_object_pose_array.poses.resize(final_image_list.objects.size());
-            std::vector<std::string> rgb_labels;
-            int rgb_count = 0;
-            for (int i=0; i<combined_object_list.objects.size(); i++)
-            {
-                if (combined_object_list.objects[i].database_id > 99)
-                {
-                    std::cout<<"[RGB] Class: "<<combined_object_list.objects[i].name<<std::endl;
-                    rgb_object_pose_array.poses[rgb_count] = combined_object_list.objects[i].pose.pose;
-                    rgb_labels.push_back(combined_object_list.objects[i].name);
-                    std::cout<<"[RGB] Pose: "<<combined_object_list.objects[i].pose.pose.position.x<<", "<<combined_object_list.objects[i].pose.pose.position.y<<", "<<combined_object_list.objects[i].pose.pose.position.z<<std::endl;
-                    rgb_count ++;
-                }
-            }
-
-            if (rgb_object_pose_array.poses.size() > 0)
-            {
-                std::cout<<"[RGB] pose array size: "<<rgb_object_pose_array.poses.size()<<std::endl;
-                pub_rgb_object_pose_array_.publish(rgb_object_pose_array);
-            }
-            if ((rgb_labels.size() == rgb_object_pose_array.poses.size()) && 
-                    (rgb_labels.size() > 0) && (rgb_object_pose_array.poses.size() > 0))
-            {
-                label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
-            }
-        }
-        /* if (!image_list.images.empty()) */
-        /* { */
-        /*     saveDebugImage(cv_image); */
-        /* } */
+        publishDebug(combined_object_list, clusters_3d, clusters_2d);
+        mm_object_recognition_utils_->saveDebugImage(cv_image, image_msg_, logdir_); 
     }
 }
 
+void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
+                                                  std::vector<PointCloud::Ptr> &clusters_3d,
+                                                  std::vector<PointCloud::Ptr> &clusters_2d)
+{
+    std::cout<<"Cloud list: "<< recognized_cloud_list_.objects.size()<<std::endl;
+    std::cout<<"RGB list: "<< recognized_image_list_.objects.size()<<std::endl;
+
+    ROS_INFO_STREAM("Combined object list: "<< combined_object_list.objects.size());
+    // Compute normal to generate parallel BBOX to the plane
+    const Eigen::Vector3f normal = pointcloud_segmentation_->getPlaneNormal();
+    
+    if (recognized_cloud_list_.objects.size() > 0)
+    {
+        // Bounding boxes
+        if (clusters_3d.size() > 0)
+        {
+            mas_perception_msgs::BoundingBoxList bounding_boxes;
+            cluster_visualizer_pcl_.publish<PointT>(clusters_3d, target_frame_id_);
+            bounding_boxes.bounding_boxes.resize(clusters_3d.size());
+            for (int i=0; i<clusters_3d.size(); i++)
+            {
+                mas_perception_libs::BoundingBox bbox;
+                pointcloud_segmentation_->get3DBoundingBox(clusters_3d[i], normal, bbox, bounding_boxes.bounding_boxes[i]);
+            }
+            if (bounding_boxes.bounding_boxes.size() > 0)
+            {
+                bounding_box_visualizer_pcl_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
+            }
+        }
+        // PCL Pose array for debug mode only
+        geometry_msgs::PoseArray pcl_object_pose_array;
+        pcl_object_pose_array.header.frame_id = target_frame_id_;
+        pcl_object_pose_array.header.stamp = ros::Time::now();
+        pcl_object_pose_array.poses.resize(recognized_cloud_list_.objects.size());
+        std::vector<std::string> pcl_labels;
+        int pcl_count = 0;
+        for (int i=0; i<combined_object_list.objects.size(); i++)
+        {
+            if (combined_object_list.objects[i].database_id < 99)
+            {
+                std::cout<<"[PCL] Class: "<<combined_object_list.objects[i].name<<std::endl;
+                pcl_object_pose_array.poses[pcl_count] = combined_object_list.objects[i].pose.pose;
+                pcl_labels.push_back(combined_object_list.objects[i].name);
+                pcl_count ++;
+            }
+        }
+        if (pcl_object_pose_array.poses.size() > 0)
+        {
+            pub_pcl_object_pose_array_.publish(pcl_object_pose_array);
+        }
+        if ((pcl_labels.size() == pcl_object_pose_array.poses.size()) &&
+                (pcl_labels.size() > 0) && (pcl_object_pose_array.poses.size() > 0))
+        {
+            label_visualizer_pcl_.publish(pcl_labels, pcl_object_pose_array);
+        }
+    }
+    if (clusters_2d.size() > 0)
+    {
+        cluster_visualizer_rgb_.publish<PointT>(clusters_2d, target_frame_id_);
+        // RGB Pose array for debug mode only
+        geometry_msgs::PoseArray rgb_object_pose_array;
+        rgb_object_pose_array.header.frame_id = target_frame_id_;
+        rgb_object_pose_array.header.stamp = ros::Time::now();
+        rgb_object_pose_array.poses.resize(recognized_image_list_.objects.size());
+        std::vector<std::string> rgb_labels;
+        int rgb_count = 0;
+        for (int i=0; i<combined_object_list.objects.size(); i++)
+        {
+            if (combined_object_list.objects[i].database_id > 99)
+            {
+                std::cout<<"[RGB] Class: "<<combined_object_list.objects[i].name<<std::endl;
+                rgb_object_pose_array.poses[rgb_count] = combined_object_list.objects[i].pose.pose;
+                rgb_labels.push_back(combined_object_list.objects[i].name);
+                rgb_count ++;
+            }
+        }
+
+        if (rgb_object_pose_array.poses.size() > 0)
+        {
+            pub_rgb_object_pose_array_.publish(rgb_object_pose_array);
+        }
+        if ((rgb_labels.size() == rgb_object_pose_array.poses.size()) && 
+                (rgb_labels.size() > 0) && (rgb_object_pose_array.poses.size() > 0))
+        {
+            label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
+        }
+    }
+}
 void MultimodalObjectRecognitionROS::publishObjectList(mas_perception_msgs::ObjectList &object_list)
 {
     for (int i=0; i<object_list.objects.size(); i++)
@@ -683,7 +638,6 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
             if (object_list.objects[i].database_id > 100)
             {
                 ROS_INFO_STREAM("Updating container pose");
-                //updateContainerPose(object_list.objects[i]);
                 mm_object_recognition_utils_->adjustContainerPose(object_list.objects[i], rgb_container_height_);
             }
         }
@@ -729,9 +683,9 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
     }
 }
 
-void MultimodalObjectRecognitionROS::saveDebugImage(const cv_bridge::CvImagePtr &cv_image_ptr)
+/* void MultimodalObjectRecognitionROS::saveDebugImage(const cv_bridge::CvImagePtr &cv_image_ptr)
 {
-    std::stringstream filename; // stringstream used for the conversion
+    std::stringstream filename; 
     ros::Time time_now = ros::Time::now();
 
     // save image
@@ -753,7 +707,7 @@ void MultimodalObjectRecognitionROS::saveDebugImage(const cv_bridge::CvImagePtr 
     filename << logdir_ << time_now << "_raw_rgb" <<".jpg";
     cv::imwrite(filename.str(), raw_cv_image->image);
 
-}
+} */
 
 void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level)
 {
@@ -797,7 +751,6 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
     rgb_min_bbox_z_ = config.rgb_min_bbox_z;
 }
 
-
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "multimodal_object_recognition");
@@ -805,15 +758,15 @@ int main(int argc, char **argv)
 
     int frame_rate = 30;
     nh.param<int>("frame_rate", frame_rate, 30);
-    ROS_INFO_STREAM("[multimodal_object_recognition] node started");
-
-    MultimodalObjectRecognitionROS object_recognition(nh);
-    //boost::shared_ptr<MultimodalObjectRecognitionROS> object_recognition = boost::make_shared<MultimodalObjectRecognitionROS>(nh);
-
     ros::Rate loop_rate(frame_rate);
+
+    ROS_WARN_STREAM("[multimodal_object_recognition] node started with rate "<<frame_rate);
+
+    MultimodalObjectRecognitionROS mm_object_recognition(nh);
+    
     while (ros::ok())
     {
-        object_recognition.update();
+        mm_object_recognition.update();
         ros::spinOnce();
         loop_rate.sleep();
     }
