@@ -71,8 +71,9 @@ class MultimodalObjectRecognitionROS
         ros::Publisher pub_event_out_;
         ros::Subscriber sub_cloud_;
 
-        tf::TransformListener transform_listener_;
-
+        //tf::TransformListener transform_listener_;
+        boost::shared_ptr<tf::TransformListener> tf_listener_;
+        
         dynamic_reconfigure::Server<mir_object_recognition::SceneSegmentationConfig> server_;
 
         // Publisher for clouds and images recognizer
@@ -185,7 +186,9 @@ class MultimodalObjectRecognitionROS
 
         void publishObjectList(mas_perception_msgs::ObjectList &object_list);
 
-        void saveDebugImage(const cv_bridge::CvImagePtr &cv_image_ptr);
+        void publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
+                          std::vector<PointCloud::Ptr> &clusters_3d,
+                          std::vector<PointCloud::Ptr> &clusters_2d);
 
     public:
         void update();
