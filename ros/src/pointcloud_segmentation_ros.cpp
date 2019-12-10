@@ -31,13 +31,18 @@
 #include <std_msgs/String.h>
 #include <std_msgs/Float32.h>
 
-PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh): 
+PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh, boost::shared_ptr<tf::TransformListener> tf_listener): 
     nh_(nh),
     add_to_octree_(false), 
-    pcl_object_id_(0)
+    pcl_object_id_(0),
+    tf_listener_(tf_listener)
 {    
     nh_.param("octree_resolution", octree_resolution_, 0.0025);
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
+    if (!tf_listener_)
+    {
+      ROS_ERROR_THROTTLE(2.0, "[PointcloudSegmentationROS]: TF listener not initialized.");
+    }
 }
 
 PointcloudSegmentationROS::~PointcloudSegmentationROS()
@@ -58,9 +63,6 @@ void PointcloudSegmentationROS::segment_cloud(mas_perception_msgs::ObjectList &o
     ros::Time now = ros::Time::now();
     for (int i = 0; i < clusters.size(); i++)
     {
-        // this is defined in helper
-        //convertBoundingBox(boxes[i], bounding_boxes.bounding_boxes[i]);
-
         sensor_msgs::PointCloud2 ros_cloud;
         ros_cloud.header.frame_id = frame_id_;
         pcl::PCLPointCloud2 pc2;
@@ -75,39 +77,8 @@ void PointcloudSegmentationROS::segment_cloud(mas_perception_msgs::ObjectList &o
         geometry_msgs::PoseStamped pose = getPose(boxes[i]);
         pose.header.stamp = now;
         pose.header.frame_id = frame_id_;
-        std::string target_frame_id;
-        if (nh_.hasParam("target_frame_id"))
-        {
-            nh_.param("target_frame_id", target_frame_id, frame_id_);
-            if (target_frame_id != frame_id_)
-            {
-                try
-                {
-                    ros::Time common_time;
-                    transform_listener_.getLatestCommonTime(frame_id_, target_frame_id, common_time, NULL);
-                    pose.header.stamp = common_time;
-                    transform_listener_.waitForTransform(target_frame_id, frame_id_, common_time, ros::Duration(0.1));
-                    geometry_msgs::PoseStamped pose_transformed;
-                    transform_listener_.transformPose(target_frame_id, pose, pose_transformed);
-                    object_list.objects[i].pose = pose_transformed;
-                }
-                catch(tf::LookupException& ex)
-                {
-                    ROS_WARN("Failed to transform pose: (%s)", ex.what());
-                    pose.header.stamp = now;
-                    object_list.objects[i].pose = pose;
-                }
-            }
-            else
-            {
-                object_list.objects[i].pose = pose;
-            }
-        }
-        else
-        {
-            object_list.objects[i].pose = pose;
-        }
 
+        object_list.objects[i].pose = pose;
         object_list.objects[i].database_id = pcl_object_id_;
         pcl_object_id_++;
     }
@@ -147,6 +118,25 @@ geometry_msgs::PoseStamped PointcloudSegmentationROS::getPose(const BoundingBox 
     pose.pose.orientation.z = q.z();
     pose.pose.orientation.w = q.w();
     return pose;
+}
+
+void PointcloudSegmentationROS::transformPose(std::string &source_frame, std::string &target_frame, 
+                                            geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &transformed_pose)
+{
+    try
+    {
+        ros::Time common_time;
+        tf_listener_->getLatestCommonTime(source_frame, target_frame, common_time, NULL);
+        pose.header.stamp = common_time;
+        tf_listener_->waitForTransform(target_frame, source_frame, common_time, ros::Duration(0.1));
+        tf_listener_->transformPose(target_frame, pose, transformed_pose);
+    }
+    catch(tf::LookupException& ex)
+    {
+        ROS_WARN("Failed to transform pose: (%s)", ex.what());
+        transformed_pose = pose;
+    }
+
 }
 
 void PointcloudSegmentationROS::reset_cloud_accumulation()
