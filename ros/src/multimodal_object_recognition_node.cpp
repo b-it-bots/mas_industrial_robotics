@@ -172,7 +172,7 @@ void MultimodalObjectRecognitionROS::update()
         recognized_image_list_.objects.clear();
         recognized_cloud_list_.objects.clear(); 
         
-        pointcloud_segmentation_->reset_cloud_accumulation();
+        pointcloud_segmentation_->resetCloudAccumulation();
         // pub e_done
         std_msgs::String event_out;
         event_out.data = "e_done";
@@ -216,8 +216,8 @@ void MultimodalObjectRecognitionROS::transformCloud()
 void MultimodalObjectRecognitionROS::segmentPointcloud(mas_perception_msgs::ObjectList &object_list, 
                                                        std::vector<PointCloud::Ptr> &clusters)
 {
-    pointcloud_segmentation_->add_cloud_accumulation(cloud_);
-    pointcloud_segmentation_->segment_cloud(object_list, clusters);
+    pointcloud_segmentation_->addCloudAccumulation(cloud_);
+    pointcloud_segmentation_->segmentCloud(object_list, clusters);
 
     std_msgs::Float64 workspace_height_msg;
     workspace_height_msg.data = pointcloud_segmentation_->getWorkspaceHeight();
@@ -235,7 +235,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
     segmentPointcloud(cloud_object_list, clusters_3d);
 
-    //Publish cluster for recognition
+    //Publish 3D object cluster for recognition
     if (!cloud_object_list.objects.empty())
     {
         ROS_INFO_STREAM("Publishing clouds for recognition");
@@ -252,7 +252,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         pub_image_to_recognizer_.publish(image_list);
     }
     ROS_INFO_STREAM("Waiting for message from Cloud and Image recognizer");
-    //loop till you received the message from the 3d and rgb recognition
+    //loop till it received the message from the 3d and rgb recognition
     int loop_rate_hz = 30;
     int timeout_wait = 2; //secs
     ros::Rate loop_rate(loop_rate_hz);
@@ -673,7 +673,7 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
     }
     else if (msg->data == "e_stop")
     {
-        pointcloud_segmentation_->reset_cloud_accumulation();
+        pointcloud_segmentation_->resetCloudAccumulation();
         event_out.data = "e_stopped";
         pub_event_out_.publish(event_out);
     }
@@ -682,32 +682,6 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
         return;
     }
 }
-
-/* void MultimodalObjectRecognitionROS::saveDebugImage(const cv_bridge::CvImagePtr &cv_image_ptr)
-{
-    std::stringstream filename; 
-    ros::Time time_now = ros::Time::now();
-
-    // save image
-    filename.str("");
-    filename << logdir_ << time_now << "_bbox_rgb" <<".jpg";
-    cv::imwrite(filename.str(), cv_image_ptr->image);
-
-    cv_bridge::CvImagePtr raw_cv_image;
-    try
-    {
-        raw_cv_image = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
-    }
-    catch (cv_bridge::Exception& e)
-    {
-        ROS_ERROR("cv_bridge exception: %s", e.what());
-        return;
-    }
-    filename.str("");
-    filename << logdir_ << time_now << "_raw_rgb" <<".jpg";
-    cv::imwrite(filename.str(), raw_cv_image->image);
-
-} */
 
 void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level)
 {

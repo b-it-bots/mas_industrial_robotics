@@ -4,6 +4,7 @@
  * Author: Mohammad Wasil
  *
  */
+
 #ifndef MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 #define MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 
@@ -43,35 +44,35 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 #include <mir_object_recognition/multimodal_object_recognition_utils.h>
+
 /**
- * This node subscribes to ...
+ * \brief 
+ * This node subscribes to pointcloud and image_raw topics
  * Inputs:
  * ~event_in:
+ *            - e_start:    - starts subscribing to pointcloud and image topics simultaneously,
+ *                          - segments pointcloud, recognize the table top clusters, estimate pose and workspace height
+ *                          - detects rgb object, find 3D ROI, estimate pose
+ *                          - adjusts object pose and publish them
+ *            - e_stop:     - stop subscribing to the input topics and clear accumulated pointcloud
  * Outputs:
  * ~event_out:
+ *            - e_done:     - done recognizing pointcloud and image, done pose estimation and done publishing object_list
+ *            - e_stopped:  - done unsubscribing, done clearing accumulated point clouds
 **/
 
 class MultimodalObjectRecognitionROS
 {
     public:
-        struct Config
-        {
-            public:
-                Config();
-            public:
-                int config_test;
-        };
-
-    public:
         MultimodalObjectRecognitionROS(ros::NodeHandle nh);
         virtual ~MultimodalObjectRecognitionROS();
+        void update();
 
     private:
         ros::Subscriber sub_event_in_;
         ros::Publisher pub_event_out_;
         ros::Subscriber sub_cloud_;
 
-        //tf::TransformListener transform_listener_;
         boost::shared_ptr<tf::TransformListener> tf_listener_;
         
         dynamic_reconfigure::Server<mir_object_recognition::SceneSegmentationConfig> server_;
@@ -92,28 +93,26 @@ class MultimodalObjectRecognitionROS
         ros::Publisher pub_pcl_debug_in_;
         ros::Publisher pub_pcl_debug_out_;
 
-        // Synchronize callback for image and pointclouds
+        // Synchronize callback for image and pointcloud
         message_filters::Subscriber<sensor_msgs::Image> *image_sub_;
         message_filters::Subscriber<sensor_msgs::PointCloud2> *cloud_sub_;
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::PointCloud2> msgSyncPolicy;
         message_filters::Synchronizer<msgSyncPolicy> *msg_sync_;
         void synchronizeCallback(const sensor_msgs::ImageConstPtr &image, 
-                                            const sensor_msgs::PointCloud2ConstPtr &cloud);
+                                 const sensor_msgs::PointCloud2ConstPtr &cloud);
 
         // Recognize Clouds and Image callback
         void recognizedImageCallback(const mas_perception_msgs::ObjectList &msg);
         void recognizedCloudCallback(const mas_perception_msgs::ObjectList &msg);
-        
     
     protected:
         ros::NodeHandle nh_;
         std::string target_frame_id_;
-        //boost::shared_ptr<SceneSegmentationROS> pointcloud_recognition_interface_; //! Linked interface.
-        //typedef SceneSegmentationROS PointcloudRecognition;
-        
-        typedef std::auto_ptr<PointcloudSegmentationROS> PointcloudSegmentationUPtr;
+
+        // Create unique_ptr for pointcloud_segmentation and mm_utils        
+        typedef std::unique_ptr<PointcloudSegmentationROS> PointcloudSegmentationUPtr;
         PointcloudSegmentationUPtr pointcloud_segmentation_;
-        typedef std::auto_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsUPtr;
+        typedef std::unique_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsUPtr;
         MultimodalObjectRecognitionUtilsUPtr mm_object_recognition_utils_;
 
         // Used to store pointcloud and image received from callback
@@ -125,6 +124,7 @@ class MultimodalObjectRecognitionROS
         int pointcloud_msg_received_count_;
         int image_msg_received_count_;
         
+        // rgb_object_id used to differentiate 2D and 3D objects
         int rgb_object_id_;
         
         // Flags for object recognition
@@ -162,48 +162,51 @@ class MultimodalObjectRecognitionROS
         std::string logdir_;
 
     private:
-        //void setConfig();
         void eventCallback(const std_msgs::String::ConstPtr &msg);
         void configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level);
         
+        /** \brief Transform pointcloud to the given frame id ("base_link" by default)*/
         void transformCloud();
+
+        /** \brief Add cloud accumulation, segment accumulated pointcloud, find the plane, 
+         *         clusters table top objects, find object heights.
+         * \param[out] 3D object list with unknown label
+         * \param[out] Table top pointcloud clusters
+        */
         void segmentPointcloud(mas_perception_msgs::ObjectList &object_list, 
                                std::vector<PointCloud::Ptr> &clusters);
+
+        /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
         void recognizeCloudAndImage();
-        /* void recognizeCloudAndImage(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud, */ 
-        /*                          const sensor_msgs::ImageConstPtr &msg); */
 
-        void recognizeImage(const sensor_msgs::ImageConstPtr &msg);
-        void publishImagesForRecognition(const sensor_msgs::ImageConstPtr &msg);
-
+        /** \brief Get 3D objects given 2D ROI 
+         * \param[in] Region of interest (bounding box) of 2D object
+         * \param[in] Ordered and transformed pointcloud
+         * \param[out] 3D pointcloud cluster (3D ROI) of the given 2D ROI 
+        */
         void get3DObject(const sensor_msgs::RegionOfInterest &roi, 
                          const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ordered_cloud,
                          pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pcl_object);
         
-        geometry_msgs::PoseStamped estimatePose(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, std::string name);
-
+        /** \brief Adjust object pose, make it flat, adjust container, axis and bolt poses.
+         * \param[in] Object_list.pose, .name,
+         * 
+        */
         void adjustObjectPose(mas_perception_msgs::ObjectList &object_list);
 
+        /** \brief Publish object_list to object_list merger 
+         * \param[in] Object list to publish
+        */
         void publishObjectList(mas_perception_msgs::ObjectList &object_list);
 
+        /** \brief Publish debug info such as bbox, poses, labels for both 2D and 3D objects.
+         * \param[in] combined object list
+         * \param[in] 3D pointcloud cluster from 3D object segmentation
+         * \param[in] 3D pointcloud cluster from 2D bounding box proposal
+        */
         void publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
                           std::vector<PointCloud::Ptr> &clusters_3d,
                           std::vector<PointCloud::Ptr> &clusters_2d);
-
-    public:
-        void update();
-        // These should be handled in algorithm_provider_impl
-        //void get3DBoundingBox();
-        //void get3DPose();
-
-    // Move this to image_recognition_ros_utils
-    private:
-        /**
-         * Object segmentation
-         */
-        ros::ServiceClient segmentation_service_;
-        std::string segmentation_service_name_;
-        cv::RNG rng;
                 
 };
 
