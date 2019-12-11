@@ -17,7 +17,8 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionUtils::estimatePose(
                     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, 
                     std::string name)
 {
-       // Apply remove points belonging to plane for non circular objects to find best orientation
+    // Apply filter to remove points belonging to plane for non circular objects 
+    // to find best orientation
     pcl::PointCloud<pcl::PointXYZRGB> filtered_cloud;
     if (name == "M30" || 
         name == "M20" ||
