@@ -19,7 +19,7 @@ MultimodalObjectRecognitionUtils::~MultimodalObjectRecognitionUtils()
 
 geometry_msgs::PoseStamped MultimodalObjectRecognitionUtils::estimatePose(
                     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, 
-                    std::string name = "None")
+                    std::string name)
 {
     // If is not object name is not m20, m30, bearing, distance tube,
     // do passtrhough to filter
@@ -101,7 +101,7 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionUtils::estimatePose(
 }
 
 void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::Object &container_object,
-                                                           float rgb_container_height=0.1)
+                                                           float rgb_container_height)
 {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::fromROSMsg(container_object.pointcloud, *cloud);
