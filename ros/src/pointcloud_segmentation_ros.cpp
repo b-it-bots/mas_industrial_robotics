@@ -39,6 +39,7 @@ PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh, boost::
 {    
     nh_.param("octree_resolution", octree_resolution_, 0.0025);
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
+    scene_segmentation_ = SceneSegmentationUPtr(new SceneSegmentation());
     if (!tf_listener_)
     {
       ROS_ERROR_THROTTLE(2.0, "[PointcloudSegmentationROS]: TF listener not initialized.");
@@ -50,13 +51,13 @@ PointcloudSegmentationROS::~PointcloudSegmentationROS()
 }
 
 void PointcloudSegmentationROS::segmentCloud(mas_perception_msgs::ObjectList &object_list, 
-                                              std::vector<PointCloud::Ptr> &clusters)
+                                             std::vector<PointCloud::Ptr> &clusters)
 {
     PointCloud::Ptr cloud(new PointCloud);
     cloud_accumulation_->getAccumulatedCloud(*cloud);
     
     std::vector<BoundingBox> boxes;
-    PointCloud::Ptr debug = scene_segmentation_.segment_scene(cloud, clusters, boxes, model_coefficients_, workspace_height_);
+    PointCloud::Ptr debug = scene_segmentation_->segment_scene(cloud, clusters, boxes, model_coefficients_, workspace_height_);
     debug->header.frame_id = "base_link";
 
     object_list.objects.resize(boxes.size());
@@ -120,23 +121,31 @@ geometry_msgs::PoseStamped PointcloudSegmentationROS::getPose(const BoundingBox 
     return pose;
 }
 
-void PointcloudSegmentationROS::transformPose(std::string &source_frame, std::string &target_frame, 
-                                            geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &transformed_pose)
+void PointcloudSegmentationROS::transformPose(std::string &target_frame, 
+                                              geometry_msgs::PoseStamped &pose, 
+                                              geometry_msgs::PoseStamped &transformed_pose)
 {
-    try
+    if (tf_listener_)
     {
-        ros::Time common_time;
-        tf_listener_->getLatestCommonTime(source_frame, target_frame, common_time, NULL);
-        pose.header.stamp = common_time;
-        tf_listener_->waitForTransform(target_frame, source_frame, common_time, ros::Duration(0.1));
-        tf_listener_->transformPose(target_frame, pose, transformed_pose);
+        try
+        {
+            ros::Time common_time;
+            tf_listener_->getLatestCommonTime(pose.header.frame_id, target_frame, common_time, NULL);
+            pose.header.stamp = common_time;
+            tf_listener_->waitForTransform(target_frame, pose.header.frame_id, common_time, ros::Duration(0.1));
+            tf_listener_->transformPose(target_frame, pose, transformed_pose);
+        }
+        catch(tf::LookupException& ex)
+        {
+            ROS_WARN("Failed to transform pose: (%s)", ex.what());
+            transformed_pose = pose;
+        }
     }
-    catch(tf::LookupException& ex)
+    else
     {
-        ROS_WARN("Failed to transform pose: (%s)", ex.what());
+        ROS_ERROR_THROTTLE(2.0, "[PointcloudSegmentationROS]: TF listener not initialized.");
         transformed_pose = pose;
     }
-
 }
 
 void PointcloudSegmentationROS::resetCloudAccumulation()
