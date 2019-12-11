@@ -1,7 +1,3 @@
-//get3DBoundingBox
-//get2DBoundingBox
-//get3DPose
-
 #include <mir_object_recognition/multimodal_object_recognition_utils.h>
 
 MultimodalObjectRecognitionUtils::MultimodalObjectRecognitionUtils(boost::shared_ptr<tf::TransformListener> tf_listener):
@@ -21,12 +17,8 @@ geometry_msgs::PoseStamped MultimodalObjectRecognitionUtils::estimatePose(
                     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &xyz_input_cloud, 
                     std::string name)
 {
-    // If is not object name is not m20, m30, bearing, distance tube,
-    // do passtrhough to filter
-    // TODO: Pose zero after filter
-    bool use_filter = true;
+       // Apply remove points belonging to plane for non circular objects to find best orientation
     pcl::PointCloud<pcl::PointXYZRGB> filtered_cloud;
-    // With filter, remove points belonging to plane for long objects
     if (name == "M30" || 
         name == "M20" ||
         name == "DISTANCE_TUBE" ||
