@@ -35,6 +35,9 @@
 class MultimodalObjectRecognitionUtils
 {
     public:
+        /** Constructor
+         * \param[in] Transform listener
+         * */
         MultimodalObjectRecognitionUtils(boost::shared_ptr<tf::TransformListener> tf_listener=nullptr);
         virtual ~MultimodalObjectRecognitionUtils();
 
@@ -63,12 +66,11 @@ class MultimodalObjectRecognitionUtils
         void adjustContainerPose(mas_perception_msgs::Object &container_object, float rgb_container_height=0.1);
 
         /** \brief Transform pose 
-         * \param[in] source_frame id
          * \param[in] target_frame id
          * \param[in] Source pose stamped
          * \param[out] Transformed pose stamped
         */
-        void transformPose(std::string &source_frame, std::string &target_frame, 
+        void transformPose(std::string &target_frame, 
                            geometry_msgs::PoseStamped &pose, 
                            geometry_msgs::PoseStamped &transformed_pose);
 
@@ -84,7 +86,6 @@ class MultimodalObjectRecognitionUtils
     private:
         // transform listener
         boost::shared_ptr<tf::TransformListener> tf_listener_;
-
 
 };
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_UTILS_H

@@ -221,25 +221,32 @@ void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::O
     }
 }
 
-void MultimodalObjectRecognitionUtils::transformPose(std::string &source_frame, std::string &target_frame, 
-                                            geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &transformed_pose)
+void MultimodalObjectRecognitionUtils::transformPose(std::string &target_frame, 
+                                        geometry_msgs::PoseStamped &pose, 
+                                        geometry_msgs::PoseStamped &transformed_pose)
 {
-    try
+    if (tf_listener_)
     {
-        ros::Time common_time;
-        tf_listener_->getLatestCommonTime(source_frame, target_frame, common_time, NULL);
-        pose.header.stamp = common_time;
-        tf_listener_->waitForTransform(target_frame, source_frame, common_time, ros::Duration(0.1));
-        tf_listener_->transformPose(target_frame, pose, transformed_pose);
+        try
+        {
+            ros::Time common_time;
+            tf_listener_->getLatestCommonTime(pose.header.frame_id, target_frame, common_time, NULL);
+            pose.header.stamp = common_time;
+            tf_listener_->waitForTransform(target_frame, pose.header.frame_id, common_time, ros::Duration(0.1));
+            tf_listener_->transformPose(target_frame, pose, transformed_pose);
+        }
+        catch(tf::LookupException& ex)
+        {
+            ROS_WARN("Failed to transform pose: (%s)", ex.what());
+            transformed_pose = pose;
+        }
     }
-    catch(tf::LookupException& ex)
+    else
     {
-        ROS_WARN("Failed to transform pose: (%s)", ex.what());
+        ROS_ERROR_THROTTLE(2.0, "[PointcloudSegmentationROS]: TF listener not initialized.");
         transformed_pose = pose;
     }
-
 }
-
 
 void MultimodalObjectRecognitionUtils::saveDebugImage(const cv_bridge::CvImagePtr &cv_image_bbox_ptr, 
                                                       const sensor_msgs::ImageConstPtr &raw_image,
