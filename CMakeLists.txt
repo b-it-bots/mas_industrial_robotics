@@ -62,7 +62,6 @@ add_dependencies(multimodal_object_recognition
 )
 target_link_libraries(multimodal_object_recognition
   ${catkin_LIBRARIES}
-  #scene_segmentation
 )
 
 roslint_cpp()
