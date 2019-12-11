@@ -734,9 +734,8 @@ int main(int argc, char **argv)
     nh.param<int>("frame_rate", frame_rate, 30);
     ros::Rate loop_rate(frame_rate);
 
-    ROS_WARN_STREAM("[multimodal_object_recognition] node started with rate "<<frame_rate);
-
     MultimodalObjectRecognitionROS mm_object_recognition(nh);
+    ROS_INFO_STREAM("\033[1;32m [multimodal_object_recognition] node started with rate "<<frame_rate<<" \033[0m\n");
     
     while (ros::ok())
     {
