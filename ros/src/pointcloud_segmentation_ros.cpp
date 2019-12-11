@@ -49,7 +49,7 @@ PointcloudSegmentationROS::~PointcloudSegmentationROS()
 {
 }
 
-void PointcloudSegmentationROS::segment_cloud(mas_perception_msgs::ObjectList &object_list, 
+void PointcloudSegmentationROS::segmentCloud(mas_perception_msgs::ObjectList &object_list, 
                                               std::vector<PointCloud::Ptr> &clusters)
 {
     PointCloud::Ptr cloud(new PointCloud);
@@ -139,12 +139,12 @@ void PointcloudSegmentationROS::transformPose(std::string &source_frame, std::st
 
 }
 
-void PointcloudSegmentationROS::reset_cloud_accumulation()
+void PointcloudSegmentationROS::resetCloudAccumulation()
 {
     cloud_accumulation_->reset();
 }
 
-void PointcloudSegmentationROS::add_cloud_accumulation(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud)
+void PointcloudSegmentationROS::addCloudAccumulation(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud)
 {
     cloud_accumulation_->addCloud(cloud);
 }
