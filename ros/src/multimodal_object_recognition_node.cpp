@@ -389,7 +389,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 pose.header.frame_id = frame_id;
                 if (frame_id != target_frame_id_)
                 {   
-                    mm_object_recognition_utils_->transformPose(frame_id, target_frame_id_, pose, rgb_object_list.objects[i].pose);
+                    mm_object_recognition_utils_->transformPose(target_frame_id_, pose, rgb_object_list.objects[i].pose);
                 }
                 else
                 {
@@ -696,7 +696,7 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
     cloudFilterParams.mVoxelLimitMinZ = static_cast<float>(config.voxel_limit_min_z);
     cloudFilterParams.mVoxelLimitMaxZ = static_cast<float>(config.voxel_limit_max_z);
     cloudFilterParams.mVoxelLeafSize = static_cast<float>(config.voxel_leaf_size);
-    pointcloud_segmentation_->scene_segmentation_.setCloudFilterParams(cloudFilterParams);
+    pointcloud_segmentation_->scene_segmentation_->setCloudFilterParams(cloudFilterParams);
 
     SacPlaneSegmenterParams planeFitParams;
     planeFitParams.mNormalRadiusSearch = config.normal_radius_search;
@@ -705,11 +705,11 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
     planeFitParams.mSacOptimizeCoeffs = config.sac_optimize_coefficients;
     planeFitParams.mSacEpsAngle = config.sac_eps_angle;
     planeFitParams.mSacNormalDistWeight = config.sac_normal_distance_weight;
-    pointcloud_segmentation_->scene_segmentation_.setPlaneSegmenterParams(planeFitParams);
+    pointcloud_segmentation_->scene_segmentation_->setPlaneSegmenterParams(planeFitParams);
 
-    pointcloud_segmentation_->scene_segmentation_.setPrismParams(config.prism_min_height, config.prism_max_height);
-    pointcloud_segmentation_->scene_segmentation_.setOutlierParams(config.outlier_radius_search, config.outlier_min_neighbors);
-    pointcloud_segmentation_->scene_segmentation_.setClusterParams(config.cluster_tolerance, config.cluster_min_size, config.cluster_max_size,
+    pointcloud_segmentation_->scene_segmentation_->setPrismParams(config.prism_min_height, config.prism_max_height);
+    pointcloud_segmentation_->scene_segmentation_->setOutlierParams(config.outlier_radius_search, config.outlier_min_neighbors);
+    pointcloud_segmentation_->scene_segmentation_->setClusterParams(config.cluster_tolerance, config.cluster_min_size, config.cluster_max_size,
             config.cluster_min_height, config.cluster_max_height, config.cluster_max_length,
             config.cluster_min_distance_to_polygon);
 
