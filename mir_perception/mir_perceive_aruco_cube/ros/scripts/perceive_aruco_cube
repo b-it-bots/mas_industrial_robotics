@@ -3,19 +3,13 @@ from __future__ import print_function
 
 import rospy
 import cv2
-import pcl
-import math
 import tf
 import numpy as np
-import sensor_msgs.point_cloud2 as pc2
 
-from tf2_ros import Buffer, TransformListener
 from cv_bridge import CvBridge, CvBridgeError
-# from message_filters import ApproximateTimeSynchronizer, Subscriber
-from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 
-from sensor_msgs.msg import Image, PointCloud2, CameraInfo
-from geometry_msgs.msg import Point, PointStamped, Polygon, PolygonStamped, Quaternion, PoseStamped
+from sensor_msgs.msg import Image, CameraInfo
+from geometry_msgs.msg import Point, Quaternion, PoseStamped
 from std_msgs.msg import String
 import mcr_manipulation_measurers_ros.pose_transformer
 
@@ -37,7 +31,6 @@ class ArucoCubePerceiver(object):
         self.marker_length = rospy.get_param('~marker_length', 0.04)
 
         # publishers
-        self.debug_polygon_pub = rospy.Publisher('/polygon_debug_topic', PolygonStamped, queue_size=1)
         self.output_pose_pub = rospy.Publisher('~output_pose', PoseStamped, queue_size=1)
         self.event_out_pub = rospy.Publisher('~event_out', String, queue_size=1)
 
@@ -46,9 +39,10 @@ class ArucoCubePerceiver(object):
         self.image_sub = rospy.Subscriber("~input_rgb_image", Image, self.input_image_cb)
         self.camera_info_sub = rospy.Subscriber("~camera_info", CameraInfo, self.camera_info_cb)
 
+        rospy.loginfo("Initialised ArucoCubePerceiver")
+
     def event_in_cb(self, msg):
         self.listening = msg.data == 'e_start'
-        print(self.listening)
 
     def camera_info_cb(self, msg):
         """Callback for camera info. Initialises camera matrix and distortion 
