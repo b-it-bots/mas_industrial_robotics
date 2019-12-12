@@ -51,17 +51,27 @@ class ArucoCubePerceiver(object):
         print(self.listening)
 
     def camera_info_cb(self, msg):
+        """Callback for camera info. Initialises camera matrix and distortion 
+        coefficient for the camera and unregisters the subscriber at the end.
+
+        :msg: sensor_msgs.CameraInfo
+        :returns: None
+        """
         camera_mat = []
         for i in range(3):
             camera_mat.append(list(msg.K[i*3:i*3+3]))
         self.camera_mat = np.array(camera_mat)
-        print(self.camera_mat)
         dist_coeff = list(msg.D)
         self.dist_coeff = np.array(dist_coeff)
-        print(self.dist_coeff)
         self.camera_info_sub.unregister()
 
     def input_image_cb(self, msg):
+        """Callback for image from camera. Aruco marker is found and its pose in 
+        cartesian space is published along with `e_success`.
+
+        :msg: sensor_msgs.Image
+        :returns: None
+        """
         if not self.listening:
             return
 
@@ -72,23 +82,33 @@ class ArucoCubePerceiver(object):
             self.check_failure()
             return
 
+        if self.camera_mat is None or self.dist_coeff is None:
+            self.check_failure()
+            return
+
         corners = self._get_best_aruco_marker_corners(cv_image)
+        
+        if corners is None:
+            self.check_failure()
+            return
+
         rot, trans, _ = cv2.aruco.estimatePoseSingleMarkers(corners,
                                                             self.marker_length,
                                                             self.camera_mat,
                                                             self.dist_coeff)
         rot = np.squeeze(rot)
         trans = np.squeeze(trans)
+
         test_pose = PoseStamped()
         test_pose.header.frame_id = msg.header.frame_id
         test_pose.header.stamp = rospy.Time.now()
-        test_pose.pose.orientation.w = 1.0
         test_pose.pose.position = Point(x=trans[0], y=trans[1], z=trans[2]+(0.75*self.marker_length))
         quat = tf.transformations.quaternion_from_euler(rot[0], rot[1], rot[2])
         test_pose.pose.orientation = Quaternion(*quat)
         target_pose = self.pose_transformer.get_transformed_pose(test_pose, self.target_frame)
         # print(target_pose)
         self.output_pose_pub.publish(target_pose)
+
         self.listening = False
         self.retry = 0
         self.event_out_pub.publish(String(data='e_success'))
