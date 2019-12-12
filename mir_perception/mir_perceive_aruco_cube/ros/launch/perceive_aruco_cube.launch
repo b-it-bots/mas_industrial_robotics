@@ -2,13 +2,16 @@
 <launch>
 
     <arg name="target_frame" default="base_link" />
+    <arg name="marker_length" default="0.04" />
     <arg name="retry_attempts" default="3" />
 
     <node pkg="mir_perceive_aruco_cube" type="perceive_aruco_cube" name="aruco_cube_perceiver" output="screen" ns="mir_perception"> 
         <remap from="~input_rgb_image" to="/arm_cam3d/rgb/image_raw"/> 
         <remap from="~input_pointcloud" to="/arm_cam3d/depth_registered/points"/> 
+        <remap from="~camera_info" to="/arm_cam3d/rgb/camera_info"/> 
         <remap from="~output_pose" to="/mir_perception/aruco_cube_perceiver/object_pose"/> 
         <param name="target_frame" type="str" value="$(arg target_frame)"/> 
         <param name="retry_attempts" type="int" value="$(arg retry_attempts)"/> 
+        <param name="marker_length" type="double" value="$(arg marker_length)"/> 
     </node> 
 </launch>
