@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 PACKAGE = "mir_object_recognition"
-NODE = "rgb_object_recognizer"
-SERVICE = "~rgb_object_recognizer"
 
 # Color map for classes
 cls2clr = {
@@ -69,7 +67,7 @@ from rgb_object_recognition import squeezeDet
 from rgb_object_recognition import SSDLiteMobilenet
 from rgb_object_recognition import util
 
-class ObjectRecognizer():
+class RGBObjectRecognizer():
     def __init__(self, model_dir, net='detection', model_name='squeezeDet', debug_mode=False):
         self.cvbridge = CvBridge()
         self.debug = debug_mode
@@ -136,19 +134,14 @@ class ObjectRecognizer():
         debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
         self.pub_debug.publish(debug_img)
 
-
 if __name__ == '__main__':
-    rospy.init_node(NODE)
+    rospy.init_node("rgb_object_recognizer")
     rospy.loginfo('Started object recognition node.')
-    #TODO
-    #Get all param here, net, model_name, debug_mode
     net = rospy.get_param("~net")
     classifier_name = rospy.get_param("~classifier")
     dataset_type = rospy.get_param("~dataset_type")
     dataset_dir = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config', classifier_name, dataset_type)
-    rospy.logwarn("RGB Recognizer is ready using %s : %s , dataset: %s ", net, classifier_name, dataset_type)
-
-    while not rospy.is_shutdown():
-        object_recognizer = ObjectRecognizer(model_dir=dataset_dir, net=net, model_name=classifier_name, debug_mode=True)
-        #rospy.sleep(0.025)
-        rospy.spin()
+    
+    object_recognizer = RGBObjectRecognizer(model_dir=dataset_dir, net=net, model_name=classifier_name, debug_mode=True)
+    rospy.loginfo('\033[92m'+"RGB Recognizer is ready using %s : %s , dataset: %s ", net, classifier_name, dataset_type)
+    rospy.spin()
