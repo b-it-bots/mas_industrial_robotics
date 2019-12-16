@@ -148,6 +148,15 @@ void PointcloudSegmentationROS::transformPose(std::string &target_frame,
     }
 }
 
+void PointcloudSegmentationROS::savePcd(const PointCloud::ConstPtr &pointcloud, std::string logdir, std::string obj_name)
+{
+    std::stringstream filename;
+    ros::Time time_now = ros::Time::now();
+    filename.str("");
+    filename << logdir << obj_name << "_" << time_now <<".pcd";
+    pcl::io::savePCDFileASCII(filename.str(), *pointcloud);
+}
+
 void PointcloudSegmentationROS::resetCloudAccumulation()
 {
     cloud_accumulation_->reset();

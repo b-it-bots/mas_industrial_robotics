@@ -88,6 +88,7 @@ class PointcloudSegmentationROS
                            geometry_msgs::PoseStamped &pose, 
                            geometry_msgs::PoseStamped &transformed_pose);
         
+        void savePcd(const PointCloud::ConstPtr &pointcloud, std::string logdir="/tmp", std::string obj_name="unknown");
         /** \brief Reset accumulated cloud */
         void resetCloudAccumulation();
 
