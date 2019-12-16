@@ -43,6 +43,8 @@ class SSDLiteMobilenet():
 
       self.image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
 
+      print ('\033[92m'+"SSDLiteMobilenet model is loaded")
+
   
   def infer_one_image(self, input_img):
     self.image_width = input_img.shape[1]
@@ -72,7 +74,6 @@ class SSDLiteMobilenet():
       labels.append(self.cat_idx[det_classes[i]]['name'])
 
     return bboxes, probs, classes, labels
-
 
   def convert_normalized_coordinates(self, box):
     return [box[0] * self.image_height, box[1] * self.image_width, 

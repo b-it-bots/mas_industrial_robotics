@@ -15,6 +15,7 @@ class SVMObjectClassifier:
         self.label_encoder = label_encoder
         self.mean = mean
         self.std = std
+        print ('\033[92m'+"3D object classifier model is loaded")
 
     def save(self, classifier_name, label_encoder_name):
         with open(classifier_name, 'wb') as f:

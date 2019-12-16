@@ -22,12 +22,11 @@ class squeezeDet():
   
   def __init__(self, checkpoint, net='squeezeDet'): 
     self.CHECKPOINT = os.path.join(checkpoint, 'model.ckpt')
-    # service
     with tf.Graph().as_default():
-      #Load model
+      # Load config
       self.mc = kitti_squeezeDet_config()
       self.mc.BATCH_SIZE = 1
-      # model parameters will be restored from checkpoint
+      # model parameters will be restored (squeezeNet)
       self.mc.LOAD_PRETRAINED_MODEL = False
       self.model = SqueezeDet(self.mc)
       self.image_width = self.mc.IMAGE_WIDTH
@@ -38,6 +37,8 @@ class squeezeDet():
       config.allow_soft_placement = True
       self.sess = tf.Session(config=config)
       saver.restore(self.sess, self.CHECKPOINT)
+
+      print ('\033[92m'+"SqueezeDet model is loaded")
 
   def infer_one_image(self, input_img):
     """Detect image."""
