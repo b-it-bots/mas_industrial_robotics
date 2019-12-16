@@ -55,7 +55,8 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     cluster_visualizer_rgb_("tabletop_cluster_rgb"),
     cluster_visualizer_pcl_("tabletop_cluster_pcl"),
     label_visualizer_rgb_("rgb_labels", Color(Color::SALMON)),
-    label_visualizer_pcl_("pcl_labels", Color(Color::TEAL))
+    label_visualizer_pcl_("pcl_labels", Color(Color::TEAL)),
+    data_collection_(false)
     
 {
     tf_listener_.reset(new tf::TransformListener);
@@ -234,6 +235,16 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     std::vector<PointCloud::Ptr> clusters_3d;
 
     segmentPointcloud(cloud_object_list, clusters_3d);
+
+    if (data_collection_)
+    {
+        for (auto& cluster:clusters_3d)
+        {
+            pointcloud_segmentation_->savePcd(cluster, logdir_);
+            ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m"<<logdir_);
+        }
+        return;
+    }
 
     //Publish 3D object cluster for recognition
     if (!cloud_object_list.objects.empty())
@@ -676,6 +687,21 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
         pointcloud_segmentation_->resetCloudAccumulation();
         event_out.data = "e_stopped";
         pub_event_out_.publish(event_out);
+    }
+    else if (msg->data == "e_data_collection")
+    {
+        data_collection_ = true;
+        event_out.data = "e_data_collection_started";
+        pub_event_out_.publish(event_out);
+        ROS_INFO_STREAM("\033[1;35mData collection enabled\033[0m");
+    }
+    else if (msg->data == "e_stop_data_collection")
+    {
+        data_collection_ = false;
+        pointcloud_segmentation_->resetCloudAccumulation();
+        event_out.data = "e_data_collection_stopped";
+        pub_event_out_.publish(event_out);
+        ROS_WARN_STREAM("\033[1;35mData collection disabled\033[0m");
     }
     else
     {

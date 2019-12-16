@@ -160,6 +160,7 @@ class MultimodalObjectRecognitionROS
 
          // logdir for saving debug image
         std::string logdir_;
+        bool data_collection_;
 
     private:
         void eventCallback(const std_msgs::String::ConstPtr &msg);
