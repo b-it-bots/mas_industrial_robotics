@@ -9,6 +9,7 @@ import math
 import numpy
 import copy
 import tf.transformations as transformations
+from geometry_msgs.msg import Quaternion
 
 
 def modify_pose(pose_in, height_threshold, standing_angle=270., angular_tolerance=2.):
@@ -85,6 +86,9 @@ def modify_pose(pose_in, height_threshold, standing_angle=270., angular_toleranc
             pose_out.pose.orientation.y = math.cos(math.pi / 4)
             pose_out.pose.orientation.z = 0.0
             pose_out.pose.orientation.w = -math.cos(math.pi / 4)
+    else: # flatten the pose so that it is parallel to the ground
+        new_orientation = transformations.quaternion_from_euler(0.0, 0.0, yaw)
+        pose_out.pose.orientation = Quaternion(*new_orientation)
 
     return pose_out, standing
 
