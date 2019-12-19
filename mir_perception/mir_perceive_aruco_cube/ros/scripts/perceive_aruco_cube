@@ -21,6 +21,7 @@ class ArucoCubePerceiver(object):
         self.bridge = CvBridge()
         self.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
         self.listening = False
+        self.publish_object = False
         self.retry = 0
         self.camera_mat = None
         self.dist_coeff = None
@@ -45,7 +46,17 @@ class ArucoCubePerceiver(object):
         rospy.loginfo("Initialised ArucoCubePerceiver")
 
     def event_in_cb(self, msg):
-        self.listening = msg.data == 'e_start'
+        if msg.data == 'e_start':
+            self.listening = True
+            self.publish_object = False
+            self.event_out_pub.publish(String(data='e_started'))
+        if msg.data == 'e_stop':
+            self.listening = False
+            self.publish_object = False
+            self.event_out_pub.publish(String(data='e_stopped'))
+        if msg.data == 'e_trigger':
+            self.listening = True
+            self.publish_object = True
 
     def camera_info_cb(self, msg):
         """Callback for camera info. Initialises camera matrix and distortion 
@@ -80,12 +91,14 @@ class ArucoCubePerceiver(object):
             return
 
         if self.camera_mat is None or self.dist_coeff is None:
+            rospy.logerr("camera calibration info not available")
             self.check_failure()
             return
 
         corners = self._get_best_aruco_marker_corners(cv_image)
         
         if corners is None:
+            rospy.logerr("No aruco markers found")
             self.check_failure()
             return
 
@@ -105,12 +118,13 @@ class ArucoCubePerceiver(object):
         target_pose = self.pose_transformer.get_transformed_pose(test_pose, self.target_frame)
         # print(target_pose)
         self.output_pose_pub.publish(target_pose)
-        obj = Object(pose=target_pose, name='ARUCO_CUBE', database_id=150)
-        self.output_obj_list_pub.publish(ObjectList(objects=[obj]))
 
-        self.listening = False
-        self.retry = 0
-        self.event_out_pub.publish(String(data='e_success'))
+        if self.publish_object:
+            obj = Object(pose=target_pose, name='ARUCO_CUBE', database_id=150)
+            self.output_obj_list_pub.publish(ObjectList(objects=[obj]))
+            self.listening = False
+            self.retry = 0
+            self.event_out_pub.publish(String(data='e_success'))
 
     def check_failure(self):
         """Check the number of retry attempts and if it exceeded threshold then publish
@@ -118,6 +132,8 @@ class ArucoCubePerceiver(object):
         :returns: None
 
         """
+        if not self.publish_object:
+            return
         if self.retry > self.retry_threshold:
             self.event_out_pub.publish(String(data='e_failure'))
             self.listening = False
@@ -141,6 +157,8 @@ class ArucoCubePerceiver(object):
         max_variance_index = variances.index(max(variances))
         # best_corners = np.squeeze(corners_set[max_variance_index])
         best_corners = corners_set[max_variance_index]
+        if self.publish_object:
+            rospy.loginfo('Detected aruco marker id: ' + str(ids[max_variance_index]))
         return best_corners
 
 
