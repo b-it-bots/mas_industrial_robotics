@@ -113,7 +113,7 @@ class ArucoCubePerceiver(object):
         test_pose.header.frame_id = msg.header.frame_id
         test_pose.header.stamp = rospy.Time.now()
         test_pose.pose.position = Point(x=trans[0], y=trans[1], z=trans[2]+(0.75*self.marker_length))
-        quat = tf.transformations.quaternion_from_euler(rot[0], rot[1], rot[2])
+        quat = tf.transformations.quaternion_from_euler(rot[0], -rot[2], rot[1])
         test_pose.pose.orientation = Quaternion(*quat)
         target_pose = self.pose_transformer.get_transformed_pose(test_pose, self.target_frame)
         # print(target_pose)

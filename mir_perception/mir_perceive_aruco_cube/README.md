@@ -23,6 +23,7 @@ Output:
  - output pose (`/mir_perception/aruco_cube_perceiver/object_pose`)
  - output object list (`/mcr_perception/object_list_merger/output_object_list`)
 
+
 ### Events:
 
 - **One shot**: 
@@ -42,6 +43,10 @@ Output:
   rostopic echo /mir_perception/aruco_cube_perceive/event_out
   rostopic pub /mir_perception/aruco_cube_perceiver/event_in std_msgs/String "data: 'e_trigger'" -1
   ```
+
+  The output pose (`/mir_perception/aruco_cube_perceiver/object_pose`) can be visualised on rviz as follows
+![RvizArucoPose](docs/rviz_aruco_pose.png)
+
   or with continous perceiving
   ```
   roslaunch mir_perceive_aruco_cube perceive_aruco_cube.launch
