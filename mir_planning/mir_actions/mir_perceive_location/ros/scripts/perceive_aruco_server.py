@@ -113,7 +113,7 @@ def main():
         
         # Get the pose of aruco cube from camera image
         smach.StateMachine.add('DETECT_ARUCO', gbs.send_and_wait_events_combined(
-                event_in_list=[('/mir_perception/aruco_cube_perceiver/event_in', 'e_start')],
+                event_in_list=[('/mir_perception/aruco_cube_perceiver/event_in', 'e_trigger')],
                 event_out_list=[('/mir_perception/aruco_cube_perceiver/event_out', 'e_success', True)],
                 timeout_duration=10),
                 transitions={'success': 'POPULATE_RESULT_WITH_OBJECTS',
