@@ -75,6 +75,8 @@
         <arg name="config_file" value="$(find mir_actions)/ros/config/youbot_dynamic_params.yaml" />
     </include>
 
+    <include file="$(find mir_moveit_to_pose)/ros/launch/moveit_to_pose.launch" />
+
   <!-- perception -->
     <!-- barrier tape detection -->
     <include file="$(find mir_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch" />
