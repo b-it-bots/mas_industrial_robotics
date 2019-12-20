@@ -1,4 +1,4 @@
-approach to follow for pick action
+approach to follow for pick action (outdated)
 ==================================
 
 1. as precondition for pick action, perception needs to be triggered before hand
