@@ -12,11 +12,11 @@ class PlannerExecutorMockup(object):
 
     """Mockup servers for planner executor testing"""
 
-    _server_topics = ["/move_base_safe_server",
+    _server_topics = ["/move_base_safe_server", "/place_object_server",
                       "/perceive_location_server", "/perceive_cavity_server",
-                      "/wbc_pick_object_server", "/place_object_server",
+                      "/wbc_pick_object_server", "pick_from_shelf_server",
                       "/stage_object_server", "/unstage_object_server",
-                      "/insert_object_server", "/insert_object_in_cavity_server"]
+                      "/insert_object_server", "/insert_cavity_server"]
 
     def __init__(self):
         self._action_servers = []
@@ -59,6 +59,8 @@ class PlannerExecutorMockup(object):
         self.server_execute_cb(goal, 7)
     def server_execute_cb_8(self, goal):
         self.server_execute_cb(goal, 8)
+    def server_execute_cb_9(self, goal):
+        self.server_execute_cb(goal, 9)
 
     def server_execute_cb(self, goal, action_server_index):
         print('\n', '='*30)

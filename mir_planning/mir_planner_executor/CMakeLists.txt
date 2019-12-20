@@ -36,7 +36,10 @@ add_executable(planner_executor
 
     ros/src/actions/move/move_action.cpp
 
+    ros/src/actions/pick/base_pick_action.cpp
     ros/src/actions/pick/pick_action.cpp
+    ros/src/actions/pick/pick_from_shelf_action.cpp
+    ros/src/actions/pick/combined_pick_action.cpp
 
     ros/src/actions/place/place_action.cpp
 
