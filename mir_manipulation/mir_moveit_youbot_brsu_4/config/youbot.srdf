@@ -234,6 +234,13 @@
     </group_state>
 
 
+    <group_state name="stage_intermediate" group="arm_1">
+        <joint name="arm_joint_1" value="2.160" />
+        <joint name="arm_joint_2" value="0.0875" />
+        <joint name="arm_joint_3" value="-1.5411" />
+        <joint name="arm_joint_4" value="3.3456" />
+        <joint name="arm_joint_5" value="2.893" />
+    </group_state>
     <group_state name="platform_middle" group="arm_1">
         <joint name="arm_joint_1" value="2.156" />
         <joint name="arm_joint_2" value="0.5169" />
@@ -428,6 +435,13 @@
         <joint name="arm_joint_2" value="1.03067" />
         <joint name="arm_joint_3" value="-0.92142" />
         <joint name="arm_joint_4" value="3.14951" />
+        <joint name="arm_joint_5" value="2.90371" />
+    </group_state>
+    <group_state name="shelf_pre_grasp_lower" group="arm_1">
+        <joint name="arm_joint_1" value="2.22067" />
+        <joint name="arm_joint_2" value="1.77619" />
+        <joint name="arm_joint_3" value="-0.14301" />
+        <joint name="arm_joint_4" value="0.82491" />
         <joint name="arm_joint_5" value="2.90371" />
     </group_state>
     <group_state name="shelf_post_grasp" group="arm_1">
