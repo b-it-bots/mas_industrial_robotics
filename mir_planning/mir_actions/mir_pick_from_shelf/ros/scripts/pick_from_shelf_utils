@@ -1,0 +1,46 @@
+#! usr/bin/env python
+
+import tf
+import rospy
+from geometry_msgs.msg import PoseStamped
+
+class PickFromShelfUtils(object):
+
+    """Util class to help pick from shelf server"""
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def calc_pose_for_dbc(obj_pose):
+        """Assumption: object pose is in `base_link_static`.
+        Calculates a target pose for direct base controller necessary for the
+        youbot to pick an object from a lower shelf
+
+        :obj_pose: geometry_msgs.PoseStamped
+        :returns: geometry_msgs.PoseStamped
+
+        """
+        x = - 0.8 + obj_pose.pose.position.x # TODO: x will be some negative value (perform experiments)
+        # (will be dependent on how far the obj is from base_link_static)
+        dbc_target_pose = PoseStamped()
+        dbc_target_pose.header.stamp = rospy.Time.now()
+        dbc_target_pose.header.frame_id = 'base_link_static'
+        dbc_target_pose.pose.position.x = x
+        dbc_target_pose.pose.position.y = obj_pose.pose.position.y
+        dbc_target_pose.pose.orientation.w = 1.0
+
+    @staticmethod
+    def modify_obj_pose_orientation(obj_pose):
+        """Modify the orientation of the object pose such that roll and yaw are 0.0
+        and pitch is leaning forward for the youbot arm to be able to pick.
+
+        :obj_pose: geometry_msgs.PoseStamped
+        :returns: geometry_msgs.PoseStamped
+
+        """
+        pitch = -1.0 # TODO: perform experiments to find pitch
+        quat = tf.transformations.quaternion_from_euler(0.0, pitch, 0.0)
+        obj_pose.pose.orientation = Quaternion(*quat)
+        return obj_pose
+        
