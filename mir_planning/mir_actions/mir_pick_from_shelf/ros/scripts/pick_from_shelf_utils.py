@@ -2,7 +2,7 @@
 
 import tf
 import rospy
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, Quaternion
 
 class PickFromShelfUtils(object):
 
@@ -21,14 +21,14 @@ class PickFromShelfUtils(object):
         :returns: geometry_msgs.PoseStamped
 
         """
-        x = - 0.8 + obj_pose.pose.position.x # TODO: x will be some negative value (perform experiments)
-        # (will be dependent on how far the obj is from base_link_static)
+        x = - 0.7 + obj_pose.pose.position.x
         dbc_target_pose = PoseStamped()
         dbc_target_pose.header.stamp = rospy.Time.now()
         dbc_target_pose.header.frame_id = 'base_link_static'
         dbc_target_pose.pose.position.x = x
         dbc_target_pose.pose.position.y = obj_pose.pose.position.y
         dbc_target_pose.pose.orientation.w = 1.0
+        return dbc_target_pose
 
     @staticmethod
     def modify_obj_pose_orientation(obj_pose):
@@ -39,8 +39,21 @@ class PickFromShelfUtils(object):
         :returns: geometry_msgs.PoseStamped
 
         """
-        pitch = -1.0 # TODO: perform experiments to find pitch
+        pitch = 2.0
         quat = tf.transformations.quaternion_from_euler(0.0, pitch, 0.0)
         obj_pose.pose.orientation = Quaternion(*quat)
         return obj_pose
         
+    @staticmethod
+    def get_retracted_dbc_pose():
+        """Return a pose in `base_link_static` frame for the robot to back up
+        :returns: geometry_msgs.PoseStamped
+
+        """
+        dbc_target_pose = PoseStamped()
+        dbc_target_pose.header.stamp = rospy.Time.now()
+        dbc_target_pose.header.frame_id = 'base_link_static'
+        dbc_target_pose.pose.position.x = -0.2
+        dbc_target_pose.pose.position.y = 0.0
+        dbc_target_pose.pose.orientation.w = 1.0
+        return dbc_target_pose
