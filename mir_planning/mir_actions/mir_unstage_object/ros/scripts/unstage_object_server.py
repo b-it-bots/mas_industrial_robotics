@@ -48,6 +48,14 @@ def main():
             output_keys = ['feedback', 'result'])
     with sm:
         #add states to the container
+        smach.StateMachine.add('MOVE_ARM_TO_STAGE_INTERMEDIATE', gms.move_arm('stage_intermediate'), 
+                transitions={'succeeded':'MOVE_ARM_TO_STAGE_INTERMEDIATE_2', 
+                             'failed':'MOVE_ARM_TO_STAGE_INTERMEDIATE'})
+
+        smach.StateMachine.add('MOVE_ARM_TO_STAGE_INTERMEDIATE_2', gms.move_arm('stage_intermediate_2'), 
+                transitions={'succeeded':'SETUP_MOVE_ARM_PRE_STAGE', 
+                             'failed':'MOVE_ARM_TO_STAGE_INTERMEDIATE_2'})
+ 
         smach.StateMachine.add('SETUP_MOVE_ARM_PRE_STAGE', SetupMoveArm('pre'),
                 transitions={'succeeded': 'MOVE_ARM_PRE_STAGE'})
         
@@ -71,8 +79,16 @@ def main():
                 transitions={'succeeded': 'MOVE_ARM_PRE_STAGE_AGAIN'})
 
         smach.StateMachine.add('MOVE_ARM_PRE_STAGE_AGAIN', gms.move_arm(),
-                transitions={'succeeded': 'OVERALL_SUCCESS',
+                transitions={'succeeded': 'MOVE_ARM_TO_STAGE_INTERMEDIATE_2_FINAL',
                              'failed': 'MOVE_ARM_PRE_STAGE_AGAIN'})
+
+        smach.StateMachine.add('MOVE_ARM_TO_STAGE_INTERMEDIATE_2_FINAL', gms.move_arm('stage_intermediate_2'), 
+                transitions={'succeeded':'MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL', 
+                             'failed':'MOVE_ARM_TO_STAGE_INTERMEDIATE_2_FINAL'})
+ 
+        smach.StateMachine.add('MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL', gms.move_arm('stage_intermediate'), 
+                transitions={'succeeded':'OVERALL_SUCCESS', 
+                             'failed':'MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL'})
 
     # smach viewer
     if rospy.get_param('~viewer_enabled', False):
