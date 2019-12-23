@@ -11,11 +11,16 @@ packagelist=(
     libsvm-dev
     libudev-dev
     libv4l-dev
+    libpcl-dev
+    libproj-dev
     python-catkin-tools
     python-pygraphviz
     python-rosinstall
     python-setuptools
     python-zmq
+    g++-multilib
+    flex
+    mongodb
     ros-kinetic-amcl
     ros-kinetic-bfl
     ros-kinetic-brics-actuator
@@ -58,12 +63,16 @@ packagelist=(
     ros-kinetic-twist-mux
     ros-kinetic-usb-cam
     ros-kinetic-global-planner
+    ros-kinetic-diagnostic-aggregator
+    ros-kinetic-diagnostic-analysis
+    ros-kinetic-laser-filters
+    ros-kinetic-mongodb-store
 )
 
 ### install debian packages listed in array above
 if [ $INSTALL_PACKAGES != false ]; then
-    sudo apt-get update
-    sudo apt-get install -y ${packagelist[@]}
+    sudo apt-get update -qq
+    sudo apt-get install -y -qq ${packagelist[@]}
 fi
 
 ### install further repositories
