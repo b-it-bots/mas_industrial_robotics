@@ -3,17 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to MAS Industrial Robotics's documentation!
-===================================================
+MAS Industrial Robotics
+=======================
 
 .. toctree::
+  :maxdepth: 2
     
   introduction
   getting_started
   contributing/index.rst
 
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 2
   :caption: Tutorial
 
   mir_perception/index.rst
