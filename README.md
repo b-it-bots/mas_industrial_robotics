@@ -60,6 +60,13 @@ First of all you have to clone the repository.
     cd ~/kinetic/src;
     git clone git@github.com:b-it-bots/mas_industrial_robotics.git
 
+
+Install documentation generation software
+    cd mas_industrial_robotics
+    git submodule init
+    git submodule update
+    pip install --user sphinx-rtd-theme
+
 Then go on with installing further external dependencies:
 
     cd ~/kinetic/src/mas_industrial_robotics
