@@ -1,3 +1,5 @@
+.. _mir_task_planning_pkg:
+
 Task planning
 =============
 
@@ -45,7 +47,7 @@ Requirements
      ``g++-multilib`` is needed to install these packages.
 
 Usage
-----
+-----
 
 - Without ROS
 
