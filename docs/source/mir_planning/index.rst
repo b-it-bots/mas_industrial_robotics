@@ -6,7 +6,7 @@ Planning
 MAS industrial robotics - task planning tutorial
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
   refbox_parser
   planning_bringup
