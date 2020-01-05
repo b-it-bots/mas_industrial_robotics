@@ -49,121 +49,121 @@
   	(total-cost) - number
  )
 
-; moves a robot ?r from ?source - location to a ?destination - location
+; moves a robot ?robot from ?source - location to a ?destination - location
 ; NOTE : the situation in which the robot arm is in any position before moving
 ; is not handled at the planning level, hence we advise to always move the arm
 ; to a folded position, then navigate
  (:action move_base
-    :parameters (?r - robot ?source ?destination - location)
-    :precondition (and (at ?r ?source)
-     					    (gripper_is_free ?r)
+    :parameters (?robot - robot ?source ?destination - location)
+    :precondition (and (at ?robot ?source)
+     					    (gripper_is_free ?robot)
      			  )
-    :effect (and (not (at ?r ?source))
-     			        (at ?r ?destination)
+    :effect (and (not (at ?robot ?source))
+     			        (at ?robot ?destination)
      			        (not (perceived ?source))
             	    	(increase (total-cost) 20)
      		 )
  )
 
- ; perceive an object ?o which is in a location ?l with a empty gripper ?g
+ ; perceive an object ?object which is in a location ?location with a empty gripper ?g
  ; to find the pose of this object before it can be picked
  (:action perceive
-   :parameters (?r - robot ?l - location)
-   :precondition 	(and 	(at ?r ?l)
-   							(gripper_is_free ?r)
-   							(not (perceived ?l))
+   :parameters (?robot - robot ?location - location)
+   :precondition 	(and 	(at ?robot ?location)
+   							(gripper_is_free ?robot)
+   							(not (perceived ?location))
    					)
-   :effect 	(and 	(perceived ?l)
+   :effect 	(and 	(perceived ?location)
                     (increase (total-cost) 10)
   			)
  )
 
- ; pick an object ?o which is inside a location ?l with a free gripper ?g
- ; with robot ?r that is at location ?l
+ ; pick an object ?object which is inside a location ?location with a free gripper ?g
+ ; with robot ?robot that is at location ?location
  ; (:action pick
  (:action pick
-     :parameters (?r - robot ?l - location ?o - object)
-     :precondition 	(and 	(on ?o ?l)
-                      		(at ?r ?l)
-                      		(perceived ?l)
-                      		(gripper_is_free ?r)
-                      		(not (holding ?r ?o))
-                      		(not (heavy ?o))
+     :parameters (?robot - robot ?location - location ?object - object)
+     :precondition 	(and 	(on ?object ?location)
+                      		(at ?robot ?location)
+                      		(perceived ?location)
+                      		(gripper_is_free ?robot)
+                      		(not (holding ?robot ?object))
+                      		(not (heavy ?object))
                    	)
-     :effect (and  	(holding ?r ?o)
-                   	(not (on ?o ?l))
-                   	(not (gripper_is_free ?r))
+     :effect (and  	(holding ?robot ?object)
+                   	(not (on ?object ?location))
+                   	(not (gripper_is_free ?robot))
                    	(increase (total-cost) 2)
              )
  )
 
  (:action place
-     :parameters (?r - robot ?l - location ?o - object)
-     :precondition  (and  (at ?r ?l)
-                          (holding ?r ?o)
-                          (not (on ?o ?l))
-                          (not (insertable ?o ))
-                          (not (gripper_is_free ?r))
+     :parameters (?robot - robot ?location - location ?object - object)
+     :precondition  (and  (at ?robot ?location)
+                          (holding ?robot ?object)
+                          (not (on ?object ?location))
+                          (not (insertable ?object ))
+                          (not (gripper_is_free ?robot))
                     )
-     :effect (and   (on ?o ?l)
-                    (not (holding ?r ?o))
-                    (gripper_is_free ?r)
+     :effect (and   (on ?object ?location)
+                    (not (holding ?robot ?object))
+                    (gripper_is_free ?robot)
                     (increase (total-cost) 2)
              )
  )
 
 
- ; stage an object ?o in a robot platform ?rp which is not occupied with a gripper ?g
- ; which is holding the object ?o
+ ; stage an object ?object in a robot platform ?platform which is not occupied with a gripper ?g
+ ; which is holding the object ?object
  (:action stage
-     :parameters (?r - robot ?rp - robot_platform ?o - object)
-     :precondition 	(and 	(holding ?r ?o)
-                      		(not (occupied ?rp))
-                            (not (gripper_is_free ?r))
+     :parameters (?robot - robot ?platform - robot_platform ?object - object)
+     :precondition 	(and 	(holding ?robot ?object)
+                      		(not (occupied ?platform))
+                            (not (gripper_is_free ?robot))
                    	)
-     :effect (and  	(not (holding ?r ?o))
-	 				     (gripper_is_free ?r)
-     			   	     (stored ?o ?rp)
-                   	     (occupied ?rp)
+     :effect (and  	(not (holding ?robot ?object))
+	 				     (gripper_is_free ?robot)
+     			   	     (stored ?object ?platform)
+                   	     (occupied ?platform)
                    	     (increase (total-cost) 1)
              )
  )
 
- ; unstage an object ?o stored on a robot platform ?rp with a free gripper ?g
+ ; unstage an object ?object stored on a robot platform ?platform with a free gripper ?g
  (:action unstage
-     :parameters (?r - robot ?rp - robot_platform ?o - object)
-     :precondition 	(and 	(gripper_is_free ?r)
-                      		(stored ?o ?rp)
-                      		(not (holding ?r ?o))
+     :parameters (?robot - robot ?platform - robot_platform ?object - object)
+     :precondition 	(and 	(gripper_is_free ?robot)
+                      		(stored ?object ?platform)
+                      		(not (holding ?robot ?object))
                    	)
-     :effect (and  	(not (gripper_is_free ?r))
-     			   	     (not (stored ?o ?rp))
-                   	     (not (occupied ?rp))
-                   	     (holding ?r ?o)
+     :effect (and  	(not (gripper_is_free ?robot))
+     			   	     (not (stored ?object ?platform))
+                   	     (not (occupied ?platform))
+                   	     (holding ?robot ?object)
                    	     (increase (total-cost) 1)
              )
  )
 
- ; inserts a object ?o which gripper ?g is holding into another object ?o at location ?l
+ ; inserts a object ?object which gripper ?g is holding into another object ?object at location ?location
  (:action insert
-   :parameters (?r - robot ?rp - robot_platform ?l - location ?peg ?hole - object   )
-   :precondition 	(and 	(at ?r ?l)
-   							(on ?hole ?l)
+   :parameters (?robot - robot ?platform - robot_platform ?location - location ?peg ?hole - object   )
+   :precondition 	(and 	(at ?robot ?location)
+   							(on ?hole ?location)
    							(container ?hole)
    							;(holding ?g ?peg)
-                      		(not (holding ?r ?peg))
+                      		(not (holding ?robot ?peg))
    							;(not (gripper_is_free ?g))
-                            (gripper_is_free ?r)
-                            (stored ?peg ?rp)
+                            (gripper_is_free ?robot)
+                            (stored ?peg ?platform)
    							(not (container ?peg)) ;a container cannot be inserted into a container
-   							(perceived ?l)
+   							(perceived ?location)
    					)
-   :effect 	(and 	(not (holding ?r ?peg))
-   					(gripper_is_free ?r)
+   :effect 	(and 	(not (holding ?robot ?peg))
+   					(gripper_is_free ?robot)
    					(in ?peg ?hole)
-   					(on ?peg ?l)
-                    (not (stored ?peg ?rp))
-                    (not (occupied ?rp))
+   					(on ?peg ?location)
+                    (not (stored ?peg ?platform))
+                    (not (occupied ?platform))
    					(heavy ?hole)
    					(heavy ?peg) ;it doesn't become heavy but it cannot be picked again
    					(increase (total-cost) 5)
