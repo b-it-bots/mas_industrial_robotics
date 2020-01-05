@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- arguments -->
+    <arg name="action_duration" default="2.0" />
+
+    <!-- sim actions -->
+    <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+        <arg name="pddl_action_name" value="move_base" />
+        <arg name="action_probability" value="0.9" />
+        <arg name="action_duration" value="$(arg action_duration)" />
+    </include>
+
+    <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+        <arg name="pddl_action_name" value="perceive" />
+        <arg name="action_probability" value="0.8" />
+        <arg name="action_duration" value="$(arg action_duration)" />
+    </include>
+
+    <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+        <arg name="pddl_action_name" value="pick" />
+        <arg name="action_probability" value="0.7" />
+        <arg name="action_duration" value="$(arg action_duration)" />
+    </include>
+
+    <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+        <arg name="pddl_action_name" value="place" />
+        <arg name="action_probability" value="1.0" />
+        <arg name="action_duration" value="$(arg action_duration)" />
+    </include>
+
+    <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+        <arg name="pddl_action_name" value="stage" />
+        <arg name="action_probability" value="1.0" />
+        <arg name="action_duration" value="$(arg action_duration)" />
+    </include>
+
+    <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+        <arg name="pddl_action_name" value="unstage" />
+        <arg name="action_probability" value="1.0" />
+        <arg name="action_duration" value="$(arg action_duration)" />
+    </include>
+
+    <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+        <arg name="pddl_action_name" value="insert" />
+        <arg name="action_probability" value="0.9" />
+        <arg name="action_duration" value="$(arg action_duration)" />
+    </include>
+
+</launch>

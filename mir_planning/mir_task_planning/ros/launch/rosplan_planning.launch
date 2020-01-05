@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- arguments -->
+    <arg name="domain_path"	default="$(find mir_task_planning)/common/pddl/domain.pddl" />
+	<arg name="problem_path" default="$(find mir_task_planning)/common/pddl/smaller_problem.pddl" />
+    <!-- <arg name="domain_path"	default="$(find rosplan_planning_system)/test/pddl/turtlebot/domain.pddl" /> -->
+	<!-- <arg name="problem_path" default="$(find rosplan_planning_system)/test/pddl/turtlebot/initial_state_problem.pddl" /> -->
+	<arg name="generated_problem_path" default="$(find mir_task_planning)/common/pddl/generated_problem.pddl" />
+    <arg name="database_path" default="$(find mir_knowledge)/common/mongoDB/" />
+    <arg name="data_path" default="/tmp/" />
+	<arg name="search_time_limit" default="10" />
+
+
+	<!-- knowledge base -->
+    <node pkg="rosplan_knowledge_base" name="rosplan_knowledge_base" type="knowledgeBase"
+          respawn="false" output="screen">
+		<param name="domain_path"   value="$(arg domain_path)" />
+		<param name="problem_path"  value="$(arg problem_path)" />
+		<param name="database_path" value="$(arg database_path)" />
+		<param name="use_unknowns"  value="false" />
+	</node>
+
+
+	<!-- problem generation -->
+	<include file="$(find rosplan_planning_system)/launch/includes/problem_interface.launch">
+		<arg name="knowledge_base"   value="rosplan_knowledge_base" />
+		<arg name="domain_path"      value="$(arg domain_path)" />
+		<arg name="problem_path"     value="$(arg generated_problem_path)" />
+		<arg name="problem_topic"    value="problem_instance" />
+	</include>
+
+	
+	<!-- scene database (MongoDB) -->
+	<include file="$(find mongodb_store)/launch/mongodb_store.launch">
+		<arg name="db_path" value="$(arg database_path)"/>
+	</include>
+
+
+	<!-- planner interface -->
+    <node pkg="rosplan_planning_system" name="rosplan_planner_interface"
+          type="lama_planner_interface" respawn="false" output="screen" >
+		<param name="use_problem_topic" value="true" />
+		<param name="problem_topic"     value="/rosplan_problem_interface/problem_instance" />
+		<param name="planner_topic"     value="planner_output" />
+		<param name="domain_path"       value="$(arg domain_path)" />
+		<param name="problem_path"      value="$(arg generated_problem_path)" />
+        <param name="data_path"         value="$(arg data_path)" />
+        <param name="planner_command"   value="$(find lama_planner)/build/LAMA/fast-downward.py --search-time-limit $(arg search_time_limit) --alias seq-sat-lama-2011 DOMAIN PROBLEM" />
+	</node>
+
+
+    <!-- parse generated plan -->
+    <node pkg="rosplan_planning_system" name="rosplan_parsing_interface"
+          type="pddl_lama_plan_parser" respawn="false" output="screen">
+		<param name="knowledge_base" value="rosplan_knowledge_base" />
+		<param name="planner_topic"  value="/rosplan_planner_interface/planner_output" />
+		<param name="plan_topic"     value="complete_plan" />
+	</node>
+
+
+	<!-- plan dispatching -->
+    <node pkg="rosplan_planning_system" name="rosplan_plan_dispatcher"
+          type="pddl_simple_plan_dispatcher" respawn="false" output="screen">
+		<param name="knowledge_base"        value="rosplan_knowledge_base" />
+		<param name="plan_topic"            value="/rosplan_parsing_interface/complete_plan" />
+		<param name="action_dispatch_topic" value="action_dispatch" />
+		<param name="action_feedback_topic" value="action_feedback" />
+	</node>
+
+
+    <!-- sim actions -->
+    <include file="$(find mir_task_planning)/ros/launch/mock_actions.launch" />
+
+</launch>
