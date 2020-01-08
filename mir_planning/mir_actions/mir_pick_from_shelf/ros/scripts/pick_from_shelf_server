@@ -1,4 +1,6 @@
 #!/usr/bin/python
+
+from __future__ import print_function
 import sys
 import rospy
 import smach
@@ -48,6 +50,7 @@ class SendPoseToDBC(smach.State):
                                          PoseStamped, self._obj_pose_cb)
         self._obj_pose = None
         self.retract = retract
+        self.utils = PickFromShelfUtils()
         rospy.sleep(0.1) # time for the publisher to register in ros network
 
     def _obj_pose_cb(self, msg):
@@ -55,9 +58,9 @@ class SendPoseToDBC(smach.State):
 
     def execute(self, userdata):
         if self.retract:
-            dbc_pose = PickFromShelfUtils.get_retracted_dbc_pose()
+            dbc_pose = self.utils.get_retracted_dbc_pose()
         else:
-            dbc_pose = PickFromShelfUtils.calc_pose_for_dbc(self._obj_pose)
+            dbc_pose = self.utils.calc_pose_for_dbc(self._obj_pose)
         self._dbc_pose_pub.publish(dbc_pose)
         self._obj_pose = None
         return 'succeeded'
@@ -65,22 +68,25 @@ class SendPoseToDBC(smach.State):
 #===============================================================================
 
 class SendPoseToMoveIt(smach.State):
-    def __init__(self):
+    def __init__(self, is_intermediate=False):
         smach.State.__init__(self,  outcomes=['succeeded'])
         self._moveit_pose_pub = rospy.Publisher('/moveit_to_pose/pose_in',
                                                 PoseStamped, queue_size=10)
         _obj_pose_sub = rospy.Subscriber('mcr_perception/object_selector/output/object_pose',
                                          PoseStamped, self._obj_pose_cb)
         self._obj_pose = None
+        self._is_intermediate = is_intermediate
+        self.utils = PickFromShelfUtils()
         rospy.sleep(0.1) # time for the publisher to register in ros network
 
     def _obj_pose_cb(self, msg):
         self._obj_pose = msg
-        rospy.loginfo("Arm pose")
-        rospy.loginfo(self._obj_pose)
 
     def execute(self, userdata):
-        modified_obj_pose = PickFromShelfUtils.modify_obj_pose_orientation(self._obj_pose)
+        modified_obj_pose = self.utils.get_arm_pose(self._obj_pose,
+                                                    self._is_intermediate)
+        rospy.loginfo("Modified pose")
+        rospy.loginfo(modified_obj_pose)
         self._moveit_pose_pub.publish(modified_obj_pose)
         self._obj_pose = None
         return 'succeeded'
@@ -132,13 +138,25 @@ def main():
                 transitions={'succeeded' : 'OPEN_GRIPPER',
                              'failed' : 'MOVE_ARM_TO_PRE_GRASP'})
 
-        smach.StateMachine.add('OPEN_GRIPPER', gms.control_gripper('open'),
-            transitions={'succeeded': 'SEND_MOVEIT_POSE'})
+        smach.StateMachine.add('OPEN_GRIPPER', gms.control_gripper('open_rtt'),
+            transitions={'succeeded': 'SEND_MOVEIT_POSE_INTERMEDIATE'})
 
-        smach.StateMachine.add('SEND_MOVEIT_POSE', SendPoseToMoveIt(),
+        smach.StateMachine.add('SEND_MOVEIT_POSE_INTERMEDIATE', SendPoseToMoveIt(is_intermediate=True),
+                transitions={'succeeded':'MOVE_ARM_USING_MOVEIT_INTERMEDIATE'})
+
+        # Move arm using moveit_to_pose to an intermediate pose before obj
+        smach.StateMachine.add('MOVE_ARM_USING_MOVEIT_INTERMEDIATE', gbs.send_and_wait_events_combined(
+                event_in_list=[('moveit_to_pose/event_in','e_trigger')],
+                event_out_list=[('moveit_to_pose/event_out','e_done', True)],
+                timeout_duration=10),
+                transitions={'success':'SEND_MOVEIT_POSE',
+                             'timeout':'MOVE_ARM_TO_PRE_GRASP_FAILED',
+                             'failure':'MOVE_ARM_TO_PRE_GRASP_FAILED'})
+
+        smach.StateMachine.add('SEND_MOVEIT_POSE', SendPoseToMoveIt(is_intermediate=False),
                 transitions={'succeeded':'MOVE_ARM_USING_MOVEIT'})
 
-        # Move arm using moveit_to_pose
+        # Move arm using moveit_to_pose to obj pose
         smach.StateMachine.add('MOVE_ARM_USING_MOVEIT', gbs.send_and_wait_events_combined(
                 event_in_list=[('moveit_to_pose/event_in','e_trigger')],
                 event_out_list=[('moveit_to_pose/event_out','e_done', True)],
