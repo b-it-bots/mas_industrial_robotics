@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit immediately if any command exits with a nonzero exit value
+set -e
+
 function install_basic_packages {
     sudo apt-get update -qq
     sudo apt-get install -y -qq curl figlet
@@ -60,9 +63,8 @@ function get_mas_industrial_robotics {
 function build_mas_industrial_robotics {
     fancy_print "Building ROS packages"
     source ~/catkin_ws/devel/setup.bash
-    # Disable building the youbot_driver_ros_interface and mcr_arm_cartesian_control in travis CI
+    # Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
     touch ~/catkin_ws/src/youbot_driver_ros_interface/CATKIN_IGNORE
-    touch ~/catkin_ws/src/mas_common_robotics/mcr_manipulation/mcr_arm_cartesian_control/CATKIN_IGNORE
     catkin build 
 }
 
