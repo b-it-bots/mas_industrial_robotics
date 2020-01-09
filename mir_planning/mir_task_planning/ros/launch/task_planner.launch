@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="verbose" default="true" />
+    <!-- search time limit in seconds -->
+    <arg name="time_limit" default="10" />
+
+    <group ns="mir_task_planning">
+
+        <node pkg="mir_task_planning" type="task_planner_server" name="task_planner_server" output="screen" >
+
+            <param name="verbose" value="$(arg verbose)" type="bool" />
+            <param name="time_limit" value="$(arg time_limit)" type="int" />
+
+            <rosparam command="load" file="$(find mir_task_planning)/ros/config/planner_commands.yaml" />
+        </node>
+
+    </group>
+
+</launch>

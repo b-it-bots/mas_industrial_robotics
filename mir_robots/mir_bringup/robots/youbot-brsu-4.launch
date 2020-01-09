@@ -32,8 +32,7 @@
   <group if="$(arg is_camera_required)" >
     <group if="$(arg is_camera_intel)" >
         <!-- <include file="$(find mir_realsense_camera_watchdog)/ros/launch/realsense_camera_watchdog.launch"/> -->
-       <include file="$(find mir_bringup)/components/realsense_camera.launch">
-        </include>
+        <include file="$(find mir_bringup)/components/realsense_camera.launch"/>
     </group>
     <group unless="$(arg is_camera_intel)" >
        <include file="$(find mir_bringup)/components/openni2.launch">

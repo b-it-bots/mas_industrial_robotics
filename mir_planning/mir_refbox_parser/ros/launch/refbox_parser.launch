@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="bnt" default="false" />
+    <node pkg="mir_refbox_parser" type="refbox_parser_node"
+          name="refbox_parser" output="screen">
+
+        <!-- the cycle time of the node (in seconds) -->
+        <param name="cycle_time" type="double" value="0.1"/>
+
+        <!-- Is launch file for BNT boolean -->
+        <param name="bnt" type="bool" value="$(arg bnt)"/>
+
+        <remap from="~refbox" to="/robot_example_ros/inventory"/>
+        <remap from="~refbox_task" to="/robot_example_ros/task_info"/>
+        <remap from="~event_out" to="/refbox_parser/event_out"/>
+        <remap from="~event_in" to="/refbox_parser/event_in"/>
+    </node>
+
+
+</launch>
+
+

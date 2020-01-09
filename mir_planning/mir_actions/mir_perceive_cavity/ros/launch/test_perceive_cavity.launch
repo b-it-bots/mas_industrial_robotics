@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<launch>
+ 
+  <!-- Launch all required components for planning approach -->
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+    <arg name="static_transform_frame" default="base_link_static" />
+    <arg name="object_perception_target_frame" default="/base_link_static"/>
+    <arg name="use_mokeup_pose" default="false"/>
+    <arg name="base_cmd_topic" default="/cmd_vel_safe"/>
+  
+    <!-- moveit! -->
+    <!-- <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch"> -->
+    <!--    <arg name="planner_pipeline" value="interpolation" /> -->
+    <!-- </include> -->
+    <!-- <param name="/move_group/trajectory_execution/allowed_execution_duration_scaling" type="double" value="1.5"/> -->
+
+    <!-- <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" /> -->
+
+<!--     <include file="$(find mir_perceive_location)/ros/launch/percieve_location_base_controller.launch"> -->
+<!--         <arg name="pose_out" value="/move_base_wrapper/pose_in" /> -->
+<!--     </include> -->
+
+    <!-- cavity finder -->
+    <include file="$(find mcr_cavity_detector)/ros/launch/detector_selector_cavity.launch"/>
+
+    <!-- whole body control which also includes pregrasp planner
+       it automatically selects wbc pipeline/pregrasp planner pipeline.(see wbc pickup object server for help-->
+    <include file="$(find mir_pick_object)/ros/launch/demo_youbot_whole_body_control.launch" >
+      <arg name="static_transform_frame" value="$(arg object_perception_target_frame)" />
+      <arg name="use_mokeup_pose" value="$(arg use_mokeup_pose)" />
+      <arg name="pose_in" value="/mcr_perception/object_selector/output/object_pose" />
+      <arg name="cmd_vel_out" value="$(arg base_cmd_topic)" />
+    </include>
+
+    <!-- place object in cavity server -->
+    <node pkg="mir_insert_object" type="insert_object_in_cavity_server.py" name="insert_object_in_cavity_server" output="screen" />
+
+    <!-- place object in cavity server -->
+    <node pkg="mir_perceive_cavity" type="perceive_cavity_server.py" name="perceive_cavity_server" output="screen" />
+</launch>

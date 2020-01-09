@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1052.36"
+   height="744.09448"
+   id="svg4463"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="node.svg"
+   inkscape:export-filename="/home/deebuls/new_catkin_ws/src/mas_industrial_robotics/mir_common/mir_refbox_parser/ros/doc/node.png"
+   inkscape:export-xdpi="89.988571"
+   inkscape:export-ydpi="89.988571">
+  <defs
+     id="defs4465">
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3818"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend"
+       style="overflow:visible">
+      <path
+         id="path3821"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend-0"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3821-1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend-2"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3821-8"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend-05"
+       style="overflow:visible">
+      <path
+         id="path3821-7"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.8050053"
+     inkscape:cx="252.4462"
+     inkscape:cy="272.66901"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1364"
+     inkscape:window-height="751"
+     inkscape:window-x="0"
+     inkscape:window-y="15"
+     inkscape:window-maximized="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4471"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata4468">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-308.2677)">
+    <rect
+       style="color:#000000;fill:#336699;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect4473"
+       width="460"
+       height="240"
+       x="296.18109"
+       y="560.31494"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <text
+       xml:space="preserve"
+       style="font-size:22px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
+       x="526.16858"
+       y="690.13892"
+       id="text4475"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155"><tspan
+         sodipodi:role="line"
+         id="tspan4477"
+         x="526.16858"
+         y="690.13892"
+         style="font-size:32px">mir_refbox_parser</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 74,622.36218 220,0"
+       id="path4479"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <text
+       xml:space="preserve"
+       style="font-size:22px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
+       x="277.89844"
+       y="586.36218"
+       id="text5173"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155"><tspan
+         sodipodi:role="line"
+         id="tspan5175"
+         x="284"
+         y="586.36218"
+         style="text-align:end;text-anchor:end">topic : </tspan><tspan
+         sodipodi:role="line"
+         x="277.89844"
+         y="608.36218"
+         id="tspan5179"
+         style="text-align:end;text-anchor:end">           ~/refbox</tspan><tspan
+         sodipodi:role="line"
+         x="277.89844"
+         y="630.36218"
+         style="text-align:end;text-anchor:end"
+         id="tspan5183" /><tspan
+         sodipodi:role="line"
+         x="284"
+         y="652.36218"
+         id="tspan5177"
+         style="text-align:end;text-anchor:end">msg type : </tspan><tspan
+         sodipodi:role="line"
+         x="277.89844"
+         y="674.36218"
+         id="tspan5181"
+         style="text-align:end;text-anchor:end">std_msgs::String</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-end:none"
+       d="m 400,194.09448 0,60"
+       id="path5185"
+       inkscape:connector-curvature="0"
+       transform="translate(0,308.2677)"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 610,204.09448 0,50"
+       id="path5187"
+       inkscape:connector-curvature="0"
+       transform="translate(0,308.2677)"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.07055652px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 760.07056,672.36218 219.92944,0"
+       id="path4479-5"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <text
+       xml:space="preserve"
+       style="font-size:22px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
+       x="760"
+       y="632.36218"
+       id="text5173-0"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155"><tspan
+         sodipodi:role="line"
+         id="tspan5175-9"
+         x="760"
+         y="632.36218"
+         style="text-align:start;text-anchor:start">topic : </tspan><tspan
+         sodipodi:role="line"
+         x="760"
+         y="654.36218"
+         id="tspan5179-5"
+         style="text-align:start;text-anchor:start">           ~/event_out</tspan><tspan
+         sodipodi:role="line"
+         x="760"
+         y="676.36218"
+         style="text-align:start;text-anchor:start"
+         id="tspan5183-9" /><tspan
+         sodipodi:role="line"
+         x="760"
+         y="698.36218"
+         id="tspan5177-2"
+         style="text-align:start;text-anchor:start">msg type : </tspan><tspan
+         sodipodi:role="line"
+         x="760"
+         y="720.36218"
+         id="tspan5181-9"
+         style="text-align:start;text-anchor:start">           std_msgs/String</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 520,802.36218 0,50"
+       id="path5187-3"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <rect
+       style="color:#000000;fill:#fdd99b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect6042"
+       width="200"
+       height="80"
+       x="420"
+       y="850.36218"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <text
+       xml:space="preserve"
+       style="font-size:22px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
+       x="520.35822"
+       y="898.49121"
+       id="text6044"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155"><tspan
+         sodipodi:role="line"
+         id="tspan6046"
+         x="520.35822"
+         y="898.49121">GUI</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
+       x="370"
+       y="482.36218"
+       id="text3032"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155"><tspan
+         sodipodi:role="line"
+         id="tspan3034"
+         x="370"
+         y="482.36218">service:</tspan><tspan
+         sodipodi:role="line"
+         x="370"
+         y="498.36218"
+         id="tspan3036">/kcl_rosplan/update_knowledge_base</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
+       x="680"
+       y="482.36218"
+       id="text3038"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155"><tspan
+         sodipodi:role="line"
+         id="tspan3040"
+         x="680"
+         y="482.36218">service:</tspan><tspan
+         sodipodi:role="line"
+         x="680"
+         y="498.36218"
+         id="tspan3042">/kcl_rosplan/get_domain_predicates</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 80,752.36219 220,0"
+       id="path4479-8"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155" />
+    <text
+       xml:space="preserve"
+       style="font-size:22px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
+       x="283.89844"
+       y="722.36218"
+       id="text5173-9"
+       sodipodi:linespacing="100%"
+       inkscape:export-filename="/home/deebuls/catkin_ws/src/mas_industrial_robotics/mir_task_planning/mir_refbox_parser/ros/doc/node.png"
+       inkscape:export-xdpi="90.482155"
+       inkscape:export-ydpi="90.482155"><tspan
+         sodipodi:role="line"
+         id="tspan5175-1"
+         x="290"
+         y="722.36218"
+         style="text-align:end;text-anchor:end">topic : </tspan><tspan
+         sodipodi:role="line"
+         x="283.89844"
+         y="744.36218"
+         id="tspan5179-6"
+         style="text-align:end;text-anchor:end">           ~/event_in</tspan><tspan
+         sodipodi:role="line"
+         x="283.89844"
+         y="766.36218"
+         style="text-align:end;text-anchor:end"
+         id="tspan5183-92" /><tspan
+         sodipodi:role="line"
+         x="290"
+         y="788.36218"
+         id="tspan5177-21"
+         style="text-align:end;text-anchor:end">msg type : </tspan><tspan
+         sodipodi:role="line"
+         x="283.89844"
+         y="810.36218"
+         id="tspan5181-1"
+         style="text-align:end;text-anchor:end">std_msgs::String</tspan></text>
+  </g>
+</svg>
