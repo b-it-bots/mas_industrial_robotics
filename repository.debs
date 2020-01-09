@@ -8,6 +8,7 @@ fi
 # create list of packages to install
 packagelist=(
     libcap2-bin
+    libsvm-dev
     libudev-dev
     libv4l-dev
     python-catkin-tools
@@ -16,6 +17,8 @@ packagelist=(
     python-setuptools
     python-zmq
     ros-kinetic-amcl
+    ros-kinetic-bfl
+    ros-kinetic-brics-actuator
     ros-kinetic-clear-costmap-recovery
     ros-kinetic-cob-scan-unifier
     ros-kinetic-cob-srvs
@@ -47,6 +50,7 @@ packagelist=(
     ros-kinetic-ros
     ros-kinetic-ros-controllers
     ros-kinetic-roslint
+    ros-kinetic-rosmon
     ros-kinetic-rqt-robot-dashboard
     ros-kinetic-serial
     ros-kinetic-smach

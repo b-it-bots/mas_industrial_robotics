@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mir_actions</name>
+  <version>1.0.0</version>
+  <description>
+      youbot actions package, provides with common code among yb
+      actions + launch file + utils to run all action servers
+  </description>
+  
+  <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+  
+  <license>GPLv3</license>
+  
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>mir_planning_msgs</depend>
+
+  <build_depend>mir_move_base_safe</build_depend>
+  <build_depend>mir_perceive_location</build_depend>
+  <build_depend>mir_perceive_cavity</build_depend>
+  <build_depend>mir_pick_object</build_depend>
+  <build_depend>mir_place_object</build_depend>
+  <build_depend>mir_stage_object</build_depend>
+  <build_depend>mir_unstage_object</build_depend>
+  <build_depend>mir_insert_object</build_depend>
+  <build_depend>mir_insert_cavity</build_depend>
+
+</package>

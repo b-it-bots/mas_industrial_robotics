@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_place_object</name>
+  <version>1.0.0</version>
+  <description>
+    Places a object at supporting surface.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

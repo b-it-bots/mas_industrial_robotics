@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!-- Note: this is an example launch file, do not modify. -->
+<launch>
+    <node pkg="mir_insert_object" type="mir_cartesian_velocity_insert.py"
+          name="mir_cartesian_velocity_insert" output="screen">
+    </node>
+</launch>

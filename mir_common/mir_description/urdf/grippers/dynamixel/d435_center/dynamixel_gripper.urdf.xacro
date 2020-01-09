@@ -11,6 +11,8 @@
   <xacro:include filename="$(find mcr_description)/urdf/motors/dynamixel_bracket_fp04-f2.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/d435_center/festo_finger_mount.urdf.xacro" />
   <xacro:include filename="$(find mcr_description)/urdf/fingers/festo_finger_dhas-gf-shm.urdf.xacro" />
+
+  <xacro:arg name="grasp_link_offset" default="0.08"/>
     
   <xacro:macro name="dynamixel_gripper_d435_center" params="parent name *origin">
 
@@ -20,6 +22,11 @@
       <child link="${name}_motor_mount_link" />
     </joint>
 
+    <joint name="${name}_static_grasp_link_joint" type="fixed" >
+        <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>  
+      <parent link="${parent}" />
+      <child link="${name}_static_grasp_link" />
+    </joint>
     <material name="black">
         <color rgba="0 0 0 1"/>
     </material>
@@ -42,11 +49,31 @@
       <collision>
         <origin xyz="-0.029 -0.046 0.0185" rpy="0 ${M_PI/2} 0" />
         <geometry>
-          <mesh filename="package://mir_description/meshes/grippers/dynamixel/d435_center/dynamixel_motor_mount_convex_hull.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/d435_center/dynamixel_motor_mount.stl" scale="0.001 0.001 0.001" />
         </geometry>
       </collision>
     </link>
     
+    <link name="${name}_static_grasp_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.038"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+
+      <visual>
+        <geometry>
+            <cylinder length="0.01" radius="0.001"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+
+      <collision>
+        <geometry>
+            <cylinder length="0.01" radius="0.001"/>
+        </geometry>
+      </collision>
+    </link>
     <!-- motors -->
     <xacro:dynamixel_motor_AX-12A name="${name}_motor_left" parent="${name}_motor_mount_link" motor_direction="-1" position_offset="0.065">
       <origin xyz="0.0 0.034 -0.009" rpy="0 0 0" />

@@ -1,0 +1,254 @@
+#! /usr/bin/env python
+from __future__ import print_function
+
+import rospy
+import math
+import tf
+from std_msgs.msg import ColorRGBA, String
+from geometry_msgs.msg import Vector3, Quaternion, PoseStamped, PoseWithCovarianceStamped
+from laser_line_extraction.msg import LineSegmentList, LineSegment
+from visualization_msgs.msg import MarkerArray, Marker
+
+NODE = 'mir_workspace_aligner'
+
+class WorkspaceAligner():
+
+    """Read line segments from line segment extractor and find a workspace in front.
+    Then try to align perpendicular to the workspace.
+
+    Assumption: The robot is close to the workspace and the robot is looking in
+    the general direction of the workspace. This module is only meant to align the
+    robot slightly to the workspace. The move_base package should be used for actually
+    travelling to the workspace."""
+
+    def __init__(self):
+        # ROS params
+        self._num_of_msgs = rospy.get_param('~num_of_msgs', 100)
+
+        self._angle_threshold = rospy.get_param('~angle_threshold', 60)
+        self._distance_threshold = rospy.get_param('~distance_threshold', 0.3)
+        self._pose_angle_threshold = rospy.get_param('~pose_angle_threshold', 0.1)
+        self._pose_distance_threshold = rospy.get_param('~pose_distance_threshold', 0.1)
+        self._workspace_length = rospy.get_param('~workspace_length', 0.8)
+        self._workspace_length_error_threshold = rospy.get_param('~workspace_length_error_threshold', 0.1)
+        self._workspace_safety_distance = rospy.get_param('~workspace_safety_distance', 0.2)
+
+        self._target_frame = rospy.get_param('~target_frame', 'map')
+        self._common_time_lookup_threshold = rospy.get_param('~common_time_lookup_threshold', 5.0)
+        self._line_segment_msg_wait_threshold = rospy.get_param('~line_segment_msg_wait_threshold', 15.0)
+        workspace_pose_param_name = rospy.get_param('~poses_of_workspaces', '/script_server/base')
+        self._workspace_poses = rospy.get_param(workspace_pose_param_name, None)
+        if not self._workspace_poses:
+            rospy.logerr("No workspace_pose found. Please check ws pose param topic")
+        print(self._workspace_poses)
+
+        # Class variables
+        self._line_segment_msgs = []
+        self._counter = self._num_of_msgs
+        self._transformer = tf.TransformListener()
+
+        # Subscribers
+        rospy.Subscriber('~line_segments', LineSegmentList, self._line_segment_cb)
+        rospy.Subscriber('~event_in', String, self._event_in_cb)
+
+        # Publishers
+        self._event_out_pub = rospy.Publisher('~event_out', String, queue_size=1)
+        self._dbc_event_in_pub = rospy.Publisher('~dbc_event_in', String, queue_size=1)
+        self.pose_publisher = rospy.Publisher('~destination_pose', PoseStamped,
+                                              queue_size=1)
+        rospy.loginfo('Initialised %s', NODE)
+
+    def _event_in_cb(self, msg):
+        """Callback function for event in topic. Subscribes a number of messages
+        from line extractor and generates a PoseStamped object.
+
+        :msg: std_msgs/String
+        :returns: None
+
+        """
+        rospy.loginfo(msg)
+        if msg.data == 'e_trigger':
+            success = self._calculate_aligned_pose()
+            if success:
+                self._event_out_pub.publish(String(data='Completed'))
+            else:
+                self._event_out_pub.publish(String(data='Failed'))
+            self._running = False
+
+    def _line_segment_cb(self, msg):
+        """Callback function for line segment list message (published from line 
+        extractor)
+
+        :msg: laser_line_extraction/LineSegmentList
+        :returns: None
+
+        """
+        if self._counter < self._num_of_msgs:
+            self._line_segment_msgs.append(msg)
+            self._counter += 1
+            if self._counter % 10 == 0 and self._counter > 0:
+                rospy.loginfo(self._counter)
+
+    def _calculate_aligned_pose(self):
+        """Calculate aligned pose of the workspace in front of the robot if possible.
+        :returns: bool (success)
+
+        """
+        common_time = self._get_common_time(source_frame='base_link', target_frame='map')
+        position, quat = self._transformer.lookupTransform('map', 'base_link', common_time)
+        current_ws_name = None
+        for ws_name in self._workspace_poses:
+            linear_distance = self._get_distance( position[:2], self._workspace_poses[ws_name][:2])
+            current_angle = tf.transformations.euler_from_quaternion(quat)[2]
+            angular_distance = abs(current_angle - self._workspace_poses[ws_name][2])
+            if linear_distance < self._pose_distance_threshold and angular_distance < self._pose_angle_threshold:
+                current_ws_name = ws_name
+                break
+        if not current_ws_name:
+            rospy.logwarn("Invalid workspace to align")
+            return False
+        rospy.loginfo("Aligning with %s", current_ws_name)
+
+        self._counter = 0
+        start_time = rospy.Time.now().to_time()
+        while self._counter < self._num_of_msgs \
+                and start_time + self._line_segment_msg_wait_threshold > rospy.Time.now().to_time():
+            rospy.sleep(0.1)
+        if self._counter < self._num_of_msgs:
+            return False
+
+        workspace_line_segment = self._get_avg_line_segment()
+
+        # convert line segment to PoseStamped
+        if workspace_line_segment:
+            workspace_pose = PoseStamped()
+            quat = tf.transformations.quaternion_from_euler(0, 0, workspace_line_segment.angle)
+            workspace_pose.pose.orientation = Quaternion(*quat)
+
+            # take midpoint of line segment
+            workspace_pose.pose.position.x = (workspace_line_segment.start[0] \
+                + workspace_line_segment.end[0])/2
+            workspace_pose.pose.position.y = (workspace_line_segment.start[1] \
+                + workspace_line_segment.end[1])/2
+
+            workspace_pose.header.stamp = self._get_common_time(target_frame=self._target_frame)
+            workspace_pose.header.frame_id = 'base_laser_front_link'
+
+            # substract distance from workspace pose (assuming laser in
+            # center of the robot)
+            position, quat = self._transformer.lookupTransform(
+                'base_link', 'base_laser_front_link', rospy.Time())
+            total_distance = self._workspace_safety_distance + position[0]
+            workspace_pose.pose.position.x -= total_distance * math.cos(workspace_line_segment.angle)
+            workspace_pose.pose.position.y -= total_distance * math.sin(workspace_line_segment.angle)
+
+            try:
+                temp = self._transformer.transformPose(self._target_frame, workspace_pose)
+                # rospy.loginfo(temp)
+                self.pose_publisher.publish(temp)
+                self._dbc_event_in_pub.publish(String(data='e_start'))
+                rospy.loginfo("Sent aligned pose to DBC")
+                return True
+            except Exception as e:
+                rospy.logerr(str(e))
+                return False
+        else:
+            return False
+
+    def _filter_line_segments(self, line_segments):
+        """filter out the line segments which are not 
+        - in the center of the FOV of the laser sensors.
+        - near the robot
+        All line segments that are not in center or are far away will be discarded.
+
+        :line_segments: list of laser_line_extraction/LineSegment
+        :returns: list of laser_line_extraction/LineSegment
+
+        """
+        filtered_line_segments = []
+        for line_segment in line_segments:
+            if abs(math.degrees(line_segment.angle)) < self._angle_threshold and\
+                    line_segment.radius < self._distance_threshold:
+                filtered_line_segments.append(line_segment)
+        return filtered_line_segments
+
+    def _get_workspace_line_segment(self, line_segments):
+        """Return a single line segment as a result of list of line segments which
+        fits the workspace specifications.
+
+        :line_segments: list of laser_line_extraction/LineSegment
+        :returns: laser_line_extraction/LineSegment or None
+
+        """
+        workspace_line_segment = None
+        if len(line_segments) == 2:
+            dist_1_2 = self._get_distance(line_segments[0].start,
+                                          line_segments[1].end)
+            dist_2_1 = self._get_distance(line_segments[1].start,
+                                          line_segments[0].end)
+            workspace_line_segment = LineSegment()
+            if dist_1_2 > dist_2_1:
+                workspace_line_segment.start = line_segments[0].start
+                workspace_line_segment.end = line_segments[1].end
+            else:
+                workspace_line_segment.start = line_segments[1].start
+                workspace_line_segment.end = line_segments[0].end
+            workspace_line_segment.angle = (line_segments[0].angle + line_segments[1].angle)/2
+        elif len(line_segments) == 1:
+            workspace_line_segment = line_segments[0]
+
+        if workspace_line_segment:
+            # filter based on length of line segment
+            length = self._get_distance(workspace_line_segment.start, workspace_line_segment.end)
+            if abs(length - self._workspace_length) < self._workspace_length_error_threshold:
+                return workspace_line_segment
+        return None
+
+    def _get_avg_line_segment(self):
+        """Return avg line segment obj from the list of line segment messages
+        :returns: laser_line_extraction/LineSegment
+
+        """
+        workspace_line_segment = None
+        start_x, start_y, end_x, end_y, angle = 0, 0, 0, 0, 0
+        for msg in self._line_segment_msgs:
+            filtered_line_segments = self._filter_line_segments(msg.line_segments)
+            workspace_line_segment = self._get_workspace_line_segment(filtered_line_segments)
+            if workspace_line_segment:
+                start_x += workspace_line_segment.start[0]
+                start_y += workspace_line_segment.start[1]
+                end_x += workspace_line_segment.end[0]
+                end_y += workspace_line_segment.end[1]
+                angle += workspace_line_segment.angle
+        self._line_segment_msgs = []
+        # create an avg line segment if non zero total values
+        if start_x != 0 and start_y != 0:
+            workspace_line_segment = LineSegment()
+            workspace_line_segment.start = [start_x/self._num_of_msgs, start_y/self._num_of_msgs]
+            workspace_line_segment.end = [end_x/self._num_of_msgs, end_y/self._num_of_msgs]
+            workspace_line_segment.angle = angle/self._num_of_msgs
+        return workspace_line_segment
+
+    def _get_common_time(self, source_frame='base_laser_front_link', target_frame='map'):
+        """Try to get common time between laser and target frame.
+        :returns: rospy.Time
+
+        """
+        start_time = rospy.Time.now().to_time()
+        common_time = rospy.Time.now()
+        got_common_time = False
+        while not got_common_time and start_time + self._common_time_lookup_threshold > rospy.Time.now().to_time():
+            try:
+                common_time = self._transformer.getLatestCommonTime(source_frame, target_frame)
+                got_common_time = True
+            except Exception as e:
+                pass
+        return common_time
+
+    def _get_distance(self, p1, p2):
+        return ((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)**0.5
+
+if __name__ == "__main__":
+    rospy.init_node(NODE)
+    workspace_aligner = WorkspaceAligner()
+    rospy.spin()

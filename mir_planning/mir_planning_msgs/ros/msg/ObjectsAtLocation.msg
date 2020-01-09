@@ -1,0 +1,2 @@
+string location
+string[] objects

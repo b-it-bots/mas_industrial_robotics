@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_refbox_parser</name>
+  <version>0.0.0</version>
+  <description>The mir_refbox_parser package</description>
+
+  <maintainer email="deebul.nair@smail.inf.h-brs.de">Deebul Nair</maintainer>
+  <author email="deebul.nair@smail.inf.h-brs.de">Deebul Nair</author>
+
+
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>std_msgs</build_depend>
+  <build_depend>roslint</build_depend>
+
+  <test_depend>rostest</test_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>tf</run_depend>
+</package>

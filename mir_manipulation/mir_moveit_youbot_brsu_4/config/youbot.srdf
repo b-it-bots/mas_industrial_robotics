@@ -46,10 +46,10 @@
     <!-- far range pose, good for arm -->
      <group_state name="barrier_tape" group="arm_1">
         <joint name="arm_joint_1" value="2.2127" />
-        <joint name="arm_joint_2" value="0.1213" />
-        <joint name="arm_joint_3" value="-0.5406" />
-        <joint name="arm_joint_4" value="0.08" />
-        <joint name="arm_joint_5" value="2.9455" />
+        <joint name="arm_joint_2" value="0.1321" />
+        <joint name="arm_joint_3" value="-0.7443" />
+        <joint name="arm_joint_4" value="3.3394" />
+        <joint name="arm_joint_5" value="1.3566" />
     </group_state>
 
     <!-- used for looking at tilted platform -->
@@ -210,19 +210,29 @@
         <joint name="arm_joint_5" value="1.345" />
     </group_state>
     <group_state name="look_at_workspace_from_near_left" group="arm_1">
-        <joint name="arm_joint_1" value="1.461" />
-        <joint name="arm_joint_2" value="1.172" />
-        <joint name="arm_joint_3" value="-1.106" />
-        <joint name="arm_joint_4" value="3.026" />
-        <joint name="arm_joint_5" value="0.568" />
+        <joint name="arm_joint_1" value="1.4703" />
+        <joint name="arm_joint_2" value="0.4803" />
+        <joint name="arm_joint_3" value="-0.6987" />
+        <joint name="arm_joint_4" value="3.09598" />
+        <joint name="arm_joint_5" value="0.6047" />
     </group_state>
+
     <group_state name="look_at_workspace_from_near_right" group="arm_1">
-        <joint name="arm_joint_1" value="2.880" />
-        <joint name="arm_joint_2" value="1.172" />
-        <joint name="arm_joint_3" value="-1.106" />
-        <joint name="arm_joint_4" value="2.964" />
-        <joint name="arm_joint_5" value="2.136" />
+        <joint name="arm_joint_1" value="2.7882" />
+        <joint name="arm_joint_2" value="0.4803" />
+        <joint name="arm_joint_3" value="-0.6987" />
+        <joint name="arm_joint_4" value="3.09598" />
+        <joint name="arm_joint_5" value="2.02064" />
     </group_state>
+
+    <group_state name="cartesian_pre_grasp" group="arm_1">
+        <joint name="arm_joint_1" value="2.16002" />
+        <joint name="arm_joint_2" value="0.47559" />
+        <joint name="arm_joint_3" value="-0.79009" />
+        <joint name="arm_joint_4" value="3.38396" />
+        <joint name="arm_joint_5" value="2.94489" />
+    </group_state>
+
 
     <group_state name="platform_middle" group="arm_1">
         <joint name="arm_joint_1" value="2.156" />
@@ -419,6 +429,13 @@
         <joint name="arm_joint_3" value="-0.92142" />
         <joint name="arm_joint_4" value="3.14951" />
         <joint name="arm_joint_5" value="2.90371" />
+    </group_state>
+    <group_state name="shelf_post_grasp" group="arm_1">
+        <joint name="arm_joint_1" value="2.22067" />
+        <joint name="arm_joint_2" value="2.02567" />
+        <joint name="arm_joint_3" value="-0.16342" />
+        <joint name="arm_joint_4" value="0.20051" />
+        <joint name="arm_joint_5" value="2.90571" />
     </group_state>
     <!-- <group_state name="after_shelf" group="arm_1"> -->
     <!--     <joint name="arm_joint_1" value="2.73031" /> -->
@@ -858,30 +875,24 @@
     <disable_collisions link1="wheel_link_br" link2="wheel_link_fl" reason="Never" />
     <disable_collisions link1="wheel_link_br" link2="wheel_link_fr" reason="Never" />
     <disable_collisions link1="wheel_link_fl" link2="wheel_link_fr" reason="Never" />
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="arm_link_5" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="camera_mount_link" reason="Never" /> -->
-    <disable_collisions link1="gripper_motor_mount_link" link2="camera_mount_link" reason="Never" />
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_bracket_left_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_bracket_right_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_mount_right_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_mount_left_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_left_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_right_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_motor_mount_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_left_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_mount_left_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_mount_right_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_finger_right_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_motor_left_base_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_motor_mount_link" reason="Adjacent" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_motor_right_base_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="wheel_link_bl" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="wheel_link_br" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_motor_right_base_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_motor_left_base_link" reason="Never" /> -->
-    <!-- <disable_collisions link1="arm_cam3d_link" link2="gripper_motor_mount_link" reason="Never" /> -->
-    <disable_collisions link1="camera_mount_link" link2="gripper_bracket_left_link" reason="Never" />
-    <disable_collisions link1="camera_mount_link" link2="gripper_bracket_right_link" reason="Never" />
-    <disable_collisions link1="gripper_bracket_left_link" link2="camera_mount_link" reason="Never" />
-    <disable_collisions link1="gripper_bracket_right_link" link2="camera_mount_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="arm_link_5" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_bracket_left_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_bracket_right_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_mount_right_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_mount_left_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_left_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_right_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_motor_mount_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_left_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_mount_left_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_mount_right_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_finger_right_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_motor_left_base_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_motor_mount_link" reason="Adjacent" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_motor_right_base_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="wheel_link_bl" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="wheel_link_br" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_motor_right_base_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_motor_left_base_link" reason="Never" />
+    <disable_collisions link1="d435_arm_camera_link" link2="gripper_motor_mount_link" reason="Never" />
 </robot>

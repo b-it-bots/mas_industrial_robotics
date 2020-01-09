@@ -1,0 +1,73 @@
+;This PDDL problem definition was made automatically from a KB snapshot
+(define (problem general_domain_task)
+(:domain general_domain)
+
+(:objects
+    SH02 CB01 WS02 WS04 WS03 WS06 WS11 WS10 WS01 WS08 SH01 PP01 START END - location
+    R20-00 R20-01 M20-00 M20_100-00 MOTOR-00 BEARING-00 M20_100-01 S40_40_G-00 AXIS-00 BEARING_BOX-00 F20_20_G-00 F20_20_B-00 F20_20_G-01 F20_20_B-01 S40_40_B-00 CONTAINER_BOX_BLUE-00 CONTAINER_BOX_RED-00 CONTAINER_BOX_BLUE-01 CONTAINER_BOX_RED-01 PP01_CAVITY - object
+    YOUBOT-BRSU - robot
+    PLATFORM_MIDDLE PLATFORM_LEFT PLATFORM_RIGHT - robot_platform
+)
+
+(:init
+    ;Cost information starts
+    (= (total-cost) 0)
+    ;Cost information ends
+
+    (at YOUBOT-BRSU START)
+    (container CONTAINER_BOX_BLUE-00)
+    (container CONTAINER_BOX_RED-00)
+    (container CONTAINER_BOX_BLUE-01)
+    (container CONTAINER_BOX_RED-01)
+    (container PP01_CAVITY)
+    (gripper_is_free YOUBOT-BRSU)
+    (heavy CONTAINER_BOX_BLUE-00)
+    (heavy CONTAINER_BOX_RED-00)
+    (heavy CONTAINER_BOX_BLUE-01)
+    (heavy CONTAINER_BOX_RED-01)
+    (heavy PP01_CAVITY)
+    (insertable M20_100-00)
+    (insertable MOTOR-00)
+    (insertable BEARING-00)
+    (insertable M20_100-01)
+    (insertable AXIS-00)
+    (on R20-00 SH02)
+    (on R20-01 SH02)
+    (on M20-00 CB01)
+    (on M20_100-00 WS02)
+    (on MOTOR-00 WS04)
+    (on BEARING-00 WS03)
+    (on M20_100-01 WS06)
+    (on S40_40_G-00 WS02)
+    (on AXIS-00 WS04)
+    (on BEARING_BOX-00 WS03)
+    (on F20_20_G-00 WS02)
+    (on F20_20_B-00 WS04)
+    (on F20_20_G-01 WS03)
+    (on F20_20_B-01 WS06)
+    (on S40_40_B-00 CB01)
+    (on CONTAINER_BOX_BLUE-00 WS01)
+    (on CONTAINER_BOX_RED-00 WS01)
+    (on CONTAINER_BOX_BLUE-01 WS08)
+    (on CONTAINER_BOX_RED-01 WS08)
+    (on PP01_CAVITY PP01)
+)
+
+(:goal (and
+    (on BEARING_BOX-00 WS10)
+    (on R20-01 WS10)
+    (on R20-00 WS11)
+    (in AXIS-00 PP01_CAVITY)
+    (on M20-00 WS11)
+    (on S40_40_G-00 SH01)
+    (in MOTOR-00 CONTAINER_BOX_RED-00)
+    (in BEARING-00 CONTAINER_BOX_BLUE-01)
+    (in M20_100-01 CONTAINER_BOX_RED-01)
+    (in M20_100-00 CONTAINER_BOX_BLUE-00)
+    )
+)
+
+(:metric minimize (total-cost))
+
+)
+
