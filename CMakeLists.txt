@@ -3,23 +3,23 @@ project(mir_object_recognition)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11
-    #-O3
+  -O3
+  -march=native
 )
 
 find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     dynamic_reconfigure
     mas_perception_msgs
-    mas_perception_libs
-    mcr_scene_segmentation
     pcl_ros
     roscpp
     rospy
     roslint
     tf
     visualization_msgs
-    mcr_algorithms
     geometry_msgs
+    mir_object_segmentation
+    mir_perception_utils
 )
 catkin_python_setup()
 find_package(PCL 1.7 REQUIRED)
@@ -34,7 +34,8 @@ catkin_package(
   INCLUDE_DIRS
     ros/include
   LIBRARIES
-    mcr_segmentation
+    mir_object_segmentation
+    ${PROJECT_NAME}
   CATKIN_DEPENDS
     mas_perception_msgs
     visualization_msgs
@@ -50,11 +51,23 @@ include_directories(
 
 add_definitions(-fpermissive)
 
+### LIBRARIES ####################################################
+add_library(${PROJECT_NAME}
+  ros/src/pointcloud_segmentation_ros.cpp
+  ros/src/multimodal_object_recognition_utils.cpp
+)
+
+add_dependencies(${PROJECT_NAME}
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
 ### EXECUTABLES ###############################################
 add_executable(multimodal_object_recognition
-  ros/src/pointcloud_segmentation_ros.cpp
   ros/src/multimodal_object_recognition_node.cpp
-  ros/src/multimodal_object_recognition_utils.cpp
 )
 add_dependencies(multimodal_object_recognition
   ${catkin_EXPORTED_TARGETS} 
@@ -62,6 +75,7 @@ add_dependencies(multimodal_object_recognition
 )
 target_link_libraries(multimodal_object_recognition
   ${catkin_LIBRARIES}
+  ${PROJECT_NAME}
 )
 
 roslint_cpp()
