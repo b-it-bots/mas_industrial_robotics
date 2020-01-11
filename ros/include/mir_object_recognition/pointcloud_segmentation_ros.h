@@ -8,21 +8,31 @@
 #define MIR_OBJECT_RECOGNITION_POINTCLOUD_SEGMENTATION_ROS_H
 
 #include <string>
+#include <Eigen/Dense>
+#include <vector>
+#include <iostream>
+#include <fstream>
 
 #include <ros/ros.h>
-#include <std_msgs/String.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PoseArray.h>
 #include <tf/transform_listener.h>
-#include <dynamic_reconfigure/server.h>
+#include <sensor_msgs/PointCloud2.h>
+
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/point_types.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl_ros/point_cloud.h>
+
+#include <mas_perception_msgs/BoundingBox.h>
+#include <mas_perception_msgs/BoundingBoxList.h>
+#include <mas_perception_msgs/ObjectList.h>
+#include <mas_perception_msgs/RecognizeObject.h>
 
 #include <mir_object_segmentation/cloud_accumulation.h>
 #include <mir_object_segmentation/scene_segmentation.h>
 #include <mir_object_segmentation/SceneSegmentationConfig.h>
 #include <mir_object_segmentation/bounding_box.h>
-
-#include <mas_perception_msgs/ObjectList.h>
+#include <mir_object_segmentation/impl/helpers.hpp>
 
 class PointcloudSegmentationROS
 {
@@ -38,21 +48,17 @@ class PointcloudSegmentationROS
     
     private:
         ros::NodeHandle nh_;
-
         ros::ServiceClient recognize_service;
-        std::string object_recognizer_service_name_;
 
-        boost::shared_ptr<tf::TransformListener> tf_listener_;
-
-         // Create unique pointer object of cloud_accumulation
+         /** Create unique pointer object of cloud_accumulation */
         CloudAccumulation::UPtr cloud_accumulation_;
-
-       
+        
+        pcl::ModelCoefficients::Ptr model_coefficients_;
+        boost::shared_ptr<tf::TransformListener> tf_listener_;
+ 
         bool add_to_octree_;
         int pcl_object_id_;
         double octree_resolution_;
-
-        pcl::ModelCoefficients::Ptr model_coefficients_;
         double workspace_height_;
 
     public:
@@ -88,8 +94,13 @@ class PointcloudSegmentationROS
         void transformPose(std::string &target_frame, 
                            geometry_msgs::PoseStamped &pose, 
                            geometry_msgs::PoseStamped &transformed_pose);
-        
-        void savePcd(const PointCloud::ConstPtr &pointcloud, std::string logdir="/tmp", std::string obj_name="unknown");
+        /** \brief Save pointcloud
+         * \param[in] logdir (default="/tmp")
+         * \param[in] obj_name (default="unknown")
+         * */
+        void savePcd(const PointCloud::ConstPtr &pointcloud, 
+                     std::string logdir="/tmp", 
+                     std::string obj_name="unknown");
         /** \brief Reset accumulated cloud */
         void resetCloudAccumulation();
 
@@ -111,9 +122,7 @@ class PointcloudSegmentationROS
         /** Create unique pointer for object scene_segmentation */
         typedef std::unique_ptr<SceneSegmentation> SceneSegmentationUPtr;
         SceneSegmentationUPtr scene_segmentation_;
-        //SceneSegmentation scene_segmentation_;
 
-        
         double object_height_above_workspace_;
         std::string frame_id_;
 
