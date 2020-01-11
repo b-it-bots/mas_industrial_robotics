@@ -17,12 +17,11 @@
   <build_depend>tf</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
-  <build_depend>mas_perception_libs</build_depend>
   <build_depend>mas_perception_msgs</build_depend>
-  <build_depend>mcr_algorithms</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>roslint</build_depend>
+  <build_depend>mir_object_segmentation</build_depend>
 
   <build_export_depend>cv_bridge</build_export_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
@@ -30,6 +29,7 @@
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>tf</build_export_depend>
+  <build_export_depend>mir_object_segmentation</build_export_depend>
   
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
