@@ -15,14 +15,14 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseArray.h>
 #include <tf/transform_listener.h>
-
-#include <mcr_scene_segmentation/cloud_accumulation.h>
-#include <mcr_scene_segmentation/scene_segmentation.h>
-#include <mcr_scene_segmentation/SceneSegmentationConfig.h>
-#include <mas_perception_libs/bounding_box.h>
-#include <mas_perception_msgs/ObjectList.h>
-
 #include <dynamic_reconfigure/server.h>
+
+#include <mir_object_segmentation/cloud_accumulation.h>
+#include <mir_object_segmentation/scene_segmentation.h>
+#include <mir_object_segmentation/SceneSegmentationConfig.h>
+#include <mir_object_segmentation/bounding_box.h>
+
+#include <mas_perception_msgs/ObjectList.h>
 
 class PointcloudSegmentationROS
 {
@@ -44,14 +44,15 @@ class PointcloudSegmentationROS
 
         boost::shared_ptr<tf::TransformListener> tf_listener_;
 
-        // Create unique pointer object of cloud_accumulation
+         // Create unique pointer object of cloud_accumulation
         CloudAccumulation::UPtr cloud_accumulation_;
 
+       
         bool add_to_octree_;
         int pcl_object_id_;
         double octree_resolution_;
 
-        Eigen::Vector4f model_coefficients_;
+        pcl::ModelCoefficients::Ptr model_coefficients_;
         double workspace_height_;
 
     public:
@@ -68,16 +69,16 @@ class PointcloudSegmentationROS
          * \param[Out] Generated bounding box
          * \param[out] Bounding box message
          * */
-        void get3DBoundingBox(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud, 
+        void get3DBoundingBox(const PointCloud::ConstPtr &cloud, 
                               const Eigen::Vector3f& normal, 
-                              mas_perception_libs::BoundingBox &bbox,  
-                              mas_perception_msgs::BoundingBox& bounding_box_msg);
+                              BoundingBox &bbox,  
+                              mas_perception_msgs::BoundingBox &bounding_box_msg);
         
         /** \brief Estimate pose given bounding box
          * \param[in] Bounding box
          * returns PoseStamped
          * */
-        geometry_msgs::PoseStamped getPose(const mas_perception_libs::BoundingBox &box);
+        geometry_msgs::PoseStamped getPose(const BoundingBox &box);
 
         /** \brief Transform pose
          * \param[in] target_frame id
@@ -95,7 +96,7 @@ class PointcloudSegmentationROS
         /** \brief Accumulate pointcloud
          * \param[in] Pointcloud to accumulate
          * */
-        void addCloudAccumulation(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud);
+        void addCloudAccumulation(const PointCloud::Ptr &cloud);
 
         /** Returns plane normal */
         Eigen::Vector3f getPlaneNormal();
@@ -110,6 +111,8 @@ class PointcloudSegmentationROS
         /** Create unique pointer for object scene_segmentation */
         typedef std::unique_ptr<SceneSegmentation> SceneSegmentationUPtr;
         SceneSegmentationUPtr scene_segmentation_;
+        //SceneSegmentation scene_segmentation_;
+
         
         double object_height_above_workspace_;
         std::string frame_id_;
