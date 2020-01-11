@@ -10,29 +10,20 @@
 #include <string>
 #include <Eigen/Dense>
 #include <vector>
-#include <iostream>
-#include <fstream>
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/point_types.h>
-#include <pcl/PCLPointCloud2.h>
-#include <pcl_ros/point_cloud.h>
-
 #include <mas_perception_msgs/BoundingBox.h>
-#include <mas_perception_msgs/BoundingBoxList.h>
 #include <mas_perception_msgs/ObjectList.h>
-#include <mas_perception_msgs/RecognizeObject.h>
 
 #include <mir_object_segmentation/cloud_accumulation.h>
 #include <mir_object_segmentation/scene_segmentation.h>
-#include <mir_object_segmentation/SceneSegmentationConfig.h>
-#include <mir_object_segmentation/bounding_box.h>
-#include <mir_object_segmentation/impl/helpers.hpp>
+
+#include <mir_perception_utils/bounding_box.h>
+#include <mir_perception_utils/object_utils.h>
 
 class PointcloudSegmentationROS
 {
@@ -41,8 +32,7 @@ class PointcloudSegmentationROS
          * \param[in] NodeHandle
          * \param[in] Transform listener
          * */
-        PointcloudSegmentationROS(ros::NodeHandle nh, 
-                                  boost::shared_ptr<tf::TransformListener> tf_listener=nullptr);
+        PointcloudSegmentationROS(ros::NodeHandle nh);
 
         virtual ~PointcloudSegmentationROS();
     
@@ -122,6 +112,8 @@ class PointcloudSegmentationROS
         /** Create unique pointer for object scene_segmentation */
         typedef std::unique_ptr<SceneSegmentation> SceneSegmentationUPtr;
         SceneSegmentationUPtr scene_segmentation_;
+        typedef std::unique_ptr<ObjectUtils> ObjectUtilsUPtr;
+        ObjectUtilsUPtr object_utils_;
 
         double object_height_above_workspace_;
         std::string frame_id_;
