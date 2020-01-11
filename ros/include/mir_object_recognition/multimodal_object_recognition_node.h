@@ -35,9 +35,9 @@
 #include <mas_perception_msgs/GetSegmentedImage.h>
 #include <sensor_msgs/RegionOfInterest.h>
 
-#include <mcr_scene_segmentation/clustered_point_cloud_visualizer.h>
-#include <mcr_scene_segmentation/bounding_box_visualizer.h>
-#include <mcr_scene_segmentation/label_visualizer.h>
+#include <mir_object_segmentation/clustered_point_cloud_visualizer.h>
+#include <mir_object_segmentation/bounding_box_visualizer.h>
+#include <mir_object_segmentation/label_visualizer.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -136,11 +136,11 @@ class MultimodalObjectRecognitionROS
         mas_perception_msgs::ObjectList recognized_cloud_list_;
 
         // Visualization
-        mcr::visualization::BoundingBoxVisualizer bounding_box_visualizer_pcl_;
-        mcr::visualization::ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        mcr::visualization::ClusteredPointCloudVisualizer cluster_visualizer_pcl_;
-        mcr::visualization::LabelVisualizer label_visualizer_rgb_;
-        mcr::visualization::LabelVisualizer label_visualizer_pcl_;
+        mir::visualization::BoundingBoxVisualizer bounding_box_visualizer_pcl_;
+        mir::visualization::ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+        mir::visualization::ClusteredPointCloudVisualizer cluster_visualizer_pcl_;
+        mir::visualization::LabelVisualizer label_visualizer_rgb_;
+        mir::visualization::LabelVisualizer label_visualizer_pcl_;
 
         // Parameters
         bool debug_mode_;
