@@ -5,39 +5,34 @@
  *
  */
 
-#include <Eigen/Dense>
-#include <vector>
-#include <string>
-#include <iostream>
-#include <fstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/RegionOfInterest.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+
+#include <std_msgs/String.h>
+#include <std_msgs/Float64.h>
 #include <geometry_msgs/PoseArray.h>
 
-#include <mas_perception_msgs/ObjectList.h>
 #include <mas_perception_msgs/ImageList.h>
 #include <mas_perception_msgs/BoundingBoxList.h>
 
-#include <mas_perception_libs/bounding_box.h>
-#include <mas_perception_libs/point_cloud_utils.h>
-#include <mas_perception_libs/sac_plane_segmenter.h>
+#include <mir_perception_utils/clustered_point_cloud_visualizer.h>
+#include <mir_perception_utils/bounding_box_visualizer.h>
+#include <mir_perception_utils/label_visualizer.h>
+#include <mir_perception_utils/bounding_box.h>
 
 #include <mir_object_recognition/multimodal_object_recognition_node.h>
-#include <mir_object_recognition/SceneSegmentationConfig.h>
 
-using mcr::visualization::BoundingBoxVisualizer;
-using mcr::visualization::ClusteredPointCloudVisualizer;
-using mcr::visualization::LabelVisualizer;
-using mas_perception_libs::Color;
-using mas_perception_libs::CloudFilterParams;
-using mas_perception_libs::SacPlaneSegmenterParams;
+using mir::visualization::BoundingBoxVisualizer;
+using mir::visualization::ClusteredPointCloudVisualizer;
+using mir::visualization::LabelVisualizer;
+using mir::visualization::Color;
 
 MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle nh):
     nh_(nh),
@@ -60,8 +55,9 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     
 {
     tf_listener_.reset(new tf::TransformListener);
-    pointcloud_segmentation_ = PointcloudSegmentationUPtr(new PointcloudSegmentationROS(nh_, tf_listener_));
-    mm_object_recognition_utils_ = MultimodalObjectRecognitionUtilsUPtr(new MultimodalObjectRecognitionUtils(tf_listener_));
+    pointcloud_segmentation_ = PointcloudSegmentationUPtr(new PointcloudSegmentationROS(nh_));
+    mm_object_recognition_utils_ = MultimodalObjectRecognitionUtilsUPtr(new MultimodalObjectRecognitionUtils());
+    object_utils_ = ObjectUtilsUPtr(new ObjectUtils());
     
     dynamic_reconfigure::Server<mir_object_recognition::SceneSegmentationConfig>::CallbackType f =
                             boost::bind(&MultimodalObjectRecognitionROS::configCallback, this, _1, _2);
@@ -102,6 +98,9 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     pub_pcl_debug_out_ = nh_.advertise<sensor_msgs::PointCloud2>("output/rgb/debug/rgb_obj_cluster_out", 1);
 
     nh_.param<std::string>("logdir", logdir_, "/tmp/");
+
+    nh_.param<std::string>("object_info", object_info_path_, "None");
+    loadObjectInfo(object_info_path_);
     
 }
 
@@ -240,7 +239,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     {
         for (auto& cluster:clusters_3d)
         {
-            pointcloud_segmentation_->savePcd(cluster, logdir_);
+            object_utils_->savePcd(cluster, logdir_);
             ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m"<<logdir_);
         }
         return;
@@ -347,6 +346,15 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         for (int i=0; i<recognized_image_list_.objects.size();i++)
         {
             mas_perception_msgs::Object object = recognized_image_list_.objects[i];
+            // Check qualitative info of the object
+            if (round_objects_.count(recognized_image_list_.objects[i].name))
+            {
+                object.shape.shape = object.shape.SPHERE;
+            }
+            else
+            {
+                object.shape.shape = object.shape.OTHER;
+            }
             //Get ROI
             sensor_msgs::RegionOfInterest roi_2d = object.roi;
             const cv::Rect2d rect2d(roi_2d.x_offset, roi_2d.y_offset, roi_2d.width, roi_2d.height);
@@ -375,7 +383,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 get3DObject(roi_2d, cloud_, pcl_object_cluster);
                 pcl_object_cluster->header.frame_id = cloud_->header.frame_id;
 
-                // Filter big objects from 2d proposal, if the height is less than 3 mm
+                // ToDo: Filter big objects from 2d proposal, if the height is less than 3 mm
                 //pcl::PointXYZRGB min_pt;
                 //pcl::PointXYZRGB max_pt;
                 //pcl::getMinMax3D(*pcl_object_cluster, min_pt, max_pt);
@@ -391,8 +399,9 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
                 clusters_2d.push_back(pcl_object_cluster);
                 // Get pose
-                geometry_msgs::PoseStamped pose = mm_object_recognition_utils_->estimatePose(pcl_object_cluster, 
-                                                                    recognized_image_list_.objects[i].name);
+                geometry_msgs::PoseStamped pose;
+                object_utils_->estimatePose(pcl_object_cluster, pose, object.shape.shape,
+                                            rgb_cluster_filter_limit_min_, rgb_cluster_filter_limit_max_);
 
                 // Transform pose
                 std::string frame_id = cloud_->header.frame_id;
@@ -400,7 +409,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 pose.header.frame_id = frame_id;
                 if (frame_id != target_frame_id_)
                 {   
-                    mm_object_recognition_utils_->transformPose(target_frame_id_, pose, rgb_object_list.objects[i].pose);
+                    object_utils_->transformPose(tf_listener_, target_frame_id_, 
+                                                 pose, rgb_object_list.objects[i].pose);
                 }
                 else
                 {
@@ -412,7 +422,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             }
             else
             {
-                std::cout<<"[RGB] DECOY"<<std::endl;
+                ROS_INFO("[RGB] DECOY");
                 rgb_object_list.objects[i].name = "DECOY";
                 rgb_object_list.objects[i].database_id = rgb_object_id_;
             }
@@ -433,7 +443,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                 /* combined_object_list.objects[i].pose.pose.position.z < pointcloud_segmentation_ */
                 /* ->object_height_above_workspace_ - 0.05) */
             {
-                ROS_WARN_STREAM("I got you filtered: "<<combined_object_list.objects[i].name<<" SORRY!!!");
+                ROS_WARN_STREAM("This object "<<combined_object_list.objects[i].name<<" out of RoI");
                 ROS_WARN_STREAM("You are a DECOY now");
                 std::cout<<"#########Filtering: "<<combined_object_list.objects[i].name<<std::endl;
                 std::cout<<"base link to laser: "<<rgb_base_link_to_laser_distance_<<std::endl;
@@ -458,7 +468,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     {
         ROS_WARN_STREAM("Debug mode: publishing object information");
         publishDebug(combined_object_list, clusters_3d, clusters_2d);
-        mm_object_recognition_utils_->saveDebugImage(cv_image, image_msg_, logdir_); 
+        object_utils_->saveImage(cv_image, image_msg_, logdir_); 
     }
 }
 
@@ -483,8 +493,8 @@ void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectLis
             bounding_boxes.bounding_boxes.resize(clusters_3d.size());
             for (int i=0; i<clusters_3d.size(); i++)
             {
-                mas_perception_libs::BoundingBox bbox;
-                pointcloud_segmentation_->get3DBoundingBox(clusters_3d[i], normal, bbox, bounding_boxes.bounding_boxes[i]);
+                BoundingBox bbox;
+                object_utils_->get3DBoundingBox(clusters_3d[i], normal, bbox, bounding_boxes.bounding_boxes[i]);
             }
             if (bounding_boxes.bounding_boxes.size() > 0)
             {
@@ -631,21 +641,14 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
         double roll, pitch, yaw;
         m.getRPY(roll, pitch, yaw);
         double change_in_pitch = 0.0;
-        if (object_list.objects[i].name == "M30" || 
-                object_list.objects[i].name == "M20" ||
-                object_list.objects[i].name == "DISTANCE_TUBE"  ||
-                object_list.objects[i].name == "RED_CONTAINER"  ||
-                object_list.objects[i].name == "BLUE_CONTAINER"  ||
-                object_list.objects[i].name == "BEARING") 
+        if (round_objects_.count(object_list.objects[i].name))
         {
             yaw = 0.0;
         }
 
-        if (object_list.objects[i].name == "RED_CONTAINER" || object_list.objects[i].name == "BLUE_CONTAINER")
+        if (object_list.objects[i].name == "CONTAINER_BOX_RED" || 
+            object_list.objects[i].name == "CONTAINER_BOX_BLUE")
         {
-            //object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight() + 0.05 ;
-            /* change_in_pitch = -M_PI / 6.0; */
-            object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight() + 0.08 ;
             if (object_list.objects[i].database_id > 100)
             {
                 ROS_INFO_STREAM("Updating container pose");
@@ -661,7 +664,7 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
         if (pointcloud_segmentation_->getWorkspaceHeight() != -1000.0)
         {
             object_list.objects[i].pose.pose.position.z = pointcloud_segmentation_->getWorkspaceHeight() + 
-                                                    pointcloud_segmentation_->object_height_above_workspace_;
+                                                          pointcloud_segmentation_->object_height_above_workspace_;
         }
 
         if (object_list.objects[i].name == "M20_100" || object_list.objects[i].name == "AXIS")
@@ -669,6 +672,37 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
             mm_object_recognition_utils_->adjustAxisBoltPose(object_list.objects[i]);
         }
     }
+}
+
+void MultimodalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
+{
+    if (filename != "None")
+    {
+        using boost::property_tree::ptree;
+        mas_perception_msgs::Object object;
+        ptree pt;
+        read_xml(filename, pt);
+
+        BOOST_FOREACH( ptree::value_type const& v, pt.get_child("object_info") ) {
+            if( v.first == "object" ) {
+                Object f;
+                f.name = v.second.get<std::string>("name");
+                f.shape = v.second.get<std::string>("shape");
+                f.color = v.second.get<std::string>("color");
+                if (f.shape == object.shape.SPHERE)
+                {
+                    round_objects_.insert(f.name);
+                }
+                object_info_.push_back(f);
+            }
+        }
+        ROS_INFO("Object info is loaded!");
+    }
+    else
+    {
+        ROS_WARN("No object info is provided!");
+    }
+
 }
 
 void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::ConstPtr &msg)
@@ -710,29 +744,17 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
 }
 
 void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level)
-{
-    CloudFilterParams cloudFilterParams;
-    
-    cloudFilterParams.mPassThroughLimitMinX = static_cast<float>(config.passthrough_limit_min_x);
-    cloudFilterParams.mPassThroughLimitMaxX = static_cast<float>(config.passthrough_limit_max_x);
-    
-    cloudFilterParams.mPassThroughLimitMinY = static_cast<float>(config.passthrough_limit_min_y);
-    cloudFilterParams.mPassThroughLimitMaxY = static_cast<float>(config.passthrough_limit_max_y);
-        
-    cloudFilterParams.mVoxelLimitMinZ = static_cast<float>(config.voxel_limit_min_z);
-    cloudFilterParams.mVoxelLimitMaxZ = static_cast<float>(config.voxel_limit_max_z);
-    cloudFilterParams.mVoxelLeafSize = static_cast<float>(config.voxel_leaf_size);
-    pointcloud_segmentation_->scene_segmentation_->setCloudFilterParams(cloudFilterParams);
-
-    SacPlaneSegmenterParams planeFitParams;
-    planeFitParams.mNormalRadiusSearch = config.normal_radius_search;
-    planeFitParams.mSacMaxIterations = config.sac_max_iterations;
-    planeFitParams.mSacDistThreshold = config.sac_distance_threshold;
-    planeFitParams.mSacOptimizeCoeffs = config.sac_optimize_coefficients;
-    planeFitParams.mSacEpsAngle = config.sac_eps_angle;
-    planeFitParams.mSacNormalDistWeight = config.sac_normal_distance_weight;
-    pointcloud_segmentation_->scene_segmentation_->setPlaneSegmenterParams(planeFitParams);
-
+{   
+    pointcloud_segmentation_->scene_segmentation_->setVoxelGridParams(config.voxel_leaf_size, config.voxel_filter_field_name,
+            config.voxel_filter_limit_min, config.voxel_filter_limit_max);
+    pointcloud_segmentation_->scene_segmentation_->setPassthroughParams(config.enable_passthrough_filter,
+            config.passthrough_filter_field_name,
+            config.passthrough_filter_limit_min,
+            config.passthrough_filter_limit_max);
+    pointcloud_segmentation_->scene_segmentation_->setNormalParams(config.normal_radius_search);
+    pointcloud_segmentation_->scene_segmentation_->setSACParams(config.sac_max_iterations, config.sac_distance_threshold,
+            config.sac_optimize_coefficients, config.sac_eps_angle,
+            config.sac_normal_distance_weight);
     pointcloud_segmentation_->scene_segmentation_->setPrismParams(config.prism_min_height, config.prism_max_height);
     pointcloud_segmentation_->scene_segmentation_->setOutlierParams(config.outlier_radius_search, config.outlier_min_neighbors);
     pointcloud_segmentation_->scene_segmentation_->setClusterParams(config.cluster_tolerance, config.cluster_min_size, config.cluster_max_size,
