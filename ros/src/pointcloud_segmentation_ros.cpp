@@ -4,32 +4,8 @@
  * Author: Mohammad Wasil, Santosh Thoduka
  *
  */
-#include <mas_perception_msgs/BoundingBox.h>
-#include <mas_perception_msgs/BoundingBoxList.h>
-#include <mas_perception_msgs/ObjectList.h>
-#include <mas_perception_msgs/RecognizeObject.h>
-#include "mcr_scene_segmentation/impl/helpers.hpp"
-#include <mas_perception_libs/bounding_box.h>
-
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/point_types.h>
-#include <pcl/PCLPointCloud2.h>
-#include <pcl/common/centroid.h>
-#include <pcl_ros/transforms.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl_ros/point_cloud.h>
-
-#include <Eigen/Dense>
-#include <std_msgs/Float64.h>
-#include <vector>
-#include <string>
-#include <iostream>
-#include <fstream>
 
 #include <mir_object_recognition/pointcloud_segmentation_ros.h>
-
-#include <std_msgs/String.h>
-#include <std_msgs/Float32.h>
 
 PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh, boost::shared_ptr<tf::TransformListener> tf_listener): 
     nh_(nh),
@@ -40,6 +16,7 @@ PointcloudSegmentationROS::PointcloudSegmentationROS(ros::NodeHandle nh, boost::
     nh_.param("octree_resolution", octree_resolution_, 0.0025);
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
     scene_segmentation_ = SceneSegmentationUPtr(new SceneSegmentation());
+    model_coefficients_ = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients);
     if (!tf_listener_)
     {
       ROS_ERROR_THROTTLE(2.0, "[PointcloudSegmentationROS]: TF listener not initialized.");
@@ -54,10 +31,12 @@ void PointcloudSegmentationROS::segmentCloud(mas_perception_msgs::ObjectList &ob
                                              std::vector<PointCloud::Ptr> &clusters)
 {
     PointCloud::Ptr cloud(new PointCloud);
+    cloud->header.frame_id = frame_id_;
     cloud_accumulation_->getAccumulatedCloud(*cloud);
-    
+        
     std::vector<BoundingBox> boxes;
-    PointCloud::Ptr debug = scene_segmentation_->segment_scene(cloud, clusters, boxes, model_coefficients_, workspace_height_);
+    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
+    PointCloud::Ptr debug = scene_segmentation_->segmentScene(cloud, clusters, boxes, model_coefficients_, workspace_height_);
     debug->header.frame_id = "base_link";
 
     object_list.objects.resize(boxes.size());
@@ -74,7 +53,6 @@ void PointcloudSegmentationROS::segmentCloud(mas_perception_msgs::ObjectList &ob
         object_list.objects[i].name = "unknown";
         object_list.objects[i].probability = 0.0;
 
-        //TODO: add tranform pose to utils 
         geometry_msgs::PoseStamped pose = getPose(boxes[i]);
         pose.header.stamp = now;
         pose.header.frame_id = frame_id_;
@@ -162,12 +140,12 @@ void PointcloudSegmentationROS::resetCloudAccumulation()
     cloud_accumulation_->reset();
 }
 
-void PointcloudSegmentationROS::addCloudAccumulation(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud)
+void PointcloudSegmentationROS::addCloudAccumulation(const PointCloud::Ptr &cloud)
 {
     cloud_accumulation_->addCloud(cloud);
 }
 
-void PointcloudSegmentationROS::get3DBoundingBox(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud, 
+void PointcloudSegmentationROS::get3DBoundingBox(const PointCloud::ConstPtr &cloud, 
                                                  const Eigen::Vector3f& normal, BoundingBox &bbox,
                                                  mas_perception_msgs::BoundingBox& bounding_box_msg)
 {
@@ -177,9 +155,7 @@ void PointcloudSegmentationROS::get3DBoundingBox(const pcl::PointCloud<pcl::Poin
 
 Eigen::Vector3f PointcloudSegmentationROS::getPlaneNormal()
 {
-    Eigen::Vector3f normal(model_coefficients_[0],
-                           model_coefficients_[1],
-                           model_coefficients_[2]);
+    Eigen::Vector3f normal(model_coefficients_->values[0], model_coefficients_->values[1], model_coefficients_->values[2]);
     return normal;
 }
 
