@@ -28,7 +28,7 @@
 
 #include <ros/ros.h>
 
-#include <mas_perception_libs/point_cloud_utils.h>
+#include <mir_object_segmentation/aliases.h>
 #include <mas_perception_msgs/ObjectList.h>
 #include <mas_perception_msgs/Object.h>
 
