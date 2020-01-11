@@ -14,36 +14,26 @@
 #include <iostream>
 #include <fstream>
 
-#include <cv_bridge/cv_bridge.h>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-#include <pcl/PCLPointCloud2.h>
-#include <pcl_ros/transforms.h>
-#include <pcl_ros/point_cloud.h>
-
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
-#include <std_msgs/String.h>
-#include <std_msgs/Float64.h>
-
-#include <dynamic_reconfigure/server.h>
-#include <mir_object_recognition/SceneSegmentationConfig.h>
-
-#include <mir_object_recognition/pointcloud_segmentation_ros.h>
-#include <mas_perception_msgs/GetSegmentedImage.h>
 #include <sensor_msgs/RegionOfInterest.h>
-
-#include <mir_object_segmentation/clustered_point_cloud_visualizer.h>
-#include <mir_object_segmentation/bounding_box_visualizer.h>
-#include <mir_object_segmentation/label_visualizer.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include <pcl/PCLPointCloud2.h>
+#include <pcl_ros/transforms.h>
+#include <pcl_ros/point_cloud.h>
+
+#include <dynamic_reconfigure/server.h>
+
+#include <mas_perception_msgs/ObjectList.h>
+
+#include <mir_object_recognition/SceneSegmentationConfig.h>
+#include <mir_object_recognition/pointcloud_segmentation_ros.h>
 #include <mir_object_recognition/multimodal_object_recognition_utils.h>
+#include <mir_perception_utils/object_utils.h>
 
 /**
  * \brief 
@@ -60,6 +50,15 @@
  *            - e_done:     - done recognizing pointcloud and image, done pose estimation and done publishing object_list
  *            - e_stopped:  - done unsubscribing, done clearing accumulated point clouds
 **/
+
+struct Object
+{
+    std::string name;
+    std::string shape;
+    std::string color;
+};
+
+typedef std::vector<Object> ObjectInfo;
 
 class MultimodalObjectRecognitionROS
 {
@@ -114,6 +113,8 @@ class MultimodalObjectRecognitionROS
         PointcloudSegmentationUPtr pointcloud_segmentation_;
         typedef std::unique_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsUPtr;
         MultimodalObjectRecognitionUtilsUPtr mm_object_recognition_utils_;
+        typedef std::unique_ptr<ObjectUtils> ObjectUtilsUPtr;
+        ObjectUtilsUPtr object_utils_;
 
         // Used to store pointcloud and image received from callback
         sensor_msgs::PointCloud2ConstPtr pointcloud_msg_;
@@ -144,6 +145,9 @@ class MultimodalObjectRecognitionROS
 
         // Parameters
         bool debug_mode_;
+        std::set<std::string> round_objects_;
+        ObjectInfo object_info_;
+        std::string object_info_path_;
 
         // Dynamic parameter
         double pcl_object_height_above_workspace_;
@@ -186,8 +190,8 @@ class MultimodalObjectRecognitionROS
          * \param[out] 3D pointcloud cluster (3D ROI) of the given 2D ROI 
         */
         void get3DObject(const sensor_msgs::RegionOfInterest &roi, 
-                         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &ordered_cloud,
-                         pcl::PointCloud<pcl::PointXYZRGB>::Ptr &pcl_object);
+                         const PointCloud::Ptr &ordered_cloud,
+                         PointCloud::Ptr &pcl_object);
         
         /** \brief Adjust object pose, make it flat, adjust container, axis and bolt poses.
          * \param[in] Object_list.pose, .name,
@@ -208,6 +212,8 @@ class MultimodalObjectRecognitionROS
         void publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
                           std::vector<PointCloud::Ptr> &clusters_3d,
                           std::vector<PointCloud::Ptr> &clusters_2d);
+
+        void loadObjectInfo(const std::string &filename);
                 
 };
 
