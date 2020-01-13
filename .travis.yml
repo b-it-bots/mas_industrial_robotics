@@ -1,0 +1,13 @@
+sudo: required
+
+language: cpp
+
+stages:
+  - build
+  - test
+
+jobs:
+  include:
+    - stage: build
+      script:
+        - ./setup.sh
