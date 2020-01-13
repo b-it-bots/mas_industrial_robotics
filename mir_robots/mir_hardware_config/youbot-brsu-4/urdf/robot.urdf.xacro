@@ -26,7 +26,7 @@
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
   <!--xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/-->
   <xacro:include filename="$(find mir_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
-  <xacro:include filename="$(find mir_description)/urdf/sensors/d435.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/asus_xtion_camera_mount.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
@@ -81,11 +81,11 @@
        <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->  
   <!-- </xacro:asus_xtion_camera-->
   
-   <xacro:sensor_d435  name="d435_back" parent="base_link">
+   <xacro:realsense_d435  name="d435_back" parent="base_link">
        <origin xyz="-0.263 0.0 0.0875" rpy="0.0 0.61 ${M_PI}" />  
-   </xacro:sensor_d435>
+   </xacro:realsense_d435>
 
-   <xacro:sensor_d435  name="d435_arm" parent="arm_link_5">
+   <xacro:realsense_d435  name="arm_cam3d" parent="arm_link_5">
        <origin xyz="0.0 -0.011 0.009" rpy="0.0 ${-M_PI / 2} ${-M_PI / 2}" />  
-   </xacro:sensor_d435>
+   </xacro:realsense_d435>
 </robot>
