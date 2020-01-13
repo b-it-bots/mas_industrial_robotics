@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=kinetic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
