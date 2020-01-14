@@ -39,7 +39,7 @@ Setup:
 
     * Then launch multimodal object recognition
 
-      .. code-block::
+      .. code-block:: bash
 
         roslaunch mir_object_recognition multimodal_object_recognition.launch debug_mode:=true
 
@@ -50,19 +50,19 @@ Setup:
 
     * Trigger data collection mode
 
-      .. code-block::
+      .. code-block:: bash
 
         rostopic pub /mir_perception/multimodal_object_recognition/event_in std_msgs/String e_data_collection
 
     * Start collectiong dataset
 
-      .. code-block::
+      .. code-block:: bash
 
         rostopic pub /mir_perception/multimodal_object_recognition/event_in std_msgs/String e_start
 
     * Stop data collection mode
 
-      .. code-block::
+      .. code-block:: bash
 
         rostopic pub /mir_perception/multimodal_object_recognition/event_in std_msgs/String e_stop_data_collection
 
