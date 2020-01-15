@@ -25,9 +25,8 @@
 
     <!-- move base safe action server -->
     <node pkg="mir_pick_from_shelf" type="pick_from_shelf_server" name="pick_from_shelf_server" output="screen" >
-        <param name="align" type="bool" value="$(arg align_with_workspace)" />
         <param name="frame_id" type="string" value="$(arg frame_id)" />
-        <param name="y_pose_movement_threshold" type="double" value="$(arg y_pose_movement_threshold)" />
+        <param name="y_pos_movement_threshold" type="double" value="$(arg y_pos_movement_threshold)" />
         <param name="start_base_pose_offset" type="double" value="$(arg start_base_pose_offset)" />
         <param name="pitch" type="double" value="$(arg pitch)" />
         <param name="arm_link_0_offset_x" type="double" value="$(arg arm_link_0_offset_x)" />
