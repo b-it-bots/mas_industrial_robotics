@@ -21,7 +21,7 @@
     <node pkg="mir_pick_object" type="pick_object_server.py" name="wbc_pick_object_server" output="screen"/>
 
     <!-- pick from shelf action server -->
-    <node pkg="mir_pick_from_shelf" type="pick_from_shelf_server" name="pick_from_shelf_server" output="screen"/>
+    <include file="$(find mir_pick_from_shelf)/ros/launch/pick_from_shelf.launch" />
     
     <!-- place object action server -->
     <node pkg="mir_place_object" type="place_object_server.py" name="place_object_server" output="screen" />
