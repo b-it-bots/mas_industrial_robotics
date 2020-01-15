@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="align_with_workspace" default="false" />
+    <arg name="frame_id" default="base_link_static" />
+
+    <!-- allowed distance for robot to move in y axis from center to align to obj -->
+    <arg name="y_pos_movement_threshold" default="0.15" />
+
+    <!-- offset along x axis from shelf to allow movement of arm without collision with upper shelf -->
+    <arg name="start_base_pose_offset" default="-0.7" />
+
+    <!-- angle at which the obj is grasped -->
+    <arg name="pitch" default="2.0" />
+
+    <!-- distance between base link and arm link 0 -->
+    <arg name="arm_link_0_offset_x" default="0.223" />
+    <arg name="arm_link_0_offset_y" default="0.0" />
+
+    <!-- percentage of distance from arm link 0 to obj pose for intermediate arm pose -->
+    <arg name="intermediate_perc" default="0.8" />
+
+    <!-- distance from robot's initial pose (perceive pose) for retracting arm -->
+    <arg name="retract_base_pose_x" default="-0.2" />
+
+    <!-- move base safe action server -->
+    <node pkg="mir_pick_from_shelf" type="pick_from_shelf_server" name="pick_from_shelf_server" output="screen" >
+        <param name="align" type="bool" value="$(arg align_with_workspace)" />
+        <param name="frame_id" type="string" value="$(arg frame_id)" />
+        <param name="y_pose_movement_threshold" type="double" value="$(arg y_pose_movement_threshold)" />
+        <param name="start_base_pose_offset" type="double" value="$(arg start_base_pose_offset)" />
+        <param name="pitch" type="double" value="$(arg pitch)" />
+        <param name="arm_link_0_offset_x" type="double" value="$(arg arm_link_0_offset_x)" />
+        <param name="arm_link_0_offset_y" type="double" value="$(arg arm_link_0_offset_y)" />
+        <param name="intermediate_perc" type="double" value="$(arg intermediate_perc)" />
+        <param name="retract_base_pose_x" type="double" value="$(arg retract_base_pose_x)" />
+    </node>
+
+</launch>
