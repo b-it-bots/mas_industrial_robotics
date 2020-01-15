@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=kinetic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
@@ -59,6 +61,13 @@ First of all you have to clone the repository.
 
     cd ~/kinetic/src;
     git clone git@github.com:b-it-bots/mas_industrial_robotics.git
+
+
+Install documentation generation software
+    cd mas_industrial_robotics
+    git submodule init
+    git submodule update
+    pip install --user sphinx-rtd-theme
 
 Then go on with installing further external dependencies:
 
