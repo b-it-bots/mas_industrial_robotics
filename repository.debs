@@ -21,6 +21,8 @@ packagelist=(
     g++-multilib
     flex
     mongodb
+    librealsense2-dkms
+    librealsense2-utils
     ros-kinetic-amcl
     ros-kinetic-bfl
     ros-kinetic-brics-actuator
@@ -67,6 +69,7 @@ packagelist=(
     ros-kinetic-diagnostic-analysis
     ros-kinetic-laser-filters
     ros-kinetic-mongodb-store
+    ros-kinetic-realsense2-camera
 )
 
 ### install debian packages listed in array above
