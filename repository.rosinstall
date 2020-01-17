@@ -1,7 +1,7 @@
 - git:
     local-name: mas_common_robotics
     uri: https://github.com/b-it-bots/mas_common_robotics.git
-    version: kinetic
+    version: melodic
 
 - git:
     local-name: youbot_driver
