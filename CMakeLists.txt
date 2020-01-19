@@ -53,7 +53,6 @@ add_definitions(-fpermissive)
 
 ### LIBRARIES ####################################################
 add_library(${PROJECT_NAME}
-  ros/src/pointcloud_segmentation_ros.cpp
   ros/src/multimodal_object_recognition_utils.cpp
 )
 
