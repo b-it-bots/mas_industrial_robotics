@@ -4,7 +4,6 @@
  * Author: Mohammad Wasil
  *
  */
-
 #ifndef MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 #define MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 
@@ -31,13 +30,12 @@
 #include <mas_perception_msgs/ObjectList.h>
 
 #include <mir_object_recognition/SceneSegmentationConfig.h>
-#include <mir_object_recognition/pointcloud_segmentation_ros.h>
 #include <mir_object_recognition/multimodal_object_recognition_utils.h>
-#include <mir_perception_utils/object_utils.h>
+#include <mir_object_segmentation/scene_segmentation_ros.h>
+#include <mir_perception_utils/object_utils_ros.h>
+#include <mir_perception_utils/pointcloud_utils_ros.h>
 
-/**
- * \brief 
- * This node subscribes to pointcloud and image_raw topics
+/** \brief This node subscribes to pointcloud and image_raw topics synchronously.
  * Inputs:
  * ~event_in:
  *            - e_start:    - starts subscribing to pointcloud and image topics simultaneously,
@@ -45,11 +43,25 @@
  *                          - detects rgb object, find 3D ROI, estimate pose
  *                          - adjusts object pose and publish them
  *            - e_stop:     - stop subscribing to the input topics and clear accumulated pointcloud
+ *            - e_data_collection -  start dataset collection mode (save dir is defined in launch file).
+ *                                   If enable, this node will not do any recognition.
  * Outputs:
  * ~event_out:
  *            - e_done:     - done recognizing pointcloud and image, done pose estimation and done publishing object_list
  *            - e_stopped:  - done unsubscribing, done clearing accumulated point clouds
+ *            - e_data_collection - data collection mode started
+ * 
+ * Topics output: rgb, pointcloud and multimodal object_lists, workspace_height.
+ * Topics output for visualization: pose array, bounding boxes and labels for both rgb and point cloud
+ * 
+ * \author Mohammad Wasil
 **/
+
+namespace mpu = mir_perception_utils;
+using mpu::visualization::BoundingBoxVisualizer;
+using mpu::visualization::ClusteredPointCloudVisualizer;
+using mpu::visualization::LabelVisualizer;
+using mpu::visualization::Color;
 
 struct Object
 {
@@ -63,11 +75,20 @@ typedef std::vector<Object> ObjectInfo;
 class MultimodalObjectRecognitionROS
 {
     public:
+        /** \brief Constructor
+         * \param[in] NodeHandle */
         MultimodalObjectRecognitionROS(ros::NodeHandle nh);
+
+        /** \brief Destructor */
         virtual ~MultimodalObjectRecognitionROS();
+        /** \brief If pointcloud and image messages has been received,
+         * multimodal object recognition will be called.
+         * This function can be called once or periodically.
+         */
         void update();
 
     private:
+        ros::NodeHandle nh_;
         ros::Subscriber sub_event_in_;
         ros::Publisher pub_event_out_;
         ros::Subscriber sub_cloud_;
@@ -89,9 +110,6 @@ class MultimodalObjectRecognitionROS
         ros::Publisher pub_pcl_object_pose_array_;
         ros::Publisher pub_rgb_object_pose_array_;
 
-        ros::Publisher pub_pcl_debug_in_;
-        ros::Publisher pub_pcl_debug_out_;
-
         // Synchronize callback for image and pointcloud
         message_filters::Subscriber<sensor_msgs::Image> *image_sub_;
         message_filters::Subscriber<sensor_msgs::PointCloud2> *cloud_sub_;
@@ -105,16 +123,10 @@ class MultimodalObjectRecognitionROS
         void recognizedCloudCallback(const mas_perception_msgs::ObjectList &msg);
     
     protected:
-        ros::NodeHandle nh_;
-        std::string target_frame_id_;
-
-        // Create unique_ptr for pointcloud_segmentation and mm_utils        
-        typedef std::unique_ptr<PointcloudSegmentationROS> PointcloudSegmentationUPtr;
-        PointcloudSegmentationUPtr pointcloud_segmentation_;
+        typedef std::unique_ptr<SceneSegmentationROS> SceneSegmentationROSUPtr;
+        SceneSegmentationROSUPtr scene_segmentation_ros_;
         typedef std::unique_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsUPtr;
         MultimodalObjectRecognitionUtilsUPtr mm_object_recognition_utils_;
-        typedef std::unique_ptr<ObjectUtils> ObjectUtilsUPtr;
-        ObjectUtilsUPtr object_utils_;
 
         // Used to store pointcloud and image received from callback
         sensor_msgs::PointCloud2ConstPtr pointcloud_msg_;
@@ -137,23 +149,23 @@ class MultimodalObjectRecognitionROS
         mas_perception_msgs::ObjectList recognized_cloud_list_;
 
         // Visualization
-        mir::visualization::BoundingBoxVisualizer bounding_box_visualizer_pcl_;
-        mir::visualization::ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        mir::visualization::ClusteredPointCloudVisualizer cluster_visualizer_pcl_;
-        mir::visualization::LabelVisualizer label_visualizer_rgb_;
-        mir::visualization::LabelVisualizer label_visualizer_pcl_;
+        BoundingBoxVisualizer bounding_box_visualizer_pcl_;
+        ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+        ClusteredPointCloudVisualizer cluster_visualizer_pcl_;
+        LabelVisualizer label_visualizer_rgb_;
+        LabelVisualizer label_visualizer_pcl_;
 
         // Parameters
         bool debug_mode_;
+        std::string target_frame_id_;
         std::set<std::string> round_objects_;
         ObjectInfo object_info_;
         std::string object_info_path_;
 
         // Dynamic parameter
-        double pcl_object_height_above_workspace_;
-        double rgb_object_height_above_workspace_;
+        double object_height_above_workspace_;
         double rgb_container_height_;
-        int rgb_bbox_size_adjustment_;
+        int rgb_roi_adjustment_;
         int rgb_bbox_min_diag_;
         int rgb_bbox_max_diag_;
         int rgb_cluster_filter_limit_min_;
@@ -167,54 +179,55 @@ class MultimodalObjectRecognitionROS
         bool data_collection_;
 
     private:
+        /** \brief Event in callback
+         * */
         void eventCallback(const std_msgs::String::ConstPtr &msg);
+
+        /** \brief Dynamic reconfigure callback
+         * */
         void configCallback(mir_object_recognition::SceneSegmentationConfig &config, uint32_t level);
         
-        /** \brief Transform pointcloud to the given frame id ("base_link" by default)*/
-        void transformCloud();
+        /** \brief Transform pointcloud to the given frame id ("base_link" by default)
+         * \param[in] PointCloud2 input
+        */
+        void preprocessPointCloud(const sensor_msgs::PointCloud2ConstPtr &cloud_msg);
 
         /** \brief Add cloud accumulation, segment accumulated pointcloud, find the plane, 
          *         clusters table top objects, find object heights.
          * \param[out] 3D object list with unknown label
          * \param[out] Table top pointcloud clusters
-        */
-        void segmentPointcloud(mas_perception_msgs::ObjectList &object_list, 
-                               std::vector<PointCloud::Ptr> &clusters);
+         **/
+        void segmentPointCloud(mas_perception_msgs::ObjectList &object_list, 
+                               std::vector<PointCloud::Ptr> &clusters,
+                               std::vector<BoundingBox> boxes);
 
         /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
         void recognizeCloudAndImage();
 
-        /** \brief Get 3D objects given 2D ROI 
-         * \param[in] Region of interest (bounding box) of 2D object
-         * \param[in] Ordered and transformed pointcloud
-         * \param[out] 3D pointcloud cluster (3D ROI) of the given 2D ROI 
-        */
-        void get3DObject(const sensor_msgs::RegionOfInterest &roi, 
-                         const PointCloud::Ptr &ordered_cloud,
-                         PointCloud::Ptr &pcl_object);
-        
         /** \brief Adjust object pose, make it flat, adjust container, axis and bolt poses.
          * \param[in] Object_list.pose, .name,
          * 
-        */
+         **/
         void adjustObjectPose(mas_perception_msgs::ObjectList &object_list);
 
         /** \brief Publish object_list to object_list merger 
          * \param[in] Object list to publish
-        */
+         **/
         void publishObjectList(mas_perception_msgs::ObjectList &object_list);
 
         /** \brief Publish debug info such as bbox, poses, labels for both 2D and 3D objects.
          * \param[in] combined object list
          * \param[in] 3D pointcloud cluster from 3D object segmentation
          * \param[in] 3D pointcloud cluster from 2D bounding box proposal
-        */
+         **/
         void publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
                           std::vector<PointCloud::Ptr> &clusters_3d,
                           std::vector<PointCloud::Ptr> &clusters_2d);
 
-        void loadObjectInfo(const std::string &filename);
-                
+        /** \brief Load qualitative object info
+         * \param[in] Path to the xml object file
+         * */ 
+        void loadObjectInfo(const std::string &filename);              
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
