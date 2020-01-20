@@ -1,14 +1,29 @@
 sudo: required
 
+services:
+  - docker
+
 language: cpp
+
+env:
+  global:
+    - COMPOSE_VERSION: 1.22.0
+    - CONTAINER_RELEASE_IMAGE: bitbots/mas_industrial_robotics:$TRAVIS_BRANCH
 
 before_install:
   - sudo pip install --upgrade pip
   - sudo pip install sphinx
   - sudo pip install --user sphinx-rtd-theme
+  - sudo rm /usr/local/bin/docker-compose
+  - sudo curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+  - sudo chmod +x /usr/local/bin/docker-compose
+  - docker-compose -v
+  - echo $CONTAINER_RELEASE_IMAGE
 
 stages:
   - build
+  - name: deploy
+    if: branch IN (devel, indigo, kinetic, melodic) OR tag = true
   - name: docs
     if: (branch IN (devel, indigo, kinetic, melodic) AND type != "pull_request") OR tag = true
 
@@ -17,7 +32,15 @@ jobs:
     - stage: build
       name: "Complete Build"
       script:
-        - ./setup.sh
+        - ./setup.sh full
+    - stage: deploy
+      name: "Docker Hub Deployment"
+      skip_cleanup: true
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - docker-compose build travis
+        - docker images
+        - docker push $CONTAINER_RELEASE_IMAGE
     - stage: docs
       name: "Build and deploy documentation"
       script:
