@@ -11,6 +11,9 @@ env:
       - CONTAINER_RELEASE_IMAGE: bitbots/mas_industrial_robotics:$TRAVIS_BRANCH
 
 before_install:
+  - sudo pip install --upgrade pip
+  - sudo pip install sphinx
+  - sudo pip install --user sphinx-rtd-theme
   - sudo rm /usr/local/bin/docker-compose
   - sudo curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
   - sudo chmod +x /usr/local/bin/docker-compose
@@ -18,21 +21,32 @@ before_install:
   - echo $CONTAINER_RELEASE_IMAGE
 
 stages:
-  - build
-  - name: deploy
-    if: branch IN (devel, indigo, kinetic, melodic) OR tag = true
+#   - build
+#   - name: deploy
+#     if: branch IN (devel, indigo, kinetic, melodic) OR tag = true
+#   - name: docs
+#     if: branch IN (devel, indigo, kinetic, melodic) OR tag = true
 
 jobs:
   include:
-    - stage: build
-      name: "Complete Build"
+    # - stage: build
+    #   name: "Complete Build"
+    #   script:
+    #     - ./setup.sh full
+    # - stage: deploy
+    #   name: "Docker Hub Deployment"
+    #   skip_cleanup: true
+    #   script:
+    #     - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+    #     - docker-compose build travis
+    #     - docker images
+    #     - docker push $CONTAINER_RELEASE_IMAGE
+    - stage: docs
+      name: "Build and deploy documentation"
       script:
-        - ./setup.sh full
-    - stage: deploy
-      name: "Docker Hub Deployment"
-      skip_cleanup: true
-      script:
-        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-        - docker-compose build travis
-        - docker images
-        - docker push $CONTAINER_RELEASE_IMAGE
+        - BRANCH=master
+        - cd docs && DOCS_DIR=$(pwd)/build && rm -rf build && make html
+        - cd /tmp && git clone https://$GITHUB_USERNAME:$GITHUB_PASSWORD@github.com/b-it-bots/wiki.git --branch $BRANCH
+        - cp -r $DOCS_DIR/html/ /tmp/wiki/work/ && cd wiki
+        - git checkout $BRANCH && git add * && git commit -m "Update mas_industrial_robotics documentation via Travis CI" || true
+        - git push origin $BRANCH
