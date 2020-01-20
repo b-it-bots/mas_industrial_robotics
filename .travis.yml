@@ -2,12 +2,28 @@ sudo: required
 
 language: cpp
 
+before_install:
+  - sudo pip install --upgrade pip
+  - sudo pip install sphinx
+  - sudo pip install --user sphinx-rtd-theme
+
 stages:
   - build
-  - test
+  - name: docs
+    if: (branch IN (devel, indigo, kinetic, melodic) AND type != "pull_request") OR tag = true
 
 jobs:
   include:
     - stage: build
+      name: "Complete Build"
       script:
         - ./setup.sh
+    - stage: docs
+      name: "Build and deploy documentation"
+      script:
+        - BRANCH=master
+        - cd docs && DOCS_DIR=$(pwd)/build && rm -rf build && make html
+        - cd /tmp && git clone https://$GITHUB_USERNAME:$GITHUB_PASSWORD@github.com/b-it-bots/wiki.git --branch $BRANCH
+        - cp -r $DOCS_DIR/html/ /tmp/wiki/work/ && cd wiki
+        - git checkout $BRANCH && git add * && git commit -m "Update mas_industrial_robotics documentation via Travis CI" || true
+        - git push origin $BRANCH
