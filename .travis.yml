@@ -8,7 +8,7 @@ language: cpp
 env:
   global:
     - COMPOSE_VERSION: 1.22.0
-    - CONTAINER_RELEASE_IMAGE: bitbots/mas_industrial_robotics:$TRAVIS_BRANCH
+    - CONTAINER_RELEASE_IMAGE: bitbots/bitbots-industrial:$TRAVIS_BRANCH
 
 before_install:
   - sudo pip install --upgrade pip
