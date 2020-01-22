@@ -23,7 +23,7 @@ before_install:
 stages:
   - build
   - name: deploy
-    if: branch IN (devel, indigo, kinetic, melodic) OR tag = true
+    if: (branch IN (devel, indigo, kinetic, melodic) AND type != "pull_request") OR tag = true
   - name: docs
     if: (branch IN (devel, indigo, kinetic, melodic) AND type != "pull_request") OR tag = true
 
