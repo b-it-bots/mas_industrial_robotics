@@ -1,0 +1,132 @@
+#! /usr/bin/env python
+"""
+This module provides a way to move a manipulator arm using moveit to a desired pose
+
+It calculates inverse kinematics of the arm to get joint_angles. These are given
+to moveit to execute the motion
+"""
+
+from __future__ import print_function
+
+import tf
+import copy
+import rospy
+import numpy as np
+from geometry_msgs.msg import PoseStamped, Quaternion
+from std_msgs.msg import String, Header
+from mcr_manipulation_utils_ros.kinematics import Kinematics
+
+class MoveitToPoseNode(object):
+
+    """
+    This module provides a way to move a manipulator arm using moveit to a desired pose
+
+    It calculates inverse kinematics of the arm to get joint_angles. These are given
+    to moveit to execute the motion
+    """
+
+    def __init__(self):
+        # ROS PARAMS
+        self.arm_name = rospy.get_param('~arm', None)
+        assert self.arm_name is not None, "Group to move (e.g. arm) must be specified."
+        arm_link_5_to_gripper_tip = rospy.get_param('~arm_link_5_to_gripper_tip', 0.11)
+        self._gripper_tip_to_arm_link_5_transform = tf.transformations.identity_matrix()
+        self._gripper_tip_to_arm_link_5_transform[2, 3] = -arm_link_5_to_gripper_tip
+
+        # kinematics class to compute the inverse kinematics and to move arm
+        # sometimes the kinematics object does not initialise because of timeout
+        self.kinematics = None
+        num_of_trial = 0
+        max_trials = 3
+        while num_of_trial < max_trials and self.kinematics is None:
+            try:
+                self.kinematics = Kinematics(self.arm_name)
+            except Exception as e:
+                rospy.logwarn('Could not initialise kinematics. Trial num: ' + str(num_of_trial))
+                num_of_trial += 1
+        if self.kinematics is None:
+            rospy.logerr('Could not initialise kinematics after ' + str(max_trials) + ' trials. Giving up.')
+            return
+
+        # Time allowed for the IK solver to find a solution (in seconds).
+        self.ik_timeout = 0.5
+
+        self._desired_pose = None
+
+        # SUBSCRIBERS
+        self._pose_sub = rospy.Subscriber('~pose_in', PoseStamped, self._input_pose_cb)
+        self._event_in_sub = rospy.Subscriber('~event_in', String, self._event_in_cb)
+
+        # PUBLISHERS
+        self._event_out_pub = rospy.Publisher('~event_out', String, queue_size=1)
+
+        rospy.loginfo("[moveit_to_pose] Initialised.")
+        
+    def _input_pose_cb(self, msg):
+        """Callback function for desired pose
+
+        :msg: geometry_msgs/PoseStamped
+        :returns: None
+
+        """
+        self._desired_pose = msg
+
+    def _event_in_cb(self, msg):
+        """Callback function for event_in messages
+
+        :msg: std_msgs/String
+        :returns: None
+
+        """
+        if msg.data == 'e_trigger':
+            response = 'e_pose_not_provided'
+            if self._desired_pose is not None:
+                arm_pose = self._get_arm_link_5_pose(self._desired_pose)
+
+                solution = self.kinematics.inverse_kinematics(
+                    arm_pose, timeout=self.ik_timeout)
+                rospy.logdebug(solution)
+                if solution is not None:
+                    self.kinematics.group.go(solution, wait=True)
+                    response = 'e_done'
+                else:
+                    response = 'e_ik_failed'
+            self._event_out_pub.publish(String(data=response))
+            self._desired_pose = None
+
+    def _get_arm_link_5_pose(self, gripper_pose):
+        """ Transform 'gripper_pose' into 'arm_pose' such that if 'gripper_pose' represents where
+        the gripper must be, then 'arm_pose' represents where the arm_link_5 must be
+
+        :gripper_pose: geometry_msgs/PoseStamped
+        :returns: geometry_msgs/PoseStamped
+
+        """
+        # convert gripper_pose to gripper_pose_matrix
+        gripper_pose_matrix = tf.transformations.quaternion_matrix([
+            gripper_pose.pose.orientation.x,
+            gripper_pose.pose.orientation.y,
+            gripper_pose.pose.orientation.z,
+            gripper_pose.pose.orientation.w])
+        gripper_pose_matrix[0, 3] = gripper_pose.pose.position.x
+        gripper_pose_matrix[1, 3] = gripper_pose.pose.position.y
+        gripper_pose_matrix[2, 3] = gripper_pose.pose.position.z
+
+        # transform gripper to arm_pose using a transformation matrix
+        arm_pose_matrix = np.dot(gripper_pose_matrix, self._gripper_tip_to_arm_link_5_transform)
+
+        # convert arm_pose_matrix to arm_pose
+        arm_pose = PoseStamped()
+        arm_pose.pose.position.x = arm_pose_matrix[0, 3]
+        arm_pose.pose.position.y = arm_pose_matrix[1, 3]
+        arm_pose.pose.position.z = arm_pose_matrix[2, 3]
+        quaternion = tf.transformations.quaternion_from_matrix(arm_pose_matrix)
+        arm_pose.pose.orientation = Quaternion(*quaternion)
+        arm_pose.header.frame_id = gripper_pose.header.frame_id
+        return arm_pose
+
+if __name__ == "__main__":
+    rospy.init_node('moveit_to_pose')
+    MOVEIT_TO_POSE_NODE = MoveitToPoseNode()
+    if MOVEIT_TO_POSE_NODE.kinematics:
+        rospy.spin()

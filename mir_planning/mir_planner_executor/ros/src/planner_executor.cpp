@@ -9,7 +9,7 @@
 #include <ros/console.h>
 
 #include <mir_planner_executor/actions/move/move_action.h>
-#include <mir_planner_executor/actions/pick/pick_action.h>
+#include <mir_planner_executor/actions/pick/combined_pick_action.h>
 #include <mir_planner_executor/actions/place/place_action.h>
 #include <mir_planner_executor/actions/perceive/combined_perceive_action.h>
 #include <mir_planner_executor/actions/stage/stage_action.h>
@@ -27,7 +27,7 @@ PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh) : server_(nh, "execute_pla
 
     //audio_publisher_ = private_nh.advertise<mir_audio_receiver::AudioMessage>("/mir_audio_receiver/tts_request", 1);
 
-    addActionExecutor("PICK", new PickAction());
+    addActionExecutor("PICK", new CombinedPickAction());
     addActionExecutor("PLACE", new PlaceAction());
     addActionExecutor("STAGE", new StageAction());
     addActionExecutor("UNSTAGE", new UnstageAction());
