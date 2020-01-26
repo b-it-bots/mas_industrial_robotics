@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_2dexplore</name>
+  <version>0.0.1</version>
+  <description>Exploring and map building</description>
+
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>gmapping</run_depend>
+  <run_depend>cob_scan_unifier</run_depend>
+  <run_depend>move_base</run_depend>
+  <run_depend>explore_lite</run_depend>
+  <run_depend>frontier_exploration</run_depend>
+
+  <test_depend>roslaunch</test_depend>  
+
+</package>
