@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
 from __future__ import print_function
-import sys
 import rospy
 import smach
 
 # import of generic states
 import mir_states.common.manipulation_states as gms
 import mcr_states.common.basic_states as gbs
+import mir_states.common.action_states as gas
 
 # action lib
 from smach_ros import ActionServerWrapper, IntrospectionServer
@@ -277,6 +277,12 @@ def main():
         # - Pick object from drawer TODO
 
         # - Stage the object TODO
+        smach.StateMachine.add(
+                'STAGE_OBJECT',
+                gas.stage_object(),
+                transitions={'success': 'OVERALL_SUCCESS',
+                             'failed' : 'OVERALL_FAILED'})                            
+
 
         # - Move base backward to close drawer
         smach.StateMachine.add(
