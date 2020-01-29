@@ -13,3 +13,12 @@ class PickFromDrawerUtils(object):
 
     def __init__(self):
         pass
+
+    def calc_pose_for_dbc_for_param(self, param_name='default'):
+        """Calculate pose for dbc based on the param
+
+        :param_name: str
+        :returns: geometry_msgs.PoseStamped
+
+        """
+        pass
