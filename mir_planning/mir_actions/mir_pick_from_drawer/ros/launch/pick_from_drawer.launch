@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_pick_from_drawer" type="pick_from_drawer_server" name="pick_from_drawer_server" output="screen" >
+    </node>
+
+</launch>
