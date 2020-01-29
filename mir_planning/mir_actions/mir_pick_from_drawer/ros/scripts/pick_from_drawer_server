@@ -63,7 +63,8 @@ class AddPoseToUserdata(smach.State):
 
 class SendPoseToDBC(smach.State):
     def __init__(self, param_name='default'):
-        smach.State.__init__(self,  outcomes=['succeeded'])
+        smach.State.__init__(self, outcomes=['succeeded'],
+                                   input_keys=['handle_pose'])
         self._dbc_pose_pub = rospy.Publisher('/mcr_navigation/direct_base_controller/input_pose',
                                              PoseStamped, queue_size=10)
         self._obj_pose = None
@@ -72,7 +73,8 @@ class SendPoseToDBC(smach.State):
         rospy.sleep(0.1) # time for the publisher to register in ros network
 
     def execute(self, userdata):
-        dbc_pose = self.utils.calc_pose_for_dbc_for_param(self._param_name)
+        dbc_pose = self.utils.calc_pose_for_dbc_for_param(userdata.handle_pose,
+                                                          self._param_name)
         self._dbc_pose_pub.publish(dbc_pose)
         return 'succeeded'
 

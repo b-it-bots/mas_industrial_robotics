@@ -2,6 +2,7 @@
 <launch>
 
     <node pkg="mir_pick_from_drawer" type="pick_from_drawer_server" name="pick_from_drawer_server" output="screen" >
+        <rosparam command="load" file="$(find mir_pick_from_drawer)/ros/config/params.yaml" />
     </node>
 
 </launch>
