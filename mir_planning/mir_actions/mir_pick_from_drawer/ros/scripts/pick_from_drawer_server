@@ -39,10 +39,12 @@ class Setup(smach.State):
 #===============================================================================
 
 class AddPoseToUserdata(smach.State):
-    def __init__(self, topic_name):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'],
-                                   output_keys=['var_name'])
+    def __init__(self, topic_name, is_object=True):
+        smach.State.__init__(self, outcomes=['succeeded', 'timeout'],
+                                   input_keys=['handle_pose', 'object_pose'],
+                                   output_keys=['handle_pose', 'object_pose'])
         _pose_sub = rospy.Subscriber(topic_name, PoseStamped, self._pose_cb)
+        self._is_object = is_object
         self._pose = None
         rospy.sleep(0.1) # time for the publisher to register in ros network
 
@@ -50,14 +52,23 @@ class AddPoseToUserdata(smach.State):
         self._pose = msg
 
     def execute(self, userdata):
+        start_time = rospy.get_time()
+        while self._pose is None and start_time + 10.0 > rospy.get_time():
+            rospy.sleep(0.5)
+
         if self._pose is not None:
-            userdata.var_name = self._pose
+            if self._is_object:
+                userdata.object_pose = self._pose
+            else:
+                userdata.handle_pose = self._pose
+            print("\nadd pose to userdata\n")
+            print(self._is_object)
             rospy.loginfo(self._pose)
             self._pose = None
             return 'succeeded'
         else:
-            rospy.loginfo("Failed")
-            return 'failed'
+            rospy.loginfo("Timeout")
+            return 'timeout'
 
 #===============================================================================
 
@@ -75,6 +86,8 @@ class SendPoseToDBC(smach.State):
     def execute(self, userdata):
         dbc_pose = self.utils.calc_pose_for_dbc_for_param(userdata.handle_pose,
                                                           self._param_name)
+        print("\n\n", self._param_name, "\n\n")
+        rospy.loginfo(dbc_pose)
         self._dbc_pose_pub.publish(dbc_pose)
         return 'succeeded'
 
@@ -110,6 +123,7 @@ def main():
             output_keys = ['feedback', 'result'])
 
     with sm:
+        # ASSUMPTION: front laser of robot is 25 cm or more away from drawer
         smach.StateMachine.add(
                 'SETUP',
                 Setup(),
@@ -140,7 +154,7 @@ def main():
                     event_in_list=[('/mcr_navigation/direct_base_controller/coordinator/event_in','e_start')],
                     event_out_list=[('/mcr_navigation/direct_base_controller/coordinator/event_out','e_success', True)],
                     timeout_duration=10),
-                transitions={'success': 'OVERALL_SUCCESS',
+                transitions={'success': 'MOVE_ARM_TO_LOOK_AT_DRAWER_HANDLE',
                              'timeout': 'OVERALL_FAILED',
                              'failure': 'OVERALL_FAILED'})
 
@@ -148,16 +162,15 @@ def main():
         smach.StateMachine.add(
                 'MOVE_ARM_TO_LOOK_AT_DRAWER_HANDLE',
                 gms.move_arm("look_at_drawer_handle"),
-                transitions={'succeeded': 'OVERALL_SUCCESS',
+                transitions={'succeeded': 'ADD_POSE_TO_USERDATA_HANDLE',
                              'failed': 'MOVE_ARM_TO_LOOK_AT_DRAWER_HANDLE'})
 
         # - Call perceive drawer handle TODO
         smach.StateMachine.add(
                 'ADD_POSE_TO_USERDATA_HANDLE',
-                AddPoseToUserdata(topic_name='~handle_pose'),
-                transitions={'succeeded': 'OVERALL_SUCCESS',
-                             'failed': 'OVERALL_FAILED'},
-                remapping={'var_name', 'handle_pose'})
+                AddPoseToUserdata(topic_name='~handle_pose', is_object=False),
+                transitions={'succeeded': 'SEND_DBC_POSE_OPEN_DRAWER_SAFE',
+                             'timeout': 'OVERALL_FAILED'})
 
         # - Based on the pose, move the base to drawer opening location (note the
         #   robot should be a bit behind, so that the arm movement does not
@@ -279,10 +292,9 @@ def main():
         # - Call perceive inside drawer TODO
         smach.StateMachine.add(
                 'ADD_POSE_TO_USERDATA_OBJECT',
-                AddPoseToUserdata(topic_name='~object_pose'),
+                AddPoseToUserdata(topic_name='~object_pose', is_object=True),
                 transitions={'succeeded': 'OVERALL_SUCCESS',
-                             'failed': 'OVERALL_FAILED'},
-                remapping={'var_name', 'object_pose'})
+                             'timeout': 'OVERALL_FAILED'})
 
         # - Pick object from drawer TODO
 

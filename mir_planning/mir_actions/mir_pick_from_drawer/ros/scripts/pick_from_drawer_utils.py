@@ -13,6 +13,7 @@ class PickFromDrawerUtils(object):
 
     def __init__(self):
         self._dbc_params = rospy.get_param('~dbc_params', None)
+        self._frame_id = rospy.get_param('~frame_id', 'base_link_static')
         if self._dbc_params is None:
             rospy.logfatal('Params not available')
 
@@ -24,7 +25,19 @@ class PickFromDrawerUtils(object):
         :returns: geometry_msgs.PoseStamped
 
         """
-        if param_name in self._dbc_params:
-            print(self._dbc_params[param_name])
-        output_pose = PoseStamped()
-        return output_pose
+        if param_name not in self._dbc_params:
+            return PoseStamped()
+
+        print(self._dbc_params[param_name])
+
+        dbc_target_pose = PoseStamped()
+        dbc_target_pose.header.stamp = rospy.Time.now()
+        dbc_target_pose.header.frame_id = self._frame_id
+        if pose_in is None:
+            dbc_target_pose.pose.position.x = self._dbc_params[param_name]['x_offset']
+        else:
+            dbc_target_pose.pose.position.x = pose_in.pose.position.x + self._dbc_params[param_name]['x_offset']
+        dbc_target_pose.pose.position.y = 0.0
+        dbc_target_pose.pose.orientation.w = 1.0
+
+        return dbc_target_pose
