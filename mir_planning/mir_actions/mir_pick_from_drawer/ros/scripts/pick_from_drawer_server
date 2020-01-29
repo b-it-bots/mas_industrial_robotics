@@ -82,6 +82,32 @@ def main():
             output_keys = ['feedback', 'result'])
 
     with sm:
+        """
+        ASSUME the robot is at desired position
+        - Move base back for perceive drawer handle
+        - Move arm to look_at_drawer_handle
+        - Call perceive drawer handle
+        - Based on the pose, move the base to drawer opening location (note the
+          robot should be a bit behind, so that the arm movement does not
+          collide with the drawer)
+        - Move the arm to drawer handle pose
+        - Move base a bit forward so that the gripper is at drawer handle
+        - Close gripper
+        - Move base backwards to open drawer
+        - Open gripper
+        - Move base a bit back so that the arm can move up without collision
+        - Move arm to look_inside_drawer
+        - Move base forward so that the camera can see inside
+        - Call perceive inside drawer
+        - Pick object from drawer
+        - Stage the object
+        - Move base backward to close drawer
+        - Move arm to close_drawer pose
+        - Move base forward to close the drawer
+        - Move base backward so that the arm does not collide when moving up
+        - Move arm to some neutral position
+        """
+
         pass
  
     # smach viewer
