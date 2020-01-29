@@ -1,0 +1,109 @@
+#!/usr/bin/python
+
+from __future__ import print_function
+import sys
+import rospy
+import smach
+
+# import of generic states
+import mir_states.common.manipulation_states as gms
+import mcr_states.common.basic_states as gbs
+
+# action lib
+from smach_ros import ActionServerWrapper, IntrospectionServer
+
+from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped
+from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteResult, GenericExecuteFeedback
+from mir_actions.utils import Utils
+from pick_from_drawer_utils import PickFromDrawerUtils
+        
+#===============================================================================
+
+class SendPoseToDBC(smach.State):
+    def __init__(self, retract=False):
+        smach.State.__init__(self,  outcomes=['succeeded'])
+        self._dbc_pose_pub = rospy.Publisher('/mcr_navigation/direct_base_controller/input_pose',
+                                             PoseStamped, queue_size=10)
+        _obj_pose_sub = rospy.Subscriber('mcr_perception/object_selector/output/object_pose',
+                                         PoseStamped, self._obj_pose_cb)
+        self._obj_pose = None
+        self.retract = retract
+        self.utils = PickFromDrawerUtils()
+        rospy.sleep(0.1) # time for the publisher to register in ros network
+
+    def _obj_pose_cb(self, msg):
+        self._obj_pose = msg
+
+    def execute(self, userdata):
+        if self.retract:
+            dbc_pose = self.utils.get_retracted_dbc_pose()
+        else:
+            dbc_pose = self.utils.calc_pose_for_dbc(self._obj_pose)
+        self._dbc_pose_pub.publish(dbc_pose)
+        self._obj_pose = None
+        return 'succeeded'
+
+#===============================================================================
+
+class SendPoseToMoveIt(smach.State):
+    def __init__(self, is_intermediate=False):
+        smach.State.__init__(self,  outcomes=['succeeded'])
+        self._moveit_pose_pub = rospy.Publisher('/moveit_to_pose/pose_in',
+                                                PoseStamped, queue_size=10)
+        _obj_pose_sub = rospy.Subscriber('mcr_perception/object_selector/output/object_pose',
+                                         PoseStamped, self._obj_pose_cb)
+        self._obj_pose = None
+        self._is_intermediate = is_intermediate
+        self.utils = PickFromDrawerUtils()
+        rospy.sleep(0.1) # time for the publisher to register in ros network
+
+    def _obj_pose_cb(self, msg):
+        self._obj_pose = msg
+
+    def execute(self, userdata):
+        modified_obj_pose = self.utils.get_arm_pose(self._obj_pose,
+                                                    self._is_intermediate)
+        rospy.loginfo("Modified pose")
+        rospy.loginfo(modified_obj_pose)
+        self._moveit_pose_pub.publish(modified_obj_pose)
+        self._obj_pose = None
+        return 'succeeded'
+
+#===============================================================================
+
+def main():
+    # Open the container
+    rospy.init_node('pick_from_drawer_server')
+    # Construct state machine
+    sm = smach.StateMachine(
+            outcomes=['OVERALL_SUCCESS','OVERALL_FAILED'],
+            input_keys = ['goal'],
+            output_keys = ['feedback', 'result'])
+
+    with sm:
+        pass
+ 
+    # smach viewer
+    if rospy.get_param('~viewer_enabled', False):
+        sis = IntrospectionServer('pick_from_drawer_viewer', sm,
+                                  '/PICK_OBJECT_FROM_DRAWER_SMACH_VIEWER')
+        sis.start()
+    
+    # Construct action server wrapper
+    asw = ActionServerWrapper(
+        server_name = 'pick_from_drawer_server',
+        action_spec = GenericExecuteAction,
+        wrapped_container = sm,
+        succeeded_outcomes = ['OVERALL_SUCCESS'],
+        aborted_outcomes   = ['OVERALL_FAILED'],
+        preempted_outcomes = ['PREEMPTED'],
+        goal_key     = 'goal',
+        feedback_key = 'feedback',
+        result_key   = 'result')
+    # Run the server in a background thread
+    asw.run_server()
+    rospy.spin()
+        
+if __name__ == '__main__':
+   main()
