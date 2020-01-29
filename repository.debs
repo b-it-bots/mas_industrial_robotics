@@ -33,6 +33,8 @@ packagelist=(
     ros-kinetic-dynamixel-controllers
     ros-kinetic-dynamixel-msgs
     ros-kinetic-eband-local-planner
+    ros-kinetic-explore-lite
+    ros-kinetic-frontier-exploration
     ros-kinetic-gazebo-ros-control
     ros-kinetic-gazebo-plugins
     ros-kinetic-gmapping
