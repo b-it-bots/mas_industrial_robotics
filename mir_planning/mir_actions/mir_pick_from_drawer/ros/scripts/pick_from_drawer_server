@@ -110,9 +110,17 @@ def main():
             output_keys = ['feedback', 'result'])
 
     with sm:
-        smach.StateMachine.add('SETUP', Setup(),
-                transitions={'succeeded':'SET_DBC_PARAMS'})
+        smach.StateMachine.add(
+                'SETUP',
+                Setup(),
+                transitions={'succeeded':'PUBLISH_REFERENCE_FRAME'})
         
+        # publish a static frame which will be used as reference for perceived objs
+        smach.StateMachine.add(
+                'PUBLISH_REFERENCE_FRAME',
+                gbs.send_event([('/static_transform_publisher_node/event_in', 'e_start')]),
+                transitions={'success':'SET_DBC_PARAMS'})
+
         smach.StateMachine.add(
                 'SET_DBC_PARAMS',
                 gbs.set_named_config('dbc_pick_object'),
@@ -305,7 +313,7 @@ def main():
         # - Move arm to close_drawer pose
         smach.StateMachine.add(
                 'MOVE_ARM_TO_CLOSE_DRAWER',
-                gms.move_arm("close_drawer"),
+                gms.move_arm("look_at_drawer_handle"),
                 transitions={'succeeded': 'OVERALL_SUCCESS',
                              'failed': 'MOVE_ARM_TO_CLOSE_DRAWER'})
 
