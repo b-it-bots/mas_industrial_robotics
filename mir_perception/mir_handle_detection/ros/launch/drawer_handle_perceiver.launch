@@ -7,7 +7,7 @@
     <arg name="y_threshold_min" default="-0.1" />
     <arg name="y_threshold_max" default="0.1" />
 
-    <node pkg="mir_pick_from_drawer" type="drawer_handle_perceiver" name="drawer_handle_perceiver" output="screen">
+    <node pkg="mir_handle_detection" type="drawer_handle_perceiver" name="drawer_handle_perceiver" output="screen">
         <remap from="~input" to="$(arg input_pointcloud_topic)" />  
         <param name="publish_output_pc" type="bool" value="true" />
         <param name="output_pc_frame" type="str" value="base_link_static" />
