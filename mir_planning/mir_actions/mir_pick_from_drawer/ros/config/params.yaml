@@ -1,8 +1,8 @@
 dbc_params:
     perceive_handle:
-        x_offset: 0.0
+        x_offset: -0.3
     open_drawer_safe:
-        x_offset: 0.0
+        x_offset: -0.7
     open_drawer:
         x_offset: 0.0
     open_drawer_post:
