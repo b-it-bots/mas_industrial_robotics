@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_handle_detection</name>
+  <version>1.0.0</version>
+  <description>
+    Detect handle of a drawer using pointcloud library.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
