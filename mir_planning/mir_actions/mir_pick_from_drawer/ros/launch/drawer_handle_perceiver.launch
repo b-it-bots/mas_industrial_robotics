@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="input_pointcloud_topic" default="/arm_cam3d/depth_registered/points" />
+    <arg name="z_threshold_min" default="-0.08" />
+    <arg name="z_threshold_max" default="0.1" />
+    <arg name="y_threshold_min" default="-0.1" />
+    <arg name="y_threshold_max" default="0.1" />
+
+    <node pkg="mir_pick_from_drawer" type="drawer_handle_perceiver" name="drawer_handle_perceiver" output="screen">
+        <remap from="~input" to="$(arg input_pointcloud_topic)" />  
+        <param name="publish_output_pc" type="bool" value="true" />
+        <param name="output_pc_frame" type="str" value="base_link_static" />
+        <param name="z_threshold_min" type="double" value="$(arg z_threshold_min)" />
+        <param name="z_threshold_max" type="double" value="$(arg z_threshold_max)" />
+        <param name="y_threshold_min" type="double" value="$(arg y_threshold_min)" />
+        <param name="y_threshold_max" type="double" value="$(arg y_threshold_max)" />
+    </node>
+
+</launch>
+
