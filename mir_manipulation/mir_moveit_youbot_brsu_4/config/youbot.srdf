@@ -226,10 +226,17 @@
 
     <group_state name="look_at_drawer_handle" group="arm_1">
         <joint name="arm_joint_1" value="2.160" />
-        <joint name="arm_joint_2" value="2.5395" />
-        <joint name="arm_joint_3" value="-0.7892" />
-        <joint name="arm_joint_4" value="0.4159" />
-        <joint name="arm_joint_5" value="2.9332" />
+        <joint name="arm_joint_2" value="2.1392" />
+        <joint name="arm_joint_3" value="-0.3269" />
+        <joint name="arm_joint_4" value="0.4764" />
+        <joint name="arm_joint_5" value="1.345" />
+    </group_state>
+    <group_state name="drawer_handle_pre_grasp" group="arm_1">
+        <joint name="arm_joint_1" value="2.160" />
+        <joint name="arm_joint_2" value="2.2125" />
+        <joint name="arm_joint_3" value="-0.3260" />
+        <joint name="arm_joint_4" value="0.6307" />
+        <joint name="arm_joint_5" value="2.9423" />
     </group_state>
     <group_state name="look_inside_drawer" group="arm_1">
         <joint name="arm_joint_1" value="2.160" />
