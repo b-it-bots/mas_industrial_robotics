@@ -5,7 +5,7 @@ output_frame: 'base_link_static'
 enable_debug_pc_pub: true
 
 # for pass through filter
-z_threshold_min: -0.08
+z_threshold_min: -0.05
 z_threshold_max: 0.1
 y_threshold_min: -0.1
 y_threshold_max: 0.1
