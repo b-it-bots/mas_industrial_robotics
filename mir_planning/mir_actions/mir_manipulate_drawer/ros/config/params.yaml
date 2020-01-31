@@ -16,18 +16,3 @@ dbc_params:
         x_offset: -0.6
     close_drawer_safe:
         x_offset: -0.75
-arm_params:
-    drawer_handle:
-        x_offset: -0.005
-        y_offset: 0.0
-        z_offset: 0.015
-        roll: 0.0
-        pitch: 2.25
-        yaw: 0.0
-    object:
-        x_offset: 0.0
-        y_offset: 0.0
-        z_offset: 0.01
-        roll: 0.0
-        pitch: 3.14
-        yaw: 0.0
