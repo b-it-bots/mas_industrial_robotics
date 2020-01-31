@@ -40,7 +40,7 @@ class PickFromDrawerUtils(object):
             dbc_target_pose.pose.position.y = 0.0
         else:
             dbc_target_pose.pose.position.x = pose_in.pose.position.x + self._dbc_params[param_name]['x_offset']
-            if param_name in ['open_drawer_post', 'open_drawer_post_safe']:
+            if param_name in ['open_drawer_post', 'open_drawer_post_safe', 'perceive_drawer', 'close_drawer_pre_safe']:
                 dbc_target_pose.pose.position.x -= self._drawer_length
             dbc_target_pose.pose.position.y = pose_in.pose.position.y
         dbc_target_pose.pose.orientation.w = 1.0
