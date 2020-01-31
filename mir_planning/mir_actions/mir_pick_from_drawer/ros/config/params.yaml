@@ -1,14 +1,13 @@
+drawer_length: 0.25
 dbc_params:
     perceive_handle:
         x_offset: -0.3
-    open_drawer_safe:
-        x_offset: -0.7
     open_drawer:
-        x_offset: 0.0
+        x_offset: -0.62
     open_drawer_post:
-        x_offset: 0.0
+        x_offset: -0.65
     open_drawer_post_safe:
-        x_offset: 0.0
+        x_offset: -0.7
     perceive_drawer:
         x_offset: 0.0
     close_drawer_pre_safe:
@@ -17,3 +16,11 @@ dbc_params:
         x_offset: 0.0
     close_drawer_safe:
         x_offset: 0.0
+arm_params:
+    drawer_handle:
+        x_offset: -0.005
+        y_offset: 0.0
+        z_offset: 0.02
+        roll: 0.0
+        pitch: 2.25
+        yaw: 0.0
