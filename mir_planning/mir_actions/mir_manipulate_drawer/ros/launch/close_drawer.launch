@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_manipulate_drawer" type="close_drawer_server" name="close_drawer_server" output="screen" >
+        <rosparam command="load" file="$(find mir_manipulate_drawer)/ros/config/params.yaml" />
+    </node>
+
+</launch>
