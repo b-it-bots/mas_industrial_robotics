@@ -113,6 +113,7 @@ void DrawerHandlePerceiver::pcCallback(const sensor_msgs::PointCloud2::ConstPtr 
     pose_stamped.pose.position.x = closest_centroid[0];
     pose_stamped.pose.position.y = closest_centroid[1];
     pose_stamped.pose.position.z = closest_centroid[2];
+    pose_stamped.pose.orientation.w = 1.0;
     pose_stamped.header.frame_id = this->output_frame;
     pose_stamped.header.stamp = ros::Time::now();
     this->pose_pub.publish(pose_stamped);
