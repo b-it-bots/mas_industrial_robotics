@@ -29,8 +29,6 @@ class ManipulateDrawerUtils(object):
         if param_name not in self._dbc_params:
             return PoseStamped()
 
-        print(self._dbc_params[param_name])
-
         dbc_target_pose = PoseStamped()
         dbc_target_pose.header.stamp = rospy.Time.now()
         dbc_target_pose.header.frame_id = self._frame_id
