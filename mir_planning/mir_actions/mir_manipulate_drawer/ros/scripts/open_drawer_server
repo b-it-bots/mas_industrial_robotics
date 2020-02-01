@@ -14,29 +14,13 @@ import mir_states.common.action_states as gas
 # action lib
 from smach_ros import ActionServerWrapper, IntrospectionServer
 
-from std_msgs.msg import String, Float32MultiArray
+from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import PoseStamped, Quaternion
 from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteResult, GenericExecuteFeedback
 from mir_actions.utils import Utils
 from mir_manipulate_drawer.manipulate_drawer_utils import ManipulateDrawerUtils
+from mir_manipulate_drawer.manipulate_drawer_utils import Setup, SendSafePoseToDBC, SendPoseToDBC
         
-#===============================================================================
-
-class Setup(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'],
-                                   input_keys=[],
-                                   output_keys=['feedback', 'result', 'handle_pose'])
-
-    def execute(self, userdata):
-        userdata.handle_pose = None # reset handle pose
-
-        # Add empty result msg (because if none of the state do it, action server gives error)
-        userdata.result = GenericExecuteResult()
-        userdata.feedback = GenericExecuteFeedback(current_state='Setup',
-                                                   text='Setting up')
-        return 'succeeded'
-
 #===============================================================================
 
 class AddPoseToUserdata(smach.State):
@@ -61,53 +45,6 @@ class AddPoseToUserdata(smach.State):
         else:
             rospy.loginfo("Timeout")
             return 'timeout'
-
-#===============================================================================
-
-class SendSafePoseToDBC(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'])
-        self._dbc_pose_pub = rospy.Publisher('/mcr_navigation/direct_base_controller/input_pose',
-                                             PoseStamped, queue_size=10)
-        laser_dist_sub = rospy.Subscriber('/mcr_navigation/laser_distances/distances',
-                                          Float32MultiArray, self._laser_dist_cb)
-        self._front_laser_dist = 0.0
-        rospy.sleep(0.1) # time for the publisher to register in ros network
-
-    def _laser_dist_cb(self, msg):
-        self._front_laser_dist = msg.data[0]
-
-    def execute(self, userdata):
-        target_dist = 0.52
-        x_offset = self._front_laser_dist - target_dist
-
-        dbc_target_pose = PoseStamped()
-        dbc_target_pose.header.stamp = rospy.Time.now()
-        dbc_target_pose.header.frame_id = 'base_link_static'
-        dbc_target_pose.pose.position.x = x_offset
-        dbc_target_pose.pose.position.y = 0.0
-        dbc_target_pose.pose.orientation.w = 1.0
-        rospy.loginfo(dbc_target_pose)
-        self._dbc_pose_pub.publish(dbc_target_pose)
-        return 'succeeded'
-
-#===============================================================================
-
-class SendPoseToDBC(smach.State):
-    def __init__(self, param_name='default'):
-        smach.State.__init__(self, outcomes=['succeeded'],
-                                   input_keys=['handle_pose'])
-        self._dbc_pose_pub = rospy.Publisher('/mcr_navigation/direct_base_controller/input_pose',
-                                             PoseStamped, queue_size=10)
-        self._param_name = param_name
-        self.utils = ManipulateDrawerUtils()
-        rospy.sleep(0.1) # time for the publisher to register in ros network
-
-    def execute(self, userdata):
-        dbc_pose = self.utils.calc_pose_for_dbc_for_param(userdata.handle_pose,
-                                                          self._param_name)
-        self._dbc_pose_pub.publish(dbc_pose)
-        return 'succeeded'
 
 #===============================================================================
 
@@ -171,8 +108,7 @@ def main():
             output_keys = ['feedback', 'result'])
 
     with sm:
-        # ASSUMPTION: front laser of robot is 52 cm or more away from drawer and
-        # the robot is aligned perpendicular to the drawer
+        # ASSUMPTION: the robot is aligned perpendicular to a closed perceived drawer 
         smach.StateMachine.add(
                 'SETUP',
                 Setup(),
@@ -209,7 +145,7 @@ def main():
         # - Move base back for perceive drawer handle
         smach.StateMachine.add(
                 'SEND_SAFE_POSE_TO_DBC',
-                SendSafePoseToDBC(),
+                SendSafePoseToDBC(target_dist=52),
                 transitions={'succeeded': 'START_DBC_SAFE_POSE'})
 
         smach.StateMachine.add(
