@@ -8,6 +8,7 @@ ArucoCubePerceiver::ArucoCubePerceiver() : nh("~"), image_transporter_(nh)
 /*     nh.param<int>("num_of_retrial", num_of_retrial_, 30); */
 /*     nh.param<int>("num_pixels_to_extrapolate", num_pixels_to_extrapolate_, 30); */
 
+
     image_pub_ = image_transporter_.advertise("debug_image", 1);
 
     sub_pointcloud_.subscribe(nh, "input_pointcloud", 10);
@@ -32,11 +33,17 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
     if (!success)
         return;
 
+    cv::Mat img = input_img_ptr->image;
     std::vector<int> markerIds;
     std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
     cv::Ptr<cv::aruco::DetectorParameters> parameters;
     cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
-    /* cv::aruco::detectMarkers(input_img_ptr->image, this->dictionary, markerCorners, markerIds, parameters, rejectedCandidates); */
+    std::cout << "before detectMarkers" << std::endl;
+    cv::aruco::detectMarkers(img, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+    std::cout << "after detectMarkers" << std::endl;
+    for (int i : markerIds) {
+        std::cout << i << std::endl;
+    }
     /* cv::Mat outputImage = inputImage.clone(); */
     /* cv::aruco::drawDetectedMarkers(outputImage, markerCorners, markerIds); */
     /* for (int i : markerIds) { */

@@ -30,6 +30,7 @@ catkin_package(
 include_directories(
   ros/include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 add_executable(aruco_cube_perceiver
@@ -37,4 +38,5 @@ add_executable(aruco_cube_perceiver
 )
 target_link_libraries(aruco_cube_perceiver
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
