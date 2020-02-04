@@ -6,8 +6,8 @@
 #include <pcl/common/centroid.h>
 #include <pcl/features/normal_3d.h>
 #include <tf/transform_datatypes.h>
-#include <tf/LinearMath/Quaternion.h>
-#include <tf/LinearMath/Vector3.h>
+/* #include <tf/LinearMath/Quaternion.h> */
+/* #include <tf/LinearMath/Vector3.h> */
 #include <algorithm>
 #include <math.h>
 
@@ -17,16 +17,16 @@ ArucoCubePerceiver::ArucoCubePerceiver() : nh("~"), image_transporter_(nh)
     nh.param<int>("num_of_retries", this->num_of_retries_, 30);
     nh.param<bool>("debug", this->debug_, false);
 
-    image_pub_ = image_transporter_.advertise("debug_image", 1);
+    this->image_pub_ = image_transporter_.advertise("debug_image", 1);
 
-    sub_pointcloud_.subscribe(nh, "input_pointcloud", 10);
-    sub_image_.subscribe(nh, "input_image", 10);
+    this->sub_pointcloud_.subscribe(nh, "input_pointcloud", 10);
+    this->sub_image_.subscribe(nh, "input_image", 10);
 
-    sync_input_ = boost::make_shared<message_filters::Synchronizer<ImageSyncPolicy> > (10);
-    sync_input_->connectInput(sub_pointcloud_, sub_image_);
-    sync_input_->registerCallback(boost::bind(&ArucoCubePerceiver::synchronizedCallback, this, _1, _2));
+    this->sync_input_ = boost::make_shared<message_filters::Synchronizer<ImageSyncPolicy> > (10);
+    this->sync_input_->connectInput(sub_pointcloud_, sub_image_);
+    this->sync_input_->registerCallback(boost::bind(&ArucoCubePerceiver::synchronizedCallback, this, _1, _2));
 
-    this->debug_point_pub_ = nh.advertise<geometry_msgs::PointStamped>("debug", 1);
+    this->debug_polygon_pub_ = nh.advertise<geometry_msgs::PolygonStamped>("debug_polygon", 1);
     this->output_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("object_pose", 1);
 
     this->aruco_dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
@@ -59,16 +59,17 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
     pcl::fromROSMsg(*pointcloud_msg, *pc_input);
     if (input_img_ptr->image.rows != pc_input->height || input_img_ptr->image.cols != pc_input->width)
     {
-        ROS_WARN("[aruco_cube_perceiver] Image size did not match PointCloud size.");
+        ROS_ERROR("[aruco_cube_perceiver] Image size did not match PointCloud size.");
         return;
     }
 
-    /* create a point cloud of aruco square */
+    /* create a point cloud out of the corners of detected aruco square */
     pcl::PointCloud<pcl::PointXYZ>::Ptr aruco_square(new pcl::PointCloud<pcl::PointXYZ>);
     aruco_square->width = 2;
     aruco_square->height = 2;
     aruco_square->points.resize(4);
-    for (int i = 0; i < corners.size(); ++i) {
+    for (int i = 0; i < corners.size(); ++i)
+    {
         int col = corners[i].x;
         int row = corners[i].y;
         pcl::PointXYZ point = pc_input->points[row*pc_input->width + col];
@@ -80,29 +81,58 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
         }
     }
 
-    pcl::PointXYZ cube_center;
+    geometry_msgs::Point cube_center;
     this->calculateCenterOfArucoCube(aruco_square, cube_center);
+
+    geometry_msgs::Quaternion quat;
+    this->calculateArucoOrientation(aruco_square->points[0], aruco_square->points[1],
+                                    aruco_square->points[3], quat);
 
     geometry_msgs::PoseStamped pose, transformed_pose;
     pose.header.frame_id = pointcloud_msg->header.frame_id;
-    pose.pose.position.x = cube_center.x;
-    pose.pose.position.y = cube_center.y;
-    pose.pose.position.z = cube_center.z;
-    /* TODO: remove hardcoded orientation */
-    pose.pose.orientation.w = 1.0;
-    /* pose.pose.orientation.x = -0.047304; */
-    /* pose.pose.orientation.y = 0.2083682; */
-    /* pose.pose.orientation.z = 0.9562657; */
-    /* pose.pose.orientation.w = 0.1997519; */
-    /* pose.pose.orientation = quat; */
-    this->transformPose(pose, transformed_pose);
-    /* this->debug_point_pub_.publish(output_ps); */
+    pose.header.stamp = ros::Time::now();
+    pose.pose.position = cube_center;
+    pose.pose.orientation = quat;
+    bool transform_success = this->transformPose(pose, transformed_pose);
+    if (!transform_success)
+    {
+        ROS_ERROR("[aruco_cube_perceiver] Could not transform pose to target_frame.");
+        return;
+    }
     this->output_pose_pub_.publish(transformed_pose);
-    /* pcl::PointXYZ diff = aruco_square->points[0] - aruco_square->points[1]; */
+
+    if (this->debug_)
+    {
+        geometry_msgs::PolygonStamped poly;
+        poly.header.frame_id = pointcloud_msg->header.frame_id;
+        poly.header.stamp = ros::Time::now();
+        for (int i = 0; i < corners.size(); ++i)
+        {
+            geometry_msgs::Point32 p;
+            p.x = aruco_square->points[i].x;
+            p.y = aruco_square->points[i].y;
+            p.z = aruco_square->points[i].z;
+            poly.polygon.points.push_back(p);
+        }
+        this->debug_polygon_pub_.publish(poly);
+    }
 }
 
+/*
+ * 1) Calculate the center of the square formed by aruco marker corners
+ * 2) Calculate the side_length of the aruco marker
+ * 3) Calculate the normal to the plane formed by 4 corners
+ * 4) Find any point on the line passing through the center and parallel to
+ *    normal to the plane with equation `new_point = center + dist_from_center*normal`
+ *    where `dist_from_center = side_length / 2` (obviously)
+ * 5) Step 4 would provide 2 points on normal which are side_lenght/2 meters
+ *    away from center (one which is actually the cube center and the other one
+ *    is outside the cube (between camera and center))
+ * 6) Find the point furthest from camera frame out of the 2 points from Step 5
+ *    and convert to geometry_msgs::Point
+ */
 void ArucoCubePerceiver::calculateCenterOfArucoCube(pcl::PointCloud<pcl::PointXYZ>::Ptr aruco_square,
-                                                    pcl::PointXYZ &cube_center)
+                                                    geometry_msgs::Point &cube_center)
 {
     Eigen::Vector4f aruco_square_center;
     pcl::compute3DCentroid(*aruco_square, aruco_square_center);
@@ -121,9 +151,41 @@ void ArucoCubePerceiver::calculateCenterOfArucoCube(pcl::PointCloud<pcl::PointXY
     pcl::PointXYZ camera;
     float dist_1 = this->euclideanDistance(possible_cube_center_1, camera);
     float dist_2 = this->euclideanDistance(possible_cube_center_2, camera);
-    cube_center = (dist_1 > dist_2) ? possible_cube_center_1 : possible_cube_center_2;
+    pcl::PointXYZ cube_center_pcl = (dist_1 > dist_2) ? possible_cube_center_1 : possible_cube_center_2;
+    cube_center.x = cube_center_pcl.x;
+    cube_center.y = cube_center_pcl.y;
+    cube_center.z = cube_center_pcl.z;
 }
 
+/*
+ * If the detected aruco marker corners are 'a', 'b', 'c' and 'd' in clockwise
+ * direction then the orientation is such that the X axis is in direction formed
+ * by vector b-a and Y axis is formed by vector d-a.
+ * Note: Corner 'a' is top left corner when aruco marker is on a surface where X
+ * axis is pointing right and Y is pointing top and Z is pointing towards the viewer.
+ */
+void ArucoCubePerceiver::calculateArucoOrientation(pcl::PointXYZ &a, pcl::PointXYZ &b,
+                                                   pcl::PointXYZ &d, geometry_msgs::Quaternion &quat)
+{
+    Eigen::Vector3f X(b.x - a.x, b.y - a.y, b.z - a.z);
+    Eigen::Vector3f Y(d.x - a.x, d.y - a.y, d.z - a.z);
+    X.normalize();
+    Y.normalize();
+    Eigen::Vector3f Z = X.cross(Y);
+    Eigen::Matrix3f mat;
+    mat << X[0], Y[0], Z[0],
+           X[1], Y[1], Z[1],
+           X[2], Y[2], Z[2];
+    Eigen::Quaternionf quaternion(mat);
+    quat.x = quaternion.x();
+    quat.y = quaternion.y();
+    quat.z = quaternion.z();
+    quat.w = quaternion.w();
+}
+
+/*
+ * Transform geometry_msgs::PoseStamped from any frame to target_frame_
+ */
 bool ArucoCubePerceiver::transformPose(geometry_msgs::PoseStamped &pose,
                                        geometry_msgs::PoseStamped &transformed_pose)
 {
@@ -148,30 +210,11 @@ bool ArucoCubePerceiver::transformPose(geometry_msgs::PoseStamped &pose,
     }
 }
 
-bool ArucoCubePerceiver::transformPoint(geometry_msgs::PointStamped &point,
-                                       geometry_msgs::PointStamped &transformed_point)
-{
-    try
-    {
-        ros::Time common_time;
-        this->tf_listener_.getLatestCommonTime(this->target_frame_,
-                                               point.header.frame_id,
-                                               common_time, NULL);
-        this->tf_listener_.waitForTransform(this->target_frame_,
-                                            point.header.frame_id,
-                                            common_time, ros::Duration(3.0));
-        point.header.stamp = common_time;
-        this->tf_listener_.transformPoint(this->target_frame_, point, transformed_point);
-        return true;
-    }
-    catch (tf::TransformException &ex)
-    {
-        ROS_WARN("PCL transform error: %s", ex.what());
-        ros::Duration(1.0).sleep();
-        return false;
-    }
-}
-
+/*
+ * Detect all the aruco markers in the given image and assign the corners of the
+ * marker which has the highest area (highest variance) to `corners`.
+ * Returns false if no aruco markers were found.
+ */
 bool ArucoCubePerceiver::getBestArucoMarkerCorner(cv_bridge::CvImagePtr &img_ptr,
                                                   std::vector<cv::Point2f> &corners)
 {
@@ -230,6 +273,10 @@ void ArucoCubePerceiver::calculateVariances(std::vector<std::vector<cv::Point2f>
     }
 }
 
+/*
+ * Convert sensor_msgs::Image::ConstPtr to cv_bridge::CvImagePtr
+ * Necessary to perform operations on the image using opencv library.
+ */
 bool ArucoCubePerceiver::imgToCV(const sensor_msgs::Image::ConstPtr &image_msg,
                                  cv_bridge::CvImagePtr &cv_ptr)
 {
@@ -245,6 +292,9 @@ bool ArucoCubePerceiver::imgToCV(const sensor_msgs::Image::ConstPtr &image_msg,
     return true;
 }
 
+/*
+ * Find euclidean distance between 2 pcl::PointXYZ objects.
+ */
 float ArucoCubePerceiver::euclideanDistance(pcl::PointXYZ &p1, pcl::PointXYZ &p2)
 {
     return sqrt(pow(p1.x-p2.x, 2) + pow(p1.y-p2.y, 2) + pow(p1.z-p2.z, 2));

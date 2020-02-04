@@ -35,7 +35,7 @@ private:
     image_transport::ImageTransport image_transporter_;
     image_transport::Publisher image_pub_;
 
-    ros::Publisher debug_point_pub_;
+    ros::Publisher debug_polygon_pub_;
     ros::Publisher output_pose_pub_;
 
     tf::TransformListener tf_listener_;
@@ -46,9 +46,9 @@ private:
 
     cv::Ptr<cv::aruco::Dictionary> aruco_dictionary;
 
-    void calculateCenterOfArucoCube(pcl::PointCloud<pcl::PointXYZ>::Ptr aruco_square, pcl::PointXYZ &cube_center);
+    void calculateCenterOfArucoCube(pcl::PointCloud<pcl::PointXYZ>::Ptr aruco_square, geometry_msgs::Point &cube_center);
+    void calculateArucoOrientation(pcl::PointXYZ &a, pcl::PointXYZ &b, pcl::PointXYZ &d, geometry_msgs::Quaternion &quat);
     bool transformPose(geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &transformed_pose);
-    bool transformPoint(geometry_msgs::PointStamped &point, geometry_msgs::PointStamped &transformed_point);
     bool getBestArucoMarkerCorner(cv_bridge::CvImagePtr &img_ptr, std::vector<cv::Point2f> &corners);
     void calculateVariances(std::vector<std::vector<cv::Point2f>> &marker_corners, std::vector<float> &variances);
     bool imgToCV(const sensor_msgs::Image::ConstPtr &image_msg, cv_bridge::CvImagePtr &cv_ptr);
