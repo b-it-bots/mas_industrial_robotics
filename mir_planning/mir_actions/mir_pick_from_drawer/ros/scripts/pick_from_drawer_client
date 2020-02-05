@@ -19,13 +19,6 @@ if __name__ == '__main__':
         obj= str(sys.argv[1]).upper()
         goal.parameters.append(KeyValue(key='object', value=obj))
 
-        if len(sys.argv) > 2:
-            platform = str(sys.argv[2]).upper()
-        else:
-            platform = 'PLATFORM_MIDDLE'
-
-        goal.parameters.append(KeyValue(key='platform', value=platform))
-
         rospy.loginfo('Sending following goal to pick from drawer server')
         rospy.loginfo(goal)
 
@@ -41,6 +34,7 @@ if __name__ == '__main__':
         if state == GoalStatus.SUCCEEDED:
             rospy.loginfo('Action SUCCESS')
             rospy.loginfo(client.get_result())
+            sys.exit(0)
         elif state == GoalStatus.ABORTED:
             rospy.logerr('Action FAILED')
         else:
@@ -48,4 +42,5 @@ if __name__ == '__main__':
             rospy.loginfo(client.get_result())
     else:
         rospy.logerr('Arguments were not received in the proper format!')
-        rospy.loginfo('usage : pick_from_drawer OBJECT_NAME PLATFORM_NAME')
+        rospy.loginfo('usage : pick_from_drawer OBJECT_NAME')
+    sys.exit(1)

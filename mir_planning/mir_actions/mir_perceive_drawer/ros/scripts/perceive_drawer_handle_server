@@ -7,18 +7,16 @@ import smach
 # import of generic states
 import mir_states.common.manipulation_states as gms
 import mcr_states.common.basic_states as gbs
-import mir_states.common.action_states as gas
 
 # action lib
 from smach_ros import ActionServerWrapper, IntrospectionServer
 
-from std_msgs.msg import String, Float32MultiArray
+from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import PoseStamped
 from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteResult, GenericExecuteFeedback
 from mas_perception_msgs.msg import ObjectList, Object
 from mir_actions.utils import Utils
-from pick_from_drawer_utils import PickFromDrawerUtils
-        
+
 #===============================================================================
 
 class Setup(smach.State):

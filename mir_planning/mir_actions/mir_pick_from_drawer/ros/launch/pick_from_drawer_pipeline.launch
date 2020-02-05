@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+    <include file="$(find mir_manipulate_drawer)/ros/launch/manipulate_drawer.launch" />
+
+    <include file="$(find mir_perceive_drawer)/ros/launch/perceive_drawer_handle.launch" />
+
+    <node pkg="mir_perceive_drawer" type="perceive_inside_drawer_server"
+          name="perceive_inside_drawer_server" output="screen" />
+
+    <node pkg="mir_pick_from_drawer" type="pick_from_drawer_server"
+          name="pick_from_drawer_server" output="screen" />
+
+</launch>

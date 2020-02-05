@@ -31,8 +31,10 @@ if __name__ == '__main__':
     if state == GoalStatus.SUCCEEDED:
         rospy.loginfo('Action SUCCESS')
         rospy.loginfo(client.get_result())
+        sys.exit(0)
     elif state == GoalStatus.ABORTED:
         rospy.logerr('Action FAILED')
     else:
         rospy.logwarn('State: ' + str(state))
         rospy.loginfo(client.get_result())
+    sys.exit(1)
