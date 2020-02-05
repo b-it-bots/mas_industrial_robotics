@@ -91,8 +91,6 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud, 
 
     sac_.setModelType(pcl::SACMODEL_NORMAL_PARALLEL_PLANE);
     sac_.setMethodType(pcl::SAC_RANSAC);
-    sac_.setAxis(Eigen::Vector3f(0.0, 0.0, 1.0));
-    //sac_.setAxis(Eigen::Vector3f(-0.866, 0.0, 0.5));
 
     sac_.setInputCloud(filtered);
     sac_.setInputNormals(normals);
@@ -153,10 +151,12 @@ void SceneSegmentation::setNormalParams(double radius_search)
     normal_estimation_omp_.setRadiusSearch(radius_search);
 }
 void SceneSegmentation::setSACParams(int max_iterations, double distance_threshold,
-        bool optimize_coefficients, double eps_angle, double normal_distance_weight)
+        bool optimize_coefficients, Eigen::Vector3f axis, double eps_angle, 
+        double normal_distance_weight)
 {
     sac_.setMaxIterations(max_iterations);
     sac_.setDistanceThreshold(distance_threshold);
+    sac_.setAxis(axis);
     sac_.setEpsAngle(eps_angle);
     sac_.setOptimizeCoefficients(optimize_coefficients);
     sac_.setNormalDistanceWeight(normal_distance_weight);

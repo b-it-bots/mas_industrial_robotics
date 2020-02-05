@@ -37,7 +37,7 @@ class SceneSegmentationROS
          * \param[in] NodeHandle in order for this to have access to parameters
          * for example octree_resolution.
          * */
-        SceneSegmentationROS(ros::NodeHandle nh);
+        explicit SceneSegmentationROS(double octree_resolution = 0.0025);
 
         /** \brief Destructor */
         virtual ~SceneSegmentationROS();
@@ -132,12 +132,14 @@ class SceneSegmentationROS
          * \param[in] The maximum number of iterations the algorithm will run for
          * \param[in] The distance to model threshold
          * \param[in] Model coefficient refinement
+         * \param[in] The axis to which the plane should be perpendicular
          * \param[in] The maximum allowed difference between the model normal and the given axis in radians
          * \param[in] The relative weight (between 0 and 1) to give to the angular distance (0 to pi/2) between point normals and the plane normal.
          * */
         void setSACParams(int sac_max_iterations, 
             double sac_distance_threshold,
-            bool sac_optimize_coefficients, 
+            bool sac_optimize_coefficients,
+            Eigen::Vector3f axis, 
             double sac_eps_angle,
             double sac_normal_distance_weight);
 

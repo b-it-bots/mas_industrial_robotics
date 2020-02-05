@@ -93,11 +93,12 @@ class SceneSegmentation
          * \param[in] The maximum number of iterations the algorithm will run for
          * \param[in] The distance to model threshold
          * \param[in] Model coefficient refinement
+         * \param[in] The axis to which the plane should be perpendicular
          * \param[in] The maximum allowed difference between the model normal and the given axis in radians
          * \param[in] The relative weight (between 0 and 1) to give to the angular distance (0 to pi/2) between point normals and the plane normal.
          * */
         void setSACParams(int max_iterations, double distance_threshold, bool optimize_coefficients,
-                        double eps_angle, double normal_distance_weight);
+                          Eigen::Vector3f axis, double eps_angle, double normal_distance_weight);
         /** \brief Set prism parameters
          * \param[in] The minimum height above the plane from which to construct the polygonal prism
          * \param[in] The maximum height above the plane from which to construct the polygonal prism
