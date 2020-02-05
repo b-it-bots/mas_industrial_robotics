@@ -16,11 +16,13 @@ Related package: `mir\_perceive\_mock`
 
 Input: 
  - raw image (`/arm_cam3d/rgb/image_raw`) 
- - camera info (`/arm_cam3d/rgb/camera_info`)
+ - pointcloud (`/arm_cam3d/depth_registered/points`) 
  - event in (`/mir_perception/aruco_cube_perceiver/event_in`)
 Output: 
  - event out (`/mir_perception/aruco_cube_perceiver/event_out`)
  - output pose (`/mir_perception/aruco_cube_perceiver/object_pose`)
+ - debug polygon (`/mir_perception/aruco_cube_perceiver/debug_polygon`)
+ - debug image (`/mir_perception/aruco_cube_perceiver/debug_image`)
  - output object list (`/mcr_perception/object_list_merger/output_object_list`)
 
 
@@ -38,7 +40,7 @@ Output:
 - **Without action server**
   Start bringup and move the arm such that the camera is looking at aruco cube
   ```
-  roslaunch mir_perceive_aruco_cube perceive_aruco_cube.launch
+  roslaunch mir_perceive_aruco_cube aruco_cube_perceiver.launch
   rostopic echo /mir_perception/aruco_cube_perceiver/object_pose
   rostopic echo /mir_perception/aruco_cube_perceive/event_out
   rostopic pub /mir_perception/aruco_cube_perceiver/event_in std_msgs/String "data: 'e_trigger'" -1
@@ -46,10 +48,12 @@ Output:
 
   The output pose (`/mir_perception/aruco_cube_perceiver/object_pose`) can be visualised on rviz as follows
 ![RvizArucoPose](docs/rviz_aruco_pose.png)
+  The debug image and polygon can be visualised on rviz as follows
+![RvizArucoPose2](docs/aruco_pose_with_debug.png)
 
   or with continous perceiving
   ```
-  roslaunch mir_perceive_aruco_cube perceive_aruco_cube.launch
+  roslaunch mir_perceive_aruco_cube aruco_cube_perceiver.launch
   rostopic echo /mir_perception/aruco_cube_perceiver/object_pose
   rostopic echo /mir_perception/aruco_cube_perceive/event_out
   rostopic pub /mir_perception/aruco_cube_perceiver/event_in std_msgs/String "data: 'e_start'" -1
