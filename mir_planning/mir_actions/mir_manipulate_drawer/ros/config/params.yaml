@@ -1,10 +1,10 @@
 drawer_length: 0.27
 dbc_params:
     open_drawer:
-        x_offset: -0.65
+        x_offset: -0.67
         drawer_length_factor: 0.0
     open_drawer_post:
-        x_offset: -0.67
+        x_offset: -0.68
         drawer_length_factor: -1.0
     open_drawer_post_safe:
         x_offset: -0.73
