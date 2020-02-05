@@ -11,11 +11,10 @@
           output="screen" ns="mir_perception"> 
         <remap from="~input_image" to="/arm_cam3d/rgb/image_raw"/> 
         <remap from="~input_pointcloud" to="/arm_cam3d/depth_registered/points"/> 
-        <remap from="~output_object_list" to="$(arg output_object_list)"/> 
+        <remap from="~obj_list" to="$(arg output_object_list)"/> 
 
         <param name="target_frame" type="str" value="$(arg target_frame)"/> 
         <param name="num_of_retries" type="int" value="$(arg retry_attempts)"/> 
-        <param name="marker_length" type="double" value="$(arg marker_length)"/> 
         <param name="debug" type="bool" value="$(arg debug)"/> 
     </node> 
 </launch>
