@@ -17,11 +17,13 @@
   <build_depend>image_transport</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>mas_perception_msgs</build_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_depend>tf</build_depend>
 
   <exec_depend>roscpp</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>mas_perception_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>image_transport</exec_depend>
 

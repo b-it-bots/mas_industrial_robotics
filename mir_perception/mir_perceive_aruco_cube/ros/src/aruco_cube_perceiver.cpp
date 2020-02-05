@@ -3,47 +3,84 @@
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/PointStamped.h>
+#include <mas_perception_msgs/Object.h>
+#include <mas_perception_msgs/ObjectList.h>
 #include <pcl/common/centroid.h>
 #include <pcl/features/normal_3d.h>
 #include <tf/transform_datatypes.h>
-/* #include <tf/LinearMath/Quaternion.h> */
-/* #include <tf/LinearMath/Vector3.h> */
 #include <algorithm>
 #include <math.h>
 
-ArucoCubePerceiver::ArucoCubePerceiver() : nh("~"), image_transporter_(nh)
+ArucoCubePerceiver::ArucoCubePerceiver()
+: nh_("~")
+, image_transporter_(nh_)
 {
-    nh.param<std::string>("target_frame", this->target_frame_, "/base_link");
-    nh.param<int>("num_of_retries", this->num_of_retries_, 30);
-    nh.param<bool>("debug", this->debug_, false);
+    nh_.param<std::string>("target_frame", this->target_frame_, "/base_link");
+    nh_.param<int>("num_of_retries", this->num_of_retries_, 30);
+    nh_.param<bool>("debug", this->debug_, false);
+    this->listening_ = false;
+    this->publish_object_ = false;
+    this->retry_attempts_ = 0;
 
     this->image_pub_ = image_transporter_.advertise("debug_image", 1);
 
-    this->sub_pointcloud_.subscribe(nh, "input_pointcloud", 10);
-    this->sub_image_.subscribe(nh, "input_image", 10);
+    this->sub_pointcloud_.subscribe(nh_, "input_pointcloud", 10);
+    this->sub_image_.subscribe(nh_, "input_image", 10);
 
     this->sync_input_ = boost::make_shared<message_filters::Synchronizer<ImageSyncPolicy> > (10);
     this->sync_input_->connectInput(sub_pointcloud_, sub_image_);
     this->sync_input_->registerCallback(boost::bind(&ArucoCubePerceiver::synchronizedCallback, this, _1, _2));
 
-    this->debug_polygon_pub_ = nh.advertise<geometry_msgs::PolygonStamped>("debug_polygon", 1);
-    this->output_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("object_pose", 1);
+    this->debug_polygon_pub_ = nh_.advertise<geometry_msgs::PolygonStamped>("debug_polygon", 1);
+    this->output_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("object_pose", 1);
+    this->event_in_sub_ = nh_.subscribe("event_in", 1, &ArucoCubePerceiver::eventInCallback, this);
+    this->event_out_pub_ = nh_.advertise<std_msgs::String>("event_out", 1);
+    this->obj_list_pub_ = nh_.advertise<mas_perception_msgs::ObjectList>("obj_list", 1);
 
-    this->aruco_dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
+    this->aruco_dictionary_ = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
 }
 
 ArucoCubePerceiver::~ArucoCubePerceiver()
 {
 }
 
+void ArucoCubePerceiver::eventInCallback(const std_msgs::String::ConstPtr &msg)
+{
+    if (msg->data == "e_start")
+    {
+        this->listening_ = true;
+        this->publish_object_ = false;
+        std_msgs::String event_out_msg;
+        event_out_msg.data = "e_started";
+        this->event_out_pub_.publish(event_out_msg);
+    }
+    else if (msg->data == "e_stop")
+    {
+        this->listening_ = false;
+        this->publish_object_ = false;
+        std_msgs::String event_out_msg;
+        event_out_msg.data = "e_stopped";
+        this->event_out_pub_.publish(event_out_msg);
+    }
+    else if (msg->data == "e_trigger")
+    {
+        this->listening_ = true;
+        this->publish_object_ = true;
+    }
+}
+
 void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::ConstPtr &pointcloud_msg,
                                               const sensor_msgs::Image::ConstPtr &image_msg)
 {
+    if (!this->listening_)
+        return;
+
     cv_bridge::CvImagePtr input_img_ptr;
     bool success = this->imgToCV(image_msg, input_img_ptr);
     if (!success)
     {
         ROS_ERROR("[aruco_cube_perceiver] Could not convert sensor_msgs::Image to cv::Image.");
+        this->checkFailure();
         return;
     }
 
@@ -52,6 +89,7 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
     if (!detection_success)
     {
         ROS_ERROR("[aruco_cube_perceiver] Could not find Aruco markers in image.");
+        this->checkFailure();
         return;
     }
 
@@ -60,6 +98,7 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
     if (input_img_ptr->image.rows != pc_input->height || input_img_ptr->image.cols != pc_input->width)
     {
         ROS_ERROR("[aruco_cube_perceiver] Image size did not match PointCloud size.");
+        this->checkFailure();
         return;
     }
 
@@ -68,15 +107,16 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
     aruco_square->width = 2;
     aruco_square->height = 2;
     aruco_square->points.resize(4);
-    for (int i = 0; i < corners.size(); ++i)
+    for (unsigned int i = 0; i < corners.size(); ++i)
     {
         int col = corners[i].x;
         int row = corners[i].y;
-        pcl::PointXYZ point = pc_input->points[row*pc_input->width + col];
+        pcl::PointXYZ point = pc_input->points[row * pc_input->width + col];
         aruco_square->points[i] = point;
         if (!pcl::isFinite(point))
         {
             ROS_WARN("[aruco_cube_perceiver] One of the corner of aruco marker is NaN.");
+            this->checkFailure();
             return;
         }
     }
@@ -88,18 +128,35 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
     this->calculateArucoOrientation(aruco_square->points[0], aruco_square->points[1],
                                     aruco_square->points[3], quat);
 
-    geometry_msgs::PoseStamped pose, transformed_pose;
+    geometry_msgs::PoseStamped pose, obj_pose;
     pose.header.frame_id = pointcloud_msg->header.frame_id;
     pose.header.stamp = ros::Time::now();
     pose.pose.position = cube_center;
     pose.pose.orientation = quat;
-    bool transform_success = this->transformPose(pose, transformed_pose);
+    bool transform_success = this->transformPose(pose, obj_pose);
     if (!transform_success)
     {
         ROS_ERROR("[aruco_cube_perceiver] Could not transform pose to target_frame.");
+        this->checkFailure();
         return;
     }
-    this->output_pose_pub_.publish(transformed_pose);
+    this->output_pose_pub_.publish(obj_pose);
+
+    if (this->publish_object_)
+    {
+        mas_perception_msgs::Object obj;
+        obj.pose = obj_pose;
+        obj.name = "ARUCO_CUBE";
+        obj.database_id = 150;
+        mas_perception_msgs::ObjectList obj_list;
+        obj_list.objects.push_back(obj);
+        this->obj_list_pub_.publish(obj_list);
+        this->listening_ = false;
+        this->retry_attempts_ = 0;
+        std_msgs::String event_out_msg;
+        event_out_msg.data = "e_success";
+        this->event_out_pub_.publish(event_out_msg);
+    }
 
     if (this->debug_)
     {
@@ -116,6 +173,23 @@ void ArucoCubePerceiver::synchronizedCallback(const sensor_msgs::PointCloud2::Co
         }
         this->debug_polygon_pub_.publish(poly);
     }
+}
+
+void ArucoCubePerceiver::checkFailure()
+{
+    if (!this->publish_object_)
+        return;
+
+    if (this->retry_attempts_ > this->num_of_retries_)
+    {
+        std_msgs::String event_out_msg;
+        event_out_msg.data = "e_failure";
+        this->event_out_pub_.publish(event_out_msg);
+        this->listening_ = false;
+        this->retry_attempts_ = 0;
+    }
+    else
+        this->retry_attempts_ += 1;
 }
 
 /*
@@ -151,7 +225,9 @@ void ArucoCubePerceiver::calculateCenterOfArucoCube(pcl::PointCloud<pcl::PointXY
     pcl::PointXYZ camera;
     float dist_1 = this->euclideanDistance(possible_cube_center_1, camera);
     float dist_2 = this->euclideanDistance(possible_cube_center_2, camera);
-    pcl::PointXYZ cube_center_pcl = (dist_1 > dist_2) ? possible_cube_center_1 : possible_cube_center_2;
+    pcl::PointXYZ cube_center_pcl = (dist_1 > dist_2) ?
+                                    possible_cube_center_1 :
+                                    possible_cube_center_2;
     cube_center.x = cube_center_pcl.x;
     cube_center.y = cube_center_pcl.y;
     cube_center.z = cube_center_pcl.z;
@@ -219,8 +295,8 @@ bool ArucoCubePerceiver::getBestArucoMarkerCorner(cv_bridge::CvImagePtr &img_ptr
                                                   std::vector<cv::Point2f> &corners)
 {
     std::vector<int> marker_ids;
-    std::vector<std::vector<cv::Point2f>> marker_corners;
-    cv::aruco::detectMarkers(img_ptr->image, this->aruco_dictionary, marker_corners, marker_ids);
+    std::vector< std::vector<cv::Point2f> > marker_corners;
+    cv::aruco::detectMarkers(img_ptr->image, this->aruco_dictionary_, marker_corners, marker_ids);
     if (marker_ids.size() == 0)
         return false;
 
@@ -239,9 +315,10 @@ bool ArucoCubePerceiver::getBestArucoMarkerCorner(cv_bridge::CvImagePtr &img_ptr
             if (i == best_index)
                 std::cout << " [SELECTED]";
             std::cout << std::endl;
-            std::cout << "Corners: " << std::endl;
+            std::cout << "Corners: ";
             for (cv::Point2f p : marker_corners[i])
-                std::cout << p << std::endl;
+                std::cout << p;
+            std::cout << std::endl;
         }
         std::cout << std::endl;
         cv::aruco::drawDetectedMarkers(img_ptr->image, marker_corners, marker_ids);
@@ -250,21 +327,22 @@ bool ArucoCubePerceiver::getBestArucoMarkerCorner(cv_bridge::CvImagePtr &img_ptr
     return true;
 }
 
-void ArucoCubePerceiver::calculateVariances(std::vector<std::vector<cv::Point2f>> &marker_corners,
+void ArucoCubePerceiver::calculateVariances(std::vector< std::vector<cv::Point2f> > &marker_corners,
                                             std::vector<float> &variances)
 {
     variances.clear();
-    for (int i = 0; i < marker_corners.size(); ++i) {
+    for (int i = 0; i < marker_corners.size(); ++i)
+    {
         /* calculate mean */
         cv::Point2f mean;
-        for (int j = 0; j < marker_corners[i].size(); ++j) {
+        for (int j = 0; j < marker_corners[i].size(); ++j)
             mean += marker_corners[i][j];
-        }
         mean *= 1.0/marker_corners[i].size();
 
         /* calculate variance */
         float squared_sum = 0.0;
-        for (int j = 0; j < marker_corners[i].size(); ++j) {
+        for (int j = 0; j < marker_corners[i].size(); ++j)
+        {
             cv::Point2f diff = marker_corners[i][j] - mean;
             squared_sum += pow(diff.x, 2) + pow(diff.y, 2);
         }

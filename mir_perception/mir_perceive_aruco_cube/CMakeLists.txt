@@ -11,6 +11,7 @@ find_package(catkin REQUIRED
     image_transport
     pcl_ros
     geometry_msgs
+    mas_perception_msgs
     tf
 )
 
@@ -22,6 +23,7 @@ catkin_package(
     sensor_msgs
     cv_bridge
     image_transport
+    mas_perception_msgs
     roscpp
   DEPENDS
     OpenCV

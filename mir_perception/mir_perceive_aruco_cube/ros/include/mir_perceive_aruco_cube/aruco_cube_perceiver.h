@@ -22,11 +22,12 @@ class ArucoCubePerceiver
 public:
     ArucoCubePerceiver();
     virtual ~ArucoCubePerceiver();
+
     void synchronizedCallback(const sensor_msgs::PointCloud2::ConstPtr &pointcloud_msg,
                               const sensor_msgs::Image::ConstPtr &image_msg);
 
 private:
-    ros::NodeHandle nh;
+    ros::NodeHandle nh_;
 
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_pointcloud_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
@@ -37,22 +38,30 @@ private:
 
     ros::Publisher debug_polygon_pub_;
     ros::Publisher output_pose_pub_;
+    ros::Subscriber event_in_sub_;
+    ros::Publisher event_out_pub_;
+    ros::Publisher obj_list_pub_;
 
     tf::TransformListener tf_listener_;
 
     std::string target_frame_;
     int num_of_retries_;
+    int retry_attempts_;
     bool debug_;
+    bool listening_;
+    bool publish_object_;
 
-    cv::Ptr<cv::aruco::Dictionary> aruco_dictionary;
+    cv::Ptr<cv::aruco::Dictionary> aruco_dictionary_;
 
+    void eventInCallback(const std_msgs::String::ConstPtr &msg);
+    void checkFailure();
     void calculateCenterOfArucoCube(pcl::PointCloud<pcl::PointXYZ>::Ptr aruco_square, geometry_msgs::Point &cube_center);
     void calculateArucoOrientation(pcl::PointXYZ &a, pcl::PointXYZ &b, pcl::PointXYZ &d, geometry_msgs::Quaternion &quat);
     bool transformPose(geometry_msgs::PoseStamped &pose, geometry_msgs::PoseStamped &transformed_pose);
     bool getBestArucoMarkerCorner(cv_bridge::CvImagePtr &img_ptr, std::vector<cv::Point2f> &corners);
-    void calculateVariances(std::vector<std::vector<cv::Point2f>> &marker_corners, std::vector<float> &variances);
+    void calculateVariances(std::vector< std::vector<cv::Point2f> > &marker_corners, std::vector<float> &variances);
     bool imgToCV(const sensor_msgs::Image::ConstPtr &image_msg, cv_bridge::CvImagePtr &cv_ptr);
-    float euclideanDistance(pcl::PointXYZ &p1, pcl::PointXYZ &p2);
+    inline float euclideanDistance(pcl::PointXYZ &p1, pcl::PointXYZ &p2);
 };
 
 #endif /* ARUCO_CUBE_PERCEIVER_H_ */
