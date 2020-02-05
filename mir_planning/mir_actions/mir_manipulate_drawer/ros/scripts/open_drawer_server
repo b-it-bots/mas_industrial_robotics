@@ -60,7 +60,7 @@ class SendPoseToMoveIt(smach.State):
     def execute(self, userdata):
         arm_target_pose = copy.deepcopy(userdata.handle_pose)
         arm_target_pose.header.stamp = rospy.Time.now()
-        arm_target_pose.pose.position.x += -0.005
+        arm_target_pose.pose.position.x += -0.02
         arm_target_pose.pose.position.y += 0.0
         arm_target_pose.pose.position.z += 0.015
         quat = tf.transformations.quaternion_from_euler(0.0, 2.25, 0.0)
@@ -145,7 +145,7 @@ def main():
         # - Move base back for perceive drawer handle
         smach.StateMachine.add(
                 'SEND_SAFE_POSE_TO_DBC',
-                SendSafePoseToDBC(target_dist=52),
+                SendSafePoseToDBC(target_dist=0.52),
                 transitions={'succeeded': 'START_DBC_SAFE_POSE'})
 
         smach.StateMachine.add(
