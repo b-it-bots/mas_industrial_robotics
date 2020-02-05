@@ -3,7 +3,7 @@
  
     <arg name="static_transform_frame" default="base_link_static" />
 
-    <include file="$(find mir_perceive_aruco_cube)/ros/launch/perceive_aruco_cube.launch" >
+    <include file="$(find mir_perceive_aruco_cube)/ros/launch/aruco_cube_perceiver.launch" >
       <arg name="target_frame" value="$(arg static_transform_frame)" />
     </include>
     
