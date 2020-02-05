@@ -33,7 +33,7 @@ SceneSegmentationNode::SceneSegmentationNode(): nh_("~"),
     label_visualizer_("output/labels", Color(Color::TEAL)),
     add_to_octree_(false), 
     object_id_(0),
-    scene_segmentation_ros_(nh_)
+    scene_segmentation_ros_(0.0025)
 {
     sub_event_in_ = nh_.subscribe("event_in", 1, &SceneSegmentationNode::eventCallback, this);
     pub_event_out_ = nh_.advertise<std_msgs::String>("event_out", 1);
@@ -46,7 +46,7 @@ SceneSegmentationNode::SceneSegmentationNode(): nh_("~"),
     server_.setCallback(f);
 
     tf_listener_.reset(new tf::TransformListener);
-
+    
     nh_.param<std::string>("logdir", logdir_, "/tmp/");
     nh_.param<std::string>("target_frame_id", target_frame_id_, "base_link");
 }
@@ -189,8 +189,9 @@ void SceneSegmentationNode::configCallback(mir_object_segmentation::SceneSegment
             config.passthrough_filter_limit_min,
             config.passthrough_filter_limit_max);
     scene_segmentation_ros_.setNormalParams(config.normal_radius_search);
+    Eigen::Vector3f axis(config.sac_x_axis, config.sac_y_axis, config.sac_z_axis);
     scene_segmentation_ros_.setSACParams(config.sac_max_iterations, config.sac_distance_threshold,
-            config.sac_optimize_coefficients, config.sac_eps_angle,
+            config.sac_optimize_coefficients, axis, config.sac_eps_angle,
             config.sac_normal_distance_weight);
     scene_segmentation_ros_.setPrismParams(config.prism_min_height, config.prism_max_height);
     scene_segmentation_ros_.setOutlierParams(config.outlier_radius_search, config.outlier_min_neighbors);

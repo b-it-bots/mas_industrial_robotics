@@ -19,11 +19,10 @@
 
 namespace mpu = mir_perception_utils;
 
-SceneSegmentationROS::SceneSegmentationROS(ros::NodeHandle nh): 
-    nh_(nh),
+SceneSegmentationROS::SceneSegmentationROS(double octree_resolution): 
+    octree_resolution_(octree_resolution),
     pcl_object_id_(0)
 {    
-    nh_.param("octree_resolution", octree_resolution_, 0.0025);
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
     scene_segmentation_ = SceneSegmentationUPtr(new SceneSegmentation());
     model_coefficients_ = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients);
@@ -135,13 +134,15 @@ void SceneSegmentationROS::setNormalParams(double normal_radius_search)
 
 void SceneSegmentationROS::setSACParams(int sac_max_iterations, 
             double sac_distance_threshold,
-            bool sac_optimize_coefficients, 
+            bool sac_optimize_coefficients,
+            Eigen::Vector3f axis, 
             double sac_eps_angle,
             double sac_normal_distance_weight)
 {
     scene_segmentation_->setSACParams(sac_max_iterations, 
             sac_distance_threshold,
-            sac_optimize_coefficients, 
+            sac_optimize_coefficients,
+            axis, 
             sac_eps_angle,
             sac_normal_distance_weight);
 }
