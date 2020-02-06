@@ -11,7 +11,7 @@ y_threshold_min: -0.1
 y_threshold_max: 0.1
 
 # for voxel grid filter
-leaf_size_x: 0.005
+leaf_size_x: 0.01
 leaf_size_y: 0.01
 leaf_size_z: 0.01
 

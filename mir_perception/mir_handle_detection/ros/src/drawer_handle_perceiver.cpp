@@ -3,7 +3,9 @@
 DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~")
 {
     nh.param<std::string>("output_frame", this->output_frame, "base_link_static");
-    nh.param<bool>("enable_debug_pc_pub", this->enable_debug_pc_pub, "true");
+    nh.param<bool>("enable_debug_pc_pub", this->enable_debug_pc_pub, true);
+    nh.param<int>("num_of_retries", this->num_of_retries_, 3);
+    this->retry_attempts_ = 0;
 
     this->pc_sub = nh.subscribe("input_point_cloud", 1, &DrawerHandlePerceiver::pcCallback, this);
     this->pose_pub = nh.advertise<geometry_msgs::PoseStamped>("output_pose", 1);
@@ -11,7 +13,9 @@ DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~")
     this->event_out_pub = nh.advertise<std_msgs::String>("event_out", 1);
 
     if (this->enable_debug_pc_pub)
+    {
         this->pc_pub = nh.advertise<sensor_msgs::PointCloud2>("output_point_cloud", 1);
+    }
 
     float z_threshold_max, z_threshold_min;
     nh.param<float>("z_threshold_min", z_threshold_min, -0.1);
@@ -31,10 +35,15 @@ DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~")
     nh.param<float>("leaf_size_z", leaf_size_z, 0.01);
     this->voxel_grid_filter.setLeafSize (leaf_size_x, leaf_size_y, leaf_size_z);
 
-    float seg_dist_threshold;
+    float seg_dist_threshold, seg_axis_x, seg_axis_y, seg_axis_z;
     nh.param<float>("seg_dist_threshold", seg_dist_threshold, 0.01);
+    nh.param<float>("seg_axis_x", seg_axis_x, 1.0);
+    nh.param<float>("seg_axis_y", seg_axis_y, 0.0);
+    nh.param<float>("seg_axis_z", seg_axis_z, 0.0);
     this->seg.setOptimizeCoefficients(true);
-    this->seg.setModelType(pcl::SACMODEL_PLANE);
+    this->seg.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
+    Eigen::Vector3f axis(seg_axis_x, seg_axis_y, seg_axis_z);
+    this->seg.setAxis(axis);
     this->seg.setMethodType(pcl::SAC_RANSAC);
     this->seg.setDistanceThreshold(seg_dist_threshold);
 
@@ -57,7 +66,7 @@ DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~")
     this->euclidean_cluster_extraction.setMinClusterSize(min_cluster_size);
     this->euclidean_cluster_extraction.setMaxClusterSize(max_cluster_size);
 
-    this->listening = false;
+    this->is_running = false;
 }
 
 DrawerHandlePerceiver::~DrawerHandlePerceiver()
@@ -69,33 +78,50 @@ void DrawerHandlePerceiver::eventInCallback(const std_msgs::String::ConstPtr &ms
     if (msg->data == "e_start")
     {
         ROS_INFO_STREAM("starting listening");
-        this->listening = true;
+        this->is_running = true;
     }
     else if (msg->data == "e_stop")
     {
-        ROS_INFO_STREAM("stoping listening");
-        this->listening = false;
+        ROS_INFO_STREAM("stopping listening");
+        this->is_running = false;
     }
+}
+
+void DrawerHandlePerceiver::checkFailure()
+{
+    if (this->retry_attempts_ > this->num_of_retries_)
+    {
+        std_msgs::String event_out_msg;
+        event_out_msg.data = "e_failure";
+        this->event_out_pub.publish(event_out_msg);
+        this->is_running = false;
+        this->retry_attempts_ = 0;
+    }
+    else
+        this->retry_attempts_ += 1;
 }
 
 void DrawerHandlePerceiver::pcCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {
-    if (!this->listening)
+    if (!this->is_running)
+    {
         return;
+    }
 
     sensor_msgs::PointCloud2 msg_transformed;
     bool success = this->transformPC(msg, msg_transformed);
     if (!success)
+    {
+        ROS_ERROR("[drawer_handle_perceiver] Could not transform pointcloud.");
+        this->checkFailure();
         return;
+    }
 
     PCloudT::Ptr pc_input(new PCloudT);
     pcl::fromROSMsg(msg_transformed, *pc_input);
 
-    PCloudT::Ptr pc_downsampled(new PCloudT);
-    this->downSamplePC(pc_input, pc_downsampled, 3);
-
     PCloudT::Ptr pc_passthrough_filtered(new PCloudT);
-    this->passthroughFilterPC(pc_downsampled, pc_passthrough_filtered);
+    this->passthroughFilterPC(pc_input, pc_passthrough_filtered);
 
     PCloudT::Ptr pc_filtered(new PCloudT);
     this->voxel_grid_filter.setInputCloud(pc_passthrough_filtered);
@@ -107,7 +133,11 @@ void DrawerHandlePerceiver::pcCallback(const sensor_msgs::PointCloud2::ConstPtr 
     Eigen::Vector4f closest_centroid(0.0, 0.0, 0.0, 0.0);
     bool cluster_success = this->getClosestCluster(pc_segmented, closest_centroid);
     if (!cluster_success)
+    {
+        ROS_ERROR("[drawer_handle_perceiver] Could not find any cluster.");
+        this->checkFailure();
         return;
+    }
 
     geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.pose.position.x = closest_centroid[0];
@@ -121,9 +151,10 @@ void DrawerHandlePerceiver::pcCallback(const sensor_msgs::PointCloud2::ConstPtr 
     std_msgs::String event_out_msg;
     event_out_msg.data = "e_done";
     this->event_out_pub.publish (event_out_msg);
-    ROS_INFO("[drawer_handle_perceiver] SUCCESSFULL");
+    ROS_INFO("[drawer_handle_perceiver] SUCCESSFUL");
 
-    this->listening = false;
+    this->is_running = false;
+    this->retry_attempts_ = 0;
 
     if (this->enable_debug_pc_pub)
     {
@@ -160,21 +191,7 @@ bool DrawerHandlePerceiver::transformPC(const sensor_msgs::PointCloud2::ConstPtr
     }
 }
 
-void DrawerHandlePerceiver::downSamplePC(PCloudT::Ptr input, PCloudT::Ptr output, int scale)
-{
-    output->width = input->width / scale;
-    output->height = input->height / scale;
-    output->points.resize(output->width * output->height);
-    for( size_t i = 0, ii = 0; i < output->height; ii += scale, i++)
-    {
-        for( size_t j = 0, jj = 0; j < output->width; jj += scale, j++)
-        {
-            output->at(j, i) = input->at(jj, ii); //at(column, row)
-        }
-    }
-}
-
-void DrawerHandlePerceiver::passthroughFilterPC(PCloudT::Ptr input, PCloudT::Ptr output)
+void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr input, PCloudT::Ptr output)
 {
     PCloudT::Ptr pc_intermediate(new PCloudT);
     this->passthrough_filter_z.setInputCloud(input);
@@ -183,12 +200,14 @@ void DrawerHandlePerceiver::passthroughFilterPC(PCloudT::Ptr input, PCloudT::Ptr
     this->passthrough_filter_y.filter(*output);
 }
 
-void DrawerHandlePerceiver::extractPlaneOutlier(PCloudT::Ptr input, PCloudT::Ptr dense_input, PCloudT::Ptr output)
+void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr input, PCloudT::Ptr dense_input, PCloudT::Ptr output)
 {
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
     this->seg.setInputCloud(input);
     this->seg.segment(*inliers, *coefficients);
+
+    std::cout << inliers->indices.size() << std::endl;
 
     //Project plane model inliers to plane
     PCloudT::Ptr pc_plane(new PCloudT);
@@ -214,7 +233,7 @@ void DrawerHandlePerceiver::extractPlaneOutlier(PCloudT::Ptr input, PCloudT::Ptr
     this->extract_indices.filter(*output);
 }
 
-bool DrawerHandlePerceiver::getClosestCluster(PCloudT::Ptr input, Eigen::Vector4f &closest_centroid)
+bool DrawerHandlePerceiver::getClosestCluster(const PCloudT::Ptr input, Eigen::Vector4f &closest_centroid)
 {
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
     std::vector<pcl::PointIndices> clusters_indices;
@@ -223,7 +242,9 @@ bool DrawerHandlePerceiver::getClosestCluster(PCloudT::Ptr input, Eigen::Vector4
     this->euclidean_cluster_extraction.extract(clusters_indices);
 
     if (clusters_indices.size() == 0)
+    {
         return false;
+    }
 
     float closest_dist = 100.0;
     Eigen::Vector4f zero_point(0.0, 0.0, 0.0, 0.0);

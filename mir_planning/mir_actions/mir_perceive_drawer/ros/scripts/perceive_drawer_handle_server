@@ -60,21 +60,21 @@ class ConvertPoseToObject(smach.State):
 #===============================================================================
 
 class SendSafePoseToDBC(smach.State):
-    def __init__(self):
+    def __init__(self, target_dist=0.2):
         smach.State.__init__(self, outcomes=['succeeded'])
         self._dbc_pose_pub = rospy.Publisher('/mcr_navigation/direct_base_controller/input_pose',
                                              PoseStamped, queue_size=10)
         laser_dist_sub = rospy.Subscriber('/mcr_navigation/laser_distances/distances',
                                           Float32MultiArray, self._laser_dist_cb)
         self._front_laser_dist = 0.0
+        self._target_dist = target_dist
         rospy.sleep(0.1) # time for the publisher to register in ros network
 
     def _laser_dist_cb(self, msg):
         self._front_laser_dist = msg.data[0]
 
     def execute(self, userdata):
-        target_dist = 0.52
-        x_offset = self._front_laser_dist - target_dist
+        x_offset = self._front_laser_dist - self.target_dist
 
         dbc_target_pose = PoseStamped()
         dbc_target_pose.header.stamp = rospy.Time.now()
@@ -124,7 +124,7 @@ def main():
         # - Move base back for perceive drawer handle
         smach.StateMachine.add(
                 'SEND_SAFE_POSE_TO_DBC',
-                SendSafePoseToDBC(),
+                SendSafePoseToDBC(target_dist=0.52),
                 transitions={'succeeded': 'START_DBC'})
 
         smach.StateMachine.add(

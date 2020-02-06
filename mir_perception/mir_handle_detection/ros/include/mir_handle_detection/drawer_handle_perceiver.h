@@ -42,7 +42,9 @@ class DrawerHandlePerceiver
 
         std::string output_frame;
         bool enable_debug_pc_pub;
-        bool listening;
+        bool is_running;
+        int retry_attempts_;
+        int num_of_retries_;
         tf::TransformListener tf_listener;
 
         pcl::PassThrough<pcl::PointXYZ> passthrough_filter_y;
@@ -55,12 +57,12 @@ class DrawerHandlePerceiver
         pcl::ExtractIndices<pcl::PointXYZ> extract_indices;
         pcl::EuclideanClusterExtraction<pcl::PointXYZ> euclidean_cluster_extraction;
 
+        void checkFailure();
         void pcCallback(const sensor_msgs::PointCloud2::ConstPtr &msg);
         void eventInCallback(const std_msgs::String::ConstPtr &msg);
         bool transformPC(const sensor_msgs::PointCloud2::ConstPtr &msg, sensor_msgs::PointCloud2 &msg_transformed);
-        void downSamplePC(PCloudT::Ptr input, PCloudT::Ptr output, int scale);
-        void passthroughFilterPC(PCloudT::Ptr input, PCloudT::Ptr output);
-        void extractPlaneOutlier(PCloudT::Ptr input, PCloudT::Ptr dense_input, PCloudT::Ptr output);
-        bool getClosestCluster(PCloudT::Ptr input, Eigen::Vector4f &closest_centroid);
+        void passthroughFilterPC(const PCloudT::Ptr input, PCloudT::Ptr output);
+        void extractPlaneOutlier(const PCloudT::Ptr input, PCloudT::Ptr dense_input, PCloudT::Ptr output);
+        bool getClosestCluster(const PCloudT::Ptr input, Eigen::Vector4f &closest_centroid);
 };
 #endif
