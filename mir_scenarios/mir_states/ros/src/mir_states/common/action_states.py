@@ -98,7 +98,8 @@ class insert_object(smach.State):
 
 class stage_object(smach.State):
     def __init__(self, platform=None):
-        smach.State.__init__(self, outcomes=['success', 'failed'])
+        smach.State.__init__(self, outcomes=['success', 'failed'],
+                                   input_keys=['goal'])
         self.client = SimpleActionClient('stage_object_server', GenericExecuteAction)
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
@@ -116,7 +117,7 @@ class stage_object(smach.State):
             self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
 
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(15.0))
+        self.client.wait_for_result(rospy.Duration.from_sec(30.0))
         state = self.client.get_state()
         if state == GoalStatus.SUCCEEDED:
             return 'success'
@@ -144,7 +145,7 @@ class unstage_object(smach.State):
             self.goal.parameters.append(KeyValue(key='platform', value=str(platform).upper()))
 
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(15.0))
+        self.client.wait_for_result(rospy.Duration.from_sec(30.0))
         state = self.client.get_state()
         if state == GoalStatus.SUCCEEDED:
             return 'success'

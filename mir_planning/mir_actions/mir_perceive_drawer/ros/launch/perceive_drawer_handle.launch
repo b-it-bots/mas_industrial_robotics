@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+ 
+    <include file="$(find mir_handle_detection)/ros/launch/drawer_handle_perceiver.launch" />
+    
+    <node pkg="mir_perceive_drawer" type="perceive_drawer_handle_server"
+          name="perceive_drawer_handle_server" output="screen" />
+
+</launch>
