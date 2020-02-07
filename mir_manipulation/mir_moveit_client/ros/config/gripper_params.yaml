@@ -1,0 +1,6 @@
+loop_rate : 10.0
+move_group : move_group
+arm : arm_1_gripper
+goal_position_tolerance : 0.0001
+goal_orientation_tolerance : 0.0001
+goal_joint_tolerance : 0.0001
