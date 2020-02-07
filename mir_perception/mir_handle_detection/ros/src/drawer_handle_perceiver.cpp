@@ -191,7 +191,7 @@ bool DrawerHandlePerceiver::transformPC(const sensor_msgs::PointCloud2::ConstPtr
     }
 }
 
-void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr input, PCloudT::Ptr output)
+void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr &input, PCloudT::Ptr output)
 {
     PCloudT::Ptr pc_intermediate(new PCloudT);
     this->passthrough_filter_z.setInputCloud(input);
@@ -200,14 +200,12 @@ void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr input, PCloud
     this->passthrough_filter_y.filter(*output);
 }
 
-void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr input, PCloudT::Ptr dense_input, PCloudT::Ptr output)
+void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output)
 {
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
     this->seg.setInputCloud(input);
     this->seg.segment(*inliers, *coefficients);
-
-    std::cout << inliers->indices.size() << std::endl;
 
     //Project plane model inliers to plane
     PCloudT::Ptr pc_plane(new PCloudT);
@@ -233,7 +231,7 @@ void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr input, PCloud
     this->extract_indices.filter(*output);
 }
 
-bool DrawerHandlePerceiver::getClosestCluster(const PCloudT::Ptr input, Eigen::Vector4f &closest_centroid)
+bool DrawerHandlePerceiver::getClosestCluster(const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid)
 {
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
     std::vector<pcl::PointIndices> clusters_indices;

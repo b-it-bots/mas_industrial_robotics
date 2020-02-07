@@ -61,8 +61,8 @@ class DrawerHandlePerceiver
         void pcCallback(const sensor_msgs::PointCloud2::ConstPtr &msg);
         void eventInCallback(const std_msgs::String::ConstPtr &msg);
         bool transformPC(const sensor_msgs::PointCloud2::ConstPtr &msg, sensor_msgs::PointCloud2 &msg_transformed);
-        void passthroughFilterPC(const PCloudT::Ptr input, PCloudT::Ptr output);
-        void extractPlaneOutlier(const PCloudT::Ptr input, PCloudT::Ptr dense_input, PCloudT::Ptr output);
-        bool getClosestCluster(const PCloudT::Ptr input, Eigen::Vector4f &closest_centroid);
+        void passthroughFilterPC(const PCloudT::Ptr &input, PCloudT::Ptr output);
+        void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output);
+        bool getClosestCluster(const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid);
 };
 #endif
