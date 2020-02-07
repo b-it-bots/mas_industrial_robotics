@@ -1,0 +1,28 @@
+# params for drawer handle perceiver
+output_frame: 'base_link_static'
+
+# publish a debug pointcloud or not
+enable_debug_pc_pub: true
+
+# for pass through filter
+z_threshold_min: -0.05
+z_threshold_max: 0.1
+y_threshold_min: -0.1
+y_threshold_max: 0.1
+
+# for voxel grid filter
+leaf_size_x: 0.01
+leaf_size_y: 0.01
+leaf_size_z: 0.01
+
+# SAC segmentation
+seg_dist_threshold: 0.005
+
+# for polygon prism extractions
+polygon_prism_height_min: 0.005
+polygon_prism_height_max: 0.1
+
+# for euclidean cluster extraction
+cluster_tolerance: 0.02
+min_cluster_size: 50
+max_cluster_size: 10000
