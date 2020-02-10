@@ -70,7 +70,7 @@ class SendPoseToDBC(smach.State):
 class SendPoseToMoveIt(smach.State):
     def __init__(self, is_intermediate=False):
         smach.State.__init__(self,  outcomes=['succeeded'])
-        self._moveit_pose_pub = rospy.Publisher('/moveit_to_pose/pose_in',
+        self._moveit_pose_pub = rospy.Publisher('/arm_moveit_client/target_pose',
                                                 PoseStamped, queue_size=10)
         _obj_pose_sub = rospy.Subscriber('mcr_perception/object_selector/output/object_pose',
                                          PoseStamped, self._obj_pose_cb)
@@ -144,10 +144,10 @@ def main():
         smach.StateMachine.add('SEND_MOVEIT_POSE_INTERMEDIATE', SendPoseToMoveIt(is_intermediate=True),
                 transitions={'succeeded':'MOVE_ARM_USING_MOVEIT_INTERMEDIATE'})
 
-        # Move arm using moveit_to_pose to an intermediate pose before obj
+        # Move arm using mir_moveit_client to an intermediate pose before obj
         smach.StateMachine.add('MOVE_ARM_USING_MOVEIT_INTERMEDIATE', gbs.send_and_wait_events_combined(
-                event_in_list=[('moveit_to_pose/event_in','e_trigger')],
-                event_out_list=[('moveit_to_pose/event_out','e_done', True)],
+                event_in_list=[('arm_moveit_client/event_in','e_start')],
+                event_out_list=[('arm_moveit_client/event_out','e_success', True)],
                 timeout_duration=10),
                 transitions={'success':'SEND_MOVEIT_POSE',
                              'timeout':'MOVE_ARM_TO_PRE_GRASP_FAILED',
@@ -156,10 +156,10 @@ def main():
         smach.StateMachine.add('SEND_MOVEIT_POSE', SendPoseToMoveIt(is_intermediate=False),
                 transitions={'succeeded':'MOVE_ARM_USING_MOVEIT'})
 
-        # Move arm using moveit_to_pose to obj pose
+        # Move arm using mir_moveit_client to obj pose
         smach.StateMachine.add('MOVE_ARM_USING_MOVEIT', gbs.send_and_wait_events_combined(
-                event_in_list=[('moveit_to_pose/event_in','e_trigger')],
-                event_out_list=[('moveit_to_pose/event_out','e_done', True)],
+                event_in_list=[('arm_moveit_client/event_in','e_start')],
+                event_out_list=[('arm_moveit_client/event_out','e_success', True)],
                 timeout_duration=10),
                 transitions={'success':'CLOSE_GRIPPER',
                              'timeout':'MOVE_ARM_TO_PRE_GRASP_FAILED',

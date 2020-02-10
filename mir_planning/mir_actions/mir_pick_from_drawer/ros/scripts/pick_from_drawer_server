@@ -45,7 +45,7 @@ class SelectObject(smach.State):
 class SendPoseToMoveIt(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['succeeded', 'failed'])
-        self._moveit_pose_pub = rospy.Publisher('/moveit_to_pose/pose_in',
+        self._moveit_pose_pub = rospy.Publisher('/arm_moveit_client/target_pose',
                                                 PoseStamped, queue_size=10)
         _pose_sub = rospy.Subscriber('/mcr_perception/object_selector/output/object_pose',
                                      PoseStamped, self._pose_cb)
@@ -119,8 +119,8 @@ def main():
         smach.StateMachine.add(
                 'TRIGGER_MOVEIT_OBJECT',
                 gbs.send_and_wait_events_combined(
-                    event_in_list=[('moveit_to_pose/event_in','e_trigger')],
-                    event_out_list=[('moveit_to_pose/event_out','e_done', True)],
+                    event_in_list=[('arm_moveit_client/event_in','e_start')],
+                    event_out_list=[('arm_moveit_client/event_out','e_success', True)],
                     timeout_duration=10),
                 transitions={'success': 'CLOSE_GRIPPER_OBJECT',
                              'timeout': 'OVERALL_FAILED',

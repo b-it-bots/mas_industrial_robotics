@@ -6,7 +6,7 @@
       Assumes that the location is a drawer and it is opened and the object
       requested for picking is perceived. 
       The base and arm are controlled using direct_base_controller and
-      moveit_to_pose.
+      mir_moveit_client.
   </description>
 
   <license>GPLv3</license>
