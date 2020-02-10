@@ -5,7 +5,7 @@
   <description>
       Action server for perceiving drawer handle and perceiving inside drawer.
       Assumes that the location is a drawer.
-      It uses direct_base_controller and moveit_to_pose for base and arm motion.
+      It uses direct_base_controller and mir_moveit_client for base and arm motion.
   </description>
 
   <license>GPLv3</license>
