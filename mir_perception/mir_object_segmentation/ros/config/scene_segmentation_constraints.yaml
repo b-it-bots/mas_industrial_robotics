@@ -9,6 +9,8 @@ scene_segmentation:
     passthrough_filter_limit_min: 0.0
     passthrough_filter_limit_max: 0.8
     normal_radius_search: 0.03
+    use_omp: False
+    num_cores: 8
     sac_max_iterations: 1000
     sac_distance_threshold: 0.01
     sac_optimize_coefficients: true
