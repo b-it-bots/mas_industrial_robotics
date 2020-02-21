@@ -10,12 +10,11 @@
 
 #include <mir_object_segmentation/scene_segmentation.h>
 
-SceneSegmentation::SceneSegmentation()
+SceneSegmentation::SceneSegmentation():
+  use_omp_(false)
 {
     cluster_extraction_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT> >());
     normal_estimation_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT> >());
-
-    normal_estimation_omp_.setNumberOfThreads(4);
     normal_estimation_omp_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT> >());
 
 };
@@ -81,11 +80,16 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud, 
         pass_through_.filter(*filtered);
     }
 
-    //normal_estimation_.setInputCloud(filtered);
-    //normal_estimation_.compute(*normals);
-
-    normal_estimation_omp_.setInputCloud(filtered);
-    normal_estimation_omp_.compute(*normals);
+    if (use_omp_)
+    {
+        normal_estimation_omp_.setInputCloud(filtered);
+        normal_estimation_omp_.compute(*normals); 
+    }
+    else
+    {
+        normal_estimation_.setInputCloud(filtered);
+        normal_estimation_.compute(*normals);
+    }
 
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
 
@@ -145,10 +149,18 @@ void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter, con
     pass_through_.setFilterLimits(limit_min, limit_max);
 }
 
-void SceneSegmentation::setNormalParams(double radius_search)
-{
-    normal_estimation_.setRadiusSearch(radius_search);
-    normal_estimation_omp_.setRadiusSearch(radius_search);
+void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int num_cores)
+{   
+    use_omp_ = use_omp;
+    if (use_omp_)
+    {
+        normal_estimation_omp_.setRadiusSearch(radius_search);
+        normal_estimation_omp_.setNumberOfThreads(num_cores);
+    }
+    else
+    {
+        normal_estimation_.setRadiusSearch(radius_search);
+    }
 }
 void SceneSegmentation::setSACParams(int max_iterations, double distance_threshold,
         bool optimize_coefficients, Eigen::Vector3f axis, double eps_angle, 
