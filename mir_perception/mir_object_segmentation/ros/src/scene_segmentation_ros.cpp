@@ -127,9 +127,9 @@ void SceneSegmentationROS::setPassthroughParams(bool enable_passthrough_filter,
             passthrough_filter_limit_max);
 }
 
-void SceneSegmentationROS::setNormalParams(double normal_radius_search)
+void SceneSegmentationROS::setNormalParams(double normal_radius_search, bool use_omp, int num_cores)
 {
-    scene_segmentation_->setNormalParams(normal_radius_search);
+    scene_segmentation_->setNormalParams(normal_radius_search, use_omp, num_cores);
 }
 
 void SceneSegmentationROS::setSACParams(int sac_max_iterations, 
