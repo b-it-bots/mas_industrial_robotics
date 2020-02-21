@@ -12,6 +12,7 @@
 #include <pcl_ros/transforms.h>
 
 #include <pcl/point_types.h>
+#include <pcl/features/normal_3d.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/extract_indices.h>
@@ -45,6 +46,7 @@ class DrawerHandlePerceiver
         bool is_running;
         int retry_attempts_;
         int num_of_retries_;
+        geometry_msgs::PoseStamped pose_stamped;
         tf::TransformListener tf_listener;
 
         pcl::PassThrough<pcl::PointXYZ> passthrough_filter_y;
@@ -64,5 +66,6 @@ class DrawerHandlePerceiver
         void passthroughFilterPC(const PCloudT::Ptr &input, PCloudT::Ptr output);
         void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output);
         bool getClosestCluster(const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid);
+        bool getDrawerPlaneNormal(const PCloudT::Ptr &input, Eigen::Vector4f &normal_vector);
 };
 #endif
