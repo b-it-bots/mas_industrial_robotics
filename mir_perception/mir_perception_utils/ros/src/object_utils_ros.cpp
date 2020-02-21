@@ -59,8 +59,8 @@ void object::estimatePose(const BoundingBox &box,
 void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, 
                     geometry_msgs::PoseStamped &pose,
                     std::string shape,
-                    float passthrough_lim_min,
-                    float passthrough_lim_max)
+                    float passthrough_lim_min_offset,
+                    float passthrough_lim_max_offset)
 {
     // Apply filter to remove points belonging to the plane for non circular/spherical object 
     // to find its orientation
@@ -76,8 +76,8 @@ void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud,
         PointT min_pt;
         PointT max_pt;
         pcl::getMinMax3D(*xyz_input_cloud, min_pt, max_pt);
-        double limit_min = min_pt.z + passthrough_lim_min;
-        double limit_max = max_pt.z + passthrough_lim_max;
+        double limit_min = min_pt.z + passthrough_lim_min_offset;
+        double limit_max = max_pt.z + passthrough_lim_max_offset;
         pass_through.setFilterLimits(limit_min, limit_max);
         pass_through.setInputCloud(xyz_input_cloud);
         pass_through.filter(filtered_cloud);
