@@ -125,8 +125,10 @@ class SceneSegmentationROS
 
         /** \brief Set Normal param using radius
          * \param[in] Radius search
+         * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu (default False)
+         * \param[in] Number of cores to use for computing normal with OMP (default=4)
          * */
-        void setNormalParams(double normal_radius_search);
+        void setNormalParams(double normal_radius_search, bool use_omp=false, int num_cores=4);
 
         /** \brief Set SAC parameters
          * \param[in] The maximum number of iterations the algorithm will run for
