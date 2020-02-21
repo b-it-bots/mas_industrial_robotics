@@ -188,7 +188,7 @@ void SceneSegmentationNode::configCallback(mir_object_segmentation::SceneSegment
             config.passthrough_filter_field_name,
             config.passthrough_filter_limit_min,
             config.passthrough_filter_limit_max);
-    scene_segmentation_ros_.setNormalParams(config.normal_radius_search);
+    scene_segmentation_ros_.setNormalParams(config.normal_radius_search, config.use_omp, config.num_cores);
     Eigen::Vector3f axis(config.sac_x_axis, config.sac_y_axis, config.sac_z_axis);
     scene_segmentation_ros_.setSACParams(config.sac_max_iterations, config.sac_distance_threshold,
             config.sac_optimize_coefficients, axis, config.sac_eps_angle,
