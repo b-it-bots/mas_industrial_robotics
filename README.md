@@ -34,6 +34,7 @@ If you have never worked with git before, we recommend to go through the followi
 ## ROS - Robot Operating System
 ### Install ROS
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
+Alternatively, you can skip this step, as ROS Kinetic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
 
 
 - ROS Kinetic - http://wiki.ros.org/kinetic/Installation/Ubuntu
@@ -48,44 +49,34 @@ If you have never worked with ROS before, we recommend to go through the beginne
 
 In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters"). 
 
-
-## Set up a catkin workspace
-
-    source /opt/ros/kinetic/setup.bash
-    mkdir -p ~/kinetic/src; cd ~/kinetic/src
-    catkin_init_workspace
-    catkin build
     
 ## Clone and compile the MAS industrial robotics software
 First of all you have to clone the repository.
 
-    cd ~/kinetic/src;
+    mkdir ~/temp
+    cd ~/temp
     git clone git@github.com:b-it-bots/mas_industrial_robotics.git
 
+Navigate into the cloned repository and run setup.sh file.
 
-Install documentation generation software
-    cd mas_industrial_robotics
-    git submodule init
-    git submodule update
-    pip install --user sphinx-rtd-theme
+     ./setup.sh
 
-Then go on with installing further external dependencies:
+This script does the following,
 
-    cd ~/kinetic/src/mas_industrial_robotics
-    ./repository.debs
+* installs ROS, if not previously installed
+* creates a catkin workspace directory in ~/catkin_ws (if it does not exist)
+* copies the clone of the mas_industiral_robotics from your ~/temp to ~/catkin_ws/src and installs the necessary ros dependencies and other related repositories
+* initiates a catkin build in the catkin workspace
 
-    source ~/kinetic/devel/setup.bash
+Add the following to your bashrc and source your bashrc, so that you need not execute ./setup.sh script each time you open your terminal
 
-The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
-
-
-And finally compile the repository:
-
-    cd ~/kinetic
-    catkin build
-
+     source ~/catkin_ws/devel/setup.bash
 
 If no errors appear everything is ready to use. Great job!
+
+Finally delete the initially cloned mas_industrial_robotics in ~/temp, as all necessary repositories and dependencies are successfully cloned and installed in your catkin workspace
+
+     rm -rf ~/temp/mas_industrial_robotics
 
 
 ### Setting the Environment Variables
