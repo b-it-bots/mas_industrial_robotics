@@ -14,8 +14,8 @@ from mir_actions.utils import Utils
 from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteResult, GenericExecuteFeedback
 from diagnostic_msgs.msg import KeyValue
 
-# perception object list
 from geometry_msgs.msg import PoseStamped, Quaternion
+# perception object list
 from mas_perception_msgs.msg import ObjectList
 
 #===============================================================================
@@ -76,7 +76,7 @@ class Setup(smach.State):
 
     def execute(self, userdata):
         userdata.arm_pose_index = 0 # reset arm position for new request
-        userdata.base_pose_index = 0 # reset arm position for new request
+        userdata.base_pose_index = 0 # reset base position for new request
 
         # Add empty result msg (because if none of the state do it, action server gives error)
         userdata.result = GenericExecuteResult()
