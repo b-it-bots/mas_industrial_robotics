@@ -46,7 +46,6 @@ class DrawerHandlePerceiver
         bool is_running;
         int retry_attempts_;
         int num_of_retries_;
-        geometry_msgs::PoseStamped pose_stamped;
         tf::TransformListener tf_listener;
 
         pcl::PassThrough<pcl::PointXYZ> passthrough_filter_y;
@@ -64,8 +63,7 @@ class DrawerHandlePerceiver
         void eventInCallback(const std_msgs::String::ConstPtr &msg);
         bool transformPC(const sensor_msgs::PointCloud2::ConstPtr &msg, sensor_msgs::PointCloud2 &msg_transformed);
         void passthroughFilterPC(const PCloudT::Ptr &input, PCloudT::Ptr output);
-        void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output);
+        void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output, geometry_msgs::PoseStamped &pose_stamped);
         bool getClosestCluster(const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid);
-        bool getDrawerPlaneNormal(const PCloudT::Ptr &input, Eigen::Vector4f &normal_vector);
 };
 #endif
