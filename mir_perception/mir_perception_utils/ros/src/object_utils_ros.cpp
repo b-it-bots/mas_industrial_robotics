@@ -174,40 +174,36 @@ void object::convertBboxToMsg(const BoundingBox &bbox,
 }
 
 void object::savePcd(const PointCloud::ConstPtr &pointcloud, 
-                        std::string logdir, 
+                        std::string log_dir, 
                         std::string obj_name)
 {
     std::stringstream filename;
-    ros::Time time_now = ros::Time::now();
     filename.str("");
-    filename << logdir << obj_name << "_" << time_now <<".pcd";
+    filename << log_dir << obj_name << ".pcd";
     pcl::io::savePCDFileASCII(filename.str(), *pointcloud);
 }
 
-void object::saveImage(const cv_bridge::CvImagePtr &cv_image_bbox_ptr, 
-                            const sensor_msgs::ImageConstPtr &raw_image,
-                            std::string logdir)
+void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image,
+                       std::string log_dir, 
+                       std::string obj_name)
 {
-    ROS_WARN_STREAM("Saving raw image and bbox information");
-    std::stringstream filename; // stringstream used for the conversion
-    ros::Time time_now = ros::Time::now();
-
-    // save image
+    std::stringstream filename;
     filename.str("");
-    filename << logdir << time_now << "_bbox_rgb" <<".jpg";
-    cv::imwrite(filename.str(), cv_image_bbox_ptr->image);
+    filename << log_dir << obj_name << ".jpg";
+    cv::imwrite(filename.str(), cv_image->image);
+}
 
-    cv_bridge::CvImagePtr raw_cv_image;
+bool object::getCVImage(const sensor_msgs::ImageConstPtr &image,
+                        cv_bridge::CvImagePtr &cv_image)
+{
     try
     {
-        raw_cv_image = cv_bridge::toCvCopy(raw_image, sensor_msgs::image_encodings::BGR8);
+        cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
+        return(true);
     }
     catch (cv_bridge::Exception& e)
     {
         ROS_ERROR("cv_bridge exception: %s", e.what());
-        return;
+        return(false);
     }
-    filename.str("");
-    filename << logdir << time_now << "_raw_rgb" <<".jpg";
-    cv::imwrite(filename.str(), raw_cv_image->image);
 }
