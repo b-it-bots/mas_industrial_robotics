@@ -83,16 +83,24 @@ namespace object
      * \param[in] obj_name (default="unknown")
      * */
     void savePcd(const PointCloud::ConstPtr &pointcloud, 
-                    std::string logdir="/tmp/", 
-                    std::string obj_name="unknown");
+                 std::string log_dir="/tmp/", 
+                 std::string obj_name="unknown");
+
     /** \brief Save debug image if debug_mode is enabled
      * \param[in] image with boundix boxes of objects drawn
      * \param[in] raw_image
      * \param[in] logdir (default /tmp)
     */
-    void saveImage(const cv_bridge::CvImagePtr &cv_image_ptr, 
-                        const sensor_msgs::ImageConstPtr &raw_image, 
-                        std::string logdir="/tmp/");
+    void saveCVImage(const cv_bridge::CvImagePtr &cv_image, 
+                     std::string log_dir="/tmp/",
+                     std::string obj_name="unknown");
+    
+    /** \brief Convert sensor_msgs/Image to cv_image
+     * \param[in] Sensor_msg/Image
+     * \param[out] cv image output
+    */
+    bool getCVImage(const sensor_msgs::ImageConstPtr &image,
+                    cv_bridge::CvImagePtr &cv_image);
 
 }
 }
