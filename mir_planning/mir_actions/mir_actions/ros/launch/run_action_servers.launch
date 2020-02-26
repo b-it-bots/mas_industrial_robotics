@@ -15,7 +15,7 @@
     <node pkg="mir_unstage_object" type="unstage_object_server.py" name="unstage_object_server" output="screen" />
 
     <!-- perceive location action server -->
-    <node pkg="mir_perceive_location" type="perceive_location_server.py" name="perceive_location_server" output="screen" />
+    <include file="$(find mir_perceive_location)/ros/launch/perceive_location_server.launch" />
 
     <!-- wbc pick object action server -->
     <node pkg="mir_pick_object" type="pick_object_server.py" name="wbc_pick_object_server" output="screen"/>
