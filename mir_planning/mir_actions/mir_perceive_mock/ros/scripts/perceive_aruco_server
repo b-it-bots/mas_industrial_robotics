@@ -43,7 +43,7 @@ class SetupMoveBaseWithDBC(smach.State):
                                    input_keys=['base_pose_index', 'base_pose_list', 'arm_pose_list', 'arm_pose_index'],
                                    output_keys=['base_pose_index', 'move_arm_to'])
         self._dbc_pose_pub = rospy.Publisher('/mcr_navigation/direct_base_controller/input_pose',
-                                             PoseStamped, queue_size=10)
+                                             PoseStamped, queue_size=1)
         rospy.sleep(0.1) # time for the publisher to register in ros network
 
     def execute(self, userdata):
