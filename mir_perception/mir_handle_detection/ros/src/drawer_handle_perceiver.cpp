@@ -128,7 +128,8 @@ void DrawerHandlePerceiver::pcCallback(const sensor_msgs::PointCloud2::ConstPtr 
     this->voxel_grid_filter.filter(*pc_filtered);
 
     PCloudT::Ptr pc_segmented(new PCloudT);
-    this->extractPlaneOutlier(pc_filtered, pc_passthrough_filtered, pc_segmented);
+    geometry_msgs::PoseStamped pose_stamped;
+    this->extractPlaneOutlier(pc_filtered, pc_passthrough_filtered, pc_segmented, pose_stamped);
 
     Eigen::Vector4f closest_centroid(0.0, 0.0, 0.0, 0.0);
     bool cluster_success = this->getClosestCluster(pc_segmented, closest_centroid);
@@ -139,14 +140,12 @@ void DrawerHandlePerceiver::pcCallback(const sensor_msgs::PointCloud2::ConstPtr 
         return;
     }
 
-    geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.pose.position.x = closest_centroid[0];
     pose_stamped.pose.position.y = closest_centroid[1];
     pose_stamped.pose.position.z = closest_centroid[2];
-    pose_stamped.pose.orientation.w = 1.0;
     pose_stamped.header.frame_id = this->output_frame;
     pose_stamped.header.stamp = ros::Time::now();
-    this->pose_pub.publish(pose_stamped);
+    pose_pub.publish(pose_stamped);
 
     std_msgs::String event_out_msg;
     event_out_msg.data = "e_done";
@@ -200,7 +199,7 @@ void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr &input, PClou
     this->passthrough_filter_y.filter(*output);
 }
 
-void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output)
+void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output, geometry_msgs::PoseStamped &pose_stamped)
 {
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
@@ -213,6 +212,14 @@ void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr &input, PClou
     this->project_inliers.setModelCoefficients(coefficients);
     this->project_inliers.setIndices(inliers);
     this->project_inliers.filter(*pc_plane);
+
+    Eigen::Matrix<float, 3, 1> normVector = Eigen::Matrix<float, 3, 1>(coefficients->values[0],coefficients->values[1],coefficients->values[2]);
+    Eigen::Quaternionf normQuat = Eigen::Quaternionf::FromTwoVectors(normVector, Eigen::Vector3f::UnitX()); 
+
+    pose_stamped.pose.orientation.x = normQuat.x();
+    pose_stamped.pose.orientation.y = normQuat.y();
+    pose_stamped.pose.orientation.z = normQuat.z();
+    pose_stamped.pose.orientation.w = normQuat.w();
 
     //Compute plane convex hull
     PCloudT::Ptr pc_hull(new PCloudT);
@@ -233,7 +240,9 @@ void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr &input, PClou
 
 bool DrawerHandlePerceiver::getClosestCluster(const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid)
 {
+
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+
     std::vector<pcl::PointIndices> clusters_indices;
     this->euclidean_cluster_extraction.setSearchMethod(tree);
     this->euclidean_cluster_extraction.setInputCloud(input);
@@ -258,6 +267,7 @@ bool DrawerHandlePerceiver::getClosestCluster(const PCloudT::Ptr &input, Eigen::
             closest_centroid = centroid;
         }
     }
+
     return true;
 }
 

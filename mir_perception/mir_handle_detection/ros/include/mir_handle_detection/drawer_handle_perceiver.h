@@ -12,6 +12,7 @@
 #include <pcl_ros/transforms.h>
 
 #include <pcl/point_types.h>
+#include <pcl/features/normal_3d.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/extract_indices.h>
@@ -62,7 +63,7 @@ class DrawerHandlePerceiver
         void eventInCallback(const std_msgs::String::ConstPtr &msg);
         bool transformPC(const sensor_msgs::PointCloud2::ConstPtr &msg, sensor_msgs::PointCloud2 &msg_transformed);
         void passthroughFilterPC(const PCloudT::Ptr &input, PCloudT::Ptr output);
-        void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output);
+        void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output, geometry_msgs::PoseStamped &pose_stamped);
         bool getClosestCluster(const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid);
 };
 #endif
