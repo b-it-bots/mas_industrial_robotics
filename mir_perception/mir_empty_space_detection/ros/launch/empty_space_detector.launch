@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="input_pointcloud_topic"  default="/arm_cam3d/depth_registered/points" />
+    <arg name="params_file" default="$(find mir_empty_space_detection)/ros/config/params.yaml" />
+
+    <group ns="mir_perception">
+        <node pkg="mir_empty_space_detection" type="empty_space_detector" name="empty_space_detector" output="screen">
+            <remap from="~input_point_cloud" to="$(arg input_pointcloud_topic)" />  
+            <rosparam file="$(arg params_file)" command="load"/>
+        </node>
+    </group>
+
+</launch>
+
