@@ -17,4 +17,5 @@
 html/
 latex/
 
+# VSCode
 .vscode/
