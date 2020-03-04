@@ -59,18 +59,18 @@ First of all you have to clone the repository.
 
 Navigate into the cloned repository and run setup.sh file.
 
-     ./setup.sh
+     ./setup.sh <optional arg for catkin_ws parent dir>
 
 This script does the following,
 
 * installs ROS, if not previously installed
-* creates a catkin workspace directory in ~/catkin_ws (if it does not exist)
-* copies the clone of the mas_industiral_robotics from your ~/temp to ~/catkin_ws/src and installs the necessary ros dependencies and other related repositories
+* creates a catkin workspace folder in the directory specified in the argument or by default places it in home directory, i.e. ~/catkin_ws (if it does not exist)
+* copies the clone of the mas_industiral_robotics from your ~/temp to \<your folder\>/catkin_ws/src and installs the necessary ros dependencies and other related repositories
 * initiates a catkin build in the catkin workspace
 
 Add the following to your bashrc and source your bashrc, so that you need not execute ./setup.sh script each time you open your terminal
 
-     source ~/catkin_ws/devel/setup.bash
+     source <your folder>/catkin_ws/devel/setup.bash
 
 If no errors appear everything is ready to use. Great job!
 
