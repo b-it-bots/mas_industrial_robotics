@@ -74,7 +74,7 @@ class SendSafePoseToDBC(smach.State):
         self._front_laser_dist = msg.data[0]
 
     def execute(self, userdata):
-        x_offset = self._front_laser_dist - self.target_dist
+        x_offset = self._front_laser_dist - self._target_dist
 
         dbc_target_pose = PoseStamped()
         dbc_target_pose.header.stamp = rospy.Time.now()
