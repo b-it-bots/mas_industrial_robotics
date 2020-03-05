@@ -94,7 +94,7 @@ if [ -z "$2" ]
     then
         INSTALL_DIR=~
     else
-        INSTALL_DIR=$1
+        INSTALL_DIR=$2
 fi
 
 install_basic_packages
