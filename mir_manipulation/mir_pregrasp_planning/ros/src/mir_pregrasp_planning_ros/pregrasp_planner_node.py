@@ -173,6 +173,7 @@ class PregraspPlannerPipeline(object):
         self.angular_tolerance = config.angular_tolerance
         self.linear_offset = [config.linear_offset_x, config.linear_offset_y, config.linear_offset_z]
         self.generate_pregrasp_waypoint = config.generate_pregrasp_waypoint
+        self.ignore_orientation = config.ignore_orientation
         self.joint_offset = [config.joint_1_offset, config.joint_2_offset, \
                              config.joint_3_offset, config.joint_4_offset, \
                              config.joint_5_offset]
@@ -180,6 +181,7 @@ class PregraspPlannerPipeline(object):
                                          config.joint_3_offset_side_grasp, config.joint_4_offset_side_grasp, \
                                          config.joint_5_offset_side_grasp]
         self.rotation_range = [config.rotation_range_min, config.rotation_range_max]
+        print(config)
         return config
 
     def event_in_cb(self, msg):
@@ -192,6 +194,7 @@ class PregraspPlannerPipeline(object):
         """
         Obtains input pose
         """
+        print('inside pose cb')
         self.pose_in = msg
 
     def start(self):
@@ -272,6 +275,46 @@ class PregraspPlannerPipeline(object):
             self.event_out.publish(status)
             self.reset_component_data()
             return 'INIT'
+
+        if self.ignore_orientation:
+            input_pose = geometry_msgs.msg.PoseStamped()
+            input_pose.header = transformed_pose.header
+            input_pose.pose.position = transformed_pose.pose.position
+            print(input_pose)
+            zenith_ranges = [(-10.0, 10.0), (-30.0, -10.0), (-60.0, -30.0), (-90.0, -60.0)]
+            if input_pose.pose.position.y > 0.0:
+                roll_ranges = [(0.0, 30.0), (30.0, 60.0), (60.0, 90.0)]
+            else:
+                roll_ranges = [(-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0)]
+            found_solution = False
+            for zenith_range in zenith_ranges:
+                self.pose_generator.set_min_zenith(math.radians(zenith_range[0]))
+                self.pose_generator.set_max_zenith(math.radians(zenith_range[1]))
+                for roll_range in roll_ranges:
+                    self.pose_generator.set_min_roll(math.radians(roll_range[0]))
+                    self.pose_generator.set_max_roll(math.radians(roll_range[1]))
+                    pose_samples = self.pose_generator.calculate_poses_list(input_pose, number_of_fields=5)
+                    print(len(pose_samples.poses))
+                    self.pose_samples_pub.publish(pose_samples)
+                    reachable_pose, joint_msg, _ = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, None)
+                    if reachable_pose is not None:
+                        print(zenith_range)
+                        print(roll_range)
+                        found_solution = True
+                        rospy.loginfo('Found solution')
+                        self.selected_pose.publish(reachable_pose)
+                        print(reachable_pose)
+                        self.joint_configuration.publish(joint_msg)
+
+                        self.event_out.publish("e_success")
+                        self.reset_component_data()
+                        return 'INIT'
+            if not found_solution:
+                rospy.logerr("Could not find IK solution")
+                status = 'e_failure'
+                self.event_out.publish(status)
+                self.reset_component_data()
+                return 'INIT'
 
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
                 transformed_pose, self.height_tolerance, angular_tolerance=self.angular_tolerance
