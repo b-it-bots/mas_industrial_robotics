@@ -90,7 +90,7 @@ fi
 
 # If no arg then catkin_ws is created in home
 # folder, otherwise in specified folder
-if [ -z "$1" ]
+if [ -z "$2" ]
     then
         INSTALL_DIR=~
     else
