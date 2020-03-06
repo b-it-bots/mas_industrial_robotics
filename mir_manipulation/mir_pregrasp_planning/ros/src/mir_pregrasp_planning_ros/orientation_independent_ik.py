@@ -44,6 +44,35 @@ class OrientationIndependentIK(object):
         :returns: brics_actuator.JointPositions or None
 
         """
+        pitch_ranges = [(0.0, 0.0), (-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0), (0.0, 10.0)]
+        return self._get_joint_msg_from_point_and_pitch_ranges(x, y, z, frame_id, pitch_ranges)
+
+    def get_joint_msg_from_point_and_pitch(self, x, y, z, pitch, pitch_tolerance, frame_id):
+        """
+        Calculates the joint angles for the arm's end effector to reach a point
+        with given pitch angle (plus or minus some given tolerance)
+        The orientation is sampled around the given point to find an IK solution.
+        The sampling is done in stages to reduce computational time. 
+
+        pitch is zero when the gripper fingers are facing down.
+        pitch is -90 degrees when gripper fingers are facing forward
+
+        Note: pitch and pitch_tolerance are considered in degrees
+
+        :x: float
+        :y: float
+        :z: float
+        :pitch: float
+        :pitch_tolerance: float
+        :frame_id: str
+        :returns: brics_actuator.JointPositions or None
+
+        """
+        tolerance = abs(pitch_tolerance)
+        pitch_ranges = [(pitch, pitch), (pitch-tolerance, pitch), (pitch, pitch+tolerance)]
+        return self._get_joint_msg_from_point_and_pitch_ranges(x, y, z, frame_id, pitch_ranges)
+
+    def _get_joint_msg_from_point_and_pitch_ranges(self, x, y, z, frame_id, pitch_ranges):
         self._initialise_base_to_arm_offset()
         if self._base_link_to_arm_base_offset is None:
             rospy.logerr('Could not get translation from ' + str(self._base_link_frame) + ' to ' + str(self._arm_base_frame))
@@ -68,7 +97,6 @@ class OrientationIndependentIK(object):
         yaw_rad = np.arctan2(delta_y, delta_x)
         yaw = np.degrees(yaw_rad)
 
-        pitch_ranges = [(0.0, 0.0), (-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0), (0.0, 10.0)]
         found_solution = False
         for pitch_range in pitch_ranges:
             pose_samples = self._generate_samples(input_pose,
