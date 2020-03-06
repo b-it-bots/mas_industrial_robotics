@@ -16,7 +16,7 @@ from tf.transformations import euler_from_quaternion
 import std_srvs.srv
 
 from mas_perception_msgs.msg import ObjectList, Object
-
+from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
 
 class Bunch:
     def __init__(self, **kwds):
@@ -47,6 +47,8 @@ class MoveitClient:
         TOPIC_TARGET_CONFIGURATION = 'moveit_client/target_configuration'
 
         self.move_arm_to = target
+
+        self._point_ik_solver = OrientationIndependentIK()
 
         # Eventin publisher
         self.pub_event = rospy.Publisher(moveit_group+TOPIC_EVENT_IN, std_msgs.msg.String, queue_size=1)
@@ -96,6 +98,12 @@ class MoveitClient:
                     self.pub_target_pose.publish(pose)
                 elif len(target) == 5:      # ... of 5 items: Joint space configuration
                     self.pub_target_config.publish(self.list_to_brics_joint_positions(target))
+                elif len(target) == 4:      # ... of 3 items: Cartesian point (x, y, z, frame_id)
+                    brics_joint_pos_msg = self._point_ik_solver.get_joint_msg_from_point(*target)
+                    if brics_joint_pos_msg is None:
+                        rospy.logerr("Could not find IK")
+                        return 'failed'
+                    self.pub_target_config.publish(brics_joint_pos_msg)
                 else:
                     rospy.logerr("target list is malformed")
                     return 'failed'
