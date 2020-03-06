@@ -65,15 +65,24 @@ class TestNode(object):
 
     def test(self):
         input_pose = PoseStamped()
-        input_pose.pose.position.x = 0.6
-        input_pose.pose.position.y = -0.2
+        input_pose.pose.position.x = 0.5
+        input_pose.pose.position.y = 0.1
         input_pose.pose.position.z = 0.1
         input_pose.pose.orientation.w = 1.0
         input_pose.header.stamp = rospy.Time.now()
         input_pose.header.frame_id = 'base_link'
         self.pose_pub.publish(input_pose)
         rospy.sleep(1.0)
-        pitch_ranges = [(-10.0, 10.0), (-30.0, -10.0), (-60.0, -30.0), (-90.0, -60.0)]
+        # first try top down
+        pose_samples = self._generate_samples(input_pose, pitch_offset=180.0)
+        self.pose_array_pub.publish(pose_samples)
+        reachable_pose, joint_msg, _ = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, None)
+        if reachable_pose is not None:
+            rospy.loginfo('Found solution top down')
+            self.pose_out_pub.publish(reachable_pose)
+            self.joint_msg_pub.publish(joint_msg)
+            return
+        pitch_ranges = [(-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0), (0.0, 10.0)]
         if input_pose.pose.position.y > 0.0:
             yaw_ranges = [(0.0, 30.0), (30.0, 60.0), (60.0, 90.0)]
         else:
@@ -95,6 +104,9 @@ class TestNode(object):
                         pitch_min=pitch_range[0], pitch_max=pitch_range[1], pitch_offset=180.0, pitch_samples=5,
                         yaw_min=yaw_range[0], yaw_max=yaw_range[1], yaw_offset=0.0, yaw_samples=5)
 
+                if input_pose.pose.position.y > 0.0:
+                    pose_samples.poses = pose_samples.poses[::-1]
+
                 self.pose_array_pub.publish(pose_samples)
                 reachable_pose, joint_msg, _ = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, None)
                 if reachable_pose is not None:
@@ -110,7 +122,6 @@ class TestNode(object):
                 break
         if not found_solution:
             rospy.logwarn('No solution found')
-        rospy.spin()
 
     def _generate_samples(self, input_pose,
                           roll_min=0.0, roll_max=0.0, roll_samples=1, roll_offset=0.0,
@@ -169,3 +180,4 @@ if __name__ == '__main__':
     rospy.init_node('test_node')
     TN = TestNode()
     TN.test()
+    rospy.spin()
