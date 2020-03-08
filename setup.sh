@@ -51,29 +51,29 @@ function install_ros {
 # Setup catkin workspace in the home directory
 function setup_catkin_ws {
     fancy_print "Setting up a catkin workspace"
-    mkdir -p ~/catkin_ws/src
-    cd ~/catkin_ws
+    mkdir -p $INSTALL_DIR/catkin_ws/src
+    cd $INSTALL_DIR/catkin_ws
     catkin init
     catkin config --extend /opt/ros/kinetic/
     catkin build
-    source ~/catkin_ws/devel/setup.bash
+    source $INSTALL_DIR/catkin_ws/devel/setup.bash
 }
 
 # Clone and install mas_industrial_robotics and all related dependencies
 function get_mas_industrial_robotics {
     fancy_print "Getting source code"
-    cd ~/catkin_ws/src
-    cp -r $ROOT_DIR ~/catkin_ws/src
-    cd ~/catkin_ws/src/mas_industrial_robotics
+    cd $INSTALL_DIR/catkin_ws/src
+    cp -r $ROOT_DIR $INSTALL_DIR/catkin_ws/src
+    cd $INSTALL_DIR/catkin_ws/src/mas_industrial_robotics
     ./repository.debs
     sudo rm -rf /var/lib/apt/lists/*
 }
 
 function build_mas_industrial_robotics {
     fancy_print "Building ROS packages"
-    source ~/catkin_ws/devel/setup.bash
+    source $INSTALL_DIR/catkin_ws/devel/setup.bash
     # Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
-    touch ~/catkin_ws/src/youbot_driver_ros_interface/CATKIN_IGNORE
+    touch $INSTALL_DIR/catkin_ws/src/youbot_driver_ros_interface/CATKIN_IGNORE
     catkin build
 }
 
@@ -86,6 +86,15 @@ FULL_INSTALL=false
 if [ $# -eq 1 ] && [ $1 == "full" ]
     then
         FULL_INSTALL=true
+fi
+
+# If no arg then catkin_ws is created in home
+# folder, otherwise in specified folder
+if [ -z "$2" ]
+    then
+        INSTALL_DIR=~
+    else
+        INSTALL_DIR=$2
 fi
 
 install_basic_packages
