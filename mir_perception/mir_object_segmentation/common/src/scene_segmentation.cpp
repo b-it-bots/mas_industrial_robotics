@@ -32,7 +32,7 @@ PointCloud::Ptr SceneSegmentation::segmentScene(const PointCloud::ConstPtr &clou
     pcl::PointIndices::Ptr segmented_cloud_inliers(new pcl::PointIndices);
     std::vector<pcl::PointIndices> clusters_indices;
 
-    filtered = findPlane(cloud, hull, coefficients, workspace_height);
+    filtered = findPlane(cloud, hull, plane, coefficients, workspace_height);
 
     if (coefficients->values.size() == 0)
     {
@@ -63,10 +63,10 @@ PointCloud::Ptr SceneSegmentation::segmentScene(const PointCloud::ConstPtr &clou
 }
 
 PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud, PointCloud::Ptr &hull,
-                              pcl::ModelCoefficients::Ptr &coefficients, double &workspace_height)
+                              PointCloud::Ptr &plane, pcl::ModelCoefficients::Ptr &coefficients,
+                              double &workspace_height)
 {
     PointCloud::Ptr filtered(new PointCloud);
-    PointCloud::Ptr plane(new PointCloud);
     pcl::PointIndices::Ptr segmented_cloud_inliers(new pcl::PointIndices);
 
     PointCloudN::Ptr normals(new PointCloudN);
