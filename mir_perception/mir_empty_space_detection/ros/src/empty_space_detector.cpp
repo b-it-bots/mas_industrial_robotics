@@ -19,7 +19,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
     }
 
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution));
-    /* scene_segmentation_ = SceneSegmentationSPtr(new SceneSegmentation()); */
+    scene_segmentation_ = SceneSegmentationSPtr(new SceneSegmentation());
     this->loadParams();
 
     tf_listener_.reset(new tf::TransformListener);
@@ -33,11 +33,15 @@ void EmptySpaceDetector::loadParams()
 {
     std::string passthrough_filter_field_name;
     float passthrough_filter_limit_min, passthrough_filter_limit_max;
+    bool enable_passthrough_filter;
+    nh_.param<bool>("enable_passthrough_filter", enable_passthrough_filter, false);
     nh_.param<std::string>("passthrough_filter_field_name", passthrough_filter_field_name, "x");
     nh_.param<float>("passthrough_filter_limit_min", passthrough_filter_limit_min, 0.0);
     nh_.param<float>("passthrough_filter_limit_max", passthrough_filter_limit_max, 0.8);
-    pass_through_.setFilterFieldName(passthrough_filter_field_name);
-    pass_through_.setFilterLimits(passthrough_filter_limit_min, passthrough_filter_limit_max);
+    scene_segmentation_->setPassthroughParams(enable_passthrough_filter,
+                                              passthrough_filter_field_name,
+                                              passthrough_filter_limit_min,
+                                              passthrough_filter_limit_max);
 
     float voxel_leaf_size, voxel_filter_limit_min, voxel_filter_limit_max;
     std::string voxel_filter_field_name;
@@ -45,16 +49,17 @@ void EmptySpaceDetector::loadParams()
     nh_.param<std::string>("voxel_filter_field_name", voxel_filter_field_name, "z");
     nh_.param<float>("voxel_filter_limit_min", voxel_filter_limit_min, -0.15);
     nh_.param<float>("voxel_filter_limit_max", voxel_filter_limit_max, 0.3);
-    voxel_grid_.setLeafSize(voxel_leaf_size, voxel_leaf_size, voxel_leaf_size);
-    voxel_grid_.setFilterFieldName(voxel_filter_field_name);
-    voxel_grid_.setFilterLimits(voxel_filter_limit_min, voxel_filter_limit_max);
+    scene_segmentation_->setVoxelGridParams(voxel_leaf_size, 
+                                            voxel_filter_field_name,
+                                            voxel_filter_limit_min, 
+                                            voxel_filter_limit_max);
 
     float normal_radius_search;
     bool use_omp;
     int num_cores;
     nh_.param<float>("normal_radius_search", normal_radius_search, 0.03);
     nh_.param<bool>("use_omp", use_omp, false);
-    normal_estimation_.setRadiusSearch(normal_radius_search);
+    scene_segmentation_->setNormalParams(normal_radius_search, use_omp, num_cores);
 
     int sac_max_iterations;
     float sac_distance_threshold, sac_x_axis, sac_y_axis, sac_z_axis, sac_eps_angle;
@@ -69,22 +74,12 @@ void EmptySpaceDetector::loadParams()
     Eigen::Vector3f axis(sac_x_axis, sac_y_axis, sac_z_axis); 
     nh_.param<float>("sac_eps_angle", sac_eps_angle, 0.09);
     nh_.param<float>("sac_normal_distance_weight", sac_normal_distance_weight, 0.05);
-    sac_.setMaxIterations(sac_max_iterations);
-    sac_.setDistanceThreshold(sac_distance_threshold);
-    sac_.setAxis(axis);
-    sac_.setEpsAngle(sac_eps_angle);
-    sac_.setOptimizeCoefficients(sac_optimize_coefficients);
-    sac_.setNormalDistanceWeight(sac_normal_distance_weight);
-    sac_.setModelType(pcl::SACMODEL_NORMAL_PARALLEL_PLANE);
-    sac_.setMethodType(pcl::SAC_RANSAC);
-
-    /* float prism_min_height, prism_max_height; */
-    /* nh_.param<float>("prism_min_height", prism_min_height, 0.01); */
-    /* nh_.param<float>("prism_max_height", prism_max_height, 0.1); */
-    /* extract_polygonal_prism_.setHeightLimits(prism_min_height, prism_max_height); */
-
-    /* extract_indices_.setNegative(true); */
-    project_inliers_.setModelType(pcl::SACMODEL_NORMAL_PARALLEL_PLANE);
+    scene_segmentation_->setSACParams(sac_max_iterations, 
+                                      sac_distance_threshold,
+                                      sac_optimize_coefficients,
+                                      axis, 
+                                      sac_eps_angle,
+                                      sac_normal_distance_weight);
 }
 
 void EmptySpaceDetector::eventInCallback(const std_msgs::String::ConstPtr &msg)
@@ -172,36 +167,17 @@ bool EmptySpaceDetector::findPlane(PointCloud::Ptr plane)
     PointCloud::Ptr cloud_in(new PointCloud);
     cloud_accumulation_->getAccumulatedCloud(*cloud_in);
 
-    PointCloud::Ptr filtered(new PointCloud);
-    PointCloudN::Ptr normals(new PointCloudN);
-    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
+    PointCloud::Ptr hull(new PointCloud);
+    pcl::ModelCoefficients::Ptr model_coefficients(new pcl::ModelCoefficients);
+    double workspace_height;
 
-    voxel_grid_.setInputCloud(cloud_in);
-    voxel_grid_.filter(*filtered);
-
-    pass_through_.setInputCloud(filtered);
-    pass_through_.filter(*filtered);
-
-    normal_estimation_.setInputCloud(filtered);
-    normal_estimation_.compute(*normals);
-
-    sac_.setInputCloud(filtered);
-    sac_.setInputNormals(normals);
-    sac_.segment(*inliers, *coefficients);
-
-    if (inliers->indices.size() == 0)
-    {
-        ROS_ERROR("No plane inliers found");
-        return false;
-    }
-
-    project_inliers_.setInputCloud(filtered);
-    project_inliers_.setModelCoefficients(coefficients);
-    project_inliers_.setIndices(inliers);
-    project_inliers_.setCopyAllData(false);
-    project_inliers_.filter(*plane);
-    return true;
+    PointCloud::Ptr debug = scene_segmentation_->findPlane(cloud_in, hull, plane,
+                                                           model_coefficients,
+                                                           workspace_height);
+    /* std::cout << "workspace height" << workspace_height << std::endl; */
+    /* std::cout << "num of point in plane" << plane->points.size() << std::endl; */
+    bool success = plane->points.size() > 0;
+    return success;
 }
 
 int main(int argc, char *argv[])

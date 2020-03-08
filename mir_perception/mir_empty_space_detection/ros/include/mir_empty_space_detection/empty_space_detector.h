@@ -7,23 +7,9 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/String.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/project_inliers.h>
-#include <pcl/filters/radius_outlier_removal.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/features/normal_3d_omp.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/surface/convex_hull.h>
-#include <pcl/segmentation/extract_clusters.h>
-#include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/ModelCoefficients.h>
 
+#include <mir_object_segmentation/scene_segmentation.h>
 #include <mir_object_segmentation/cloud_accumulation.h>
 #include <mir_perception_utils/pointcloud_utils_ros.h>
 
@@ -51,15 +37,10 @@ class EmptySpaceDetector
         /* int num_of_retries_; */
         boost::shared_ptr<tf::TransformListener> tf_listener_;
 
+        typedef std::shared_ptr<SceneSegmentation> SceneSegmentationSPtr;
+        SceneSegmentationSPtr scene_segmentation_;
         CloudAccumulation::UPtr cloud_accumulation_;
 
-        pcl::PassThrough<PointT> pass_through_;
-        pcl::VoxelGrid<PointT> voxel_grid_;
-        pcl::NormalEstimation<PointT, PointNT> normal_estimation_;
-
-        pcl::SACSegmentationFromNormals<PointT, PointNT> sac_;
-        pcl::ProjectInliers<PointT> project_inliers_;
-        pcl::ExtractIndices<PointT> extract_indices_;
         pcl::KdTreeFLANN<PointT> kdtree_;
 
         void pcCallback(const sensor_msgs::PointCloud2::ConstPtr &msg);
