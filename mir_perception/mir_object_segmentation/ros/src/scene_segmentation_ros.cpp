@@ -70,7 +70,8 @@ void SceneSegmentationROS::findPlane(const PointCloud::ConstPtr &cloud_in,
                                      PointCloud::Ptr &cloud_debug)
 {
     PointCloud::Ptr hull(new PointCloud);
-    cloud_debug = scene_segmentation_->findPlane(cloud_in, hull, model_coefficients_, workspace_height_);
+    PointCloud::Ptr plane(new PointCloud);
+    cloud_debug = scene_segmentation_->findPlane(cloud_in, hull, plane, model_coefficients_, workspace_height_);
     cloud_debug->header.frame_id = cloud_in->header.frame_id;
 }
 
