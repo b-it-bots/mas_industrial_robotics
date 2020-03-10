@@ -1,4 +1,8 @@
 #include <mir_empty_space_detection/empty_space_detector.h>
+#include <stdlib.h>
+#include <time.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
 
 EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
 {
@@ -6,23 +10,25 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
     nh_.param<bool>("enable_debug_pc_pub", enable_debug_pc_pub_, true);
     float octree_resolution;
     nh_.param<float>("octree_resolution", octree_resolution, 0.0025);
-    this->add_to_octree_ = true;
+    add_to_octree_ = false;
 
-    this->pc_sub_ = nh_.subscribe("input_point_cloud", 1, &EmptySpaceDetector::pcCallback, this);
-    this->pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("output_pose", 1);
-    this->event_in_sub_ = nh_.subscribe("event_in", 1, &EmptySpaceDetector::eventInCallback, this);
-    this->event_out_pub_ = nh_.advertise<std_msgs::String>("event_out", 1);
+    pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("empty_spaces", 1);
+    event_out_pub_ = nh_.advertise<std_msgs::String>("event_out", 1);
+
+    pc_sub_ = nh_.subscribe("input_point_cloud", 1, &EmptySpaceDetector::pcCallback, this);
+    event_in_sub_ = nh_.subscribe("event_in", 1, &EmptySpaceDetector::eventInCallback, this);
 
     if (enable_debug_pc_pub_)
     {
-        this->pc_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("output_point_cloud", 1);
+        pc_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("output_point_cloud", 1);
     }
 
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution));
     scene_segmentation_ = SceneSegmentationSPtr(new SceneSegmentation());
-    this->loadParams();
+    loadParams();
 
     tf_listener_.reset(new tf::TransformListener);
+    ROS_INFO("Initialised");
 }
 
 EmptySpaceDetector::~EmptySpaceDetector()
@@ -80,10 +86,35 @@ void EmptySpaceDetector::loadParams()
                                       axis, 
                                       sac_eps_angle,
                                       sac_normal_distance_weight);
+
+    nh_.param<float>("empty_space_point_count_percentage_threshold", empty_space_pnt_cnt_perc_thresh_, 0.8);
+    nh_.param<float>("empty_space_radius", empty_space_radius_, 0.05);
+    expected_num_of_points_ = (empty_space_radius_ * empty_space_radius_ * 3.14159) / (voxel_leaf_size * voxel_leaf_size);
 }
 
 void EmptySpaceDetector::eventInCallback(const std_msgs::String::ConstPtr &msg)
 {
+    std_msgs::String event_out;
+    if (msg->data == "e_add_cloud")
+    {
+        add_to_octree_ = true;
+        return;
+    }
+    else if (msg->data == "e_add_cloud_stop")
+    {
+        add_to_octree_ = false;
+        event_out.data = "e_add_cloud_stopped";
+    }
+    else if (msg->data == "e_trigger")
+    {
+        bool success = findEmptySpaces();
+        event_out.data = (success) ? "e_success" : "e_failure";
+    }
+    else
+    {
+        return;
+    }
+    event_out_pub_.publish(event_out);
 }
 
 void EmptySpaceDetector::pcCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
@@ -100,65 +131,108 @@ void EmptySpaceDetector::pcCallback(const sensor_msgs::PointCloud2::ConstPtr &ms
         cloud_accumulation_->addCloud(input_pc);
         
         add_to_octree_ = false;
-        PointCloud::Ptr plane(new PointCloud);
-        bool plane_found = this->findPlane(plane);
-        if (!plane_found)
-        {
-            return;
-        }
 
-        this->findEmptySpacesOnPlane(plane);
-
-        /* if (enable_debug_pc_pub_) */
-        /* { */
-        /*     /1* publish debug pointcloud *1/ */
-        /*     sensor_msgs::PointCloud2 output; */
-        /*     pcl::toROSMsg(*plane, output); */
-        /*     output.header.frame_id = output_frame_; */
-        /*     output.header.stamp = ros::Time::now(); */
-        /*     pc_pub_.publish(output); */
-        /*     ROS_INFO("Publishing debug pointcloud"); */
-        /* } */
+        std_msgs::String event_out;
+        event_out.data = "e_added_cloud";
+        event_out_pub_.publish(event_out);
     }
 }
 
-void EmptySpaceDetector::findEmptySpacesOnPlane(const PointCloud::Ptr &plane)
+bool EmptySpaceDetector::findEmptySpaces()
 {
-    PointCloud::Ptr new_plane(new PointCloud);
-    pcl::copyPointCloud(*plane, *new_plane);
-
-    std::cout << new_plane->width << std::endl;
-    int random_index = 500;
-    if (random_index < new_plane->width)
+    PointCloud::Ptr plane(new PointCloud);
+    bool plane_found = this->findPlane(plane);
+    if (!plane_found)
     {
-        kdtree_.setInputCloud (new_plane);
-
-        std::vector<int> pointIdxRadiusSearch;
-        std::vector<float> pointRadiusSquaredDistance;
-
-        double radius = 0.05;
-
-        if ( kdtree_.radiusSearch (random_index, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 )
-        {
-            std::cout << "num of points within that radius " << pointIdxRadiusSearch.size() << std::endl;
-            for (std::size_t i = 0; i < pointIdxRadiusSearch.size (); ++i)
-            {
-                std::cout << "    "  <<   new_plane->points[ pointIdxRadiusSearch[i] ].x 
-                    << " " << new_plane->points[ pointIdxRadiusSearch[i] ].y 
-                    << " " << new_plane->points[ pointIdxRadiusSearch[i] ].z << std::endl;
-                new_plane->points[pointIdxRadiusSearch[i]].z += 0.1; 
-            }
-        }
+        return false;
     }
+
+    geometry_msgs::PoseArray empty_space_poses;
+    this->findEmptySpacesOnPlane(plane, empty_space_poses);
+    ROS_DEBUG_STREAM(empty_space_poses);
+    if (empty_space_poses.poses.size() == 0)
+    {
+        return false;
+    }
+
+    pose_array_pub_.publish(empty_space_poses);
+
     if (enable_debug_pc_pub_)
     {
         /* publish debug pointcloud */
         sensor_msgs::PointCloud2 output;
-        pcl::toROSMsg(*new_plane, output);
+        pcl::toROSMsg(*plane, output);
         output.header.frame_id = output_frame_;
         output.header.stamp = ros::Time::now();
         pc_pub_.publish(output);
         ROS_INFO("Publishing debug pointcloud");
+    }
+
+    return true;
+}
+
+void EmptySpaceDetector::findEmptySpacesOnPlane(const PointCloud::Ptr &plane,
+                                                geometry_msgs::PoseArray &empty_space_poses)
+{
+    srand(time(NULL));
+    int num_of_empty_spaces_required;
+    nh_.param<int>("num_of_empty_spaces_required", num_of_empty_spaces_required, 3);
+    empty_space_poses.header.frame_id = output_frame_;
+    empty_space_poses.header.stamp = ros::Time::now();
+    int attempts = 0;
+
+    while (attempts < 100 * num_of_empty_spaces_required)
+    {
+        attempts ++;
+        ROS_DEBUG_STREAM("Attempt: " << attempts);
+        PointCloud::Ptr new_plane(new PointCloud);
+        pcl::copyPointCloud(*plane, *new_plane);
+        pcl::PointIndices::Ptr empty_space(new pcl::PointIndices());
+
+        std::vector<PointT> samples;
+        for (int i = 0; i < num_of_empty_spaces_required; ++i)
+        {
+            int random_index = rand() % new_plane->width;
+            samples.push_back(new_plane->points[random_index]);
+        }
+
+        bool success = true;
+        for (PointT p : samples)
+        {
+            std::vector<int> ids;
+            std::vector<float> sq_distances;
+            kdtree_.setInputCloud(new_plane);
+            if (kdtree_.radiusSearch(p, empty_space_radius_, ids, sq_distances) > 0)
+            {
+                if (((float)ids.size() / expected_num_of_points_) > empty_space_pnt_cnt_perc_thresh_)
+                {
+                    empty_space->indices = ids;
+                    extract_indices_.setInputCloud(new_plane);
+                    extract_indices_.setIndices(empty_space);
+                    extract_indices_.setNegative(true);
+                    extract_indices_.filter(*new_plane);
+                }
+                else
+                {
+                    success = false;
+                    break;
+                }
+            }
+        }
+        if (success)
+        {
+            ROS_INFO_STREAM("Found solution at attempt: " << attempts);
+            for (PointT p : samples)
+            {
+                geometry_msgs::Pose pose;
+                pose.position.x = p.x;
+                pose.position.y = p.y;
+                pose.position.z = p.z;
+                pose.orientation.w = 1.0;
+                empty_space_poses.poses.push_back(pose);
+            }
+            break;
+        }
     }
 }
 
