@@ -54,3 +54,17 @@ def main():
 if __name__ == '__main__':
     rospy.init_node('move_arm_to_target_conf')
     main()
+# def main():
+#     pose = Pose()
+#     pose.position.x = 0.65
+#     pose.position.y = 0.0
+#     pose.position.z = 0.1
+#     pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(3.14, 0.5, 3.14))
+
+#     kinematics = Kinematics()
+#     print(kinematics.forward_kinematics([2.159 , 0.087 , -1.541 , 3.345 , 2.933]))
+#     print(kinematics.inverse_kinematics(pose))
+
+# if __name__ == "__main__":
+#     main()
+
