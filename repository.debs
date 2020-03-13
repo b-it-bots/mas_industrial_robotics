@@ -65,12 +65,13 @@ packagelist=(
     ros-melodic-diagnostic-analysis
     ros-melodic-laser-filters
     ros-melodic-mongodb-store
+    ros-melodic-pcl-conversions
 )
 
 ### install debian packages listed in array above
 if [ $INSTALL_PACKAGES != false ]; then
-    sudo apt-get update -qq
-    sudo apt-get install -y -qq ${packagelist[@]}
+    sudo apt-get update
+    sudo apt-get install -y ${packagelist[@]}
 fi
 
 ### install further repositories

@@ -1,4 +1,4 @@
-FROM ros:kinetic
+FROM ros:melodic
 
 RUN apt update -qq && \
     apt install -y -qq sudo software-properties-common
