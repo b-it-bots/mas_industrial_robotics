@@ -177,11 +177,17 @@ void EmptySpaceDetector::findEmptySpacesOnPlane(const PointCloud::Ptr &plane,
     srand(time(NULL));
     int num_of_empty_spaces_required;
     nh_.param<int>("num_of_empty_spaces_required", num_of_empty_spaces_required, 3);
+
+    float trial_duration_sec;
+    nh_.param<float>("trial_duration", trial_duration_sec, 3.0);
+    ros::Duration trial_duration(trial_duration_sec);
+    ros::Time start_time = ros::Time::now();
+
     empty_space_poses.header.frame_id = output_frame_;
     empty_space_poses.header.stamp = ros::Time::now();
     int attempts = 0;
 
-    while (attempts < 100 * num_of_empty_spaces_required)
+    while (ros::Time::now() - start_time < trial_duration)
     {
         attempts ++;
         ROS_DEBUG_STREAM("Attempt: " << attempts);
