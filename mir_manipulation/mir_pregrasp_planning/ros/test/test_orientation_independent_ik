@@ -9,9 +9,8 @@ from brics_actuator.msg import JointPositions
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped, Pose, Quaternion
 
-from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
+# from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
 from mir_pregrasp_planning_ros.kinematics import Kinematics
-from mcr_manipulation_utils_ros.kinematics import Kinematics as MoveitKinematics
 
 MOVEIT_CONF_PUB = None
 MOVEIT_TRIGGER_PUB = None
@@ -57,32 +56,26 @@ def send_arm_to_joint(joint_msg):
     # rospy.spin()
 
 def main():
+    kinematics = Kinematics()
     pose = Pose()
     pose.position.x = 0.65
     pose.position.y = 0.0
     pose.position.z = 0.1
     pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(3.14, 0.5, 3.14))
-    print(pose)
-    answer = [2.16, 2.08, -1.91, 2.84, 2.91]
+    # ik_answer = [2.16, 2.08, -1.91, 2.84, 2.91]
 
-    kinematics = Kinematics()
-    # print(kinematics.forward_kinematics([2.159 , 0.087 , -1.541 , 3.345 , 2.933]))
-    print(kinematics.forward_kinematics(answer))
-    # print(kinematics.inverse_kinematics(pose))
+    ik_solution = kinematics.inverse_kinematics(pose)
+    fk_pose = kinematics.forward_kinematics(ik_solution)
 
-    # ik_solver = OrientationIndependentIK(debug=True)
-    # rospy.sleep(0.5)
-    # rospy.loginfo('Initialised')
-    # moveit_kinematics = MoveitKinematics('arm_1')
-    # pose_arm = ik_solver._get_arm_pose_from_ee_pose(pose)
-    # # print(pose_arm)
-    # pose_stamped = PoseStamped()
-    # pose_stamped.pose = pose_arm
-    # pose_stamped.header.frame_id = 'base_link'
-    # pose_stamped.header.stamp = rospy.Time.now()
-    # solution = moveit_kinematics.inverse_kinematics(pose_stamped, timeout=0.5)
-    # print(solution)
-    print(kinematics.inverse_kinematics(pose))
+    threshold = 0.001
+    assert abs(pose.position.x - fk_pose.position.x) < threshold
+    assert abs(pose.position.y - fk_pose.position.y) < threshold
+    assert abs(pose.position.z - fk_pose.position.z) < threshold
+    assert abs(pose.orientation.x - fk_pose.orientation.x) < threshold
+    assert abs(pose.orientation.y - fk_pose.orientation.y) < threshold
+    assert abs(pose.orientation.z - fk_pose.orientation.z) < threshold
+    assert abs(pose.orientation.w - fk_pose.orientation.w) < threshold
+    print('Test PASSED')
 
 if __name__ == '__main__':
     rospy.init_node('move_arm_to_target_conf')
