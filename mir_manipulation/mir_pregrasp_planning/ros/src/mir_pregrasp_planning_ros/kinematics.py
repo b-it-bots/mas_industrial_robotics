@@ -15,6 +15,15 @@ class Kinematics(object):
         self.root = root
         self.tip = tip
         self.joint_limits = self._get_joint_limits()
+        self.joint_limits[0][1] = 5.839
+        self.joint_limits[1][1] = 2.535
+        self.joint_limits[2][0] = -4.94
+        self.joint_limits[2][1] = -0.09
+        self.joint_limits[3][0] = 0.11
+        self.joint_limits[3][1] = 3.336
+        self.joint_limits[4][0] = 0.19
+        self.joint_limits[4][1] = 5.61
+        print(self.joint_limits)
         self.chain = self._get_chain()
         self.fk_solver = kdl.ChainFkSolverPos_recursive(self.chain)
         self.vik = kdl.ChainIkSolverVel_pinv(self.chain)
@@ -56,6 +65,7 @@ class Kinematics(object):
         target_frame = Kinematics.get_frame_from_pose(pose)
         target_joint_arr = kdl.JntArray(self.num_of_joints)
         self.ik_solver.CartToJnt(init_joint_arr, target_frame, target_joint_arr)
+        print(target_joint_arr)
         if self._is_ik_solution_valid(target_joint_arr, pose):
             return [target_joint_arr[i] for i in range(self.num_of_joints)]
         else:
@@ -71,19 +81,21 @@ class Kinematics(object):
         possible = True
         two_pi = 2 * math.pi
         for i in range(self.num_of_joints):
+            print(i)
             joint = target_joint_angles[i]
             if not (self.joint_limits[i][0] < joint < self.joint_limits[i][1]):
                 # scale down joint angle to be between -2pi and +2pi
-                if joint > two_pi or joint < -two_pi:
-                    joint %= two_pi if joint > 0.0 else -two_pi
+                # if joint > two_pi or joint < -two_pi:
+                #     joint %= two_pi if joint > 0.0 else -two_pi
                 # revert joint angle from +ve to -ve or vise versa to fit in joint limit
                 if not (self.joint_limits[i][0] < joint < self.joint_limits[i][1]):
                     joint += two_pi if joint < 0.0 else -two_pi
+                print(joint)
                 if self.joint_limits[i][0] < joint < self.joint_limits[i][1]:
                     target_joint_angles[i] = joint
                 else:
                     possible = False
-                    break
+                    # break
         if possible:
             pose = self._forward_kinematics_joint_arr(target_joint_angles)
             if self._is_within_tolerance(pose.position.x, target_pose.position.x) and\
@@ -107,7 +119,7 @@ class Kinematics(object):
                     break
         limits = []
         for joint in joints:
-            limits.append((joint.limit.lower, joint.limit.upper))
+            limits.append([joint.limit.lower, joint.limit.upper])
         return limits
 
     def _get_chain(self):

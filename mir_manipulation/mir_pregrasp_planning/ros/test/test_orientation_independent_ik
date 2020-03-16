@@ -2,12 +2,16 @@
 
 from __future__ import print_function
 
+import tf
 import rospy
 
 from brics_actuator.msg import JointPositions
 from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped, Pose, Quaternion
 
 from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
+from mir_pregrasp_planning_ros.kinematics import Kinematics
+from mcr_manipulation_utils_ros.kinematics import Kinematics as MoveitKinematics
 
 MOVEIT_CONF_PUB = None
 MOVEIT_TRIGGER_PUB = None
@@ -24,47 +28,62 @@ def send_arm_to_joint(joint_msg):
     rospy.sleep(1.0)
     rospy.loginfo('Test successful')
 
+# def main():
+#     global MOVEIT_CONF_PUB, MOVEIT_TRIGGER_PUB
+#     MOVEIT_CONF_PUB = rospy.Publisher('/arm_moveit_client/target_configuration',
+#                                       JointPositions, queue_size=1)
+#     MOVEIT_TRIGGER_PUB = rospy.Publisher('/arm_moveit_client/event_in',
+#                                          String, queue_size=1)
+#     ik_solver = OrientationIndependentIK(debug=True)
+#     rospy.sleep(0.5)
+#     rospy.loginfo('Initialised')
+
+#     goal = (0.65, 0.1, 0.1, 'base_link')
+#     print('Goal:', goal)
+#     joint_msg = ik_solver.get_joint_msg_from_point(*goal)
+#     if joint_msg is None:
+#         rospy.logerr('Test failed. Could not find IK solution')
+#         return
+    # send_arm_to_joint(joint_msg)
+    # rospy.sleep(5.0)
+
+    # goal = (0.65, 0.1, 0.1, -60.0, 10.0, 'base_link')
+    # print('Goal:', goal)
+    # joint_msg = ik_solver.get_joint_msg_from_point_and_pitch(*goal) 
+    # if joint_msg is None:
+    #     rospy.logerr('Test failed. Could not find IK solution')
+    #     return
+    # send_arm_to_joint(joint_msg)
+    # rospy.spin()
+
 def main():
-    global MOVEIT_CONF_PUB, MOVEIT_TRIGGER_PUB
-    MOVEIT_CONF_PUB = rospy.Publisher('/arm_moveit_client/target_configuration',
-                                      JointPositions, queue_size=1)
-    MOVEIT_TRIGGER_PUB = rospy.Publisher('/arm_moveit_client/event_in',
-                                         String, queue_size=1)
-    ik_solver = OrientationIndependentIK(debug=True)
-    rospy.sleep(0.5)
-    rospy.loginfo('Initialised')
+    pose = Pose()
+    pose.position.x = 0.65
+    pose.position.y = 0.0
+    pose.position.z = 0.1
+    pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(3.14, 0.5, 3.14))
+    print(pose)
+    answer = [2.16, 2.08, -1.91, 2.84, 2.91]
 
-    goal = (0.65, 0.1, 0.1, 'base_link')
-    print('Goal:', goal)
-    joint_msg = ik_solver.get_joint_msg_from_point(*goal)
-    if joint_msg is None:
-        rospy.logerr('Test failed. Could not find IK solution')
-        return
-    send_arm_to_joint(joint_msg)
-    rospy.sleep(5.0)
+    kinematics = Kinematics()
+    # print(kinematics.forward_kinematics([2.159 , 0.087 , -1.541 , 3.345 , 2.933]))
+    print(kinematics.forward_kinematics(answer))
+    # print(kinematics.inverse_kinematics(pose))
 
-    goal = (0.65, 0.1, 0.1, -60.0, 10.0, 'base_link')
-    print('Goal:', goal)
-    joint_msg = ik_solver.get_joint_msg_from_point_and_pitch(*goal) 
-    if joint_msg is None:
-        rospy.logerr('Test failed. Could not find IK solution')
-        return
-    send_arm_to_joint(joint_msg)
+    # ik_solver = OrientationIndependentIK(debug=True)
+    # rospy.sleep(0.5)
+    # rospy.loginfo('Initialised')
+    # moveit_kinematics = MoveitKinematics('arm_1')
+    # pose_arm = ik_solver._get_arm_pose_from_ee_pose(pose)
+    # # print(pose_arm)
+    # pose_stamped = PoseStamped()
+    # pose_stamped.pose = pose_arm
+    # pose_stamped.header.frame_id = 'base_link'
+    # pose_stamped.header.stamp = rospy.Time.now()
+    # solution = moveit_kinematics.inverse_kinematics(pose_stamped, timeout=0.5)
+    # print(solution)
+    print(kinematics.inverse_kinematics(pose))
 
 if __name__ == '__main__':
     rospy.init_node('move_arm_to_target_conf')
     main()
-# def main():
-#     pose = Pose()
-#     pose.position.x = 0.65
-#     pose.position.y = 0.0
-#     pose.position.z = 0.1
-#     pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(3.14, 0.5, 3.14))
-
-#     kinematics = Kinematics()
-#     print(kinematics.forward_kinematics([2.159 , 0.087 , -1.541 , 3.345 , 2.933]))
-#     print(kinematics.inverse_kinematics(pose))
-
-# if __name__ == "__main__":
-#     main()
-
