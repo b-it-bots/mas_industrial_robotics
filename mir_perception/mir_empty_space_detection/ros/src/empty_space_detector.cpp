@@ -89,7 +89,7 @@ void EmptySpaceDetector::loadParams()
 
     nh_.param<float>("empty_space_point_count_percentage_threshold", empty_space_pnt_cnt_perc_thresh_, 0.8);
     nh_.param<float>("empty_space_radius", empty_space_radius_, 0.05);
-    expected_num_of_points_ = (empty_space_radius_ * empty_space_radius_ * 3.14159) / (voxel_leaf_size * voxel_leaf_size);
+    expected_num_of_points_ = (empty_space_radius_ * empty_space_radius_ * M_PI) / (voxel_leaf_size * voxel_leaf_size);
 }
 
 void EmptySpaceDetector::eventInCallback(const std_msgs::String::ConstPtr &msg)
@@ -254,8 +254,6 @@ bool EmptySpaceDetector::findPlane(PointCloud::Ptr plane)
     PointCloud::Ptr debug = scene_segmentation_->findPlane(cloud_in, hull, plane,
                                                            model_coefficients,
                                                            workspace_height);
-    /* std::cout << "workspace height" << workspace_height << std::endl; */
-    /* std::cout << "num of point in plane" << plane->points.size() << std::endl; */
     bool success = plane->points.size() > 0;
     return success;
 }
