@@ -24,7 +24,7 @@ class Kinematics(object):
         # self.ik_solver = kdl.ChainIkSolverPos_NR(self.chain, self.fk_solver, self.vik)
         self.ik_solver = kdl.ChainIkSolverPos_NR_JL(self.chain, lower_limit, upper_limit,
                                                     self.fk_solver, self.vik,
-                                                    maxiter=100, eps=self.tolerance)
+                                                    maxiter=100, eps=0.0001)
 
     def forward_kinematics(self, joint_angles=[]):
         """
@@ -63,9 +63,12 @@ class Kinematics(object):
         target_frame = Kinematics.get_frame_from_pose(pose)
         target_joint_arr = kdl.JntArray(self.num_of_joints)
         self.ik_solver.CartToJnt(init_joint_arr, target_frame, target_joint_arr)
+        print(target_joint_arr)
         reached_frame = kdl.Frame()
         self.fk_solver.JntToCart(target_joint_arr, reached_frame)
-        if kdl.Equal(reached_frame, target_frame, self.tolerance):
+        print(target_frame)
+        print(reached_frame)
+        if kdl.Equal(reached_frame, target_frame, 0.01):
             return [target_joint_arr[i] for i in range(self.num_of_joints)]
         else:
             return None
