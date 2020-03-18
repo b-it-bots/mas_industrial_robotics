@@ -67,7 +67,8 @@ class SceneSegmentation
          * \param[out] Workspace height
          * */
         PointCloud::Ptr findPlane(const PointCloud::ConstPtr &cloud, PointCloud::Ptr &hull,
-                                pcl::ModelCoefficients::Ptr &coefficients, double &workspace_height);
+                                PointCloud::Ptr &plane, pcl::ModelCoefficients::Ptr &coefficients,
+                                double &workspace_height);
 
         /** \brief Set voxel grid parameters
          * \param[in] Leaf size for x,y,z
