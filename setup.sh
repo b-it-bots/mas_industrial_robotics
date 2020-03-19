@@ -27,7 +27,7 @@ function install_ros_melodic_base {
 
 function install_ros_dependencies {
     sudo apt-get install python-rosdep
-    # sudo rm -rf /etc/ros/rosdep/sources.list.d/*
+    sudo rm -rf /etc/ros/rosdep/sources.list.d/*
     sudo rosdep init -q
     rosdep update -q
     sudo apt install -y -qq python-rosinstall python-rosinstall-generator python-wstool build-essential python-catkin-tools python-pip
