@@ -22,11 +22,12 @@ function update_keys {
 
 function install_ros_melodic_base {
     sudo apt update -qq
-    sudo apt-get install -y -qq ros-melodic-ros-base
+    sudo apt install -y -qq ros-melodic-ros-base
 }
 
 function install_ros_dependencies {
-    sudo rm -rf /etc/ros/rosdep/sources.list.d/*
+    sudo apt-get install python-rosdep
+    # sudo rm -rf /etc/ros/rosdep/sources.list.d/*
     sudo rosdep init -q
     rosdep update -q
     sudo apt install -y -qq python-rosinstall python-rosinstall-generator python-wstool build-essential python-catkin-tools python-pip
