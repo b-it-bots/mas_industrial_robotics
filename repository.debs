@@ -57,6 +57,12 @@ packagelist=(
     ros-melodic-rqt-robot-dashboard
     ros-melodic-serial
     ros-melodic-smach
+    ros-melodic-smach-ros
+    ros-melodic-image-view
+    ros-melodic-robot-state-publisher
+    ros-melodic-joint-state-publisher
+    ros-melodic-pr2-power-board
+    ros-melodic-tf-conversions
     ros-melodic-srdfdom
     ros-melodic-twist-mux
     ros-melodic-usb-cam
@@ -65,13 +71,14 @@ packagelist=(
     ros-melodic-diagnostic-analysis
     ros-melodic-laser-filters
     ros-melodic-mongodb-store
+    ros-melodic-pcl-ros
     ros-melodic-pcl-conversions
 )
 
 ### install debian packages listed in array above
 if [ $INSTALL_PACKAGES != false ]; then
-    sudo apt-get update
-    sudo apt-get install -y ${packagelist[@]}
+    sudo apt-get update -qq
+    sudo apt-get install -y -qq ${packagelist[@]}
 fi
 
 ### install further repositories
