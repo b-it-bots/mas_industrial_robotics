@@ -63,6 +63,7 @@ packagelist=(
     ros-kinetic-rqt-robot-dashboard
     ros-kinetic-serial
     ros-kinetic-smach
+    ros-kinetic-smach-ros
     ros-kinetic-srdfdom
     ros-kinetic-twist-mux
     ros-kinetic-usb-cam
