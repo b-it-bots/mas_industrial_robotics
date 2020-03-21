@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<launch>
+ 
+  <!-- Launch all required components for planning approach -->
+  
+  <!-- Launch file arguments -->    
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+    <arg name="sim" default="false"/>
+    <arg name="object_perception_target_frame" default="/base_link_static"/>
+    <arg name="base_cmd_topic" default="/cmd_vel_safe"/>
+    <arg name="use_mokeup_pose" default="false"/>
+    <arg name="domain" default="btt_domain" />
+    <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
+    <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
+    <!--arg name="domain_path" default="$(arg base_path)/domain_with_perception_cost.pddl" /-->
+    <arg name="official_refbox" default="cfh1" />
+    <arg name="refbox" default="true" />
+    <arg name="logging" default="false" />
+
+    <arg name="perceive_with_cloud_accumulation" default="true"/>
+
+    <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" />
+    <include file="$(find mir_pick_object)/ros/launch/demo_youbot_whole_body_control.launch" >
+      <arg name="static_transform_frame" value="$(arg object_perception_target_frame)" />
+      <arg name="use_mokeup_pose" value="$(arg use_mokeup_pose)" />
+      <arg name="pose_in" value="/mcr_perception/object_selector/output/object_pose" />
+      <arg name="cmd_vel_out" value="$(arg base_cmd_topic)" />
+    </include>
+    
+
+    <!-- dynamic reconfigure from code, receive string and params and does the request NOT TESTED -->
+    <include file="$(find mcr_dynamic_reconfigure_client)/ros/launch/dynamic_reconfigure_client.launch">
+        <arg name="config_file" value="$(find mir_yb_actions)/ros/config/yb_manipulation_params.yaml" />
+    </include>
+    
+  <!-- perception -->
+    <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch"/>
+    <!-- <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" > -->
+    <!--   <arg name="target_frame" value="$(arg object_perception_target_frame)" /> -->
+    <!--   <arg name="classifier" value="erl_2016" /> -->
+    <!--   <arg name="use_cloud_accumulator" value="$(arg perceive_with_cloud_accumulation)" /> -->
+    <!-- </include> -->
+    <!-- <include file="$(find mir_perceive_location)/ros/launch/percieve_location_base_controller.launch"> -->
+    <!--     <arg name="pose_out" value="/move_base_wrapper/pose_in" /> -->
+    <!-- </include> -->
+
+    <!-- Object list merger -->
+    <include file="$(find mcr_object_list_merger)/ros/launch/object_list_merger.launch"/>
+
+    <!-- Object selector used for planning in pick and insert actions NOT TESTED -->
+    <include file="$(find mcr_perception_selectors)/ros/launch/object_selector.launch">
+       <arg name="input_topic" value="/mcr_perception/object_list_merger/output_object_list" />
+    </include>
+    <node pkg="mir_perceive_location" type="perceive_location_server_arm_poses.py" name="perceive_location_server" output="screen" />
+    <node pkg="mir_pick_object" type="pick_object_server_whole_body_control.py" name="wbc_pick_object_server"
+            output="screen"/>
+    
+</launch>

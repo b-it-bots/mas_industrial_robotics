@@ -1,0 +1,11 @@
+planner_configs:
+  Interpolation:
+    type_1: Trapezoidal
+arm_1:
+  planner_configs:
+    - Interpolation
+  planner_minimum_sample_time: 0.1
+arm_1_gripper:
+  planner_configs:
+    - Interpolation
+  planner_minimum_sample_time: 0.1

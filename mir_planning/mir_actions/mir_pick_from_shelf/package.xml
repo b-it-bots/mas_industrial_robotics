@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_pick_from_shelf</name>
+  <version>1.0.0</version>
+  <description>
+    Assumes that the location is a shelf and its already perceived and objects
+    were found. It picks up an object from the bottom shelf using direct_base_controller
+    and moveit_to_pose.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

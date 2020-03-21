@@ -1,7 +1,9 @@
+[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=melodic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
-- ROS Kinetic: Ubuntu 16.04
+- ROS Melodic: Ubuntu 18.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -32,9 +34,10 @@ If you have never worked with git before, we recommend to go through the followi
 ## ROS - Robot Operating System
 ### Install ROS
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
+Alternatively, you can skip this step, as ROS Melodic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
 
 
-- ROS Kinetic - http://wiki.ros.org/kinetic/Installation/Ubuntu
+- ROS Melodic - http://wiki.ros.org/melodic/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
   
@@ -46,37 +49,34 @@ If you have never worked with ROS before, we recommend to go through the beginne
 
 In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters"). 
 
-
-## Set up a catkin workspace
-
-    source /opt/ros/kinetic/setup.bash
-    mkdir -p ~/kinetic/src; cd ~/kinetic/src
-    catkin_init_workspace
-    catkin build
     
 ## Clone and compile the MAS industrial robotics software
 First of all you have to clone the repository.
 
-    cd ~/kinetic/src;
+    mkdir ~/temp
+    cd ~/temp
     git clone git@github.com:b-it-bots/mas_industrial_robotics.git
 
-Then go on with installing further external dependencies:
+Navigate into the cloned repository and run setup.sh file.
 
-    cd ~/kinetic/src/mas_industrial_robotics
-    ./repository.debs
+     ./setup.sh full <optional arg for catkin_ws parent dir>
 
-    source ~/kinetic/devel/setup.bash
+This script does the following,
 
-The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
+* installs ROS, if not previously installed, provided the optional argument full is given
+* creates a catkin workspace folder in the directory specified in the argument or by default places it in home directory, i.e. ~/catkin_ws (if it does not exist)
+* copies the clone of the mas_industiral_robotics from your ~/temp to \<your folder\>/catkin_ws/src and installs the necessary ros dependencies and other related repositories
+* initiates a catkin build in the catkin workspace
 
+Add the following to your bashrc and source your bashrc, so that you need not execute ./setup.sh script each time you open your terminal
 
-And finally compile the repository:
-
-    cd ~/kinetic
-    catkin build
-
+     source <your folder>/catkin_ws/devel/setup.bash
 
 If no errors appear everything is ready to use. Great job!
+
+Finally delete the initially cloned mas_industrial_robotics in ~/temp, as all necessary repositories and dependencies are successfully cloned and installed in your catkin workspace
+
+     rm -rf ~/temp/mas_industrial_robotics
 
 
 ### Setting the Environment Variables

@@ -1,0 +1,133 @@
+#! /usr/bin/env python
+
+from __future__ import print_function
+
+import rospy
+from geometry_msgs.msg import PoseStamped, Twist
+from std_msgs.msg import String, Float32MultiArray
+import mcr_manipulation_measurers_ros.pose_transformer
+
+class ClosedLoopPickBaseController(object):
+    """ Convert from cluster (from segmentation node) to images for varied purposes.
+    """
+    
+    def __init__(self):
+        self._obj_pose_sub = rospy.Subscriber('~input_pose', PoseStamped, self.obj_pose_cb)
+        self._event_in_sub = rospy.Subscriber('~event_in', String, self.event_in_cb)
+        self._initial_obj_pose_sub = rospy.Subscriber('~initial_obj_pose', PoseStamped, self.initial_obj_pose_cb)
+        self._laser_distances_sub = rospy.Subscriber('~laser_distances', Float32MultiArray, self.laser_distances_cb)
+
+        self._cmd_vel_pub = rospy.Publisher('~cmd_vel', Twist, queue_size=1)
+        self._event_out_pub = rospy.Publisher('~event_out', String, queue_size=1)
+        self._closest_obj_event_in_pub = rospy.Publisher('~closest_obj_event_in', String, queue_size=1)
+        self._debug_pose_pub = rospy.Publisher('~debug_pose', PoseStamped, queue_size=1)
+
+        self._camera_link = rospy.get_param('~camera_link')
+        self.pose_transformer = mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
+        self._target_frame = 'base_link_static'
+        self._target_pose = None
+        self._moving = False
+        self._initial_target_pose = None
+        self._front_laser_distance_threshold = rospy.get_param('front_laser_distance_threshold', 0.1)
+        self.front_laser_distance = 1.0
+
+        # controller parameters
+        self._stopping_threshold = 0.1
+        self.p_x = 0.2
+        self.p_y = -1.0
+        self.c_x = 0.02
+        self.c_y = 50.0
+        self.max_vel = 0.1
+        self.min_vel = -0.1
+
+    def obj_pose_cb(self, msg):
+        obj_position = msg.pose.position
+        # if not (obj_position.x == obj_position.y == obj_position.z == 0.0 or self._get_distance(msg) > 0.3):
+        #     self._target_pose = self.pose_transformer.get_transformed_pose(msg, self._target_frame)
+        # rospy.loginfo(self._target_pose)
+        if self._target_pose is not None:
+            self._debug_pose_pub.publish(self._target_pose)
+        if self._moving and self._target_pose is not None:
+            transformed_pose = self.pose_transformer.get_transformed_pose(self._target_pose, self._camera_link)
+            dist_z = transformed_pose.pose.position.z
+            dist_y = transformed_pose.pose.position.y
+            print(self.front_laser_distance)
+            if dist_z < self._stopping_threshold or self.front_laser_distance < self._front_laser_distance_threshold:
+                self._moving = False
+                self._target_pose = None
+                self._publish_zero_vel()
+                self._event_out_pub.publish(String(data='e_done'))
+                self._closest_obj_event_in_pub.publish(String(data='e_stop'))
+                return
+            vel_x = ((dist_z * self.p_x) + self.c_x) / (1.0 + (abs(dist_y) * self.c_y))
+            vel_y = dist_y * self.p_y
+            vel_x = max(self.min_vel, min(vel_x, self.max_vel))
+            vel_y = max(self.min_vel, min(vel_y, self.max_vel))
+            # print(vel_x, vel_y)
+            self._cmd_vel_pub.publish(self._get_twist(x=vel_x, y=vel_y))
+        else:
+            # print("pub zero")
+            self._publish_zero_vel()
+
+    def event_in_cb(self, msg):
+        if msg.data == "e_start":
+            self._moving = True
+            self._closest_obj_event_in_pub.publish(String(data='e_start'))
+            self._target_pose = self._initial_target_pose
+        elif msg.data == "e_stop":
+            self._moving = False
+            self._target_pose = None
+            self._initial_target_pose = None
+            self._closest_obj_event_in_pub.publish(String(data='e_stop'))
+            self._publish_zero_vel() # for safety
+
+    def initial_obj_pose_cb(self, msg):
+        print("got initial target pose")
+        self._initial_target_pose = msg
+
+    def laser_distances_cb(self, msg):
+        try:
+            self.front_laser_distance = msg.data[0]
+        except:
+            self.front_laser_distance = self._front_laser_distance_threshold
+
+    def _get_twist(self, x=0.0, y=0.0, theta=0.0):
+        """Return twist ros message object.
+
+        :x: float
+        :y: float
+        :theta: float
+        :returns: geometry_msgs.msg.Twist
+
+        """
+        msg = Twist()
+        msg.linear.x = x
+        msg.linear.y = y
+        msg.angular.z = theta
+        return msg
+
+    def _publish_zero_vel(self):
+        # rospy.loginfo("Zero vel")
+        self._cmd_vel_pub.publish(self._get_twist())
+
+    def _get_distance(self, new_pose):
+        """Compute cartesian distance given new object pose
+
+        :new_position: geometry_msgs.PoseStamped
+        :returns: float
+
+        """
+        if self._target_pose is None:
+            return 0.0
+        new_pose_in_target_frame = self.pose_transformer.get_transformed_pose(new_pose, self._target_frame)
+        delta_x = new_pose_in_target_frame.pose.position.x - self._target_pose.pose.position.x
+        delta_y = new_pose_in_target_frame.pose.position.y - self._target_pose.pose.position.y
+        return (delta_x**2 + delta_y**2)**0.5
+
+if __name__ == '__main__':
+    rospy.init_node('closed_loop_pick_base_controller')
+    CLPBC = ClosedLoopPickBaseController()
+
+    rospy.spin()
+    print("Exiting...")
+    CLPBC._publish_zero_vel()

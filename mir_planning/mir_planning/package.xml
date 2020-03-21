@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mir_planning</name>
+  <version>0.0.1</version>
+  <description>Components for planning for at work domain</description>
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <author email="torsten.jandt@smail.inf.h-brs.de">Torsten Jandt</author>
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+
+  <maintainer email="torsten.jandt@smail.inf.h-brs.de">Torsten Jandt</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>mir_task_planning</exec_depend>
+  <exec_depend>mir_planner_executor</exec_depend>
+  <exec_depend>mir_planning_bringup</exec_depend>
+  <exec_depend>mir_planning_core</exec_depend>
+  <exec_depend>mir_planning_msgs</exec_depend>
+  <exec_depend>mir_knowledge_base_analyzer</exec_depend>
+  <exec_depend>mir_refbox_parser</exec_depend>
+  <exec_depend>mir_actions</exec_depend>
+  <exec_depend>mir_knowledge</exec_depend>
+  <exec_depend>mir_pddl_problem_generator</exec_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

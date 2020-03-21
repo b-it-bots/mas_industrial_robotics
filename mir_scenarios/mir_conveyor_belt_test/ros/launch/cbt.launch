@@ -25,8 +25,16 @@
     <!--include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch" /-->
     <!--include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" /--> 
     
+    <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+      <param name="video_device" value="/dev/video3" />
+      <param name="image_width" value="640" />
+      <param name="image_height" value="480" />
+      <param name="pixel_format" value="yuyv" />
+      <param name="camera_frame_id" value="usb_cam" />
+      <param name="io_method" value="mmap"/>
+    </node>
     <include file="$(find mcr_background_change_detection)/ros/launch/background_change_detection.launch"/>
-    <include file="$(find mcr_edit_image)/ros/launch/edit_image.launch"/>
-    <node name="conveyor_belt_test" pkg="mir_conveyor_belt_test" type="conveyor_belt_test" output="screen"/>
+    <!--include file="$(find mcr_edit_image)/ros/launch/edit_image.launch"/-->
+    <!--node name="conveyor_belt_test" pkg="mir_conveyor_belt_test" type="conveyor_belt_test" output="screen"/-->
     <!--include file="$(find atwork_refbox_ros_client)/ros/launch/b-it-bots-cfh1.launch" /-->
 </launch>

@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import mir_move_base_ros.move_base
+
+if __name__ == '__main__':
+    mir_move_base_ros.move_base.main()

@@ -1,0 +1,85 @@
+#! /usr/bin/env python
+
+from __future__ import print_function
+
+import rospy
+from actionlib import SimpleActionClient
+from mir_planning_msgs.msg import ExecutePlanAction, ExecutePlanGoal, ExecutePlanResult
+from rosplan_dispatch_msgs.msg import ActionDispatch, CompletePlan
+from diagnostic_msgs.msg import KeyValue
+
+# This is a made up plan which has all 7 actions
+PLAN = """\
+(move_base youbot-brsu start ws04)
+(perceive youbot-brsu ws04)
+(pick youbot-brsu ws04 axis-00)
+(stage youbot-brsu platform_left axis-00)
+(pick youbot-brsu ws04 motor-00)
+(stage youbot-brsu platform_middle motor-00)
+(move_base youbot-brsu ws04 sh01)
+(perceive youbot-brsu sh01)
+(pick youbot-brsu sh01 m20_100-00)
+(stage youbot-brsu platform_left m20_100-00)
+(move_base youbot-brsu ws04 pp01)
+(perceive youbot-brsu pp01)
+(insert youbot-brsu platform_left pp01 axis-00 pp01_cavity)
+(move_base youbot-brsu pp01 ws01)
+(perceive youbot-brsu ws01)
+(insert youbot-brsu platform_left ws01 m20_100-00 container_box_blue-00)
+(move_base youbot-brsu ws01 ws06)
+(unstage youbot-brsu platform_right motor-00)
+(place youbot-brsu ws06 motor-00)"""
+
+SMALL_PLAN = """\
+(move_base youbot-brsu start ws04)
+(perceive youbot-brsu ws04)"""
+
+
+
+# Copied from mir_task_planning/ros/scripts/task_planner_server
+def get_action_msg_from_string(string, action_id):
+    """Create and return Action obj from string of type '(word word word ...)'
+
+    :string: string
+    :action_id: int
+    :returns: rosplan_dispatch_msgs/ActionDispatch
+
+    """
+    # remove parenthesis, convert str to upper case and split at spaces
+    action_param_list = string[1:-1].upper().split()
+    name = action_param_list[0]
+    params = [KeyValue('param_'+str(i+1), param) for i, param in enumerate(action_param_list[2:])]
+    params.insert(0, KeyValue('robot_name', action_param_list[1]))
+    return ActionDispatch(action_id=action_id, name=name, parameters=params)
+
+def get_complete_plan_from_string(string):
+    """Create and return CompletePlan obj from a multiline string 
+
+    :string: string
+    :returns: rosplan_dispatch_msgs/CompletePlan
+
+    """
+    complete_plan = CompletePlan()
+    for line_num, line in enumerate(string.split('\n')):
+        action_msg = get_action_msg_from_string(line, line_num+1)
+        complete_plan.plan.append(action_msg)
+    return complete_plan
+
+def main():
+    complete_plan = get_complete_plan_from_string(PLAN)
+    # complete_plan = get_complete_plan_from_string(SMALL_PLAN)
+    planner_executor_client = SimpleActionClient('/task_planning/execute_plan',
+                                                 ExecutePlanAction)
+    rospy.loginfo("Waiting for planner executor...")
+    planner_executor_client.wait_for_server()
+    rospy.loginfo("Wait complete. Sending goal.")
+    goal = ExecutePlanGoal(plan=complete_plan)
+    planner_executor_client.send_goal(goal)
+    planner_executor_client.wait_for_result()
+    result = planner_executor_client.get_result()
+    rospy.loginfo("Got result")
+    print(result)
+
+if __name__ == "__main__":
+    rospy.init_node('planner_executor_test')
+    main()

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="camera" value="arm_cam3d" />
+        <arg name="tf_prefix" value="arm_cam3d_camera" />
+        <arg name="rgb" value="rgb" />
+    </include>
+</launch>

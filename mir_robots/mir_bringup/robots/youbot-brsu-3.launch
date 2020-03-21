@@ -3,14 +3,18 @@
 
   <arg name="robot" value="$(optenv ROBOT youbot-brsu-3)" />
   <arg name="is_camera_required" default="true" />
+  <arg name="is_camera_intel" default="true" />
 
-  <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" />
+  <include file="$(find mir_bringup)/components/youbot_oodl_driver.launch" >
+      <arg name="youBotHasBase"  default="true"/>
+      <arg name="youBotHasArms"  default="false"/> 
+  </include>
 
-  <include file="$(find mir_bringup)/components/base_front_hokuyo_node.launch">
+  <include file="$(find mir_bringup)/components/base_front_urg_node.launch">
     <arg name="robot" value="$(arg robot)" />
   </include>
 
-  <include file="$(find mir_bringup)/components/base_rear_hokuyo_node.launch">
+  <include file="$(find mir_bringup)/components/base_rear_urg_node.launch">
     <arg name="robot" value="$(arg robot)" />
   </include>
 
@@ -27,8 +31,8 @@
     <arg name="robot" value="$(arg robot)"/>
   </include>
 
-  <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />
-  <include file="$(find mir_gripper_controller)/ros/launch/dynamixel_gripper.launch" />
+  <!-- <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" /> -->
+  <!-- <include file="$(find mir_gripper_controller)/ros/launch/dynamixel_gripper.launch" /> -->
 
   <group if="$(arg is_camera_required)" >
     <include file="$(find mir_bringup)/components/realsense_camera_dorabot.launch"/>
