@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import rospy
-from mcr_perception_msgs.msg import ObjectList, Object
+from mas_perception_msgs.msg import ObjectList, Object
 
 import smach
 

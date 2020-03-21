@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_perceive_location</name>
+  <version>1.0.0</version>
+  <description>
+    Assumes that the robot is in front of a platform, then triggers base placement component
+    moves the arm to look_at_workspace and triggers perception pipeline.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

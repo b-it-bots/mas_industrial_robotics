@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- Note: example launch file. Do not modify! -->
+<launch>
+  <arg name="move_base_action_name" default="move_base"/>
+  <arg name="loop_rate" default="10"/>
+
+  <node pkg="mir_move_base" type="move_base_node" name="move_base_wrapper" output="screen">
+
+    <!-- Action name to move the robot's base -->
+    <param name="move_base_action_name" type="string" value="$(arg move_base_action_name)"/>
+
+    <!-- Node cycle rate (in hz) -->
+    <param name="loop_rate" type="double" value="10"/>
+  </node>
+</launch>

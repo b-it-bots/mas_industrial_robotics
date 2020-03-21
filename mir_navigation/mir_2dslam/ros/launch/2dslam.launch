@@ -11,7 +11,7 @@
 
 	<!-- launch gmapping -->
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
-		<remap from="scan" to="/scan_unified"/>
+		<remap from="scan" to="/scan_front"/>
 		<param name="base_frame" value="base_footprint"/>
 		<param name="map_frame" value="map"/>
 		<param name="odom_frame" value="odom"/>

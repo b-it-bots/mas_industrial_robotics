@@ -14,7 +14,7 @@
   <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform_v2.urdf.xacro" />
   <!-- youbot arm and gripper-->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
-  <xacro:include filename="$(find mir_description)/urdf/misc/adapter_plate.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/full_platform.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.urdf.xacro" />
   <!-- controller manager -->
   <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
@@ -24,34 +24,32 @@
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/asus_xtion_camera_mount.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
 
   <!-- standard youBot configuration -->
   <xacro:youbot_base name="base"/>
 
-  <!-- Rear Platform -->
-  <xacro:rear_platform_v2 name="rear_platform" parent="base_link">
-    <origin xyz="0.12 -0.175 ${0.021 + 0.0062 + 0.025 + 0.012}" rpy="0 0 0" />  <!-- ${alignment with base top + nut height + spacer height + slide height } -->
-  </xacro:rear_platform_v2>
-
   <!-- Arm Plate moving arm 8cm foward and 45 degree rotation -->
-  <xacro:adapter_plate name="adapter_plate" parent="base_link" arm_angle="${-M_PI / 4}">
-    <origin xyz="${0.159+0.08} 0 ${0.021 + 0.025 + 0.025}" rpy="0 0 0" />    <!-- ${alignment with base top + spacer height + spacer height } -->
-  </xacro:adapter_plate>
+  <xacro:full_platform name="full_platform" parent="base_link" arm_angle="${-M_PI / 4}">
+    <origin xyz="0.0 0.0 ${0.021 + 0.025 + 0.025}" rpy="0 0 0" />    <!-- ${alignment with base top + spacer height + spacer height } -->
+  </xacro:full_platform>
 
-  <xacro:youbot_arm name="arm" parent="adapter_plate_arm_root_link">
+  <xacro:youbot_arm name="arm" parent="full_platform_arm_root_link">
     <origin xyz="-0.022 0.0 0.037" rpy="0 0 0" />
   </xacro:youbot_arm>
 
   <!-- base laser front -->
   <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
-    <origin xyz="0.3 0 -0.035" rpy="${M_PI} 0 0"/>
+    <origin xyz="0.3 0 -0.035" rpy="0 0 0"/>
   </xacro:hokuyo_urg04_laser>
 
   <!-- base laser rear -->
   <xacro:hokuyo_urg04_laser name="base_laser_rear" parent="base" ros_topic="scan_rear" update_rate="10" min_angle="-1.57" max_angle="1.57" >
-     <origin xyz="-0.3 0.0 -0.035" rpy="${M_PI} 0 ${M_PI}" />
+     <origin xyz="-0.3 0.0 -0.035" rpy="0 0 ${M_PI}" />
   </xacro:hokuyo_urg04_laser>
 
   <xacro:dynamixel_gripper_v2 name="gripper" parent="arm_link_5">
@@ -59,14 +57,16 @@
   </xacro:dynamixel_gripper_v2>
 
   <!-- camera mount for Intel RealSense F200 -->
-  <xacro:intel_f200_camera_mount name="camera_mount" parent="gripper_motor_mount_link">
-    <origin xyz="-0.00375 -0.0007 0.012" rpy="0.06 -0.04 0" />
-  </xacro:intel_f200_camera_mount>
+  <xacro:asus_xtion_camera_mount  name="camera_mount" parent="gripper_motor_mount_link">
+      <origin xyz="0.035 -0.00 0.0" rpy="0 0.025 ${M_PI/2} " />
+  </xacro:asus_xtion_camera_mount>
 
   <!-- 3D camera on arm -->
-  <xacro:intel_realsense_f200_camera name="arm_cam3d" parent="camera_mount_link">
-    <origin xyz="-0.045 -0.00 0.00" rpy="0.0 -${M_PI/2} 0.0" />
-  </xacro:intel_realsense_f200_camera>
-
+  <!-- xacro:intel_realsense_f200_camera name="arm_cam3d" parent="camera_mount_link">
+    <origin xyz="-0.05 -0.01 0.03" rpy="0.0 -${M_PI/2 - 0.03} 0.0" />
+  </xacro:intel_realsense_f200_camera -->
+   <xacro:realsense_d435 name="arm_cam3d" parent="camera_mount_link">
+       <origin xyz="0.010 -0.022 0.017" rpy="0 ${M_PI/2 - 0.18} -${M_PI/2}" />  
+   </xacro:realsense_d435>
   
 </robot>

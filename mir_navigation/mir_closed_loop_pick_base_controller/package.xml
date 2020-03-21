@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mir_closed_loop_pick_base_controller</name>
+  <version>0.0.1</version>
+  <description>The package to move base to grasp an object with closed loop.
+  </description>
+
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

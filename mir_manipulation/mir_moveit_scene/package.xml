@@ -21,7 +21,7 @@
 
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
-  <run_depend>mcr_perception_msgs</run_depend>
+  <run_depend>mas_perception_msgs</run_depend>
   <run_depend>moveit_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>shape_msgs</run_depend>

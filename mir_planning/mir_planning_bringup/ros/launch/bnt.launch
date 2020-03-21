@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Launch all required components for basic navigation test with barrier tape detection -->
+
+  <!-- Launch file arguments -->
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+    <arg name="sim" default="false" />
+
+  <!-- navigation -->
+    <!-- move base -->
+    <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
+
+    <!-- move_base action lib wrapper -->
+    <include file="$(find mir_move_base_safe)/ros/launch/move_base.launch" />
+
+    <!-- direct relative controller -->
+    <include file="$(find mir_direct_base_controller)/ros/launch/direct_base_controller.launch"/>
+
+  <!-- manipulation -->
+
+    <!-- moveit! -->
+    <param name="/move_group/trajectory_execution/allowed_execution_duration_scaling" type="double" value="1.5"/>
+    <!-- by setting this parameter we disable checking that the first point in the trajectory is the current state -->
+    <param name="/move_group/trajectory_execution/allowed_start_tolerance" type="double" value="0"/>
+    <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch">
+       <arg name="planner_pipeline" value="interpolation" />
+    </include>
+    <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" />
+
+  <!-- action servers -->
+    <!-- move base safe action server -->                                                                               
+    <node pkg="mir_move_base_safe" type="move_base_safe_server.py" name="move_base_safe_server" output="screen">
+        <param name="align" type="bool" value="false" />
+    </node>
+
+  <!-- perception -->
+
+    <!-- barrier tape detection -->
+    <include file="$(find mir_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch" />
+
+    <!-- dynamic reconfigure from code, receive string and params and does the request -->
+    <!-- used for switching between close and far range camera -->
+    <include file="$(find mcr_dynamic_reconfigure_client)/ros/launch/dynamic_reconfigure_client.launch">
+        <arg name="config_file" value="$(find mir_yb_actions)/ros/config/youbot_dynamic_params.yaml" />
+    </include>
+
+  <!-- refbox communication -->
+    <include file="$(find mir_refbox_parser)/ros/launch/refbox_parser.launch">
+      <arg name="bnt" value="true" />
+    </include>
+
+    <!-- include file="$(find mir_basic_navigation_test)/ros/launch/logging.launch" /-->
+
+    <include file="$(find atwork_refbox_ros_client)/ros/launch/b-it-bots-cfh1.launch" />
+    
+</launch>

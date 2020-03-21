@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="line_extractor" pkg="laser_line_extraction" type="line_extraction_node">
+        <param name="~frequency" value="30.0" />
+        <param name="~frame_id" value="base_laser_front_link" />
+        <param name="~scan_topic" value="scan_front" />
+        <param name="~publish_markers" value="true" />
+        <param name="~bearing_std_dev" value="1e-5" />
+        <param name="~range_std_dev" value="0.012" />
+        <param name="~least_sq_angle_thresh" value="0.0001" />
+        <param name="~least_sq_radius_thresh" value="0.0001" />
+        <param name="~max_line_gap" value="0.5" />
+        <param name="~min_line_length" value="0.2" />
+        <param name="~min_range" value="0.2" />
+        <param name="~min_split_dist" value="0.04" />
+        <param name="~outlier_dist" value="0.06" />
+        <param name="~min_line_points" value="5" />
+    </node>
+
+    <node pkg="mir_workspace_alignment" name="workspace_aligner" type="workspace_aligner" output="screen">
+        <param name="~num_of_msgs" type="int" value="100" />
+        <!-- Only consider lines with angle threshold FOV (in degrees) -->
+        <param name="~angle_threshold" type="double" value="60" />
+        <!-- Only consider lines within distance threshold (in meters) -->
+        <param name="~distance_threshold" type="double" value="0.3" />
+
+        <!-- only align if the robot's current position is within threshold distance 
+             of known WS poses -->
+        <param name="~pose_angle_threshold" type="double" value="0.3" />
+        <param name="~pose_distance_threshold" type="double" value="0.2" />
+
+        <param name="~workspace_length" type="double" value="0.8" />
+        <param name="~workspace_length_error_threshold" type="double" value="0.2" />
+        <!-- safety distance of laser from workspace -->
+        <param name="~workspace_safety_distance" type="double" value="0.10" />
+
+        <param name="~poses_of_workspaces" type="string" value="/script_server/base" />
+
+        <remap from="~line_segments" to="/line_segments" />
+        <remap from="~destination_pose" to="/mcr_navigation/direct_base_controller/input_pose" />
+        <remap from="~dbc_event_in" to="/mcr_navigation/direct_base_controller//coordinator/event_in" />
+    </node>
+
+</launch>
+
