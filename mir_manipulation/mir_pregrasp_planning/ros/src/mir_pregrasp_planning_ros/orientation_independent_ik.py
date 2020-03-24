@@ -4,20 +4,16 @@ import rospy
 
 from brics_actuator.msg import JointPositions
 from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Quaternion
-# from mcr_manipulation_pose_selector_ros.reachability_pose_selector import PoseSelector
 from mcr_manipulation_measurers_ros.pose_transformer import PoseTransformer
 from mir_pregrasp_planning_ros.kinematics import Kinematics
 
 class OrientationIndependentIK(object):
 
-    def __init__(self, ee_to_arm_dist=0.11, debug=False):
+    def __init__(self, debug=False):
         self.debug = debug
         self._base_link_frame = 'base_link'
-        self.kinematics = Kinematics(root=self._base_link_frame, tip='gripper_static_grasp_link')
-        # self._ee_to_arm_transform = np.identity(4)
-        # self._ee_to_arm_transform[2, 3] = -ee_to_arm_dist
+        self.kinematics = Kinematics(tip='gripper_static_grasp_link')
 
-        # self._pose_selector = PoseSelector()
         self._pose_transformer = PoseTransformer()
         self._tf_listener = tf.TransformListener()
         self._arm_base_frame = 'arm_link_0'
@@ -114,13 +110,12 @@ class OrientationIndependentIK(object):
             if self.debug:
                 self._pose_array_pub.publish(pose_samples)
                 print(pitch_range)
-            # reachable_pose, joint_msg, _ = self._pose_selector.get_reachable_pose_and_configuration(
-            #         pose_samples, None)
             reachable_pose, joint_angles = self._get_reachable_pose_and_configuration(pose_samples)
             if reachable_pose is not None:
                 found_solution = True
                 rospy.logdebug('Found solution')
                 rospy.logdebug('Pitch range: ' + str(pitch_range))
+                rospy.logdebug('Yaw : ' + str(yaw))
                 if self.debug:
                     self._pose_out_pub.publish(reachable_pose)
                 return joint_angles
@@ -128,12 +123,16 @@ class OrientationIndependentIK(object):
 
     def _get_reachable_pose_and_configuration(self, pose_samples):
         for pose in pose_samples.poses:
-            solution = self.kinematics.inverse_kinematics(pose)
-            print(solution)
+            # transform pose to arm base frame (since ik only works with that)
+            pose_stamped = PoseStamped(pose=pose, header=pose_samples.header)
+            trans_pose = self._pose_transformer.get_transformed_pose(pose_stamped,
+                                                                     self._arm_base_frame)
+            if trans_pose is None:
+                rospy.logerr("Unable to transform pose to {0}".format(self._arm_base_frame))
+
+            solution = self.kinematics.inverse_kinematics(trans_pose.pose)
             if solution is not None:
-                reachable_pose = PoseStamped(pose=pose)
-                reachable_pose.header.frame_id = self._base_link_frame
-                reachable_pose.header.stamp = rospy.Time.now()
+                reachable_pose = PoseStamped(pose=pose, header=pose_samples.header)
                 return reachable_pose, solution
         return None, None
 
@@ -179,40 +178,7 @@ class OrientationIndependentIK(object):
                     yaw_rad = np.radians(yaw + yaw_offset)
                     pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(roll_rad, pitch_rad, yaw_rad))
                     pose_samples.poses.append(pose)
-                    # transformed_pose = self._get_arm_pose_from_ee_pose(pose)
-                    # pose_samples.poses.append(transformed_pose)
         return pose_samples
-
-    # def _get_arm_pose_from_ee_pose(self, gripper_pose):
-    #     """ (Copied from mcr_moveit_client)
-    #     Transform 'gripper_pose' into 'arm_pose' such that if 'gripper_pose' represents where
-    #     the gripper must be, then 'arm_pose' represents where the arm_link_5 must be
-
-    #     :gripper_pose: geometry_msgs/Pose
-    #     :returns: geometry_msgs/Pose
-
-    #     """
-    #     # convert gripper_pose to gripper_pose_matrix
-    #     gripper_pose_matrix = tf.transformations.quaternion_matrix([
-    #         gripper_pose.orientation.x,
-    #         gripper_pose.orientation.y,
-    #         gripper_pose.orientation.z,
-    #         gripper_pose.orientation.w])
-    #     gripper_pose_matrix[0, 3] = gripper_pose.position.x
-    #     gripper_pose_matrix[1, 3] = gripper_pose.position.y
-    #     gripper_pose_matrix[2, 3] = gripper_pose.position.z
-
-    #     # transform gripper to arm_pose using a transformation matrix
-    #     arm_pose_matrix = np.dot(gripper_pose_matrix, self._ee_to_arm_transform)
-
-    #     # convert arm_pose_matrix to arm_pose
-    #     arm_pose = Pose()
-    #     arm_pose.position.x = arm_pose_matrix[0, 3]
-    #     arm_pose.position.y = arm_pose_matrix[1, 3]
-    #     arm_pose.position.z = arm_pose_matrix[2, 3]
-    #     quaternion = tf.transformations.quaternion_from_matrix(arm_pose_matrix)
-    #     arm_pose.orientation = Quaternion(*quaternion)
-    #     return arm_pose
 
     def _initialise_base_to_arm_offset(self):
         num_of_tries = 0
