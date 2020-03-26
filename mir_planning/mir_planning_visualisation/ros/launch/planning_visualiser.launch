@@ -2,13 +2,17 @@
 <launch>
 
     <arg name="debug" default="true" />
+    <arg name="global_frame" default="map" />
+    <arg name="model_path" default="$(optenv MODEL_PATH ~/kinetic/src/models/manipulation_objects)"/>
 
     <group ns="mir_planning">
 
         <node pkg="mir_planning_visualisation" type="planning_visualiser"
               name="planning_visualiser" output="screen" >
 
-            <param name="debug" value="$(arg debug)" type="bool" />
+            <param name="debug" type="bool" value="$(arg debug)" />
+            <param name="global_frame" type="str" value="$(arg global_frame)" />
+            <param name="model_path" type="str" value="$(arg model_path)" />
 
         </node>
 

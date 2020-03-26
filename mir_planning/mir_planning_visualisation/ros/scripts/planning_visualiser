@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+import os
 import rospy
 from visualization_msgs.msg import MarkerArray, Marker
 
@@ -14,6 +15,13 @@ class PlanningVisualiser(object):
     def __init__(self):
         # read ros params
         self._debug = rospy.get_param('~debug', False)
+        self._global_frame = rospy.get_param('~global_frame', 'map')
+        self._model_path = rospy.get_param('~model_path', None)
+        if self._model_path is None:
+            raise Exception('Model path not provided.')
+        if not os.path.exists(self._model_path):
+            raise Exception('Invalid model path provided. ' + str(self._model_path) + ' does not exist')
+
 
         # read config files
         # if not planner_commands:
@@ -29,6 +37,9 @@ class PlanningVisualiser(object):
         # class variables
 
         rospy.loginfo('Initialised')
+
+    def _get_file_path_from_model_name():
+        pass
 
 if __name__ == '__main__':
     rospy.init_node('planning_visualiser')
