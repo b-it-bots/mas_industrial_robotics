@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="debug" default="true" />
+
+    <group ns="mir_planning">
+
+        <node pkg="mir_planning_visualisation" type="planning_visualiser"
+              name="planning_visualiser" output="screen" >
+
+            <param name="debug" value="$(arg debug)" type="bool" />
+
+        </node>
+
+    </group>
+
+</launch>

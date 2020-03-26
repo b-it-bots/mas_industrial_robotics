@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import rospy
+from visualization_msgs.msg import MarkerArray, Marker
+
+class PlanningVisualiser(object):
+
+    """
+    TODO
+    """
+
+    def __init__(self):
+        # read ros params
+        self._debug = rospy.get_param('~debug', False)
+
+        # read config files
+        # if not planner_commands:
+        #     raise Exception('')
+
+        # Subscribers
+
+        # Publishers
+        self._kb_marker_pub = rospy.Publisher('~markers', MarkerArray, queue_size=1)
+
+        # Action servers
+
+        # class variables
+
+        rospy.loginfo('Initialised')
+
+if __name__ == '__main__':
+    rospy.init_node('planning_visualiser')
+    visualiser = PlanningVisualiser()
+    rospy.spin()
