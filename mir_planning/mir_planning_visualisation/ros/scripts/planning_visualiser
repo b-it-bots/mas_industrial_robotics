@@ -22,11 +22,6 @@ class PlanningVisualiser(object):
         if not os.path.exists(self._model_path):
             raise Exception('Invalid model path provided. ' + str(self._model_path) + ' does not exist')
 
-
-        # read config files
-        # if not planner_commands:
-        #     raise Exception('')
-
         # Subscribers
 
         # Publishers
@@ -37,9 +32,36 @@ class PlanningVisualiser(object):
         # class variables
 
         rospy.loginfo('Initialised')
+        rospy.sleep(1.0)
+        file_path = self._get_file_path_from_obj_name('m20')
+        msg = MarkerArray()
+        marker = Marker(type=Marker.MESH_RESOURCE)
+        marker.mesh_resource = file_path
+        marker.header.stamp = rospy.Time.now()
+        marker.header.frame_id = self._global_frame
+        marker.pose.position.x = 1.0
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 0.01
+        marker.scale.y = 0.01
+        marker.scale.z = 0.01
+        marker.id = 1
+        marker.color.r = marker.color.a = 1.0
+        msg.markers.append(marker)
+        self._kb_marker_pub.publish(msg)
+        rospy.sleep(1.0)
+        rospy.loginfo('Published')
 
-    def _get_file_path_from_model_name():
-        pass
+    def _get_file_path_from_obj_name(self, obj_name):
+        """
+        Return full path of model's stl file based on its name.
+        If such file does not exist, returns None
+
+        :obj_name: str
+        :returns: str or None
+
+        """
+        file_path = os.path.join(self._model_path, obj_name.lower() + '.stl')
+        return 'file://' + file_path if os.path.exists(file_path) else None
 
 if __name__ == '__main__':
     rospy.init_node('planning_visualiser')

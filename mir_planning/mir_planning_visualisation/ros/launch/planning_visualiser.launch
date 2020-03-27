@@ -3,7 +3,7 @@
 
     <arg name="debug" default="true" />
     <arg name="global_frame" default="map" />
-    <arg name="model_path" default="$(optenv MODEL_PATH ~/kinetic/src/models/manipulation_objects)"/>
+    <arg name="model_path" default="$(find mir_planning_visualisation)/resource"/>
 
     <group ns="mir_planning">
 
