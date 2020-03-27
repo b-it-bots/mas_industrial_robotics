@@ -4,6 +4,9 @@
     <arg name="debug" default="true" />
     <arg name="global_frame" default="map" />
     <arg name="model_path" default="$(find mir_planning_visualisation)/resource"/>
+    <arg name="model_to_marker_config"
+         default="$(find mir_planning_visualisation)/ros/config/model_to_marker.yaml"/>
+
 
     <group ns="mir_planning">
 
@@ -13,6 +16,7 @@
             <param name="debug" type="bool" value="$(arg debug)" />
             <param name="global_frame" type="str" value="$(arg global_frame)" />
             <param name="model_path" type="str" value="$(arg model_path)" />
+            <rosparam command="load" file="$(arg model_to_marker_config)" />
 
         </node>
 
