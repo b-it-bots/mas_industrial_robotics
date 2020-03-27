@@ -2,9 +2,12 @@
 
 from __future__ import print_function
 
+import tf
 import os
+import math
 import rospy
 from visualization_msgs.msg import MarkerArray, Marker
+from geometry_msgs.msg import Quaternion
 
 class PlanningVisualiser(object):
 
@@ -21,6 +24,9 @@ class PlanningVisualiser(object):
             raise Exception('Model path not provided.')
         if not os.path.exists(self._model_path):
             raise Exception('Invalid model path provided. ' + str(self._model_path) + ' does not exist')
+        self._marker_config = rospy.get_param('~model_to_marker_config', None)
+        if self._marker_config is None:
+            raise Exception('Model config not provided.')
 
         # Subscribers
 
@@ -30,38 +36,57 @@ class PlanningVisualiser(object):
         # Action servers
 
         # class variables
+        self._marker_counter = 1
 
         rospy.loginfo('Initialised')
         rospy.sleep(1.0)
-        file_path = self._get_file_path_from_obj_name('m20')
         msg = MarkerArray()
-        marker = Marker(type=Marker.MESH_RESOURCE)
-        marker.mesh_resource = file_path
-        marker.header.stamp = rospy.Time.now()
+        marker = self._get_marker_from_obj_name('M30')
         marker.header.frame_id = self._global_frame
         marker.pose.position.x = 1.0
-        marker.pose.orientation.w = 1.0
-        marker.scale.x = 0.01
-        marker.scale.y = 0.01
-        marker.scale.z = 0.01
-        marker.id = 1
-        marker.color.r = marker.color.a = 1.0
         msg.markers.append(marker)
+        marker2 = self._get_marker_from_obj_name('container_blue')
+        marker2.header.frame_id = self._global_frame
+        marker2.pose.position.x = 1.0
+        marker2.pose.position.y = 0.1
+        msg.markers.append(marker2)
         self._kb_marker_pub.publish(msg)
         rospy.sleep(1.0)
         rospy.loginfo('Published')
 
-    def _get_file_path_from_obj_name(self, obj_name):
-        """
-        Return full path of model's stl file based on its name.
-        If such file does not exist, returns None
+    def _get_marker_from_obj_name(self, obj_name):
+        obj_name = obj_name.lower()
+        marker = Marker()
+        if obj_name not in self._marker_config:
+            rospy.logwarn('Could not find ' + str(obj_name) + '. Using default marker')
+            marker.type = Marker.CUBE
+            config = self._marker_config['default']
+        else:
+            config = self._marker_config[obj_name]
+            file_path = os.path.join(self._model_path, config['file_name'])
+            if os.path.exists(file_path):
+                resource_file = 'file://' + file_path
+                marker.type=Marker.MESH_RESOURCE
+                marker.mesh_resource = resource_file
+            else:
+                rospy.logwarn('Could not find file ' + str(file_path) + '. Using default marker')
+                marker.type = Marker.CUBE
+                config = self._marker_config['default']
 
-        :obj_name: str
-        :returns: str or None
-
-        """
-        file_path = os.path.join(self._model_path, obj_name.lower() + '.stl')
-        return 'file://' + file_path if os.path.exists(file_path) else None
+        marker.header.stamp = rospy.Time.now()
+        marker.scale.x = marker.scale.y = marker.scale.z = config['scale']
+        marker.color.r = config['color']['r']
+        marker.color.g = config['color']['g']
+        marker.color.b = config['color']['b']
+        marker.color.a = 1.0
+        quat = tf.transformations.quaternion_from_euler(
+                math.radians(config['orientation']['r']),
+                math.radians(config['orientation']['p']),
+                math.radians(config['orientation']['y']))
+        marker.pose.orientation = Quaternion(*quat)
+        marker.id = self._marker_counter
+        self._marker_counter += 1
+        return marker
 
 if __name__ == '__main__':
     rospy.init_node('planning_visualiser')
