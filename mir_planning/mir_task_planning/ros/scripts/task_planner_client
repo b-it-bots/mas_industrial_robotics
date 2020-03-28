@@ -11,7 +11,7 @@ import rospy
 # action lib
 import actionlib
 from actionlib_msgs.msg import GoalStatus
-from mir_task_planning.msg import PlanAction, PlanGoal
+from mir_planning_msgs.msg import PlanAction, PlanGoal
 
 def send_action_goal(domain_file, problem_file, planner="mercury", mode=PlanGoal.NORMAL):
     """Create a client for task_planner action server and send a goal with given parameters
