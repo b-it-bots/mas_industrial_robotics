@@ -6,11 +6,13 @@ model_to_marker_config:
             r: 0.1
             g: 0.1
             b: 0.1
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.0
             y: 0.0
+            z: 0.0
+            roll: 0.0
+            pitch: -90.0
+            yaw: 180.0
     m30:
         file_name: 'm30.stl'
         scale: 0.001
@@ -18,11 +20,13 @@ model_to_marker_config:
             r: 0.1
             g: 0.1
             b: 0.1
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.02
             y: 0.0
+            z: 0.0
+            roll: 0.0
+            pitch: -90.0
+            yaw: 0.0
     f20_20_b:
         file_name: 'f20_20.stl'
         scale: 0.001
@@ -30,11 +34,13 @@ model_to_marker_config:
             r: 0.1
             g: 0.1
             b: 0.1
-        z_offset: 0.01
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.0
             y: 0.0
+            z: 0.01
+            roll: 0.0
+            pitch: -90.0
+            yaw: 180.0
     f20_20_g:
         file_name: 'f20_20.stl'
         scale: 0.001
@@ -42,11 +48,13 @@ model_to_marker_config:
             r: 0.5
             g: 0.5
             b: 0.5
-        z_offset: 0.01
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.0
             y: 0.0
+            z: 0.01
+            roll: 0.0
+            pitch: -90.0
+            yaw: 180.0
     s40_40_b:
         file_name: 's40_40.stl'
         scale: 0.001
@@ -54,11 +62,13 @@ model_to_marker_config:
             r: 0.1
             g: 0.1
             b: 0.1
-        z_offset: 0.02
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.0
             y: 0.0
+            z: 0.02
+            roll: 0.0
+            pitch: -90.0
+            yaw: 180.0
     s40_40_g:
         file_name: 's40_40.stl'
         scale: 0.001
@@ -66,11 +76,13 @@ model_to_marker_config:
             r: 0.5
             g: 0.5
             b: 0.5
-        z_offset: 0.02
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.0
             y: 0.0
+            z: 0.02
+            roll: 0.0
+            pitch: -90.0
+            yaw: 180.0
     m20_100:
         file_name: 'm20_100.stl'
         scale: 0.001
@@ -78,11 +90,13 @@ model_to_marker_config:
             r: 0.1
             g: 0.1
             b: 0.1
-        z_offset: 0.0
-        orientation:
-            r: 30.0
-            p: 3.0
-            y: 180.0
+        offset:
+            x: 0.013
+            y: 0.01
+            z: 0.0
+            roll: 30.0
+            pitch: 3.0
+            yaw: 0.0
     r20:
         file_name: 'r20.stl'
         scale: 0.001
@@ -90,11 +104,13 @@ model_to_marker_config:
             r: 0.1
             g: 0.1
             b: 0.1
-        z_offset: 0.015
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.0
             y: 0.0
+            z: 0.015
+            roll: 0.0
+            pitch: -90.0
+            yaw: 180.0
     motor:
         file_name: 'motor.stl'
         scale: 0.001
@@ -102,11 +118,13 @@ model_to_marker_config:
             r: 0.1
             g: 0.1
             b: 0.1
-        z_offset: 0.02
-        orientation:
-            r: 0.0
-            p: 180.0
+        offset:
+            x: 0.0
             y: 0.0
+            z: 0.02
+            roll: 0.0
+            pitch: 0.0
+            yaw: 0.0
     distance_tube:
         file_name: 'distance_tube.stl'
         scale: 0.001
@@ -114,11 +132,13 @@ model_to_marker_config:
             r: 0.5
             g: 0.5
             b: 0.5
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: 0.0
+        offset:
+            x: 0.015
             y: 0.0
+            z: 0.0
+            roll: 0.0
+            pitch: 0.0
+            yaw: 0.0
     bearing:
         file_name: 'bearing.stl'
         scale: 0.001
@@ -126,11 +146,13 @@ model_to_marker_config:
             r: 0.6
             g: 0.6
             b: 0.6
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: -90.0
+        offset:
+            x: 0.015
             y: 0.0
+            z: 0.0
+            roll: 0.0
+            pitch: -90.0
+            yaw: 0.0
     bearing_box:
         file_name: 'bearing_box.stl'
         scale: 0.001
@@ -138,11 +160,13 @@ model_to_marker_config:
             r: 0.5
             g: 0.5
             b: 0.5
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: 0.0
-            y: 180.0
+        offset:
+            x: 0.0
+            y: -0.025
+            z: 0.0
+            roll: 0.0
+            pitch: 0.0
+            yaw: 0.0
     axis:
         file_name: 'axis.stl'
         scale: 0.001
@@ -150,11 +174,13 @@ model_to_marker_config:
             r: 0.5
             g: 0.5
             b: 0.5
-        z_offset: 0.015
-        orientation:
-            r: 0.0
-            p: 6.0
-            y: 180.0
+        offset:
+            x: 0.0
+            y: 0.0
+            z: 0.015
+            roll: 0.0
+            pitch: 6.0
+            yaw: 0.0
     container_red:
         file_name: 'container.stl'
         scale: 0.001
@@ -162,11 +188,13 @@ model_to_marker_config:
             r: 1.0
             g: 0.0
             b: 0.0
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: 0.0
-            y: 0.0
+        offset:
+            x: 0.0
+            y: -0.07
+            z: 0.0
+            roll: 0.0
+            pitch: 0.0
+            yaw: 180.0
     container_blue:
         file_name: 'container.stl'
         scale: 0.001
@@ -174,11 +202,13 @@ model_to_marker_config:
             r: 0.0
             g: 0.0
             b: 1.0
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: 0.0
-            y: 0.0
+        offset:
+            x: 0.0
+            y: -0.07
+            z: 0.0
+            roll: 0.0
+            pitch: 0.0
+            yaw: 180.0
     ws:
         file_name: 'workstation.stl'
         scale: 0.001
@@ -186,13 +216,13 @@ model_to_marker_config:
             r: 0.9
             g: 0.9
             b: 0.9
-        x_offset: -0.1
-        y_offset: -0.4
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: 0.0
-            y: 180.0
+        offset:
+            x: 0.0
+            y: -0.4
+            z: 0.0
+            roll: 0.0
+            pitch: 0.0
+            yaw: 180.0
     sh:
         file_name: 'shelf.stl'
         scale: 0.001
@@ -200,13 +230,13 @@ model_to_marker_config:
             r: 0.9
             g: 0.9
             b: 0.9
-        x_offset: -0.6
-        y_offset: -0.4
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: 0.0
-            y: 180.0
+        offset:
+            x: -0.5
+            y: -0.4
+            z: 0.0
+            roll: 0.0
+            pitch: 0.0
+            yaw: 180.0
     pp:
         file_name: 'ppt_platform.stl'
         scale: 0.001
@@ -214,13 +244,13 @@ model_to_marker_config:
             r: 0.9
             g: 0.9
             b: 0.9
-        x_offset: -0.35
-        y_offset: -0.05
-        z_offset: 0.0
-        orientation:
-            r: 0.0
-            p: 0.0
-            y: 180.0
+        offset:
+            x: -0.25
+            y: -0.05
+            z: 0.0
+            roll: 0.0
+            pitch: 0.0
+            yaw: 180.0
     cb:
         file_name: 'workstation.stl'
         scale: 1.0
@@ -228,13 +258,13 @@ model_to_marker_config:
             r: 0.9
             g: 0.9
             b: 0.9
-        x_offset: 0.6
-        y_offset: 0.0
-        z_offset: 0.1
-        orientation:
-            r: 0.0
-            p: 0.0
+        offset:
+            x: 0.5
             y: 0.0
+            z: 0.09
+            roll: 0.0
+            pitch: 0.0
+            yaw: 0.0
     default: 
         file_name: ''
         scale: 0.05
