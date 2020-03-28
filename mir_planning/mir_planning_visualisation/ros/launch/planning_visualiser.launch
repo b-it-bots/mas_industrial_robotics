@@ -15,9 +15,10 @@
 
     <group ns="mir_planning">
 
-        <node pkg="mir_planning_visualisation" type="planning_visualiser"
-              name="planning_visualiser" output="screen" >
+        <node pkg="mir_planning_visualisation" type="kb_visualiser"
+              name="kb_visualiser" output="screen" >
 
+            <remap from='~markers' to='/mir_planning/planning_visualisation/kb_markers' />
             <param name="debug" type="bool" value="$(arg debug)" />
             <param name="global_frame" type="str" value="$(arg global_frame)" />
             <param name="model_path" type="str" value="$(arg model_path)" />
@@ -25,6 +26,11 @@
             <rosparam command="load" param="navigation_goals" file="$(arg navigation_goals_file)" />
 
         </node>
+
+        <!-- <node pkg="mir_planning_visualisation" type="plan_visualiser" -->
+        <!--       name="plan_visualiser" output="screen" > -->
+        <!--     <remap from='~markers' to='/mir_planning/planning_visualisation/plan_markers' /> -->
+        <!-- </node> -->
 
     </group>
 
