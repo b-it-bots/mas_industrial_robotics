@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="debug" default="true" />
-    <arg name="global_frame" default="map" />
     <arg name="model_path" default="$(find mir_planning_visualisation)/resource"/>
     <arg name="model_to_marker_config"
          default="$(find mir_planning_visualisation)/ros/config/model_to_marker.yaml"/>
@@ -11,6 +9,10 @@
     <!--      default="$(find mcr_default_env_config)/$(arg robot_env)/navigation_goals.yaml" /> -->
     <arg name="navigation_goals_file"
          default="$(find mir_planning_visualisation)/ros/config/test_navigation_goals.yaml" />
+    <arg name="debug" default="true" />
+    <arg name="global_frame" default="map" />
+    <arg name="alpha" default="1.0" />
+    <arg name="base_link_to_ws_edge" default="0.4" />
 
 
     <group ns="mir_planning">
@@ -22,6 +24,8 @@
             <param name="debug" type="bool" value="$(arg debug)" />
             <param name="global_frame" type="str" value="$(arg global_frame)" />
             <param name="model_path" type="str" value="$(arg model_path)" />
+            <param name="alpha" type="double" value="$(arg alpha)" />
+            <param name="base_link_to_ws_edge" type="double" value="$(arg base_link_to_ws_edge)" />
             <rosparam command="load" file="$(arg model_to_marker_config)" />
             <rosparam command="load" param="navigation_goals" file="$(arg navigation_goals_file)" />
 
