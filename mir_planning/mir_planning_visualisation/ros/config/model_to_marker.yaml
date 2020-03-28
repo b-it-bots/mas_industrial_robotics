@@ -1,176 +1,248 @@
 model_to_marker_config:
-    m20: 
+    m20:
         file_name: 'm20.stl'
         scale: 0.001
         color: 
             r: 0.1
             g: 0.1
             b: 0.1
+        z_offset: 0.0
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    m30: 
+    m30:
         file_name: 'm30.stl'
         scale: 0.001
         color: 
             r: 0.1
             g: 0.1
             b: 0.1
+        z_offset: 0.0
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    f20_20_b: 
+    f20_20_b:
         file_name: 'f20_20.stl'
         scale: 0.001
         color: 
             r: 0.1
             g: 0.1
             b: 0.1
+        z_offset: 0.01
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    f20_20_g: 
+    f20_20_g:
         file_name: 'f20_20.stl'
         scale: 0.001
         color: 
             r: 0.5
             g: 0.5
             b: 0.5
+        z_offset: 0.01
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    s40_40_b: 
+    s40_40_b:
         file_name: 's40_40.stl'
         scale: 0.001
         color: 
             r: 0.1
             g: 0.1
             b: 0.1
+        z_offset: 0.02
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    s40_40_g: 
+    s40_40_g:
         file_name: 's40_40.stl'
         scale: 0.001
         color: 
             r: 0.5
             g: 0.5
             b: 0.5
+        z_offset: 0.02
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    m20_100: 
+    m20_100:
         file_name: 'm20_100.stl'
         scale: 0.001
         color: 
             r: 0.1
             g: 0.1
             b: 0.1
+        z_offset: 0.0
         orientation:
-            r: 0.0
-            p: 0.0
-            y: 0.0
-    r20: 
+            r: 30.0
+            p: 3.0
+            y: 180.0
+    r20:
         file_name: 'r20.stl'
         scale: 0.001
         color: 
             r: 0.1
             g: 0.1
             b: 0.1
+        z_offset: 0.015
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    motor: 
+    motor:
         file_name: 'motor.stl'
         scale: 0.001
         color: 
             r: 0.1
             g: 0.1
             b: 0.1
+        z_offset: 0.02
         orientation:
             r: 0.0
-            p: 0.0
+            p: 180.0
             y: 0.0
-    distance_tube: 
+    distance_tube:
         file_name: 'distance_tube.stl'
         scale: 0.001
         color: 
             r: 0.5
             g: 0.5
             b: 0.5
+        z_offset: 0.0
         orientation:
             r: 0.0
             p: 0.0
             y: 0.0
-    bearing: 
+    bearing:
         file_name: 'bearing.stl'
         scale: 0.001
         color: 
             r: 0.6
             g: 0.6
             b: 0.6
+        z_offset: 0.0
         orientation:
             r: 0.0
             p: -90.0
             y: 0.0
-    bearing_box: 
+    bearing_box:
         file_name: 'bearing_box.stl'
         scale: 0.001
         color: 
             r: 0.5
             g: 0.5
             b: 0.5
+        z_offset: 0.0
         orientation:
             r: 0.0
             p: 0.0
-            y: 0.0
-    axis: 
+            y: 180.0
+    axis:
         file_name: 'axis.stl'
         scale: 0.001
         color: 
             r: 0.5
             g: 0.5
             b: 0.5
+        z_offset: 0.015
         orientation:
             r: 0.0
-            p: 0.0
-            y: 0.0
-    container_red: 
+            p: 6.0
+            y: 180.0
+    container_red:
         file_name: 'container.stl'
         scale: 0.001
         color: 
             r: 1.0
             g: 0.0
             b: 0.0
+        z_offset: 0.0
         orientation:
             r: 0.0
             p: 0.0
             y: 0.0
-    container_blue: 
+    container_blue:
         file_name: 'container.stl'
         scale: 0.001
         color: 
             r: 0.0
             g: 0.0
             b: 1.0
+        z_offset: 0.0
+        orientation:
+            r: 0.0
+            p: 0.0
+            y: 0.0
+    ws:
+        file_name: 'workstation.stl'
+        scale: 0.001
+        color: 
+            r: 0.9
+            g: 0.9
+            b: 0.9
+        x_offset: -0.1
+        y_offset: -0.4
+        z_offset: 0.0
+        orientation:
+            r: 0.0
+            p: 0.0
+            y: 180.0
+    sh:
+        file_name: 'shelf.stl'
+        scale: 0.001
+        color: 
+            r: 0.9
+            g: 0.9
+            b: 0.9
+        x_offset: -0.6
+        y_offset: -0.4
+        z_offset: 0.0
+        orientation:
+            r: 0.0
+            p: 0.0
+            y: 180.0
+    pp:
+        file_name: 'ppt_platform.stl'
+        scale: 0.001
+        color: 
+            r: 0.9
+            g: 0.9
+            b: 0.9
+        x_offset: -0.35
+        y_offset: -0.05
+        z_offset: 0.0
+        orientation:
+            r: 0.0
+            p: 0.0
+            y: 180.0
+    cb:
+        file_name: 'workstation.stl'
+        scale: 1.0
+        color: 
+            r: 0.9
+            g: 0.9
+            b: 0.9
+        x_offset: 0.6
+        y_offset: 0.0
+        z_offset: 0.1
         orientation:
             r: 0.0
             p: 0.0
             y: 0.0
     default: 
-        file_name: 'm20.stl'
+        file_name: ''
         scale: 0.05
         color: 
             r: 1.0
             g: 0.0
             b: 0.0
+        z_offset: 0.025
         orientation:
             r: 0.0
             p: 0.0

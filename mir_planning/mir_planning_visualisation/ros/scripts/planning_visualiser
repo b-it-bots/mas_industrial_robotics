@@ -27,6 +27,9 @@ class PlanningVisualiser(object):
         self._marker_config = rospy.get_param('~model_to_marker_config', None)
         if self._marker_config is None:
             raise Exception('Model config not provided.')
+        self._navigation_goals = rospy.get_param('~navigation_goals', None)
+        if self._navigation_goals is None:
+            raise Exception('Navigation goal file not provided.')
 
         # Subscribers
 
@@ -39,22 +42,63 @@ class PlanningVisualiser(object):
         self._marker_counter = 1
 
         rospy.loginfo('Initialised')
+
+    def test(self):
         rospy.sleep(1.0)
+
         msg = MarkerArray()
-        marker = self._get_marker_from_obj_name('M30')
-        marker.header.frame_id = self._global_frame
-        marker.pose.position.x = 1.0
-        msg.markers.append(marker)
-        marker2 = self._get_marker_from_obj_name('container_blue')
-        marker2.header.frame_id = self._global_frame
-        marker2.pose.position.x = 1.0
-        marker2.pose.position.y = 0.1
-        msg.markers.append(marker2)
+        markers = self._get_markers_from_nav_goals()
+        msg.markers = markers
+        # marker = self._get_marker_from_obj_name_and_pos('pp', x=1.0)
+        # msg.markers.append(marker)
+        # marker2 = self._get_marker_from_obj_name_and_pos('container_red', x=1.0, y=0.1)
+        # msg.markers.append(marker2)
         self._kb_marker_pub.publish(msg)
         rospy.sleep(1.0)
         rospy.loginfo('Published')
 
-    def _get_marker_from_obj_name(self, obj_name):
+    def _get_markers_from_nav_goals(self):
+        """Create markers for workstations
+        :returns: list of visualization_msgs.Marker
+
+        """
+        markers = []
+        for ws_name, pos in self._navigation_goals.iteritems():
+            ws = ws_name.lower()
+            if 'ws' in ws:
+                marker = self._get_marker_from_obj_name_and_pos('ws')
+                config = self._marker_config['ws']
+            elif 'sh' in ws:
+                marker = self._get_marker_from_obj_name_and_pos('sh')
+                config = self._marker_config['sh']
+            elif 'cb' in ws:
+                marker = self._get_marker_from_obj_name_and_pos('cb')
+                config = self._marker_config['cb']
+                marker.type = Marker.CYLINDER
+                marker.scale.x = marker.scale.y = config['scale']
+                marker.scale.z = 0.1
+            elif 'pp' in ws:
+                marker = self._get_marker_from_obj_name_and_pos('pp')
+                config = self._marker_config['pp']
+            else:
+                continue
+            angle = math.radians(config['orientation']['y']) + pos[2]
+            delta_x = (math.cos(angle) * config['x_offset']) \
+                    + (-math.sin(angle) * config['y_offset'])
+            delta_y = (math.sin(angle) * config['x_offset']) \
+                    + (math.cos(angle) * config['y_offset'])
+            quat = tf.transformations.quaternion_from_euler(0.0, 0.0, angle)
+            marker.pose.orientation = Quaternion(*quat)
+            marker.pose.position.x = pos[0] + delta_x
+            marker.pose.position.y = pos[1] + delta_y
+            markers.append(marker)
+        return markers
+
+    def _get_marker_from_obj_name_and_pos(self, obj_name, x=0.0, y=0.0, z=0.0, frame=None):
+        if frame is None:
+            frame = self._global_frame
+
+        # TODO: make obj name into correct format (e.g. axis-00 -> axis)
         obj_name = obj_name.lower()
         marker = Marker()
         if obj_name not in self._marker_config:
@@ -84,11 +128,17 @@ class PlanningVisualiser(object):
                 math.radians(config['orientation']['p']),
                 math.radians(config['orientation']['y']))
         marker.pose.orientation = Quaternion(*quat)
+        marker.pose.position.x = x
+        marker.pose.position.y = y
+        marker.pose.position.z = z + config['z_offset']
+        marker.header.frame_id = frame
         marker.id = self._marker_counter
         self._marker_counter += 1
         return marker
 
+
 if __name__ == '__main__':
     rospy.init_node('planning_visualiser')
     visualiser = PlanningVisualiser()
+    visualiser.test()
     rospy.spin()
