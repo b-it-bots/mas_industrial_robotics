@@ -8,6 +8,8 @@ import math
 import rospy
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Quaternion
+from rosplan_knowledge_msgs.srv import GetAttributeService
+from rosplan_knowledge_msgs.msg import KnowledgeItem
 
 class KnowledgeBaseVisualiser(object):
 
@@ -21,6 +23,9 @@ class KnowledgeBaseVisualiser(object):
         self._global_frame = rospy.get_param('~global_frame', 'map')
         self._alpha = rospy.get_param('~alpha', 1.0)
         base_link_to_ws_edge = rospy.get_param('~base_link_to_ws_edge', 0.4)
+        self._kb_server_topic = rospy.get_param('~kb_server_topic', None)
+        if self._kb_server_topic is None:
+            raise Exception('Topic for querying knowledge base not provided.')
         self._model_path = rospy.get_param('~model_path', None)
         if self._model_path is None:
             raise Exception('Model path not provided.')
@@ -53,19 +58,56 @@ class KnowledgeBaseVisualiser(object):
 
     def test(self):
         rospy.sleep(1.0)
+        resp = self._get_response_from_kb()
+        if resp is None or (isinstance(resp, list) and len(resp) == 0):
+            rospy.loginfo('No valid response')
+            return
+        else:
+            obj_on_ws = {}
+            for fact in resp:
+                if fact[0] == 'on':
+                    if fact[1]['l'] in obj_on_ws:
+                        obj_on_ws[fact[1]['l']].append(fact[1]['o'])
+                    else:
+                        obj_on_ws[fact[1]['l']] = [fact[1]['o']]
+
         msg = MarkerArray()
         markers = self._get_markers_from_ws_pos()
         msg.markers = markers
-        obj_on_ws = {'ws01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b'],
-                     'ws02':['s40_40_g', 's40_40_b', 'bearing', 'bearing_box', 'distance_tube'],
-                     'sh01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b'],
-                     'cb01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b']}
+        # obj_on_ws = {'ws01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b'],
+        #              'ws02':['s40_40_g', 's40_40_b', 'bearing', 'bearing_box', 'distance_tube'],
+        #              'sh01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b'],
+        #              'cb01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b']}
         for ws_name, obj_list in obj_on_ws.iteritems():
             obj_markers = self._get_markers_from_obj_on_ws(obj_list, ws_name)
             msg.markers.extend(obj_markers)
         self._kb_marker_pub.publish(msg)
-        rospy.sleep(1.0)
         rospy.loginfo('Published')
+        rospy.sleep(3)
+
+    def _get_response_from_kb(self):
+        rospy.loginfo('Waiting for service: ' + self._kb_server_topic)
+        rospy.wait_for_service(self._kb_server_topic)
+        rospy.loginfo('Service ' + self._kb_server_topic + ' is available, proceeding')
+        try:
+            pending_goals = rospy.ServiceProxy(self._kb_server_topic, GetAttributeService)
+            response = pending_goals()
+            if len(response.attributes) == 0:
+                rospy.logwarn('No propositions in KB')
+                return None
+            else:
+                rospy.loginfo('Found propositions: ' + str(len(response.attributes)))
+                facts = [attribute for attribute in response.attributes 
+                         if attribute.knowledge_type == KnowledgeItem.FACT]
+                resp = [(fact.attribute_name, {kv.key:kv.value for kv in fact.values}) for fact in facts]
+                return resp
+                # for fact in resp:
+                #     if fact.attribute_name == 'on':
+                #         dict_obj = {kv.key:kv.value for kv in fact.values}
+                #         print(dict_obj)
+        except rospy.ServiceException, e:
+            rospy.logerr('Service call failed: %s'%e)
+            return None
 
     def _get_markers_from_ws_pos(self):
         """Create markers for workstations
@@ -170,4 +212,3 @@ if __name__ == '__main__':
     rospy.init_node('planning_visualiser')
     visualiser = KnowledgeBaseVisualiser()
     visualiser.test()
-    rospy.spin()
