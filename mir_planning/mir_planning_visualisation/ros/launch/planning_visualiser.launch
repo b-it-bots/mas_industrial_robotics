@@ -33,10 +33,10 @@
 
         </node>
 
-        <!-- <node pkg="mir_planning_visualisation" type="plan_visualiser" -->
-        <!--       name="plan_visualiser" output="screen" > -->
-        <!--     <remap from='~markers' to='/mir_planning/planning_visualisation/plan_markers' /> -->
-        <!-- </node> -->
+        <node pkg="mir_planning_visualisation" type="task_plan_visualiser"
+              name="task_plan_visualiser" output="screen" >
+            <remap from='~markers' to='/mir_planning/planning_visualisation/task_plan_markers' />
+        </node>
 
     </group>
 
