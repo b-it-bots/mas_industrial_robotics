@@ -8,7 +8,7 @@ import rospy
 
 # action lib
 import actionlib
-from mir_task_planning.msg import PlanAction, PlanResult, PlanGoal
+from mir_planning_msgs.msg import PlanAction, PlanResult, PlanGoal
 from rosplan_dispatch_msgs.msg import ActionDispatch, CompletePlan
 from planner_wrapper.planner_wrapper import PlannerWrapper
 from diagnostic_msgs.msg import KeyValue
