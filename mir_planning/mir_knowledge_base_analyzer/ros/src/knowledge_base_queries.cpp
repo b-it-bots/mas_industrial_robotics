@@ -6,7 +6,7 @@
 KnowledgeBaseQueries::KnowledgeBaseQueries(ros::NodeHandle &nh) : nh_(nh)
 
 {
-    current_knowledge_client_ = nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/kcl_rosplan/get_current_knowledge");
+    current_knowledge_client_ = nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/rosplan_knowledge_base/state/propositions");
 
     query_sub_ = nh_.subscribe("query", 1, &KnowledgeBaseQueries::queryCallback, this);
     query_param_sub_ = nh_.subscribe("query_param", 1, &KnowledgeBaseQueries::queryParamCallback, this);

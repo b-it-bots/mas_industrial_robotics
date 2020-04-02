@@ -312,7 +312,7 @@
          sodipodi:role="line"
          x="370"
          y="498.36218"
-         id="tspan3036">/kcl_rosplan/update_knowledge_base</tspan></text>
+         id="tspan3036">/rosplan_knowledge_base/update</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:TeXGyreAdventor;-inkscape-font-specification:TeXGyreAdventor"
@@ -330,7 +330,7 @@
          sodipodi:role="line"
          x="680"
          y="498.36218"
-         id="tspan3042">/kcl_rosplan/get_domain_predicates</tspan></text>
+         id="tspan3042">/rosplan_knowledge_base/domain/predicates</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
        d="m 80,752.36219 220,0"

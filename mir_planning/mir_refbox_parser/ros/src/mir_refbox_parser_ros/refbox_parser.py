@@ -112,15 +112,15 @@ class RefboxParser(object):
             rospy.loginfo('Running BNT from refbox. Not waiting for the database world model')
         else:
             rospy.loginfo('waiting for update world model service')
-            rospy.wait_for_service('/kcl_rosplan/update_knowledge_base')
+            rospy.wait_for_service('/rosplan_knowledge_base/update')
 
-            self.update_kb = rospy.ServiceProxy('/kcl_rosplan/update_knowledge_base',
+            self.update_kb = rospy.ServiceProxy('/rosplan_knowledge_base/update',
                                             KnowledgeUpdateService)
 
             # populate goal combo boxes
-            rospy.wait_for_service('/kcl_rosplan/get_domain_predicates')
+            rospy.wait_for_service('/rosplan_knowledge_base/domain/predicates')
             try:
-                predicates_client = rospy.ServiceProxy('/kcl_rosplan/get_domain_predicates', GetDomainAttributeService)
+                predicates_client = rospy.ServiceProxy('/rosplan_knowledge_base/domain/predicates', GetDomainAttributeService)
                 resp = predicates_client()
                 for pred in resp.items:
                     param_list = []
@@ -138,9 +138,9 @@ class RefboxParser(object):
                 print "Service call failed: %s"%e
 
             # populate type combo box
-            rospy.wait_for_service('/kcl_rosplan/get_domain_types')
+            rospy.wait_for_service('/rosplan_knowledge_base/domain/types')
             try:
-                type_client = rospy.ServiceProxy('/kcl_rosplan/get_domain_types', GetDomainTypeService)
+                type_client = rospy.ServiceProxy('/rosplan_knowledge_base/domain/types', GetDomainTypeService)
                 resp = type_client()
                 for typename in resp.types:
                     self._type_list.append(typename)
