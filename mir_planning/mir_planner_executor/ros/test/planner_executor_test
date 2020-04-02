@@ -30,10 +30,12 @@ PLAN = """\
 (unstage youbot-brsu platform_right motor-00)
 (place youbot-brsu ws06 motor-00)"""
 
-SMALL_PLAN = """\
-(move_base youbot-brsu start ws04)
-(perceive youbot-brsu ws04)"""
+# SMALL_PLAN = """\
+# (move_base youbot-brsu start ws04)
+# (perceive youbot-brsu ws04)"""
 
+SMALL_PLAN = """\
+(move_base youbot-brsu start end)"""
 
 
 # Copied from mir_task_planning/ros/scripts/task_planner_server
@@ -66,8 +68,8 @@ def get_complete_plan_from_string(string):
     return complete_plan
 
 def main():
-    complete_plan = get_complete_plan_from_string(PLAN)
-    # complete_plan = get_complete_plan_from_string(SMALL_PLAN)
+    # complete_plan = get_complete_plan_from_string(PLAN)
+    complete_plan = get_complete_plan_from_string(SMALL_PLAN)
     planner_executor_client = SimpleActionClient('/task_planning/execute_plan',
                                                  ExecutePlanAction)
     rospy.loginfo("Waiting for planner executor...")
