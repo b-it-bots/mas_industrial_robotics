@@ -23,9 +23,7 @@ class KnowledgeBaseVisualiser(object):
         self._global_frame = rospy.get_param('~global_frame', 'map')
         self._alpha = rospy.get_param('~alpha', 1.0)
         base_link_to_ws_edge = rospy.get_param('~base_link_to_ws_edge', 0.4)
-        self._kb_server_topic = rospy.get_param('~kb_server_topic', None)
-        if self._kb_server_topic is None:
-            raise Exception('Topic for querying knowledge base not provided.')
+        self._kb_server_topic = '~kb_server_topic'
         self._model_path = rospy.get_param('~model_path', None)
         if self._model_path is None:
             raise Exception('Model path not provided.')
@@ -62,14 +60,15 @@ class KnowledgeBaseVisualiser(object):
         if resp is None or (isinstance(resp, list) and len(resp) == 0):
             rospy.loginfo('No valid response')
             return
-        else:
-            obj_on_ws = {}
-            for fact in resp:
-                if fact[0] == 'on':
-                    if fact[1]['l'] in obj_on_ws:
-                        obj_on_ws[fact[1]['l']].append(fact[1]['o'])
-                    else:
-                        obj_on_ws[fact[1]['l']] = [fact[1]['o']]
+        obj_on_ws = {}
+        for fact in resp:
+            print(fact)
+            if fact[0] == 'on':
+                if fact[1]['l'] in obj_on_ws:
+                    obj_on_ws[fact[1]['l']].append(fact[1]['o'])
+                else:
+                    obj_on_ws[fact[1]['l']] = [fact[1]['o']]
+        print(obj_on_ws)
 
         msg = MarkerArray()
         markers = self._get_markers_from_ws_pos()
@@ -99,12 +98,9 @@ class KnowledgeBaseVisualiser(object):
                 rospy.loginfo('Found propositions: ' + str(len(response.attributes)))
                 facts = [attribute for attribute in response.attributes 
                          if attribute.knowledge_type == KnowledgeItem.FACT]
-                resp = [(fact.attribute_name, {kv.key:kv.value for kv in fact.values}) for fact in facts]
+                resp = [(fact.attribute_name, {kv.key:kv.value for kv in fact.values})
+                        for fact in facts]
                 return resp
-                # for fact in resp:
-                #     if fact.attribute_name == 'on':
-                #         dict_obj = {kv.key:kv.value for kv in fact.values}
-                #         print(dict_obj)
         except rospy.ServiceException, e:
             rospy.logerr('Service call failed: %s'%e)
             return None
