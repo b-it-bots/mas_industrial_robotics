@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="problem_path" default="/tmp/problem.pddl" />
+    <arg name="points_config_file" default="$(find mir_pddl_problem_generator)/ros/config/points.yaml" />
+    <arg name="knowledge_base" default="rosplan_knowledge_base" />
+    <arg name="prefer_goals_with_same_source_ws" default="true" />
+    <arg name="max_goals" default="3" />
+
+    <group ns="mir_planning">
+
+        <node pkg="mir_pddl_problem_generator" type="pddl_problem_generator_node"
+              name="pddl_problem_generator" output="screen">
+
+            <param name="problem_path" value="$(arg problem_path)" />
+            <param name="max_goals" value="$(arg max_goals)" />
+            <param name="knowledge_base" value="$(arg knowledge_base)" />
+            <param name="prefer_goals_with_same_source_ws"
+                   value="$(arg prefer_goals_with_same_source_ws)" />
+            <rosparam command="load" param="points" file="$(arg points_config_file)" />
+
+        </node>
+
+    </group>
+
+</launch>
