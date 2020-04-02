@@ -68,6 +68,7 @@ class TaskPlannerServer(object):
             goal.problem_file,
             goal.mode==PlanGoal.FAST)
         if not plan:
+            rospy.logerr('Failed to plan.')
             self._action_server.set_aborted()
             return
 

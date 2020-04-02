@@ -62,6 +62,7 @@ class PlannerWrapper(object):
         command = self._get_valid_planner_command(planner, domain_file, problem_file)
         if not command:
             return None
+        print(command)
 
         if self._run_command_in_tmp(command.split(), fast_mode):
             plan_file = self._find_correct_plan_file()
@@ -83,6 +84,11 @@ class PlannerWrapper(object):
 
                 return task_plan
         print("[planner_wrapper] Plan call failed")
+        print("\n\nHere is the output of the command: ", command, "\n\n\n")
+        with open(os.path.join(self._plan_dir, "command_output.txt"), "r") as output_file:
+            output_text = output_file.read()
+            print(output_text)
+        print("\n\n\n")
         return None
 
     def _run_command_in_tmp(self, command, fast_mode):
