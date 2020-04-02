@@ -15,19 +15,18 @@ catkin_package(
 )
 
 include_directories(
-    common/include
     ros/include
     ${catkin_INCLUDE_DIRS}
 )
 
-### LIBRARY
-add_library(pddl_problem_generator common/src/pddl_problem_generator.cpp)
+# LIBRARY
+add_library(pddl_problem_generator ros/src/pddl_problem_generator.cpp)
 
-### EXECUTABLES
+# EXECUTABLES
 add_executable(pddl_problem_generator_node ros/src/pddl_problem_generator_node.cpp)
 target_link_libraries(pddl_problem_generator_node ${catkin_LIBRARIES} pddl_problem_generator)
 
-### TESTS
+# TESTS
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   roslaunch_add_file_check(ros/launch)
@@ -35,7 +34,7 @@ endif()
 
 roslint_cpp()
 
-### INSTALLS
+# INSTALLS
 install(DIRECTORY common/include/${PROJECT_NAME}/
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
     FILES_MATCHING PATTERN "*.h"
