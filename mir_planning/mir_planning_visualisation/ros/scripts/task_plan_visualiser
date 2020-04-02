@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import rospy
+from mir_planning_msgs.msg import PlanActionResult
+from visualization_msgs.msg import Marker, MarkerArray
+
+
+class TaskPlanVisualizer:
+
+    def __init__(self):
+
+        self._debug = rospy.get_param('~debug', False)
+        self._global_frame = rospy.get_param('~global_frame', 'map')
+
+        self._task_plan_marker_pub = rospy.Publisher(
+            '~markers', MarkerArray,
+            queue_size=1
+        )
+        rospy.Subscriber(
+            "/mir_task_planning/task_planner_server/plan_task/result",
+            PlanActionResult,
+            self._task_planner_cb
+        )
+        rospy.loginfo('Initialised Task Plan Visualizer')
+
+    def _task_planner_cb(self, msg):
+
+        self.complete_plan = msg
+        rospy.loginfo("Plan Received")
+        msg = MarkerArray()
+
+        markers = []
+
+        marker_name_offset = 0
+
+        for action in self.complete_plan.result.plan.plan:
+            marker_name_offset += 1.1
+            marker = self._map_plan_to_marker(action, marker_name_offset)
+            markers.append(marker)
+            if (action.action_id+1) % 8 == 0:
+                marker_name_offset = 0
+
+        msg.markers = markers
+        self._task_plan_marker_pub.publish(msg)
+        rospy.sleep(2)
+        rospy.loginfo('Published Task Plan Marker Text')
+
+    def _map_plan_to_marker(self,
+                            action,
+                            marker_name_offset):
+
+        marker = Marker()
+        marker.header.frame_id = self._global_frame
+        marker.id = action.action_id
+        marker.action = marker.ADD
+        marker.type = Marker.TEXT_VIEW_FACING
+        marker.text = "(" + str(action.action_id) + ")" + action.name.upper()
+        marker.header.stamp = rospy.Time.now()
+        marker.pose.position.x = -4.0 + marker_name_offset
+        marker.pose.position.y = 4.0
+        marker.pose.position.z = 2.0 - int(action.action_id/8) * 0.5
+        marker.pose.orientation.w = 1.0
+        marker.scale.z = 0.15
+        marker.color.r = 0.8
+        marker.color.g = 0.8
+        marker.color.b = 0.4
+        marker.color.a = 1.0
+
+        return marker
+
+
+if __name__ == '__main__':
+    rospy.init_node('task_plan_visualiser')
+    visualiser = TaskPlanVisualizer()
+    rospy.spin()
