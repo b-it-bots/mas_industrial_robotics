@@ -3,10 +3,10 @@
 (:objects
 
     ; robots
-    youbot-brsu - robot
+    YOUBOT-BRSU - robot
 
     ; robot available platforms, to store objects inside the robot
-    platform_middle platform_left platform_right - robot_platform
+    PLATFORM_MIDDLE PLATFORM_LEFT PLATFORM_RIGHT - robot_platform
 
     ; locations
     START END - location
@@ -17,10 +17,10 @@
 (:init
 
     ; robot initial conditions : location
-    (at youbot-brsu start) ; youbot is at start position
+    (at YOUBOT-BRSU START) ; youbot is at start position
 
     ; status of the gripper at the beginning
-    (gripper_is_free youbot-brsu)
+    (gripper_is_free YOUBOT-BRSU)
     ;(on o1 s1)
     ;(on o2 s2)
     ;(on o3 s3)
@@ -29,10 +29,10 @@
 )
 (:goal
     (and
-        ;(at youbot-brsu END)
-        ;(holding youbot-brsu o1)
-        ;(stored o1 platform_middle)
-        ;(at youbot-brsu S5)
+        ;(at YOUBOT-BRSU END)
+        ;(holding YOUBOT-BRSU o1)
+        ;(stored o1 PLATFORM_MIDDLE)
+        ;(at YOUBOT-BRSU S5)
         ;(on o1 S5)
 	    ;(on o2 S3)
         ;(on o3 S6)
