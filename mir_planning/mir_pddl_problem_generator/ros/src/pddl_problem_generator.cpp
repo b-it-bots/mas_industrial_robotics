@@ -213,8 +213,16 @@ bool PDDLProblemGenerator::makeInitialState(std::ofstream &pFile)
                     if(attr.is_negative) pFile << "not (";
 
                     pFile << attr.attribute_name;
-                    for(size_t j=0; j<attr.values.size(); j++) {
-                        pFile << " " << attr.values[j].value;
+                    for (auto j : ait->typed_parameters)
+                    {
+                        for (auto k : attr.values)
+                        {
+                            if (j.key.compare(k.key) == 0)
+                            {
+                                pFile << " " << k.value;
+                            }
+                        }
+                        
                     }
                     pFile << ")";
                     
@@ -276,13 +284,13 @@ bool PDDLProblemGenerator::makeGoals(std::ofstream &pFile)
         std::sort(goals.begin(), goals.end(), goal_sort_());
 
         /* for debugging */
-        /* for (auto goal : goals) */
-        /* { */
-        /*     std::cout << std::get<1>(goal) << " "<< std::get<0>(goal)["obj"] */ 
-        /*               << " " << std::get<0>(goal)["src"] << " -> " */ 
-        /*               << std::get<0>(goal)["dest"] << std::endl; */
-        /* } */
-        /* std::cout << std::endl; */
+        for (auto goal : goals)
+        {
+            std::cout << std::get<1>(goal) << " "<< std::get<0>(goal)["obj"] 
+                      << " " << std::get<0>(goal)["src"] << " -> " 
+                      << std::get<0>(goal)["dest"] << std::endl;
+        }
+        std::cout << std::endl;
         has_goals = goals.size() > 0;
 
         unsigned int goal_counter = 0;
@@ -372,7 +380,7 @@ std::string PDDLProblemGenerator::getSourceLocation(rosplan_knowledge_msgs::Know
             }
         }
     }
-    return "";
+    return "XXXX"; // dummy location
 }
 
 float PDDLProblemGenerator::getPoints(std::string key)
