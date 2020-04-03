@@ -5,9 +5,6 @@
     <arg name="domain" default="general_domain" />
     <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
     <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
-    <arg name="database_path" default="$(find mir_knowledge)/common/mongoDB" />
-    <arg name="mongodb_host" default="localhost" />
-    <arg name="mongodb_port" default="27019" />    <!-- Do not use ubuntu default mongodb port : 27017-->
 
     <!-- upload domain args - pddl problem that will be loaded as instrinsic knowledge -->
     <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/minimum_required_facts.pddl" />
@@ -15,23 +12,12 @@
     <!-- pddl problem gen - path for the pddl problem generator to save the created file, and for the planner to make plan -->
     <arg name="problem_path" default="$(arg base_path)/problems/p1.pddl" />
 
-    <!-- scene database (MongoDB) -->
-    <node pkg="mongodb_store" type="mongodb_server.py" name="mongodb_server" output="screen" >
-        <param name="master" value="false"/>
-        <param name="host" value="$(arg mongodb_host)" />
-        <param name="port" value="$(arg mongodb_port)" />
-        <param name="database_path" value="$(arg database_path)" />
-    </node>
-
-    <!-- scene database messages (MongoDB) -->
-    <param name="mongodb_host" type="str" value="$(arg mongodb_host)" />
-    <param name="mongodb_port" type="int" value="$(arg mongodb_port)" />
-    <node pkg="mongodb_store" type="message_store_node.py" name="message_store_node" output="screen" />
-
     <!-- rosplan knowledge base interface-->
-    <param name="rosplan/domain_path" value="$(arg domain_path)" />
     <node pkg="rosplan_knowledge_base" type="knowledgeBase" name="rosplan_knowledge_base"
-          output="screen" required="true" />
+          output="screen" required="true" >
+        <param name="domain_path" value="$(arg domain_path)" />
+        <param name="problem_path" value="$(arg yb_intrinsic_knowledge)" />
+    </node>
 
     <!-- to upload knowledge which will not come from referee box, such as yb intrinsic knowledge, etc -->
     <node pkg="mir_knowledge" type="upload_knowledge" name="upload_knowledge" output="screen">
