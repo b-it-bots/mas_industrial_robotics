@@ -9,9 +9,9 @@ import rospy
 # action lib
 import actionlib
 from mir_planning_msgs.msg import PlanAction, PlanResult, PlanGoal
-from rosplan_dispatch_msgs.msg import ActionDispatch, CompletePlan
+from rosplan_dispatch_msgs.msg import CompletePlan
 from planner_wrapper.planner_wrapper import PlannerWrapper
-from diagnostic_msgs.msg import KeyValue
+from mir_task_planning.utils import Utils
 
 class TaskPlannerServer(object):
 
@@ -75,28 +75,12 @@ class TaskPlannerServer(object):
         complete_plan = CompletePlan()
         for action_id, action_string in enumerate(plan):
             complete_plan.plan.append(
-                TaskPlannerServer.get_action_msg_from_string(action_string, action_id+1))
+                Utils.get_action_msg_from_string(action_string, action_id+1))
 
         filtered_plan = TaskPlannerServer.post_process_plan(complete_plan)
 
         self._plan_result = PlanResult(plan=filtered_plan)
         self._action_server.set_succeeded(self._plan_result)
-
-    @staticmethod
-    def get_action_msg_from_string(string, action_id):
-        """Create and return Action obj from string of type '(word word word ...)'
-
-        :string: string
-        :action_id: int
-        :returns: rosplan_dispatch_msgs/ActionDispatch
-
-        """
-        # remove parenthesis, convert str to upper case and split at spaces
-        action_param_list = string[1:-1].upper().split()
-        name = action_param_list[0]
-        params = [KeyValue('param_'+str(i+1), param) for i, param in enumerate(action_param_list[2:])]
-        params.insert(0, KeyValue('robot_name', action_param_list[1]))
-        return ActionDispatch(action_id=action_id, name=name, parameters=params)
 
     @staticmethod
     def post_process_plan(complete_plan):
