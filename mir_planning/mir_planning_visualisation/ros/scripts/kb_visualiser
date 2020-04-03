@@ -5,6 +5,7 @@ from __future__ import print_function
 import tf
 import os
 import math
+import yaml
 import rospy
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Quaternion
@@ -22,16 +23,22 @@ class KnowledgeBaseVisualiser(object):
         self._debug = rospy.get_param('~debug', False)
         self._global_frame = rospy.get_param('~global_frame', 'map')
         self._alpha = rospy.get_param('~alpha', 1.0)
-        base_link_to_ws_edge = rospy.get_param('~base_link_to_ws_edge', 0.4)
+        self._base_link_to_ws_edge = rospy.get_param('~base_link_to_ws_edge', 0.4)
         self._kb_server_topic = '~kb_server_topic'
+
         self._model_path = rospy.get_param('~model_path', None)
         if self._model_path is None:
             raise Exception('Model path not provided.')
         if not os.path.exists(self._model_path):
             raise Exception('Invalid model path provided. ' + str(self._model_path) + ' does not exist')
-        self._marker_config = rospy.get_param('~model_to_marker_config', None)
+
+        marker_config_file = rospy.get_param('~model_to_marker_config', None)
+        self._marker_config = None
+        with open(marker_config_file) as file_obj:
+            self._marker_config = yaml.safe_load(file_obj)
         if self._marker_config is None:
             raise Exception('Model config not provided.')
+
         navigation_goals = rospy.get_param('~navigation_goals', None)
         if navigation_goals is None:
             raise Exception('Navigation goal file not provided.')
@@ -44,50 +51,55 @@ class KnowledgeBaseVisualiser(object):
         # Action servers
 
         # class variables
-        self._marker_counter = 1
+        self._marker_counter = 0
         self._ws_pos = dict()
         # offset nav goal based on size of robot to initialise workstation poses
         for ws, pos in navigation_goals.iteritems():
-            delta_x = (math.cos(pos[2]) * base_link_to_ws_edge)
-            delta_y = (math.sin(pos[2]) * base_link_to_ws_edge)
+            delta_x = (math.cos(pos[2]) * self._base_link_to_ws_edge)
+            delta_y = (math.sin(pos[2]) * self._base_link_to_ws_edge)
             self._ws_pos[ws.lower()] = [pos[0] + delta_x, pos[1] + delta_y, pos[2]]
 
+        rospy.sleep(1.0)
+        self._kb_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
         rospy.loginfo('Initialised')
 
-    def test(self):
-        rospy.sleep(1.0)
+    def visualise(self):
+        self._kb_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
+        self._marker_counter = 0
         resp = self._get_response_from_kb()
         if resp is None or (isinstance(resp, list) and len(resp) == 0):
             rospy.loginfo('No valid response')
             return
         obj_on_ws = {}
+        robot_ws = 'start'
+        obj_on_robot = {}
         for fact in resp:
-            print(fact)
+            if self._debug:
+                print(fact)
             if fact[0] == 'on':
                 if fact[1]['l'] in obj_on_ws:
                     obj_on_ws[fact[1]['l']].append(fact[1]['o'])
                 else:
                     obj_on_ws[fact[1]['l']] = [fact[1]['o']]
-        print(obj_on_ws)
+            if fact[0] == 'stored':
+                obj_on_robot[fact[1]['rp']] = fact[1]['o']
+            if fact[0] == 'at':
+                robot_ws = fact[1]['l']
 
         msg = MarkerArray()
         markers = self._get_markers_from_ws_pos()
-        msg.markers = markers
-        # obj_on_ws = {'ws01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b'],
-        #              'ws02':['s40_40_g', 's40_40_b', 'bearing', 'bearing_box', 'distance_tube'],
-        #              'sh01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b'],
-        #              'cb01':['M20', 'M30', 'axis', 'm20_100', 'f20_20_g', 'f20_20_b']}
+        msg.markers.extend(markers)
         for ws_name, obj_list in obj_on_ws.iteritems():
             obj_markers = self._get_markers_from_obj_on_ws(obj_list, ws_name)
             msg.markers.extend(obj_markers)
+        msg.markers.extend(self._get_markers_for_youbot(robot_ws))
+        msg.markers.extend(self._get_markers_from_obj_on_robot(obj_on_robot, robot_ws))
         self._kb_marker_pub.publish(msg)
-        rospy.loginfo('Published')
-        rospy.sleep(3)
 
     def _get_response_from_kb(self):
-        rospy.loginfo('Waiting for service: ' + self._kb_server_topic)
+        if self._debug:
+            rospy.loginfo('Waiting for service: ' + self._kb_server_topic)
         rospy.wait_for_service(self._kb_server_topic)
-        rospy.loginfo('Service ' + self._kb_server_topic + ' is available, proceeding')
         try:
             pending_goals = rospy.ServiceProxy(self._kb_server_topic, GetAttributeService)
             response = pending_goals()
@@ -95,7 +107,8 @@ class KnowledgeBaseVisualiser(object):
                 rospy.logwarn('No propositions in KB')
                 return None
             else:
-                rospy.loginfo('Found propositions: ' + str(len(response.attributes)))
+                if self._debug:
+                    rospy.loginfo('Found propositions: ' + str(len(response.attributes)))
                 facts = [attribute for attribute in response.attributes 
                          if attribute.knowledge_type == KnowledgeItem.FACT]
                 resp = [(fact.attribute_name, {kv.key:kv.value for kv in fact.values})
@@ -107,6 +120,7 @@ class KnowledgeBaseVisualiser(object):
 
     def _get_markers_from_ws_pos(self):
         """Create markers for workstations
+
         :returns: list of visualization_msgs.Marker
 
         """
@@ -129,6 +143,27 @@ class KnowledgeBaseVisualiser(object):
             markers.append(marker)
         return markers
 
+    def _get_markers_for_youbot(self, robot_ws='start'):
+        """Create markers for robot
+
+        :ws_name: str
+        :returns: list of visualization_msgs.Marker
+
+        """
+        x, y, yaw = self._ws_pos.get(robot_ws.lower(), [0.0, 0.0, 0.0])
+        delta_x = (math.cos(yaw) * self._base_link_to_ws_edge)
+        delta_y = (math.sin(yaw) * self._base_link_to_ws_edge)
+        x, y = x-delta_x, y-delta_y
+        keys = ['youbot', 'arm_0', 'arm_1', 'arm_2', 'arm_3', 'arm_4', 'arm_5',\
+                'arm_palm', 'youbot_plate', 'yb_wheel_lf', 'yb_wheel_rf',\
+                'yb_wheel_lb', 'yb_wheel_rb']
+        marker_dict = {key:self._get_marker_from_obj_name_and_pos(key, x=x, y=y, z=0.05, yaw=yaw)
+                       for key in keys}
+        for key, marker in marker_dict.iteritems():
+            if 'wheel' in key:
+                marker.type = Marker.SPHERE
+        return marker_dict.values()
+
     def _get_markers_from_obj_on_ws(self, obj_list, ws_name):
         ws = ws_name.lower()
         pos = self._ws_pos.get(ws, None)
@@ -136,7 +171,7 @@ class KnowledgeBaseVisualiser(object):
             return []
         markers = []
         if 'ws' in ws or 'sh' in ws:
-            obj_pose_offsets = [(x, y) for x in [0.05, 0.2] for y in [0.0, 0.15, 0.3, -0.15, -0.3]]
+            obj_pose_offsets = [(x, y) for x in [0.05, 0.2] for y in [0.0, 0.15, -0.15, 0.3, -0.3]]
         elif 'cb' in ws:
             cb_radius = self._marker_config['cb']['scale']/2.0
             obj_pose_offsets = [(math.cos(math.radians(theta))*cb_radius*0.8 + cb_radius,
@@ -155,12 +190,34 @@ class KnowledgeBaseVisualiser(object):
             markers.append(marker)
         return markers
 
+    def _get_markers_from_obj_on_robot(self, obj_on_robot, robot_ws):
+        x, y, yaw = self._ws_pos.get(robot_ws.lower(), [0.0, 0.0, 0.0])
+        delta_x = (math.cos(yaw) * self._base_link_to_ws_edge)
+        delta_y = (math.sin(yaw) * self._base_link_to_ws_edge)
+        x, y = x-delta_x, y-delta_y
+        markers = []
+        obj_pose_offsets = {platform:(-0.1, y) for platform, y in zip(
+                                ['platform_middle', 'platform_left', 'platform_right'],
+                                [0.0, 0.1, -0.1])}
+
+        for platform, obj in obj_on_robot.iteritems():
+            offset = obj_pose_offsets.get(platform.lower(), None)
+            if offset is None:
+                rospy.logwarn('Object ' + obj + ' on unknown platform '+ platform)
+                continue
+            delta_x = (math.cos(yaw) * offset[0]) + (-math.sin(yaw) * offset[1])
+            delta_y = (math.sin(yaw) * offset[0]) + (math.cos(yaw) * offset[1])
+            marker = self._get_marker_from_obj_name_and_pos(
+                    obj, x=x+delta_x, y=y+delta_y, z=0.11, yaw=yaw)
+            markers.append(marker)
+        return markers
+
     def _get_marker_from_obj_name_and_pos(self, obj_name, x=0.0, y=0.0, z=0.0,
                                           yaw=0.0, frame=None):
         if frame is None:
             frame = self._global_frame
 
-        # TODO: make obj name into correct format (e.g. axis-00 -> axis)
+        obj_name = obj_name.split('-')[0] if '-' in obj_name else obj_name
         obj_name = obj_name.lower()
         marker = Marker()
         if obj_name not in self._marker_config:
@@ -185,6 +242,8 @@ class KnowledgeBaseVisualiser(object):
         marker.color.g = config['color']['g']
         marker.color.b = config['color']['b']
         marker.color.a = self._alpha
+        # marker.color.r = marker.color.g = marker.color.b = marker.color.a = 0.0
+        # marker.mesh_use_embedded_materials = True
         angle = math.radians(config['offset']['yaw']) + yaw
         quat = tf.transformations.quaternion_from_euler(
                 math.radians(config['offset']['roll']),
@@ -199,12 +258,15 @@ class KnowledgeBaseVisualiser(object):
         marker.pose.position.y = y + delta_y
         marker.pose.position.z = z + config['offset']['z']
         marker.header.frame_id = frame
-        marker.id = self._marker_counter
         self._marker_counter += 1
+        marker.id = self._marker_counter
         return marker
 
-
 if __name__ == '__main__':
-    rospy.init_node('planning_visualiser')
-    visualiser = KnowledgeBaseVisualiser()
-    visualiser.test()
+    rospy.init_node('kb_visualiser')
+    VISUALISER = KnowledgeBaseVisualiser()
+    RATE = rospy.Rate(rospy.get_param('~rate', 0.2))
+    while not rospy.is_shutdown():
+        VISUALISER.visualise()
+        RATE.sleep()
+    rospy.loginfo('Exiting...')
