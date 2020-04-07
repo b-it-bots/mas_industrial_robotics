@@ -6,7 +6,7 @@ find_package(catkin REQUIRED)
 catkin_package(
   CATKIN_DEPENDS
     mcr_image_filter
-    mcr_blob_detection
+#    mcr_blob_detection
 #    mcr_blob_tracking
 #    mcr_image_cartesian_mapper
     rostopic
