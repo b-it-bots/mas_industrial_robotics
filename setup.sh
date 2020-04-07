@@ -30,7 +30,7 @@ function install_ros_kinetic_base {
 function install_ros_dependencies {
     sudo rm -rf /etc/ros/rosdep/sources.list.d/*
     sudo rosdep init -q
-    sudo rosdep update -q
+    rosdep update -q
     sudo apt install -y -qq python-rosinstall python-rosinstall-generator python-wstool build-essential python-catkin-tools python-pip
     sudo pip install catkin_pkg empy
     sudo rm -rf /var/lib/apt/lists/*
@@ -89,7 +89,7 @@ function build_mas_industrial_robotics {
 ROOT_DIR=$(pwd)
 
 FULL_INSTALL=false
-if [ $# -eq 2 ] && [ $1 == "full" ]
+if [ $# -le 2 ] && [ $1 == "full" ]
     then
         FULL_INSTALL=true
 fi
