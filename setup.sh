@@ -5,7 +5,7 @@ set -e
 
 function install_basic_packages {
     sudo apt-get update -qq
-    sudo apt-get install -y -qq curl figlet
+    sudo apt-get install -y -qq curl figlet wget
 }
 
 function fancy_print {
@@ -59,14 +59,20 @@ function setup_catkin_ws {
     source $INSTALL_DIR/catkin_ws/devel/setup.bash
 }
 
-# Clone and install mas_industrial_robotics and all related dependencies
+# Clone mas_industrial_robotics and other repos
 function get_mas_industrial_robotics {
     fancy_print "Getting source code"
-    cd $INSTALL_DIR/catkin_ws/src
-    cp -r $ROOT_DIR $INSTALL_DIR/catkin_ws/src
-    cd $INSTALL_DIR/catkin_ws/src/mas_industrial_robotics
-    ./repository.debs
-    sudo rm -rf /var/lib/apt/lists/*
+    wstool init --shallow src
+    wstool merge -t src $ROOT_DIR/repository.rosinstall
+    wstool update -t src
+}
+
+# Install ros and other dependencies
+function install_mas_dependencies {
+    fancy_print "Installing MAS Dependencies"
+    rosdep update -q
+    sudo apt-get update
+    rosdep install --from-paths src --ignore-src --rosdistro=kinetic --skip-keys rosplan_demos -y
 }
 
 function build_mas_industrial_robotics {
@@ -83,7 +89,7 @@ function build_mas_industrial_robotics {
 ROOT_DIR=$(pwd)
 
 FULL_INSTALL=false
-if [ $# -eq 1 ] && [ $1 == "full" ]
+if [ $# -eq 2 ] && [ $1 == "full" ]
     then
         FULL_INSTALL=true
 fi
@@ -101,5 +107,6 @@ install_basic_packages
 install_ros $FULL_INSTALL
 setup_catkin_ws
 get_mas_industrial_robotics
+install_mas_dependencies
 build_mas_industrial_robotics
 fancy_print "Build Complete"
