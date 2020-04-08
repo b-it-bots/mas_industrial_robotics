@@ -183,7 +183,7 @@ axis:
         roll: 0.0
         pitch: 6.0
         yaw: 0.0
-container_red:
+container_box_red:
     file_name: 'container.stl'
     scale: 0.001
     color: 
@@ -197,7 +197,7 @@ container_red:
         roll: 0.0
         pitch: 0.0
         yaw: 180.0
-container_blue:
+container_box_blue:
     file_name: 'container.stl'
     scale: 0.001
     color: 

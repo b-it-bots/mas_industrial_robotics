@@ -73,27 +73,35 @@ class KnowledgeBaseVisualiser(object):
         obj_on_ws = {}
         robot_ws = 'start'
         obj_on_robot = {}
+        obj_in_container = {}
         for fact in resp:
             if self._debug:
                 print(fact)
             if fact[0] == 'on':
-                if fact[1]['l'] in obj_on_ws:
+                if fact[1]['l'] not in obj_on_ws:
+                    obj_on_ws[fact[1]['l']] = []
+                if 'o' in fact[1]:
                     obj_on_ws[fact[1]['l']].append(fact[1]['o'])
-                else:
-                    obj_on_ws[fact[1]['l']] = [fact[1]['o']]
             if fact[0] == 'stored':
                 obj_on_robot[fact[1]['rp']] = fact[1]['o']
             if fact[0] == 'at':
                 robot_ws = fact[1]['l']
+            if fact[0] == 'in':
+                container = fact[1]['hole']
+                if container not in obj_in_container:
+                    obj_in_container[container] = []
+                if 'peg' in fact[1]:
+                    obj_in_container[container].append(fact[1]['peg'])
 
         msg = MarkerArray()
         markers = self._get_markers_from_ws_pos()
         msg.markers.extend(markers)
         for ws_name, obj_list in obj_on_ws.iteritems():
-            obj_markers = self._get_markers_from_obj_on_ws(obj_list, ws_name)
+            obj_markers = self._get_markers_from_obj_on_ws(obj_list, ws_name, obj_in_container)
             msg.markers.extend(obj_markers)
         msg.markers.extend(self._get_markers_for_youbot(robot_ws))
         msg.markers.extend(self._get_markers_from_obj_on_robot(obj_on_robot, robot_ws))
+        # msg.markers.extend(self._get_markers_from_obj_in_container(obj_in_container))
         self._kb_marker_pub.publish(msg)
 
     def _get_response_from_kb(self):
@@ -164,7 +172,7 @@ class KnowledgeBaseVisualiser(object):
                 marker.type = Marker.SPHERE
         return marker_dict.values()
 
-    def _get_markers_from_obj_on_ws(self, obj_list, ws_name):
+    def _get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj):
         ws = ws_name.lower()
         pos = self._ws_pos.get(ws, None)
         if pos is None:
@@ -188,6 +196,19 @@ class KnowledgeBaseVisualiser(object):
             marker = self._get_marker_from_obj_name_and_pos(
                     obj, x=pos[0]+delta_x, y=pos[1]+delta_y, z=0.1, yaw=pos[2])
             markers.append(marker)
+            # for containers
+            if obj in container_to_obj:
+                objs_in_container = container_to_obj[obj]
+                delta_x_container = (math.cos(pos[2]) * (offset[0]+0.05)) + (-math.sin(pos[2]) * offset[1])
+                delta_y_container = (math.sin(pos[2]) * (offset[0]+0.05)) + (math.cos(pos[2]) * offset[1])
+                z = 0.1
+                for obj_in_container in objs_in_container:
+                    z += 0.05
+                    marker = self._get_marker_from_obj_name_and_pos(obj_in_container,
+                                                                    x=pos[0]+delta_x_container,
+                                                                    y=pos[1]+delta_y_container,
+                                                                    z=z, yaw=pos[2])
+                    markers.append(marker)
         return markers
 
     def _get_markers_from_obj_on_robot(self, obj_on_robot, robot_ws):
