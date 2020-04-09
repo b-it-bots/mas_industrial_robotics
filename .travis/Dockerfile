@@ -1,7 +1,8 @@
 FROM ros:kinetic
 
 RUN apt update -qq && \
-    apt install -y -qq sudo software-properties-common
+    apt install -y -qq sudo software-properties-common && \
+    apt install -y -qq gcc-multilib g++-multilib
 
 WORKDIR /mas_industrial_robotics
 COPY . /mas_industrial_robotics
