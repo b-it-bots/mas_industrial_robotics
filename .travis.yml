@@ -32,13 +32,12 @@ jobs:
     - stage: build
       name: "Complete Build"
       script:
-        - ./setup.sh
+        - docker-compose build travis
     - stage: deploy
       name: "Docker Hub Deployment"
       skip_cleanup: true
       script:
         - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-        - docker-compose build travis
         - docker images
         - docker push $CONTAINER_RELEASE_IMAGE
     - stage: docs
