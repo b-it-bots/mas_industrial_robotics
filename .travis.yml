@@ -32,7 +32,7 @@ jobs:
     - stage: build
       name: "Complete Build"
       script:
-        - ./setup.sh full
+        - ./setup.sh
     - stage: deploy
       name: "Docker Hub Deployment"
       skip_cleanup: true

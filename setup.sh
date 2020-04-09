@@ -89,7 +89,7 @@ function build_mas_industrial_robotics {
 ROOT_DIR=$(pwd)
 
 FULL_INSTALL=false
-if [ $# -le 2 ] && [ $1 == "full" ]
+if [[ $1 = "full" ]]
     then
         FULL_INSTALL=true
 fi
