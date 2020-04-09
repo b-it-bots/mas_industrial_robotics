@@ -8,4 +8,4 @@ planner_commands:
     lama: 
         command: 'EXECUTABLE --search-time-limit TIMELIMIT --alias seq-sat-lama-2011 --plan-file FILENAME DOMAIN PROBLEM'
         rospkg_name: 'lama_planner'
-        executable_path: 'build/LAMA/fast-downward.py'
+        executable_path: 'fast-downward/fast-downward.py'
