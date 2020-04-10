@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import rospy
+from mir_planning_msgs.msg import (GenericExecuteActionGoal,
+                                   GenericExecuteActionResult)
+from mir_planning_visualisation.utils import Utils
+from visualization_msgs.msg import Marker, MarkerArray
+
+
+class PlanVisualiser(object):
+
+    def __init__(self):
+
+        self.utils = Utils()
+
+        self._task_plan_marker_pub = rospy.Publisher(
+            '~markers', MarkerArray,
+            queue_size=1
+        )
+        rospy.Subscriber(
+            "/wbc_pick_object_server/goal",
+            GenericExecuteActionGoal,
+            self._wbc_pick_object_goal_cb
+        )
+
+        rospy.Subscriber(
+            "/wbc_pick_object_server/result",
+            GenericExecuteActionResult,
+            self._wbc_pick_object_result_cb
+        )
+
+        rospy.loginfo('Initialised Plan Visualizer')
+
+    def _wbc_pick_object_goal_cb(self, msg):
+        rospy.loginfo("Pick message Received")
+
+        if msg.goal.parameters:
+            marker_msg = MarkerArray()
+            obj_list = [msg.goal.parameters[2].value]
+            ws_name = msg.goal.parameters[1].value
+            markers = self.utils.get_markers_from_obj_on_ws(
+                obj_list,
+                ws_name
+            )
+            markers[0].color.r = 0.3
+            markers[0].color.g = 1.0
+            markers[0].color.b = 0.3
+            marker_msg.markers = markers
+            self._task_plan_marker_pub.publish(marker_msg)
+            rospy.sleep(1.0)
+            rospy.loginfo('Published Pick Task Object Marker')
+
+    def _wbc_pick_object_result_cb(self, msg):
+
+        if msg:
+            self._task_plan_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
+
+
+if __name__ == '__main__':
+    rospy.init_node('plan_visualiser')
+    visualiser = PlanVisualiser()
+    rospy.spin()
