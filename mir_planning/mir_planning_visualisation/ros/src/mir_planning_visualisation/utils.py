@@ -127,7 +127,7 @@ class Utils(object):
         return markers
 
         
-    def get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj):
+    def get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj=None):
         """Create markers for objects on a given workstation
 
         :obj_list: list
@@ -161,7 +161,7 @@ class Utils(object):
                     obj, x=pos[0]+delta_x, y=pos[1]+delta_y, z=0.1, yaw=pos[2])
             markers.append(marker)
             # for containers
-            if obj in container_to_obj:
+            if container_to_obj and obj in container_to_obj:
                 objs_in_container = container_to_obj[obj]
                 delta_x_container = (math.cos(pos[2]) * (offset[0]+0.05)) \
                                     + (-math.sin(pos[2]) * offset[1])
