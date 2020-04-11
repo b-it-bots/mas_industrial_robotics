@@ -71,12 +71,18 @@ class KnowledgeBaseVisualiser(object):
 
         msg = MarkerArray()
         markers = self.utils.get_markers_from_ws_pos()
+        obj_on_robot_markers = []
         msg.markers.extend(markers)
         for ws_name, obj_list in obj_on_ws.iteritems():
             obj_markers = self.utils.get_markers_from_obj_on_ws(obj_list, ws_name, obj_in_container)
             msg.markers.extend(obj_markers)
+        for platform, obj in obj_on_robot.iteritems():
+            obj_marker = self.utils.get_markers_from_obj_on_robot(obj, platform, robot_ws)
+            if obj_marker:
+                obj_on_robot_markers.append(obj_marker)
+
         msg.markers.extend(self.utils.get_markers_for_youbot(robot_ws))
-        msg.markers.extend(self.utils.get_markers_from_obj_on_robot(obj_on_robot, robot_ws))
+        msg.markers.extend(obj_on_robot_markers)
         self._kb_marker_pub.publish(msg)
 
     def _get_response_from_kb(self):
