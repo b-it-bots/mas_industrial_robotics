@@ -26,10 +26,10 @@ class Utils(object):
             raise Exception('Invalid model path provided. ' + str(self._model_path) + ' does not exist')
 
         marker_config_file = rospy.get_param('~model_to_marker_config', None)
-        self._marker_config = None
+        self.marker_config = None
         with open(marker_config_file) as file_obj:
-            self._marker_config = yaml.safe_load(file_obj)
-        if self._marker_config is None:
+            self.marker_config = yaml.safe_load(file_obj)
+        if self.marker_config is None:
             raise Exception('Model config not provided.')
 
         navigation_goals = rospy.get_param('~navigation_goals', None)
@@ -39,12 +39,12 @@ class Utils(object):
 
         # class variables
         self.marker_counter = 0
-        self._ws_pos = dict()
+        self.ws_pose = dict()
         # offset nav goal based on size of robot to initialise workstation poses
         for ws, pos in navigation_goals.iteritems():
             delta_x = (math.cos(pos[2]) * self._base_link_to_ws_edge)
             delta_y = (math.sin(pos[2]) * self._base_link_to_ws_edge)
-            self._ws_pos[ws.lower()] = [pos[0] + delta_x, pos[1] + delta_y, pos[2]]
+            self.ws_pose[ws.lower()] = [pos[0] + delta_x, pos[1] + delta_y, pos[2]]
 
 
     def get_markers_from_ws_pos(self):
@@ -54,7 +54,7 @@ class Utils(object):
 
         """
         markers = []
-        for ws, pos in self._ws_pos.iteritems():
+        for ws, pos in self.ws_pose.iteritems():
             if 'ws' in ws:
                 marker = self.get_marker_from_obj_name_and_pos('ws', x=pos[0],
                                                                y=pos[1], yaw=pos[2])
@@ -67,7 +67,7 @@ class Utils(object):
             elif 'cb' in ws:
                 marker = self.get_marker_from_obj_name_and_pos('cb', x=pos[0],
                                                                y=pos[1], yaw=pos[2])
-                config = self._marker_config['cb']
+                config = self.marker_config['cb']
                 marker.type = Marker.CYLINDER
                 marker.scale.x = marker.scale.y = config['scale']
                 marker.scale.z = 0.02
@@ -83,7 +83,7 @@ class Utils(object):
         :returns: list of visualization_msgs.Marker
 
         """
-        x, y, yaw = self._ws_pos.get(robot_ws.lower(), [0.0, 0.0, 0.0])
+        x, y, yaw = self.ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
         delta_x = (math.cos(yaw) * self._base_link_to_ws_edge)
         delta_y = (math.sin(yaw) * self._base_link_to_ws_edge)
         x, y = x-delta_x, y-delta_y
@@ -97,34 +97,33 @@ class Utils(object):
                 marker.type = Marker.SPHERE
         return marker_dict.values()
 
-    def get_markers_from_obj_on_robot(self, obj_on_robot, robot_ws):
+    def get_markers_from_obj_on_robot(self, obj, platform, robot_ws):
         """Create markers for objects stored on robot's platform
 
-        :obj_on_robot: dict
+        :obj: str
+        :platform: str
         :robot_ws: str
         :returns: list of visualization_msgs.Marker
 
         """
-        x, y, yaw = self._ws_pos.get(robot_ws.lower(), [0.0, 0.0, 0.0])
+        x, y, yaw = self.ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
         delta_x = (math.cos(yaw) * self._base_link_to_ws_edge)
         delta_y = (math.sin(yaw) * self._base_link_to_ws_edge)
         x, y = x-delta_x, y-delta_y
-        markers = []
         obj_pose_offsets = {platform:(-0.1, y) for platform, y in zip(
                                 ['platform_middle', 'platform_left', 'platform_right'],
                                 [0.0, 0.1, -0.1])}
 
-        for platform, obj in obj_on_robot.iteritems():
-            offset = obj_pose_offsets.get(platform.lower(), None)
-            if offset is None:
-                rospy.logwarn('Object ' + obj + ' on unknown platform '+ platform)
-                continue
+
+        offset = obj_pose_offsets.get(platform.lower(), None)
+        if offset:
             delta_x = (math.cos(yaw) * offset[0]) + (-math.sin(yaw) * offset[1])
             delta_y = (math.sin(yaw) * offset[0]) + (math.cos(yaw) * offset[1])
             marker = self.get_marker_from_obj_name_and_pos(
                     obj, x=x+delta_x, y=y+delta_y, z=0.11, yaw=yaw)
-            markers.append(marker)
-        return markers
+            return marker
+        else:
+            rospy.logwarn('Object ' + obj + ' on unknown platform '+ platform)
 
         
     def get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj=None):
@@ -137,7 +136,7 @@ class Utils(object):
 
         """
         ws = ws_name.lower()
-        pos = self._ws_pos.get(ws, None)
+        pos = self.ws_pose.get(ws, None)
         if pos is None:
             return []
         markers = []
@@ -145,7 +144,7 @@ class Utils(object):
             obj_pose_offsets = [(x, y) for x in [0.05, 0.2]
                                        for y in [0.0, 0.15, -0.15, 0.3, -0.3]]
         elif 'cb' in ws:
-            cb_radius = self._marker_config['cb']['scale']/2.0
+            cb_radius = self.marker_config['cb']['scale']/2.0
             obj_pose_offsets = [(math.cos(math.radians(theta))*cb_radius*0.8 + cb_radius,
                                  math.sin(math.radians(theta))*cb_radius*0.8)
                                 for theta in range(0, 360, 36)]
@@ -203,12 +202,12 @@ class Utils(object):
         obj_name = obj_name.split('-')[0] if '-' in obj_name else obj_name
         obj_name = obj_name.lower()
         marker = Marker()
-        if obj_name not in self._marker_config:
+        if obj_name not in self.marker_config:
             rospy.logwarn('Could not find ' + str(obj_name) + '. Using default marker')
             marker.type = Marker.CUBE
-            config = self._marker_config['default']
+            config = self.marker_config['default']
         else:
-            config = self._marker_config[obj_name]
+            config = self.marker_config[obj_name]
             file_path = os.path.join(self._model_path, config['file_name'])
             if os.path.exists(file_path):
                 resource_file = 'file://' + file_path
@@ -217,7 +216,7 @@ class Utils(object):
             else:
                 rospy.logwarn('Could not find file ' + str(file_path) + '. Using default marker')
                 marker.type = Marker.CUBE
-                config = self._marker_config['default']
+                config = self.marker_config['default']
 
         marker.header.stamp = rospy.Time.now()
 
