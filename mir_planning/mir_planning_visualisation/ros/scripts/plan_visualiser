@@ -10,8 +10,14 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 
 class PlanVisualiser(object):
+    """ Class to visualize tasks in plan
+    such as pick, place and move base
+    """
 
     def __init__(self):
+        """ Class constructor to create
+        necessary publisher and subscriber
+        """
 
         self.utils = Utils()
 
@@ -69,20 +75,48 @@ class PlanVisualiser(object):
 
         rospy.loginfo('Initialised Plan Visualizer')
 
-    def _publish_colored_marker(self, markers, color, alpha=1):
+    def _publish_colored_marker(self, markers, color, text, alpha=1):
+        """ Class method is publish a colored marker of an object
 
-            marker_msg = MarkerArray()
-            markers[0].mesh_use_embedded_materials = True
-            markers[0].color.r = color[0]
-            markers[0].color.g = color[1]
-            markers[0].color.b = color[2]
-            markers[0].color.a = alpha
-            marker_msg.markers = markers
-            self._task_plan_marker_pub.publish(marker_msg)
-            rospy.sleep(0.5)
-            rospy.loginfo('Published Pick Task Object Marker')
+        Parameters
+        ----------
+        markers : list
+            list of markers
+        color : tuple
+            r, g, b color values in range [0-1]
+        text : str
+            text info to be published in marker
+        alpha : int, optional
+            transparency value, by default 1
+        """
+
+        marker_msg = MarkerArray()
+        markers[0].mesh_use_embedded_materials = True
+        markers[0].color.r = color[0]
+        markers[0].color.g = color[1]
+        markers[0].color.b = color[2]
+        markers[0].color.a = alpha
+        markers[0].text = text
+        marker_msg.markers = markers
+        self._task_plan_marker_pub.publish(marker_msg)
+        rospy.sleep(0.5)
+        rospy.loginfo('Published Pick Task Object Marker')
 
     def _get_location_marker(self, dest_name):
+        """ Class method to get location of workspace for
+        move_base and place tasks
+
+        Parameters
+        ----------
+        dest_name : str
+            destination workspace name
+
+        Returns
+        -------
+        Marker
+            rviz marker
+        """
+
         dest_loc = self.utils.ws_pose[dest_name]
         dest_type = "".join([i for i in dest_name if i.isalpha()])
         marker = self.utils.get_marker_from_obj_name_and_pos(
@@ -99,14 +133,37 @@ class PlanVisualiser(object):
         return marker
 
     def _move_base_goal_cb(self, msg):
+        """ Subscriber callback which visualizes move base action
+        when it is going to be executed. The destination is highlighted
+        in red
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionGoal
+        """
+
         rospy.loginfo("Move base message Received")
 
         if msg.goal.parameters:
             dest_name = msg.goal.parameters[2].value.lower()
             marker = self._get_location_marker(dest_name)
-            self._publish_colored_marker([marker], (0.8, 0, 0), 0.5)
+            self._publish_colored_marker(
+                [marker],
+                (0.8, 0, 0),
+                "move base action",
+                0.5
+            )
 
     def _wbc_pick_object_goal_cb(self, msg):
+        """ Subscriber callback which visualizes pick object action
+        when it is going to be executed. The object to be picked is
+        highlighted in bright green
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionGoal
+        """
+
         rospy.loginfo("Pick object message Received")
 
         if msg.goal.parameters:
@@ -116,9 +173,22 @@ class PlanVisualiser(object):
                 obj_list,
                 ws_name
             )
-            self._publish_colored_marker(marker, (0.3, 0.8, 0.3))
+            self._publish_colored_marker(
+                marker,
+                (0.3, 0.8, 0.3),
+                "wbc pick action"
+            )
 
     def _pick_from_shelf_goal_cb(self, msg):
+        """ Subscriber callback which visualizes pick object from
+        shelf action when it is going to be executed. The object to
+        be picked is highlighted in bright green
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionGoal
+        """
+
         rospy.loginfo("Pick from shelf message Received")
 
         if msg.goal.parameters:
@@ -128,17 +198,42 @@ class PlanVisualiser(object):
                 obj_list,
                 ws_name
             )
-            self._publish_colored_marker(marker, (0.3, 0.8, 0.3))
+            self._publish_colored_marker(
+                marker,
+                (0.3, 0.8, 0.3),
+                "pick from shelf action"
+            )
 
     def _place_object_goal_cb(self, msg):
+        """ Subscriber callback which visualizes place object action
+        when it is going to be executed. The destination is highlighted
+        in green
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionGoal
+        """
+
         rospy.loginfo("Place message Received")
 
         if msg.goal.parameters:
             dest_name = msg.goal.parameters[1].value.lower()
             marker = self._get_location_marker(dest_name)
-            self._publish_colored_marker([marker], (0, 0.8, 0), 0.5)
+            self._publish_colored_marker(
+                [marker],
+                (0, 0.8, 0),
+                "place object marker",
+                0.5
+            )
 
     def _wbc_pick_object_result_cb(self, msg):
+        """ Subscriber callback which deletes the marker when
+        pick object action is completed
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionResult
+        """
 
         if msg:
             self._task_plan_marker_pub.publish(
@@ -146,6 +241,13 @@ class PlanVisualiser(object):
                 )
 
     def _pick_from_shelf_result_cb(self, msg):
+        """ Subscriber callback which deletes the marker when
+        pick object from shelf action is completed
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionResult
+        """
 
         if msg:
             self._task_plan_marker_pub.publish(
@@ -153,6 +255,13 @@ class PlanVisualiser(object):
                 )
 
     def _place_object_result_cb(self, msg):
+        """ Subscriber callback which deletes the marker when
+        place object action is completed
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionResult
+        """
 
         if msg:
             self._task_plan_marker_pub.publish(
@@ -160,6 +269,13 @@ class PlanVisualiser(object):
                 )
 
     def _move_base_result_cb(self, msg):
+        """ Subscriber callback which deletes the marker when
+        move base action is completed
+
+        Parameters
+        ----------
+        msg : GenericExecuteActionResult
+        """
 
         if msg:
             self._task_plan_marker_pub.publish(
