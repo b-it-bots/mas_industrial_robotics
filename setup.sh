@@ -71,7 +71,7 @@ function install_mas_dependencies {
     fancy_print "Installing MAS Dependencies"
     rosdep update -q
     sudo apt-get update
-    rosdep install --from-paths src --ignore-src --rosdistro=kinetic --skip-keys rosplan_demos -y
+    rosdep install --from-paths src --ignore-src --rosdistro=melodic --skip-keys rosplan_demos -y
 }
 
 function build_mas_industrial_robotics {
