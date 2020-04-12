@@ -36,7 +36,6 @@ class Utils(object):
         if navigation_goals is None:
             raise Exception('Navigation goal file not provided.')
 
-
         # class variables
         self.marker_counter = 0
         self.ws_pose = dict()
@@ -45,7 +44,6 @@ class Utils(object):
             delta_x = (math.cos(pos[2]) * self._base_link_to_ws_edge)
             delta_y = (math.sin(pos[2]) * self._base_link_to_ws_edge)
             self.ws_pose[ws.lower()] = [pos[0] + delta_x, pos[1] + delta_y, pos[2]]
-
 
     def get_markers_from_ws_pos(self):
         """Create markers for workstations
@@ -114,7 +112,6 @@ class Utils(object):
                                 ['platform_middle', 'platform_left', 'platform_right'],
                                 [0.0, 0.1, -0.1])}
 
-
         offset = obj_pose_offsets.get(platform.lower(), None)
         if offset:
             delta_x = (math.cos(yaw) * offset[0]) + (-math.sin(yaw) * offset[1])
@@ -124,7 +121,6 @@ class Utils(object):
             return marker
         else:
             rospy.logwarn('Object ' + obj + ' on unknown platform '+ platform)
-
         
     def get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj=None):
         """Create markers for objects on a given workstation
