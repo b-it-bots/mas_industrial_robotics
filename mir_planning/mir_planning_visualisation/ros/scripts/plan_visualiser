@@ -11,7 +11,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 class PlanVisualiser(object):
     """ Class to visualize tasks in plan
-    such as pick, place and move base
+    such as pick, unstage and move base
     """
 
     def __init__(self):
@@ -20,6 +20,7 @@ class PlanVisualiser(object):
         """
 
         self.utils = Utils()
+        self.curr_dest = None
 
         self._task_plan_marker_pub = rospy.Publisher(
             '~markers', MarkerArray,
@@ -50,15 +51,15 @@ class PlanVisualiser(object):
         )
 
         rospy.Subscriber(
-            "/place_object_server/goal",
+            "/unstage_object_server/goal",
             GenericExecuteActionGoal,
-            self._place_object_goal_cb
+            self._unstage_object_goal_cb
         )
 
         rospy.Subscriber(
-            "/place_object_server/result",
+            "/unstage_object_server/result",
             GenericExecuteActionResult,
-            self._place_object_result_cb
+            self._unstage_object_result_cb
         )
 
         rospy.Subscriber(
@@ -104,7 +105,7 @@ class PlanVisualiser(object):
 
     def _get_location_marker(self, dest_name):
         """ Class method to get location of workspace for
-        move_base and place tasks
+        move_base and unstage tasks
 
         Parameters
         ----------
@@ -146,6 +147,7 @@ class PlanVisualiser(object):
 
         if msg.goal.parameters:
             dest_name = msg.goal.parameters[2].value.lower()
+            self.curr_dest = dest_name
             marker = self._get_location_marker(dest_name)
             self._publish_colored_marker(
                 [marker],
@@ -204,9 +206,9 @@ class PlanVisualiser(object):
                 "pick from shelf action"
             )
 
-    def _place_object_goal_cb(self, msg):
-        """ Subscriber callback which visualizes place object action
-        when it is going to be executed. The destination is highlighted
+    def _unstage_object_goal_cb(self, msg):
+        """ Subscriber callback which visualizes the object which is going
+        to be unstage and placed on the workspace. The object is highlighted
         in green
 
         Parameters
@@ -214,16 +216,22 @@ class PlanVisualiser(object):
         msg : GenericExecuteActionGoal
         """
 
-        rospy.loginfo("Place message Received")
+        rospy.loginfo("unstage message Received")
 
         if msg.goal.parameters:
-            dest_name = msg.goal.parameters[1].value.lower()
-            marker = self._get_location_marker(dest_name)
+            obj = msg.goal.parameters[2].value
+            platform = msg.goal.parameters[1].value
+            robot_ws = self.curr_dest
+            marker = self.utils.get_markers_from_obj_on_robot(
+                obj,
+                platform,
+                robot_ws
+            )
+
             self._publish_colored_marker(
                 [marker],
-                (0, 0.8, 0),
-                "place object marker",
-                0.5
+                (0.3, 0.8, 0.3),
+                "unstage action"
             )
 
     def _wbc_pick_object_result_cb(self, msg):
@@ -254,9 +262,9 @@ class PlanVisualiser(object):
                 MarkerArray(markers=[Marker(action=Marker.DELETEALL)])
                 )
 
-    def _place_object_result_cb(self, msg):
+    def _unstage_object_result_cb(self, msg):
         """ Subscriber callback which deletes the marker when
-        place object action is completed
+        unstage object action is completed
 
         Parameters
         ----------
