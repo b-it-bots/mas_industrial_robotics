@@ -26,63 +26,32 @@ class KnowledgeBaseVisualiser(object):
         self._kb_marker_pub = rospy.Publisher('~markers', MarkerArray, queue_size=1)
 
         # class variables
-        self.utils = Utils()
+        self._utils = Utils()
+        self._prev_data = self._get_visualisable_data_from_facts()
+        self._prev_marker_msg = MarkerArray()
 
         rospy.sleep(1.0)
         self._kb_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
         rospy.loginfo('Initialised')
 
     def visualise(self):
-        self._kb_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
-        self.utils.marker_counter = 0
-
-        resp = self._get_response_from_kb()
-        if resp is None or (isinstance(resp, list) and len(resp) == 0):
+        facts = self._get_response_from_kb()
+        if facts is None or (isinstance(facts, list) and len(facts) == 0):
             rospy.loginfo('No valid response')
             return
 
-        obj_on_ws = {}
-        robot_ws = 'start'
-        obj_on_robot = {}
-        obj_in_container = {}
+        data = self._get_visualisable_data_from_facts(facts)
+        if data == self._prev_data:
+            self._kb_marker_pub.publish(self._prev_marker_msg)
+            return
 
-        for fact in resp:
-            if self._debug:
-                print(fact)
-
-            if fact[0] == 'on':
-                if fact[1]['l'] not in obj_on_ws:
-                    obj_on_ws[fact[1]['l']] = []
-                if 'o' in fact[1]:
-                    obj_on_ws[fact[1]['l']].append(fact[1]['o'])
-
-            if fact[0] == 'stored':
-                obj_on_robot[fact[1]['rp']] = fact[1]['o']
-
-            if fact[0] == 'at':
-                robot_ws = fact[1]['l']
-
-            if fact[0] == 'in':
-                container = fact[1]['hole']
-                if container not in obj_in_container:
-                    obj_in_container[container] = []
-                if 'peg' in fact[1]:
-                    obj_in_container[container].append(fact[1]['peg'])
+        self._kb_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
+        self._utils.marker_counter = 0
 
         msg = MarkerArray()
-        markers = self.utils.get_markers_from_ws_pos()
-        obj_on_robot_markers = []
-        msg.markers.extend(markers)
-        for ws_name, obj_list in obj_on_ws.iteritems():
-            obj_markers = self.utils.get_markers_from_obj_on_ws(obj_list, ws_name, obj_in_container)
-            msg.markers.extend(obj_markers)
-        for platform, obj in obj_on_robot.iteritems():
-            obj_marker = self.utils.get_markers_from_obj_on_robot(obj, platform, robot_ws)
-            if obj_marker:
-                obj_on_robot_markers.append(obj_marker)
-
-        msg.markers.extend(self.utils.get_markers_for_youbot(robot_ws))
-        msg.markers.extend(obj_on_robot_markers)
+        msg.markers = self._get_markers_from_data(data)
+        self._prev_data = data
+        self._prev_marker_msg = msg
         self._kb_marker_pub.publish(msg)
 
     def _get_response_from_kb(self):
@@ -106,6 +75,67 @@ class KnowledgeBaseVisualiser(object):
         except rospy.ServiceException, e:
             rospy.logerr('Service call failed: %s'%e)
             return None
+
+    def _get_markers_from_data(self, data):
+        markers = []
+
+        markers.extend(self._utils.get_markers_from_ws_pos())
+
+        for ws_name, obj_list in data['obj_on_ws'].iteritems():
+            obj_markers = self._utils.get_markers_from_obj_on_ws(obj_list,
+                                                                 ws_name,
+                                                                 data['obj_in_container'])
+            markers.extend(obj_markers)
+
+        obj_on_robot_markers = []
+        for platform, obj in data['obj_on_robot'].iteritems():
+            obj_marker = self._utils.get_markers_from_obj_on_robot(obj,
+                                                                   platform,
+                                                                   data['robot_ws'])
+            if obj_marker:
+                obj_on_robot_markers.append(obj_marker)
+        markers.extend(obj_on_robot_markers)
+
+        markers.extend(self._utils.get_markers_for_youbot(data['robot_ws']))
+        return markers
+
+    def _get_visualisable_data_from_facts(self, facts=[]):
+        obj_on_ws = {}
+        robot_ws = 'start'
+        obj_on_robot = {}
+        obj_in_container = {}
+
+        data = {}
+
+        for fact in facts:
+            if self._debug:
+                print(fact)
+
+            if fact[0] == 'on':
+                if fact[1]['l'] not in obj_on_ws:
+                    obj_on_ws[fact[1]['l']] = []
+                if 'o' in fact[1]:
+                    obj_on_ws[fact[1]['l']].append(fact[1]['o'])
+
+            if fact[0] == 'stored':
+                obj_on_robot[fact[1]['rp']] = fact[1]['o']
+
+            if fact[0] == 'at':
+                robot_ws = fact[1]['l']
+
+            if fact[0] == 'in':
+                container = fact[1]['hole']
+                if container not in obj_in_container:
+                    obj_in_container[container] = []
+                if 'peg' in fact[1]:
+                    obj_in_container[container].append(fact[1]['peg'])
+
+        data['obj_on_ws'] = obj_on_ws
+        data['robot_ws'] = robot_ws
+        data['obj_on_robot'] = obj_on_robot
+        data['obj_in_container'] = obj_in_container
+        return data
+
 
 if __name__ == '__main__':
     rospy.init_node('kb_visualiser')
