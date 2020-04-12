@@ -23,7 +23,6 @@
   <run_depend>mir_twist_mux</run_depend>
   <run_depend>openni_launch</run_depend>
   <run_depend>openni2_launch</run_depend>
-  <run_depend>realsense_camera_dorabot</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>rgbd_launch</run_depend>
   <run_depend>tf</run_depend>

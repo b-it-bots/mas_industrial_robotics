@@ -8,7 +8,7 @@ catkin_package(
     mcr_image_filter
     mcr_blob_detection
     mcr_blob_tracking
-    mcr_image_cartesian_mapper
+#    mcr_image_cartesian_mapper
     rostopic
     mcr_manipulation_measurers
     mcr_twist_limiter
