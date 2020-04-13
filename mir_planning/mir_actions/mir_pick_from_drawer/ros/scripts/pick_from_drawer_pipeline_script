@@ -1,0 +1,8 @@
+#! /bin/bash
+
+rosrun mir_perceive_drawer perceive_drawer_handle_client &&
+    rosrun mir_manipulate_drawer open_drawer_client &&
+    rosrun mir_perceive_drawer perceive_inside_drawer_client &&
+    rosrun mir_pick_from_drawer pick_from_drawer_client ARUCO_CUBE &&
+    rosrun mir_stage_object stage_object_client_test.py PLATFORM_MIDDLE &&
+    rosrun mir_manipulate_drawer close_drawer_client

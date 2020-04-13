@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_moveit_client</name>
+  <version>0.1.0</version>
+  <description>
+    This package that provides launcher of moveit client node for
+    youbot arm and gripper.
+  </description>
+  <license>GPLv3</license>
+
+  <maintainer email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</maintainer>
+  <author email="shehzad.ahmed@smail.inf.h-brs.de">Shehzad Ahmed</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>roslint</build_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>mcr_moveit_client</run_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+</package>

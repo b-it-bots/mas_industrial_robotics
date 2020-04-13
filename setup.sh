@@ -57,7 +57,7 @@ function setup_catkin_ws {
     source $INSTALL_DIR/catkin_ws/devel/setup.bash
 }
 
-# Clone and install mas_industrial_robotics and all related dependencies
+# Clone mas_industrial_robotics and other repos
 function get_mas_industrial_robotics {
     fancy_print "Getting source code"
     wstool init --shallow src
