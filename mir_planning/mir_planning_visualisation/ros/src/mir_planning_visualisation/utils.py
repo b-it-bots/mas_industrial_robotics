@@ -6,7 +6,7 @@ import math
 import yaml
 import rospy
 
-from geometry_msgs.msg import Quaternion
+from geometry_msgs.msg import Quaternion, Point
 from visualization_msgs.msg import Marker
 
 class Utils(object):
@@ -242,3 +242,32 @@ class Utils(object):
         marker.id = self.marker_counter
         return marker
 
+    def get_arc_marker(self, point_a, point_b, num_of_points=10, scale_factor=2.0):
+        """TODO: Docstring for get_arc_points.
+
+        :point_a: tuple of 2 float
+        :point_b: tuple of 2 float
+        :num_of_points: int
+        :scale_factor: float
+        :returns: visualization_msgs.Marker
+
+        """
+        delta_x = (point_b[0] - point_a[0])/num_of_points
+        delta_y = (point_b[1] - point_a[1])/num_of_points
+        delta_z = math.pi/(num_of_points)
+        dist = ((point_b[0]-point_a[0])**2 + (point_b[1]-point_a[1])**2)**0.5
+        scale_z = min(dist / scale_factor, 2.0)
+        points = []
+        for i in range(num_of_points+1):
+            x = point_a[0] + i * delta_x
+            y = point_a[1] + i * delta_y
+            z = math.sin(i * delta_z) * scale_z
+            points.append(Point(x=x, y=y, z=z))
+
+        marker = Marker(type=Marker.LINE_STRIP, id=1)
+        marker.points = points
+        marker.header.stamp = rospy.Time.now()
+        marker.header.frame_id = self._global_frame
+        marker.color.g = marker.color.a = 1.0
+        marker.scale.x = 0.02
+        return marker
