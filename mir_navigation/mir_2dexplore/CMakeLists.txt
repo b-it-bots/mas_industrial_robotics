@@ -9,5 +9,5 @@ catkin_package(
     cob_scan_unifier
     move_base
     explore_lite
-    frontier_exploration
+    exploration_server
 )

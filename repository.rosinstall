@@ -82,3 +82,13 @@
     local-name: dmp
     uri: https://github.com/b-it-bots/dmp.git
     version: master
+
+- git:
+    local-name: frontier_exploration
+    uri: https://github.com/paulbovbel/frontier_exploration.git
+    version: melodic-devel
+
+- git:
+    local-name: explore_lite
+    uri: https://github.com/hrnr/m-explore.git
+    version: melodic-devel
