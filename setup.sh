@@ -63,7 +63,6 @@ function get_mas_industrial_robotics {
     wstool init --shallow src
     wstool merge -t src $ROOT_DIR/repository.rosinstall
     wstool update -t src
-    cp -r $ROOT_DIR $INSTALL_DIR/catkin_ws/src
 }
 
 # Install ros and other dependencies
