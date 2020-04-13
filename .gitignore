@@ -16,3 +16,6 @@
 *~
 html/
 latex/
+
+# VSCode
+.vscode/

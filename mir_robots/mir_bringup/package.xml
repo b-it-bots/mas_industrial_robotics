@@ -12,7 +12,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>hokuyo_node</run_depend>
+  <run_depend>urg_node</run_depend>
   <run_depend>mcr_default_env_config</run_depend>
   <run_depend>mcr_collision_velocity_filter</run_depend>
   <run_depend>mir_arm_cartesian_control</run_depend>

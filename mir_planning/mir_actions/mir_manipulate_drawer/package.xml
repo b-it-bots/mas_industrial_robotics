@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_manipulate_drawer</name>
+  <version>1.0.0</version>
+  <description>
+      Action server for opening and closing drawer. Assumes the handle is perceived.
+      It uses direct_base_controller and mir_moveit_client for base and arm motion.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
