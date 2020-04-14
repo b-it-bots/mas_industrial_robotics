@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_empty_space_detection</name>
+  <version>1.0.0</version>
+  <description>
+    Detect empty space on a workstation using pointcloud library.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>mir_object_segmentation</build_depend>
+  <build_depend>mir_perception_utils</build_depend>
+
+</package>

@@ -5,7 +5,7 @@ find_package(catkin REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS
-    hokuyo_node
+    urg_node
     mcr_collision_velocity_filter
     mcr_default_env_config
     mir_arm_cartesian_control

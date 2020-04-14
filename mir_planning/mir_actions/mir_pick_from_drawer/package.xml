@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_pick_from_drawer</name>
+  <version>1.0.0</version>
+  <description>
+      Assumes that the location is a drawer and it is opened and the object
+      requested for picking is perceived. 
+      The base and arm are controlled using direct_base_controller and
+      mir_moveit_client.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
