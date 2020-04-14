@@ -1,7 +1,10 @@
 FROM ros:melodic
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 RUN apt update -qq && \
-    apt install -y -qq sudo software-properties-common
+    apt install -y -qq sudo software-properties-common && \
+    apt install -y -qq gcc-multilib g++-multilib
 
 WORKDIR /mas_industrial_robotics
 COPY . /mas_industrial_robotics

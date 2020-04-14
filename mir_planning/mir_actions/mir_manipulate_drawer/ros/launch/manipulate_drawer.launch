@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+    <include file="$(find mir_manipulate_drawer)/ros/launch/open_drawer.launch" />
+    <include file="$(find mir_manipulate_drawer)/ros/launch/close_drawer.launch" />
+
+</launch>

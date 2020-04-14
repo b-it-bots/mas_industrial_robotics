@@ -14,9 +14,9 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>mcr_image_filter</run_depend>
-  <run_depend>mcr_blob_detection</run_depend>
-  <run_depend>mcr_blob_tracking</run_depend>
-  <run_depend>mcr_image_cartesian_mapper</run_depend>
+  <!-- <run_depend>mcr_blob_detection</run_depend> -->
+  <!-- <run_depend>mcr_blob_tracking</run_depend> -->
+  <!-- <run_depend>mcr_image_cartesian_mapper</run_depend> -->
   <run_depend>rostopic</run_depend>
   <run_depend>mcr_manipulation_measurers</run_depend>
   <run_depend>mcr_twist_limiter</run_depend>
