@@ -42,7 +42,7 @@
             <param name="alpha" type="double" value="$(arg alpha)" />
             <param name="base_link_to_ws_edge" type="double" value="$(arg base_link_to_ws_edge)" />
             <param name="model_to_marker_config" type="str" value="$(arg model_to_marker_config)" />
-
+            <param name="debug" type="bool" value="$(arg debug)" />
             <remap from='~markers' to='/mir_planning/planning_visualisation/plan_markers' />
             <rosparam command="load" param="navigation_goals" file="$(arg navigation_goals_file)" />
         </node>
