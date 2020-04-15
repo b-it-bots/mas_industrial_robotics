@@ -71,6 +71,7 @@ class Utils(object):
                 marker.scale.z = 0.02
             else:
                 continue
+            marker.text = ws
             markers.append(marker)
         return markers
 
@@ -195,15 +196,15 @@ class Utils(object):
         if frame is None:
             frame = self._global_frame
 
-        obj_name = obj_name.split('-')[0] if '-' in obj_name else obj_name
-        obj_name = obj_name.lower()
+        model_name = obj_name.split('-')[0] if '-' in obj_name else obj_name
+        model_name = model_name.lower()
         marker = Marker()
-        if obj_name not in self.marker_config:
-            rospy.logwarn('Could not find ' + str(obj_name) + '. Using default marker')
+        if model_name not in self.marker_config:
+            rospy.logwarn('Could not find ' + str(model_name) + '. Using default marker')
             marker.type = Marker.CUBE
             config = self.marker_config['default']
         else:
-            config = self.marker_config[obj_name]
+            config = self.marker_config[model_name]
             file_path = os.path.join(self._model_path, config['file_name'])
             if os.path.exists(file_path):
                 resource_file = 'file://' + file_path
@@ -240,6 +241,7 @@ class Utils(object):
         marker.header.frame_id = frame
         self.marker_counter += 1
         marker.id = self.marker_counter
+        marker.text = obj_name
         return marker
 
     def get_arc_marker(self, point_a, point_b, num_of_points=10, scale_factor=2.0):
