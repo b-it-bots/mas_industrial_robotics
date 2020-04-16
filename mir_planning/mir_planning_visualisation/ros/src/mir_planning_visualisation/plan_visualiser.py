@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import print_function
 
 import rospy
@@ -27,13 +25,6 @@ class PlanVisualiser(object):
         self._display_marker_flag = True
         self._plan_changed = False
         self._unstage_marker = []
-
-        self._task_plan_marker_pub = rospy.Publisher(
-            '~markers', MarkerArray,
-            queue_size=1
-        )
-
-        rospy.loginfo('Initialised Plan Visualizer')
 
     def _get_response_from_servers(self):
 
@@ -141,6 +132,26 @@ class PlanVisualiser(object):
                     0.7
                 )
                 self._display_marker_flag = False
+
+    def visualise(self, kb_markers, kb_data=None):
+        """
+        TODO: docstring for visualise method
+
+        :kb_markers: list of visualization_msgs.Marker
+        :kb_data: dict
+        :returns: list of visualization_msgs.Marker
+
+        """
+        if kb_data is None:
+            return None
+
+        self._utils.marker_counter = 10000 # to avoid marker id repetition
+
+        # TODO: modify kb_markers based on kb_data and self._complete_plan
+
+        # TODO: add arc markers for move base
+
+        return kb_markers
 
     def _publish_colored_marker(self, markers, color, alpha=1):
         """ Class method is publish a colored marker of an object
@@ -296,13 +307,3 @@ class PlanVisualiser(object):
             self._move_base_markers.pop(0)
             self._move_base_execute = False
             self._display_marker_flag = True
-
-
-if __name__ == '__main__':
-    rospy.init_node('plan_visualiser')
-    visualiser = PlanVisualiser()
-    RATE = rospy.Rate(rospy.get_param('~rate', 0.2))
-    while not rospy.is_shutdown():
-        visualiser.visualise_plan()
-        RATE.sleep()
-    rospy.loginfo('Exiting...')

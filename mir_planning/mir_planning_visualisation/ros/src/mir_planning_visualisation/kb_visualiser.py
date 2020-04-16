@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import print_function
 
 import rospy
@@ -22,37 +20,33 @@ class KnowledgeBaseVisualiser(object):
         self._debug = rospy.get_param('~debug', False)
         self._kb_server_topic = '~kb_server_topic'
 
-        # Publishers
-        self._kb_marker_pub = rospy.Publisher('~markers', MarkerArray, queue_size=1)
-
         # class variables
         self._utils = Utils()
         self._prev_data = self._get_visualisable_data_from_facts()
-        self._prev_marker_msg = MarkerArray()
-
-        rospy.sleep(1.0)
-        self._kb_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
-        rospy.loginfo('Initialised')
+        self._prev_markers = None
 
     def visualise(self):
+        """
+        - Query KB for all the facts.
+        - Create data for facts with specific attribute.
+        - Create markers from that data.
+        - Return markers and data
+
+        :returns: (list of visualization_msgs.Marker, dict)
+
+        """
         facts = self._get_response_from_kb()
         if facts is None or (isinstance(facts, list) and len(facts) == 0):
             rospy.loginfo('No valid response')
-            return
+            return None, None
 
         data = self._get_visualisable_data_from_facts(facts)
-        if data == self._prev_data:
-            self._kb_marker_pub.publish(self._prev_marker_msg)
-            return
+        if data != self._prev_data:
+            self._utils.marker_counter = 0
+            self._prev_data = data
+            self._prev_markers = self._get_markers_from_data(data)
 
-        self._kb_marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
-        self._utils.marker_counter = 0
-
-        msg = MarkerArray()
-        msg.markers = self._get_markers_from_data(data)
-        self._prev_data = data
-        self._prev_marker_msg = msg
-        self._kb_marker_pub.publish(msg)
+        return self._prev_markers, self._prev_data
 
     def _get_response_from_kb(self):
         if self._debug:
@@ -135,13 +129,3 @@ class KnowledgeBaseVisualiser(object):
         data['obj_on_robot'] = obj_on_robot
         data['obj_in_container'] = obj_in_container
         return data
-
-
-if __name__ == '__main__':
-    rospy.init_node('kb_visualiser')
-    VISUALISER = KnowledgeBaseVisualiser()
-    RATE = rospy.Rate(rospy.get_param('~rate', 0.2))
-    while not rospy.is_shutdown():
-        VISUALISER.visualise()
-        RATE.sleep()
-    rospy.loginfo('Exiting...')

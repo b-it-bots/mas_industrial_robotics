@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import rospy
+
+from visualization_msgs.msg import MarkerArray, Marker
+
+from mir_planning_visualisation.kb_visualiser import KnowledgeBaseVisualiser
+from mir_planning_visualisation.plan_visualiser import PlanVisualiser
+
+class Visualiser(object):
+
+    """
+    Visualise Knowledge base and plan with MarkerArray msg
+    """
+
+    def __init__(self):
+        # Publishers
+        self._marker_pub = rospy.Publisher('~markers', MarkerArray, queue_size=1)
+
+        # class variables
+        self._kb_visualiser = KnowledgeBaseVisualiser()
+        self._plan_visualiser = PlanVisualiser()
+
+        rospy.sleep(1.0)
+        self._marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
+        rospy.loginfo('Initialised')
+
+    def visualise(self):
+        kb_markers, kb_data = self._kb_visualiser.visualise()
+        if kb_markers is None:
+            return
+
+        markers = self._plan_visualiser.visualise(kb_markers, kb_data=kb_data)
+        if markers is None:
+            return
+
+        # reset markers
+        self._marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
+
+        # publish all markers
+        self._marker_pub.publish(MarkerArray(markers=markers))
+
+if __name__ == '__main__':
+    rospy.init_node('planning_visualiser')
+    VISUALISER = Visualiser()
+    RATE = rospy.Rate(rospy.get_param('~rate', 0.2))
+    while not rospy.is_shutdown():
+        VISUALISER.visualise()
+        RATE.sleep()
+    rospy.loginfo('Exiting...')
