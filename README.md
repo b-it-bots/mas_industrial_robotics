@@ -69,7 +69,7 @@ Navigate into the cloned repository and run setup.sh file.
 
      ./setup.sh full <optional arg for catkin_ws parent dir>
 
-**Note:** In case you are the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
+**Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
 
 This script does the following,
 
