@@ -33,7 +33,12 @@ jobs:
       name: "Complete Build"
       script:
         - docker-compose build travis
+      workspaces:
+        create:
+          name: build_workspace
     - stage: deploy
+      workspaces:
+        use: build_workspace
       name: "Docker Hub Deployment"
       skip_cleanup: true
       script:
