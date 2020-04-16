@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import rospy
+import yaml
 from mir_planning_msgs.msg import (GenericExecuteActionGoal,
                                    GenericExecuteActionResult,
                                    PlanActionResult)
@@ -18,15 +19,20 @@ class PlanVisualiser(object):
         necessary publisher and subscriber
         """
 
-        self._debug = rospy.get_param('~debug', False)
         self._utils = Utils()
-        self._curr_dest = None
+        marker_config_file = rospy.get_param(
+            '~plan_marker_color_config',
+            None
+        )
+        self.plan_marker_config = None
+        with open(marker_config_file) as file_obj:
+            self.plan_marker_config = yaml.safe_load(file_obj)
+        if self.plan_marker_config is None:
+            raise Exception('Model config not provided.')
         self._complete_plan = None
-        self._display_marker_flag = True
-        self._plan_changed = False
-        self._unstage_marker = []
+        self._prev_location = "START"
 
-    def _get_response_from_servers(self):
+    def _create_subscriber_to_task_planner_server(self):
 
         rospy.Subscriber(
             "/mir_task_planning/task_planner_server/plan_task/result",
@@ -34,66 +40,27 @@ class PlanVisualiser(object):
             self._task_planner_cb
         )
 
-        rospy.Subscriber(
-            "/wbc_pick_object_server/goal",
-            GenericExecuteActionGoal,
-            self._wbc_pick_object_goal_cb
-        )
-
-        rospy.Subscriber(
-            "/wbc_pick_object_server/result",
-            GenericExecuteActionResult,
-            self._wbc_pick_object_result_cb
-        )
-
-        rospy.Subscriber(
-            "/pick_from_shelf_server/goal",
-            GenericExecuteActionGoal,
-            self._pick_from_shelf_goal_cb
-        )
-
-        rospy.Subscriber(
-            "/pick_from_shelf_server/result",
-            GenericExecuteActionResult,
-            self._pick_from_shelf_result_cb
-        )
-
-        rospy.Subscriber(
-            "/unstage_object_server/goal",
-            GenericExecuteActionGoal,
-            self._unstage_object_goal_cb
-        )
-
-        rospy.Subscriber(
-            "/unstage_object_server/result",
-            GenericExecuteActionResult,
-            self._unstage_object_result_cb
-        )
-
-        rospy.Subscriber(
-            "/move_base_safe_server/goal",
-            GenericExecuteActionGoal,
-            self._move_base_goal_cb
-        )
-
-        rospy.Subscriber(
-            "/move_base_safe_server/result",
-            GenericExecuteActionResult,
-            self._move_base_result_cb
-        )
-
     def _task_planner_cb(self, msg):
 
         if msg:
-            self._complete_plan = msg
+            self._complete_plan = msg.result.plan.plan
             self._plan_changed = True
-            rospy.loginfo("Plan Received")
 
-    def _get_markers_for_complete_plan(self):
+    def _set_markers_for_complete_plan(self, kb_markers, kb_data):
 
-        self._move_base_markers = []
-        self._pick_markers = []
-        for action in self._complete_plan.result.plan.plan:
+        move_base_config = self.plan_marker_config['move_base']
+        pick_config = self.plan_marker_config['pick']
+        move_base_markers = []
+        curr_location = kb_data['robot_ws'].upper()
+        if curr_location != self._prev_location:
+            self._prev_location = curr_location
+            for idx, action in enumerate(self._complete_plan):
+                if (action.name.upper() == "MOVE_BASE" and
+                    action.parameters[2].value.upper() == kb_data['robot_ws']):
+                    self._complete_plan = self._complete_plan[idx+1:]
+                    break
+
+        for action in self._complete_plan:
             if action.name.upper() == "MOVE_BASE":
                 source = action.parameters[1].value.lower()
                 destination = action.parameters[2].value.lower()
@@ -103,41 +70,29 @@ class PlanVisualiser(object):
                     source_loc,
                     dest_loc
                 )
-                self._move_base_markers.append(marker)
+                marker.color.r = move_base_config['color']['r']
+                marker.color.g = move_base_config['color']['g']
+                marker.color.b = move_base_config['color']['b']
+                marker.color.a = move_base_config['color']['a']
+                move_base_markers.append(marker)
             elif action.name.upper() == "PICK":
-                obj_list = [action.parameters[2].value]
-                ws_name = action.parameters[1].value
-                marker = self._utils.get_markers_from_obj_on_ws(
-                    obj_list,
-                    ws_name
-                )
-                self._pick_markers.extend(marker)
+                for marker in kb_markers[0]:
+                    if marker.text.upper() == action.parameters[2].value:
+                        marker.mesh_use_embedded_materials = True
+                        marker.color.r = pick_config['color']['r']
+                        marker.color.g = pick_config['color']['g']
+                        marker.color.b = pick_config['color']['b']
+                        marker.color.a = pick_config['color']['a']
+                        marker.scale.x = marker.scale.y = marker.scale.z = pick_config['scale']['x']
+                        break
 
-    def visualise_plan(self):
-
-        self._get_response_from_servers()
-
-        if self._complete_plan:
-            if self._plan_changed:
-                self._plan_changed = False
-                self._display_marker_flag = True
-                self._get_markers_for_complete_plan()
-
-            if self._display_marker_flag:
-                rospy.loginfo("Marker list modified")
-                complete_plan_markers = self._move_base_markers + self._pick_markers + self._unstage_marker
-                self._publish_colored_marker(
-                    complete_plan_markers,
-                    (0.3, 0.9, 0.3),
-                    0.7
-                )
-                self._display_marker_flag = False
+        kb_markers.append(move_base_markers)
 
     def visualise(self, kb_markers, kb_data=None):
         """
         TODO: docstring for visualise method
 
-        :kb_markers: list of visualization_msgs.Marker
+        :kb_markers: list of lists
         :kb_data: dict
         :returns: list of visualization_msgs.Marker
 
@@ -146,164 +101,8 @@ class PlanVisualiser(object):
             return None
 
         self._utils.marker_counter = 10000 # to avoid marker id repetition
+        self._create_subscriber_to_task_planner_server()
+        if self._complete_plan:
+            self._set_markers_for_complete_plan(kb_markers, kb_data)
 
-        # TODO: modify kb_markers based on kb_data and self._complete_plan
-
-        # TODO: add arc markers for move base
-
-        return kb_markers
-
-    def _publish_colored_marker(self, markers, color, alpha=1):
-        """ Class method is publish a colored marker of an object
-
-        Parameters
-        ----------
-        markers : list
-            list of markers
-        color : tuple
-            r, g, b color values in range [0-1]
-        alpha : int, optional
-            transparency value, by default 1
-        """
-
-        marker_msg = MarkerArray()
-        for idx, marker in enumerate(markers):
-            marker.id = idx
-            marker.mesh_use_embedded_materials = True
-            marker.color.r = color[0]
-            marker.color.g = color[1]
-            marker.color.b = color[2]
-            marker.color.a = alpha
-        marker_msg.markers = markers
-        self._task_plan_marker_pub.publish(marker_msg)
-        rospy.sleep(0.5)
-
-    def _unstage_object_goal_cb(self, msg):
-        """ Subscriber callback which visualizes the object which is going
-        to be unstage and placed on the workspace. The object is highlighted
-        in green
-
-        Parameters
-        ----------
-        msg : GenericExecuteActionGoal
-        """
-
-        if msg.goal.parameters:
-            obj = msg.goal.parameters[2].value
-            platform = msg.goal.parameters[1].value
-            robot_ws = self._curr_dest
-            marker = self._utils.get_markers_from_obj_on_robot(
-                obj,
-                platform,
-                robot_ws
-            )
-
-            self._unstage_marker = [marker]
-            self._unstage_execute = True
-            self._display_marker_flag = True
-
-    def _move_base_goal_cb(self, msg):
-        """ Subscriber callback which visualizes move base action
-        when it is going to be executed. The destination is highlighted
-        in red
-        Parameters
-        ----------
-        msg : GenericExecuteActionGoal
-        """
-
-        if msg.goal.parameters:
-            self._move_base_execute = True
-            dest_name = msg.goal.parameters[2].value.lower()
-            self._curr_dest = dest_name
-
-    def _wbc_pick_object_goal_cb(self, msg):
-        """ Subscriber callback which visualizes pick object action
-        when it is going to be executed. The object to be picked is
-        highlighted in bright green
-        Parameters
-        ----------
-        msg : GenericExecuteActionGoal
-        """
-
-        if msg.goal.parameters:
-            self._pick_execute = True
-
-    def _pick_from_shelf_goal_cb(self, msg):
-        """ Subscriber callback which visualizes pick object action
-        when it is going to be executed. The object to be picked is
-        highlighted in bright green
-        Parameters
-        ----------
-        msg : GenericExecuteActionGoal
-        """
-
-        if msg.goal.parameters:
-            self._pick_execute = True
-
-    def _wbc_pick_object_result_cb(self, msg):
-        """ Subscriber callback which deletes the marker when
-        pick object action is completed
-
-        Parameters
-        ----------
-        msg : GenericExecuteActionResult
-        """
-
-        if self._pick_execute:
-            self._task_plan_marker_pub.publish(
-                MarkerArray(markers=[Marker(action=Marker.DELETEALL)])
-                )
-            self._pick_markers.pop(0)
-            self._pick_execute = False
-            self._display_marker_flag = True
-
-    def _pick_from_shelf_result_cb(self, msg):
-        """ Subscriber callback which deletes the marker when
-        pick object from shelf action is completed
-
-        Parameters
-        ----------
-        msg : GenericExecuteActionResult
-        """
-
-        if self._pick_execute:
-            self._task_plan_marker_pub.publish(
-                MarkerArray(markers=[Marker(action=Marker.DELETEALL)])
-                )
-            self._pick_markers.pop(0)
-            self._pick_execute = False
-            self._display_marker_flag = True
-
-    def _unstage_object_result_cb(self, msg):
-        """ Subscriber callback which deletes the marker when
-        unstage object action is completed
-
-        Parameters
-        ----------
-        msg : GenericExecuteActionResult
-        """
-
-        if self._unstage_execute:
-            self._task_plan_marker_pub.publish(
-                MarkerArray(markers=[Marker(action=Marker.DELETEALL)])
-                )
-            self._unstage_marker.pop(0)
-            self._unstage_execute = False
-            self._display_marker_flag = True
-
-    def _move_base_result_cb(self, msg):
-        """ Subscriber callback which deletes the marker when
-        move base action is completed
-
-        Parameters
-        ----------
-        msg : GenericExecuteActionResult
-        """
-
-        if self._move_base_execute:
-            self._task_plan_marker_pub.publish(
-                MarkerArray(markers=[Marker(action=Marker.DELETEALL)])
-                )
-            self._move_base_markers.pop(0)
-            self._move_base_execute = False
-            self._display_marker_flag = True
+        return sum(kb_markers, [])

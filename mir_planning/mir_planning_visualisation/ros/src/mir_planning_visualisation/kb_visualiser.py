@@ -72,15 +72,13 @@ class KnowledgeBaseVisualiser(object):
 
     def _get_markers_from_data(self, data):
         markers = []
-
-        markers.extend(self._utils.get_markers_from_ws_pos())
-
+        obj_on_ws = []
         for ws_name, obj_list in data['obj_on_ws'].iteritems():
             obj_markers = self._utils.get_markers_from_obj_on_ws(obj_list,
                                                                  ws_name,
                                                                  data['obj_in_container'])
-            markers.extend(obj_markers)
-
+            obj_on_ws.extend(obj_markers)
+        markers.append(obj_on_ws)
         obj_on_robot_markers = []
         for platform, obj in data['obj_on_robot'].iteritems():
             obj_marker = self._utils.get_markers_from_obj_on_robot(obj,
@@ -88,9 +86,10 @@ class KnowledgeBaseVisualiser(object):
                                                                    data['robot_ws'])
             if obj_marker:
                 obj_on_robot_markers.append(obj_marker)
-        markers.extend(obj_on_robot_markers)
+        markers.append(obj_on_robot_markers)
 
-        markers.extend(self._utils.get_markers_for_youbot(data['robot_ws']))
+        markers.append(self._utils.get_markers_for_youbot(data['robot_ws']))
+        markers.append(self._utils.get_markers_from_ws_pos())
         return markers
 
     def _get_visualisable_data_from_facts(self, facts=[]):
