@@ -266,7 +266,9 @@ class Utils(object):
             z = math.sin(i * delta_z) * scale_z
             points.append(Point(x=x, y=y, z=z))
 
-        marker = Marker(type=Marker.LINE_STRIP, id=1)
+        marker = Marker(type=Marker.LINE_STRIP)
+        self.marker_counter += 1
+        marker.id = self.marker_counter
         marker.points = points
         marker.header.stamp = rospy.Time.now()
         marker.header.frame_id = self._global_frame

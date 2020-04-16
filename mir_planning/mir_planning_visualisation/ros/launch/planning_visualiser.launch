@@ -18,10 +18,9 @@
 
     <group ns="mir_planning">
 
-        <node pkg="mir_planning_visualisation" type="kb_visualiser"
-              name="kb_visualiser" output="screen" >
+        <node pkg="mir_planning_visualisation" type="visualiser"
+              name="planning_visualiser" output="screen" >
 
-            <remap from="~markers" to="/mir_planning/planning_visualisation/kb_markers" />
             <remap from="~kb_server_topic" to="$(arg kb_server_topic)" />
             <param name="debug" type="bool" value="$(arg debug)" />
             <param name="global_frame" type="str" value="$(arg global_frame)" />
@@ -33,18 +32,6 @@
 
             <rosparam command="load" param="navigation_goals" file="$(arg navigation_goals_file)" />
 
-        </node>
-
-        <node pkg="mir_planning_visualisation" type="plan_visualiser"
-              name="plan_visualiser" output="screen" >
-            <param name="global_frame" type="str" value="$(arg global_frame)" />
-            <param name="model_path" type="str" value="$(arg model_path)" />
-            <param name="alpha" type="double" value="$(arg alpha)" />
-            <param name="base_link_to_ws_edge" type="double" value="$(arg base_link_to_ws_edge)" />
-            <param name="model_to_marker_config" type="str" value="$(arg model_to_marker_config)" />
-            <param name="debug" type="bool" value="$(arg debug)" />
-            <remap from='~markers' to='/mir_planning/planning_visualisation/plan_markers' />
-            <rosparam command="load" param="navigation_goals" file="$(arg navigation_goals_file)" />
         </node>
 
     </group>
