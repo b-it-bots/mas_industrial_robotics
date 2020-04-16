@@ -4,6 +4,8 @@
     <arg name="model_path" default="$(find mir_planning_visualisation)/resource"/>
     <arg name="model_to_marker_config"
          default="$(find mir_planning_visualisation)/ros/config/model_to_marker.yaml"/>
+    <arg name="plan_marker_color_config"
+         default="$(find mir_planning_visualisation)/ros/config/plan_marker_color.yaml"/>
     <arg name="robot_env" default="$(optenv ROBOT_ENV !!NO_ROBOT_ENV_SET!!)" />
     <!-- <arg name="navigation_goals_file" -->
     <!--      default="$(find mcr_default_env_config)/$(arg robot_env)/navigation_goals.yaml" /> -->
@@ -28,6 +30,7 @@
             <param name="alpha" type="double" value="$(arg alpha)" />
             <param name="base_link_to_ws_edge" type="double" value="$(arg base_link_to_ws_edge)" />
             <param name="model_to_marker_config" type="str" value="$(arg model_to_marker_config)" />
+            <param name="plan_marker_color_config" type="str" value="$(arg plan_marker_color_config)" />
             <param name="rate" type="double" value="1.0" />
 
             <rosparam command="load" param="navigation_goals" file="$(arg navigation_goals_file)" />
