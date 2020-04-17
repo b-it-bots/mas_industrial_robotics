@@ -79,6 +79,7 @@ class KnowledgeBaseVisualiser(object):
                                                                  data['obj_in_container'])
             obj_on_ws.extend(obj_markers)
         markers.append(obj_on_ws)
+
         obj_on_robot_markers = []
         for platform, obj in data['obj_on_robot'].iteritems():
             obj_marker = self._utils.get_markers_from_obj_on_robot(obj,
