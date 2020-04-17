@@ -10,8 +10,8 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 
 class PlanVisualiser(object):
-    """ Class to visualize tasks in plan
-    such as pick, unstage and move base
+    """ Class to visualize tasks in plan.
+    Currently supported actions `move_base` and `pick`
     """
 
     def __init__(self):
@@ -19,20 +19,21 @@ class PlanVisualiser(object):
         necessary publisher and subscriber
         """
 
-        self._utils = Utils()
         marker_config_file = rospy.get_param(
             '~plan_marker_color_config',
             None
         )
+
+        self._utils = Utils()
+
         self.plan_marker_config = None
         with open(marker_config_file) as file_obj:
             self.plan_marker_config = yaml.safe_load(file_obj)
         if self.plan_marker_config is None:
             raise Exception('Model config not provided.')
+
         self._complete_plan = None
         self._prev_location = "START"
-
-    def _create_subscriber_to_task_planner_server(self):
 
         rospy.Subscriber(
             "/mir_task_planning/task_planner_server/plan_task/result",
@@ -41,13 +42,11 @@ class PlanVisualiser(object):
         )
 
     def _task_planner_cb(self, msg):
-
         if msg:
             self._complete_plan = msg.result.plan.plan
             self._plan_changed = True
 
     def _set_markers_for_complete_plan(self, kb_markers, kb_data):
-
         move_base_config = self.plan_marker_config['move_base']
         pick_config = self.plan_marker_config['pick']
         move_base_markers = []
@@ -59,6 +58,7 @@ class PlanVisualiser(object):
                     action.parameters[2].value.upper() == kb_data['robot_ws']):
                     self._complete_plan = self._complete_plan[idx+1:]
                     break
+
 
         for action in self._complete_plan:
             if action.name.upper() == "MOVE_BASE":
@@ -83,16 +83,17 @@ class PlanVisualiser(object):
                         marker.color.g = pick_config['color']['g']
                         marker.color.b = pick_config['color']['b']
                         marker.color.a = pick_config['color']['a']
-                        marker.scale.x = marker.scale.y = marker.scale.z = pick_config['scale']['x']
+                        marker.scale.x = marker.scale.y = marker.scale.z = pick_config['scale']
                         break
 
         kb_markers.append(move_base_markers)
 
     def visualise(self, kb_markers, kb_data=None):
         """
-        TODO: docstring for visualise method
+        - Modify markers based on pick action.
+        - Add markers for move_base actions
 
-        :kb_markers: list of lists
+        :kb_markers: list of lists of visualization_msgs.Marker
         :kb_data: dict
         :returns: list of visualization_msgs.Marker
 
@@ -101,8 +102,8 @@ class PlanVisualiser(object):
             return None
 
         self._utils.marker_counter = 10000 # to avoid marker id repetition
-        self._create_subscriber_to_task_planner_server()
         if self._complete_plan:
             self._set_markers_for_complete_plan(kb_markers, kb_data)
 
+        # flatten the list of markers
         return sum(kb_markers, [])
