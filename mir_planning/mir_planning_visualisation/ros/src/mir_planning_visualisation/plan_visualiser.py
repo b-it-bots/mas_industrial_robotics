@@ -59,17 +59,11 @@ class PlanVisualiser(object):
                     self._complete_plan = self._complete_plan[idx+1:]
                     break
 
-
         for action in self._complete_plan:
             if action.name.upper() == "MOVE_BASE":
                 source = action.parameters[1].value.lower()
                 destination = action.parameters[2].value.lower()
-                source_loc = self._utils.ws_pose[source]
-                dest_loc = self._utils.ws_pose[destination]
-                marker = self._utils.get_arc_marker(
-                    source_loc,
-                    dest_loc
-                )
+                marker = self._utils.get_arc_marker(source, destination)
                 marker.color.r = move_base_config['color']['r']
                 marker.color.g = move_base_config['color']['g']
                 marker.color.b = move_base_config['color']['b']

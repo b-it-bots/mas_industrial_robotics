@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import tf
 import os
+import copy
 import math
 import yaml
 import rospy
@@ -247,27 +248,41 @@ class Utils(object):
         marker.text = obj_name
         return marker
 
-    def get_arc_marker(self, point_a, point_b, num_of_points=10, scale_factor=2.0):
-        """TODO: Docstring for get_arc_points.
+    def get_arc_marker(self, src, dest, num_of_points=11, scale_factor=3.0):
+        """Create an arc from src to dest with an arrow head at the top
 
-        :point_a: tuple of 2 float
-        :point_b: tuple of 2 float
+        :src: str
+        :dest: str
         :num_of_points: int
         :scale_factor: float
         :returns: visualization_msgs.Marker
 
         """
+        if num_of_points < 5:
+            num_of_points = 5
+
+        point_a = self._ws_pose.get(src, None)
+        point_b = self._ws_pose.get(dest, None)
+        if point_a is None or point_b is None:
+            return None
+
         delta_x = (point_b[0] - point_a[0])/num_of_points
         delta_y = (point_b[1] - point_a[1])/num_of_points
         delta_z = math.pi/(num_of_points)
         dist = ((point_b[0]-point_a[0])**2 + (point_b[1]-point_a[1])**2)**0.5
         scale_z = min(dist / scale_factor, 2.0)
-        points = []
-        for i in range(num_of_points+1):
-            x = point_a[0] + i * delta_x
-            y = point_a[1] + i * delta_y
-            z = math.sin(i * delta_z) * scale_z
-            points.append(Point(x=x, y=y, z=z))
+        points = [Point(x=point_a[0] + i * delta_x,
+                        y=point_a[1] + i * delta_y,
+                        z=math.sin(i * delta_z) * scale_z)
+                  for i in range(num_of_points+1)]
+
+        # add arrow at the top of arc
+        mid = points[num_of_points/2]
+        arrow_points = [(copy.deepcopy(points[num_of_points/2+1])),
+                        Point(x=mid.x + delta_y/2, y=mid.y + delta_x/2, z=mid.z),
+                        Point(x=mid.x - delta_y/2, y=mid.y - delta_x/2, z=mid.z)]
+        for p in arrow_points:
+            points.insert(num_of_points/2+2, p)
 
         marker = Marker(type=Marker.LINE_STRIP)
         self.marker_counter += 1
