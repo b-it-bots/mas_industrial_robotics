@@ -5,11 +5,11 @@ from __future__ import print_function
 NODE = 'task_planner_server'
 
 import rospy
-
-# action lib
 import actionlib
+
 from mir_planning_msgs.msg import PlanAction, PlanResult, PlanGoal
 from rosplan_dispatch_msgs.msg import CompletePlan
+
 from planner_wrapper.planner_wrapper import PlannerWrapper
 from mir_task_planning.utils import Utils
 
