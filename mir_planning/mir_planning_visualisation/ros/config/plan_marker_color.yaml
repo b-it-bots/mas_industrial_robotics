@@ -1,5 +1,5 @@
 # =======
-# MOVE_BASE
+# ACTIONS
 # =======
 move_base:
     color: 
@@ -7,11 +7,18 @@ move_base:
         g: 0.9
         b: 0.3
         a: 0.6
-# =======
-# PICK
-# =======
 pick:
     color: 
+        r: 0.2
+        g: 0.2
+        b: 0.8
+        a: 0.8
+    scale: 0.0012
+# =====
+# GOALS
+# =====
+goal:
+    color:
         r: 0.3
         g: 0.9
         b: 0.3

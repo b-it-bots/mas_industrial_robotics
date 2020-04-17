@@ -30,7 +30,7 @@ class PlanVisualiser(object):
         with open(marker_config_file) as file_obj:
             self.plan_marker_config = yaml.safe_load(file_obj)
         if self.plan_marker_config is None:
-            raise Exception('Model config not provided.')
+            raise Exception('Plan marker config not provided.')
 
         self._complete_plan = None
         self._prev_location = "START"

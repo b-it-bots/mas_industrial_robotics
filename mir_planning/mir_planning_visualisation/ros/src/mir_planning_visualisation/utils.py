@@ -123,7 +123,7 @@ class Utils(object):
         else:
             rospy.logwarn('Object ' + obj + ' on unknown platform '+ platform)
         
-    def get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj=None):
+    def get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj=None, is_goal=False):
         """Create markers for objects on a given workstation
 
         :obj_list: list
@@ -147,6 +147,9 @@ class Utils(object):
                                 for theta in range(0, 360, 36)]
         else:
             return []
+
+        if is_goal:
+            obj_pose_offsets = [(0.35, y) for y in [0.0, 0.15, -0.15, 0.3, -0.3]]
 
         if len(obj_list) > 10:
             rospy.logwarn('Only showing 10 objects on ' + str(ws))

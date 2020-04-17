@@ -15,7 +15,8 @@
     <arg name="global_frame" default="map" />
     <arg name="alpha" default="1.0" />
     <arg name="base_link_to_ws_edge" default="0.4" />
-    <arg name="kb_server_topic" default="/rosplan_knowledge_base/state/propositions" />
+    <arg name="kb_server_facts_topic" default="/rosplan_knowledge_base/state/propositions" />
+    <arg name="kb_server_goals_topic" default="/rosplan_knowledge_base/state/goals" />
 
 
     <group ns="mir_planning">
@@ -23,7 +24,8 @@
         <node pkg="mir_planning_visualisation" type="visualiser"
               name="planning_visualiser" output="screen" >
 
-            <remap from="~kb_server_topic" to="$(arg kb_server_topic)" />
+            <remap from="~kb_server_facts_topic" to="$(arg kb_server_facts_topic)" />
+            <remap from="~kb_server_goals_topic" to="$(arg kb_server_goals_topic)" />
             <param name="debug" type="bool" value="$(arg debug)" />
             <param name="global_frame" type="str" value="$(arg global_frame)" />
             <param name="model_path" type="str" value="$(arg model_path)" />
