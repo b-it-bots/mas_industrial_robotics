@@ -45,7 +45,7 @@ class Visualiser(object):
 if __name__ == '__main__':
     rospy.init_node('planning_visualiser')
     VISUALISER = Visualiser()
-    RATE = rospy.Rate(rospy.get_param('~rate', 0.2))
+    RATE = rospy.Rate(rospy.get_param('~rate', 0.5))
     while not rospy.is_shutdown():
         VISUALISER.visualise()
         RATE.sleep()

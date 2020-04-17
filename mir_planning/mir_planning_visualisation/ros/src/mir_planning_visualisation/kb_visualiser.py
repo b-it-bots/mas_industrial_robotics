@@ -19,8 +19,9 @@ class KnowledgeBaseVisualiser(object):
     def __init__(self):
         # read ros params
         self._debug = rospy.get_param('~debug', False)
-        self._kb_server_facts_topic = '~kb_server_facts_topic'
-        self._kb_server_goals_topic = '~kb_server_goals_topic'
+        self._visualise_robot = rospy.get_param('~visualise_robot', True)
+        self._kb_server_facts_topic = rospy.get_param('~kb_server_facts_topic', '~facts')
+        self._kb_server_goals_topic = rospy.get_param('~kb_server_goals_topic', '~goals')
         marker_config_file = rospy.get_param('~plan_marker_color_config', None)
 
         plan_marker_config = None
@@ -95,14 +96,15 @@ class KnowledgeBaseVisualiser(object):
             obj_on_ws.extend(obj_markers)
         markers.append(obj_on_ws)
 
-        obj_on_robot_markers = []
-        for platform, obj in data['obj_on_robot'].iteritems():
-            obj_marker = self._utils.get_markers_from_obj_on_robot(obj,
-                                                                   platform,
-                                                                   data['robot_ws'])
-            if obj_marker:
-                obj_on_robot_markers.append(obj_marker)
-        markers.append(obj_on_robot_markers)
+        if self._visualise_robot:
+            obj_on_robot_markers = []
+            for platform, obj in data['obj_on_robot'].iteritems():
+                obj_marker = self._utils.get_markers_from_obj_on_robot(obj,
+                                                                       platform,
+                                                                       data['robot_ws'])
+                if obj_marker:
+                    obj_on_robot_markers.append(obj_marker)
+            markers.append(obj_on_robot_markers)
 
         goal_obj_on_ws = []
         for ws_name, obj_list in data['goal_obj_on_ws'].iteritems():
@@ -120,7 +122,9 @@ class KnowledgeBaseVisualiser(object):
             goal_obj_on_ws.extend(obj_markers)
         markers.append(goal_obj_on_ws)
 
-        markers.append(self._utils.get_markers_for_youbot(data['robot_ws']))
+        if self._visualise_robot:
+            markers.append(self._utils.get_markers_for_youbot(data['robot_ws']))
+
         markers.append(self._utils.get_markers_from_ws_pos())
         return markers
 
@@ -157,7 +161,7 @@ class KnowledgeBaseVisualiser(object):
 
         for fact in goals:
             if self._debug:
-                print(fact)
+                print('goal', fact)
 
             if fact[0] == 'on':
                 if fact[1]['l'] not in goal_obj_on_ws:

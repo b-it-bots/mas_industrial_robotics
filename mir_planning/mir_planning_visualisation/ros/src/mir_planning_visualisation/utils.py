@@ -33,18 +33,21 @@ class Utils(object):
         if self.marker_config is None:
             raise Exception('Model config not provided.')
 
-        navigation_goals = rospy.get_param('~navigation_goals', None)
+        navigation_goals_file = rospy.get_param('~navigation_goals', None)
+        navigation_goals = None
+        with open(navigation_goals_file) as file_obj:
+            navigation_goals = yaml.safe_load(file_obj)
         if navigation_goals is None:
             raise Exception('Navigation goal file not provided.')
 
         # class variables
         self.marker_counter = 0
-        self.ws_pose = dict()
+        self._ws_pose = dict()
         # offset nav goal based on size of robot to initialise workstation poses
         for ws, pos in navigation_goals.iteritems():
             delta_x = (math.cos(pos[2]) * self._base_link_to_ws_edge)
             delta_y = (math.sin(pos[2]) * self._base_link_to_ws_edge)
-            self.ws_pose[ws.lower()] = [pos[0] + delta_x, pos[1] + delta_y, pos[2]]
+            self._ws_pose[ws.lower()] = [pos[0] + delta_x, pos[1] + delta_y, pos[2]]
 
     def get_markers_from_ws_pos(self):
         """Create markers for workstations
@@ -53,7 +56,7 @@ class Utils(object):
 
         """
         markers = []
-        for ws, pos in self.ws_pose.iteritems():
+        for ws, pos in self._ws_pose.iteritems():
             if 'ws' in ws:
                 marker = self.get_marker_from_obj_name_and_pos('ws', x=pos[0],
                                                                y=pos[1], yaw=pos[2])
@@ -83,7 +86,7 @@ class Utils(object):
         :returns: list of visualization_msgs.Marker
 
         """
-        x, y, yaw = self.ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
+        x, y, yaw = self._ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
         delta_x = (math.cos(yaw) * self._base_link_to_ws_edge)
         delta_y = (math.sin(yaw) * self._base_link_to_ws_edge)
         x, y = x-delta_x, y-delta_y
@@ -106,7 +109,7 @@ class Utils(object):
         :returns: list of visualization_msgs.Marker
 
         """
-        x, y, yaw = self.ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
+        x, y, yaw = self._ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
         delta_x = (math.cos(yaw) * self._base_link_to_ws_edge)
         delta_y = (math.sin(yaw) * self._base_link_to_ws_edge)
         x, y = x-delta_x, y-delta_y
@@ -134,7 +137,7 @@ class Utils(object):
 
         """
         ws = ws_name.lower()
-        pos = self.ws_pose.get(ws, None)
+        pos = self._ws_pose.get(ws, None)
         if pos is None:
             return []
         markers = []
