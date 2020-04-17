@@ -12,7 +12,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>hokuyo_node</run_depend>
+  <run_depend>urg_node</run_depend>
   <run_depend>mcr_default_env_config</run_depend>
   <run_depend>mcr_collision_velocity_filter</run_depend>
   <run_depend>mir_arm_cartesian_control</run_depend>
@@ -23,7 +23,6 @@
   <run_depend>mir_twist_mux</run_depend>
   <run_depend>openni_launch</run_depend>
   <run_depend>openni2_launch</run_depend>
-  <run_depend>realsense_camera_dorabot</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>rgbd_launch</run_depend>
   <run_depend>tf</run_depend>
