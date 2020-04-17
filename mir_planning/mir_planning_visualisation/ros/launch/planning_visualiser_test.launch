@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+    <include file="$(find mir_planning_visualisation)/ros/launch/planning_visualiser.launch">
+        <arg name="navigation_goals_file"
+             value="$(find mir_planning_visualisation)/ros/config/test_navigation_goals.yaml" />
+
+        <arg name="debug" value="true" />
+        <arg name="alpha" value="1.0" />
+        <arg name="visualise_robot" value="true" />
+    </include>
+
+
+</launch>
