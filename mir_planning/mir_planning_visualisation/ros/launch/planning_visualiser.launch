@@ -19,12 +19,15 @@
 
     <arg name="kb_server_facts_topic" default="/rosplan_knowledge_base/state/propositions" />
     <arg name="kb_server_goals_topic" default="/rosplan_knowledge_base/state/goals" />
+    <arg name="plan_topic" default="/mir_task_planning/task_planner_server/plan_task/result" />
 
 
     <group ns="mir_planning">
 
         <node pkg="mir_planning_visualisation" type="visualiser"
               name="planning_visualiser" output="screen" >
+
+            <remap from="~plan" to="$(arg plan_topic)" />
 
             <param name="kb_server_facts_topic" type="str" value="$(arg kb_server_facts_topic)" />
             <param name="kb_server_goals_topic" type="str" value="$(arg kb_server_goals_topic)" />
@@ -38,7 +41,6 @@
             <param name="navigation_goals" type="str" value="$(arg navigation_goals_file)" />
             <param name="visualise_robot" type="bool" value="$(arg visualise_robot)" />
             <param name="rate" type="double" value="1.0" />
-
 
         </node>
 

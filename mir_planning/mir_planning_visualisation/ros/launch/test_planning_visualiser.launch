@@ -10,5 +10,8 @@
         <arg name="visualise_robot" value="true" />
     </include>
 
+    <node pkg="rviz" type="rviz" name="planning_rviz"
+          args="-d $(find mir_planning_visualisation)/ros/config/planning_rviz.rviz" />
+
 
 </launch>
