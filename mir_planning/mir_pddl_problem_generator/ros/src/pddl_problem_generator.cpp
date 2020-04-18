@@ -46,7 +46,7 @@ PDDLProblemGenerator::~PDDLProblemGenerator()
 {
 }
 
-bool PDDLProblemGenerator::generatePDDLProblemFile(std::string problem_path)
+bool PDDLProblemGenerator::generatePDDLProblemFile(const std::string &problem_path)
 {
     boost::filesystem::path boost_problem_file((problem_path).c_str());
     boost::filesystem::path boost_problem_dir = boost_problem_file.parent_path();
@@ -344,16 +344,16 @@ bool PDDLProblemGenerator::makeMetric(std::ofstream& pFile)
     return true;
 }
 
-float PDDLProblemGenerator::getGoalScore(std::map<std::string, std::string> goal)
+float PDDLProblemGenerator::getGoalScore(const std::map<std::string, std::string> &goal)
 {
     float score = 0.0;
-    score += getPointsLocation(goal["src"]);
-    score += getPointsLocation(goal["dest"]);
-    score += getPointsObject(goal["obj"]);
+    score += getPointsLocation(goal.at("src"));
+    score += getPointsLocation(goal.at("dest"));
+    score += getPointsObject(goal.at("obj"));
     return score;
 }
 
-std::string PDDLProblemGenerator::getSourceLocation(rosplan_knowledge_msgs::KnowledgeItem ki)
+std::string PDDLProblemGenerator::getSourceLocation(const rosplan_knowledge_msgs::KnowledgeItem &ki)
 {
     if (ki.attribute_name.compare("in") != 0 and ki.attribute_name.compare("on") != 0)
         return "";
@@ -383,20 +383,21 @@ std::string PDDLProblemGenerator::getSourceLocation(rosplan_knowledge_msgs::Know
     return "XXXX"; // dummy location
 }
 
-float PDDLProblemGenerator::getPoints(std::string key)
+float PDDLProblemGenerator::getPoints(const std::string &key)
 {
-    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-    auto it = points_map_.find(key);
+    std::string key_lower(key.length(), 'X');
+    std::transform(key.begin(), key.end(), key_lower.begin(), ::tolower);
+    auto it = points_map_.find(key_lower);
     return (it == points_map_.end()) ? 0.0f : it->second;
 }
 
-float PDDLProblemGenerator::getPointsObject(std::string obj)
+float PDDLProblemGenerator::getPointsObject(const std::string &obj)
 {
     size_t minus_pos = obj.find_first_of("-");
     return (minus_pos == obj.npos) ? getPoints(obj) : getPoints(obj.substr(0, minus_pos));
 }
 
-float PDDLProblemGenerator::getPointsLocation(std::string loc)
+float PDDLProblemGenerator::getPointsLocation(const std::string &loc)
 {
     return (loc.size() > 2) ? getPoints(loc.substr(0, 2)) : 0.0f;
 }

@@ -25,7 +25,7 @@ class PDDLProblemGenerator
         PDDLProblemGenerator();
         ~PDDLProblemGenerator();
 
-        bool generatePDDLProblemFile(std::string problem_path);
+        bool generatePDDLProblemFile(const std::string &problem_path);
 
     private:
         ros::NodeHandle nh_;
@@ -42,11 +42,11 @@ class PDDLProblemGenerator
         int max_goals_;
         bool prefer_goals_with_same_source_ws_;
 
-        float getPoints(std::string key);
-        float getPointsObject(std::string str);
-        float getPointsLocation(std::string str);
-        float getGoalScore(std::map<std::string, std::string> goal);
-        std::string getSourceLocation(rosplan_knowledge_msgs::KnowledgeItem ki);
+        float getPoints(const std::string &key);
+        float getPointsObject(const std::string &obj);
+        float getPointsLocation(const std::string &loc);
+        float getGoalScore(const std::map<std::string, std::string> &goal);
+        std::string getSourceLocation(const rosplan_knowledge_msgs::KnowledgeItem &ki);
 
         bool makeHeader(std::ofstream &pFile);
         bool makeObjects(std::ofstream &pFile);
