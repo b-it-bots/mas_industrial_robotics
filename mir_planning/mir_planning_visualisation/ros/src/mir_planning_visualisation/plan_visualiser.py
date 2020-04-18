@@ -15,10 +15,7 @@ class PlanVisualiser(object):
         necessary publisher and subscriber
         """
 
-        marker_config_file = rospy.get_param(
-            '~plan_marker_color_config',
-            None
-        )
+        marker_config_file = rospy.get_param('~plan_marker_color_config', None)
 
         self._utils = Utils()
 
@@ -31,11 +28,7 @@ class PlanVisualiser(object):
         self._complete_plan = None
         self._prev_location = "START"
 
-        rospy.Subscriber(
-            "/mir_task_planning/task_planner_server/plan_task/result",
-            PlanActionResult,
-            self._task_planner_cb
-        )
+        rospy.Subscriber('~plan', PlanActionResult, self._task_planner_cb)
 
     def _task_planner_cb(self, msg):
         if msg:
