@@ -3,7 +3,6 @@ from __future__ import print_function
 import yaml
 import rospy
 
-from visualization_msgs.msg import MarkerArray, Marker
 from rosplan_knowledge_msgs.srv import GetAttributeService
 from rosplan_knowledge_msgs.msg import KnowledgeItem
 
