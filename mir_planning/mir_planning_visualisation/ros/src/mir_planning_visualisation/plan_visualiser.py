@@ -2,12 +2,8 @@ from __future__ import print_function
 
 import rospy
 import yaml
-from mir_planning_msgs.msg import (GenericExecuteActionGoal,
-                                   GenericExecuteActionResult,
-                                   PlanActionResult)
+from mir_planning_msgs.msg import PlanActionResult
 from mir_planning_visualisation.utils import Utils
-from visualization_msgs.msg import Marker, MarkerArray
-
 
 class PlanVisualiser(object):
     """ Class to visualize tasks in plan.
