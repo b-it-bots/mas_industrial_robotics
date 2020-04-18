@@ -56,7 +56,7 @@
 - git:
     local-name: ROSPlan
     uri: https://github.com/b-it-bots/ROSPlan.git
-    version: indigo-devel
+    version: master
 
 - git:
     local-name: mercury_planner
