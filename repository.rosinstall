@@ -4,11 +4,6 @@
     version: kinetic
 
 - git:
-    local-name: mas_industrial_robotics
-    uri: https://github.com/b-it-bots/mas_industrial_robotics.git
-    version: kinetic
-
-- git:
     local-name: youbot_driver
     uri: https://github.com/mas-group/youbot_driver.git
     version: indigo-devel
