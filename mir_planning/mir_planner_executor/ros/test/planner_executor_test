@@ -5,8 +5,8 @@ from __future__ import print_function
 import rospy
 from actionlib import SimpleActionClient
 from mir_planning_msgs.msg import ExecutePlanAction, ExecutePlanGoal, ExecutePlanResult
-from rosplan_dispatch_msgs.msg import ActionDispatch, CompletePlan
-from diagnostic_msgs.msg import KeyValue
+from rosplan_dispatch_msgs.msg import CompletePlan
+from mir_task_planning.utils import Utils
 
 # This is a made up plan which has all 7 actions
 PLAN = """\
@@ -35,23 +35,6 @@ SMALL_PLAN = """\
 (perceive youbot-brsu ws04)"""
 
 
-
-# Copied from mir_task_planning/ros/scripts/task_planner_server
-def get_action_msg_from_string(string, action_id):
-    """Create and return Action obj from string of type '(word word word ...)'
-
-    :string: string
-    :action_id: int
-    :returns: rosplan_dispatch_msgs/ActionDispatch
-
-    """
-    # remove parenthesis, convert str to upper case and split at spaces
-    action_param_list = string[1:-1].upper().split()
-    name = action_param_list[0]
-    params = [KeyValue('param_'+str(i+1), param) for i, param in enumerate(action_param_list[2:])]
-    params.insert(0, KeyValue('robot_name', action_param_list[1]))
-    return ActionDispatch(action_id=action_id, name=name, parameters=params)
-
 def get_complete_plan_from_string(string):
     """Create and return CompletePlan obj from a multiline string 
 
@@ -61,7 +44,7 @@ def get_complete_plan_from_string(string):
     """
     complete_plan = CompletePlan()
     for line_num, line in enumerate(string.split('\n')):
-        action_msg = get_action_msg_from_string(line, line_num+1)
+        action_msg = Utils.get_action_msg_from_string(line, line_num+1)
         complete_plan.plan.append(action_msg)
     return complete_plan
 

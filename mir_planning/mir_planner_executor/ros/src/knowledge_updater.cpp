@@ -11,9 +11,9 @@
 #include <ros/console.h>
 
 KnowledgeUpdater::KnowledgeUpdater(ros::NodeHandle &nh) {
-    rosplan_update_client_ = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base");
-    rosplan_get_goals_client_ = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/kcl_rosplan/get_current_goals");
-    rosplan_get_knowledge_client_ = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/kcl_rosplan/get_current_knowledge");
+    rosplan_update_client_ = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/rosplan_knowledge_base/update");
+    rosplan_get_goals_client_ = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/rosplan_knowledge_base/state/goals");
+    rosplan_get_knowledge_client_ = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/rosplan_knowledge_base/state/propositions");
     re_add_goals_server_ = nh.advertiseService("re_add_goals", &KnowledgeUpdater::re_add_goals, this);
 }
 KnowledgeUpdater::~KnowledgeUpdater() {

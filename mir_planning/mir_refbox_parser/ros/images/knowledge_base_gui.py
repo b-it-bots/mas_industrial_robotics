@@ -91,7 +91,7 @@ class VisualizeWorldModel():
         for key,loc in self.locations.iteritems():
             self.objects_on_location[key] = [""]
         try:
-            model_client = rospy.ServiceProxy('/kcl_rosplan/get_current_knowledge', GetAttributeService)
+            model_client = rospy.ServiceProxy('/rosplan_knowledge_base/state/propositions', GetAttributeService)
             resp = model_client('')
             for attribute in resp.attributes:
                 if 'on' == attribute.attribute_name:
@@ -133,7 +133,7 @@ class VisualizeWorldModel():
         for key,loc in self.locations.iteritems():
             self.goals_from_knowledge_base[key] = [""]
         try:
-            model_client = rospy.ServiceProxy('/kcl_rosplan/get_current_goals', GetAttributeService)
+            model_client = rospy.ServiceProxy('/rosplan_knowledge_base/state/goals', GetAttributeService)
             resp = model_client('')
             for attribute in resp.attributes:
                 if 'on' == attribute.attribute_name:
