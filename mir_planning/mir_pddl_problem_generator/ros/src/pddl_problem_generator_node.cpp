@@ -18,8 +18,9 @@ PDDLProblemGeneratorNode::PDDLProblemGeneratorNode() : nh_("~"), is_event_in_rec
     // publications
     pub_event_out_ = nh_.advertise<std_msgs::String>("event_out", 2);
 
-    // querying parameters from parameter server
-    getSetParams();
+    nh_.param<std::string>("problem_path", problem_path_, "/tmp/problem.pddl");
+    ROS_INFO("PDDL problem path : %s", problem_path_.c_str());
+    pddl_problem_generator_ = new PDDLProblemGenerator();
 }
 
 PDDLProblemGeneratorNode::~PDDLProblemGeneratorNode()
@@ -28,47 +29,6 @@ PDDLProblemGeneratorNode::~PDDLProblemGeneratorNode()
     // shut down publishers and subscribers
     sub_event_in_.shutdown();
     pub_event_out_.shutdown();
-}
-
-void PDDLProblemGeneratorNode::getSetParams()
-{
-    std::string domain_path;
-    std::string problem_path;
-
-
-    std::string metric = "(:metric minimize (total-cost))";
-    // setup cost file paths default arguments
-    std::vector<std::string> default_args;
-    default_args.push_back("no_cost");
-
-    std::vector<std::string> cost_file_paths;
-
-    // getting required parameters from parameter server
-    nh_.param<std::string>("domain_path", domain_path, "/home/user/my_domain.pddl");
-    nh_.param<std::string>("problem_path", problem_path, "/home/user/my_problem.pddl");
-
-    // informing the user about the parameters which will be used
-    ROS_INFO("PDDL domain path : %s", domain_path.c_str());
-    ROS_INFO("PDDL problem path : %s", problem_path.c_str());
-
-    pddl_problem_generator_ = new PDDLProbGenCost(problem_path, metric);
-
-    int max_goals;
-    nh_.param<int>("max_goals", max_goals, 3);
-    pddl_problem_generator_->setMaxGoals(max_goals);
-
-    // check domain file existance
-    if (boost::filesystem::exists(domain_path.c_str()))
-    {
-        // parse domain.pddl and setup environment with its information
-        environment_.parseDomain(domain_path);
-    }
-    else
-    {
-        ROS_ERROR("Error while parsing PDDL domain, file does not exist : %s", domain_path.c_str());
-        ROS_WARN("Will exit process now...");
-        exit(1);
-    }
 }
 
 void PDDLProblemGeneratorNode::eventInCallback(const std_msgs::String::ConstPtr& msg)
@@ -95,32 +55,17 @@ void PDDLProblemGeneratorNode::update()
         return;
     }
 
-    try
-    {
-        // take knowledge base snapshot and store it in environment
-        environment_.update(nh_);
-    }
-    catch (const std::exception& e)
-    {
-        ROS_ERROR("An exception occurred while updating the environment (knowledge base) : %s", e.what());
-        even_out_msg_.data = std::string("e_failure");
-        pub_event_out_.publish(even_out_msg_);
-        return;
-    }
-
     // generate PDDL file
-    if (!pddl_problem_generator_->generatePDDLProblemFile(environment_))
+    if (!pddl_problem_generator_->generatePDDLProblemFile(problem_path_))
     {
         ROS_ERROR("An error occurred while generating PDDL file");
-        even_out_msg_.data = std::string("e_failure");
-        pub_event_out_.publish(even_out_msg_);
-
+        event_out_msg_.data = std::string("e_failure");
+        pub_event_out_.publish(event_out_msg_);
         return;
     }
 
-    // publish even_out : "e_success"
-    even_out_msg_.data = std::string("e_success");
-    pub_event_out_.publish(even_out_msg_);
+    event_out_msg_.data = std::string("e_success");
+    pub_event_out_.publish(event_out_msg_);
     ROS_INFO("Succesfully created PDDL problem from KB snapshot !");
 }
 

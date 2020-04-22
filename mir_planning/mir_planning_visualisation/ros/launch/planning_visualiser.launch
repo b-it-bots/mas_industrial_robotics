@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="model_path" default="$(find mir_planning_visualisation)/resource"/>
+    <arg name="model_to_marker_config"
+         default="$(find mir_planning_visualisation)/ros/config/model_to_marker.yaml"/>
+    <arg name="plan_marker_color_config"
+         default="$(find mir_planning_visualisation)/ros/config/plan_marker_color.yaml"/>
+
+    <arg name="robot_env" default="$(optenv ROBOT_ENV !!NO_ROBOT_ENV_SET!!)" />
+    <arg name="navigation_goals_file"
+         default="$(find mcr_default_env_config)/$(arg robot_env)/navigation_goals.yaml" />
+
+    <arg name="debug" default="false" />
+    <arg name="global_frame" default="map" />
+    <arg name="alpha" default="1.0" />
+    <arg name="base_link_to_ws_edge" default="0.4" />
+    <arg name="visualise_robot" default="true" />
+
+    <arg name="kb_server_facts_topic" default="/rosplan_knowledge_base/state/propositions" />
+    <arg name="kb_server_goals_topic" default="/rosplan_knowledge_base/state/goals" />
+    <arg name="plan_topic" default="/mir_task_planning/task_planner_server/plan_task/result" />
+
+
+    <group ns="mir_planning">
+
+        <node pkg="mir_planning_visualisation" type="visualiser"
+              name="planning_visualiser" output="screen" >
+
+            <remap from="~plan" to="$(arg plan_topic)" />
+
+            <param name="kb_server_facts_topic" type="str" value="$(arg kb_server_facts_topic)" />
+            <param name="kb_server_goals_topic" type="str" value="$(arg kb_server_goals_topic)" />
+            <param name="debug" type="bool" value="$(arg debug)" />
+            <param name="global_frame" type="str" value="$(arg global_frame)" />
+            <param name="model_path" type="str" value="$(arg model_path)" />
+            <param name="alpha" type="double" value="$(arg alpha)" />
+            <param name="base_link_to_ws_edge" type="double" value="$(arg base_link_to_ws_edge)" />
+            <param name="model_to_marker_config" type="str" value="$(arg model_to_marker_config)" />
+            <param name="plan_marker_color_config" type="str" value="$(arg plan_marker_color_config)" />
+            <param name="navigation_goals" type="str" value="$(arg navigation_goals_file)" />
+            <param name="visualise_robot" type="bool" value="$(arg visualise_robot)" />
+            <param name="rate" type="double" value="1.0" />
+
+        </node>
+
+    </group>
+
+</launch>
