@@ -9,6 +9,8 @@ env:
   global:
     - COMPOSE_VERSION: 1.22.0
     - CONTAINER_RELEASE_IMAGE: bitbots/bitbots-industrial:$TRAVIS_BRANCH
+    - CACHE_FOLDER=$HOME/docker-images
+    - CACHE_FILE=${CACHE_FOLDER}/bitbots-industrial.tgz
 
 before_install:
   - sudo pip install --upgrade pip
@@ -23,9 +25,9 @@ before_install:
 stages:
   - build
   - name: deploy
-    if: (branch IN (devel, indigo, kinetic, melodic) AND type != "pull_request") OR tag = true
+    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
   - name: docs
-    if: (branch IN (devel, indigo, kinetic, melodic) AND type != "pull_request") OR tag = true
+    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
 
 jobs:
   include:
@@ -33,17 +35,23 @@ jobs:
       name: "Complete Build"
       script:
         - docker-compose build travis
+        - mkdir -p ${CACHE_FOLDER}
+        - docker save ${CONTAINER_RELEASE_IMAGE} | gzip -c > ${CACHE_FILE}
       workspaces:
         create:
           name: build_workspace
+          paths:
+            - ${CACHE_FILE}
     - stage: deploy
       workspaces:
         use: build_workspace
       name: "Docker Hub Deployment"
       skip_cleanup: true
       script:
-        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+        - ls -la ${CACHE_FOLDER}
+        - if [[ -f ${CACHE_FILE} ]]; then docker load -i ${CACHE_FILE}; fi
         - docker images
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
         - docker push $CONTAINER_RELEASE_IMAGE
     - stage: docs
       name: "Build and deploy documentation"
