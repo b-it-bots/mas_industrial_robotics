@@ -43,20 +43,6 @@
     <param name="publish_frequency" type="double" value="100.0" />
   </node>
 
-  <!-- moveit! -->
-  <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch">
-      <arg name="planner_pipeline" value="interpolation" />
-  </include>
-  <param name="/move_group/trajectory_execution/allowed_execution_duration_scaling" type="double" value="1.5"/>
-  <!-- by setting this parameter we disable checking that the first point in the trajectory is the current state -->
-  <param name="/move_group/trajectory_execution/allowed_start_tolerance" type="double" value="0.0"/>
-
-  <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" />
-
-  <!-- launching navigation nodes -->
-   <!-- move_base with dwa approach -->
-   <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
-
   <!-- load robot specific launch files -->
   <include file="$(find mir_bringup_sim)/robots/$(arg robot).launch" />
 
