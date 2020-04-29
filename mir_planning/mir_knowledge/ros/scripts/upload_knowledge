@@ -1,6 +1,34 @@
 #!/usr/bin/env python
 
-import mir_knowledge_ros.upload_knowledge
+import rospy
+from std_msgs.msg import String
+
+from mir_knowledge_ros.problem_uploader import ProblemUploader
+
+UPLOADER = None
+
+def event_in_cb(msg):
+    if msg.data == 'e_trigger':
+        UPLOADER.upload()
+    else:
+        rospy.logerr('Unrecognized event in message. Expecting `e_trigger` ...')
+
+
+def main():
+    global UPLOADER
+    rospy.init_node('upload_knowledge')
+    rospy.sleep(0.5)
+
+    pddl_problem_file = rospy.get_param('~problem_file', None)
+    if pddl_problem_file == None:
+        rospy.logerr('No problem file provided. Exiting...')
+        return
+
+    UPLOADER = ProblemUploader(pddl_problem_file)
+    rospy.Subscriber("~event_in", String, event_in_cb)
+
+    rospy.loginfo('[upload_knowledge] Initialized.')
+    rospy.spin()
 
 if __name__ == '__main__':
-    mir_knowledge_ros.upload_knowledge.main()
+    main()

@@ -161,8 +161,8 @@ def main():
 
         # generate problem from knowledge base snapshot
         smach.StateMachine.add('GENERATE_PDDL_PROBLEM', gbs.send_and_wait_events_combined(
-                event_in_list=[('/task_planning/pddl_problem_generator_node/event_in', 'e_trigger')],
-                event_out_list=[('/task_planning/pddl_problem_generator_node/event_out', 'e_success', True)],
+                event_in_list=[('/mir_planning/pddl_problem_generator/event_in', 'e_trigger')],
+                event_out_list=[('/mir_planning/pddl_problem_generator/event_out', 'e_success', True)],
                 timeout_duration=5),
                 transitions={'success': 'PLAN',
                              'timeout': 'GENERATE_PDDL_PROBLEM',

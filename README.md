@@ -30,6 +30,14 @@ If you have never worked with git before, we recommend to go through the followi
 
      http://excess.org/article/2008/07/ogre-git-tutorial/
 
+## Docker (Recommended, Optional)
+### Getting started with docker
+The docker images available [here](https://hub.docker.com/r/bitbots/bitbots-industrial/tags) provide a proper development environment -with ros pre-installed and without any missing dependencies- for the MAS industrial software. It is highly recommended that you use docker containers to build and run your nodes rather than directly installing ROS and working with the MAS industrial software on your PC.
+
+The latest versions of docker-engine and docker-compose have to be installed before getting started.
+Please have a look at [docker's official website](https://docs.docker.com/get-started/overview/) for more insights into the working and usage of docker images and docker containers.
+Please refer [here](https://github.com/b-it-bots/docker/blob/master/industrial/README.md) for more detailed instructions on the usage of bitbots-industrial docker images.
+
 
 ## ROS - Robot Operating System
 ### Install ROS
@@ -61,12 +69,16 @@ Navigate into the cloned repository and run setup.sh file.
 
      ./setup.sh full <optional arg for catkin_ws parent dir>
 
+**Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
+
 This script does the following,
 
-* installs ROS, if not previously installed, provided the optional argument full is given
+* installs ROS, if not previously installed, provided the optional argument full is given. In case, you dont want to install ROS then replace full by none.
 * creates a catkin workspace folder in the directory specified in the argument or by default places it in home directory, i.e. ~/catkin_ws (if it does not exist)
-* copies the clone of the mas_industiral_robotics from your ~/temp to \<your folder\>/catkin_ws/src and installs the necessary ros dependencies and other related repositories
+* clones the mas_industiral_robotics repository along with other repositories mentioned in repository.rosinstall file to \<your folder\>/catkin_ws/src and installs the necessary ros dependencies
 * initiates a catkin build in the catkin workspace
+
+**Note:** A catkin_ws built inside docker container can be built only within docker containers having the same mounted directory in the container. Do not try to switch the catkin_ws build between docker containers and local PC, as it will produce errors due to conflicting paths.
 
 Add the following to your bashrc and source your bashrc, so that you need not execute ./setup.sh script each time you open your terminal
 
@@ -83,7 +95,7 @@ Finally delete the initially cloned mas_industrial_robotics in ~/temp, as all ne
 #### ROBOT variable
 With the ROBOT variable you can choose which hardware configuration should be loaded when starting the robot. The following line will add the variable to your .bashrc:
 
-     echo "export ROBOT=youbot-brsu-1" >> ~/.bashrc
+     echo "export ROBOT=youbot-brsu-4" >> ~/.bashrc
      source ~/.bashrc
 
 
