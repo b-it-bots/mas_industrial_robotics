@@ -12,20 +12,16 @@
 #define MIR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
 
 #include <ros/ros.h>
-#include <rosplan_planning_system/PlanningEnvironment.h>
-#include <mir_pddl_problem_generator/pddl_problem_generator.h>
 #include <std_msgs/String.h>
 #include <string>
-#include <boost/filesystem.hpp>
+
+#include <mir_pddl_generator_node/pddl_problem_generator.h>
 
 class PDDLProblemGeneratorNode
 {
     public:
         PDDLProblemGeneratorNode();
         ~PDDLProblemGeneratorNode();
-
-        // get parameters from param server
-        void getSetParams();
 
         // std_msgs/String node event_in callback to trigger PDDL generation process
         void eventInCallback(const std_msgs::String::ConstPtr& msg);
@@ -46,13 +42,13 @@ class PDDLProblemGeneratorNode
         std_msgs::String event_in_msg_;
 
         // for publishing event_out string msg
-        std_msgs::String even_out_msg_;
+        std_msgs::String event_out_msg_;
+
+        std::string problem_path_;
 
         // Common class pddl problem generator
-        PDDLProbGenCost* pddl_problem_generator_;
+        PDDLProblemGenerator* pddl_problem_generator_;
 
-        // Parses the domain and gets its attributes
-        KCL_rosplan::PlanningEnvironment environment_;
 };
 #endif  // MIR_PDDL_GENERATOR_NODE_PDDL_PROBLEM_GENERATOR_NODE_H
 

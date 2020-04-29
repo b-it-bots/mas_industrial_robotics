@@ -4,7 +4,7 @@ from rosplan_knowledge_msgs.srv import GetAttributeService
 from std_msgs.msg import String
 
 """
-rosservice call /kcl_rosplan/get_current_goals "predicate_name: ''"
+rosservice call /rosplan_knowledge_base/state/goals "predicate_name: ''"
 check if it is empty, this means there are no unfinished goals
 """
 
@@ -27,13 +27,13 @@ class KnowledgeBaseAnalizer(object):
 
         """
         rospy.loginfo('Pending goal request received...')
-        rospy.loginfo('Waiting for service: /kcl_rosplan/get_current_goals')
-        rospy.wait_for_service('/kcl_rosplan/get_current_goals')
-        rospy.loginfo('Service /kcl_rosplan/get_current_goals is available, proceeding')
+        rospy.loginfo('Waiting for service: /rosplan_knowledge_base/state/goals')
+        rospy.wait_for_service('/rosplan_knowledge_base/state/goals')
+        rospy.loginfo('Service /rosplan_knowledge_base/state/goals is available, proceeding')
         event_out = String()
         event_out.data = 'e_failure'
         try:
-            pending_goals = rospy.ServiceProxy('/kcl_rosplan/get_current_goals', GetAttributeService)
+            pending_goals = rospy.ServiceProxy('/rosplan_knowledge_base/state/goals', GetAttributeService)
             response = pending_goals('')
             if str(response) == 'attributes: []':
                 rospy.loginfo('There are no pending goals in the knowledge base')
