@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=kinetic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=melodic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
 
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
-- ROS Kinetic: Ubuntu 16.04
+- ROS Melodic: Ubuntu 18.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -42,10 +42,10 @@ Please refer [here](https://github.com/b-it-bots/docker/blob/master/industrial/R
 ## ROS - Robot Operating System
 ### Install ROS
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
-Alternatively, you can skip this step, as ROS Kinetic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
+Alternatively, you can skip this step, as ROS Melodic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
 
 
-- ROS Kinetic - http://wiki.ros.org/kinetic/Installation/Ubuntu
+- ROS Melodic - http://wiki.ros.org/melodic/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
   
