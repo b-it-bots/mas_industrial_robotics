@@ -8,6 +8,10 @@
 	
 	<xacro:macro name="full_platform" params="parent name arm_angle *origin">
 
+        <material name="Silver">
+            <color rgba="0.9 0.9 0.9 1.0" />
+        </material>
+
 		<!-- joint between arm_7_link and sdh_palm_link -->
 		<joint name="${name}_joint" type="fixed" >
 			<xacro:insert_block name="origin" />
@@ -28,7 +32,7 @@
 					<box size="0.6 0.396 0.005" />
 					<!--mesh filename="package://mir_description/meshes/misc/full_platform.dae"/-->
 				</geometry>
-				<material name="DarkGrey"/>
+				<material name="Silver"/>
 			</visual>
 			
 			<collision>
