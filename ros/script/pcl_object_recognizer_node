@@ -4,6 +4,24 @@ PACKAGE = 'mir_object_recognition'
 NODE = 'pcl_object_recognizer'
 SERVICE = '~recognize_object/mean_circle'
 
+class_label = {
+            0: 'AXIS',
+            1: 'BEARING',
+            2: 'BEARING_BOX',
+            3: 'CONTAINER_BOX_BLUE',
+            4: 'CONTAINER_BOX_RED',
+            5: 'DISTANCE_TUBE',
+            6: 'F20_20_B',
+            7: 'F20_20_G',
+            8: 'M20',
+            9: 'M20_100',
+            10: 'M30',
+            11: 'MOTOR',
+            12: 'R20',
+            13: 'S40_40_B',
+            14: 'S40_40_G'
+}
+
 import glob
 import roslib
 import rospy
@@ -14,6 +32,7 @@ import numpy as np
 
 # Import helper class for loading trained network
 from pcl_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
+from pcl_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
 from pcl_object_recognition.utils.features import FVRDDFeatureExtraction
 import pcl_object_recognition.utils.pc_utils as utils
 
@@ -24,6 +43,7 @@ from mas_perception_msgs.msg import ObjectList
 import sensor_msgs.point_cloud2
 import struct
 import colorsys
+import pcl
 
 class PointcloudObjectRecognizer():
 
@@ -52,8 +72,7 @@ class PointcloudObjectRecognizer():
 
         elif self.model == "cnn_based":
             if self.model_id == "DGCNN":
-
-            raise NotImplementedError
+                self.classifier = CNNBasedClassifiers("None", "None")
 
     def recognize_object_topic_cb(self, object_data):
         if object_data.objects:
@@ -61,30 +80,38 @@ class PointcloudObjectRecognizer():
             result_object_list = ObjectList()
             result_object_list = object_data.objects
             for object in result_object_list:
-                if self.model == "feature_based"
-                    xyzhsv = self.convert_to_xyzhsv(object.pointcloud)
+                if self.model == "feature_based":
+                    xyzhsv = self.extract_pointcloud(object.pointcloud, color="hsv")
                     features = self.fe_method(xyzhsv)
                     features = np.reshape(features, (1,-1))
                     label, probability = self.classifier.classify(features)
+                    label = label[0]
                 elif self.model == "cnn_based":
-                    xyzrgb = sensor_msgs.point_cloud2.read_points(pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
+                    xyzhsv = self.extract_pointcloud(object.pointcloud, color="rgb")
+                    label, probability = self.classifier.infer_one_cloud(xyzhsv)
+                    label = class_label[label[0]]
 
-                object.name = label[0]
+                object.name = label
                 object.probability = probability
             self.pub.publish(result_object_list)
 
-    def convert_to_xyzhsv(self, pc):
+    def extract_pointcloud(self, pc, color="hsv"):
         # Generator for x,y,z,rgb fields from pointcloud
         xyzrgb_gen = sensor_msgs.point_cloud2.read_points(pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
 
         # convert generator to list of lists then numpy array
-        xyzrgb = [list(elem) for elem in list(xyzrgb_gen)]
-        xyzrgb = np.array(xyzrgb)
-        rgb = xyzrgb[:,3][np.newaxis].T
-        hsv = np.array([list(colorsys.rgb_to_hsv(*utils.float_to_rgb(i))) for i in rgb])
-        xyzhsv = np.hstack([xyzrgb[:,0:3], hsv])
+        pointcloud = [list(elem) for elem in list(xyzrgb_gen)]
+        pointcloud = np.array(pointcloud)
+        float_rgb = pointcloud[:,3][np.newaxis].T
 
-        return xyzhsv
+        if color == "hsv":
+            pc_color = np.array([list(colorsys.rgb_to_hsv(*utils.float_to_rgb(frgb))) for frgb in float_rgb])
+        elif color == "rgb":
+            pc_color = np.array([list(utils.float_to_rgb(frgb)) for frgb in float_rgb])
+
+        pointcloud = np.hstack([pointcloud[:,0:3], pc_color])
+
+        return pointcloud
 
 if __name__ == '__main__':
     rospy.init_node(NODE)
