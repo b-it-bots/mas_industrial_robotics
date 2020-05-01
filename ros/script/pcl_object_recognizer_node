@@ -13,9 +13,9 @@ from os.path import join
 import numpy as np
 
 # Import helper class for loading trained network
-from pcl_object_recognition.svm_classifier import SVMObjectClassifier
-from pcl_object_recognition.features import calculate_feature_vector, calculate_maxrdd_fv_features
-import pcl_object_recognition.utils as utils
+from pcl_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
+from pcl_object_recognition.utils.features import FVRDDFeatureExtraction
+import pcl_object_recognition.utils.pc_utils as utils
 
 from mas_perception_msgs.srv import RecognizeObject
 from mas_perception_msgs.srv import RecognizeObjectResponse
@@ -27,53 +27,51 @@ import colorsys
 
 class PointcloudObjectRecognizer():
 
-    def __init__(self, classifier_name, dataset_type, variance=0.05, mc_feature=True):
-        self.classifier = self.load_classifier(dataset_type)
+    def __init__(self, model, model_id, dataset, ngaussians=2, variance=0.05, mc_feature=True):
+        self.model = model
+        self.model_id = model_id
+        self.dataset = model_id + "_" + dataset
         # Subscriber
         self.sub = rospy.Subscriber("input/object_list",ObjectList, self.recognize_object_topic_cb)
         # Publisher
         self.pub = rospy.Publisher("output/object_list",ObjectList, queue_size=1)
-        
-        self.classifier_name = classifier_name
-        self.dataset_type = dataset_type
-        self.mc_feature = mc_feature
-        self.gmm = None
-        if self.classifier_name == "fisher_vector":
-            n_gaussian = int(''.join(filter(str.isdigit, self.dataset_type)))
-            self.gmm = utils.get_3d_grid_gmm(subdivisions=[n_gaussian, n_gaussian, n_gaussian], variance=variance)
-        
+
+        if self.model == "feature_based":        
+            self.feature_extraction = FVRDDFeatureExtraction(self.model_id)
+            self.fe_method = self.feature_extraction.get_method()
+            if model_id == "FVRDD":
+                self.gmm = utils.get_3d_grid_gmm(subdivisions=[ngaussians, ngaussians, ngaussians], variance=variance)
+                self.feature_extraction.set_fv_params(self.gmm, use_rdd=True)
+            elif model_id == "RDD":
+                self.feature_extraction.set_rdd_params(color=True)
+            
+            cfg_folder = join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config')
+            classifier_file = join(cfg_folder, self.dataset, 'classifier.pkl')
+            label_encoder = join(cfg_folder, self.dataset, 'label_encoder.pkl')
+            self.classifier = FeatureBasedClassifiers(classifier_file, label_encoder)
+
+        elif self.model == "cnn_based":
+            if self.model_id == "DGCNN":
+
+            raise NotImplementedError
+
     def recognize_object_topic_cb(self, object_data):
         if object_data.objects:
             rospy.loginfo("%d clouds received ", len(object_data.objects))
             result_object_list = ObjectList()
             result_object_list = object_data.objects
             for object in result_object_list:
-                xyzhsv = self.convert_to_xyzhsv(object.pointcloud)
-                #features = calculate_feature_vector(xyzhsv, True)
-                if self.classifier_name == 'mean_circle':
-                    features = calculate_feature_vector(xyzhsv, enable_color=True)
-                else:
-                    features = calculate_maxrdd_fv_features(xyzhsv, self.gmm, self.dataset_type, mean_circle=self.mc_feature)
-                features = np.reshape(features, (1,-1))
-                label, probability = self.classifier.classify(features)
+                if self.model == "feature_based"
+                    xyzhsv = self.convert_to_xyzhsv(object.pointcloud)
+                    features = self.fe_method(xyzhsv)
+                    features = np.reshape(features, (1,-1))
+                    label, probability = self.classifier.classify(features)
+                elif self.model == "cnn_based":
+                    xyzrgb = sensor_msgs.point_cloud2.read_points(pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
+
                 object.name = label[0]
                 object.probability = probability
             self.pub.publish(result_object_list)
-
-    # copied from python-pcl
-    def float_to_rgb(self, p_rgb):
-        # rgb = *reinterpret_cast<int*>(&p.rgb)
-        rgb_bytes = struct.pack('f', p_rgb)
-        rgb = struct.unpack('I', rgb_bytes)[0]
-        r = (rgb >> 16) & 0x0000ff
-        g = (rgb >> 8)  & 0x0000ff
-        b = (rgb)       & 0x0000ff
-        return (r/255.0),(g/255.0),(b/255.0)
-
-    def load_classifier(self, classifier_name):
-        cfg_folder = join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config')
-        return SVMObjectClassifier.load(join(cfg_folder, classifier_name, 'classifier.pkl'),
-                                        join(cfg_folder, classifier_name, 'label_encoder.pkl'))
 
     def convert_to_xyzhsv(self, pc):
         # Generator for x,y,z,rgb fields from pointcloud
@@ -83,15 +81,16 @@ class PointcloudObjectRecognizer():
         xyzrgb = [list(elem) for elem in list(xyzrgb_gen)]
         xyzrgb = np.array(xyzrgb)
         rgb = xyzrgb[:,3][np.newaxis].T
-        hsv = np.array([list(colorsys.rgb_to_hsv(*self.float_to_rgb(i))) for i in rgb])
+        hsv = np.array([list(colorsys.rgb_to_hsv(*utils.float_to_rgb(i))) for i in rgb])
         xyzhsv = np.hstack([xyzrgb[:,0:3], hsv])
 
         return xyzhsv
 
 if __name__ == '__main__':
     rospy.init_node(NODE)
-    classifier_name = rospy.get_param("~classifier")
-    dataset_type = rospy.get_param("~dataset_type")
-    object_recognizer = PointcloudObjectRecognizer(classifier_name, dataset_type)
-    rospy.logwarn('\033[92m'+"PCL Recognizer is ready using: %s , model: %s ", classifier_name, dataset_type)
+    model = rospy.get_param("~model")
+    model_id = rospy.get_param("~model_id")
+    dataset = rospy.get_param("~dataset")
+    object_recognizer = PointcloudObjectRecognizer(model, model_id, dataset)
+    rospy.logwarn('\033[92m'+"PCL Recognizer is ready using: %s , model: %s ", model_id, dataset)
     rospy.spin()
