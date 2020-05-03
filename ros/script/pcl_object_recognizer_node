@@ -2,7 +2,6 @@
 
 PACKAGE = 'mir_object_recognition'
 NODE = 'pcl_object_recognizer'
-SERVICE = '~recognize_object/mean_circle'
 
 class_label = {
             0: 'AXIS',
@@ -26,8 +25,8 @@ import glob
 import roslib
 import rospy
 
+import os
 import sys
-from os.path import join
 import numpy as np
 
 # Import helper class for loading trained network
@@ -51,9 +50,10 @@ class PointcloudObjectRecognizer():
         self.model = model
         self.model_id = model_id
         self.dataset = model_id + "_" + dataset
-        # Subscriber
+        self.cfg_folder = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config')
+
+        # Subscriber and publisher
         self.sub = rospy.Subscriber("input/object_list",ObjectList, self.recognize_object_topic_cb)
-        # Publisher
         self.pub = rospy.Publisher("output/object_list",ObjectList, queue_size=1)
 
         if self.model == "feature_based":        
@@ -65,14 +65,14 @@ class PointcloudObjectRecognizer():
             elif model_id == "RDD":
                 self.feature_extraction.set_rdd_params(color=True)
             
-            cfg_folder = join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config')
-            classifier_file = join(cfg_folder, self.dataset, 'classifier.pkl')
-            label_encoder = join(cfg_folder, self.dataset, 'label_encoder.pkl')
+            classifier_file = os.path.join(self.cfg_folder, self.dataset, 'classifier.pkl')
+            label_encoder = os.path.join(self.cfg_folder, self.dataset, 'label_encoder.pkl')
             self.classifier = FeatureBasedClassifiers(classifier_file, label_encoder)
 
         elif self.model == "cnn_based":
+            self.checkpoint_file = os.path.join(self.cfg_folder, self.dataset, 'model.ckpt')
             if self.model_id == "DGCNN":
-                self.classifier = CNNBasedClassifiers("None", "None")
+                self.classifier = CNNBasedClassifiers(self.checkpoint_file, num_points=2048)
 
     def recognize_object_topic_cb(self, object_data):
         if object_data.objects:
@@ -88,7 +88,7 @@ class PointcloudObjectRecognizer():
                     label = label[0]
                 elif self.model == "cnn_based":
                     xyzhsv = self.extract_pointcloud(object.pointcloud, color="rgb")
-                    label, probability = self.classifier.infer_one_cloud(xyzhsv)
+                    label, probability = self.classifier.infer_one_cloud(xyzhsv, center=False, rotate=True, pad=True)
                     label = class_label[label[0]]
 
                 object.name = label
@@ -99,11 +99,11 @@ class PointcloudObjectRecognizer():
         # Generator for x,y,z,rgb fields from pointcloud
         xyzrgb_gen = sensor_msgs.point_cloud2.read_points(pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
 
-        # convert generator to list of lists then numpy array
         pointcloud = [list(elem) for elem in list(xyzrgb_gen)]
         pointcloud = np.array(pointcloud)
         float_rgb = pointcloud[:,3][np.newaxis].T
 
+        # Convert float rgb to hsv/rgb
         if color == "hsv":
             pc_color = np.array([list(colorsys.rgb_to_hsv(*utils.float_to_rgb(frgb))) for frgb in float_rgb])
         elif color == "rgb":
