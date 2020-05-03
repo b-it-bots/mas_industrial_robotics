@@ -3,16 +3,18 @@
 
   <arg name="input_pointcloud_topic" default="/arm_cam3d/depth_registered/points" />
   <arg name="target_frame" default="odom" />
-  <arg name="classifier" default="fisher_vector" />
-  <arg name="dataset_type" default="msc_fv_2" />
+  <arg name="model" default="cnn_based" />
+  <arg name="model_id" default="DGCNN" />
+  <arg name="dataset" default="asus" />
   <!-- <arg name="classifier" default="mean_circle" /> -->
   <!-- <arg name="dataset_type" default="mc" /> -->
 
   <group ns="mir_perception">
     <node pkg="mir_object_recognition" type="pcl_object_recognizer_node" name="pcl_object_recognizer" output="screen" 
           respawn="false" ns="multimodal_object_recognition/recognizer/pcl">
-      <param name="classifier" value="$(arg classifier)" type="str" />
-      <param name="dataset_type" value="$(arg dataset_type)" type="str" />
+      <param name="model" value="$(arg model)" type="str" />
+      <param name="model_id" value="$(arg model_id)" type="str" />
+      <param name="dataset" value="$(arg dataset)" type="str" />
       <remap from="~input/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/pcl/input/object_list" />
       <remap from="~output/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/pcl/output/object_list"/>
     </node>
