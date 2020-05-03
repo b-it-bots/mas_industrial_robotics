@@ -48,8 +48,8 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     
 {
     tf_listener_.reset(new tf::TransformListener);
-    scene_segmentation_ros_ = SceneSegmentationROSUPtr(new SceneSegmentationROS(nh_));
-    mm_object_recognition_utils_ = MultimodalObjectRecognitionUtilsUPtr(new MultimodalObjectRecognitionUtils());
+    scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
+    mm_object_recognition_utils_ = MultimodalObjectRecognitionUtilsSPtr(new MultimodalObjectRecognitionUtils());
     
     dynamic_reconfigure::Server<mir_object_recognition::SceneSegmentationConfig>::CallbackType f =
                             boost::bind(&MultimodalObjectRecognitionROS::configCallback, this, _1, _2);
@@ -183,7 +183,7 @@ void MultimodalObjectRecognitionROS::preprocessPointCloud(const sensor_msgs::Poi
     pc2->header.frame_id = msg_transformed.header.frame_id;
     
     cloud_ = PointCloud::Ptr(new PointCloud); 
-    pcl::fromPCLPointCloud2(*pc2, *cloud_);
+    pcl::fromPCLPointCloud2(*pc2, *cloud_);    
 }
 
 
@@ -194,7 +194,8 @@ void MultimodalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::Obje
     PointCloud::Ptr cloud(new PointCloud);
     cloud->header.frame_id = target_frame_id_;
     scene_segmentation_ros_->getCloudAccumulation(cloud);
-    scene_segmentation_ros_->segmentCloud(cloud, object_list, clusters, boxes);
+    scene_segmentation_ros_->segmentCloud(cloud, object_list, clusters, boxes, 
+                                          center_cluster_, pad_cluster_, padded_cluster_size_);
 
     std_msgs::Float64 workspace_height_msg;
     workspace_height_msg.data = scene_segmentation_ros_->getWorkspaceHeight();
@@ -212,9 +213,13 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
     if (data_collection_)
     {
+        std::string filename;
         for (auto& cluster:clusters_3d)
         {
-            mpu::object::savePcd(cluster, logdir_);
+            filename = "";
+            filename.append("pcd_cluster_");
+            filename.append(std::to_string(ros::Time::now().toSec()));
+            mpu::object::savePcd(cluster, logdir_, filename);
             ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m"<<logdir_);
         }
         return;
@@ -443,7 +448,39 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     {
         ROS_WARN_STREAM("Debug mode: publishing object information");
         publishDebug(combined_object_list, clusters_3d, clusters_2d);
-        mpu::object::saveImage(cv_image, image_msg_, logdir_); 
+
+        ros::Time time_now = ros::Time::now();
+        
+        // Save image raw and debug
+        std::string filename = "";
+        filename.append("rgb_debug_");
+        filename.append(std::to_string(time_now.toSec()));
+        mpu::object::saveCVImage(cv_image, logdir_, filename); 
+        ROS_INFO("Image saved to ", logdir_);
+
+        cv_bridge::CvImagePtr raw_cv_image;
+        if (mpu::object::getCVImage(image_msg_, raw_cv_image))
+        {
+            filename = "";
+            filename.append("rgb_raw_");
+            filename.append(std::to_string(time_now.toSec()));
+            mpu::object::saveCVImage(raw_cv_image, logdir_, filename); 
+            ROS_INFO("Image saved to ", logdir_);
+        }
+        else
+        {
+            ROS_ERROR("Cannot generate cv image...");
+        }
+
+        // Save pointcloud debug
+        for (auto& cluster:clusters_3d)
+        {
+            filename = "";
+            filename.append("pcd_cluster_");
+            filename.append(std::to_string(time_now.toSec()));
+            mpu::object::savePcd(cluster, logdir_, filename);
+            ROS_INFO("Point cloud saved to ", logdir_);
+        }
     }
 }
 
@@ -680,15 +717,20 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
             config.passthrough_filter_field_name,
             config.passthrough_filter_limit_min,
             config.passthrough_filter_limit_max);
-    scene_segmentation_ros_->setNormalParams(config.normal_radius_search);
+    scene_segmentation_ros_->setNormalParams(config.normal_radius_search, config.use_omp, config.num_cores);
+    Eigen::Vector3f axis(config.sac_x_axis, config.sac_y_axis, config.sac_z_axis);
     scene_segmentation_ros_->setSACParams(config.sac_max_iterations, config.sac_distance_threshold,
-            config.sac_optimize_coefficients, config.sac_eps_angle,
+            config.sac_optimize_coefficients, axis, config.sac_eps_angle,
             config.sac_normal_distance_weight);
     scene_segmentation_ros_->setPrismParams(config.prism_min_height, config.prism_max_height);
     scene_segmentation_ros_->setOutlierParams(config.outlier_radius_search, config.outlier_min_neighbors);
     scene_segmentation_ros_->setClusterParams(config.cluster_tolerance, config.cluster_min_size, config.cluster_max_size,
             config.cluster_min_height, config.cluster_max_height, config.cluster_max_length,
             config.cluster_min_distance_to_polygon);
+
+    center_cluster_ = config.center_cluster;
+    pad_cluster_ = config.pad_cluster;
+    padded_cluster_size_ = config.padded_cluster_size;
 
     object_height_above_workspace_ = config.object_height_above_workspace;
     rgb_container_height_ = config.rgb_container_height;
