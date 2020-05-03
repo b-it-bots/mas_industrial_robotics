@@ -123,10 +123,10 @@ class MultimodalObjectRecognitionROS
         void recognizedCloudCallback(const mas_perception_msgs::ObjectList &msg);
     
     protected:
-        typedef std::unique_ptr<SceneSegmentationROS> SceneSegmentationROSUPtr;
-        SceneSegmentationROSUPtr scene_segmentation_ros_;
-        typedef std::unique_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsUPtr;
-        MultimodalObjectRecognitionUtilsUPtr mm_object_recognition_utils_;
+        typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
+        SceneSegmentationROSSPtr scene_segmentation_ros_;
+        typedef std::shared_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsSPtr;
+        MultimodalObjectRecognitionUtilsSPtr mm_object_recognition_utils_;
 
         // Used to store pointcloud and image received from callback
         sensor_msgs::PointCloud2ConstPtr pointcloud_msg_;
@@ -173,6 +173,11 @@ class MultimodalObjectRecognitionROS
         double rgb_base_link_to_laser_distance_;
         double rgb_max_object_pose_x_to_base_link_;
         double rgb_min_bbox_z_;
+
+        //cluster
+        bool center_cluster_;
+        bool pad_cluster_;
+        unsigned int padded_cluster_size_;
 
          // logdir for saving debug image
         std::string logdir_;
