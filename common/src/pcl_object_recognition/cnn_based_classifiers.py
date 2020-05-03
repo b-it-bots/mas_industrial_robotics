@@ -14,14 +14,17 @@ class CNNBasedClassifiers():
 
     """
 
-    def __init__(self, checkpoint_path, num_points=2048):
+    def __init__(self, checkpoint_path, num_points=2048, num_classes=15, cloud_dim=6):
         self.num_points = num_points
+        self.num_classes = num_classes
+        self.K = cloud_dim
         with tf.Graph().as_default():
             K = 6
-            self.points_pl = tf.placeholder(tf.float32, [1, self.num_points, K])
+            self.points_pl = tf.placeholder(tf.float32, [1, self.num_points, self.K])
             self.is_training_pl = tf.placeholder(tf.bool)
             
-            _, end_points = dgcnn.get_model(self.points_pl, num_classes=15, is_training=self.is_training_pl, bn_decay=None, K=K)
+            _, end_points = dgcnn.get_model(self.points_pl, num_classes=self.num_classes, 
+                                            is_training=self.is_training_pl, bn_decay=None, K=self.K)
             
             self.probabilities = end_points['Probabilities']
             self.predictions = tf.argmax(self.probabilities, 1)
