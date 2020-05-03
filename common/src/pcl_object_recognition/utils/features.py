@@ -1,7 +1,7 @@
 #######!/usr/bin/env python
 
 import numpy as np
-from pc_utils import scale_to_unit_sphere, normalize_pointcloud
+from pc_utils import scale_to_unit_sphere, center_and_rotate_pointcloud
 #import fv_utils
 
 class FVRDDFeatureExtraction():
@@ -252,7 +252,7 @@ class FVRDDFeatureExtraction():
         :rtype:                 numpy.array
 
         """
-        pointcloud = normalize_pointcloud(pointcloud)
+        pointcloud = center_and_rotate_pointcloud(pointcloud)
 
         # BBox feature: 3
         xyz = self.calculate_bounding_box(pointcloud)
@@ -342,7 +342,7 @@ class FVRDDFeatureExtraction():
     # Compute Multi-Axes Radial Density Distribution and Fisher Vector
     # Combine the feature
     def calculate_maxrdd_fv_features(self, pointcloud):
-        pointcloud = normalize_pointcloud(pointcloud)
+        pointcloud = center_and_rotate_pointcloud(pointcloud)
 
         features = []
         slice_features = self.calculate_slice_features(pointcloud, 8)
@@ -392,14 +392,14 @@ class FVRDDFeatureExtraction():
         
         # Use color feature
         pcl_color = pointcloud[:,3:6]
-        pcl_color = normalize_pointcloud(pcl_color)
+        pcl_color = center_and_rotate_pointcloud(pcl_color)
         pcl_color = scale_to_unit_sphere(pcl_color)
         pcl_color = np.expand_dims(pcl_color, 0)
         fv_color = self.get_3DmFV(pcl_color, self.gmm.weights_, self.gmm.means_, np.sqrt(self.gmm.covariances_))
         
         # Point feature
         pointcloud = pointcloud[:,0:3]
-        pointcloud = normalize_pointcloud(pointcloud)
+        pointcloud = center_and_rotate_pointcloud(pointcloud)
         pointcloud = scale_to_unit_sphere(pointcloud)
         pointcloud = np.expand_dims(pointcloud, 0)
         fv = self.get_3DmFV(pointcloud, self.gmm.weights_, self.gmm.means_, np.sqrt(self.gmm.covariances_))
