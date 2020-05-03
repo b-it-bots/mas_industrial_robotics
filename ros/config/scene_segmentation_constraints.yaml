@@ -9,9 +9,14 @@ pc_object_segmentation:
     passthrough_filter_limit_min: 0.0
     passthrough_filter_limit_max: 0.8
     normal_radius_search: 0.03
+    use_omp: False
+    num_cores: 8
     sac_max_iterations: 1000
     sac_distance_threshold: 0.01
     sac_optimize_coefficients: true
+    sac_x_axis: 0.0
+    sac_y_axis: 0.0
+    sac_z_axis: 1.0
     sac_eps_angle: 0.09
     sac_normal_distance_weight: 0.05
     prism_min_height: 0.01
@@ -25,8 +30,11 @@ pc_object_segmentation:
     cluster_max_height: 0.09
     cluster_max_length: 0.25
     cluster_min_distance_to_polygon: 0.04
+    center_cluster: True
+    pad_cluster: False
+    padded_cluster_size: 2048
     octree_resolution: 0.0025
-    object_height_above_workspace: 0.052
+    object_height_above_workspace: 0.020
     rgb_container_height: 0.0335
     rgb_roi_adjustment: 2
     rgb_bbox_min_diag: 21
