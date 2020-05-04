@@ -17,5 +17,6 @@
 
   <depend>rospy</depend>
   <depend>mir_planning_msgs</depend>
+  <depend>mcr_gazebo_objects</depend>
 
 </package>
