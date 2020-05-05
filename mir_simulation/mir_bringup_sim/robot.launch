@@ -8,7 +8,7 @@
   <arg name="use_sim_time" default="true"/>
   <arg name="gui" default="false"/>
 
-  <arg name="init_pos_x" default="-1.0"/>
+  <arg name="init_pos_x" default="-0.5"/>
   <arg name="init_pos_y" default="0.0"/>
   <arg name="init_pos_z" default="0.08"/>
 
@@ -43,6 +43,10 @@
     <param name="publish_frequency" type="double" value="100.0" />
   </node>
 
+  <!-- load robot specific launch files -->
+  <include file="$(find mir_bringup_sim)/robots/$(arg robot).launch" />
+
+  <!-- launching manipulation nodes -->
   <!-- moveit! -->
   <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch">
       <arg name="planner_pipeline" value="interpolation" />
@@ -54,10 +58,7 @@
   <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" />
 
   <!-- launching navigation nodes -->
-   <!-- move_base with dwa approach -->
-   <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
-
-  <!-- load robot specific launch files -->
-  <include file="$(find mir_bringup_sim)/robots/$(arg robot).launch" />
+  <!-- move_base with dwa approach -->
+  <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
 
 </launch>
