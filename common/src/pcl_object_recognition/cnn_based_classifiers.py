@@ -1,63 +1,28 @@
-#!/usr/bin/env python
+from abc import ABCMeta, abstractmethod
 
-import os
-import pickle
-import numpy as np
-import tensorflow as tf
-
-import pcl_object_recognition.models.dgcnn as dgcnn
-import pcl_object_recognition.utils.pc_utils as pc_utils
-
-class CNNBasedClassifiers():
+class CNNBasedClassifiers(object):
     """
-    CNN based classifier
-
+    Abstraction class for CNN based classifiers
     """
 
-    def __init__(self, checkpoint_path, num_points=2048, num_classes=15, cloud_dim=6):
-        self.num_points = num_points
-        self.num_classes = num_classes
-        self.K = cloud_dim
-        with tf.Graph().as_default():
-            K = 6
-            self.points_pl = tf.placeholder(tf.float32, [1, self.num_points, self.K])
-            self.is_training_pl = tf.placeholder(tf.bool)
-            
-            _, end_points = dgcnn.get_model(self.points_pl, num_classes=self.num_classes, 
-                                            is_training=self.is_training_pl, bn_decay=None, K=self.K)
-            
-            self.probabilities = end_points['Probabilities']
-            self.predictions = tf.argmax(self.probabilities, 1)
-                                
-            saver = tf.train.Saver()
-            
-            config = tf.ConfigProto()
-            config.allow_soft_placement = True
-            self.sess = tf.Session(config=config)
-            saver.restore(self.sess, checkpoint_path)
+    __metaclass__ = ABCMeta
 
-    def infer_one_cloud(self, points, center=True, rotate=True, pad=True): 
-        if center:
-            points = pc_utils.center_pointcloud(points)
-        
-        if rotate:
-            points = pc_utils.rotate_pointcloud(points)
+    def __init__(self, **kwargs):
+        self.checkpoint_path = kwargs.get("checkpoint_path", None)
+        self.num_classes = kwargs.get("num_classes", None)
+        self.num_points = kwargs.get("num_points", None)
+        self.cloud_dim = kwargs.get("cloud_dim", None)
 
-        if pad:
-            points = points.tolist()
-            while (len(points) < self.num_points):
-                points.append([0,0,0,0,0,0])
+        #Todo: option to load config from yaml?
 
-        points = np.asarray(points)
+    @abstractmethod
+    def classify(self, pointcloud):
+        """
+        A classify method to be implemented
 
-        points = pc_utils.scale_to_unit_sphere(points, normalize=False)
-        points = np.expand_dims(points, 0)
+        :param pointcloud:  The input pointcloud
+        :type:              numpy.array
 
-        feed_dict = {self.points_pl: points,
-                     self.is_training_pl: False}
-        
-        pred_val, probs = self.sess.run([self.predictions, self.probabilities],
-                                         feed_dict=feed_dict)
-        probs = probs[0][pred_val][0]
-
-        return pred_val, probs 
+        :return:            Predicted label and probability
+        """
+        pass
