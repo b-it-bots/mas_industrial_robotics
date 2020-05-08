@@ -4,6 +4,7 @@ project(mir_planning_visualisation)
 find_package(catkin REQUIRED
   COMPONENTS
   mir_planning_msgs
+  mcr_gazebo_objects
 )
 
 catkin_python_setup()
