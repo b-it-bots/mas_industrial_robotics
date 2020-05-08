@@ -5,296 +5,204 @@ import math
 import tensorflow as tf
 import numpy as np
 
-from pcl_object_recognition.utils import tf_util as dgcnn_util
+import pcl_object_recognition.utils.tf_util as tf_util
 from transform_nets import input_transform_net
 
-def get_model(point_cloud, num_classes, is_training, bn_decay=None, base=False, K=3):
-  """ Classification PointNet, input is BxNx3, output Bx40 """
-  batch_size = point_cloud.get_shape()[0].value
-  num_point = point_cloud.get_shape()[1].value
-  end_points = {}
-  k = 20
+def get_model(pointcloud, num_classes, is_training, base=False):
+    """ 
+    Classification model DGCNN, input is BxNx3, output Bxnum_classes 
 
-  adj_matrix = dgcnn_util.pairwise_distance(point_cloud)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(point_cloud, nn_idx=nn_idx, k=k)
+    :param pointcloud:  The input pointcloud (BxNxD), D can be XYZ or XYZRGB
+    :type name:         Array
+    :param num_classes: The number of classes
+    :type name:         Int
+    :param is_training: Training mode or not
+    :type name:         Bool
+    :param base:        If true, return DGCNN backbone
+    :type name:         Bool
 
-  # with tf.variable_scope('transform_net1') as sc:
-  #   transform = input_transform_net(edge_feature, is_training, bn_decay, K=K)
-  #   end_points['transform'] = transform
+    :return:  Logits and endpoints
+    """
+    batch_size = pointcloud.get_shape()[0].value
+    end_points = {}
+    k = 20
+
+    adj_matrix = tf_util.pairwise_distance(pointcloud)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(pointcloud, nn_idx=nn_idx, k=k)
+
+    net = tf_util.conv2d(edge_feature, 64, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn1', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net1 = net
+    end_points['dgcnn1'] = net1
+
+    adj_matrix = tf_util.pairwise_distance(net)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)
+
+    net = tf_util.conv2d(edge_feature, 64, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn2', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net2 = net
+    end_points['dgcnn2'] = net2
+
+    adj_matrix = tf_util.pairwise_distance(net)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k) 
+
+    net = tf_util.conv2d(edge_feature, 64, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn3', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net3 = net
+    end_points['dgcnn3'] = net3
+
+    adj_matrix = tf_util.pairwise_distance(net)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
+
+    net = tf_util.conv2d(edge_feature, 128, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn4', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net4 = net
+    end_points['dgcnn4'] = net4
+
+    net = tf_util.conv2d(tf.concat([net1, net2, net3, net4], axis=-1), 1024, [1, 1], 
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='agg', bn_decay=None)
+
+    net = tf.reduce_max(net, axis=1, keep_dims=True) 
+
+    if base:
+        end_points['DGCNN_PreFC'] = net
+        return end_points
+
+    # MLP on global point cloud vector
+    net = tf.reshape(net, [batch_size, -1]) 
+    net = tf_util.fully_connected(net, 512, bn=True, is_training=is_training,
+                                     scope='fc1', bn_decay=None)
+    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training, scope='dp1')
     
-  # point_cloud_transformed = tf.matmul(point_cloud, transform)
-  # adj_matrix = dgcnn_util.pairwise_distance(point_cloud_transformed)
-  # nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  # edge_feature = dgcnn_util.get_edge_feature(point_cloud_transformed, nn_idx=nn_idx, k=k)
-  
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn1', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net1 = net
-  end_points['dgcnn1'] = net1
+    net = tf_util.fully_connected(net, 256, bn=True, is_training=is_training,
+                                     scope='fc2', bn_decay=None)
+    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training,scope='dp2')
 
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)
+    net = tf_util.fully_connected(net, num_classes, activation_fn=None, scope='fc3')
 
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn2', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net2 = net
-  end_points['dgcnn2'] = net2
- 
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k) 
-  
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn3', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net3 = net
-  end_points['dgcnn3'] = net3
+    end_points['Logits'] = net
+    end_points['Probabilities'] = tf.nn.softmax(net, name='Probabilities')
 
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
-  
-  net = dgcnn_util.conv2d(edge_feature, 128, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn4', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net4 = net
-  end_points['dgcnn4'] = net4
-  
-  net = dgcnn_util.conv2d(tf.concat([net1, net2, net3, net4], axis=-1), 1024, [1, 1], 
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='agg', bn_decay=bn_decay)
- 
-  net = tf.reduce_max(net, axis=1, keep_dims=True) 
-  if base:
-    end_points['DGCNN_PreFC'] = net
-    return end_points
+    return net, end_points
 
-  # MLP on global point cloud vector
-  net = tf.reshape(net, [batch_size, -1]) 
-  net = dgcnn_util.fully_connected(net, 512, bn=True, is_training=is_training,
-                                scope='fc1', bn_decay=bn_decay)
-  net = dgcnn_util.dropout(net, keep_prob=0.5, is_training=is_training,
-                         scope='dp1')
-  net = dgcnn_util.fully_connected(net, 256, bn=True, is_training=is_training,
-                                scope='fc2', bn_decay=bn_decay)
-  net = dgcnn_util.dropout(net, keep_prob=0.5, is_training=is_training,
-                        scope='dp2')
-  net = dgcnn_util.fully_connected(net, num_classes, activation_fn=None, scope='fc3')
-  
-  end_points['Logits'] = net
-  end_points['Probabilities'] = tf.nn.softmax(net, name='Probabilities')
+def get_model_with_tfnet(pointcloud, num_classes, is_training, base=False):
+    """ 
+    Classification model DGCNN with tfnet, input is BxNx3, output Bxnum_classes 
+    :param pointcloud:  The input pointcloud
+    :type name: Array
+    :param num_classes:  The number of classes
+    :type name: Int
+    :param is_training:  True indicating training mode
+    :type name: Bool
+    :param base:  If true, return DGCNN backbone
+    :type name: Bool
 
-  return net, end_points
+    :return:  Logits and endpoints
+    """
+    batch_size = pointcloud.get_shape()[0].value
+    pc_dim = pointcloud.get_shape()[2].value
+    end_points = {}
+    k = 20
 
-def get_loss(pred, label, end_points, num_classes=49):
-  """ pred: B*NUM_CLASSES,
-      label: B, """
-  labels = tf.one_hot(indices=label, depth=num_classes)
-  #loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=pred, label_smoothing=0.2)
-  loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=pred)
-  classify_loss = tf.reduce_mean(loss)
-  return classify_loss
+    adj_matrix = tf_util.pairwise_distance(pointcloud)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(pointcloud, nn_idx=nn_idx, k=k)
 
+    with tf.variable_scope('transform_net1') as sc:
+        transform = input_transform_net(edge_feature, is_training, K=pc_dim)
+        end_points['transform'] = transform
+    
+    pointcloud_transformed = tf.matmul(pointcloud, transform)
+    adj_matrix = tf_util.pairwise_distance(pointcloud_transformed)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(pointcloud_transformed, nn_idx=nn_idx, k=k)
 
-def get_model_v3(point_cloud, num_classes, is_training, bn_decay=None):
-  """ Classification PointNet, input is BxNx3, output Bx40 """
-  batch_size = point_cloud.get_shape()[0].value
-  num_point = point_cloud.get_shape()[1].value
-  end_points = {}
-  k = 20
+    net = tf_util.conv2d(edge_feature, 64, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn1', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net1 = net
+    end_points['dgcnn1'] = net1
 
-  adj_matrix = dgcnn_util.pairwise_distance(point_cloud)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(point_cloud, nn_idx=nn_idx, k=k)
+    adj_matrix = tf_util.pairwise_distance(net)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)
 
-  with tf.variable_scope('transform_net1') as sc:
-    transform = input_transform_net(edge_feature, is_training, bn_decay, K=3)
+    net = tf_util.conv2d(edge_feature, 64, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn2', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net2 = net
+    end_points['dgcnn2'] = net2
 
-  point_cloud_transformed = tf.matmul(point_cloud, transform)
-  adj_matrix = dgcnn_util.pairwise_distance(point_cloud_transformed)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(point_cloud_transformed, nn_idx=nn_idx, k=k)
+    adj_matrix = tf_util.pairwise_distance(net)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k) 
 
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn1', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net1 = net
-  end_points['dgcnn1'] = net1
+    net = tf_util.conv2d(edge_feature, 64, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn3', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net3 = net
+    end_points['dgcnn3'] = net3
 
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)
+    adj_matrix = tf_util.pairwise_distance(net)
+    nn_idx = tf_util.knn(adj_matrix, k=k)
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
 
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn2', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net2 = net
-  end_points['dgcnn2'] = net2
- 
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
+    net = tf_util.conv2d(edge_feature, 128, [1,1],
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='dgcnn4', bn_decay=None)
+    net = tf.reduce_max(net, axis=-2, keep_dims=True)
+    net4 = net
+    end_points['dgcnn4'] = net4
 
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn3', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net3 = net
-  end_points['dgcnn3'] = net3
+    net = tf_util.conv2d(tf.concat([net1, net2, net3, net4], axis=-1), 1024, [1, 1], 
+                        padding='VALID', stride=[1,1],
+                        bn=True, is_training=is_training,
+                        scope='agg', bn_decay=None)
 
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
-  
-  net = dgcnn_util.conv2d(edge_feature, 128, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn4', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net4 = net
-  end_points['dgcnn4'] = net4
-  
-  print ("dgcnn1", net1)
-  print ("dgcnn2", net2)
-  print ("dgcnn3", net3)
-  print ("dgcnn4", net4)
-  
-  net = dgcnn_util.conv2d(tf.concat([net1, net2, net3, net4], axis=-1), 1024, [1, 1], 
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='agg', bn_decay=bn_decay)
- 
-  net = tf.reduce_max(net, axis=1, keep_dims=True) 
-  print ("dgcnn-agg", net)
-  end_points['dgcnn-agg'] = net
-  
-  # MLP on global point cloud vector
-  net = tf.reshape(net, [batch_size, -1]) 
-  net = dgcnn_util.fully_connected(net, 512, bn=True, is_training=is_training,
-                                scope='fc1', bn_decay=bn_decay)
-  net = dgcnn_util.dropout(net, keep_prob=0.5, is_training=is_training,
-                         scope='dp1')
-  net = dgcnn_util.fully_connected(net, 256, bn=True, is_training=is_training,
-                                scope='fc2', bn_decay=bn_decay)
-  net = dgcnn_util.dropout(net, keep_prob=0.5, is_training=is_training,
-                        scope='dp2')
-  net = dgcnn_util.fully_connected(net, num_classes, activation_fn=None, scope='fc3')
-  
-  end_points['Logits'] = net
-  end_points['Predictions'] = tf.nn.softmax(net, name='Predictions')
+    net = tf.reduce_max(net, axis=1, keep_dims=True) 
 
-  return net, end_points
+    if base:
+        end_points['DGCNN_PreFC'] = net
+        return end_points
 
-def get_model_v2(point_cloud, num_classes, is_training, bn_decay=None):
-  """ Classification PointNet, input is BxNx3, output Bx40 """
-  batch_size = point_cloud.get_shape()[0].value
-  num_point = point_cloud.get_shape()[1].value
-  end_points = {}
-  k = 20
+    # MLP on global point cloud vector
+    net = tf.reshape(net, [batch_size, -1]) 
+    net = tf_util.fully_connected(net, 512, bn=True, is_training=is_training,
+                                     scope='fc1', bn_decay=None)
+    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training, scope='dp1')
+    
+    net = tf_util.fully_connected(net, 256, bn=True, is_training=is_training,
+                                     scope='fc2', bn_decay=None)
+    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training,scope='dp2')
 
-  adj_matrix = dgcnn_util.pairwise_distance(point_cloud)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(point_cloud, nn_idx=nn_idx, k=k)
+    net = tf_util.fully_connected(net, num_classes, activation_fn=None, scope='fc3')
 
-  with tf.variable_scope('transform_net1') as sc:
-    transform = input_transform_net(edge_feature, is_training, bn_decay, K=3)
+    end_points['Logits'] = net
+    end_points['Probabilities'] = tf.nn.softmax(net, name='Probabilities')
 
-  point_cloud_transformed = tf.matmul(point_cloud, transform)
-  adj_matrix = dgcnn_util.pairwise_distance(point_cloud_transformed)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(point_cloud_transformed, nn_idx=nn_idx, k=k)
-
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn1', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net1 = net
-  end_points['dgcnn1'] = net1
-
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)
-
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn2', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net2 = net
-  end_points['dgcnn2'] = net2
- 
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
-
-  net = dgcnn_util.conv2d(edge_feature, 64, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn3', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net3 = net
-  end_points['dgcnn3'] = net3
-
-  adj_matrix = dgcnn_util.pairwise_distance(net)
-  nn_idx = dgcnn_util.knn(adj_matrix, k=k)
-  edge_feature = dgcnn_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
-  
-  net = dgcnn_util.conv2d(edge_feature, 128, [1,1],
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='dgcnn4', bn_decay=bn_decay)
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
-  net4 = net
-  end_points['dgcnn4'] = net4
-  
-  print ("dgcnn1", net1)
-  print ("dgcnn2", net2)
-  print ("dgcnn3", net3)
-  print ("dgcnn4", net4)
-  
-  net = dgcnn_util.conv2d(tf.concat([net1, net2, net3, net4], axis=-1), 1024, [1, 1], 
-                       padding='VALID', stride=[1,1],
-                       bn=True, is_training=is_training,
-                       scope='agg', bn_decay=bn_decay)
- 
-  net = tf.reduce_max(net, axis=1, keep_dims=True) 
-  net = tf.reshape(net, [batch_size, -1])
-  end_points['dgcnn-agg'] = net
-  print ("agg: ", net.shape)
-  
-  net = dgcnn_util.fully_connected(net, 512, bn=True, is_training=is_training,scope='fc0', bn_decay=bn_decay)
-  net = dgcnn_util.dropout(net, keep_prob=0.5, is_training=is_training,scope='dp0')
-  end_points['fc0'] = net
-  print ("fc0: ", net.shape)
-
-  net = dgcnn_util.fully_connected(net, 512, bn=True, is_training=is_training, scope='fc1', bn_decay=bn_decay)
-  net = dgcnn_util.dropout(net, keep_prob=0.5, is_training=is_training,scope='dp1')
-  end_points['fc1'] = net
-  print ("fc1: ", net.shape)
-  
-  net = dgcnn_util.fully_connected(net, 512, bn=True, is_training=is_training,scope='fc2', bn_decay=bn_decay)
-  net = dgcnn_util.dropout(net, keep_prob=0.5, is_training=is_training, scope='dp2')
-  end_points['fc2'] = net
-  print ("fc2: ", net.shape)
-
-  return net, end_points
-
+    return net, end_points
