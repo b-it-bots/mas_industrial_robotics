@@ -3,9 +3,10 @@
 Author: Charles R. Qi
 Date: November 2016
 
-Upadted by Yue Wang and Yongbin Sun
+Upadated by Yue Wang and Yongbin Sun
+Updated by Mohammad Wasil
 """
-
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -49,7 +50,6 @@ def _variable_with_weight_decay(name, shape, stddev, wd, use_xavier=True):
     weight_decay = tf.multiply(tf.nn.l2_loss(var), wd, name='weight_loss')
     tf.add_to_collection('losses', weight_decay)
   return var
-
 
 def conv1d(inputs,
            num_output_channels,
@@ -108,9 +108,6 @@ def conv1d(inputs,
     if activation_fn is not None:
       outputs = activation_fn(outputs)
     return outputs
-
-
-
 
 def conv2d(inputs,
            num_output_channels,
@@ -171,7 +168,6 @@ def conv2d(inputs,
       if activation_fn is not None:
         outputs = activation_fn(outputs)
       return outputs
-
 
 def conv2d_transpose(inputs,
                      num_output_channels,
@@ -351,7 +347,6 @@ def fully_connected(inputs,
       outputs = activation_fn(outputs)
     return outputs
 
-
 def max_pool2d(inputs,
                kernel_size,
                scope,
@@ -402,7 +397,6 @@ def avg_pool2d(inputs,
                              name=sc.name)
     return outputs
 
-
 def max_pool3d(inputs,
                kernel_size,
                scope,
@@ -452,10 +446,6 @@ def avg_pool3d(inputs,
                                padding=padding,
                                name=sc.name)
     return outputs
-
-
-
-
 
 def batch_norm_template(inputs, is_training, scope, moments_dims, bn_decay):
   """ Batch normalization on convolutional maps and beyond...
@@ -551,7 +541,6 @@ def batch_norm_for_fc(inputs, is_training, bn_decay, scope, is_dist=False):
   else:
     return batch_norm_template(inputs, is_training, scope, [0,], bn_decay)
 
-
 def batch_norm_for_conv1d(inputs, is_training, bn_decay, scope, is_dist=False):
   """ Batch normalization on 1D convolutional maps.
   
@@ -586,8 +575,6 @@ def batch_norm_for_conv2d(inputs, is_training, bn_decay, scope, is_dist=False):
   else:
     return batch_norm_template(inputs, is_training, scope, [0,1,2], bn_decay)
 
-
-
 def batch_norm_for_conv3d(inputs, is_training, bn_decay, scope, is_dist=False):
   """ Batch normalization on 3D convolutional maps.
   
@@ -604,7 +591,6 @@ def batch_norm_for_conv3d(inputs, is_training, bn_decay, scope, is_dist=False):
     return batch_norm_dist_template(inputs, is_training, scope, [0,1,2,3], bn_decay)
   else:
     return batch_norm_template(inputs, is_training, scope, [0,1,2,3], bn_decay)
-
 
 def dropout(inputs,
             is_training,
@@ -629,7 +615,6 @@ def dropout(inputs,
                       lambda: inputs)
     return outputs
 
-
 def pairwise_distance(point_cloud):
   """Compute pairwise distance of a point cloud.
 
@@ -639,24 +624,18 @@ def pairwise_distance(point_cloud):
   Returns:
     pairwise distance: (batch_size, num_points, num_points)
   """
-  print ("pc input: ", point_cloud)
   og_batch_size = point_cloud.get_shape().as_list()[0]
   point_cloud = tf.squeeze(point_cloud)
-  print ("pc squeezed: ", point_cloud)
   if og_batch_size == 1:
     point_cloud = tf.expand_dims(point_cloud, 0)
     
   point_cloud_transpose = tf.transpose(point_cloud, perm=[0, 2, 1])
-  print ("pc transpose perm=[0,2,1]: ", point_cloud_transpose)
   point_cloud_inner = tf.matmul(point_cloud, point_cloud_transpose)
-  print ("pc inner: ", point_cloud_inner)
   point_cloud_inner = -2*point_cloud_inner
   point_cloud_square = tf.reduce_sum(tf.square(point_cloud), axis=-1, keep_dims=True)
-  print ("pc cloud square reduce sum: ", point_cloud_square)
   point_cloud_square_tranpose = tf.transpose(point_cloud_square, perm=[0, 2, 1])
-  print ("pc cloud square transpose: ", point_cloud_square)
-  return point_cloud_square + point_cloud_inner + point_cloud_square_tranpose
 
+  return point_cloud_square + point_cloud_inner + point_cloud_square_tranpose
 
 def knn(adj_matrix, k=20):
   """Get KNN based on the pairwise distance.
@@ -670,7 +649,6 @@ def knn(adj_matrix, k=20):
   neg_adj = -adj_matrix
   _, nn_idx = tf.nn.top_k(neg_adj, k=k)
   return nn_idx
-
 
 def get_edge_feature(point_cloud, nn_idx, k=20):
   """Construct edge feature for each point

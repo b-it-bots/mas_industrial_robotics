@@ -6,27 +6,45 @@ from sklearn.decomposition import PCA
 
 # copied from python-pcl
 def float_to_rgb(p_rgb):
+    """
+    Get rgb color from float rgb
+    
+    :param p_rgb:       24 bit packed rgb 
+    :type:              numpy.array
+    
+    :return:            The rgb color
+    :rtype:             numpy.array
+    """
     # rgb = *reinterpret_cast<int*>(&p.rgb)
     rgb_bytes = struct.pack('f', p_rgb)
     rgb = struct.unpack('I', rgb_bytes)[0]
     r = (rgb >> 16) & 0x0000ff
     g = (rgb >> 8)  & 0x0000ff
     b = (rgb)       & 0x0000ff
+
     return (r/255.0),(g/255.0),(b/255.0)
 
-def scale_to_unit_sphere(points, normalize=True):
+def scale_to_unit_sphere(pointcloud, normalize=True):
     """
     Scale point cloud to unit sphere
+
+    :param pointcloud:  The input pointcloud
+    :type:              numpy.array
+    :param normalize:   True if pointcloud needs to be normalized
+    :type:              bool
+    
+    :return:            The rotated pointcloud
+    :rtype:             numpy.array
     """
     if normalize:
-        centroid = np.mean(points, axis=0)
-        points = points - centroid
+        centroid = np.mean(pointcloud, axis=0)
+        pointcloud = pointcloud - centroid
         
-    scale = np.max(np.sqrt(np.sum(points**2, axis=1)))
+    scale = np.max(np.sqrt(np.sum(pointcloud**2, axis=1)))
     if scale > 0.0:
-        points = points / scale
+        pointcloud = pointcloud / scale
 
-    return points  
+    return pointcloud  
 
 def pca_compress(pointcloud, n_components=3):
     """
@@ -46,11 +64,15 @@ def pca_compress(pointcloud, n_components=3):
 
 def rotate_pointcloud(normalized_pointcloud):
     """
-    \brief Find first three principal components and rotate pointcloud so the first principal
+    Find first three principal components and rotate pointcloud so the first principal
     component is aligned along the x-axis, 2nd principal component along y-axis and the
     third along the z-axis
+
     :param pointcloud:  The input pointcloud
+    :type pointcloud:   numpy.array
+
     :return:            The rotated pointcloud
+    :rtype:             numpy.array
 
     """
     pointcloud_xyz = normalized_pointcloud[:, 0:3]
@@ -76,7 +98,10 @@ def center_pointcloud(pointcloud):
     """
     Center pointcloud
     :param pointcloud:  The input pointcloud
-    :return:            The centered pointcloud
+    :type pointcloud:   numpy.array
+
+    :return:            The rotated pointcloud
+    :rtype:             numpy.array
     """
     pointcloud_xyz = pointcloud[:, 0:3]
     number_of_points = pointcloud_xyz.shape[0]
