@@ -11,7 +11,7 @@ class FeatureBasedClassifiers():
     """
     def __init__(self, classifier_name, label_encoder_name):
         self.load_classifier(classifier_name, label_encoder_name)
-        print ('\033[92m'+"3D object classifier model is loaded")
+        print ('\033[92m'+"Feature based 3D object classifier model is loaded")
 
     def save(self, classifier_name, label_encoder_name):
         with open(classifier_name, 'wb') as f:
