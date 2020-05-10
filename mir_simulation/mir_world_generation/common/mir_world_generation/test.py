@@ -20,32 +20,63 @@ class Node(object):
         if direction == 'N':
             if 'S' in self.probable_ws_direction:
                 self.probable_ws_direction.remove('S')
-            x = random.randint(self.x + 40, self.x + 110)
+            x = self._resolve_overlap(direction) if len(self.ws) > 0 \
+                    else random.randint(self.x + 40, self.x + 110)
             y = self.y + 25
             theta = math.pi/2
         if direction == 'S':
             if 'N' in self.probable_ws_direction:
                 self.probable_ws_direction.remove('N')
-            x = random.randint(self.x + 40, self.x + 110)
+            x = self._resolve_overlap(direction) if len(self.ws) > 0 \
+                    else random.randint(self.x + 40, self.x + 110)
             y = self.y + 125
             theta = -math.pi/2
         if direction == 'E':
             if 'W' in self.probable_ws_direction:
                 self.probable_ws_direction.remove('W')
             x = self.x + 125
-            y = random.randint(self.y + 40, self.y + 110)
+            y = self._resolve_overlap(direction) if len(self.ws) > 0 \
+                    else random.randint(self.y + 40, self.y + 110)
             theta = 0.0
         if direction == 'W':
             if 'E' in self.probable_ws_direction:
                 self.probable_ws_direction.remove('E')
             x = self.x + 25
-            y = random.randint(self.y + 40, self.y + 110)
+            y = self._resolve_overlap(direction) if len(self.ws) > 0 \
+                    else random.randint(self.y + 40, self.y + 110)
             theta = math.pi
 
         self.ws.append({'x': x, 'y': y, 'theta': theta})
 
+    def _resolve_overlap(self, direction):
+        ws1 = self.ws[0] # already present WS
+        ws1_dir = Node.get_direction_from_theta(ws1['theta'])
+        if direction == 'N':
+            ws1['y'] = self.y + 110
+            return self.x + 40 if ws1_dir == 'E' else self.x + 110
+        if direction == 'S':
+            ws1['y'] = self.y + 40
+            return self.x + 40 if ws1_dir == 'E' else self.x + 110
+        if direction == 'E':
+            ws1['x'] = self.x + 40
+            return self.y + 40 if ws1_dir == 'S' else self.y + 110
+        if direction == 'W':
+            ws1['x'] = self.x + 110
+            return self.y + 40 if ws1_dir == 'S' else self.y + 110
+            
+    @staticmethod
+    def get_direction_from_theta(theta):
+        if theta == 0.0:
+            return 'E'
+        elif theta == math.pi:
+            return 'W'
+        elif theta == math.pi/2:
+            return 'N'
+        elif theta == -math.pi/2:
+            return 'S'
+
     @property
-    def num_ws_limit(self):
+    def remaining_ws_slot(self):
         limit = 0
         if 'N' in self.probable_ws_direction or 'S' in self.probable_ws_direction:
             limit += 1
@@ -69,57 +100,65 @@ class TestClass(object):
 
     def __init__(self):
         self._grid_dim = 150
-        self._num_of_grid = 4
-        self._start_cell = (1, 0)
-        self._exit_cell = (3, 3)
-        self._num_of_ws = 5
-        self._grid = [[None for _ in range(self._num_of_grid)] for _ in range(self._num_of_grid)]
+        self._num_of_rows = 3
+        self._num_of_cols = 4
+        self._start_cell = (random.randint(0, self._num_of_rows-1), 0)
+        self._exit_cell = (random.randint(0, self._num_of_rows-1), self._num_of_cols-1)
+        self._num_of_ws = 10
+        self._grid = [[None for _ in range(self._num_of_cols)] for _ in range(self._num_of_rows)]
         self._walled_edges = []
-        self._generate_nodes_and_edges()
-        self._grid_map = Image.new('L', (self._num_of_grid*self._grid_dim, self._num_of_grid*self._grid_dim), 255)
+        self._grid_map = Image.new('L', (self._num_of_cols*self._grid_dim, self._num_of_rows*self._grid_dim), 255)
         self._draw_obj = ImageDraw.Draw(self._grid_map)
 
-    def _generate_nodes_and_edges(self):
-        for i in range(self._num_of_grid):
-            for j in range(self._num_of_grid):
-                node = Node(x=j*self._grid_dim, y=i*self._grid_dim)
-                self._grid[i][j] = node
+    def generate_configuration(self):
+        attempts = 0
+        max_retries_allowed = 5
+        while attempts < max_retries_allowed:
+            attempts += 1
+            print()
+            print('Generating wall and ws configuration. Attempt:', attempts)
+            for i in range(self._num_of_rows):
+                for j in range(self._num_of_cols):
+                    self._grid[i][j] = Node(x=j*self._grid_dim, y=i*self._grid_dim)
 
-        all_edges = []
-        for i in range(self._num_of_grid-1):
-            for j in range(self._num_of_grid):
-                all_edges.append(((i, j), (i+1, j)))
-        for i in range(self._num_of_grid):
-            for j in range(self._num_of_grid-1):
-                all_edges.append(((i, j), (i, j+1)))
-        walled_edges = []
-        for edge in all_edges:
-            if random.random() < 0.3:
-                walled_edges.append(edge)
-        walled_edge = self._make_connected(walled_edges)
-        self._walled_edges = walled_edges
+            all_edges = []
+            for i in range(self._num_of_rows-1):
+                for j in range(self._num_of_cols):
+                    all_edges.append(((i, j), (i+1, j)))
+            for i in range(self._num_of_rows):
+                for j in range(self._num_of_cols-1):
+                    all_edges.append(((i, j), (i, j+1)))
+            walled_edges = []
+            for edge in all_edges:
+                if random.random() < 0.3:
+                    walled_edges.append(edge)
+                    print('Adding wall', edge)
+            walled_edge = self._make_connected(walled_edges)
+            self._walled_edges = walled_edges
 
-        self._generate_ws()
+            success = self._generate_ws()
+            if success:
+                return True
+        return False
 
     def _generate_ws(self):
         max_possible_ws = 0
-        for i in range(self._num_of_grid):
-            for j in range(self._num_of_grid):
+        for i in range(self._num_of_rows):
+            for j in range(self._num_of_cols):
                 self._calc_ws_lim(i, j)
-                max_possible_ws += self._grid[i][j].num_ws_limit
+                max_possible_ws += self._grid[i][j].remaining_ws_slot
+        print('Max possible workstation:', max_possible_ws)
         if max_possible_ws < self._num_of_ws:
             print('ERROR. This many ws not possible with current configuration')
-            return
+            return False
 
         for i in range(self._num_of_ws):
             while True:
-                i, j = random.randint(0, self._num_of_grid-1), random.randint(0, self._num_of_grid-1)
-                if len(self._grid[i][j].ws) < self._grid[i][j].num_ws_limit:
+                i, j = random.randint(0, self._num_of_rows-1), random.randint(0, self._num_of_cols-1)
+                if self._grid[i][j].remaining_ws_slot > 0:
                     self._grid[i][j].add_ws()
                     break
-        # for i in range(self._num_of_grid):
-        #     for j in range(self._num_of_grid):
-        #         print(self._grid[i][j])
+        return True
 
     def _calc_ws_lim(self, i, j):
         if (i, j) == self._start_cell or (i, j) == self._exit_cell:
@@ -141,10 +180,10 @@ class TestClass(object):
 
     def _make_connected(self, walled_edges):
         connected_nodes = self._get_connected_nodes(walled_edges)
-        while len(connected_nodes) != self._num_of_grid**2:
+        while len(connected_nodes) != self._num_of_rows*self._num_of_cols:
             disconnected_nodes = []
-            for i in range(self._num_of_grid):
-                for j in range(self._num_of_grid):
+            for i in range(self._num_of_rows):
+                for j in range(self._num_of_cols):
                     if (i, j) not in connected_nodes:
                         disconnected_nodes.append((i, j))
             node = random.choice(disconnected_nodes)
@@ -182,21 +221,22 @@ class TestClass(object):
         neighbours = []
         if i != 0:
             neighbours.append((i-1, j))
-        if i != self._num_of_grid-1:
+        if i != self._num_of_rows-1:
             neighbours.append((i+1, j))
         if j != 0:
             neighbours.append((i, j-1))
-        if j != self._num_of_grid-1:
+        if j != self._num_of_cols-1:
             neighbours.append((i, j+1))
         return neighbours
 
     def create_image(self):
         # draw map edges
-        length = self._num_of_grid*self._grid_dim
-        self._draw_obj.line([(0, 0), (0, length)], fill=0, width=4)
-        self._draw_obj.line([(0, 0), (length, 0)], fill=0, width=4)
-        self._draw_obj.line([(0, length), (length, length)], fill=0, width=4)
-        self._draw_obj.line([(length, 0), (length, length)], fill=0, width=4)
+        height = self._num_of_rows*self._grid_dim
+        width = self._num_of_cols*self._grid_dim
+        self._draw_obj.line([(0, 0), (0, height)], fill=0, width=4)
+        self._draw_obj.line([(0, 0), (width, 0)], fill=0, width=4)
+        self._draw_obj.line([(0, height), (width, height)], fill=0, width=4)
+        self._draw_obj.line([(width, 0), (width, height)], fill=0, width=4)
         for edge in self._walled_edges:
             n1 = self._grid[edge[0][0]][edge[0][1]]
             n2 = self._grid[edge[1][0]][edge[1][1]]
@@ -218,9 +258,9 @@ class TestClass(object):
                      'down': [(node.x, node.y + self._grid_dim), (node.x + self._grid_dim, node.y + self._grid_dim)],
                      'left': [(node.x, node.y), (node.x, node.y + self._grid_dim)],
                      'right': [(node.x + self._grid_dim, node.y), (node.x + self._grid_dim, node.y + self._grid_dim)]}
-        print(node)
         for ws in node.ws:
-            if ws['theta'] == math.pi or ws['theta'] == 0.0: # 'E' or 'W' facing
+            direction = Node.get_direction_from_theta(ws['theta'])
+            if direction == 'E' or direction == 'W':
                 x, y = ws['x'], ws['y']
                 xy = [(x-25, y-40), (x+25, y+40)]
             else: # 'N' or 'S' facing
@@ -230,4 +270,5 @@ class TestClass(object):
 
 if __name__ == "__main__":
     TC = TestClass()
-    TC.create_image()
+    if TC.generate_configuration():
+        TC.create_image()
