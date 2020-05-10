@@ -1,0 +1,4 @@
+    <xacro:wall name="wall_{WALL_ID}" parent="origin" length="{LENGTH}">
+        <origin xyz="{X} {Y} 0.1" rpy="0.0 0.0 {YAW}"/>
+    </xacro:wall>
+
