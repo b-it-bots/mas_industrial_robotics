@@ -55,24 +55,6 @@
     </link>
     
     <link name="${name}_static_grasp_link">
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.038"/>
-        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
-      </inertial>
-
-      <visual>
-        <geometry>
-            <cylinder length="0.01" radius="0.001"/>
-        </geometry>
-        <material name="black"/>
-      </visual>
-
-      <collision>
-        <geometry>
-            <cylinder length="0.01" radius="0.001"/>
-        </geometry>
-      </collision>
     </link>
     <!-- motors -->
     <xacro:dynamixel_motor_AX-12A name="${name}_motor_left" parent="${name}_motor_mount_link" motor_direction="-1" position_offset="0.065">
