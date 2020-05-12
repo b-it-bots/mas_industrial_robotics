@@ -212,6 +212,9 @@ class GridBasedGenerator(object):
             nav_goals.append(name+': '+pos)
         nav_goals.sort()
         nav_goals.append('START: [0.0, 0.0, 0.0]')
+        x = (self._exit_cell[1]*1.5) + (self._start_cell[1]*1.5)
+        y = -(self._exit_cell[0]*1.5) + (self._start_cell[0]*1.5)
+        nav_goals.append('EXIT: [' + str(x) + ', ' + str(y) + ', 0.0]')
 
         nav_goal_path = os.path.join(self._generation_dir, 'navigation_goals.yaml')
         with open(nav_goal_path, 'w') as file_obj:
