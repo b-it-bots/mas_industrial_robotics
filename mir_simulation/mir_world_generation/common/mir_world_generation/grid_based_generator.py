@@ -164,7 +164,7 @@ class GridBasedGenerator(object):
         common_dir = os.path.dirname(code_dir)
         xacro_snippet_dir = os.path.join(common_dir, "xacro_snippet")
         snippets = {}
-        for file_name in ['beginning', 'end', 'wall', 'ws', 'sh']:
+        for file_name in os.listdir(xacro_snippet_dir):
             with open(os.path.join(xacro_snippet_dir, file_name), 'r') as file_obj:
                 snippets[file_name] = file_obj.read()
 

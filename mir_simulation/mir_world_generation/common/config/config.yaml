@@ -2,6 +2,7 @@
 ws_type_to_num: 
     ws: 8
     sh: 2
+    pp: 1
 
 # Path where all the generated files should be stored
 generation_dir: '/tmp'
