@@ -8,7 +8,7 @@
     <arg name="debug" default="false"/>
 
     <!-- model args -->
-    <arg name="world_model" default="/tmp/test.xacro"/>
+    <arg name="world_model" default="/tmp/at_work_arena.xacro"/>
     <arg name="map_file" default="/tmp/map.yaml"/>
 
     <!-- launch empty world in gazebo -->

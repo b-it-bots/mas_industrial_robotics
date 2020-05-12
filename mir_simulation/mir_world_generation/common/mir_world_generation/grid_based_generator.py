@@ -12,28 +12,51 @@ from mir_world_generation.utils import Utils
 class GridBasedGenerator(object):
 
     def __init__(self):
-        self._resolution = 0.01 # meters/pixel
-        self._grid_dim = int(1.5 / self._resolution) # pixels
+        # configurable variables
         self._num_of_rows = 3
         self._num_of_cols = 4
-        self._start_cell = (random.randint(0, self._num_of_rows-1), 0)
-        # self._start_cell = (0, 0)
-        self._exit_cell = (random.randint(0, self._num_of_rows-1), self._num_of_cols-1)
         self._ws_type_to_num = {'ws': 8, 'sh': 2}
+        self._max_retries_allowed = 5
+        self._generation_dir = '/tmp'
+
+        # hardcoded values         
+        # 0.01 resolution makes 1 px = 1 cm. This makes occ generation calc easy
+        self._resolution = 0.01 # meters/pixel
+        # 1.5 x 1.5 meter cell is by design since it allows 2 ws and youbot at the same time
+        self._grid_dim = int(1.5 / self._resolution) # pixels
+
+        # randomly choose a start cell in first column
+        self._start_cell = (random.randint(0, self._num_of_rows-1), 0)
+        # randomly choose an exit cell in last column
+        self._exit_cell = (random.randint(0, self._num_of_rows-1), self._num_of_cols-1)
+
+        # calc total num of ws required
         self._num_of_ws = sum(self._ws_type_to_num.values())
+
         self._grid = [[None for _ in range(self._num_of_cols)] for _ in range(self._num_of_rows)]
         self._walled_edges = []
 
     def generate_configuration(self):
+        """
+        1. Generate a grid of cells (Node object).
+        2. Add walls between these cells randomly.
+        3. Add required amount of workstations in this grid randomly.
+        4. If required amount of workstations are more that what is possible with 
+        the current randomly generated configuration, repeat 1, 2 and 3.
+        
+        Return false after failing multiple times.
+
+        :returns: bool
+
+        """
+        print('='*40)
         attempts = 0
-        max_retries_allowed = 5
-        while attempts < max_retries_allowed:
+        while attempts < self._max_retries_allowed:
             attempts += 1
-            print()
             print('Generating wall and ws configuration. Attempt:', attempts)
             for i in range(self._num_of_rows):
                 for j in range(self._num_of_cols):
-                    self._grid[i][j] = Node(x=j*self._grid_dim, y=i*self._grid_dim)
+                    self._grid[i][j] = Node(col=j, row=i, size=self._grid_dim)
 
             all_edges = []
             for i in range(self._num_of_rows-1):
@@ -52,26 +75,117 @@ class GridBasedGenerator(object):
 
             success = self._generate_ws()
             if success:
+                print('='*40)
+                print()
                 return True
+
+            print()
         return False
 
+    def create_occ_grid(self, border=100):
+        """
+        Create occupancy grid map (map.pgm) and its config (map.yaml) based on
+        walls and grid
+
+        :border: int (pixels)
+
+        """
+        height = self._num_of_rows*self._grid_dim
+        width = self._num_of_cols*self._grid_dim
+        self._grid_map = Image.new('L', (width + 2*border, height + 2*border), 205)
+        self._draw_obj = ImageDraw.Draw(self._grid_map)
+
+        # draw clear reactangle with walls around it
+        xy = [(-2, -2), (width+2, height+2)]
+        self._draw_obj.rectangle(GridBasedGenerator.offset_xy_with_border(xy, border),
+                                 outline=0, fill=255, width=4)
+
+        # draw internal walls
+        for edge in self._walled_edges:
+            n1 = self._grid[edge[0][0]][edge[0][1]]
+            n2 = self._grid[edge[1][0]][edge[1][1]]
+            if n1.x == n2.x:
+                xy = [(n2.x, n2.y), (n2.x+self._grid_dim, n2.y)]
+            else:
+                xy = [(n2.x, n2.y), (n2.x, n2.y+self._grid_dim)]
+            self._draw_obj.line(GridBasedGenerator.offset_xy_with_border(xy, border), fill=0, width=4)
+
+        # draw WS
+        for i, row in enumerate(self._grid):
+            for j, cell in enumerate(row):
+                self._draw_cell(self._grid[i][j], border)
+
+        image_path = os.path.join(self._generation_dir, 'map.pgm')
+        self._grid_map.save(image_path)
+        print('Occupancy grid map created:', image_path)
+        self._save_yaml_file(height, border)
+
+    def create_xacro(self, name="at_work_arena"):
+        """
+        Create a xacro file which can be spawned into gazebo simulator based on
+        walls and grid
+
+        :name: str (name of world and name of xacro file)
+        """
+        # read snippets
+        code_dir = os.path.abspath(os.path.dirname(__file__))
+        common_dir = os.path.dirname(code_dir)
+        xacro_snippet_dir = os.path.join(common_dir, "xacro_snippet")
+        snippets = {}
+        for file_name in ['beginning', 'end', 'wall', 'ws', 'sh']:
+            with open(os.path.join(xacro_snippet_dir, file_name), 'r') as file_obj:
+                snippets[file_name] = file_obj.read()
+
+        file_string = []
+
+        # start with headers
+        file_string.append(snippets['beginning'].format(**{'NAME': name}))
+
+        # add walls
+        wall_dict_list = self._get_wall_dict_list()
+        for wall in wall_dict_list:
+            file_string.append(snippets['wall'].format(**wall))
+
+        # add all ws (ws, sh, pp)
+        ws_dict_list = self._get_ws_dict_list()
+        random.shuffle(ws_dict_list) # randomise ws types
+        i = 0
+        for ws_type, num in self._ws_type_to_num.iteritems():
+            for ws_dict in ws_dict_list[i:i+num]:
+                file_string.append(snippets[ws_type].format(**ws_dict))
+            i += num
+
+        # end with closing tag
+        file_string.append(snippets['end'].format())
+
+        # write to a file
+        string = ''.join(file_string)
+        xacro_path = os.path.join(self._generation_dir, name+'.xacro')
+        with open(xacro_path, 'w') as file_obj:
+            file_obj.write(string)
+        print('Xacro file created:', xacro_path)
+
     def _generate_ws(self):
+        # calc probable position of workstation for each cell
         max_possible_ws = 0
         for i in range(self._num_of_rows):
             for j in range(self._num_of_cols):
                 self._calc_cell_ws_probability(i, j)
                 max_possible_ws += self._grid[i][j].remaining_ws_slot
+
+        print('Required workstation:', self._num_of_ws)
         print('Max possible workstation:', max_possible_ws)
         if max_possible_ws < self._num_of_ws:
             print('ERROR. This many ws not possible with current configuration')
             return False
 
+        # randomly pick a cell and generate a ws in it if possible
         for ws_num in range(self._num_of_ws):
             while True:
                 i, j = random.randint(0, self._num_of_rows-1), random.randint(0, self._num_of_cols-1)
                 if self._grid[i][j].remaining_ws_slot > 0:
                     self._grid[i][j].add_ws()
-                    print('Adding ws', ws_num)
+                    print('Adding ws', ws_num+1)
                     break
         return True
 
@@ -115,79 +229,7 @@ class GridBasedGenerator(object):
                                                         self._num_of_rows, self._num_of_cols)
         return walled_edges
 
-    def create_image(self):
-        height = self._num_of_rows*self._grid_dim
-        width = self._num_of_cols*self._grid_dim
-        border = 100 # pixel
-        self._grid_map = Image.new('L', (width + 2*border, height + 2*border), 205)
-        self._draw_obj = ImageDraw.Draw(self._grid_map)
-
-        xy = [(-2, -2), (width+2, height+2)]
-        self._draw_obj.rectangle(GridBasedGenerator.offset_xy_with_border(xy, border),
-                                 outline=0, fill=255, width=4)
-
-        # draw walls
-        for edge in self._walled_edges:
-            n1 = self._grid[edge[0][0]][edge[0][1]]
-            n2 = self._grid[edge[1][0]][edge[1][1]]
-            if n1.x == n2.x:
-                xy = [(n2.x, n2.y), (n2.x+self._grid_dim, n2.y)]
-            else:
-                xy = [(n2.x, n2.y), (n2.x, n2.y+self._grid_dim)]
-            self._draw_obj.line(GridBasedGenerator.offset_xy_with_border(xy, border), fill=0, width=4)
-
-        # draw WS
-        for i, row in enumerate(self._grid):
-            for j, cell in enumerate(row):
-                self._draw_cell(self._grid[i][j], border)
-
-        self._grid_map.save("/tmp/map.pgm")
-        self._save_yaml_file(height, border)
-
-    @staticmethod
-    def offset_xy_with_border(xy, border):
-        return [(xy[0][0]+border, xy[0][1]+border), (xy[1][0]+border, xy[1][1]+border)]
-
-    def _draw_cell(self, node, border):
-        for ws in node.ws:
-            direction = Node.get_direction_from_theta(ws['theta'])
-            if direction == 'E' or direction == 'W':
-                x, y = ws['x'], ws['y']
-                xy = [(x-25, y-40), (x+25, y+40)]
-            else: # 'N' or 'S' facing
-                x, y = ws['x'], ws['y']
-                xy = [(x-40, y-25), (x+40, y+25)]
-            self._draw_obj.rectangle(GridBasedGenerator.offset_xy_with_border(xy, border),
-                                     outline=0, fill=205, width=2)
-
-    def _save_yaml_file(self, height, border):
-        i, j = self._start_cell
-        x = j*1.5 + border*self._resolution + 0.75
-        y = (height*self._resolution) - i*1.5 + border*self._resolution - 0.75
-        data = dict(
-            image='map.pgm',
-            resolution=0.01,
-            origin=[-x, -y, 0.0],
-            negate=0,
-            occupied_thresh=0.65,
-            free_thresh=0.196
-        )
-
-        with open('/tmp/map.yaml', 'w') as outfile:
-            yaml.dump(data, outfile, default_flow_style=False)
-
-    def create_xacro(self, name="test"):
-        code_dir = os.path.abspath(os.path.dirname(__file__))
-        common_dir = os.path.dirname(code_dir)
-        xacro_snippet_dir = os.path.join(common_dir, "xacro_snippet")
-        snippets = {}
-        for file_name in ['beginning', 'end', 'wall', 'ws', 'sh']:
-            with open(os.path.join(xacro_snippet_dir, file_name), 'r') as file_obj:
-                snippets[file_name] = file_obj.read()
-
-        file_string = []
-        file_string.append(snippets['beginning'].format(**{'NAME': name}))
-
+    def _get_wall_dict_list(self):
         walls = []
         wall_id = 1
         # add internal walls
@@ -221,12 +263,11 @@ class GridBasedGenerator(object):
                           'X': x, 'Y': -y, 'YAW': theta})
             wall_id += 1
 
-        for wall in walls:
-            file_string.append(snippets['wall'].format(**wall))
+        return walls
 
-        # add ws
-        ws_id = 1
+    def _get_ws_dict_list(self):
         ws_dict_list = []
+        ws_id = 1
         for i in range(self._num_of_rows):
             for j in range(self._num_of_cols):
                 for ws in self._grid[i][j].ws:
@@ -236,21 +277,46 @@ class GridBasedGenerator(object):
                                          'X': x, 'Y': -y,
                                          'YAW': ws['theta']})
                     ws_id += 1
+        return ws_dict_list
 
-        random.shuffle(ws_dict_list)
-        for ws_type, num in self._ws_type_to_num.iteritems():
-            i = num
-            while i > 0:
-                i -= 1
-                ws_dict = ws_dict_list.pop()
-                file_string.append(snippets[ws_type].format(**ws_dict))
-                
+    @staticmethod
+    def offset_xy_with_border(xy, border):
+        return [(xy[0][0]+border, xy[0][1]+border), (xy[1][0]+border, xy[1][1]+border)]
 
-        file_string.append(snippets['end'].format())
+    def _draw_cell(self, node, border):
+        for ws in node.ws:
+            direction = Node.get_direction_from_theta(ws['theta'])
+            if direction == 'E' or direction == 'W':
+                x, y = ws['x'], ws['y']
+                xy = [(x-Node.ws_width/2, y-Node.ws_length/2),
+                      (x+Node.ws_width/2, y+Node.ws_length/2)]
+            else: # 'N' or 'S' facing
+                x, y = ws['x'], ws['y']
+                xy = [(x-Node.ws_length/2, y-Node.ws_width/2),
+                      (x+Node.ws_length/2, y+Node.ws_width/2)]
+            self._draw_obj.rectangle(
+                    GridBasedGenerator.offset_xy_with_border(xy, border),
+                    outline=0,
+                    fill=205,
+                    width=2)
 
-        string = ''.join(file_string)
-        with open('/tmp/test.xacro', 'w') as file_obj:
-            file_obj.write(string)
+    def _save_yaml_file(self, height, border):
+        i, j = self._start_cell
+        x = j*1.5 + border*self._resolution + 0.75
+        y = (height*self._resolution) - i*1.5 + border*self._resolution - 0.75
+        data = dict(
+            image='map.pgm',
+            resolution=0.01,
+            origin=[-x, -y, 0.0],
+            negate=0,
+            occupied_thresh=0.65,
+            free_thresh=0.196
+        )
+
+        yaml_path = os.path.join(self._generation_dir, 'map.yaml')
+        with open(yaml_path, 'w') as outfile:
+            yaml.dump(data, outfile, default_flow_style=False)
+        print('Occupancy grid config created:', yaml_path)
 
     def _get_x_y_from_2_points(self, p1, p2):
         x = (p1[0] + p2[0])/2 + (self._start_cell[1]*1.5) - 0.75
@@ -258,7 +324,7 @@ class GridBasedGenerator(object):
         return x, y
 
 if __name__ == "__main__":
-    TC = GridBasedGenerator()
-    if TC.generate_configuration():
-        TC.create_image()
-        TC.create_xacro()
+    GBG = GridBasedGenerator()
+    if GBG.generate_configuration():
+        GBG.create_occ_grid()
+        GBG.create_xacro()

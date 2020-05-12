@@ -1,4 +1,4 @@
-    <xacro:ws name="ws_{ID}" parent="origin">
+    <xacro:ws name="ws{ID}" parent="origin">
         <origin xyz="{X} {Y} 0.0" rpy="0.0 0.0 {YAW}"/>
     </xacro:ws>
 
