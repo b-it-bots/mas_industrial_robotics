@@ -12,13 +12,21 @@ from mir_world_generation.utils import Utils
 class GridBasedGenerator(object):
 
     def __init__(self):
+        code_dir = os.path.abspath(os.path.dirname(__file__))
+        common_dir = os.path.dirname(code_dir)
+        config_dir = os.path.join(common_dir, "config")
+        config_file = os.path.join(config_dir, "config.yaml")
+        with open(config_file, 'r') as file_obj:
+            config_data = yaml.safe_load(file_obj)
+
         # configurable variables
-        self._num_of_rows = 3
-        self._num_of_cols = 4
-        self._ws_type_to_num = {'ws': 8, 'sh': 2}
-        self._max_retries_allowed = 5
-        self._generation_dir = '/tmp'
-        self._base_link_to_ws_center = 0.65
+        self._num_of_rows = config_data.get('num_of_rows', 3)
+        self._num_of_cols = config_data.get('num_of_cols', 4)
+        self._ws_type_to_num = config_data.get('ws_type_to_num', {})
+        self._max_retries_allowed = config_data.get('max_retries_allowed', 5)
+        self._generation_dir = config_data.get('generation_dir', '/tmp')
+        self._base_link_to_ws_center = config_data.get('base_link_to_ws_center', 0.65)
+        self._wall_generation_threshold = config_data.get('wall_generation_threshold', 0.3)
 
         # hardcoded values         
         # 0.01 resolution makes 1 px = 1 cm. This makes occ generation calc easy
@@ -66,7 +74,7 @@ class GridBasedGenerator(object):
                     all_edges.append(((i, j), (i, j+1)))
             walled_edges = []
             for edge in all_edges:
-                if random.random() < 0.3:
+                if random.random() < self._wall_generation_threshold:
                     walled_edges.append(edge)
                     print('Adding wall', edge)
             walled_edge = self._make_connected(walled_edges)
