@@ -8,8 +8,11 @@
     <arg name="debug" default="false"/>
 
     <!-- model args -->
-    <arg name="world_model" default="/tmp/at_work_arena.xacro"/>
-    <arg name="map_file" default="/tmp/map.yaml"/>
+    
+    <arg name="generation_dir" default="/tmp"/>
+    <arg name="world_model" default="$(arg generation_dir)/at_work_arena.xacro"/>
+    <arg name="map_file" default="$(arg generation_dir)/map.yaml"/>
+    <arg name="nav_goal_file" default="$(arg generation_dir)/navigation_goals.yaml"/>
 
     <!-- launch empty world in gazebo -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -37,5 +40,12 @@
     <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)" output="screen"/>
 
     <node pkg="tf" type="static_transform_publisher" name="map_2_world" args="0 0 0 0 0 0 1 map origin 10" />
+
+    <!-- visualize navigation goals -->
+    <node pkg="mcr_navigation_tools" name="pose_visualiser" type="pose_visualiser" output="screen">
+        <param name="pose_frame" value="map" />
+        <param name="pose_description_file" value="$(arg nav_goal_file)" />
+    </node>
+
 
 </launch>
