@@ -27,6 +27,7 @@ class GridBasedGenerator(object):
         self._generation_dir = config_data.get('generation_dir', '/tmp')
         self._base_link_to_ws_center = config_data.get('base_link_to_ws_center', 0.65)
         self._wall_generation_threshold = config_data.get('wall_generation_threshold', 0.3)
+        self._noise_threshold = config_data.get('noise_threshold', 0.1)
 
         # hardcoded values         
         # 0.01 resolution makes 1 px = 1 cm. This makes occ generation calc easy
@@ -134,6 +135,16 @@ class GridBasedGenerator(object):
                                 ws_dict['type'].upper()+ws_dict['id'],
                                 fill=255)
 
+        # add noise
+        for i in range(self._grid_map.width):
+            for j in range(self._grid_map.height):
+                if self._grid_map.getpixel((i, j)) == 0: # px is black
+                    if self._grid_map.getpixel((i-1, j)) == 255 or\ # one of the
+                       self._grid_map.getpixel((i+1, j)) == 255 or\ # surrounding
+                       self._grid_map.getpixel((i, j-1)) == 255 or\ # px is white
+                       self._grid_map.getpixel((i, j+1)) == 255:
+                        if random.random() < self._noise_threshold:
+                            self._grid_map.putpixel((i, j), 255)
 
         image_path = os.path.join(self._generation_dir, 'map.pgm')
         self._grid_map.save(image_path)
@@ -359,7 +370,6 @@ class GridBasedGenerator(object):
 if __name__ == "__main__":
     GBG = GridBasedGenerator()
     if GBG.generate_configuration():
-        # pass
         GBG.create_occ_grid()
         GBG.create_xacro()
         GBG.create_nav_goal()
