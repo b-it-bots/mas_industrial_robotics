@@ -6,99 +6,10 @@ import math
 import random
 from PIL import Image, ImageDraw
 
-class Node(object):
+from mir_world_generation.node import Node
+from mir_world_generation.utils import Utils
 
-    """Docstring for Node. """
-
-    def __init__(self, x=0, y=0):
-        self.x = x
-        self.y = y
-        self.ws = []
-        self.probable_ws_direction = ['N', 'S', 'E', 'W']
-
-    def add_ws(self):
-        direction = random.choice(self.probable_ws_direction)
-        self.probable_ws_direction.remove(direction)
-        if direction == 'N':
-            if 'S' in self.probable_ws_direction:
-                self.probable_ws_direction.remove('S')
-            x = self._resolve_overlap(direction) if len(self.ws) > 0 \
-                    else random.randint(self.x + 40, self.x + 110)
-            y = self.y + 25
-            theta = math.pi/2
-        if direction == 'S':
-            if 'N' in self.probable_ws_direction:
-                self.probable_ws_direction.remove('N')
-            x = self._resolve_overlap(direction) if len(self.ws) > 0 \
-                    else random.randint(self.x + 40, self.x + 110)
-            y = self.y + 125
-            theta = -math.pi/2
-        if direction == 'E':
-            if 'W' in self.probable_ws_direction:
-                self.probable_ws_direction.remove('W')
-            x = self.x + 125
-            y = self._resolve_overlap(direction) if len(self.ws) > 0 \
-                    else random.randint(self.y + 40, self.y + 110)
-            theta = 0.0
-        if direction == 'W':
-            if 'E' in self.probable_ws_direction:
-                self.probable_ws_direction.remove('E')
-            x = self.x + 25
-            y = self._resolve_overlap(direction) if len(self.ws) > 0 \
-                    else random.randint(self.y + 40, self.y + 110)
-            theta = math.pi
-
-        self.ws.append({'x': x, 'y': y, 'theta': theta})
-
-    def _resolve_overlap(self, direction):
-        ws1 = self.ws[0] # already present WS
-        ws1_dir = Node.get_direction_from_theta(ws1['theta'])
-        if direction == 'N':
-            ws1['y'] = self.y + 110
-            return self.x + 40 if ws1_dir == 'E' else self.x + 110
-        if direction == 'S':
-            ws1['y'] = self.y + 40
-            return self.x + 40 if ws1_dir == 'E' else self.x + 110
-        if direction == 'E':
-            ws1['x'] = self.x + 40
-            return self.y + 40 if ws1_dir == 'S' else self.y + 110
-        if direction == 'W':
-            ws1['x'] = self.x + 110
-            return self.y + 40 if ws1_dir == 'S' else self.y + 110
-            
-    @staticmethod
-    def get_direction_from_theta(theta):
-        if theta == 0.0:
-            return 'E'
-        elif theta == math.pi:
-            return 'W'
-        elif theta == math.pi/2:
-            return 'N'
-        elif theta == -math.pi/2:
-            return 'S'
-
-    @property
-    def remaining_ws_slot(self):
-        limit = 0
-        if 'N' in self.probable_ws_direction or 'S' in self.probable_ws_direction:
-            limit += 1
-        if 'E' in self.probable_ws_direction or 'W' in self.probable_ws_direction:
-            limit += 1
-        return limit
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        string = '<'
-        string += 'x: ' + str(self.x) + ', '
-        string += 'y: ' + str(self.y) + ', '
-        string += 'prob: ' + str(self.probable_ws_direction) + ', '
-        string += 'ws: ' + str(self.ws)
-        string += '>'
-        return string
-
-class TestClass(object):
+class GridBasedGenerator(object):
 
     def __init__(self):
         self._resolution = 0.01 # meters/pixel
@@ -148,7 +59,7 @@ class TestClass(object):
         max_possible_ws = 0
         for i in range(self._num_of_rows):
             for j in range(self._num_of_cols):
-                self._calc_ws_lim(i, j)
+                self._calc_cell_ws_probability(i, j)
                 max_possible_ws += self._grid[i][j].remaining_ws_slot
         print('Max possible workstation:', max_possible_ws)
         if max_possible_ws < self._num_of_ws:
@@ -164,11 +75,12 @@ class TestClass(object):
                     break
         return True
 
-    def _calc_ws_lim(self, i, j):
+    def _calc_cell_ws_probability(self, i, j):
         if (i, j) == self._start_cell or (i, j) == self._exit_cell:
             self._grid[i][j].probable_ws_direction = []
             return
-        connected_neighbours = self._get_connected_neighbour((i, j), self._walled_edges)
+        connected_neighbours = Utils.get_connected_neighbour(
+                (i, j), self._walled_edges, self._num_of_rows, self._num_of_cols)
         for neighbour in connected_neighbours:
             diff_i = neighbour[0] - i
             diff_j = neighbour[1] - j
@@ -183,7 +95,8 @@ class TestClass(object):
         return
 
     def _make_connected(self, walled_edges):
-        connected_nodes = self._get_connected_nodes(walled_edges)
+        connected_nodes = Utils.get_connected_nodes(self._start_cell, walled_edges,
+                                                    self._num_of_rows, self._num_of_cols)
         while len(connected_nodes) != self._num_of_rows*self._num_of_cols:
             disconnected_nodes = []
             for i in range(self._num_of_rows):
@@ -198,40 +111,9 @@ class TestClass(object):
             chosen_wall = random.choice(walls_around_node)
             walled_edges.remove(chosen_wall)
             print("Disconnected map. Removed wall", chosen_wall)
-            connected_nodes = self._get_connected_nodes(walled_edges)
+            connected_nodes = Utils.get_connected_nodes(self._start_cell, walled_edges,
+                                                        self._num_of_rows, self._num_of_cols)
         return walled_edges
-
-    def _get_connected_nodes(self, walled_edges):
-        connected_nodes = []
-        fringe = [self._start_cell]
-        while len(fringe) > 0:
-            current = fringe.pop(0)
-            if current in connected_nodes:
-                continue
-            connected_neighbours = self._get_connected_neighbour(current, walled_edges)
-            connected_nodes.append(current)
-            for neighbour in connected_neighbours:
-                if neighbour not in connected_nodes:
-                    fringe.append(neighbour)
-        return connected_nodes
-
-    def _get_connected_neighbour(self, node, walled_edges):
-        neighbours = self._get_neighbours(*node)
-        connected_neighbours = [n for n in neighbours \
-                                if (node, n) not in walled_edges and (n, node) not in walled_edges]
-        return connected_neighbours
-
-    def _get_neighbours(self, i, j):
-        neighbours = []
-        if i != 0:
-            neighbours.append((i-1, j))
-        if i != self._num_of_rows-1:
-            neighbours.append((i+1, j))
-        if j != 0:
-            neighbours.append((i, j-1))
-        if j != self._num_of_cols-1:
-            neighbours.append((i, j+1))
-        return neighbours
 
     def create_image(self):
         height = self._num_of_rows*self._grid_dim
@@ -241,7 +123,7 @@ class TestClass(object):
         self._draw_obj = ImageDraw.Draw(self._grid_map)
 
         xy = [(-2, -2), (width+2, height+2)]
-        self._draw_obj.rectangle(TestClass.offset_xy_with_border(xy, border),
+        self._draw_obj.rectangle(GridBasedGenerator.offset_xy_with_border(xy, border),
                                  outline=0, fill=255, width=4)
 
         # draw walls
@@ -252,7 +134,7 @@ class TestClass(object):
                 xy = [(n2.x, n2.y), (n2.x+self._grid_dim, n2.y)]
             else:
                 xy = [(n2.x, n2.y), (n2.x, n2.y+self._grid_dim)]
-            self._draw_obj.line(TestClass.offset_xy_with_border(xy, border), fill=0, width=4)
+            self._draw_obj.line(GridBasedGenerator.offset_xy_with_border(xy, border), fill=0, width=4)
 
         # draw WS
         for i, row in enumerate(self._grid):
@@ -275,7 +157,7 @@ class TestClass(object):
             else: # 'N' or 'S' facing
                 x, y = ws['x'], ws['y']
                 xy = [(x-40, y-25), (x+40, y+25)]
-            self._draw_obj.rectangle(TestClass.offset_xy_with_border(xy, border),
+            self._draw_obj.rectangle(GridBasedGenerator.offset_xy_with_border(xy, border),
                                      outline=0, fill=205, width=2)
 
     def _save_yaml_file(self, height, border):
@@ -303,8 +185,6 @@ class TestClass(object):
             with open(os.path.join(xacro_snippet_dir, file_name), 'r') as file_obj:
                 snippets[file_name] = file_obj.read()
 
-        # origin_offset_x = self._start_cell[0]*1.5
-        # origin_offset_y = self._start_cell[1]*1.5
         file_string = []
         file_string.append(snippets['beginning'].format(**{'NAME': name}))
 
@@ -378,7 +258,7 @@ class TestClass(object):
         return x, y
 
 if __name__ == "__main__":
-    TC = TestClass()
+    TC = GridBasedGenerator()
     if TC.generate_configuration():
         TC.create_image()
         TC.create_xacro()
