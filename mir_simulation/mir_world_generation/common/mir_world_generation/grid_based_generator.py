@@ -11,6 +11,14 @@ from mir_world_generation.utils import Utils
 
 class GridBasedGenerator(object):
 
+    """
+    Generate world model for @work arenas based on a grid of cells.
+    Each cell in the grid can contain atmost 2 workstations. 
+    There is a start and exit cell which will contain no workstations.
+    The grid is surrounded with walls on all 4 sides.
+    There can be walls between 2 adjacent cells.
+    """
+
     def __init__(self):
         code_dir = os.path.abspath(os.path.dirname(__file__))
         common_dir = os.path.dirname(code_dir)

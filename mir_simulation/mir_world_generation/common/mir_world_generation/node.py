@@ -3,7 +3,10 @@ import random
 
 class Node(object):
 
-    """Docstring for Node. """
+    """
+    An object representation of a cell in a grid of size `row` x `col`. Each cell
+    is a square of dimension `size` (in cm) which can hold atmost 2 workstations.
+    """
 
     ws_length = 80 # cm
     ws_width = 50 # cm
@@ -16,6 +19,11 @@ class Node(object):
         self.probable_ws_direction = ['N', 'S', 'E', 'W'] 
 
     def add_ws(self):
+        """
+        Add a workstation at random in the cell.
+        If a workstation is already present then move that one in a way such that 
+        there is no overlap between the two
+        """
         min_len_pos = self.ws_length/2
         max_len_pos = self.size - (self.ws_length/2)
         min_wid_pos = self.ws_width/2
@@ -55,6 +63,16 @@ class Node(object):
         self.ws.append({'x': x, 'y': y, 'theta': theta})
 
     def _resolve_overlap(self, direction):
+        """
+        Given the direction of a workstation that needs to be added to the cell,
+        resolve any possible overlap between it and the already present WS.
+        The already present WS is moved to a corner and the new WS will be spawned 
+        to diagonally opposite corner.
+
+        :direction: str ('N', 'S', 'E', or 'W')
+        :returns: int
+
+        """
         min_len_pos = self.ws_length/2
         max_len_pos = self.size - (self.ws_length/2)
         min_wid_pos = self.ws_width/2
@@ -77,6 +95,13 @@ class Node(object):
             
     @staticmethod
     def get_direction_from_theta(theta):
+        """
+        Return a direction ('N', 'S', 'E', 'W') from theta (-pi to pi)
+        
+        :theta: float
+        :returns: str
+
+        """
         if theta == 0.0:
             return 'E'
         elif theta == math.pi:
@@ -88,6 +113,12 @@ class Node(object):
 
     @property
     def remaining_ws_slot(self):
+        """
+        Calculate how many more workstation can be spawned into this cell
+
+        :returns: int
+
+        """
         remaining_ws_slot = 0
         if 'N' in self.probable_ws_direction or 'S' in self.probable_ws_direction:
             remaining_ws_slot += 1
