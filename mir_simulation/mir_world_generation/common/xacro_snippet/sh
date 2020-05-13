@@ -1,0 +1,4 @@
+    <xacro:shelf name="sh{ID}" parent="origin">
+        <origin xyz="{X} {Y} 0.0" rpy="0.0 0.0 {YAW}"/>
+    </xacro:shelf>
+
