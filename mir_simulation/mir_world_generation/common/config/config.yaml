@@ -1,0 +1,25 @@
+# how many workstation of each type is required
+ws_type_to_num: 
+    ws: 8
+    sh: 2
+    pp: 1
+
+# Path where all the generated files should be stored
+generation_dir: '/tmp'
+
+# number of row and columns of cells in grid
+num_of_rows: 3
+num_of_cols: 4
+
+# threshold for generating a wall between 2 cell [0.0 - 1.0]
+# Increase this value to generate more complex environment (more walls and/or more ws)
+wall_generation_threshold: 0.3
+
+# threshold for generating noise in occupancy grid [0.0 - 1.0]
+noise_threshold: 0.15
+
+# number of retries before giving up
+max_retries_allowed: 5
+
+# distance from base link of robot to center of workstation (used for nav goal)
+base_link_to_ws_center: 0.65
