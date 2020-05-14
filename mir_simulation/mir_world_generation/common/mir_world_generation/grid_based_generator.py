@@ -12,8 +12,9 @@ from mir_world_generation.utils import Utils
 class GridBasedGenerator(object):
 
     """
-    Generate world model for @work arenas based on a grid of cells.
-    Each cell in the grid can contain atmost 2 workstations. 
+    Generate world model for @work arenas based on a grid of cells
+    (represented by :class:`mir_world_generation.node.Node`).
+    Each cell in the grid can contain atmost 2 workstations.
     There is a start and exit cell which will contain no workstations.
     The grid is surrounded with walls on all 4 sides.
     There can be walls between 2 adjacent cells.
@@ -57,12 +58,12 @@ class GridBasedGenerator(object):
         1. Generate a grid of cells (Node object).
         2. Add walls between these cells randomly.
         3. Add required amount of workstations in this grid randomly.
-        4. If required amount of workstations are more that what is possible with 
-        the current randomly generated configuration, repeat 1, 2 and 3.
-        
-        Return false after failing multiple times.
+        4. If required amount of workstations are more that what is possible\
+           with the current randomly generated configuration, repeat 1, 2 and 3.
 
-        :returns: bool
+
+        :return: Return false after failing multiple times.
+        :rtype: bool
 
         """
         print('='*40)
@@ -103,7 +104,8 @@ class GridBasedGenerator(object):
         Create occupancy grid map (map.pgm) and its config (map.yaml) based on
         walls and grid
 
-        :border: int (pixels)
+        :param border: num of pixel surrounding grid of cells
+        :type border: int
 
         """
         height = self._num_of_rows*self._grid_dim
@@ -163,9 +165,11 @@ class GridBasedGenerator(object):
     def create_xacro(self, name="at_work_arena"):
         """
         Create a xacro file which can be spawned into gazebo simulator based on
-        walls and grid
+        walls and grid of cells generated from :func:`generate_configuration`
 
-        :name: str (name of world and name of xacro file)
+        :param name: name of world and name of xacro file
+        :type name: str
+
         """
         # read snippets
         code_dir = os.path.abspath(os.path.dirname(__file__))
@@ -205,8 +209,8 @@ class GridBasedGenerator(object):
 
     def create_nav_goal(self):
         """
-        Create navigation goals file based on ws
-
+        Create navigation goals file (navigation_goals.yaml) based on ``self._ws``
+        and ``self._start_cell`` and ``self._exit_cell``
         """
         nav_goals = []
         for ws_dict in self._ws:
