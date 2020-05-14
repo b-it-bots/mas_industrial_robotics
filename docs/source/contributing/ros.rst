@@ -56,9 +56,9 @@ Creating a new package
     │   ├── include
     │   │   └── <package_name>
     │   ├── launch
-    │   │   |— <package_name>.launch
+    │   │   └── <package_name>.launch
     │   ├── rviz
-    │   │   |— <package_name>.rviz
+    │   │   └── <package_name>.rviz
     │   ├── scripts
     │   │   └── <package_name>
     │   ├── src
