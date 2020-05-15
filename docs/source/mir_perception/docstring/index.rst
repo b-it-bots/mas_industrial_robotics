@@ -4,4 +4,4 @@ Perception Documentation
 ########################
 
 .. toctree::
-
+  :maxdepth: 1

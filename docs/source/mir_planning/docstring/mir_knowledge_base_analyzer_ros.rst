@@ -1,7 +1,7 @@
 .. _mir_knowledge_base_analyzer_ros_docs:
 
-mir\_knowledge\_base\_analyzer\_ros package
-===========================================
+mir\_knowledge\_base\_analyzer\_ros
+===================================
 
 mir\_knowledge\_base\_analyzer\_ros.knowledge\_base\_analyzer module
 --------------------------------------------------------------------

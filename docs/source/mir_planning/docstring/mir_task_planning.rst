@@ -1,7 +1,7 @@
 .. _mir_task_planning_docs:
 
-mir\_task\_planning package
-===========================
+mir\_task\_planning
+===================
 
 mir\_task\_planning.utils module
 --------------------------------

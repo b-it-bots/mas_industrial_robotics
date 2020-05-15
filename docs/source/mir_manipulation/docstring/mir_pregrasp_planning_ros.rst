@@ -1,7 +1,7 @@
 .. _mir_pregrasp_planning_ros_docs:
 
-mir\_pregrasp\_planning\_ros package
-====================================
+mir\_pregrasp\_planning\_ros
+============================
 
 mir\_pregrasp\_planning\_ros.pose\_mock\_up\_gui module
 -------------------------------------------------------
