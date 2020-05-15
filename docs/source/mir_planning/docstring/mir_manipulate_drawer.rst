@@ -1,7 +1,7 @@
 .. _mir_manipulate_drawer_docs:
 
-mir\_manipulate\_drawer package
-===============================
+mir\_manipulate\_drawer
+=======================
 
 mir\_manipulate\_drawer.manipulate\_drawer\_utils module
 --------------------------------------------------------

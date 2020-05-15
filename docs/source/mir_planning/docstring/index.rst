@@ -4,6 +4,8 @@ Planning Documentation
 ######################
 
 .. toctree::
+  :maxdepth: 1
+
   mir_actions
   mir_knowledge_base_analyzer
   mir_knowledge_base_analyzer_ros

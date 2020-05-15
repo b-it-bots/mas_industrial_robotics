@@ -1,7 +1,7 @@
 .. _mir_planner_wrapper_docs:
 
-planner\_wrapper package
-========================
+planner\_wrapper
+================
 
 planner\_wrapper.planner\_wrapper module
 ----------------------------------------

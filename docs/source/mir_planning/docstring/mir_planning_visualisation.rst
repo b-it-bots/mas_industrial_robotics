@@ -1,7 +1,7 @@
 .. _mir_planning_visualisation_docs:
 
-mir\_planning\_visualisation package
-====================================
+mir\_planning\_visualisation
+============================
 
 mir\_planning\_visualisation.kb\_visualiser module
 --------------------------------------------------

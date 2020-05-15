@@ -4,5 +4,6 @@ Simulation Documentation
 ########################
 
 .. toctree::
+  :maxdepth: 1
 
-    mir_world_generation
+  mir_world_generation

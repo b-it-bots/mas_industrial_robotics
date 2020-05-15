@@ -1,7 +1,7 @@
 .. _mir_move_base_ros_docs:
 
-mir\_move\_base\_ros package
-============================
+mir\_move\_base\_ros
+====================
 
 mir\_move\_base\_ros.move\_base module
 --------------------------------------

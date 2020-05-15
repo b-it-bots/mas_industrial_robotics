@@ -1,7 +1,7 @@
 .. _mir_knowledge_ros_docs:
 
-mir\_knowledge\_ros package
-===========================
+mir\_knowledge\_ros
+===================
 
 mir\_knowledge\_ros.problem\_uploader module
 --------------------------------------------

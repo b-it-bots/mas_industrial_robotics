@@ -1,7 +1,7 @@
 .. _mir_moveit_scene_ros_docs:
 
-mir\_moveit\_scene\_ros package
-===============================
+mir\_moveit\_scene\_ros
+=======================
 
 mir\_moveit\_scene\_ros.attach\_grasped\_object module
 ------------------------------------------------------

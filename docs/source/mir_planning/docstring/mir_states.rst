@@ -1,7 +1,7 @@
 .. _mir_states_docs:
 
-mir\_states package
-===================
+mir\_states
+===========
 
 common.action\_states module
 ----------------------------

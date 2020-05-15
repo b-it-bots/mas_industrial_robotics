@@ -1,7 +1,7 @@
 .. _mir_knowledge_base_analyzer_docs:
 
-mir\_knowledge\_base\_analyzer package
-======================================
+mir\_knowledge\_base\_analyzer
+==============================
 
 mir\_knowledge\_base\_analyzer.my\_generic\_util\_class module
 --------------------------------------------------------------
