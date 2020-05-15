@@ -10,13 +10,15 @@ and transforms into pddl vector.
 Example:
     the third element of this vector looks like this:
 
-    [':objects', 'dynamixel', '-', 'gripper', 's1', 's2', 's3', 's4',
-     'start', 'exit', 'cb_ramp', 'cb_trash', 'drill_loc',
-     'force_fitting', 'assembly_station', '-', 'location',
-     'o1', 'o2', 'o3', 'o4', 'o5', 'o6', 'faulty_plate',
-     'fixable_plate', 'filecard', 'tray', 'blue_box', 'drill',
-     'trash', '-', 'object', 'youbot-brsu-3', '-', 'robot',
-     'platform_middle', 'platform_left', 'platform_right', '-', 'robot_platform']
+    .. code-block:: python
+
+        [':objects', 'dynamixel', '-', 'gripper', 's1', 's2', 's3', 's4',
+         'start', 'exit', 'cb_ramp', 'cb_trash', 'drill_loc',
+         'force_fitting', 'assembly_station', '-', 'location',
+         'o1', 'o2', 'o3', 'o4', 'o5', 'o6', 'faulty_plate',
+         'fixable_plate', 'filecard', 'tray', 'blue_box', 'drill',
+         'trash', '-', 'object', 'youbot-brsu-3', '-', 'robot',
+         'platform_middle', 'platform_left', 'platform_right', '-', 'robot_platform']
 
 Above shown example shows the instances part of pddl problem file.
 Init facts and goal follows after.
@@ -43,10 +45,10 @@ import mercury_planner.pddl as pddl # for parsing pddl file
 class ProblemUploader(object):
 
     """
-    Upload problem to KB
-    
-    Parameters:
-    :problem_file: str (path of problem file)
+    Upload instances and facts from a pddl problem file to Knowledge Base
+
+    :param problem_file: path of problem file
+    :type problem_file: str
 
     """
 
@@ -75,8 +77,9 @@ class ProblemUploader(object):
         """
         Create a list of KnowledgeItem from instances
 
-        :instances: dict {str: [str, str, ...], ...}
-        :returns: list of rosplan_knowledge_msgs.KnowledgeItem
+        :param instances: instances
+        :type instances: dict {str: [str, str, ...], ...}
+        :rtype: list of rosplan_knowledge_msgs.KnowledgeItem
 
         """
         ki_list = []
@@ -92,8 +95,9 @@ class ProblemUploader(object):
         """
         Create a list of KnowledgeItem from facts
 
-        :facts: list of tuple ( each tuple is (str, [(str, str), ...]) )
-        :returns: list of rosplan_knowledge_msgs.KnowledgeItem
+        :param facts: facts
+        :type facts: list of tuple ( each tuple is (str, [(str, str), ...]) )
+        :rtype: list of rosplan_knowledge_msgs.msg.KnowledgeItem
 
         """
         ki_list = []
@@ -106,11 +110,14 @@ class ProblemUploader(object):
 
     @staticmethod
     def update_kb_array(ki_list, update_type):
-        """TODO: Docstring for update_kb_array.
+        """
+        Update knowledge base with an array of knowledge item
 
-        :ki_list: TODO
-        :update_type: TODO
-        :returns: TODO
+        :param ki_list: list of knowledge item
+        :type ki_list: list (rosplan_knowledge_msgs.msg.KnowledgeItem)
+        :param update_type: type of update to be performed in KB
+        :type update_type: int
+        :return: None
 
         """
         update_kb_topic = '/rosplan_knowledge_base/update_array'
@@ -135,9 +142,10 @@ class ProblemUploader(object):
         first element is ignored, then after a dash is the categories,
         and all the instances before are the objects belonging to that categories.
 
-        :pddl_objects: list
-        :returns: dict {str: [str, str, ...], ...}
-        
+        :param pddl_objects: list of pddl objects
+        :type pddl_objects: list (str)
+        :rtype: dict {str: [str, str, ...], ...}
+
         """
         # ignore first element
         objects = pddl_objects[1:]
@@ -158,8 +166,9 @@ class ProblemUploader(object):
         """
         parse facts from a list of strings
 
-        :pddl_facts: list of str
-        :returns: list of tuple ( each tuple is (str, [(str, str), ...]) )
+        :param pddl_facts: list of pddl facts
+        :type pddl_facts: list (str)
+        :rtype: list (tuple (str, [(str, str), ...]) )
 
         """
         facts = []
@@ -177,12 +186,15 @@ class ProblemUploader(object):
     def get_attr_to_obj_type(obj_names):
         """
         Create a dict to look up from attribute name to object keys
-        For example: 'on' -> ('o', 'l')
+
+        Example: 'on' -> ('o', 'l')
         where 'o' stands for object and 'l' stands for location according to the
         domain file.
 
-        :obj_names: list
-        :returns: dict
+        :param obj_names: names of objects
+        :type obj_names: list (str)
+        :return: a dict to map attribute name to object keys
+        :rtype: dict
 
         """
         domain_attr_kb_topic = '/rosplan_knowledge_base/domain/predicates'
@@ -201,17 +213,32 @@ class ProblemUploader(object):
         for item in response.items:
             attr_to_obj_type[item.name] = [param.key for param in item.typed_parameters]
         return attr_to_obj_type
-    
+
     @staticmethod
     def make_srv_req_to_KB(knowledge_type_is_instance=True,
                            instance_type='', instance_name='',
                            attribute_name='', values=[],
                            update_type_is_knowledge=True):
         """
-        make a service call to rosplan knowledge base (mongodb)
+        make a service call to ``rosplan_knowledge_base`` (mongodb)
+
+        :param knowledge_type_is_instance: type of knowledge
+        :type knowledge_type_is_instance: bool
+        :param instance_type: type of instance
+        :type instance_type: str
+        :param instance_name: name of instance
+        :type instance_name: str
+        :param attribute_name: name of attribute
+        :type attribute_name: str
+        :param values: values for attribute
+        :type value: list (tuple (str, str))
+        :param update_type_is_knowledge: type of update to be performed
+        :type update_type_is_knowledge: bool
+        :return: success
+        :rtype: bool
 
         example 1:
-        **upload instance**: youbot has one ``dynamixel`` ``gripper``
+        **upload instance**: youbot has one ``dynamixel`` ``gripper``.
 
         .. code-block:: bash
 
@@ -223,6 +250,14 @@ class ProblemUploader(object):
                 attribute_name: ''
                 values: {}
                 function_value: 0.0";
+
+        To perform the following using this function
+
+        .. code-block:: python
+
+            ProblemUploader.make_srv_req_to_KB(knowledge_type_is_instance=True,
+                                               instance_type='gripper',
+                                               instance_name='dynamixel')
 
         example 2:
         **upload fact**: object ``o4`` is on location ``S3``
@@ -239,6 +274,15 @@ class ProblemUploader(object):
                 - {key: 'o', value: 'o4'}
                 - {key: 'l', value: 'S3'}
                 function_value: 0.0";
+
+        To perform the following using this function
+
+        .. code-block:: python
+
+            ProblemUploader.make_srv_req_to_KB(knowledge_type_is_instance=False,
+                                               attribute_name='on',
+                                               values=[('o', 'o4'),
+                                                       ('l', 'S3')])
 
         """
         msg = KnowledgeItem()

@@ -3,10 +3,7 @@
 mir\_manipulate\_drawer
 =======================
 
-mir\_manipulate\_drawer.manipulate\_drawer\_utils module
---------------------------------------------------------
-
-.. automodule:: mir_manipulate_drawer.manipulate_drawer_utils
+.. autoclass:: mir_manipulate_drawer.manipulate_drawer_utils.ManipulateDrawerUtils
     :members:
     :undoc-members:
     :show-inheritance:

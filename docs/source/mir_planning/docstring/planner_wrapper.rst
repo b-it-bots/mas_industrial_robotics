@@ -3,10 +3,7 @@
 planner\_wrapper
 ================
 
-planner\_wrapper.planner\_wrapper module
-----------------------------------------
-
-.. automodule:: planner_wrapper.planner_wrapper
+.. autoclass:: planner_wrapper.planner_wrapper.PlannerWrapper
     :members:
     :undoc-members:
     :show-inheritance:

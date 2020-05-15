@@ -1,12 +1,17 @@
 #!/usr/bin/env python
+"""
+Check if the response of the following is empty or not
+
+.. code-block:: bash
+
+    rosservice call /rosplan_knowledge_base/state/goals "predicate_name: ''"
+
+If it is, then there are no unfinished goals
+"""
+
 import rospy
 from rosplan_knowledge_msgs.srv import GetAttributeService
 from std_msgs.msg import String
-
-"""
-rosservice call /rosplan_knowledge_base/state/goals "predicate_name: ''"
-check if it is empty, this means there are no unfinished goals
-"""
 
 class KnowledgeBaseAnalizer(object):
     """
@@ -24,6 +29,9 @@ class KnowledgeBaseAnalizer(object):
     def pending_goals_event_in_cb(self, msg):
         """
         Obtains an event for the component.
+
+        :param msg: Incoming message
+        :type msg: std_msgs.msg.String
 
         """
         rospy.loginfo('Pending goal request received...')
@@ -48,7 +56,7 @@ class KnowledgeBaseAnalizer(object):
 
     def start(self):
         """
-        Starts the component.
+        Starts the component in a loop till rosnode is alive.
 
         """
         rospy.loginfo('Pending_goals_analyzer node initilized...')
