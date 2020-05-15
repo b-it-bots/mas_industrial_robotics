@@ -178,9 +178,8 @@ class ProblemUploader(object):
         """
         Create a dict to look up from attribute name to object keys
         For example: 'on' -> ('o', 'l')
-                               ^    ^
-                               |    |
-                           object  location
+        where 'o' stands for object and 'l' stands for location according to the
+        domain file.
 
         :obj_names: list
         :returns: dict
@@ -212,29 +211,34 @@ class ProblemUploader(object):
         make a service call to rosplan knowledge base (mongodb)
 
         example 1:
-        # upload instance : youbot has one dynamixel gripper (dynamixel - gripper)
-        rosservice call /rosplan_knowledge_base/update "update_type: 0 # ADD_KNOWLEDGE = 0
-            knowledge:
-            knowledge_type: 0 # INSTANCE = 0
-            instance_type: 'gripper'
-            instance_name: 'dynamixel'
-            attribute_name: ''
-            values:
-            -{}
-            function_value: 0.0";
+        **upload instance**: youbot has one ``dynamixel`` ``gripper``
 
-        example 2: object4 (o4) is on location S3
-        # upload fact :
-        rosservice call /rosplan_knowledge_base/update "update_type: 0 # ADD_KNOWLEDGE = 0
-            knowledge:
-            knowledge_type: 1 # FACT = 1
-            instance_type: ''
-            instance_name: ''
-            attribute_name: 'on'
-            values:
-            - {key: 'o', value: 'o4'}
-            - {key: 'l', value: 'S3'}
-            function_value: 0.0";
+        .. code-block:: bash
+
+            rosservice call /rosplan_knowledge_base/update "update_type: 0
+                knowledge:
+                knowledge_type: 0
+                instance_type: 'gripper'
+                instance_name: 'dynamixel'
+                attribute_name: ''
+                values: {}
+                function_value: 0.0";
+
+        example 2:
+        **upload fact**: object ``o4`` is on location ``S3``
+
+        .. code-block:: bash
+
+            rosservice call /rosplan_knowledge_base/update "update_type: 0
+                knowledge:
+                knowledge_type: 1
+                instance_type: ''
+                instance_name: ''
+                attribute_name: 'on'
+                values:
+                - {key: 'o', value: 'o4'}
+                - {key: 'l', value: 'S3'}
+                function_value: 0.0";
 
         """
         msg = KnowledgeItem()

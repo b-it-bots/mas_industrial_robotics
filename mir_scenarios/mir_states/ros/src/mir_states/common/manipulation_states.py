@@ -28,14 +28,13 @@ class MoveitClient:
     Move arm to a target. target may be fixed at construction time or set
     through userdata.
 
-    Input
-    -----
-    move_arm_to: str | tuple | list
-        target where the arm should move. If it is a string, then it gives
+    :param move_arm_to: target where the arm should move. If it is a string, then it gives
         target name (should be availabile on the parameter server). If it as
         tuple or a list, then it is treated differently based on the length. If it
         has 7 items, then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame.
         If it has 5 items, then it is arm configuration in join space.
+    :type move_arm_to: str | tuple | list
+
     """
 
     def __init__(self, moveit_group=None, target=None, timeout=10.0, joint_names=None):

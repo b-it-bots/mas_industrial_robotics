@@ -3,9 +3,6 @@
 planner\_wrapper package
 ========================
 
-Submodules
-----------
-
 planner\_wrapper.planner\_wrapper module
 ----------------------------------------
 

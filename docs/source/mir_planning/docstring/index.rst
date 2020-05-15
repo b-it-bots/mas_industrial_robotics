@@ -13,3 +13,4 @@ Planning Documentation
   mir_task_planning
   planner_wrapper
   mir_states
+  mir_refbox_parser_ros
