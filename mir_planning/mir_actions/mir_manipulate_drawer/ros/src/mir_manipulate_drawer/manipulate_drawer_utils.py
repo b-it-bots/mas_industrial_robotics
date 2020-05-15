@@ -19,11 +19,15 @@ class ManipulateDrawerUtils(object):
             rospy.logfatal('Params not available')
 
     def calc_pose_for_dbc_for_param(self, pose_in, param_name='default'):
-        """Calculate pose for dbc based on the param
+        """
+        Calculate pose for dbc based on the param
 
-        :pose_in: geometry_msgs.PoseStamped
-        :param_name: str
-        :returns: geometry_msgs.PoseStamped
+        :param pose_in: input pose
+        :type pose_in: geometry_msgs.msg.PoseStamped
+        :param param_name: name of parameter in action server step
+        :type param_name: str
+        :return: Pose for the robot to be at to perform ``param_name`` step
+        :rtype: geometry_msgs.PoseStamped
 
         """
         if param_name not in self._dbc_params:

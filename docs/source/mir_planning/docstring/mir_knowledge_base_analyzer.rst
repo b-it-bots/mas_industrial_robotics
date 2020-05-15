@@ -3,10 +3,10 @@
 mir\_knowledge\_base\_analyzer
 ==============================
 
-mir\_knowledge\_base\_analyzer.my\_generic\_util\_class module
---------------------------------------------------------------
+mir\_knowledge\_base\_analyzer\_ros.knowledge\_base\_analyzer module
+--------------------------------------------------------------------
 
-.. automodule:: mir_knowledge_base_analyzer.my_generic_util_class
+.. automodule:: mir_knowledge_base_analyzer_ros.knowledge_base_analyzer
     :members:
     :undoc-members:
     :show-inheritance:
