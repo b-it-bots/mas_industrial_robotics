@@ -9,12 +9,13 @@ import rospy
 import std_msgs.msg
 import geometry_msgs.msg
 import atwork_ros_msgs.msg
+from actionlib_msgs.msg import GoalStatus
 
 import roslib
 import actionlib
 import sys
-from mir_yb_action_msgs.msg import MoveBaseSafeAction, MoveBaseSafeGoal
-from mir_yb_action_msgs.msg import MoveBaseSafeResult
+from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteGoal
+from mir_planning_msgs.msg import GenericExecuteResult
 
 from rosplan_knowledge_msgs.srv import KnowledgeUpdateService
 from rosplan_knowledge_msgs.srv import GetDomainAttributeService
@@ -168,30 +169,32 @@ class RefboxParser(object):
                 self._model_number = {}
             self.loop_rate.sleep()
 
-    '''
-    Callback on inventory message
-
-    Inventory message has a list of "Items".
-    Each Item has the following structure.
-
-
-    object                      ->description of the object
-        type
-        type_id
-        instance_id(optional)   ->If provided then dont check quantity
-        description(optional)
-    quantity(optional)          ->If instance_id not provided check this
-    container(optional)         ->The container in which the item is stored
-        type
-        type_id
-        instance_id(optional)
-        description(optional)
-    location(optional)          ->Location where the object is stored
-        type
-        instance_id
-        description(optional)
-    '''
     def inventory_callback(self, msg):
+        '''
+        Callback on inventory message
+
+        Inventory message has a list of "Items".
+        Each Item has the following structure.
+
+        .. code-block::
+
+            object                      ->description of the object
+                type
+                type_id
+                instance_id(optional)   ->If provided then dont check quantity
+                description(optional)
+            quantity(optional)          ->If instance_id not provided check this
+            container(optional)         ->The container in which the item is stored
+                type
+                type_id
+                instance_id(optional)
+                description(optional)
+            location(optional)          ->Location where the object is stored
+                type
+                instance_id
+                description(optional)
+
+        '''
         self._inventory_message = atwork_ros_msgs.msg.Inventory(msg.items)
 	pass
 
@@ -261,7 +264,7 @@ class RefboxParser(object):
 
         if (None == self._inventory_message):
             return
-        
+
         #Creating the message
         instance_msg = KnowledgeItem()
 
@@ -441,12 +444,12 @@ class RefboxParser(object):
     # Navigation task
     ####################################################################
     def execute_navigation_task(self):
-        client = actionlib.SimpleActionClient('move_base_safe_server', MoveBaseSafeAction)
-        rospy.loginfo("Waiting for Movebase actionlib server")
+        client = actionlib.SimpleActionClient('move_base_safe_server', GenericExecuteAction)
+        rospy.loginfo("Waiting for move_base_safe's actionlib server")
         client.wait_for_server()
-        rospy.loginfo("Got Movebase actionlib server sending goals")
-        goal = MoveBaseSafeGoal()
-        goal.arm_safe_position = 'folded'
+        rospy.loginfo("Got move_base_safe's actionlib server sending goals")
+        goal = GenericExecuteGoal()
+        goal.parameters.append(KeyValue(key='arm_safe_position', value='barrier_tape'))
 
         # start logging and tell the refbox that we're logging
         self.pub_logger.publish('e_start')
@@ -461,19 +464,24 @@ class RefboxParser(object):
                 print self.location_type[task.navigation_task.location.type.data] + \
                                               str(task.navigation_task.location.instance_id.data ).zfill(2)
                 try:
-                    goal.source_location = ""
-                    goal.destination_location = self.location_type[task.navigation_task.location.type.data] + \
-                                                 str(task.navigation_task.location.instance_id.data ).zfill(2)
-                    goal.destination_orientation = self.orientation[task.navigation_task.orientation.data]
+                    destination_location = self.location_type[
+                            task.navigation_task.location.type.data] + \
+                            str(task.navigation_task.location.instance_id.data ).zfill(2)
+                    goal.parameters.append(KeyValue(key='destination_location',
+                                                    value=destination_location))
+                    destination_orientation = self.orientation[task.navigation_task.orientation.data]
+                    goal.parameters.append(KeyValue(key='destination_orientation',
+                                                    value=destination_orientation))
                     timeout = 60.0
                     rospy.loginfo('Sending action lib goal to move_base_safe_server'
-                                     + ' , destination : ' + goal.destination_location 
-                                     + ' , orientation : '+ goal.destination_orientation)
+                                     + ' , destination : ' + destination_location
+                                     + ' , orientation : '+ destination_orientation)
                     client.send_goal(goal)
                     client.wait_for_result(rospy.Duration.from_sec(int(timeout)))
                     result = client.get_result()
+                    state = client.get_state()
                     if(result):
-                        if True == result.success:
+                        if state == GoalStatus.SUCCEEDED:
                             # wait for required time at location
                             d = rospy.Duration(task.navigation_task.wait_time.data.secs, 0)
                             rospy.sleep(d)
@@ -483,10 +491,12 @@ class RefboxParser(object):
                         client.cancel_goal()
                         rospy.logerr('No Result from client')
                 except:
-                    rospy.logerr("FAILED . Action server MOVE_BASE_SAFE to desitnaton %s ", goal.destination_location)
+                    rospy.logerr("FAILED . Action server MOVE_BASE_SAFE to desitnaton %s ", destination_location)
 
         #Exiting when the action is done move to EXIT
-        goal.destination_location = "EXIT"
+        goal = GenericExecuteGoal()
+        goal.parameters.append(KeyValue(key='arm_safe_position', value='barrier_tape'))
+        goal.parameters.append(KeyValue(key='destination_location', value='EXIT'))
         timeout = 60.0
         client.send_goal(goal)
         client.wait_for_result(rospy.Duration.from_sec(int(timeout)))
@@ -496,7 +506,7 @@ class RefboxParser(object):
         # stop logging and tell the refbox that we've stopped logging
         self.pub_logger.publish('e_stop')
         logging_status= atwork_ros_msgs.msg.LoggingStatus()
-        logging_status.is_logging.data = False 
+        logging_status.is_logging.data = False
         self.pub_logging_status.publish(logging_status)
 
 
@@ -548,7 +558,6 @@ class RefboxParser(object):
                         object_name = self.fill_order(task.transportation_task, 'in', 'object', 'container', container_name=container_name)
                         if object_name:
                             self.load_fact_message('insertable', object_name, task.transportation_task, 'destination')
-                   
 
                 elif (0 != task.transportation_task.destination.instance_id.data):
                 #if (0 != task.transportation_task.destination.instance_id.data): //Add when 'in' domain is not present
@@ -596,7 +605,7 @@ class RefboxParser(object):
         output_value.key = (self._predicate_param_label_list[fact_msg.attribute_name])[0]
         name_of_object = self.msg_to_instance_name(order, first, count)
         output_value.value = name_of_object
-        
+
         ##Robocup finals hack not adding goals for object to be picked from rotation table
         if output_value.value in self.object_to_delete_goals:
             print "Not adding goal for ",output_value.value
