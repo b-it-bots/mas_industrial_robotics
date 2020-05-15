@@ -3,9 +3,6 @@
 mir\_task\_planning package
 ===========================
 
-Submodules
-----------
-
 mir\_task\_planning.utils module
 --------------------------------
 

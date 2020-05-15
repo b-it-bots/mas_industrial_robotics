@@ -10,10 +10,10 @@ to the gripper.
 
 The box is attached to the gripper at attachment_frame_id with the orientation in
 the gripper as if:
-1. the object was first sitting on a surface and the gripper is ready to 
-   grasp the object.
-2. the surface which the object is sitting on has the same orientation as
-   the fixed_frame_id at the time of receiving e_start.
+1) the object was first sitting on a surface and the gripper is ready to grasp\
+   the object.
+2) the surface which the object is sitting on has the same orientation as the\
+   fixed_frame_id at the time of receiving e_start.
 
 event_in expects "e_start" and "e_stop",
 start attaches the object, stop detaches the object.
@@ -62,6 +62,9 @@ class GraspedObjectAttacher(object):
     def event_in_cb(self, msg):
         """
         Obtains an event for the GraspedObjectAttacher.
+
+        :param msg: TODO
+        :type msg: std_msgs.msg.String
 
         supported events: "e_start", "e_stop"
         """

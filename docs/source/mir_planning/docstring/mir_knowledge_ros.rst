@@ -3,9 +3,6 @@
 mir\_knowledge\_ros package
 ===========================
 
-Submodules
-----------
-
 mir\_knowledge\_ros.problem\_uploader module
 --------------------------------------------
 

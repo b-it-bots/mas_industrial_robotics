@@ -3,9 +3,6 @@
 mir\_states package
 ===================
 
-Submodules
-----------
-
 common.action\_states module
 ----------------------------
 

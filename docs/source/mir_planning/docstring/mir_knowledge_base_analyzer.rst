@@ -3,9 +3,6 @@
 mir\_knowledge\_base\_analyzer package
 ======================================
 
-Submodules
-----------
-
 mir\_knowledge\_base\_analyzer.my\_generic\_util\_class module
 --------------------------------------------------------------
 

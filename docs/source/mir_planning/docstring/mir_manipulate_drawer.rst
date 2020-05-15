@@ -3,9 +3,6 @@
 mir\_manipulate\_drawer package
 ===============================
 
-Submodules
-----------
-
 mir\_manipulate\_drawer.manipulate\_drawer\_utils module
 --------------------------------------------------------
 

@@ -3,9 +3,6 @@
 mir\_planning\_visualisation package
 ====================================
 
-Submodules
-----------
-
 mir\_planning\_visualisation.kb\_visualiser module
 --------------------------------------------------
 

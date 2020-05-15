@@ -3,9 +3,6 @@
 mir\_pregrasp\_planning\_ros package
 ====================================
 
-Submodules
-----------
-
 mir\_pregrasp\_planning\_ros.pose\_mock\_up\_gui module
 -------------------------------------------------------
 
@@ -26,15 +23,6 @@ mir\_pregrasp\_planning\_ros.simple\_pregrasp\_planner\_utils module
 --------------------------------------------------------------------
 
 .. automodule:: mir_pregrasp_planning_ros.simple_pregrasp_planner_utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: mir_pregrasp_planning_ros
     :members:
     :undoc-members:
     :show-inheritance:

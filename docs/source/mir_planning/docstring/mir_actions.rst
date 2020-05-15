@@ -3,9 +3,6 @@
 mir\_actions package
 ====================
 
-Submodules
-----------
-
 mir\_actions.utils module
 -------------------------
 

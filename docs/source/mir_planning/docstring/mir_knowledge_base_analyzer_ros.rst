@@ -3,9 +3,6 @@
 mir\_knowledge\_base\_analyzer\_ros package
 ===========================================
 
-Submodules
-----------
-
 mir\_knowledge\_base\_analyzer\_ros.knowledge\_base\_analyzer module
 --------------------------------------------------------------------
 
