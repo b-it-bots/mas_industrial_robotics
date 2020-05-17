@@ -9,7 +9,7 @@ from pcl_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
 
 class DGCNNClassifier(CNNBasedClassifiers):
     """
-    A wrapper for CNN based classifiers
+    Point cloud classifier using Dynamic graph CNN (DGCNN) 
 
     """
 
