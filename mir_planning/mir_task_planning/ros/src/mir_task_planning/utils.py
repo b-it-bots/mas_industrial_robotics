@@ -5,11 +5,15 @@ class Utils(object):
 
     @staticmethod
     def get_action_msg_from_string(string, action_id):
-        """Create and return Action obj from string of type '(word word word ...)'
+        """
+        Create and return Action obj from string of type ``(word word word ...)``
 
-        :string: string
-        :action_id: int
-        :returns: rosplan_dispatch_msgs/ActionDispatch
+        :param string: action represented in string format
+        :type string: str
+        :param action_id: identifier for the given action
+        :type action_id: int
+        :return: action represented in action object format
+        :rtype: rosplan_dispatch_msgs.msg.ActionDispatch
 
         """
         # remove parenthesis, convert str to upper case and split at spaces

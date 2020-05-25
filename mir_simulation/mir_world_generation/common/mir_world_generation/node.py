@@ -4,8 +4,8 @@ import random
 class Node(object):
 
     """
-    An object representation of a cell in a grid of size `row` x `col`. Each cell
-    is a square of dimension `size` (in cm) which can hold atmost 2 workstations.
+    An object representation of a cell in a grid of size ``row`` x ``col``. Each cell
+    is a square of dimension ``size`` (in cm) which can hold **atmost 2** workstations.
     """
 
     ws_length = 80 # cm
@@ -16,7 +16,7 @@ class Node(object):
         self.y = row * self.size
         self.ws = []
         # North, South, East, West (north will be positive Y axis)
-        self.probable_ws_direction = ['N', 'S', 'E', 'W'] 
+        self.probable_ws_direction = ['N', 'S', 'E', 'W']
 
     def add_ws(self):
         """
@@ -92,12 +92,12 @@ class Node(object):
         if direction == 'W':
             ws1['x'] = self.x + max_len_pos
             return self.y + min_len_pos if ws1_dir == 'S' else self.y + max_len_pos
-            
+
     @staticmethod
     def get_direction_from_theta(theta):
         """
         Return a direction ('N', 'S', 'E', 'W') from theta (-pi to pi)
-        
+
         :theta: float
         :returns: str
 

@@ -22,10 +22,10 @@ parameters for all the components and starts/stops them accordingly.
   * `target_pose`: The pose where the manipulator's end effector is required to be.
 
 **Output(s):**
-  * `selected_pose`: The pose of the manipulator's last joint so that the end effector
-  reaches the `target_pose`.
-  * `configuration_out`: The joint position values for the manipulator to reach
-  the `selected_pose`.
+  * `selected_pose`: The pose of the manipulator's last joint so that the end\
+                     effector reaches the `target_pose`.
+  * `configuration_out`: The joint position values for the manipulator to reach\
+                         the `selected_pose`.
 
 **Relevant parameter(s):**
   * `simple_grasp_planner`

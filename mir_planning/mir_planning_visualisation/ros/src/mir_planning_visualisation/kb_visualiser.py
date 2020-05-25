@@ -12,7 +12,7 @@ class KnowledgeBaseVisualiser(object):
 
     """
     Visualise propositions from knowledge base
-    Currently supported attributes are `on`, `in`, `at` and `stored`.
+    Currently supported attributes are ``on``, ``in``, ``at`` and ``stored``.
     """
 
     def __init__(self):
@@ -42,7 +42,8 @@ class KnowledgeBaseVisualiser(object):
         - Create markers from that data.
         - Return markers and data
 
-        :returns: (list of visualization_msgs.Marker, dict)
+        :return: a list of markers along with relevant data from KB
+        :rtype: tuple (list (list( visualization_msgs.msg.Marker)), dict)
 
         """
         facts = self._get_response_from_kb(self._kb_server_facts_topic)

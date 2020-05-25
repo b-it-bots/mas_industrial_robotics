@@ -17,13 +17,13 @@ def modify_pose(pose_in, height_threshold, standing_angle=270., angular_toleranc
     Computes a modified pose (of an object) only if the object is
     standing (vertically) on a surface, based on the following criteria:
 
-    - If the object's height is below the height_threshold, then a modified
-        pose is computed consisting of a rotation of 90 degrees of pose_in
-        (e.g. the new pose will have the object laying horizontally).
-    - If the object's height is not below the height_threshold, then the
-        orientation is preserved (i.e. still standing), but the rotation
-        will be set to zero degrees around the X axis (assuming the X axis
-        is pointing upwards, see module description of 'simple_grasp_planner').
+    - If the object's height is below the height_threshold, then a modified\
+      pose is computed consisting of a rotation of 90 degrees of pose_in\
+      (e.g. the new pose will have the object laying horizontally).
+    - If the object's height is not below the height_threshold, then the\
+      orientation is preserved (i.e. still standing), but the rotation\
+      will be set to zero degrees around the X axis (assuming the X axis\
+      is pointing upwards, see module description of 'simple_grasp_planner').
 
     It also returns whether the object is standing.
 
@@ -183,8 +183,8 @@ def restrict_angle_to_range(angle, offset, rotation_range):
     :return: The angle restricted to a range within a circle (in radians).
     :rtype: float
 
-    Examples
-    --------
+    :Examples:
+
     >>> angle = math.radians(60)
     >>> offset = math.radians(0)
     >>> rotation_range = list(numpy.radians([0, 180]))

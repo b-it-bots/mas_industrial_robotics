@@ -12,7 +12,10 @@ from visualization_msgs.msg import Marker
 
 class Utils(object):
 
-    """Utils class to create marker based on a config file as requested."""
+    """
+    Utils class to create marker on request based on the configutation from
+    a config file.
+    """
 
     def __init__(self):
         # read ros params
@@ -52,7 +55,8 @@ class Utils(object):
     def get_markers_from_ws_pos(self):
         """Create markers for workstations
 
-        :returns: list of visualization_msgs.Marker
+        :return: workstation markers
+        :rtype: list of visualization_msgs.Marker
 
         """
         markers = []
@@ -82,8 +86,10 @@ class Utils(object):
     def get_markers_for_youbot(self, robot_ws='start'):
         """Create markers for robot
 
-        :ws_name: str
-        :returns: list of visualization_msgs.Marker
+        :param ws_name: name of workstation where the robot currently is
+        :type ws_name: str
+        :return: markers representing youbot body
+        :rtype: list (visualization_msgs.Marker)
 
         """
         x, y, yaw = self._ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
@@ -103,10 +109,14 @@ class Utils(object):
     def get_markers_from_obj_on_robot(self, obj, platform, robot_ws):
         """Create markers for objects stored on robot's platform
 
-        :obj: str
-        :platform: str
-        :robot_ws: str
-        :returns: list of visualization_msgs.Marker
+        :param obj: name of object
+        :type obj: str
+        :param platform: name of robot platform on which the object is
+        :type platform: str
+        :param robot_ws: name of location where the robot currently is
+        :type robot_ws: str
+        :return: marker of object on robot platform
+        :rtype: list (visualization_msgs.Marker)
 
         """
         x, y, yaw = self._ws_pose.get(robot_ws.lower(), [0.0, 0.0, 0.0])
@@ -126,14 +136,18 @@ class Utils(object):
             return marker
         else:
             rospy.logwarn('Object ' + obj + ' on unknown platform '+ platform)
-        
+
     def get_markers_from_obj_on_ws(self, obj_list, ws_name, container_to_obj=None, is_goal=False):
         """Create markers for objects on a given workstation
 
-        :obj_list: list
-        :ws_name: str
-        :container_to_obj: dict
-        :returns: list of visualization_msgs.Marker
+        :param obj_list: list of object present on a workstation
+        :type obj_list: list
+        :param ws_name: name of workstation
+        :type ws_name: str
+        :param container_to_obj: dict mapping container name of obj present in it
+        :type container_to_obj: dict
+        :return: markers for objects on a workstation
+        :rtype: list (visualization_msgs.Marker)
 
         """
         ws = ws_name.lower()
@@ -188,16 +202,18 @@ class Utils(object):
         The marker is created in such a way that the position (given by x, y and z)
         lies at the middle bottom of the model.
 
-        If the given object name cannot be mapped to a model, a default marker 
+        If the given object name cannot be mapped to a model, a default marker
         is used instead. Default marker is a small red cube.
 
-        :obj_name: string
-        :x: float
-        :y: float
-        :z: float
-        :yaw: float
-        :frame: str
-        :returns: visualization_msgs.Marker
+        :param obj_name: name of object (contains '-' and an ID number after)
+        :type obj_name: string
+        :param x: float
+        :param y: float
+        :param z: float
+        :param yaw: float
+        :param frame: str
+        :return: marker representing an object
+        :rtype: visualization_msgs.Marker
 
         """
         if frame is None:
@@ -254,11 +270,18 @@ class Utils(object):
     def get_arc_marker(self, src, dest, num_of_points=11, scale_factor=3.0):
         """Create an arc from src to dest with an arrow head at the top
 
-        :src: str
-        :dest: str
-        :num_of_points: int
-        :scale_factor: float
-        :returns: visualization_msgs.Marker
+        :param src: source location
+        :type src: str
+        :param dest: destination location
+        :type dest: str
+        :param num_of_points: number of points that the arc should contain
+        :type num_of_points: int
+        :param scale_factor: float
+        :type scale_factor: float
+        :return: Marker representing ``move_base`` action in the plan
+        :rtype: visualization_msgs.Marker
+
+        .. note:: ``num_of_points`` should be greater or equal to 5
 
         """
         if num_of_points < 5:

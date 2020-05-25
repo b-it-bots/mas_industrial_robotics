@@ -22,3 +22,13 @@ MAS Industrial Robotics
   mir_navigation/index.rst
   mir_planning/index.rst
   mir_simulation/index.rst
+
+.. toctree::
+  :maxdepth: 2
+  :caption: Documentation
+
+  mir_perception/docstring/index.rst
+  mir_manipulation/docstring/index.rst
+  mir_navigation/docstring/index.rst
+  mir_planning/docstring/index.rst
+  mir_simulation/docstring/index.rst
