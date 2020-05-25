@@ -3,15 +3,20 @@ class Utils(object):
     @staticmethod
     def get_connected_nodes(start_cell, walled_edges, max_row, max_col):
         """
-        Find the connected graph starting from `start_cell` in a grid of size 
-        `max_row` x `max_col`. All the edges except `walled_edges` are considered
+        Find the connected graph starting from ``start_cell`` in a grid of size 
+        ``max_row`` x ``max_col``. All the edges except ``walled_edges`` are considered
         as connected.
 
-        :start_cell: tuple (int, int)
-        :walled_edges: list of list of tuple (int, int)
-        :max_row: int
-        :max_col: int
-        :returns: list of tuple (int, int)
+        :param start_cell: starting position of the robot in grid
+        :type start_cell: tuple (int, int)
+        :param walled_edges: edges in a graph which are not connected
+        :type walled_edges: list (list (tuple (int, int)))
+        :param max_row: number of rows in the grid
+        :type max_row: int
+        :param max_col: number of columns in the grid
+        :type max_col: int
+        :return: connected graph of cells
+        :rtype: list (tuple(int, int))
 
         """
         connected_nodes = []
@@ -26,17 +31,23 @@ class Utils(object):
                 if neighbour not in connected_nodes:
                     fringe.append(neighbour)
         return connected_nodes
- 
+
     @staticmethod
     def get_connected_neighbour(node, walled_edges, max_row, max_col):
         """
-        Return neighbours of a cell (Node object) which are connected (not walled off).
-        
-        :node: tuple (int, int)
-        :walled_edges: list of list of tuple (int, int)
-        :max_row: int
-        :max_col: int
-        :returns: list of tuple (int, int)
+        Return neighbours of a cell (represented by :class:`mir_world_generation.node.Node`)
+        which are connected (not walled off).
+
+        :param node: cell/node in a graph made from a grid
+        :type node: tuple (int, int)
+        :param walled_edges: edges in a graph which are not connected
+        :type walled_edges: list (list (tuple (int, int)))
+        :param max_row: number of rows in the grid
+        :type max_row: int
+        :param max_col: number of columns in the grid
+        :type max_col: int
+        :return: neighbours of a cell which are connected (not walled off)
+        :rtype: list (tuple (int, int))
 
         """
         neighbours = Utils.get_neighbours(node[0], node[1], max_row, max_col)
@@ -47,14 +58,19 @@ class Utils(object):
     @staticmethod
     def get_neighbours(i, j, max_row, max_col):
         """
-        Return all possible neighbour of a cell at position (`i`, `j`) in a grid
-        of size `max_row` x `max_col`.
+        Return all possible neighbour of a cell at position (``i``, ``j``) in a grid
+        of size ``max_row`` x ``max_col``.
 
-        :i: int
-        :j: int
-        :max_row: int
-        :max_col: int
-        :returns: list of tuple (int, int)
+        :param i: row index
+        :type i: int
+        :param j: column index
+        :type j: int
+        :param max_row: number of rows in the grid
+        :type max_row: int
+        :param max_col: number of columns in the grid
+        :type max_col: int
+        :return: all possible neighbours
+        :rtype: list (tuple (int, int))
 
         """
         neighbours = []

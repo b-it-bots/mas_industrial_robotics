@@ -6,8 +6,9 @@ from mir_planning_msgs.msg import PlanActionResult
 from mir_planning_visualisation.utils import Utils
 
 class PlanVisualiser(object):
-    """ Class to visualize tasks in plan.
-    Currently supported actions `move_base` and `pick`
+    """
+    Class to visualize tasks in plan.
+    Currently supported actions ``move_base`` and ``pick``
     """
 
     def __init__(self):
@@ -76,9 +77,12 @@ class PlanVisualiser(object):
         - Modify markers based on pick action.
         - Add markers for move_base actions
 
-        :kb_markers: list of lists of visualization_msgs.Marker
-        :kb_data: dict
-        :returns: list of visualization_msgs.Marker
+        :param kb_markers: markers from :class:`mir_planning_visualisation.kb_visualiser.KnowledgeBaseVisualiser`
+        :type kb_markers: list (lists (visualization_msgs.msg.Marker))
+        :param kb_data: data from knowledge base
+        :type kb_data: dict
+        :return: all markers to be published
+        :rtype: list (visualization_msgs.msg.Marker)
 
         """
         if kb_data is None:

@@ -158,6 +158,9 @@ class RefboxParser(object):
             self.start_order_flag = True
 
     def start(self):
+        """
+        Main loop for parsing
+        """
         while not rospy.is_shutdown():
             if self.start_inventory_flag :
                 self.load_inventory_to_knowledge_base()
@@ -173,10 +176,13 @@ class RefboxParser(object):
         '''
         Callback on inventory message
 
+        :param msg: incoming message
+        :type msg: atwork_ros_msgs.msg.Inventory
+
         Inventory message has a list of "Items".
         Each Item has the following structure.
 
-        .. code-block::
+        .. code-block:: bash
 
             object                      ->description of the object
                 type
@@ -424,10 +430,10 @@ class RefboxParser(object):
                      str(item.destination.instance_id.data).zfill(2)
         return text
 
-    '''
-    Order callback for taking the order
-    '''
     def task_callback(self, msg):
+        """
+        Order callback for taking the order
+        """
         self._tasks = atwork_ros_msgs.msg.TaskInfo(msg.tasks)
 	pass
 

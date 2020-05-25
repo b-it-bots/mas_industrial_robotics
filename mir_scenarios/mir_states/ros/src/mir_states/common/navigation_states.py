@@ -57,11 +57,11 @@ class move_base_relative(smach.State):
     Shift the robot by the offset stored in 'move_base_by' field of userdata
     or the offset passed to the constructor.
 
-    Input
-    -----
-    move_base_by: 3-tuple
-        x, y, and yaw displacement the shift the robot by (in /base_link). If an offset was
-        supplied to the state constructor then it will override this input.
+    :param move_base_by: x, y, and yaw displacement the shift the robot by
+                        (in /base_link). If an offset was supplied to the
+                        state constructor then it will override this input.
+    :type move_base_by: 3-tuple
+
     """
 
     def __init__(self, offset=None):

@@ -6,3 +6,4 @@ Simulation
 .. toctree::
 
     mapping_and_navigation
+    world_generation

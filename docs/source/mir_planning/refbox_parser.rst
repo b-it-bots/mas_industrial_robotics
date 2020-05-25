@@ -3,7 +3,8 @@
 Refbox parser
 =============
 
-This node contains components to store the world model of the environment and the goal of the tasks in the knowledge base of the robot.
+This node contains components to store the world model of the environment and \
+the goal of the tasks in the knowledge base of the robot.
 World model is defined as the locations and properties of different moveable
 objects(eg: robot, box etc) in the environment.
 The world model node has to subscribe to the incoming data stream which informs
