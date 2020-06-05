@@ -8,7 +8,6 @@
     YOUBOT-BRSU - robot
     PLATFORM_MIDDLE PLATFORM_LEFT PLATFORM_RIGHT - robot_platform
     DRAW01 - drawer
-    DRAW01_MIDDLE, DRAW01_LEFT, DRAW01_RIGHT - drawer_slots
 )
 
 (:init
@@ -20,7 +19,6 @@
     (gripper_is_free YOUBOT-BRSU)
     (located_at DRAW01 DRAW01_LOC)
     (inside R20 DRAW01)
-    (occupied DRAW01_RIGHT)
     (on M20 WS01)
     (on AXIS WS02)
     (on BEARING SH01)
