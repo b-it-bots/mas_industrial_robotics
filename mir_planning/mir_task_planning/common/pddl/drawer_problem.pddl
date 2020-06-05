@@ -3,11 +3,12 @@
 (:domain general_domain)
 
 (:objects
-    DRAWLOC01 SH01 CB01 WS01 WS02 START END - location
+    DRAW01_LOC SH01 CB01 WS01 WS02 START END - location
     R20 M20 M30-00 M30-01 AXIS BEARING - object
     YOUBOT-BRSU - robot
     PLATFORM_MIDDLE PLATFORM_LEFT PLATFORM_RIGHT - robot_platform
     DRAW01 - drawer
+    DRAW01_MIDDLE, DRAW01_LEFT, DRAW01_RIGHT - drawer_slots
 )
 
 (:init
@@ -17,17 +18,19 @@
 
     (at YOUBOT-BRSU START)
     (gripper_is_free YOUBOT-BRSU)
-    (located_at DRAW01 DRAWLOC01)
+    (located_at DRAW01 DRAW01_LOC)
     (inside R20 DRAW01)
+    (occupied DRAW01_RIGHT)
     (on M20 WS01)
     (on AXIS WS02)
-    (on BEARING WS01)
+    (on BEARING SH01)
 )
 
 (:goal (and
     (on R20 WS01)
     (inside M20 DRAW01)
     (inside AXIS DRAW01)
+    (inside BEARING DRAW01)
     (not (opened DRAW01))
     )
 )
