@@ -6,7 +6,6 @@
   	object				; objects to be manipulated by the robot
   	robot_platform		; platform slots for the robot to store objects
 	drawer              ; drawer to store objects
-	drawer_slots        ; slots in drawer to store objects
  )
 
  (:predicates
@@ -47,9 +46,6 @@
 
 	; specifies whether the gripper has opened the drawer ?d
 	(opened ?d - drawer)
-
- 	; drawer location ?d is occupied, yb has 3 free places to store objects
-	(occupied ?slots - drawer_slots)
 
 	; object ?o is located inside drawer ?d
 	(inside ?o - object ?d - drawer)
@@ -192,6 +188,7 @@
      :parameters (?r - robot ?draw_loc - location ?d - drawer)
      :precondition 	(and 	(at ?r ?draw_loc)
 	 						(located_at ?d ?draw_loc)
+							(perceived ?draw_loc)
                       		(gripper_is_free ?r)
 							(not (opened ?d))
                    	)
@@ -234,7 +231,7 @@
  ; pick an object ?o which is inside a drawer ?d at location ?draw_loc with a free gripper
  ; with robot ?r that is at location ?draw_loc
  (:action pick_from_drawer
-     :parameters (?r - robot ?draw_loc - location ?d - drawer  ?slots - drawer_slots ?o - object)
+     :parameters (?r - robot ?draw_loc - location ?d - drawer ?o - object)
      :precondition 	(and 	(inside ?o ?d)
                       		(at ?r ?draw_loc)
 							(located_at ?d ?draw_loc)
@@ -242,13 +239,11 @@
                       		(gripper_is_free ?r)
                       		(not (holding ?r ?o))
                       		(not (heavy ?o))
-							(occupied ?slots)
 							(opened ?d)
                    	)
      :effect (and  	(holding ?r ?o)
                    	(not (inside ?o ?d))
                    	(not (gripper_is_free ?r))
-					(not (occupied ?slots))
                    	(increase (total-cost) 2)
              )
  )
@@ -256,20 +251,17 @@
  ; place an object ?o inside a drawer ?d at location ?drawer
  ; with robot ?r that is at location ?draw_loc
  (:action place_inside_drawer
-     :parameters (?r - robot ?draw_loc - location ?d - drawer  ?slots - drawer_slots ?o - object)
+     :parameters (?r - robot ?draw_loc - location ?d - drawer ?o - object)
      :precondition  (and  (at ?r ?draw_loc)
 	 					  (located_at ?d ?draw_loc)
                           (holding ?r ?o)
-                          (not (inside ?o ?d))
                           (not (insertable ?o ))
                           (not (gripper_is_free ?r))
 						  (opened ?d)
-						  (not (occupied ?slots))
                     )
      :effect (and   (inside ?o ?d)
                     (not (holding ?r ?o))
                     (gripper_is_free ?r)
-					(occupied ?slots)
                     (increase (total-cost) 2)
              )
  )
