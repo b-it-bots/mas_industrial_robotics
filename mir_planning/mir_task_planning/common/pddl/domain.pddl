@@ -188,6 +188,7 @@
      :parameters (?r - robot ?draw_loc - location ?d - drawer)
      :precondition 	(and 	(at ?r ?draw_loc)
 	 						(located_at ?d ?draw_loc)
+							(perceived ?draw_loc)
                       		(gripper_is_free ?r)
 							(not (opened ?d))
                    	)
