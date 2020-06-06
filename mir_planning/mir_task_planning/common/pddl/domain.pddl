@@ -255,6 +255,7 @@
      :precondition  (and  (at ?r ?draw_loc)
 	 					  (located_at ?d ?draw_loc)
                           (holding ?r ?o)
+						  (perceived ?draw_loc)
                           (not (insertable ?o ))
                           (not (gripper_is_free ?r))
 						  (opened ?d)
