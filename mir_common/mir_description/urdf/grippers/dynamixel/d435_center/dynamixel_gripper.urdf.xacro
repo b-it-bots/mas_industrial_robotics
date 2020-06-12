@@ -10,6 +10,7 @@
   <xacro:include filename="$(find mcr_description)/urdf/motors/dynamixel_motor_ax-12a.urdf.xacro" />
   <xacro:include filename="$(find mcr_description)/urdf/motors/dynamixel_bracket_fp04-f2.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/d435_center/festo_finger_mount.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/grasp_fix_plugin.urdf.xacro" />
   <xacro:include filename="$(find mcr_description)/urdf/fingers/festo_finger_dhas-gf-shm.urdf.xacro" />
 
   <xacro:arg name="grasp_link_offset" default="0.11"/>
@@ -91,6 +92,8 @@
     <xacro:festo_finger_DHAS-GF-shm name="${name}_finger_right" parent="${name}_finger_mount_right_link">
       <origin xyz="0.004 0 0.0045" rpy="0 0 0" />
     </xacro:festo_finger_DHAS-GF-shm>
+
+    <xacro:gzplugin_grasp_fix />
   </xacro:macro>
 
 </robot>
