@@ -11,16 +11,17 @@ class _GetChar:
         except ImportError:
             self.impl = _GetCharWindows()
 
-    def __call__(self): return self.impl()
+    def __call__(self):
+        return self.impl()
 
 
 class _GetCharUnix:
-
     def __init__(self):
         import tty, sys
 
     def __call__(self):
         import sys, tty, termios
+
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -32,12 +33,12 @@ class _GetCharUnix:
 
 
 class _GetCharWindows:
-
     def __init__(self):
         import msvcrt
 
     def __call__(self):
         import msvcrt
+
         return msvcrt.getch()
 
 

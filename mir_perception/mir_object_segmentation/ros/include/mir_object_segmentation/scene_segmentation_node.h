@@ -38,7 +38,7 @@
  *      - e_add_cloud_stopped: stopped adding the cloud to octree
  *      - e_done: started finding the plane or started segmenting the pointcloud
  *      - e_stopped: stopped subscribing and cleared accumulated pointcloud
- * 
+ *
  * \author Mohammad Wasil, Santosh Thoduka
  */
 
@@ -89,12 +89,12 @@ class SceneSegmentationNode
         void eventCallback(const std_msgs::String::ConstPtr &msg);
         void configCallback(mir_object_segmentation::SceneSegmentationConfig &config, uint32_t level);
 
-        /** \brief Segment accumulated pointcloud, find the plane, 
+        /** \brief Segment accumulated pointcloud, find the plane,
          *         clusters table top objects, find object heights, and publish them.
          **/
         void segmentPointCloud();
 
-        /** \brief Segment accumulated pointcloud, find the plane, 
+        /** \brief Segment accumulated pointcloud, find the plane,
          *         find the plane height, and publish it.
          **/
         void findPlane();

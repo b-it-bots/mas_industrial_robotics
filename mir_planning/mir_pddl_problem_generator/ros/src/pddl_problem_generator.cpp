@@ -207,8 +207,8 @@ bool PDDLProblemGenerator::makeInitialState(std::ofstream &pFile)
                 {
                     rosplan_knowledge_msgs::KnowledgeItem attr = attr_srv.response.attributes[i];
 
-                    pFile << "    (";		
-                    
+                    pFile << "    (";
+
                     //Check if the attribute is negated
                     if(attr.is_negative) pFile << "not (";
 
@@ -222,10 +222,10 @@ bool PDDLProblemGenerator::makeInitialState(std::ofstream &pFile)
                                 pFile << " " << k.value;
                             }
                         }
-                        
+
                     }
                     pFile << ")";
-                    
+
                     if(attr.is_negative) pFile << ")";
 
                     pFile << std::endl;
@@ -286,8 +286,8 @@ bool PDDLProblemGenerator::makeGoals(std::ofstream &pFile)
         /* for debugging */
         for (auto goal : goals)
         {
-            std::cout << std::get<1>(goal) << " "<< std::get<0>(goal)["obj"] 
-                      << " " << std::get<0>(goal)["src"] << " -> " 
+            std::cout << std::get<1>(goal) << " "<< std::get<0>(goal)["obj"]
+                      << " " << std::get<0>(goal)["src"] << " -> "
                       << std::get<0>(goal)["dest"] << std::endl;
         }
         std::cout << std::endl;

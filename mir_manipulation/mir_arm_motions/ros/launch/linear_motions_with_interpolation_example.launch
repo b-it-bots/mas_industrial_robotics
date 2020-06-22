@@ -22,7 +22,7 @@
       - 'arm_joint_5'
     </rosparam>
 
-    <remap from="~poses" 
+    <remap from="~poses"
            to="/mir_manipulation/linear_interpolator/linear_interpolator/path"/>
   </node>
 

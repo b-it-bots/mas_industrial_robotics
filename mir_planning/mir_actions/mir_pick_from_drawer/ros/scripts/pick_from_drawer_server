@@ -1,63 +1,75 @@
 #!/usr/bin/python
 
 from __future__ import print_function
-import tf
-import copy
-import rospy
-import smach
 
-# import of generic states
-import mir_states.common.manipulation_states as gms
+import copy
+
 import mcr_states.common.basic_states as gbs
 import mir_states.common.action_states as gas
-
-# action lib
-from smach_ros import ActionServerWrapper, IntrospectionServer
-
-from std_msgs.msg import String
+import mir_states.common.manipulation_states as gms
+import rospy
+import smach
+import tf
 from geometry_msgs.msg import PoseStamped, Quaternion
-from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteResult, GenericExecuteFeedback
 from mir_actions.utils import Utils
+from mir_planning_msgs.msg import (
+    GenericExecuteAction,
+    GenericExecuteFeedback,
+    GenericExecuteResult,
+)
+from smach_ros import ActionServerWrapper, IntrospectionServer
+from std_msgs.msg import String
 
-#===============================================================================
+# ===============================================================================
+
 
 class SelectObject(smach.State):
     def __init__(self, topic_name):
-        smach.State.__init__(self,  outcomes=['succeeded'],
-                                    input_keys=['goal'],
-                                    output_keys=['feedback', 'result'])
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded"],
+            input_keys=["goal"],
+            output_keys=["feedback", "result"],
+        )
         self.publisher = rospy.Publisher(topic_name, String, queue_size=10)
-        rospy.sleep(0.1) # time for the publisher to register in ros network
+        rospy.sleep(0.1)  # time for the publisher to register in ros network
 
     def execute(self, userdata):
         # Add empty result msg (because if none of the state do it, action server gives error)
         userdata.result = GenericExecuteResult()
-        userdata.feedback = GenericExecuteFeedback(current_state='SelectObject',
-                                                   text='selecting object')
+        userdata.feedback = GenericExecuteFeedback(
+            current_state="SelectObject", text="selecting object"
+        )
 
-        obj = Utils.get_value_of(userdata.goal.parameters, 'object')
+        obj = Utils.get_value_of(userdata.goal.parameters, "object")
         self.publisher.publish(String(data=obj))
-        rospy.sleep(0.2) # let the topic survive for some time
-        return 'succeeded'
-        
-#===============================================================================
+        rospy.sleep(0.2)  # let the topic survive for some time
+        return "succeeded"
+
+
+# ===============================================================================
+
 
 class SendPoseToMoveIt(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
-        self._moveit_pose_pub = rospy.Publisher('/arm_moveit_client/target_pose',
-                                                PoseStamped, queue_size=10)
-        _pose_sub = rospy.Subscriber('/mcr_perception/object_selector/output/object_pose',
-                                     PoseStamped, self._pose_cb)
+        smach.State.__init__(self, outcomes=["succeeded", "failed"])
+        self._moveit_pose_pub = rospy.Publisher(
+            "/arm_moveit_client/target_pose", PoseStamped, queue_size=10
+        )
+        _pose_sub = rospy.Subscriber(
+            "/mcr_perception/object_selector/output/object_pose",
+            PoseStamped,
+            self._pose_cb,
+        )
         self._pose = None
-        rospy.sleep(0.1) # time for the publisher to register in ros network
+        rospy.sleep(0.1)  # time for the publisher to register in ros network
 
     def _pose_cb(self, msg):
         self._pose = msg
 
     def execute(self, userdata):
         if self._pose is None:
-            return 'failed'
+            return "failed"
         arm_target_pose = copy.deepcopy(self._pose)
         arm_target_pose.header.stamp = rospy.Time.now()
         arm_target_pose.pose.position.x += 0.0
@@ -69,103 +81,138 @@ class SendPoseToMoveIt(smach.State):
         rospy.loginfo(arm_target_pose)
         self._moveit_pose_pub.publish(arm_target_pose)
         self._pose = None
-        return 'succeeded'
+        return "succeeded"
 
-#===============================================================================
+
+# ===============================================================================
+
 
 def main():
     # Open the container
-    rospy.init_node('pick_from_drawer_server')
+    rospy.init_node("pick_from_drawer_server")
     # Construct state machine
     sm = smach.StateMachine(
-            outcomes=['OVERALL_SUCCESS','OVERALL_FAILED'],
-            input_keys = ['goal'],
-            output_keys = ['feedback', 'result'])
+        outcomes=["OVERALL_SUCCESS", "OVERALL_FAILED"],
+        input_keys=["goal"],
+        output_keys=["feedback", "result"],
+    )
 
     with sm:
         smach.StateMachine.add(
-                'SELECT_OBJECT',
-                SelectObject('/mcr_perception/object_selector/input/object_name'),
-                transitions={'succeeded':'GENERATE_OBJECT_POSE'})
-        
+            "SELECT_OBJECT",
+            SelectObject("/mcr_perception/object_selector/input/object_name"),
+            transitions={"succeeded": "GENERATE_OBJECT_POSE"},
+        )
+
         # generates a pose of object
-        smach.StateMachine.add('GENERATE_OBJECT_POSE', gbs.send_and_wait_events_combined(
-                event_in_list=[('/mcr_perception/object_selector/event_in','e_trigger')],
-                event_out_list=[('/mcr_perception/object_selector/event_out','e_selected', True)],
-                timeout_duration=10),
-                transitions={'success':'MOVE_ARM_TO_LOOK_INSIDE_DRAWER',
-                             'timeout':'OVERALL_FAILED',
-                             'failure':'OVERALL_FAILED'})
+        smach.StateMachine.add(
+            "GENERATE_OBJECT_POSE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    ("/mcr_perception/object_selector/event_in", "e_trigger")
+                ],
+                event_out_list=[
+                    ("/mcr_perception/object_selector/event_out", "e_selected", True,)
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "MOVE_ARM_TO_LOOK_INSIDE_DRAWER",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
 
         # - Move arm to look_inside_drawer
         smach.StateMachine.add(
-                'MOVE_ARM_TO_LOOK_INSIDE_DRAWER',
-                gms.move_arm("look_inside_drawer"),
-                transitions={'succeeded': 'OPEN_GRIPPER',
-                             'failed': 'MOVE_ARM_TO_LOOK_INSIDE_DRAWER'})
+            "MOVE_ARM_TO_LOOK_INSIDE_DRAWER",
+            gms.move_arm("look_inside_drawer"),
+            transitions={
+                "succeeded": "OPEN_GRIPPER",
+                "failed": "MOVE_ARM_TO_LOOK_INSIDE_DRAWER",
+            },
+        )
 
         smach.StateMachine.add(
-                'OPEN_GRIPPER',
-                gms.control_gripper('open'),
-                transitions={'succeeded': 'SEND_MOVEIT_POSE_OBJECT'})
+            "OPEN_GRIPPER",
+            gms.control_gripper("open"),
+            transitions={"succeeded": "SEND_MOVEIT_POSE_OBJECT"},
+        )
 
         # - Pick object from drawer
         smach.StateMachine.add(
-                'SEND_MOVEIT_POSE_OBJECT',
-                SendPoseToMoveIt(),
-                transitions={'succeeded': 'TRIGGER_MOVEIT_OBJECT',
-                             'failed': 'OVERALL_FAILED'})
+            "SEND_MOVEIT_POSE_OBJECT",
+            SendPoseToMoveIt(),
+            transitions={
+                "succeeded": "TRIGGER_MOVEIT_OBJECT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
 
         smach.StateMachine.add(
-                'TRIGGER_MOVEIT_OBJECT',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('arm_moveit_client/event_in','e_start')],
-                    event_out_list=[('arm_moveit_client/event_out','e_success', True)],
-                    timeout_duration=10),
-                transitions={'success': 'CLOSE_GRIPPER_OBJECT',
-                             'timeout': 'OVERALL_FAILED',
-                             'failure': 'OVERALL_FAILED'})
+            "TRIGGER_MOVEIT_OBJECT",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("arm_moveit_client/event_in", "e_start")],
+                event_out_list=[("arm_moveit_client/event_out", "e_success", True)],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "CLOSE_GRIPPER_OBJECT",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
 
         # - Close gripper
         smach.StateMachine.add(
-                'CLOSE_GRIPPER_OBJECT',
-                gms.control_gripper('close'),
-                transitions={'succeeded': 'MOVE_ARM_TO_RETRACT'})
+            "CLOSE_GRIPPER_OBJECT",
+            gms.control_gripper("close"),
+            transitions={"succeeded": "MOVE_ARM_TO_RETRACT"},
+        )
 
         # Retract arm after pick
         smach.StateMachine.add(
-                'MOVE_ARM_TO_RETRACT',
-                gms.move_arm("look_inside_drawer"),
-                transitions={'succeeded': 'MOVE_ARM_TO_NEUTRAL',
-                             'failed': 'MOVE_ARM_TO_RETRACT'})
+            "MOVE_ARM_TO_RETRACT",
+            gms.move_arm("look_inside_drawer"),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_NEUTRAL",
+                "failed": "MOVE_ARM_TO_RETRACT",
+            },
+        )
 
         # - Move arm to some neutral position
         smach.StateMachine.add(
-                'MOVE_ARM_TO_NEUTRAL',
-                gms.move_arm("look_at_workspace_from_near"),
-                transitions={'succeeded': 'OVERALL_SUCCESS',
-                             'failed': 'MOVE_ARM_TO_NEUTRAL'})
- 
+            "MOVE_ARM_TO_NEUTRAL",
+            gms.move_arm("look_at_workspace_from_near"),
+            transitions={
+                "succeeded": "OVERALL_SUCCESS",
+                "failed": "MOVE_ARM_TO_NEUTRAL",
+            },
+        )
+
     # smach viewer
-    if rospy.get_param('~viewer_enabled', False):
-        sis = IntrospectionServer('pick_from_drawer_viewer', sm,
-                                  '/PICK_OBJECT_FROM_DRAWER_SMACH_VIEWER')
+    if rospy.get_param("~viewer_enabled", False):
+        sis = IntrospectionServer(
+            "pick_from_drawer_viewer", sm, "/PICK_OBJECT_FROM_DRAWER_SMACH_VIEWER",
+        )
         sis.start()
-    
+
     # Construct action server wrapper
     asw = ActionServerWrapper(
-        server_name = 'pick_from_drawer_server',
-        action_spec = GenericExecuteAction,
-        wrapped_container = sm,
-        succeeded_outcomes = ['OVERALL_SUCCESS'],
-        aborted_outcomes   = ['OVERALL_FAILED'],
-        preempted_outcomes = ['PREEMPTED'],
-        goal_key     = 'goal',
-        feedback_key = 'feedback',
-        result_key   = 'result')
+        server_name="pick_from_drawer_server",
+        action_spec=GenericExecuteAction,
+        wrapped_container=sm,
+        succeeded_outcomes=["OVERALL_SUCCESS"],
+        aborted_outcomes=["OVERALL_FAILED"],
+        preempted_outcomes=["PREEMPTED"],
+        goal_key="goal",
+        feedback_key="feedback",
+        result_key="result",
+    )
     # Run the server in a background thread
     asw.run_server()
     rospy.spin()
-        
-if __name__ == '__main__':
-   main()
+
+
+if __name__ == "__main__":
+    main()

@@ -14,7 +14,7 @@
   <xacro:include filename="$(find mcr_description)/urdf/fingers/festo_finger_dhas-gf-shm.urdf.xacro" />
 
   <xacro:arg name="grasp_link_offset" default="0.11"/>
-    
+
   <xacro:macro name="dynamixel_gripper_d435_center" params="parent name *origin">
 
     <joint name="${name}_motor_mount_joint" type="fixed" >
@@ -24,7 +24,7 @@
     </joint>
 
     <joint name="${name}_static_grasp_link_joint" type="fixed" >
-        <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>  
+        <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>
       <parent link="${parent}" />
       <child link="${name}_static_grasp_link" />
     </joint>
@@ -54,18 +54,18 @@
         </geometry>
       </collision>
     </link>
-    
+
     <link name="${name}_static_grasp_link">
     </link>
     <!-- motors -->
     <xacro:dynamixel_motor_AX-12A name="${name}_motor_left" parent="${name}_motor_mount_link" motor_direction="-1" position_offset="0.065">
       <origin xyz="0.0 0.034 -0.009" rpy="0 0 0" />
     </xacro:dynamixel_motor_AX-12A>
-    
+
     <xacro:dynamixel_motor_AX-12A name="${name}_motor_right" parent="${name}_motor_mount_link" motor_direction="1" position_offset="-0.065">
       <origin xyz="0.0 -0.034 -0.009" rpy="0 0 0" />
     </xacro:dynamixel_motor_AX-12A>
-    
+
     <!-- brackets -->
     <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_left" parent="${name}_motor_left_link">
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -74,21 +74,21 @@
     <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_right" parent="${name}_motor_right_link">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:dynamixel_bracket_FP04-F2>
-    
+
     <!-- finger mounts -->
     <xacro:festo_finger_mount name="${name}_finger_mount_left" parent="${name}_bracket_left_link">
       <origin xyz="0.014 +0.0125 0.026" rpy="0 0 ${M_PI}" />
     </xacro:festo_finger_mount>
-    
+
     <xacro:festo_finger_mount name="${name}_finger_mount_right" parent="${name}_bracket_right_link">
       <origin xyz="-0.014 -0.0125 0.026" rpy="0 0 0" />
     </xacro:festo_finger_mount>
-    
+
     <!-- fingers -->
     <xacro:festo_finger_DHAS-GF-shm name="${name}_finger_left" parent="${name}_finger_mount_left_link">
       <origin xyz="0.004 0 0.0045" rpy="0 0 0" />
     </xacro:festo_finger_DHAS-GF-shm>
-    
+
     <xacro:festo_finger_DHAS-GF-shm name="${name}_finger_right" parent="${name}_finger_mount_right_link">
       <origin xyz="0.004 0 0.0045" rpy="0 0 0" />
     </xacro:festo_finger_DHAS-GF-shm>

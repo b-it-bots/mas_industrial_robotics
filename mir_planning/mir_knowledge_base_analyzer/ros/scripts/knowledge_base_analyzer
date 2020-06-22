@@ -2,5 +2,5 @@
 
 import mir_knowledge_base_analyzer_ros.knowledge_base_analyzer
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mir_knowledge_base_analyzer_ros.knowledge_base_analyzer.main()

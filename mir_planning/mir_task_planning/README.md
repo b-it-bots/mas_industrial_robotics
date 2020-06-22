@@ -1,11 +1,11 @@
 # mir_task_planning
 
-Generate task plan using classical planner. 
+Generate task plan using classical planner.
 
 This module provides ros independent wrapping for planners (currently `mercury`
 and `lama`) in `/common/planner_wrapper/`.
 This ros wrapper on top of the previously mentioned module is available in
-`/ros` folder. The ros wrapper is implemented as an `ActionServer`. 
+`/ros` folder. The ros wrapper is implemented as an `ActionServer`.
 
 Upon request from a `ActionClient` containing `domain_file`, `problem_file`, `planner`
  and `mode`, the server tries to

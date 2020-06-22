@@ -1,44 +1,41 @@
 #!/usr/bin/env python
 
-import rospy
-
+import actionlib
 import roslib
 import rospy
-import actionlib
+from brics_actuator.msg import JointPositions, JointValue
+from brics_actuator.msg._JointValue import JointValue
+from mcr_manipulation_msgs.msg import GripperCommand
+from sensor_msgs.msg import JointState
 
 from control_msgs.msg import GripperCommandAction
-
-from brics_actuator.msg import JointPositions, JointValue
-
-from sensor_msgs.msg import JointState
-from brics_actuator.msg._JointValue import JointValue
-
-from mcr_manipulation_msgs.msg import GripperCommand
 
 
 class GripperCommandControllerServer:
     def __init__(self):
         self.received_state = False
 
-        self.server = actionlib.SimpleActionServer('gripper_controller', GripperCommandAction, self.execute, False)
-        self.pub_joint_positions = rospy.Publisher('~position_command', JointPositions)
+        self.server = actionlib.SimpleActionServer(
+            "gripper_controller", GripperCommandAction, self.execute, False
+        )
+        self.pub_joint_positions = rospy.Publisher("~position_command", JointPositions)
 
         self.joint_names = []
         self.current_joint_configuration = [0, 0]
 
-        if (not rospy.has_param("~joints")):
+        if not rospy.has_param("~joints"):
             rospy.logerr("No parameter set for <joints>")
             exit(-1)
         else:
             self.joint_names = rospy.get_param("~joints")
 
-        if (not rospy.has_param("~open")):
+        if not rospy.has_param("~open"):
             rospy.logerr("No parameter set for <open>")
             exit(-1)
         else:
             self.configuration_open = rospy.get_param("~open")
 
-        if (not rospy.has_param("~close")):
+        if not rospy.has_param("~close"):
             rospy.logerr("No parameter set for <close>")
             exit(-1)
         else:
@@ -54,7 +51,7 @@ class GripperCommandControllerServer:
     def wait_for_new_joint_states(self):
         self.received_state = False
 
-        while (self.received_state is False):
+        while self.received_state is False:
             rospy.sleep(0.01)
 
         return
@@ -74,7 +71,9 @@ class GripperCommandControllerServer:
     def execute(self, goal):
         rospy.logdebug("Executing command goal: " + str(goal))
 
-        publish_joint_position(self.joint_names, [goal.command.position, goal.command.position])
+        publish_joint_position(
+            self.joint_names, [goal.command.position, goal.command.position]
+        )
 
         rospy.sleep(3.0)
         self.server.set_succeeded()
@@ -82,7 +81,7 @@ class GripperCommandControllerServer:
     def joint_states_callback(self, msg):
         for k in range(len(self.joint_names)):
             for i in range(len(msg.name)):
-                if (msg.name[i] == self.joint_names[k]):
+                if msg.name[i] == self.joint_names[k]:
                     self.current_joint_configuration[k] = msg.position[i]
 
         self.received_state = True
@@ -91,15 +90,22 @@ class GripperCommandControllerServer:
 
     def gripper_command_callback(self, msg):
         if msg.command == GripperCommand.OPEN:
-            publish_joint_position(self.joint_names, [self.configuration_open[0], self.configuration_open[1]])
+            publish_joint_position(
+                self.joint_names,
+                [self.configuration_open[0], self.configuration_open[1]],
+            )
         elif msg.command == GripperCommand.CLOSE:
-            publish_joint_position(self.joint_names, [self.configuration_close[0], self.configuration_close[1]])
+            publish_joint_position(
+                self.joint_names,
+                [self.configuration_close[0], self.configuration_close[1]],
+            )
         else:
             rospy.logerr("Unsupported gripper command: " + msg.command)
 
         return True
 
-if __name__ == '__main__':
-    rospy.init_node('gripper_controller')
+
+if __name__ == "__main__":
+    rospy.init_node("gripper_controller")
     server = GripperCommandControllerServer()
     rospy.spin()

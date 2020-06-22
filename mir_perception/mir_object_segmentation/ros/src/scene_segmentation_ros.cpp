@@ -19,10 +19,10 @@
 
 namespace mpu = mir_perception_utils;
 
-SceneSegmentationROS::SceneSegmentationROS(double octree_resolution): 
+SceneSegmentationROS::SceneSegmentationROS(double octree_resolution):
     octree_resolution_(octree_resolution),
     pcl_object_id_(0)
-{    
+{
     cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
     scene_segmentation_ = SceneSegmentationUPtr(new SceneSegmentation());
     model_coefficients_ = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients);
@@ -33,7 +33,7 @@ SceneSegmentationROS::~SceneSegmentationROS()
 }
 
 void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
-                                        mas_perception_msgs::ObjectList &object_list, 
+                                        mas_perception_msgs::ObjectList &object_list,
                                         std::vector<PointCloud::Ptr> &clusters,
                                         std::vector<BoundingBox> &boxes)
 {
@@ -106,14 +106,14 @@ void SceneSegmentationROS::resetPclObjectId()
     pcl_object_id_ = 0;
 }
 
-void SceneSegmentationROS::setVoxelGridParams(double voxel_leaf_size, 
+void SceneSegmentationROS::setVoxelGridParams(double voxel_leaf_size,
             std::string voxel_filter_field_name,
-            double voxel_filter_limit_min, 
+            double voxel_filter_limit_min,
             double voxel_filter_limit_max)
 {
-    scene_segmentation_->setVoxelGridParams(voxel_leaf_size, 
+    scene_segmentation_->setVoxelGridParams(voxel_leaf_size,
             voxel_filter_field_name,
-            voxel_filter_limit_min, 
+            voxel_filter_limit_min,
             voxel_filter_limit_max);
 }
 
@@ -133,17 +133,17 @@ void SceneSegmentationROS::setNormalParams(double normal_radius_search, bool use
     scene_segmentation_->setNormalParams(normal_radius_search, use_omp, num_cores);
 }
 
-void SceneSegmentationROS::setSACParams(int sac_max_iterations, 
+void SceneSegmentationROS::setSACParams(int sac_max_iterations,
             double sac_distance_threshold,
             bool sac_optimize_coefficients,
-            Eigen::Vector3f axis, 
+            Eigen::Vector3f axis,
             double sac_eps_angle,
             double sac_normal_distance_weight)
 {
-    scene_segmentation_->setSACParams(sac_max_iterations, 
+    scene_segmentation_->setSACParams(sac_max_iterations,
             sac_distance_threshold,
             sac_optimize_coefficients,
-            axis, 
+            axis,
             sac_eps_angle,
             sac_normal_distance_weight);
 }
@@ -158,8 +158,8 @@ void SceneSegmentationROS::setOutlierParams(double outlier_radius_search, double
     scene_segmentation_->setOutlierParams(outlier_radius_search, outlier_min_neighbors);
 }
 
-void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluster_min_size, 
-            int cluster_max_size, double cluster_min_height, 
+void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluster_min_size,
+            int cluster_max_size, double cluster_min_height,
             double cluster_max_height, double cluster_max_length,
             double cluster_min_distance_to_polygon)
 {
@@ -167,5 +167,5 @@ void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluste
             cluster_min_height, cluster_max_height, cluster_max_length,
             cluster_min_distance_to_polygon);
 }
-    
-    
+
+

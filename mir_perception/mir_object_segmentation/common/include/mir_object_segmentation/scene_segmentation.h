@@ -58,7 +58,7 @@ class SceneSegmentation
          * \param[out] Workspace height
          * */
         PointCloud::Ptr segmentScene(const PointCloud::ConstPtr &cloud, std::vector<PointCloud::Ptr> &clusters,
-                                    std::vector<BoundingBox> &boxes, pcl::ModelCoefficients::Ptr &coefficients, 
+                                    std::vector<BoundingBox> &boxes, pcl::ModelCoefficients::Ptr &coefficients,
                                     double &workspace_height);
         /** \brief Find plane
          * \param[in] Point cloud
@@ -76,7 +76,7 @@ class SceneSegmentation
          * \param[in] The minimum allowed the field value
          * \param[in] The maximum allowed the field value
          * */
-        void setVoxelGridParams(double leaf_size, const std::string &field_name, 
+        void setVoxelGridParams(double leaf_size, const std::string &field_name,
                                 double limit_min, double limit_max);
         /** \brief Set passthrough filter parameters
          * \param[in] Enable or disable passthrough filter
@@ -84,7 +84,7 @@ class SceneSegmentation
          * \param[in] The minimum allowed the field value
          * \param[in] The maximum allowed the field value
          * */
-        void setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name, 
+        void setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name,
                                 double limit_min, double limit_max);
         /** \brief Set Normal param using radius
          * \param[in] Radius search
@@ -125,7 +125,7 @@ class SceneSegmentation
                             double cluster_min_height, double cluster_max_height,  double max_length,
                             double cluster_min_distance_to_polygon);
     private:
-        
+
         bool enable_passthrough_filter_;
         bool use_omp_;
 

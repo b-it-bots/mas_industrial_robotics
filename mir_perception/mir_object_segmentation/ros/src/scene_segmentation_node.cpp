@@ -31,7 +31,7 @@ SceneSegmentationNode::SceneSegmentationNode(): nh_("~"),
     bounding_box_visualizer_("output/bounding_boxes", Color(Color::SEA_GREEN)),
     cluster_visualizer_("output/tabletop_clusters"),
     label_visualizer_("output/labels", Color(Color::TEAL)),
-    add_to_octree_(false), 
+    add_to_octree_(false),
     object_id_(0),
     scene_segmentation_ros_(0.0025)
 {
@@ -40,13 +40,13 @@ SceneSegmentationNode::SceneSegmentationNode(): nh_("~"),
     pub_object_list_ = nh_.advertise<mas_perception_msgs::ObjectList>("output/object_list", 1);
     pub_workspace_height_ = nh_.advertise<std_msgs::Float64>("output/workspace_height", 1);
     pub_debug_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud", 1);
-    
+
     dynamic_reconfigure::Server<mir_object_segmentation::SceneSegmentationConfig>::CallbackType f =
                             boost::bind(&SceneSegmentationNode::configCallback, this, _1, _2);
     server_.setCallback(f);
 
     tf_listener_.reset(new tf::TransformListener);
-    
+
     nh_.param<std::string>("logdir", logdir_, "/tmp/");
     nh_.param<std::string>("target_frame_id", target_frame_id_, "base_link");
 }
@@ -59,17 +59,17 @@ void SceneSegmentationNode::pointcloudCallback(const sensor_msgs::PointCloud2::P
 {
     if (add_to_octree_)
     {
-        sensor_msgs::PointCloud2 msg_transformed;   
+        sensor_msgs::PointCloud2 msg_transformed;
         if (!mpu::pointcloud::transformPointCloudMsg(tf_listener_, target_frame_id_, *msg, msg_transformed))
             return;
-        
+
         PointCloud::Ptr cloud = boost::make_shared<PointCloud>();
         pcl::PCLPointCloud2 pc2;
         pcl_conversions::toPCL(msg_transformed, pc2);
         pcl::fromPCLPointCloud2(pc2, *cloud);
 
         scene_segmentation_ros_.addCloudAccumulation(cloud);
-        
+
         std_msgs::String event_out;
         add_to_octree_ = false;
         event_out.data = "e_add_cloud_stopped";
@@ -87,10 +87,10 @@ void SceneSegmentationNode::segmentPointCloud()
     mas_perception_msgs::ObjectList object_list;
     std::vector<BoundingBox> boxes;
     scene_segmentation_ros_.segmentCloud(cloud, object_list, clusters, boxes);
-    
+
     mas_perception_msgs::BoundingBoxList bounding_boxes;
     bounding_boxes.bounding_boxes.resize(clusters.size());
-    
+
     geometry_msgs::PoseArray poses;
     poses.header.stamp = ros::Time::now();
     poses.header.frame_id = target_frame_id_;
@@ -198,7 +198,7 @@ void SceneSegmentationNode::configCallback(mir_object_segmentation::SceneSegment
     scene_segmentation_ros_.setClusterParams(config.cluster_tolerance, config.cluster_min_size, config.cluster_max_size,
             config.cluster_min_height, config.cluster_max_height, config.cluster_max_length,
             config.cluster_min_distance_to_polygon);
-    
+
     octree_resolution_ = config.octree_resolution;
     object_height_above_workspace_ = config.object_height_above_workspace;
 }

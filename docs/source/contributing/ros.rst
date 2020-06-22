@@ -15,14 +15,14 @@ Creating a new package
 
   1. The package name has always the following format:
 
-    .. code-block:: bash      
-    
+    .. code-block:: bash
+
       prefix_my_package_name
 
-  2. Use the right prefix for every repository: 
-    
+  2. Use the right prefix for every repository:
+
     a. mas_domestic_robotics: *mdr_*
-    b. mas_industrial_robotics: *mir_* 
+    b. mas_industrial_robotics: *mir_*
     c. mas_common_robotics: *mcr_*
 
   3. Use lowercase.
@@ -40,7 +40,7 @@ Creating a new package
 
   Every ROS package within our repositories has to strictly match the following structure:
 
-  .. code-block:: bash 
+  .. code-block:: bash
 
     .
     ├── common
@@ -88,8 +88,8 @@ If the package you are creating is meant to contain other packages inside of it,
       └── README.md
 
 .. note::
-  
-  It is **extremely** important to maintain your *package.xml* up to date with its dependencies. 
+
+  It is **extremely** important to maintain your *package.xml* up to date with its dependencies.
   Not doing so results in the need of specialized tools or manual inspection of launch files and
   source code to discover your package dependencies.
 
@@ -124,13 +124,13 @@ Linting
 Running **roslint** with catkin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Before merging into the main repository *roslint* is ran on all merge requests. 
+Before merging into the main repository *roslint* is ran on all merge requests.
 Unless all errors are resolved the merge request will be rejected. To test if your changes would pass the *roslint* test locally:
 
 * Add the following lines to your `CMakelists.txt`:
 
   .. code-block:: bash
-  
+
     find_package(catkin REQUIRED COMPONENTS roslint ...)
 
     roslint_python()  # pep8 linting
@@ -139,35 +139,35 @@ Unless all errors are resolved the merge request will be rejected. To test if yo
   Your *package.xm* should include *roslint* as a build dependency:
 
   .. code-block:: bash
-    
+
     <build_depend>roslint</build_depend>
 
 * Build target roslint:
 
-  * with `catkin_make`: 
+  * with `catkin_make`:
 
     .. code-block:: bash
-      
+
       catkin_make roslint_<package_name>
 
-  * with `catkin_tools`: 
-    
+  * with `catkin_tools`:
+
     .. code-block:: bash
-    
+
       catkin build --no-deps <package_name> --make-args roslint_<package_name>
 
 * If build fail copy and execute the gray line that looks something like the following to see more detailed errors:
 
   .. code-block:: bash
-    
-    cd <package_source_directory> 
+
+    cd <package_source_directory>
     catkin build --get-env <package_name> | catkin env -si  /usr/bin/make roslint --jobserver-fds=6,7 -j; cd -
 
 
 Running **catkin_lint**
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You should also make sure that the *catkin_lint* tests pass; 
+You should also make sure that the *catkin_lint* tests pass;
 running it from the root of your catkin workspace you can run:
 
 .. code-block:: bash

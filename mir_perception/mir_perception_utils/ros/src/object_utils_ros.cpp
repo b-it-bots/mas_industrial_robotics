@@ -56,16 +56,16 @@ void object::estimatePose(const BoundingBox &box,
     pose.pose.orientation.w = q.w();
 }
 
-void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, 
+void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud,
                     geometry_msgs::PoseStamped &pose,
                     std::string shape,
                     float passthrough_lim_min_offset,
                     float passthrough_lim_max_offset)
 {
-    // Apply filter to remove points belonging to the plane for non circular/spherical object 
+    // Apply filter to remove points belonging to the plane for non circular/spherical object
     // to find its orientation
     PointCloud filtered_cloud;
-    if (shape == "sphere") 
+    if (shape == "sphere")
     {
         filtered_cloud = *xyz_input_cloud;
     }
@@ -126,13 +126,13 @@ void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud,
     tf::Matrix3x3 m(quaternion);
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
-    
+
     pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw);
 }
 
 void object::transformPose(const boost::shared_ptr<tf::TransformListener> tf_listener,
-                                const std::string &target_frame, 
-                                const geometry_msgs::PoseStamped &pose, 
+                                const std::string &target_frame,
+                                const geometry_msgs::PoseStamped &pose,
                                 geometry_msgs::PoseStamped &transformed_pose)
 {
     if (tf_listener)
@@ -158,8 +158,8 @@ void object::transformPose(const boost::shared_ptr<tf::TransformListener> tf_lis
     }
 }
 
-void object::get3DBoundingBox(const PointCloud::ConstPtr &cloud, 
-                                const Eigen::Vector3f& normal, 
+void object::get3DBoundingBox(const PointCloud::ConstPtr &cloud,
+                                const Eigen::Vector3f& normal,
                                 BoundingBox &bbox,
                                 mas_perception_msgs::BoundingBox& bounding_box_msg)
 {
@@ -173,8 +173,8 @@ void object::convertBboxToMsg(const BoundingBox &bbox,
     convertBoundingBox(bbox, bounding_box_msg);
 }
 
-void object::savePcd(const PointCloud::ConstPtr &pointcloud, 
-                        std::string log_dir, 
+void object::savePcd(const PointCloud::ConstPtr &pointcloud,
+                        std::string log_dir,
                         std::string obj_name)
 {
     std::stringstream filename;
@@ -184,7 +184,7 @@ void object::savePcd(const PointCloud::ConstPtr &pointcloud,
 }
 
 void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image,
-                       std::string log_dir, 
+                       std::string log_dir,
                        std::string obj_name)
 {
     std::stringstream filename;

@@ -69,7 +69,7 @@ inline double computePlanarPolygonArea(const PlanarPolygon& polygon)
 }
 
 /** Convert from BoundingBox object to ROS message. */
-inline void convertBoundingBox(const BoundingBox& bounding_box, 
+inline void convertBoundingBox(const BoundingBox& bounding_box,
                                mas_perception_msgs::BoundingBox& bounding_box_msg)
 {
     const BoundingBox::Point& center = bounding_box.getCenter();

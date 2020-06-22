@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <node pkg="usb_cam" type="usb_cam_node" name="arm_cam" respawn="true" >  
+  <node pkg="usb_cam" type="usb_cam_node" name="arm_cam" respawn="true" >
     <param name="video_device" value="/dev/youbot/microsoft_life_cam" />
     <param name="pixel_format" value="yuyv" />
     <param name="framerate" value="30" />

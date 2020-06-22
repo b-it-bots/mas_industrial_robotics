@@ -10,9 +10,8 @@ import subprocess
 import sys
 import time
 
-import yaml
-
 import rospkg
+import yaml
 
 
 class PlannerWrapper(object):
@@ -74,9 +73,7 @@ class PlannerWrapper(object):
             return None
 
         print("[planner_wrapper] Trying to plan...")
-        command = self._get_valid_planner_command(
-            planner, domain_file, problem_file
-        )
+        command = self._get_valid_planner_command(planner, domain_file, problem_file)
         if not command:
             return None
         print(command)
@@ -91,9 +88,7 @@ class PlannerWrapper(object):
                     raw_plan = file_object.read().split("\n")
                     # remove comments
                     task_plan = [
-                        line
-                        for line in raw_plan
-                        if len(line) > 0 and line[0] != ";"
+                        line for line in raw_plan if len(line) > 0 and line[0] != ";"
                     ]
 
                 # delete all files in plan directory
@@ -103,9 +98,7 @@ class PlannerWrapper(object):
                 with open(
                     os.path.join(self._plan_backup_dir, "task_plan.plan"), "w"
                 ) as file_obj:
-                    file_obj.writelines(
-                        ["%s\n" % action for action in task_plan]
-                    )
+                    file_obj.writelines(["%s\n" % action for action in task_plan])
 
                 return task_plan
         print("[planner_wrapper] Plan call failed")
@@ -173,9 +166,7 @@ class PlannerWrapper(object):
         if len(plan_file_list) == 0:
             print("[planner_wrapper] No plan files found.")
             return None
-        best_plan = sorted(
-            plan_file_list, key=lambda x: int(x.split(".")[-1])
-        )[-1]
+        best_plan = sorted(plan_file_list, key=lambda x: int(x.split(".")[-1]))[-1]
         return os.path.join(self._plan_dir, best_plan)
 
     def _clean_plan_dir(self):

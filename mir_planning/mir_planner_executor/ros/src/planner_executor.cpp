@@ -88,7 +88,7 @@ void PlannerExecutor::executeCallback() {
 
         BaseExecutorAction* executor = getActionExecutor(action_name);
         bool res = executor->execute(action_name, params);
-        
+
         if(!res) {
             ROS_WARN("\nAction \"%s\" failed, abort plan execution\n", action_name.c_str());
             mir_planning_msgs::ExecutePlanResult msg_result;
