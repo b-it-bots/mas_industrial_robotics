@@ -17,6 +17,7 @@ repos:
             -   id: black
                 language_version: python3.7     # Black requires python3.6 or above to run
 
+# Exit zero to be removed after fixing python linting errors
     -   repo: https://github.com/pycqa/pylint
         rev: pylint-2.4.4
         hooks:
@@ -24,12 +25,12 @@ repos:
                 entry: pylint --verbose --jobs 4 --exit-zero
                 language_version: python3.7
 
-
+# CppLint to be enabled once cpp linting errors are fixed
     -   repo: https://github.com/bmorcos/pre-commit-hooks-cpp
         rev: master
         hooks:
             -   id: clang-format
-            # -   id: cpplint      # To be enabled once cpp linting errors are fixed
+            # -   id: cpplint
             -   id: cppcheck
 
     -   repo: https://github.com/pre-commit/pre-commit-hooks
