@@ -9,7 +9,7 @@
 
 #include <mir_planner_executor/actions/pick/base_pick_action.h>
 
-class PickFromShelfAction : public BasePickAction  {
-public:
-    PickFromShelfAction();
+class PickFromShelfAction : public BasePickAction {
+ public:
+  PickFromShelfAction();
 };

@@ -9,7 +9,7 @@
 
 #include <mir_planner_executor/actions/perceive/base_perceive_action.h>
 
-class PerceiveCavityAction : public BasePerceiveAction  {
-public:
-    PerceiveCavityAction();
+class PerceiveCavityAction : public BasePerceiveAction {
+ public:
+  PerceiveCavityAction();
 };

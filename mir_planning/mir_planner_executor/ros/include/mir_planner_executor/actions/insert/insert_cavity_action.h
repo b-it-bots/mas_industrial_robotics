@@ -9,7 +9,7 @@
 
 #include <mir_planner_executor/actions/insert/base_insert_action.h>
 
-class InsertCavityAction : public BaseInsertAction  {
-public:
-    InsertCavityAction();
+class InsertCavityAction : public BaseInsertAction {
+ public:
+  InsertCavityAction();
 };

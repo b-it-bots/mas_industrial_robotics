@@ -8,5 +8,5 @@
 #include <mir_planner_executor/actions/pick/pick_action.h>
 
 PickAction::PickAction() : BasePickAction("/wbc_pick_object_server") {
-    //client_.waitForServer();
+  // client_.waitForServer();
 }

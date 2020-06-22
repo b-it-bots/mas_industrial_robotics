@@ -1,89 +1,89 @@
 - git:
-    local-name: mas_common_robotics
-    uri: https://github.com/b-it-bots/mas_common_robotics.git
+    local - name: mas_common_robotics
+    uri: https: // github.com / b - it - bots / mas_common_robotics.git
     version: kinetic
 
 - git:
-    local-name: youbot_driver
-    uri: https://github.com/mas-group/youbot_driver.git
-    version: indigo-devel
+    local - name: youbot_driver
+    uri: https: // github.com / mas - group / youbot_driver.git
+    version: indigo - devel
 
 - git:
-    local-name: youbot_driver_ros_interface
-    uri: https://github.com/mas-group/youbot_driver_ros_interface.git
+    local - name: youbot_driver_ros_interface
+    uri: https: // github.com / mas - group / youbot_driver_ros_interface.git
     version: trajectory_controller_dirty_fix
 
 - git:
-    local-name: youbot_description
-    uri: https://github.com/mas-group/youbot_description.git
-    version: kinetic-devel
+    local - name: youbot_description
+    uri: https: // github.com / mas - group / youbot_description.git
+    version: kinetic - devel
 
 - git:
-    local-name: youbot_simulation
-    uri: https://github.com/mas-group/youbot_simulation.git
-    version: kinetic-devel
+    local - name: youbot_simulation
+    uri: https: // github.com / mas - group / youbot_simulation.git
+    version: kinetic - devel
 
 - git:
-    local-name: youbot_diagnostics
-    uri: https://github.com/mas-group/youbot_diagnostics.git
-    version: indigo-devel
+    local - name: youbot_diagnostics
+    uri: https: // github.com / mas - group / youbot_diagnostics.git
+    version: indigo - devel
 
 - git:
-    local-name: youbot-manipulation
-    uri: https://github.com/mas-group/youbot-manipulation.git
+    local - name: youbot - manipulation
+    uri: https: // github.com / mas - group / youbot - manipulation.git
     version: kinetic
 
 - git:
-    local-name: dynamixel_motor
-    uri: https://github.com/mas-group/dynamixel_motor.git
+    local - name: dynamixel_motor
+    uri: https: // github.com / mas - group / dynamixel_motor.git
     version: master
 
 - git:
-    local-name: mas_navigation
-    uri: https://github.com/b-it-bots/mas_navigation.git
+    local - name: mas_navigation
+    uri: https: // github.com / b - it - bots / mas_navigation.git
     version: kinetic
 
 - git:
-    local-name: mas_perception
-    uri: https://github.com/b-it-bots/mas_perception.git
+    local - name: mas_perception
+    uri: https: // github.com / b - it - bots / mas_perception.git
     version: kinetic
 
 - git:
-    local-name: mas_perception_msgs
-    uri: https://github.com/b-it-bots/mas_perception_msgs.git
+    local - name: mas_perception_msgs
+    uri: https: // github.com / b - it - bots / mas_perception_msgs.git
     version: kinetic
 
 - git:
-    local-name: ROSPlan
-    uri: https://github.com/b-it-bots/ROSPlan.git
+    local - name: ROSPlan
+    uri: https: // github.com / b - it - bots / ROSPlan.git
     version: master
 
 - git:
-    local-name: mercury_planner
-    uri: https://github.com/b-it-bots/mercury_planner.git
+    local - name: mercury_planner
+    uri: https: // github.com / b - it - bots / mercury_planner.git
     version: master
 
 - git:
-    local-name: lama_planner
-    uri: https://github.com/b-it-bots/lama_planner.git
+    local - name: lama_planner
+    uri: https: // github.com / b - it - bots / lama_planner.git
     version: master
 
 - git:
-    local-name: orocos_kinematics_dynamics
-    uri: https://github.com/b-it-bots/orocos_kinematics_dynamics.git
+    local - name: orocos_kinematics_dynamics
+    uri: https: // github.com / b - it - bots / orocos_kinematics_dynamics.git
     version: master
 
 - git:
-    local-name: kdl_parser
-    uri: https://github.com/ros/kdl_parser.git
-    version: kinetic-devel
+    local - name: kdl_parser
+    uri: https: // github.com / ros / kdl_parser.git
+    version: kinetic - devel
 
 - git:
-    local-name: dmp
-    uri: https://github.com/b-it-bots/dmp.git
+    local - name: dmp
+    uri: https: // github.com / b - it - bots / dmp.git
     version: master
 
 - git:
-    local-name: gazebo-pkgs
-    uri: https://github.com/b-it-bots/gazebo-pkgs.git
+    local - name: gazebo - pkgs
+    uri: https: // github.com / b - it - bots / gazebo - pkgs.git
     version: master
