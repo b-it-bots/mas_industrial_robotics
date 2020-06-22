@@ -118,7 +118,7 @@ bool pointcloud::transformPointCloud2(const boost::shared_ptr<tf::TransformListe
     return(true);
 }
 
-void pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, 
+void pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi,
                                   const PointCloud::Ptr &cloud_in,
                                   PointCloud::Ptr &cloud_roi,
                                   float roi_size_adjustment,
@@ -138,7 +138,7 @@ void pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi,
     if (roi.y_offset > roi_size_adjustment) min_y = min_y - roi_size_adjustment;
     if (roi.width+roi_size_adjustment < cloud_in->width) min_x = min_x + roi_size_adjustment;
     if (roi.height+roi_size_adjustment < cloud_in->height) min_y = min_y + roi_size_adjustment;
-    
+
     std::vector<cv::Point> pixel_loc;
 
     for (int i=min_x; i<max_x; i++)

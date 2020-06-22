@@ -19,7 +19,7 @@ This is the pose of the handle
 
 - See the response with
   ```
-  rostopic echo /mir_perception/drawer_handle_perceiver/event_out 
+  rostopic echo /mir_perception/drawer_handle_perceiver/event_out
   ```
 
 - Trigger the detection with

@@ -214,7 +214,7 @@ void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr &input, PClou
     this->project_inliers.filter(*pc_plane);
 
     Eigen::Matrix<float, 3, 1> normVector = Eigen::Matrix<float, 3, 1>(coefficients->values[0],coefficients->values[1],coefficients->values[2]);
-    Eigen::Quaternionf normQuat = Eigen::Quaternionf::FromTwoVectors(normVector, Eigen::Vector3f::UnitX()); 
+    Eigen::Quaternionf normQuat = Eigen::Quaternionf::FromTwoVectors(normVector, Eigen::Vector3f::UnitX());
 
     pose_stamped.pose.orientation.x = normQuat.x();
     pose_stamped.pose.orientation.y = normQuat.y();

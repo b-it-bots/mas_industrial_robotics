@@ -15,6 +15,6 @@
   <run_depend>mir_basic_transportation_test</run_depend>
   <run_depend>mir_states</run_depend>
 
-  <test_depend>roslaunch</test_depend>  
+  <test_depend>roslaunch</test_depend>
 
 </package>

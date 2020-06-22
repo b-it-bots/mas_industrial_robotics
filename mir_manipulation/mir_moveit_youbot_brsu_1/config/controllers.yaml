@@ -13,6 +13,6 @@ controller_list:
     action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
     default: true
-    joints: 
+    joints:
       - gripper_finger_joint_l
       - gripper_finger_joint_r

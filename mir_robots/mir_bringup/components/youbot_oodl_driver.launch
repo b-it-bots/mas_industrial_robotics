@@ -14,10 +14,10 @@ or enable the USE_SETCAP flag in the cmake file and recompile again.
 
   <!-- Set relevant parameters. -->
   <arg name="youBotHasBase"  default="true"/>
-  <arg name="youBotHasArms"  default="true"/> 
+  <arg name="youBotHasArms"  default="true"/>
 
   <param name="youBotHasBase" type="bool" value="$(arg youBotHasBase)"/>
-  <param name="youBotHasArms" type="bool" value="$(arg youBotHasArms)"/> 
+  <param name="youBotHasArms" type="bool" value="$(arg youBotHasArms)"/>
 
   <param name="youBotDriverCycleFrequencyInHz" type="double" value="50.0"/>
   <param name="youBotDriverGripperReadingsCycleFrequencyInHz" type="double" value="0.5" />
@@ -27,9 +27,9 @@ or enable the USE_SETCAP flag in the cmake file and recompile again.
   <param name="trajectoryPositionGain" type="double" value="5.0"/>
   <param name="trajectoryVelocityGain" type="double" value="0.0"/>
 
-  <!-- 
+  <!--
     Initialize youBot arms by name. Each named arm must have a matching config
-    file. For example, the entry:   
+    file. For example, the entry:
       <param name="youBotArmName1" type="str" value="MyArm"/>
     will attempt to initialize an arm using the config file "MyArm.cfg" in your
     default configuration path.
@@ -37,16 +37,16 @@ or enable the USE_SETCAP flag in the cmake file and recompile again.
     To initialize multiple arms, simply define parameters naming each of them,
     beginning with the parameter "youBotArmName1", then "youBotArmName2", etc.
   -->
-  
-  <!-- Default name values --> 
+
+  <!-- Default name values -->
   <param name="youBotBaseName" type="str" value="youbot-base"/>
   <param name="youBotArmName1" type="str" value="youbot-manipulator"/>
-  
+
 
   <!-- Start the driver. NOTE: Every joint topic is mapped to armName/joint_states -->
   <node pkg="youbot_driver_ros_interface" type="youbot_driver_ros_interface" name="youbot_driver_ros_interface" output="screen">
-    <remap from="base/joint_states" to="joint_states"/> 
-    <remap from="arm_1/joint_states" to="joint_states" /> 
+    <remap from="base/joint_states" to="joint_states"/>
+    <remap from="arm_1/joint_states" to="joint_states" />
   </node>
-      
+
 </launch>

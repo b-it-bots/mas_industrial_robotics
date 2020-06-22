@@ -5,7 +5,7 @@ World Generation
 
 Procedurally generates at work arena for gazebo simulation.
 
-Generates 
+Generates
 
 - ``.xacro`` file containing world model for gazebo simulator
 - ``map.pgm`` and ``map.yaml`` files for occupancy grid for ros navigation

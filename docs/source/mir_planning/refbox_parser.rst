@@ -9,7 +9,7 @@ World model is defined as the locations and properties of different moveable
 objects(eg: robot, box etc) in the environment.
 The world model node has to subscribe to the incoming data stream which informs
 of the current state of the world.(Eg : Refree box)
-It then has to store this value in the any format which can be utilized for 
+It then has to store this value in the any format which can be utilized for
 other components.
 
 .. image:: ../../../mir_planning/mir_refbox_parser/ros/doc/node.png
@@ -63,7 +63,7 @@ Testing
 Input(s)
 ^^^^^^^^
 
-  * ``event_in``: trigger to start the node. 
+  * ``event_in``: trigger to start the node.
   * ``refbox``: the ros topic string format on which the BTT, BNT, BPT, BMT, CBT messages is being published
 
 Output(s)

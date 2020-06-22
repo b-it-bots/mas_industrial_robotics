@@ -1,7 +1,7 @@
 # mir_world_generation
 
 Procedurally generates at work arena for gazebo simulation.
-Generates 
+Generates
 - `.xacro` file containing world model for gazebo simulator
 - `map.pgm` and `map.yaml` files for occupancy grid for ros navigation
 - `navigation_goals.yaml` file for industrial robotics `move_base_safe` action

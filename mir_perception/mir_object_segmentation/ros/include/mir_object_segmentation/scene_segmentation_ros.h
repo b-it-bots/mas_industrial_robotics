@@ -26,7 +26,7 @@
 #include <mir_perception_utils/object_utils_ros.h>
 
 /** \brief This class is a wrapper for table top point cloud segmentation.
- * 
+ *
  * \author Mohammad Wasil, Santosh Thoduka
  */
 
@@ -41,7 +41,7 @@ class SceneSegmentationROS
 
         /** \brief Destructor */
         virtual ~SceneSegmentationROS();
-    
+
     private:
         ros::NodeHandle nh_;
         ros::ServiceClient recognize_service;
@@ -51,10 +51,10 @@ class SceneSegmentationROS
         /** Create unique pointer for object scene_segmentation */
         typedef std::unique_ptr<SceneSegmentation> SceneSegmentationUPtr;
         SceneSegmentationUPtr scene_segmentation_;
-        
+
         pcl::ModelCoefficients::Ptr model_coefficients_;
         boost::shared_ptr<tf::TransformListener> tf_listener_;
- 
+
         bool add_to_octree_;
         int pcl_object_id_;
         double octree_resolution_;
@@ -71,7 +71,7 @@ class SceneSegmentationROS
                           mas_perception_msgs::ObjectList &obj_list,
                           std::vector<PointCloud::Ptr> &clusters,
                           std::vector<BoundingBox> &boxes);
-        
+
         /** \brief Find plane
          * \param[in] Input point cloud
          * \param[out] Point cloud debug output
@@ -107,11 +107,11 @@ class SceneSegmentationROS
          * \param[in] The minimum allowed the field value
          * \param[in] The maximum allowed the field value
          * */
-        void setVoxelGridParams(double voxel_leaf_size, 
+        void setVoxelGridParams(double voxel_leaf_size,
             std::string voxel_filter_field_name,
-            double voxel_filter_limit_min, 
+            double voxel_filter_limit_min,
             double voxel_filter_limit_max);
-        
+
         /** \brief Set passthrough filter parameters
          * \param[in] Enable or disable passthrough filter
          * \param[in] Field name, on which axis the filter will be applied
@@ -138,10 +138,10 @@ class SceneSegmentationROS
          * \param[in] The maximum allowed difference between the model normal and the given axis in radians
          * \param[in] The relative weight (between 0 and 1) to give to the angular distance (0 to pi/2) between point normals and the plane normal.
          * */
-        void setSACParams(int sac_max_iterations, 
+        void setSACParams(int sac_max_iterations,
             double sac_distance_threshold,
             bool sac_optimize_coefficients,
-            Eigen::Vector3f axis, 
+            Eigen::Vector3f axis,
             double sac_eps_angle,
             double sac_normal_distance_weight);
 
@@ -166,8 +166,8 @@ class SceneSegmentationROS
          * \param[in] The maximum length of the cluster
          * \param[in] The minimum height of the cluster above the given polygon
          * */
-        void setClusterParams(double cluster_tolerance, int cluster_min_size, 
-            int cluster_max_size, double cluster_min_height, 
+        void setClusterParams(double cluster_tolerance, int cluster_min_size,
+            int cluster_max_size, double cluster_min_height,
             double cluster_max_height, double cluster_max_length,
             double cluster_min_distance_to_polygon);
 };

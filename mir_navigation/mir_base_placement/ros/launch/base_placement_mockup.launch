@@ -2,6 +2,6 @@
 <launch>
 
   <node pkg="mir_base_placement" type="base_placement_node_mockup" name="base_placement" ns="mir_navigation" respawn="false" output="screen">
-  </node> 
+  </node>
 
 </launch>

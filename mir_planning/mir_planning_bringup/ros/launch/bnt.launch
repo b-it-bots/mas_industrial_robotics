@@ -29,7 +29,7 @@
     <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" />
 
   <!-- action servers -->
-    <!-- move base safe action server -->                                                                               
+    <!-- move base safe action server -->
     <node pkg="mir_move_base_safe" type="move_base_safe_server.py" name="move_base_safe_server" output="screen">
         <param name="align" type="bool" value="false" />
     </node>
@@ -53,5 +53,5 @@
     <!-- include file="$(find mir_basic_navigation_test)/ros/launch/logging.launch" /-->
 
     <include file="$(find atwork_refbox_ros_client)/ros/launch/b-it-bots-cfh1.launch" />
-    
+
 </launch>

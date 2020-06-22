@@ -83,7 +83,7 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud, 
     if (use_omp_)
     {
         normal_estimation_omp_.setInputCloud(filtered);
-        normal_estimation_omp_.compute(*normals); 
+        normal_estimation_omp_.compute(*normals);
     }
     else
     {
@@ -141,7 +141,7 @@ void SceneSegmentation::setVoxelGridParams(double leaf_size, const std::string &
     voxel_grid_.setFilterLimits(limit_min, limit_max);
 }
 
-void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name, 
+void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name,
                                              double limit_min, double limit_max)
 {
     enable_passthrough_filter_ = enable_passthrough_filter;
@@ -150,7 +150,7 @@ void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter, con
 }
 
 void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int num_cores)
-{   
+{
     use_omp_ = use_omp;
     if (use_omp_)
     {
@@ -163,7 +163,7 @@ void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int 
     }
 }
 void SceneSegmentation::setSACParams(int max_iterations, double distance_threshold,
-        bool optimize_coefficients, Eigen::Vector3f axis, double eps_angle, 
+        bool optimize_coefficients, Eigen::Vector3f axis, double eps_angle,
         double normal_distance_weight)
 {
     sac_.setMaxIterations(max_iterations);

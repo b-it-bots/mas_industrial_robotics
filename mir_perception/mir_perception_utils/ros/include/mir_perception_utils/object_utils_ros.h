@@ -32,9 +32,9 @@ namespace object
      * \param[Out] Generated bounding box
      * \param[out] Bounding box message
      * */
-    void get3DBoundingBox(const PointCloud::ConstPtr &cloud, 
-                            const Eigen::Vector3f& normal, 
-                            BoundingBox &bbox,  
+    void get3DBoundingBox(const PointCloud::ConstPtr &cloud,
+                            const Eigen::Vector3f& normal,
+                            BoundingBox &bbox,
                             mas_perception_msgs::BoundingBox &bounding_box_msg);
 
     /** \brief Estimate pose given bounding box
@@ -50,11 +50,11 @@ namespace object
      *         http://www.pcl-users.org/Finding-oriented-bounding-box-of-a-cloud-td4024616.html
      * \param[in] Point cloud cluster
      * \param[out] Estimated pose
-     * \param[in] The label of the cluster (optional), and is used to filter round objects 
+     * \param[in] The label of the cluster (optional), and is used to filter round objects
      * \param[in] Minimum value of the field z allowed
      * \param[in] Maximum value of the field z allowed
     */
-    void estimatePose(const PointCloud::Ptr &xyz_input_cloud, 
+    void estimatePose(const PointCloud::Ptr &xyz_input_cloud,
                         geometry_msgs::PoseStamped &pose,
                         std::string shape = "None",
                         float passthrough_lim_min=0.0060,
@@ -67,8 +67,8 @@ namespace object
      * \param[out] Transformed pose stamped
      * */
     void transformPose(const boost::shared_ptr<tf::TransformListener> tf_listener,
-                        const std::string &target_frame, 
-                        const geometry_msgs::PoseStamped &pose, 
+                        const std::string &target_frame,
+                        const geometry_msgs::PoseStamped &pose,
                         geometry_msgs::PoseStamped &transformed_pose);
 
     /** \brief Convert boundingbox to bounding box ros msg
@@ -82,8 +82,8 @@ namespace object
      * \param[in] logdir (default="/tmp")
      * \param[in] obj_name (default="unknown")
      * */
-    void savePcd(const PointCloud::ConstPtr &pointcloud, 
-                 std::string log_dir="/tmp/", 
+    void savePcd(const PointCloud::ConstPtr &pointcloud,
+                 std::string log_dir="/tmp/",
                  std::string obj_name="unknown");
 
     /** \brief Save debug image if debug_mode is enabled
@@ -91,10 +91,10 @@ namespace object
      * \param[in] raw_image
      * \param[in] logdir (default /tmp)
     */
-    void saveCVImage(const cv_bridge::CvImagePtr &cv_image, 
+    void saveCVImage(const cv_bridge::CvImagePtr &cv_image,
                      std::string log_dir="/tmp/",
                      std::string obj_name="unknown");
-    
+
     /** \brief Convert sensor_msgs/Image to cv_image
      * \param[in] Sensor_msg/Image
      * \param[out] cv image output

@@ -4,8 +4,8 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-	
-	
+
+
 	<xacro:macro name="full_platform" params="parent name arm_angle *origin">
 
 		<!-- joint between arm_7_link and sdh_palm_link -->
@@ -21,7 +21,7 @@
 				<mass value="1.5"/>
 				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
 			</inertial>
-			
+
 			<visual>
 				<origin xyz="-0.0 0.0 0" rpy="0 0 0" />
 				<geometry>
@@ -30,7 +30,7 @@
 				</geometry>
 				<material name="DarkGrey"/>
 			</visual>
-			
+
 			<collision>
 				<origin xyz="-0.0 0.0 0" rpy="0 0 0" />
 				<geometry>
@@ -46,8 +46,8 @@
 		</joint>
 		<link name="${name}_arm_root_link" />
 		<!-- extensions -->
-		
-	
+
+
 	</xacro:macro>
 
 </robot>

@@ -2,18 +2,21 @@
 
 from __future__ import print_function
 
-NODE = 'task_planner_client'
-
-import sys
 import os.path
-import rospy
+import sys
 
 # action lib
 import actionlib
+import rospy
 from actionlib_msgs.msg import GoalStatus
 from mir_planning_msgs.msg import PlanAction, PlanGoal
 
-def send_action_goal(domain_file, problem_file, planner="mercury", mode=PlanGoal.NORMAL):
+NODE = "task_planner_client"
+
+
+def send_action_goal(
+    domain_file, problem_file, planner="mercury", mode=PlanGoal.NORMAL
+):
     """Create a client for task_planner action server and send a goal with given parameters
 
     :domain: string (file path of domain file)
@@ -23,13 +26,16 @@ def send_action_goal(domain_file, problem_file, planner="mercury", mode=PlanGoal
     :returns: list of strings (plan)
 
     """
-    client = actionlib.SimpleActionClient('/mir_task_planning/task_planner_server/plan_task', PlanAction)
+    client = actionlib.SimpleActionClient(
+        "/mir_task_planning/task_planner_server/plan_task", PlanAction
+    )
     if client.wait_for_server(timeout=rospy.Duration(5)):
         goal = PlanGoal(
-                planner=planner, 
-                domain_file=domain_file, 
-                problem_file=problem_file,
-                mode=mode)
+            planner=planner,
+            domain_file=domain_file,
+            problem_file=problem_file,
+            mode=mode,
+        )
         client.send_goal(goal)
         client.wait_for_result()
         state = client.get_state()
@@ -40,41 +46,46 @@ def send_action_goal(domain_file, problem_file, planner="mercury", mode=PlanGoal
         elif state == GoalStatus.ABORTED:
             rospy.logerr("Failed to plan")
     else:
-        print('timeout while contacting task_planner server')
+        print("timeout while contacting task_planner server")
+
 
 def main():
-    domain_file_name = rospy.get_param('~domain_file_name', None)
-    problem_file_name = rospy.get_param('~problem_file_name', None)
-    file_path = rospy.get_param('~file_path', None)
+    domain_file_name = rospy.get_param("~domain_file_name", None)
+    problem_file_name = rospy.get_param("~problem_file_name", None)
+    file_path = rospy.get_param("~file_path", None)
 
     if domain_file_name is None or problem_file_name is None or file_path is None:
-        rospy.logfatal('Either domain file name or problem file name or file path not provided. Exiting.')
+        rospy.logfatal(
+            "Either domain file name or problem file name or file path not provided. Exiting."
+        )
         sys.exit(1)
 
     domain_file = os.path.join(file_path, domain_file_name)
     problem_file = os.path.join(file_path, problem_file_name)
 
     if not os.path.exists(domain_file) or not os.path.exists(problem_file):
-        rospy.logfatal('Either domain file or problem file does not exist. Exiting.')
+        rospy.logfatal("Either domain file or problem file does not exist. Exiting.")
         sys.exit(1)
 
     # planner = 'mercury'
-    planner = 'lama'
+    planner = "lama"
     mode = PlanGoal.NORMAL
     # mode = PlanGoal.FAST
 
     try:
-        rospy.loginfo('Started '+ NODE + ' node')
+        rospy.loginfo("Started " + NODE + " node")
         plan = send_action_goal(
-                domain_file=domain_file,
-                problem_file=problem_file,
-                planner=planner,
-                mode=mode)
-        rospy.sleep(0.2) # time for client to finish
+            domain_file=domain_file,
+            problem_file=problem_file,
+            planner=planner,
+            mode=mode,
+        )
+        rospy.sleep(0.2)  # time for client to finish
     except Exception as e:
-        print('Got following exception while executing', NODE, '\n', str(e))
+        print("Got following exception while executing", NODE, "\n", str(e))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     rospy.init_node(NODE)
     main()

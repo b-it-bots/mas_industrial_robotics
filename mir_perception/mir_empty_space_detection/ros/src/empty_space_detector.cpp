@@ -55,9 +55,9 @@ void EmptySpaceDetector::loadParams()
     nh_.param<std::string>("voxel_filter_field_name", voxel_filter_field_name, "z");
     nh_.param<float>("voxel_filter_limit_min", voxel_filter_limit_min, -0.15);
     nh_.param<float>("voxel_filter_limit_max", voxel_filter_limit_max, 0.3);
-    scene_segmentation_->setVoxelGridParams(voxel_leaf_size, 
+    scene_segmentation_->setVoxelGridParams(voxel_leaf_size,
                                             voxel_filter_field_name,
-                                            voxel_filter_limit_min, 
+                                            voxel_filter_limit_min,
                                             voxel_filter_limit_max);
 
     float normal_radius_search;
@@ -77,13 +77,13 @@ void EmptySpaceDetector::loadParams()
     nh_.param<float>("sac_x_axis", sac_x_axis, 0.0);
     nh_.param<float>("sac_y_axis", sac_y_axis, 0.0);
     nh_.param<float>("sac_z_axis", sac_z_axis, 1.0);
-    Eigen::Vector3f axis(sac_x_axis, sac_y_axis, sac_z_axis); 
+    Eigen::Vector3f axis(sac_x_axis, sac_y_axis, sac_z_axis);
     nh_.param<float>("sac_eps_angle", sac_eps_angle, 0.09);
     nh_.param<float>("sac_normal_distance_weight", sac_normal_distance_weight, 0.05);
-    scene_segmentation_->setSACParams(sac_max_iterations, 
+    scene_segmentation_->setSACParams(sac_max_iterations,
                                       sac_distance_threshold,
                                       sac_optimize_coefficients,
-                                      axis, 
+                                      axis,
                                       sac_eps_angle,
                                       sac_normal_distance_weight);
 
@@ -121,15 +121,15 @@ void EmptySpaceDetector::pcCallback(const sensor_msgs::PointCloud2::ConstPtr &ms
 {
     if (add_to_octree_)
     {
-        sensor_msgs::PointCloud2 msg_transformed;   
+        sensor_msgs::PointCloud2 msg_transformed;
         if (!mpu::pointcloud::transformPointCloudMsg(tf_listener_, output_frame_, *msg, msg_transformed))
             return;
-        
+
         PointCloud::Ptr input_pc(new PointCloud);
         pcl::fromROSMsg(msg_transformed, *input_pc);
 
         cloud_accumulation_->addCloud(input_pc);
-        
+
         add_to_octree_ = false;
 
         std_msgs::String event_out;

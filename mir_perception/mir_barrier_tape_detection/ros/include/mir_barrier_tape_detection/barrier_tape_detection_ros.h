@@ -41,9 +41,9 @@ public:
     void runState();
     void detectBarrierTape();
     /**
-     * Converts the input pointcloud message into a 3 channel cv::Mat object 
+     * Converts the input pointcloud message into a 3 channel cv::Mat object
      * where each channel holds the x, y and z coordinate of each pixel (i.e. the pixel
-     * corresponding to that point in the pointcloud. 
+     * corresponding to that point in the pointcloud.
      * Points which are NaN and the Z-coordinate is < 0.01 are discarded
      *
      * This output cv::Mat is later used to map pixels in the RGB image to 3D positions

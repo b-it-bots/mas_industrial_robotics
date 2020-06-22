@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Bonn-Rhein-Sieg University
- * 
+ *
  * Maintainer: Mohammad Wasil
  * Author: Sergey Alexandrov
  *
@@ -41,14 +41,14 @@ class BoundingBox
             return dimensions_[0] * dimensions_[1] * dimensions_[2];
         }
 
-        /** \brief Create a bounding box around the cloud, restricting it to be parallel to the plane defined by the normal. 
+        /** \brief Create a bounding box around the cloud, restricting it to be parallel to the plane defined by the normal.
          * \param[in] Point cloud
          * \param[in] Normal
          * */
         static BoundingBox create(const typename PointCloud::ConstPtr& cloud,
                                 const Eigen::Vector3f& normal);
 
-        /** \brief Create a bounding box around the point vector, restricting it to be parallel to the plane defined by the normal. 
+        /** \brief Create a bounding box around the point vector, restricting it to be parallel to the plane defined by the normal.
          * \param[in] Point vector
          * \param[in] Normal
         */

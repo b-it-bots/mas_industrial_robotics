@@ -48,16 +48,16 @@ Alternatively, you can skip this step, as ROS Kinetic is automatically installed
 - ROS Kinetic - http://wiki.ros.org/kinetic/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
-  
+
 
 ### ROS Tutorials
 If you have never worked with ROS before, we recommend to go through the beginner tutorials provided by ROS:
 
      http://wiki.ros.org/ROS/Tutorials
 
-In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters"). 
+In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters").
 
-    
+
 ## Clone and compile the MAS industrial robotics software
 First of all you have to clone the repository.
 
@@ -115,8 +115,8 @@ The ROBOT_ENV variable can be used to switch between different environments. The
 ### In Simulation
 
      roslaunch mir_bringup_sim robot.launch
-     
-     
+
+
 In a new terminal you can open the Gazebo GUI to see the environment and the robot
 
 	     rosrun gazebo_ros gzclient
@@ -124,12 +124,12 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ### At the Real Robot
 
      roslaunch mir_bringup robot.launch
-     
+
 
 ## Test the base
 
      roslaunch mir_teleop teleop_keyboard.launch
-     
+
 
 ## Visualize the robot state and sensor data
 
@@ -139,14 +139,14 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ## Build a map for base navigation
 
      roslaunch mir_2dslam 2dslam.launch
-     
+
 
 ## Use autonomous navigation
 ### Omni-directional navigation
 
      roslaunch mir_2dnav 2dnav.launch nav_mode:=dwa
 
-     
+
 
 
 Click on the menu bar "File -> Open Config", navigate to "~/indigo/src/mas_industrial_robotics" and select the "youbot.rviz" file.

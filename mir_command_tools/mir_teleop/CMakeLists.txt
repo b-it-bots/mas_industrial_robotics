@@ -40,7 +40,7 @@ include_directories(
   ros/include
 )
 
-add_executable(teleop_joypad_node 
+add_executable(teleop_joypad_node
   ros/src/teleop_joypad_node.cpp
   ros/src/teleop_joypad.cpp
 )

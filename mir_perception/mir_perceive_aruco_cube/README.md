@@ -14,11 +14,11 @@ publishes a pose continously.
 
 Related package: `mir\_perceive\_mock`
 
-Input: 
- - raw image (`/arm_cam3d/rgb/image_raw`) 
+Input:
+ - raw image (`/arm_cam3d/rgb/image_raw`)
  - camera info (`/arm_cam3d/rgb/camera_info`)
  - event in (`/mir_perception/aruco_cube_perceiver/event_in`)
-Output: 
+Output:
  - event out (`/mir_perception/aruco_cube_perceiver/event_out`)
  - output pose (`/mir_perception/aruco_cube_perceiver/object_pose`)
  - output object list (`/mcr_perception/object_list_merger/output_object_list`)
@@ -27,7 +27,7 @@ Output:
 
 ### Events:
 
-- **One shot**: 
+- **One shot**:
   - event in: `e_trigger`
   - event out: `e_success` or `e_failure`
 - **Continous**:

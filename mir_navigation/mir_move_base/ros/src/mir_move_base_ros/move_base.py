@@ -15,14 +15,14 @@ pose if an 'e_stop' message is received.
   * `goal`: The navigation goal for the robot's base.
 
 """
-#-*- encoding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
-import rospy
-import std_msgs.msg
+import actionlib
+import actionlib_msgs.msg
 import geometry_msgs.msg
 import move_base_msgs.msg
-import actionlib_msgs.msg
-import actionlib
+import rospy
+import std_msgs.msg
 
 
 class MoveBase(object):
@@ -30,6 +30,7 @@ class MoveBase(object):
     Moves the base of a robot to a target pose
 
     """
+
     def __init__(self):
         # Params
         self.event = None
@@ -37,20 +38,25 @@ class MoveBase(object):
         self.client_result = None
 
         # Action name to move the robot's base
-        self.move_base_action_name = rospy.get_param('~move_base_action_name', None)
-        assert self.move_base_action_name is not None,\
-            "Action name for 'move_base' must be specified."
+        self.move_base_action_name = rospy.get_param("~move_base_action_name", None)
+        assert (
+            self.move_base_action_name is not None
+        ), "Action name for 'move_base' must be specified."
 
         # Node cycle rate (in hz).
-        self.loop_rate = rospy.Rate(rospy.get_param('~loop_rate', 10))
+        self.loop_rate = rospy.Rate(rospy.get_param("~loop_rate", 10))
 
         # Publishers
-        self.event_out = rospy.Publisher('~event_out', std_msgs.msg.String, queue_size=1)
-        self.goal = rospy.Publisher('~pose_out', move_base_msgs.msg.MoveBaseGoal, queue_size=1)
+        self.event_out = rospy.Publisher(
+            "~event_out", std_msgs.msg.String, queue_size=1
+        )
+        self.goal = rospy.Publisher(
+            "~pose_out", move_base_msgs.msg.MoveBaseGoal, queue_size=1
+        )
 
         # Subscribers
-        rospy.Subscriber('~event_in', std_msgs.msg.String, self.event_in_cb)
-        rospy.Subscriber('~pose_in', geometry_msgs.msg.PoseStamped, self.pose_in_cb)
+        rospy.Subscriber("~event_in", std_msgs.msg.String, self.event_in_cb)
+        rospy.Subscriber("~pose_in", geometry_msgs.msg.PoseStamped, self.pose_in_cb)
 
         # Actions
         self.move_base_action = actionlib.SimpleActionClient(
@@ -87,17 +93,17 @@ class MoveBase(object):
 
         """
         rospy.loginfo("Ready to start...")
-        state = 'INIT'
+        state = "INIT"
 
         while not rospy.is_shutdown():
 
-            if state == 'INIT':
+            if state == "INIT":
                 state = self.init_state()
-            elif state == 'IDLE':
+            elif state == "IDLE":
                 state = self.idle_state()
-            elif state == 'CONFIGURING':
+            elif state == "CONFIGURING":
                 state = self.configuring_state()
-            elif state == 'RUNNING':
+            elif state == "RUNNING":
                 state = self.running_state()
 
             rospy.logdebug("State: {0}".format(state))
@@ -111,10 +117,10 @@ class MoveBase(object):
         :rtype: str
 
         """
-        if self.event == 'e_start':
-            return 'IDLE'
+        if self.event == "e_start":
+            return "IDLE"
         else:
-            return 'INIT'
+            return "INIT"
 
     def idle_state(self):
         """
@@ -124,14 +130,14 @@ class MoveBase(object):
         :rtype: str
 
         """
-        if self.event == 'e_stop':
+        if self.event == "e_stop":
             self.reset_component_data()
-            self.event_out.publish('e_stopped')
-            return 'INIT'
+            self.event_out.publish("e_stopped")
+            return "INIT"
         elif self.pose_in:
-            return 'CONFIGURING'
+            return "CONFIGURING"
         else:
-            return 'IDLE'
+            return "IDLE"
 
     def configuring_state(self):
         """
@@ -146,7 +152,7 @@ class MoveBase(object):
 
         self.move_base_action.send_goal(goal, done_cb=self.client_result_cb)
 
-        return 'RUNNING'
+        return "RUNNING"
 
     def running_state(self):
         """
@@ -156,23 +162,25 @@ class MoveBase(object):
         :rtype: str
 
         """
-        if self.event == 'e_stop':
+        if self.event == "e_stop":
             self.move_base_action.cancel_goal()
             self.reset_component_data()
-            self.event_out.publish('e_stopped')
-            return 'INIT'
+            self.event_out.publish("e_stopped")
+            return "INIT"
         else:
             if self.client_result == actionlib_msgs.msg.GoalStatus.SUCCEEDED:
-                self.event_out.publish('e_success')
+                self.event_out.publish("e_success")
                 self.reset_component_data()
-                return 'INIT'
-            elif self.client_result == actionlib_msgs.msg.GoalStatus.ABORTED \
-                    or self.client_result == actionlib_msgs.msg.GoalStatus.REJECTED:
-                self.event_out.publish('e_failure')
+                return "INIT"
+            elif (
+                self.client_result == actionlib_msgs.msg.GoalStatus.ABORTED
+                or self.client_result == actionlib_msgs.msg.GoalStatus.REJECTED
+            ):
+                self.event_out.publish("e_failure")
                 self.reset_component_data()
-                return 'INIT'
+                return "INIT"
             else:
-                return 'RUNNING'
+                return "RUNNING"
 
     def reset_component_data(self):
         """
@@ -185,6 +193,6 @@ class MoveBase(object):
 
 
 def main():
-    rospy.init_node('move_base', anonymous=True)
+    rospy.init_node("move_base", anonymous=True)
     move_base = MoveBase()
     move_base.start()

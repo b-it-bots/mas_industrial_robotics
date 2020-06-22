@@ -1,4 +1,4 @@
-# If position error (goal and current motor pos difference) 
+# If position error (goal and current motor pos difference)
 # is bigger than error_threshold an object is grasped
 position_error_threshold: 0.07
 load_threshold: 0.16
