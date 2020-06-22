@@ -7,35 +7,37 @@
 
 #pragma once
 
-#include <ros/ros.h>
-#include <map>
-#include <vector>
-#include <string>
 #include <actionlib/server/simple_action_server.h>
-#include <rosplan_knowledge_msgs/KnowledgeItem.h>
+#include <mir_planner_executor/actions/base_executor_action.h>
 #include <mir_planner_executor/knowledge_updater.h>
 #include <mir_planning_msgs/ExecutePlanAction.h>
-#include <mir_planner_executor/actions/base_executor_action.h>
+#include <ros/ros.h>
+#include <rosplan_knowledge_msgs/KnowledgeItem.h>
+#include <map>
+#include <string>
+#include <vector>
 
 class PlannerExecutor {
-private:
-    actionlib::SimpleActionServer<mir_planning_msgs::ExecutePlanAction> server_;
+ private:
+  actionlib::SimpleActionServer<mir_planning_msgs::ExecutePlanAction> server_;
 
-    KnowledgeUpdater* knowledge_updater_;
+  KnowledgeUpdater *knowledge_updater_;
 
-    ros::Publisher audio_publisher_;
+  ros::Publisher audio_publisher_;
 
-    std::map <std::string, BaseExecutorAction*> actions_;
+  std::map<std::string, BaseExecutorAction *> actions_;
 
-    void announceAction(std::string action_name, std::vector<diagnostic_msgs::KeyValue> params);
+  void announceAction(std::string action_name,
+                      std::vector<diagnostic_msgs::KeyValue> params);
 
-    BaseExecutorAction* getActionExecutor(std::string& name);
+  BaseExecutorAction *getActionExecutor(std::string &name);
 
-    bool checkPlan(const rosplan_dispatch_msgs::CompletePlan& plan);
-    std::string toUpper(std::string str);
-    void addActionExecutor(std::string name, BaseExecutorAction* action);
-public:
-    PlannerExecutor(ros::NodeHandle &nh);
-    ~PlannerExecutor();
-    void executeCallback();
+  bool checkPlan(const rosplan_dispatch_msgs::CompletePlan &plan);
+  std::string toUpper(std::string str);
+  void addActionExecutor(std::string name, BaseExecutorAction *action);
+
+ public:
+  PlannerExecutor(ros::NodeHandle &nh);
+  ~PlannerExecutor();
+  void executeCallback();
 };

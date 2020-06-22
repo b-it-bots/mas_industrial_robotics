@@ -24,6 +24,14 @@ repos:
                 entry: pylint --verbose --jobs 4 --exit-zero
                 language_version: python3.7
 
+
+    -   repo: https://github.com/bmorcos/pre-commit-hooks-cpp
+        rev: master
+        hooks:
+            -   id: clang-format
+            # -   id: cpplint      # To be enabled once cpp linting errors are fixed
+            -   id: cppcheck
+
     -   repo: https://github.com/pre-commit/pre-commit-hooks
         rev: v2.5.0
         hooks:

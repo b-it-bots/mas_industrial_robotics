@@ -7,6 +7,7 @@
 
 #include <mir_planner_executor/actions/pick/pick_from_shelf_action.h>
 
-PickFromShelfAction::PickFromShelfAction() : BasePickAction("/pick_from_shelf_server") {
-    //client_.waitForServer();
+PickFromShelfAction::PickFromShelfAction()
+    : BasePickAction("/pick_from_shelf_server") {
+  // client_.waitForServer();
 }
