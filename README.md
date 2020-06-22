@@ -146,7 +146,13 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 
      roslaunch mir_2dnav 2dnav.launch nav_mode:=dwa
 
-
-
-
 Click on the menu bar "File -> Open Config", navigate to "~/indigo/src/mas_industrial_robotics" and select the "youbot.rviz" file.
+
+# Note on Contributions:
+
+[Pre-commit](https://pre-commit.com/#intro) hooks has been added to this repository. Please note that you will not be able to locally commit your changes to git until all the checks in the .pre-commit-config.yaml pass. Although, cpp and python code formatters are present in .pre-commit-config.yaml, some serious violations of the standard coding guidelines will not be automatically fixed while running the pre-commit hooks. These errors will be displayed while running git commit and have to be manually fixed. Users will not be able to commit their code, until these errors are fixed. Alternatively, one could also verify if the pre-commit hooks pass before actually committing the code to git. To do so please run the following command after making necessary changes to your code.
+```
+pre-commit run --all-files
+```
+
+

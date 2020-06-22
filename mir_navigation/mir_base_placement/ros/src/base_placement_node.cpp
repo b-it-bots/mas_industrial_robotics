@@ -33,7 +33,7 @@ class OrientToLaserReadingAction {
   double error_lin_d = 0.0;
 
   double last_error_lin = 0.0;
-  double last_error_angula = 0.0r;
+  double last_error_angular = 0.0;
 
   double error_tolerance = 0.0;
 
