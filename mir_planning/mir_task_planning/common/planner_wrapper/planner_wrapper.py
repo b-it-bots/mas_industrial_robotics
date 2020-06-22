@@ -276,7 +276,7 @@ def get_domain_and_problem_file():
     code_dir = os.path.abspath(os.path.dirname(__file__))
     common_dir = os.path.dirname(code_dir)
     domain_file = os.path.join(common_dir, "pddl/domain.pddl")
-    problem_file = os.path.join(common_dir, "pddl/drawer_problem.pddl")
+    problem_file = os.path.join(common_dir, "pddl/problem.pddl")
     files = {"domain": None, "problem": None}
     try:
         with open(domain_file, "r") as file_handle:
