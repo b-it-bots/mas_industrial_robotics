@@ -41,7 +41,7 @@ class PointcloudObjectRecognizer():
         cfg_folder = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 'common', 'config')
         
         model_config_file = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 
-                            'ros', 'config', "pc_" + model + "_config.yaml")
+                            'ros', 'config', "pc_classifier_config.yaml")
         
         if os.path.isfile(model_config_file):
             configs = {}
@@ -86,6 +86,7 @@ class PointcloudObjectRecognizer():
         :param object_list:     Object list
         :type:                  mas_perception_msgs.object_list
         """
+        
         if object_list.objects:
             rospy.loginfo("%d clouds received ", len(object_list.objects))
             recognized_object_list = ObjectList()
