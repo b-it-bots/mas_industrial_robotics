@@ -2,52 +2,11 @@
 
 PACKAGE = "mir_object_recognition"
 
-# Color map for classes
-cls2clr = {
-    's40_40_G':(0, 0, 255), 
-    's40_40_B':(0, 0, 255),
-    'r20':(0, 0, 255),
-    'motor':(0, 0, 255),
-    'm30':(0, 0, 255), 
-    'm20_100':(0, 0, 255), 
-    'm20':(0, 0, 255), 
-    'f20_20_G':(255, 191, 0), 
-    'f20_20_B':(0, 0, 255),
-    'em_02':(0, 0, 255), 
-    'em_01':(0, 0, 255), 
-    'distance_tube':(0, 0, 255), 
-    'container_box_red':(0, 0, 255),
-    'container_box_blue':(0, 0, 255), 
-    'bearing_box_ax16':(0, 0, 255),
-    'bearing_box_ax01':(0, 0, 255),
-    'bearing':(0, 0, 255),
-    'axis':(0, 0, 255)
-}
-class_label = {
-    's40_40_G':'S40_40_G', 
-    's40_40_B':'S40_40_B',
-    'r20':'R20',
-    'motor':'MOTOR',
-    'm30':'M30', 
-    'm20_100':'M20_100', 
-    'm20':'M20', 
-    'f20_20_G':'F20_20_G', 
-    'f20_20_B':'F20_20_B',
-    'em_02':'EM-02', 
-    'em_01':'EM-01', 
-    'distance_tube':'DISTANCE_TUBE', 
-    'container_box_red':'CONTAINER_BOX_RED',
-    'container_box_blue':'CONTAINER_BOX_BLUE', 
-    'bearing_box_ax16':'BEARING_BOX',
-    'bearing_box_ax01':'BEARING_BOX',
-    'bearing':'BEARING',
-    'axis':'AXIS'
-}
-
 import os
 import sys
 import struct
 import colorsys
+import yaml
 
 import roslib
 import rospy
@@ -63,7 +22,7 @@ from mas_perception_msgs.srv import RecognizeImage, RecognizeImageResponse
 from mas_perception_msgs.msg import ImageList, ObjectList, Object
 from sensor_msgs.msg import Image, RegionOfInterest
 
-from rgb_object_recognition import squeezeDet
+from rgb_object_recognition import SqueezeDetClassifier
 from rgb_object_recognition import SSDLiteMobilenet
 from rgb_object_recognition import util
 
@@ -76,14 +35,29 @@ class RGBObjectRecognizer():
         self.sub_img = rospy.Subscriber("input/images", ImageList, self.image_recognition_cb)
         self.net = net
         self.model_name = model_name
+
+        config_file = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 
+                            'ros', 'config', "image_classifier_config.yaml")
         
-        if self.net == 'detection':
-            if self.model_name == 'squeezeDet':
-                self.model = squeezeDet(model_dir)
-            elif self.model_name == 'ssdLiteMobilenet':
-                self.model = SSDLiteMobilenet(model_dir)
-        elif self.net == 'classification':
-           print "TODO: MobileNet"
+        if os.path.isfile(config_file):
+            configs = {}
+            with open(config_file, 'r') as infile:
+                configs = yaml.safe_load(infile)
+            
+            model_config = configs['model'][model_name]
+            self.classes = configs['classes']
+            self.colors = configs['colors']
+
+            if self.net == 'detection':
+                if self.model_name == 'squeezeDet':
+                    self.model = SqueezeDetClassifier(config=model_config,
+                                                      checkpoint_path=model_dir)
+                elif self.model_name == 'ssdLiteMobilenet':
+                    self.model = SSDLiteMobilenet(model_dir)
+            elif self.net == 'classification':
+                print "TODO: MobileNet"
+        else:
+            rospy.logerr("Config file: {} not found".format(config_file))
 
     def image_recognition_cb(self, img_msg):
         if img_msg.images:
@@ -93,10 +67,10 @@ class RGBObjectRecognizer():
             if self.net == 'detection':
                 try:
                     cv_image = self.cvbridge.imgmsg_to_cv2(img_msg.images[0], "bgr8")
-                    bboxes, probs, classes, labels = self.model.infer_one_image(cv_image)
-                    for i in range(len(classes)):
+                    bboxes, probs, labels = self.model.classify(cv_image)
+                    for i in range(len(labels)):
                         result = Object()
-                        result.name = class_label[labels[i]]
+                        result.name = self.classes[labels[i]]
                         result.probability = probs[i]
                         roi = RegionOfInterest()
                         bbox = util.bbox_transform(bboxes[i])
@@ -115,10 +89,12 @@ class RGBObjectRecognizer():
                         # Draw bounding box on image
                         debug_img = cv_image
                         debug_img = debug_img.astype(np.float32, copy=False)
-                        debug_img = cv2.resize(debug_img, (self.model.image_width, self.model.image_height))
+                        debug_img = cv2.resize(debug_img, (img_msg.images[0].width, 
+                                                           img_msg.images[0].height)
+                                              )
                         # Get display labels
-                        class_labels = [class_label[label] for label in labels]
-                        util.draw_box_on_img(debug_img, bboxes, probs, class_labels, cls2clr)
+                        classes = [self.classes[label] for label in labels]
+                        util.draw_box_on_img(debug_img, bboxes, probs, classes, self.colors)
                         # publish bbox and label
                         self.publish_debug_img(debug_img)
 
