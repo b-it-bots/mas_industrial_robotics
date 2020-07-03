@@ -59,6 +59,7 @@ class DGCNNClassifier(CNNBasedClassifiers):
 
         :return:  Predicted label and probablity
         """
+        
         if center:
             pointcloud = pc_utils.center_pointcloud(pointcloud)
         

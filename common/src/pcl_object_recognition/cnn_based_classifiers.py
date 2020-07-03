@@ -13,8 +13,6 @@ class CNNBasedClassifiers(object):
         self.num_points = kwargs.get("num_points", None)
         self.cloud_dim = kwargs.get("cloud_dim", None)
 
-        #Todo: option to load config from yaml?
-
     @abstractmethod
     def classify(self, pointcloud):
         """
