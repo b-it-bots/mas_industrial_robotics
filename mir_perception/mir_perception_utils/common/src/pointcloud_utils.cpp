@@ -64,7 +64,6 @@ unsigned int pointcloud::padPointCloud(PointCloud::Ptr &cloud_in,
     unsigned int point_count;
     point_count = static_cast<unsigned int> (cloud_in->size ());
     
-    //ToDo: check if the cloud size > 2048, if so, downsample
     if (point_count > num_points)
     {
         unsigned int point_diff = point_count - num_points;
