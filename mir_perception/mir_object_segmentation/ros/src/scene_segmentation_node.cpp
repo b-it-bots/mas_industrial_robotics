@@ -86,7 +86,8 @@ void SceneSegmentationNode::segmentPointCloud()
     std::vector<PointCloud::Ptr> clusters;
     mas_perception_msgs::ObjectList object_list;
     std::vector<BoundingBox> boxes;
-    scene_segmentation_ros_.segmentCloud(cloud, object_list, clusters, boxes);
+    scene_segmentation_ros_.segmentCloud(cloud, object_list, clusters, boxes,
+                                         center_cluster_, pad_cluster_, padded_cluster_size_);
     
     mas_perception_msgs::BoundingBoxList bounding_boxes;
     bounding_boxes.bounding_boxes.resize(clusters.size());
@@ -198,6 +199,10 @@ void SceneSegmentationNode::configCallback(mir_object_segmentation::SceneSegment
     scene_segmentation_ros_.setClusterParams(config.cluster_tolerance, config.cluster_min_size, config.cluster_max_size,
             config.cluster_min_height, config.cluster_max_height, config.cluster_max_length,
             config.cluster_min_distance_to_polygon);
+
+    center_cluster_ = config.center_cluster;
+    pad_cluster_ = config.pad_cluster;
+    padded_cluster_size_ = config.padded_cluster_size;
     
     octree_resolution_ = config.octree_resolution;
     object_height_above_workspace_ = config.object_height_above_workspace;

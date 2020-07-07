@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
-#define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
+#ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_ROS_H
+#define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_ROS_H
 
 #include <ros/ros.h>
 
@@ -63,11 +63,11 @@ namespace pointcloud
      * \param[in] Remove 3D ROI outliers
     */
     void getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, 
-                          const PointCloud::Ptr &cloud_id,
+                          const PointCloud::Ptr &cloud_in,
                           PointCloud::Ptr &cloud_roi,
                           float roi_size_adjustment,
                           bool remove_outliers);
 }
 };
 
-#endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
+#endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_ROS_H
