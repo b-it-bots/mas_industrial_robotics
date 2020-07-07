@@ -84,6 +84,11 @@ class SceneSegmentationNode
         double octree_resolution_;
         double object_height_above_workspace_;
 
+        //cluster
+        bool center_cluster_;
+        bool pad_cluster_;
+        unsigned int padded_cluster_size_;
+
     private:
         void pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg);
         void eventCallback(const std_msgs::String::ConstPtr &msg);

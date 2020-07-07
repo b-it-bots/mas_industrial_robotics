@@ -16,6 +16,7 @@
 #include <mir_object_segmentation/scene_segmentation_ros.h>
 
 #include <mir_perception_utils/object_utils_ros.h>
+#include <mir_perception_utils/pointcloud_utils.h>
 
 namespace mpu = mir_perception_utils;
 
@@ -35,7 +36,10 @@ SceneSegmentationROS::~SceneSegmentationROS()
 void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
                                         mas_perception_msgs::ObjectList &object_list, 
                                         std::vector<PointCloud::Ptr> &clusters,
-                                        std::vector<BoundingBox> &boxes)
+                                        std::vector<BoundingBox> &boxes,
+                                        bool center_cluster,
+                                        bool pad_cluster,
+                                        bool num_points)
 {
     std::string frame_id = cloud->header.frame_id;
     PointCloud::Ptr debug = scene_segmentation_->segmentScene(cloud, clusters, boxes, model_coefficients_, workspace_height_);
@@ -47,10 +51,20 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
     {
         sensor_msgs::PointCloud2 ros_cloud;
         ros_cloud.header.frame_id = frame_id;
-        pcl::PCLPointCloud2 pc2;
-        pcl::toPCLPointCloud2(*clusters[i], pc2);
-        pcl_conversions::fromPCL(pc2, ros_cloud);
-        // Assign unknown for every object by default then recognize it later
+        if (center_cluster)
+        {
+            PointCloud::Ptr centered_cluster (new PointCloud);
+            unsigned int num_points = mpu::pointcloud::centerPointCloud(*clusters[i], *centered_cluster);
+            if (pad_cluster)
+                num_points = mpu::pointcloud::padPointCloud(centered_cluster, num_points);
+            pcl::toROSMsg(*centered_cluster,ros_cloud);
+        }
+        else
+        {
+            pcl::toROSMsg(*clusters[i],ros_cloud);
+        }
+        
+        // Assign unknown name for every object by default then recognize it later
         object_list.objects[i].pointcloud = ros_cloud;
         object_list.objects[i].name = "unknown";
         object_list.objects[i].probability = 0.0;
