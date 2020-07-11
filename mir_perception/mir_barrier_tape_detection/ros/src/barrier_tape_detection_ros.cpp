@@ -1,35 +1,35 @@
 #include <mir_barrier_tape_detection/barrier_tape_detection_ros.h>
 
 BarrierTapeDetectionRos::BarrierTapeDetectionRos(ros::NodeHandle &nh)
-    : node_handler_(nh), image_transporter_(nh) {
+    : node_handler_(nh), image_transporter_(nh)
+{
   transform_listener_ = new tf::TransformListener();
 
   nh.param<std::string>("target_frame", target_frame_, "/base_link");
   nh.param<int>("num_of_retrial", num_of_retrial_, 30);
   nh.param<int>("num_pixels_to_extrapolate", num_pixels_to_extrapolate_, 30);
-  dynamic_reconfigure_server_.setCallback(boost::bind(
-      &BarrierTapeDetectionRos::dynamicReconfigCallback, this, _1, _2));
+  dynamic_reconfigure_server_.setCallback(
+      boost::bind(&BarrierTapeDetectionRos::dynamicReconfigCallback, this, _1, _2));
 
   event_pub_ = node_handler_.advertise<std_msgs::String>("event_out", 1);
-  pub_yellow_barrier_tape_cloud_ = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>(
-      "output/yellow_barrier_tape_pointcloud", 1);
-  pub_yellow_barrier_tape_pose_array_ = nh.advertise<geometry_msgs::PoseArray>(
-      "output/yellow_barrier_tape_pose_array", 1);
+  pub_yellow_barrier_tape_cloud_ =
+      nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("output/yellow_barrier_tape_pointcloud", 1);
+  pub_yellow_barrier_tape_pose_array_ =
+      nh.advertise<geometry_msgs::PoseArray>("output/yellow_barrier_tape_pose_array", 1);
   image_pub_ = image_transporter_.advertise("debug_image", 1);
 
-  event_sub_ = node_handler_.subscribe(
-      "event_in", 1, &BarrierTapeDetectionRos::eventCallback, this);
+  event_sub_ =
+      node_handler_.subscribe("event_in", 1, &BarrierTapeDetectionRos::eventCallback, this);
   sub_pointcloud_.subscribe(node_handler_, "input_pointcloud", 1);
   sub_rgb_image_.subscribe(node_handler_, "input_rgb_image", 1);
 
   sub_pointcloud_.unsubscribe();
   sub_rgb_image_.unsubscribe();
 
-  sync_input_ =
-      boost::make_shared<message_filters::Synchronizer<ImageSyncPolicy>>(10);
+  sync_input_ = boost::make_shared<message_filters::Synchronizer<ImageSyncPolicy>>(10);
   sync_input_->connectInput(sub_pointcloud_, sub_rgb_image_);
-  sync_input_->registerCallback(boost::bind(
-      &BarrierTapeDetectionRos::synchronizedCallback, this, _1, _2));
+  sync_input_->registerCallback(
+      boost::bind(&BarrierTapeDetectionRos::synchronizedCallback, this, _1, _2));
 
   current_state_ = INIT;
   has_image_data_ = false;
@@ -37,7 +37,8 @@ BarrierTapeDetectionRos::BarrierTapeDetectionRos(ros::NodeHandle &nh)
   barrier_tape_cloud_ = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
 }
 
-BarrierTapeDetectionRos::~BarrierTapeDetectionRos() {
+BarrierTapeDetectionRos::~BarrierTapeDetectionRos()
+{
   image_pub_.shutdown();
   pub_yellow_barrier_tape_pose_array_.shutdown();
   event_pub_.shutdown();
@@ -45,28 +46,31 @@ BarrierTapeDetectionRos::~BarrierTapeDetectionRos() {
 }
 
 void BarrierTapeDetectionRos::dynamicReconfigCallback(
-    mir_barrier_tape_detection::BarrierTapeConfig &config, uint32_t level) {
+    mir_barrier_tape_detection::BarrierTapeConfig &config, uint32_t level)
+{
   is_debug_mode_ = config.is_debug_mode;
-  btd_.updateDynamicVariables(
-      is_debug_mode_, config.min_area, config.color_thresh_min_h,
-      config.color_thresh_min_s, config.color_thresh_min_v,
-      config.color_thresh_max_h, config.color_thresh_max_s,
-      config.color_thresh_max_v);
+  btd_.updateDynamicVariables(is_debug_mode_, config.min_area, config.color_thresh_min_h,
+                              config.color_thresh_min_s, config.color_thresh_min_v,
+                              config.color_thresh_max_h, config.color_thresh_max_s,
+                              config.color_thresh_max_v);
 }
 
 void BarrierTapeDetectionRos::synchronizedCallback(
     const sensor_msgs::PointCloud2::ConstPtr &pointcloud_msg,
-    const sensor_msgs::Image::ConstPtr &rgb_image_msg) {
+    const sensor_msgs::Image::ConstPtr &rgb_image_msg)
+{
   pointcloud_msg_ = pointcloud_msg;
   rgb_image_msg_ = rgb_image_msg;
   has_image_data_ = true;
 }
 
-void BarrierTapeDetectionRos::eventCallback(const std_msgs::String &event_msg) {
+void BarrierTapeDetectionRos::eventCallback(const std_msgs::String &event_msg)
+{
   event_in_msg_ = event_msg;
 }
 
-void BarrierTapeDetectionRos::states() {
+void BarrierTapeDetectionRos::states()
+{
   switch (current_state_) {
     case INIT:
       initState();
@@ -82,7 +86,8 @@ void BarrierTapeDetectionRos::states() {
   }
 }
 
-void BarrierTapeDetectionRos::initState() {
+void BarrierTapeDetectionRos::initState()
+{
   if (event_in_msg_.data == "e_start") {
     current_state_ = IDLE;
     event_in_msg_.data = "";
@@ -93,7 +98,8 @@ void BarrierTapeDetectionRos::initState() {
   }
 }
 
-void BarrierTapeDetectionRos::idleState() {
+void BarrierTapeDetectionRos::idleState()
+{
   if (event_in_msg_.data == "e_stop") {
     current_state_ = INIT;
     event_in_msg_.data = "";
@@ -107,7 +113,8 @@ void BarrierTapeDetectionRos::idleState() {
   }
 }
 
-void BarrierTapeDetectionRos::runState() {
+void BarrierTapeDetectionRos::runState()
+{
   if (event_in_msg_.data == "e_reset") {
     barrier_tape_cloud_->points.clear();
     event_in_msg_.data = "";
@@ -125,14 +132,14 @@ void BarrierTapeDetectionRos::runState() {
   }
 }
 
-void BarrierTapeDetectionRos::detectBarrierTape() {
+void BarrierTapeDetectionRos::detectBarrierTape()
+{
   cv_bridge::CvImagePtr cv_img_tmp1 =
       cv_bridge::toCvCopy(rgb_image_msg_, sensor_msgs::image_encodings::BGR8);
   cv::Mat rgb_image_frame = cv_img_tmp1->image;
 
   barrier_tape_cloud_->header.frame_id = target_frame_;
-  pcl_conversions::toPCL(pointcloud_msg_->header.stamp,
-                         barrier_tape_cloud_->header.stamp);
+  pcl_conversions::toPCL(pointcloud_msg_->header.stamp, barrier_tape_cloud_->header.stamp);
 
   std::vector<std::vector<std::vector<int>>> barrier_tape_img_coordinates;
   int pixel_y;
@@ -147,8 +154,7 @@ void BarrierTapeDetectionRos::detectBarrierTape() {
   cv::Mat rgb_depth_image_frame;
   convertPointCloudToXYZImage(rgb_depth_image_frame);
 
-  if (btd_.detectBarrierTape(rgb_image_frame, debug_image_,
-                             barrier_tape_img_coordinates)) {
+  if (btd_.detectBarrierTape(rgb_image_frame, debug_image_, barrier_tape_img_coordinates)) {
     for (int i = 0; i < barrier_tape_img_coordinates.size(); i++) {
       for (int j = 0; j < barrier_tape_img_coordinates[i].size(); j++) {
         pixel_y = barrier_tape_img_coordinates[i][j][1];
@@ -173,11 +179,9 @@ void BarrierTapeDetectionRos::detectBarrierTape() {
 
           geometry_msgs::PoseStamped transformed_pose;
           try {
-            transform_listener_->waitForTransform(
-                target_frame_, pose_stamped.header.frame_id,
-                pose_stamped.header.stamp, ros::Duration(0.1));
-            transform_listener_->transformPose(target_frame_, pose_stamped,
-                                               transformed_pose);
+            transform_listener_->waitForTransform(target_frame_, pose_stamped.header.frame_id,
+                                                  pose_stamped.header.stamp, ros::Duration(0.1));
+            transform_listener_->transformPose(target_frame_, pose_stamped, transformed_pose);
             pose_array_.poses.push_back(transformed_pose.pose);
 
             // Ignore points which are > 0 since we are only interested in
@@ -209,26 +213,22 @@ void BarrierTapeDetectionRos::detectBarrierTape() {
   pub_yellow_barrier_tape_cloud_.publish(barrier_tape_cloud_);
 }
 
-void BarrierTapeDetectionRos::convertPointCloudToXYZImage(
-    cv::Mat &output_xyz_image) {
+void BarrierTapeDetectionRos::convertPointCloudToXYZImage(cv::Mat &output_xyz_image)
+{
   pcl::PCLPointCloud2::Ptr pcl_input_cloud(new pcl::PCLPointCloud2);
 
   pcl_conversions::toPCL(*pointcloud_msg_, *pcl_input_cloud);
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_input_cloud(
-      new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::fromPCLPointCloud2(*pcl_input_cloud, *xyz_input_cloud);
 
   pcl::PointCloud<pcl::PointXYZ>::iterator b1;
 
   int index = 0;
-  float *xyz_frame_buffer =
-      new float[pointcloud_msg_->width * pointcloud_msg_->height * 3];
-  cv::Mat xyz_frame(pointcloud_msg_->height, pointcloud_msg_->width, CV_32FC3,
-                    xyz_frame_buffer);
+  float *xyz_frame_buffer = new float[pointcloud_msg_->width * pointcloud_msg_->height * 3];
+  cv::Mat xyz_frame(pointcloud_msg_->height, pointcloud_msg_->width, CV_32FC3, xyz_frame_buffer);
   xyz_frame = cv::Scalar::all(0.0f);
-  for (b1 = xyz_input_cloud->points.begin(); b1 < xyz_input_cloud->points.end();
-       b1++) {
+  for (b1 = xyz_input_cloud->points.begin(); b1 < xyz_input_cloud->points.end(); b1++) {
     pcl::PointXYZ pcl_point = *b1;
     if ((!pcl_isnan(pcl_point.x)) && (!pcl_isnan(pcl_point.y)) &&
         (!pcl_isnan(pcl_point.z) && (pcl_point.z > 0.01))) {
@@ -242,7 +242,8 @@ void BarrierTapeDetectionRos::convertPointCloudToXYZImage(
   delete[] xyz_frame_buffer;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "barrier_tape_detection");
   ros::NodeHandle nh("~");
   ROS_INFO("Barrier Tape Detection Node Initialised");

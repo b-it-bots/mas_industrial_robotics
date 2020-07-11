@@ -1,21 +1,19 @@
 #include <mir_handle_detection/drawer_handle_perceiver.h>
 
-DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~") {
+DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~")
+{
   nh.param<std::string>("output_frame", this->output_frame, "base_link_static");
   nh.param<bool>("enable_debug_pc_pub", this->enable_debug_pc_pub, true);
   nh.param<int>("num_of_retries", this->num_of_retries_, 3);
   this->retry_attempts_ = 0;
 
-  this->pc_sub = nh.subscribe("input_point_cloud", 1,
-                              &DrawerHandlePerceiver::pcCallback, this);
+  this->pc_sub = nh.subscribe("input_point_cloud", 1, &DrawerHandlePerceiver::pcCallback, this);
   this->pose_pub = nh.advertise<geometry_msgs::PoseStamped>("output_pose", 1);
-  this->event_in_sub = nh.subscribe(
-      "event_in", 1, &DrawerHandlePerceiver::eventInCallback, this);
+  this->event_in_sub = nh.subscribe("event_in", 1, &DrawerHandlePerceiver::eventInCallback, this);
   this->event_out_pub = nh.advertise<std_msgs::String>("event_out", 1);
 
   if (this->enable_debug_pc_pub) {
-    this->pc_pub =
-        nh.advertise<sensor_msgs::PointCloud2>("output_point_cloud", 1);
+    this->pc_pub = nh.advertise<sensor_msgs::PointCloud2>("output_point_cloud", 1);
   }
 
   float z_threshold_max, z_threshold_min;
@@ -54,8 +52,7 @@ DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~") {
   float polygon_prism_height_min, polygon_prism_height_max;
   nh.param<float>("polygon_prism_height_min", polygon_prism_height_min, 0.01);
   nh.param<float>("polygon_prism_height_max", polygon_prism_height_max, 0.1);
-  this->extract_polygonal_prism.setHeightLimits(polygon_prism_height_min,
-                                                polygon_prism_height_max);
+  this->extract_polygonal_prism.setHeightLimits(polygon_prism_height_min, polygon_prism_height_max);
 
   this->extract_indices.setNegative(false);
 
@@ -72,9 +69,8 @@ DrawerHandlePerceiver::DrawerHandlePerceiver() : nh("~") {
 }
 
 DrawerHandlePerceiver::~DrawerHandlePerceiver() {}
-
-void DrawerHandlePerceiver::eventInCallback(
-    const std_msgs::String::ConstPtr &msg) {
+void DrawerHandlePerceiver::eventInCallback(const std_msgs::String::ConstPtr &msg)
+{
   if (msg->data == "e_start") {
     ROS_INFO_STREAM("starting listening");
     this->is_running = true;
@@ -84,7 +80,8 @@ void DrawerHandlePerceiver::eventInCallback(
   }
 }
 
-void DrawerHandlePerceiver::checkFailure() {
+void DrawerHandlePerceiver::checkFailure()
+{
   if (this->retry_attempts_ > this->num_of_retries_) {
     std_msgs::String event_out_msg;
     event_out_msg.data = "e_failure";
@@ -95,8 +92,8 @@ void DrawerHandlePerceiver::checkFailure() {
     this->retry_attempts_ += 1;
 }
 
-void DrawerHandlePerceiver::pcCallback(
-    const sensor_msgs::PointCloud2::ConstPtr &msg) {
+void DrawerHandlePerceiver::pcCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
+{
   if (!this->is_running) {
     return;
   }
@@ -121,12 +118,10 @@ void DrawerHandlePerceiver::pcCallback(
 
   PCloudT::Ptr pc_segmented(new PCloudT);
   geometry_msgs::PoseStamped pose_stamped;
-  this->extractPlaneOutlier(pc_filtered, pc_passthrough_filtered, pc_segmented,
-                            pose_stamped);
+  this->extractPlaneOutlier(pc_filtered, pc_passthrough_filtered, pc_segmented, pose_stamped);
 
   Eigen::Vector4f closest_centroid(0.0, 0.0, 0.0, 0.0);
-  bool cluster_success =
-      this->getClosestCluster(pc_segmented, closest_centroid);
+  bool cluster_success = this->getClosestCluster(pc_segmented, closest_centroid);
   if (!cluster_success) {
     ROS_ERROR("[drawer_handle_perceiver] Could not find any cluster.");
     this->checkFailure();
@@ -159,21 +154,20 @@ void DrawerHandlePerceiver::pcCallback(
   }
 }
 
-bool DrawerHandlePerceiver::transformPC(
-    const sensor_msgs::PointCloud2::ConstPtr &msg,
-    sensor_msgs::PointCloud2 &msg_transformed) {
+bool DrawerHandlePerceiver::transformPC(const sensor_msgs::PointCloud2::ConstPtr &msg,
+                                        sensor_msgs::PointCloud2 &msg_transformed)
+{
   msg_transformed.header.frame_id = this->output_frame;
   try {
     ros::Time common_time;
-    this->tf_listener.getLatestCommonTime(
-        this->output_frame, msg->header.frame_id, common_time, NULL);
+    this->tf_listener.getLatestCommonTime(this->output_frame, msg->header.frame_id, common_time,
+                                          NULL);
     tf::StampedTransform transform;
-    this->tf_listener.waitForTransform(this->output_frame, msg->header.frame_id,
-                                       common_time, ros::Duration(1.0));
-    this->tf_listener.lookupTransform(this->output_frame, msg->header.frame_id,
-                                      common_time, transform);
-    pcl_ros::transformPointCloud(this->output_frame, transform, *msg,
-                                 msg_transformed);
+    this->tf_listener.waitForTransform(this->output_frame, msg->header.frame_id, common_time,
+                                       ros::Duration(1.0));
+    this->tf_listener.lookupTransform(this->output_frame, msg->header.frame_id, common_time,
+                                      transform);
+    pcl_ros::transformPointCloud(this->output_frame, transform, *msg, msg_transformed);
     return true;
   } catch (tf::TransformException &ex) {
     ROS_WARN("PCL transform error: %s", ex.what());
@@ -182,8 +176,8 @@ bool DrawerHandlePerceiver::transformPC(
   }
 }
 
-void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr &input,
-                                                PCloudT::Ptr output) {
+void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr &input, PCloudT::Ptr output)
+{
   PCloudT::Ptr pc_intermediate(new PCloudT);
   this->passthrough_filter_z.setInputCloud(input);
   this->passthrough_filter_z.filter(*pc_intermediate);
@@ -191,9 +185,10 @@ void DrawerHandlePerceiver::passthroughFilterPC(const PCloudT::Ptr &input,
   this->passthrough_filter_y.filter(*output);
 }
 
-void DrawerHandlePerceiver::extractPlaneOutlier(
-    const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output,
-    geometry_msgs::PoseStamped &pose_stamped) {
+void DrawerHandlePerceiver::extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input,
+                                                PCloudT::Ptr output,
+                                                geometry_msgs::PoseStamped &pose_stamped)
+{
   pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
   this->seg.setInputCloud(input);
@@ -207,8 +202,7 @@ void DrawerHandlePerceiver::extractPlaneOutlier(
   this->project_inliers.filter(*pc_plane);
 
   Eigen::Matrix<float, 3, 1> normVector = Eigen::Matrix<float, 3, 1>(
-      coefficients->values[0], coefficients->values[1],
-      coefficients->values[2]);
+      coefficients->values[0], coefficients->values[1], coefficients->values[2]);
   Eigen::Quaternionf normQuat =
       Eigen::Quaternionf::FromTwoVectors(normVector, Eigen::Vector3f::UnitX());
 
@@ -234,10 +228,10 @@ void DrawerHandlePerceiver::extractPlaneOutlier(
   this->extract_indices.filter(*output);
 }
 
-bool DrawerHandlePerceiver::getClosestCluster(
-    const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid) {
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(
-      new pcl::search::KdTree<pcl::PointXYZ>);
+bool DrawerHandlePerceiver::getClosestCluster(const PCloudT::Ptr &input,
+                                              Eigen::Vector4f &closest_centroid)
+{
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
 
   std::vector<pcl::PointIndices> clusters_indices;
   this->euclidean_cluster_extraction.setSearchMethod(tree);
@@ -264,7 +258,8 @@ bool DrawerHandlePerceiver::getClosestCluster(
   return true;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   ros::init(argc, argv, "drawer_handle_perceiver");
   DrawerHandlePerceiver dhperceiver;
   ros::Rate loop_rate(10.0);

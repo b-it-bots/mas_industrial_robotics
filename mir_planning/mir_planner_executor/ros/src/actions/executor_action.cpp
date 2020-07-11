@@ -8,19 +8,21 @@
 #include <mir_planner_executor/actions/executor_action.h>
 #include <ros/console.h>
 
-void ExecutorAction::initialize(KnowledgeUpdater *knowledge_updater) {
+void ExecutorAction::initialize(KnowledgeUpdater *knowledge_updater)
+{
   knowledge_updater_ = knowledge_updater;
 }
 
-bool ExecutorAction::execute(std::string &name,
-                             std::vector<diagnostic_msgs::KeyValue> &params) {
+bool ExecutorAction::execute(std::string &name, std::vector<diagnostic_msgs::KeyValue> &params)
+{
   updateParamsBasedOnContext(params);
   bool success = run(params);
   update_knowledge_base(success, params);
   return success;
 }
 
-bool ExecutorAction::run(std::vector<diagnostic_msgs::KeyValue> &params) {
+bool ExecutorAction::run(std::vector<diagnostic_msgs::KeyValue> &params)
+{
   mir_planning_msgs::GenericExecuteGoal goal;
   goal.parameters = params;
   actionlib::SimpleClientGoalState state =

@@ -22,17 +22,18 @@
 #include <mas_perception_msgs/ObjectList.h>
 #include <mir_perception_utils/bounding_box.h>
 
-namespace mir_perception_utils {
-namespace object {
+namespace mir_perception_utils
+{
+namespace object
+{
 /** \brief Compute 3D bounding box parallel with the plane
  * \param[in] Pointcloud pointer
  * \param[in] Plane normal
  * \param[Out] Generated bounding box
  * \param[out] Bounding box message
  * */
-void get3DBoundingBox(const PointCloud::ConstPtr &cloud,
-                      const Eigen::Vector3f &normal, BoundingBox &bbox,
-                      mas_perception_msgs::BoundingBox &bounding_box_msg);
+void get3DBoundingBox(const PointCloud::ConstPtr &cloud, const Eigen::Vector3f &normal,
+                      BoundingBox &bbox, mas_perception_msgs::BoundingBox &bounding_box_msg);
 
 /** \brief Estimate pose given bounding box
  * \param[in] Bounding box
@@ -53,9 +54,8 @@ void estimatePose(const BoundingBox &box, geometry_msgs::PoseStamped &pose);
  * \param[in] Minimum value of the field z allowed
  * \param[in] Maximum value of the field z allowed
 */
-void estimatePose(const PointCloud::Ptr &xyz_input_cloud,
-                  geometry_msgs::PoseStamped &pose, std::string shape = "None",
-                  float passthrough_lim_min = 0.0060,
+void estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
+                  std::string shape = "None", float passthrough_lim_min = 0.0060,
                   float passthrough_lim_max = 0.0);
 
 /** \brief Transform pose
@@ -65,39 +65,35 @@ void estimatePose(const PointCloud::Ptr &xyz_input_cloud,
  * \param[out] Transformed pose stamped
  * */
 void transformPose(const boost::shared_ptr<tf::TransformListener> tf_listener,
-                   const std::string &target_frame,
-                   const geometry_msgs::PoseStamped &pose,
+                   const std::string &target_frame, const geometry_msgs::PoseStamped &pose,
                    geometry_msgs::PoseStamped &transformed_pose);
 
 /** \brief Convert boundingbox to bounding box ros msg
  * \param[in] BoundingBox bbox
  * \param[out] Bounding box message
  * */
-void convertBboxToMsg(const BoundingBox &bbox,
-                      mas_perception_msgs::BoundingBox &bounding_box_msg);
+void convertBboxToMsg(const BoundingBox &bbox, mas_perception_msgs::BoundingBox &bounding_box_msg);
 
 /** \brief Save pointcloud
  * \param[in] logdir (default="/tmp")
  * \param[in] obj_name (default="unknown")
  * */
-void savePcd(const PointCloud::ConstPtr &pointcloud,
-             std::string log_dir = "/tmp/", std::string obj_name = "unknown");
+void savePcd(const PointCloud::ConstPtr &pointcloud, std::string log_dir = "/tmp/",
+             std::string obj_name = "unknown");
 
 /** \brief Save debug image if debug_mode is enabled
  * \param[in] image with boundix boxes of objects drawn
  * \param[in] raw_image
  * \param[in] logdir (default /tmp)
 */
-void saveCVImage(const cv_bridge::CvImagePtr &cv_image,
-                 std::string log_dir = "/tmp/",
+void saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir = "/tmp/",
                  std::string obj_name = "unknown");
 
 /** \brief Convert sensor_msgs/Image to cv_image
  * \param[in] Sensor_msg/Image
  * \param[out] cv image output
 */
-bool getCVImage(const sensor_msgs::ImageConstPtr &image,
-                cv_bridge::CvImagePtr &cv_image);
+bool getCVImage(const sensor_msgs::ImageConstPtr &image, cv_bridge::CvImagePtr &cv_image);
 }
 }
 

@@ -13,7 +13,8 @@
 #include <string>
 #include <vector>
 
-class KnowledgeUpdater {
+class KnowledgeUpdater
+{
  private:
   static constexpr const char *LOG_NAME = "KNOWLEDGE_UPDATER";
 
@@ -25,21 +26,16 @@ class KnowledgeUpdater {
   ros::ServiceServer re_add_goals_server_;
 
   std::string toUpper(std::string str);
-  bool update_knowledge(
-      uint8_t type, std::string name,
-      std::vector<std::pair<std::string, std::string>> values);
+  bool update_knowledge(uint8_t type, std::string name,
+                        std::vector<std::pair<std::string, std::string>> values);
 
  public:
   KnowledgeUpdater(ros::NodeHandle &nh);
   ~KnowledgeUpdater();
-  bool addGoal(std::string name,
-               std::vector<std::pair<std::string, std::string>> values);
-  bool remGoal(std::string name,
-               std::vector<std::pair<std::string, std::string>> values);
-  bool addKnowledge(std::string name,
-                    std::vector<std::pair<std::string, std::string>> values);
-  bool remKnowledge(std::string name,
-                    std::vector<std::pair<std::string, std::string>> values);
+  bool addGoal(std::string name, std::vector<std::pair<std::string, std::string>> values);
+  bool remGoal(std::string name, std::vector<std::pair<std::string, std::string>> values);
+  bool addKnowledge(std::string name, std::vector<std::pair<std::string, std::string>> values);
+  bool remKnowledge(std::string name, std::vector<std::pair<std::string, std::string>> values);
   bool remGoalsWithObject(std::string object_name);
   bool remGoalsWithLocation(std::string location);
   bool remGoalsRelatedToLocation(std::string location);

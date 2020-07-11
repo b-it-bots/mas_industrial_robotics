@@ -15,7 +15,8 @@
 
 /** This class accumulates input point clouds in the occupancy octree with a
   * given spatial resolution. */
-class CloudAccumulation {
+class CloudAccumulation
+{
  public:
   typedef std::unique_ptr<CloudAccumulation> UPtr;
 

@@ -10,11 +10,10 @@
 #include <mir_pddl_generator_node/pddl_problem_generator_node.h>
 #include <string>
 
-PDDLProblemGeneratorNode::PDDLProblemGeneratorNode()
-    : nh_("~"), is_event_in_received_(false) {
+PDDLProblemGeneratorNode::PDDLProblemGeneratorNode() : nh_("~"), is_event_in_received_(false)
+{
   // subscriptions
-  sub_event_in_ = nh_.subscribe(
-      "event_in", 1, &PDDLProblemGeneratorNode::eventInCallback, this);
+  sub_event_in_ = nh_.subscribe("event_in", 1, &PDDLProblemGeneratorNode::eventInCallback, this);
 
   // publications
   pub_event_out_ = nh_.advertise<std_msgs::String>("event_out", 2);
@@ -24,20 +23,22 @@ PDDLProblemGeneratorNode::PDDLProblemGeneratorNode()
   pddl_problem_generator_ = new PDDLProblemGenerator();
 }
 
-PDDLProblemGeneratorNode::~PDDLProblemGeneratorNode() {
+PDDLProblemGeneratorNode::~PDDLProblemGeneratorNode()
+{
   delete pddl_problem_generator_;
   // shut down publishers and subscribers
   sub_event_in_.shutdown();
   pub_event_out_.shutdown();
 }
 
-void PDDLProblemGeneratorNode::eventInCallback(
-    const std_msgs::String::ConstPtr &msg) {
+void PDDLProblemGeneratorNode::eventInCallback(const std_msgs::String::ConstPtr &msg)
+{
   event_in_msg_ = *msg;
   is_event_in_received_ = true;
 }
 
-void PDDLProblemGeneratorNode::update() {
+void PDDLProblemGeneratorNode::update()
+{
   // listen to callbacks
   ros::spinOnce();
 
@@ -65,7 +66,8 @@ void PDDLProblemGeneratorNode::update() {
   ROS_INFO("Succesfully created PDDL problem from KB snapshot !");
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "pddl_problem_generator");
 
   ROS_INFO("Node is going to initialize...");

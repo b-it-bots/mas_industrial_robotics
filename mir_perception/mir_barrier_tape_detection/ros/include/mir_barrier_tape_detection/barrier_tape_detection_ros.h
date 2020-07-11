@@ -21,23 +21,23 @@
 #include <mir_barrier_tape_detection/BarrierTapeConfig.h>
 #include <mir_barrier_tape_detection/barrier_tape_detection.h>
 
-typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::PointCloud2, sensor_msgs::Image>
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2,
+                                                        sensor_msgs::Image>
     ImageSyncPolicy;
 
-class BarrierTapeDetectionRos {
+class BarrierTapeDetectionRos
+{
  public:
   BarrierTapeDetectionRos(ros::NodeHandle &nh);
   virtual ~BarrierTapeDetectionRos();
-  void dynamicReconfigCallback(
-      mir_barrier_tape_detection::BarrierTapeConfig &config, uint32_t level);
+  void dynamicReconfigCallback(mir_barrier_tape_detection::BarrierTapeConfig &config,
+                               uint32_t level);
   void eventCallback(const std_msgs::String &event_command);
   /**
    * Get 3D pointcloud and RGB image at the same time
    */
-  void synchronizedCallback(
-      const sensor_msgs::PointCloud2::ConstPtr &pointcloud_msg,
-      const sensor_msgs::Image::ConstPtr &rgb_image_msg);
+  void synchronizedCallback(const sensor_msgs::PointCloud2::ConstPtr &pointcloud_msg,
+                            const sensor_msgs::Image::ConstPtr &rgb_image_msg);
   void states();
   void initState();
   void idleState();

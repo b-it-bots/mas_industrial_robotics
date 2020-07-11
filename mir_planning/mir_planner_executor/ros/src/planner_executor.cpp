@@ -18,10 +18,9 @@
 
 //#include <mir_audio_receiver/AudioMessage.h>
 
-PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh)
-    : server_(nh, "execute_plan", false) {
-  server_.registerGoalCallback(
-      boost::bind(&PlannerExecutor::executeCallback, this));
+PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh) : server_(nh, "execute_plan", false)
+{
+  server_.registerGoalCallback(boost::bind(&PlannerExecutor::executeCallback, this));
   server_.start();
 
   ros::NodeHandle private_nh("~");
@@ -42,16 +41,15 @@ PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh)
 }
 
 PlannerExecutor::~PlannerExecutor() {}
-
-void PlannerExecutor::addActionExecutor(std::string name,
-                                        BaseExecutorAction *action) {
+void PlannerExecutor::addActionExecutor(std::string name, BaseExecutorAction *action)
+{
   actions_[toUpper(name)] = action;
   action->initialize(knowledge_updater_);
 }
 
-void PlannerExecutor::executeCallback() {
-  const mir_planning_msgs::ExecutePlanGoalConstPtr &msg_goal =
-      server_.acceptNewGoal();
+void PlannerExecutor::executeCallback()
+{
+  const mir_planning_msgs::ExecutePlanGoalConstPtr &msg_goal = server_.acceptNewGoal();
   const rosplan_dispatch_msgs::CompletePlan &plan = msg_goal->plan;
   const std::vector<rosplan_dispatch_msgs::ActionDispatch> &actions = plan.plan;
   ROS_INFO("Got plan, %d actions", (unsigned int)actions.size());
@@ -96,8 +94,7 @@ void PlannerExecutor::executeCallback() {
     bool res = executor->execute(action_name, params);
 
     if (!res) {
-      ROS_WARN("\nAction \"%s\" failed, abort plan execution\n",
-               action_name.c_str());
+      ROS_WARN("\nAction \"%s\" failed, abort plan execution\n", action_name.c_str());
       mir_planning_msgs::ExecutePlanResult msg_result;
       msg_result.success = false;
       server_.setAborted(msg_result);
@@ -111,8 +108,8 @@ void PlannerExecutor::executeCallback() {
   server_.setSucceeded(msg_result);
 }
 
-bool PlannerExecutor::checkPlan(
-    const rosplan_dispatch_msgs::CompletePlan &plan) {
+bool PlannerExecutor::checkPlan(const rosplan_dispatch_msgs::CompletePlan &plan)
+{
   const std::vector<rosplan_dispatch_msgs::ActionDispatch> &actions = plan.plan;
   for (auto const &action : actions) {
     std::string action_name = toUpper(action.name);
@@ -127,8 +124,9 @@ bool PlannerExecutor::checkPlan(
   return true;
 }
 
-void PlannerExecutor::announceAction(
-    std::string action_name, std::vector<diagnostic_msgs::KeyValue> params) {
+void PlannerExecutor::announceAction(std::string action_name,
+                                     std::vector<diagnostic_msgs::KeyValue> params)
+{
   /* announce action with text */
   std::cout << std::endl << std::endl << std::endl << std::endl << std::endl;
   ROS_INFO("Executing action \"%s\"", action_name.c_str());
@@ -146,16 +144,19 @@ void PlannerExecutor::announceAction(
   audio_publisher_.publish(audio_msg); */
 }
 
-std::string PlannerExecutor::toUpper(std::string str) {
+std::string PlannerExecutor::toUpper(std::string str)
+{
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
   return str;
 }
 
-BaseExecutorAction *PlannerExecutor::getActionExecutor(std::string &name) {
+BaseExecutorAction *PlannerExecutor::getActionExecutor(std::string &name)
+{
   return actions_[toUpper(name)];
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "planner_executor");
 
   ros::NodeHandle nh;

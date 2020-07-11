@@ -13,23 +13,21 @@
 #include <mir_planning_msgs/GenericExecuteAction.h>
 #include <vector>
 
-class ExecutorAction : public BaseExecutorAction {
+class ExecutorAction : public BaseExecutorAction
+{
  private:
  protected:
-  actionlib::SimpleActionClient<mir_planning_msgs::GenericExecuteAction>
-      client_;
+  actionlib::SimpleActionClient<mir_planning_msgs::GenericExecuteAction> client_;
   KnowledgeUpdater *knowledge_updater_;
 
   ExecutorAction(std::string server_topic) : client_(server_topic){};
 
   virtual bool run(std::vector<diagnostic_msgs::KeyValue> &params);
-  virtual void update_knowledge_base(
-      bool success, std::vector<diagnostic_msgs::KeyValue> &params) = 0;
-  virtual void updateParamsBasedOnContext(
-      std::vector<diagnostic_msgs::KeyValue> &params) = 0;
+  virtual void update_knowledge_base(bool success,
+                                     std::vector<diagnostic_msgs::KeyValue> &params) = 0;
+  virtual void updateParamsBasedOnContext(std::vector<diagnostic_msgs::KeyValue> &params) = 0;
 
  public:
-  bool execute(std::string &name,
-               std::vector<diagnostic_msgs::KeyValue> &params) override;
+  bool execute(std::string &name, std::vector<diagnostic_msgs::KeyValue> &params) override;
   void initialize(KnowledgeUpdater *knowledge_updater) override;
 };

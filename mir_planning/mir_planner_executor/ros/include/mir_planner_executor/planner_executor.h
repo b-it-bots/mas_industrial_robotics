@@ -17,7 +17,8 @@
 #include <string>
 #include <vector>
 
-class PlannerExecutor {
+class PlannerExecutor
+{
  private:
   actionlib::SimpleActionServer<mir_planning_msgs::ExecutePlanAction> server_;
 
@@ -27,8 +28,7 @@ class PlannerExecutor {
 
   std::map<std::string, BaseExecutorAction *> actions_;
 
-  void announceAction(std::string action_name,
-                      std::vector<diagnostic_msgs::KeyValue> params);
+  void announceAction(std::string action_name, std::vector<diagnostic_msgs::KeyValue> params);
 
   BaseExecutorAction *getActionExecutor(std::string &name);
 

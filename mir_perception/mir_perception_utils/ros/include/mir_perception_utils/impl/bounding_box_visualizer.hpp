@@ -7,40 +7,37 @@
 
 using mir_perception_utils::visualization::Color;
 
-namespace mir_perception_utils {
-
-namespace visualization {
-
-BoundingBoxVisualizer::BoundingBoxVisualizer(ros::NodeHandle *nh,
-                                             const std::string &topic_name,
-                                             Color color,
-                                             bool check_subscribers)
-    : color_(color), check_subscribers_(check_subscribers) {
+namespace mir_perception_utils
+{
+namespace visualization
+{
+BoundingBoxVisualizer::BoundingBoxVisualizer(ros::NodeHandle *nh, const std::string &topic_name,
+                                             Color color, bool check_subscribers)
+    : color_(color), check_subscribers_(check_subscribers)
+{
   marker_publisher_ = nh->advertise<visualization_msgs::Marker>(topic_name, 10);
 }
 
-BoundingBoxVisualizer::BoundingBoxVisualizer(const std::string &topic_name,
-                                             Color color,
+BoundingBoxVisualizer::BoundingBoxVisualizer(const std::string &topic_name, Color color,
                                              bool check_subscribers)
-    : color_(color), check_subscribers_(check_subscribers) {
+    : color_(color), check_subscribers_(check_subscribers)
+{
   ros::NodeHandle nh("~");
   marker_publisher_ = nh.advertise<visualization_msgs::Marker>(topic_name, 10);
 }
 
-int BoundingBoxVisualizer::getNumSubscribers() {
-  return marker_publisher_.getNumSubscribers();
-}
-
+int BoundingBoxVisualizer::getNumSubscribers() { return marker_publisher_.getNumSubscribers(); }
 void BoundingBoxVisualizer::publish(const mas_perception_msgs::BoundingBox &box,
-                                    const std::string &frame_id) {
+                                    const std::string &frame_id)
+{
   std::vector<mas_perception_msgs::BoundingBox> boxes;
   boxes.push_back(box);
   publish(boxes, frame_id);
 }
 
-void BoundingBoxVisualizer::publish(
-    const std::vector<mas_perception_msgs::BoundingBox> &boxes,
-    const std::string &frame_id) {
+void BoundingBoxVisualizer::publish(const std::vector<mas_perception_msgs::BoundingBox> &boxes,
+                                    const std::string &frame_id)
+{
   if (check_subscribers_ && marker_publisher_.getNumSubscribers() == 0) return;
   visualization_msgs::Marker lines;
   lines.header.frame_id = frame_id;

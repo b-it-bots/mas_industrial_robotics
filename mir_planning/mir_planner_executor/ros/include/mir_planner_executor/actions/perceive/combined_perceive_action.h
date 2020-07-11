@@ -10,7 +10,8 @@
 #include <mir_planner_executor/actions/base_executor_action.h>
 #include <mir_planner_executor/actions/executor_action.h>
 
-class CombinedPerceiveAction : public BaseExecutorAction {
+class CombinedPerceiveAction : public BaseExecutorAction
+{
  private:
   ExecutorAction *default_perceive_;
   ExecutorAction *cavity_perceive_;
@@ -18,6 +19,5 @@ class CombinedPerceiveAction : public BaseExecutorAction {
  public:
   CombinedPerceiveAction();
   void initialize(KnowledgeUpdater *knowledge_updater) override;
-  bool execute(std::string &name,
-               std::vector<diagnostic_msgs::KeyValue> &params) override;
+  bool execute(std::string &name, std::vector<diagnostic_msgs::KeyValue> &params) override;
 };

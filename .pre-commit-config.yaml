@@ -24,12 +24,18 @@ repos:
                 entry: pylint --verbose --jobs 4
                 language_version: python3.7
 
+    -   repo: https://github.com/pocc/pre-commit-hooks
+        rev: python
+        hooks:
+            -   id: clang-format
+                language_version: python3.7
+
     -   repo: https://github.com/bmorcos/pre-commit-hooks-cpp
         rev: master
         hooks:
-            -   id: clang-format
-            -   id: cpplint
+            # -   id: cpplint
             -   id: cppcheck
+
 
     -   repo: https://github.com/pre-commit/pre-commit-hooks
         rev: v2.5.0

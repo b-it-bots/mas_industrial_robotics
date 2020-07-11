@@ -1,11 +1,9 @@
 #include <mir_barrier_tape_detection/barrier_tape_detection.h>
 
 BarrierTapeDetection::BarrierTapeDetection() {}
-
 BarrierTapeDetection::~BarrierTapeDetection() {}
-
-void BarrierTapeDetection::preprocessImage(const cv::Mat &input_img,
-                                           cv::Mat &output_img) {
+void BarrierTapeDetection::preprocessImage(const cv::Mat &input_img, cv::Mat &output_img)
+{
   cv::Mat hsv_img;
   cv::Mat filtered_img;
 
@@ -16,7 +14,8 @@ void BarrierTapeDetection::preprocessImage(const cv::Mat &input_img,
 
 bool BarrierTapeDetection::detectBarrierTape(
     const cv::Mat &input_img, cv::Mat &output_img,
-    std::vector<std::vector<std::vector<int>>> &barrier_tape_pts) {
+    std::vector<std::vector<std::vector<int>>> &barrier_tape_pts)
+{
   cv::Mat preprocessed_img;
   cv::Mat edge_img;
   cv::RotatedRect box;
@@ -27,13 +26,11 @@ bool BarrierTapeDetection::detectBarrierTape(
   preprocessImage(input_img, preprocessed_img);
 
   if (is_debug_mode_) {
-    output_img =
-        cv::Mat::zeros(preprocessed_img.size(), preprocessed_img.type());
+    output_img = cv::Mat::zeros(preprocessed_img.size(), preprocessed_img.type());
   }
 
   cv::Canny(preprocessed_img, edge_img, 50, 100);
-  cv::findContours(edge_img, contours, cv::RETR_EXTERNAL,
-                   cv::CHAIN_APPROX_SIMPLE);
+  cv::findContours(edge_img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
   for (int i = 0; i < contours.size(); i++) {
     std::vector<int> barrier_tape_box_center;
@@ -71,18 +68,17 @@ bool BarrierTapeDetection::detectBarrierTape(
   return has_detected_barrier_tape;
 }
 
-void BarrierTapeDetection::updateDynamicVariables(
-    bool debug_mode, double min_area, int color_thresh_min_h,
-    int color_thresh_min_s, int color_thresh_min_v, int color_thresh_max_h,
-    int color_thresh_max_s, int color_thresh_max_v) {
+void BarrierTapeDetection::updateDynamicVariables(bool debug_mode, double min_area,
+                                                  int color_thresh_min_h, int color_thresh_min_s,
+                                                  int color_thresh_min_v, int color_thresh_max_h,
+                                                  int color_thresh_max_s, int color_thresh_max_v)
+{
   is_debug_mode_ = debug_mode;
   min_area_ = min_area;
   // convert the given HSV threshold from the standard (360, 100, 100) range to
   // the (180, 255, 255) opencv range
   color_thresh_min_ =
-      cv::Scalar(color_thresh_min_h * 0.5, color_thresh_min_s * 2.55,
-                 color_thresh_min_v * 2.55);
+      cv::Scalar(color_thresh_min_h * 0.5, color_thresh_min_s * 2.55, color_thresh_min_v * 2.55);
   color_thresh_max_ =
-      cv::Scalar(color_thresh_max_h * 0.5, color_thresh_max_s * 2.55,
-                 color_thresh_max_v * 2.55);
+      cv::Scalar(color_thresh_max_h * 0.5, color_thresh_max_s * 2.55, color_thresh_max_v * 2.55);
 }

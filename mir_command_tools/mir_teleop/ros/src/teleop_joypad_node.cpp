@@ -9,7 +9,8 @@
 
 #include "mir_teleop/teleop_joypad.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "teleop_joypad");
   ros::NodeHandle nh("~");
 

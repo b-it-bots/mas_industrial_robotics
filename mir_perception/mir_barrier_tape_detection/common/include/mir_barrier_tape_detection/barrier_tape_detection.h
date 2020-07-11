@@ -4,7 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
-class BarrierTapeDetection {
+class BarrierTapeDetection
+{
  public:
   BarrierTapeDetection();
   virtual ~BarrierTapeDetection();
@@ -16,16 +17,15 @@ class BarrierTapeDetection {
    * Canny edge detection, contour detection, filter contours within certain
    * area range
    */
-  bool detectBarrierTape(
-      const cv::Mat &input_img, cv::Mat &output_img,
-      std::vector<std::vector<std::vector<int>>> &barrier_tape_pts);
+  bool detectBarrierTape(const cv::Mat &input_img, cv::Mat &output_img,
+                         std::vector<std::vector<std::vector<int>>> &barrier_tape_pts);
   /**
    * Set thresholds for min and max HSV values and min area of contours
    */
-  void updateDynamicVariables(bool debug_mode, double min_area,
-                              int color_thresh_min_h, int color_thresh_min_s,
-                              int color_thresh_min_v, int color_thresh_max_h,
-                              int color_thresh_max_s, int color_thresh_max_v);
+  void updateDynamicVariables(bool debug_mode, double min_area, int color_thresh_min_h,
+                              int color_thresh_min_s, int color_thresh_min_v,
+                              int color_thresh_max_h, int color_thresh_max_s,
+                              int color_thresh_max_v);
 
  private:
   /**

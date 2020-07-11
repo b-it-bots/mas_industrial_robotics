@@ -4,7 +4,8 @@
 
 #include <mir_navigation_msgs/OrientToBaseAction.h>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "base_orientation_Test");
 
   actionlib::SimpleActionClient<mir_navigation_msgs::OrientToBaseAction> ac(

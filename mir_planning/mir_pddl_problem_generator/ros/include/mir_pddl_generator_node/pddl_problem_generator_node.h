@@ -17,7 +17,8 @@
 
 #include <mir_pddl_generator_node/pddl_problem_generator.h>
 
-class PDDLProblemGeneratorNode {
+class PDDLProblemGeneratorNode
+{
  public:
   PDDLProblemGeneratorNode();
   ~PDDLProblemGeneratorNode();

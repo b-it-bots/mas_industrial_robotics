@@ -12,23 +12,25 @@
 
 using mir_perception_utils::visualization::Color;
 
-namespace mir_perception_utils {
-
-namespace visualization {
-
+namespace mir_perception_utils
+{
+namespace visualization
+{
 ClusteredPointCloudVisualizer::ClusteredPointCloudVisualizer(
     const boost::shared_ptr<ros::NodeHandle> &nh, const std::string &topic_name,
     bool check_subscribers)
-    : check_subscribers_(check_subscribers) {
+    : check_subscribers_(check_subscribers)
+{
   cloud_publisher_ = nh->advertise<sensor_msgs::PointCloud2>(topic_name, 1);
   for (size_t i = 0; i < COLORS_NUM; ++i) {
     COLORS[i] = 1.0f * rand() / RAND_MAX;
   }
 }
 
-ClusteredPointCloudVisualizer::ClusteredPointCloudVisualizer(
-    const std::string &topic_name, bool check_subscribers)
-    : check_subscribers_(check_subscribers) {
+ClusteredPointCloudVisualizer::ClusteredPointCloudVisualizer(const std::string &topic_name,
+                                                             bool check_subscribers)
+    : check_subscribers_(check_subscribers)
+{
   ros::NodeHandle nh("~");
   cloud_publisher_ = nh.advertise<sensor_msgs::PointCloud2>(topic_name, 1);
   for (size_t i = 0; i < COLORS_NUM; ++i) {
@@ -36,14 +38,15 @@ ClusteredPointCloudVisualizer::ClusteredPointCloudVisualizer(
   }
 }
 
-int ClusteredPointCloudVisualizer::getNumSubscribers() {
+int ClusteredPointCloudVisualizer::getNumSubscribers()
+{
   return cloud_publisher_.getNumSubscribers();
 }
 
 template <typename PointT>
 void ClusteredPointCloudVisualizer::publish(
-    const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
-    const std::string &frame_id) {
+    const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters, const std::string &frame_id)
+{
   if (cloud_publisher_.getNumSubscribers() == 0) return;
   pcl::PointCloud<pcl::PointXYZRGB> composite;
   size_t color = 0;

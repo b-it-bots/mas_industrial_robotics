@@ -17,20 +17,19 @@
 
 using mir_perception_utils::visualization::Color;
 
-namespace mir_perception_utils {
-
-namespace visualization {
-
-class LabelVisualizer {
+namespace mir_perception_utils
+{
+namespace visualization
+{
+class LabelVisualizer
+{
  public:
-  LabelVisualizer(const ros::NodeHandle &nh, const std::string &topic_name,
-                  Color color, bool check_subscribers = true);
-
-  LabelVisualizer(const std::string &topic_name, Color color,
+  LabelVisualizer(const ros::NodeHandle &nh, const std::string &topic_name, Color color,
                   bool check_subscribers = true);
 
-  void publish(const std::vector<std::string> &labels,
-               const geometry_msgs::PoseArray &poses);
+  LabelVisualizer(const std::string &topic_name, Color color, bool check_subscribers = true);
+
+  void publish(const std::vector<std::string> &labels, const geometry_msgs::PoseArray &poses);
 
   int getNumSubscribers();
 

@@ -3,7 +3,8 @@
 #include "misc.h"
 
 // initialize the adc
-void adc_init(void) {
+void adc_init(void)
+{
   // left adjust data in register
   SETBIT1(ADMUX, ADLAR);
   // AVcc as reference
@@ -19,17 +20,14 @@ void adc_init(void) {
 
 // set adc pin
 void adc_select(uint8_t pin) { ADMUX = (ADMUX & 0xF0) | (pin & 0x0F); }
-
 // start adc conversion
 void adc_start(void) { SETBIT1(ADCSRA, ADSC); }
-
 // is conversion running
 char adc_running(void) { return GETBIT(ADCSRA, ADSC); }
-
 // read adc value
 uint8_t adc_value(void) { return ADCH; }
-
-uint8_t adc_read(uint8_t pin) {
+uint8_t adc_read(uint8_t pin)
+{
   adc_select(pin);
   adc_start();
   while (adc_running()) {

@@ -7,6 +7,7 @@
 
 #include <mir_planner_executor/actions/insert/insert_action.h>
 
-InsertAction::InsertAction() : BaseInsertAction("/insert_object_server") {
+InsertAction::InsertAction() : BaseInsertAction("/insert_object_server")
+{
   // client_.waitForServer();
 }

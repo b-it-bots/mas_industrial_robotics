@@ -31,7 +31,8 @@
 
 #define MAX_JOYPAD 1.0
 
-class TeleOpJoypad {
+class TeleOpJoypad
+{
  public:
   explicit TeleOpJoypad(ros::NodeHandle &nh);
 
@@ -45,8 +46,7 @@ class TeleOpJoypad {
 
   void cbJoypad(const sensor_msgs::Joy::ConstPtr &command);
   void cbJointStates(const sensor_msgs::JointState::ConstPtr &state_msg);
-  void cbDynamicReconfigure(mir_teleop::TeleopJoypadConfig &config,
-                            uint32_t level);
+  void cbDynamicReconfigure(mir_teleop::TeleopJoypadConfig &config, uint32_t level);
   void setAllArmJointVel(double motor_vel);
   void setSingleArmJointVel(double motor_vel, std::string joint_name);
   void checkArmJointLimits();
@@ -55,8 +55,7 @@ class TeleOpJoypad {
   ros::NodeHandle *nh_;
 
   dynamic_reconfigure::Server<mir_teleop::TeleopJoypadConfig> dyn_recfg_server;
-  dynamic_reconfigure::Server<mir_teleop::TeleopJoypadConfig>::CallbackType
-      dyn_recfg_cb;
+  dynamic_reconfigure::Server<mir_teleop::TeleopJoypadConfig>::CallbackType dyn_recfg_cb;
 
   mir_teleop::TeleopJoypadConfig teleop_config_;
 

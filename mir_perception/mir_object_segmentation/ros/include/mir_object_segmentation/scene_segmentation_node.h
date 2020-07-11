@@ -49,7 +49,8 @@ using mpu::visualization::ClusteredPointCloudVisualizer;
 using mpu::visualization::LabelVisualizer;
 using mpu::visualization::Color;
 
-class SceneSegmentationNode {
+class SceneSegmentationNode
+{
  public:
   SceneSegmentationNode();
   virtual ~SceneSegmentationNode();
@@ -64,8 +65,7 @@ class SceneSegmentationNode {
   ros::Subscriber sub_cloud_;
   ros::Subscriber sub_event_in_;
 
-  dynamic_reconfigure::Server<mir_object_segmentation::SceneSegmentationConfig>
-      server_;
+  dynamic_reconfigure::Server<mir_object_segmentation::SceneSegmentationConfig> server_;
 
   boost::shared_ptr<tf::TransformListener> tf_listener_;
 
@@ -88,8 +88,7 @@ class SceneSegmentationNode {
  private:
   void pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg);
   void eventCallback(const std_msgs::String::ConstPtr &msg);
-  void configCallback(mir_object_segmentation::SceneSegmentationConfig &config,
-                      uint32_t level);
+  void configCallback(mir_object_segmentation::SceneSegmentationConfig &config, uint32_t level);
 
   /** \brief Segment accumulated pointcloud, find the plane,
    *         clusters table top objects, find object heights, and publish them.

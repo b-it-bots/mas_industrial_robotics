@@ -8,12 +8,14 @@
 #include <mir_planner_executor/actions/place/place_action.h>
 #include <utility>
 
-PlaceAction::PlaceAction() : ExecutorAction("/place_object_server") {
+PlaceAction::PlaceAction() : ExecutorAction("/place_object_server")
+{
   // client_.waitForServer();
 }
 
-void PlaceAction::update_knowledge_base(
-    bool success, std::vector<diagnostic_msgs::KeyValue> &params) {
+void PlaceAction::update_knowledge_base(bool success,
+                                        std::vector<diagnostic_msgs::KeyValue> &params)
+{
   std::string robot = getValueOf(params, "robot_name");
   std::string location = getValueOf(params, "location");
   std::string object = getValueOf(params, "object");
@@ -30,8 +32,8 @@ void PlaceAction::update_knowledge_base(
   }
 }
 
-void PlaceAction::updateParamsBasedOnContext(
-    std::vector<diagnostic_msgs::KeyValue> &params) {
+void PlaceAction::updateParamsBasedOnContext(std::vector<diagnostic_msgs::KeyValue> &params)
+{
   int location_index = getIndexOf(params, "param_1");
   int object_index = getIndexOf(params, "param_2");
   if (location_index > 0) {

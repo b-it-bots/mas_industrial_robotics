@@ -14,8 +14,8 @@ extern "C" {
   *
   * @param transform : pointer to an array of 6 floats, which will be filled
   * with x, y, z, roll, pitch, and yaw of the estimated transform. */
-void estimateTransformation(float *a, float *b, int point_count,
-                            float *transform) {
+void estimateTransformation(float *a, float *b, int point_count, float *transform)
+{
   pcl::PointCloud<pcl::PointXYZ> A, B;
   for (int i = 0; i < point_count; i++) {
     pcl::PointXYZ pa{a[i * 3], a[i * 3 + 1], a[i * 3 + 2]};
@@ -24,8 +24,7 @@ void estimateTransformation(float *a, float *b, int point_count,
     B.push_back(pb);
   }
   Eigen::Matrix4f t;
-  pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>
-      te;
+  pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ> te;
   te.estimateRigidTransformation(A, B, t);
   Eigen::Transform<float, 3, Eigen::Affine> ta(t);
   Eigen::Vector3f rpy = ta.rotation().eulerAngles(0, 1, 2);

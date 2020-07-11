@@ -7,12 +7,13 @@
 
 #include <mir_planner_executor/actions/move/move_action.h>
 
-MoveAction::MoveAction() : ExecutorAction("/move_base_safe_server") {
+MoveAction::MoveAction() : ExecutorAction("/move_base_safe_server")
+{
   // client_.waitForServer();
 }
 
-void MoveAction::update_knowledge_base(
-    bool success, std::vector<diagnostic_msgs::KeyValue> &params) {
+void MoveAction::update_knowledge_base(bool success, std::vector<diagnostic_msgs::KeyValue> &params)
+{
   std::string robot = getValueOf(params, "robot_name");
   std::string from = getValueOf(params, "source_location");
   std::string to = getValueOf(params, "destination_location");
@@ -31,9 +32,8 @@ void MoveAction::update_knowledge_base(
     ROS_WARN("Move to location \"%s\" failed %d times", to.c_str(), count);
     if (count > N) {
       knowledge_updater_->remGoalsRelatedToLocation(to);
-      ROS_WARN(
-          "Move failed %d times, remove goals with object from location \"%s\"",
-          count, to.c_str());
+      ROS_WARN("Move failed %d times, remove goals with object from location \"%s\"", count,
+               to.c_str());
       failure_count_[to] = 0;
     } else {
       failure_count_[to] = count;
@@ -41,8 +41,8 @@ void MoveAction::update_knowledge_base(
   }
 }
 
-void MoveAction::updateParamsBasedOnContext(
-    std::vector<diagnostic_msgs::KeyValue> &params) {
+void MoveAction::updateParamsBasedOnContext(std::vector<diagnostic_msgs::KeyValue> &params)
+{
   int from_index = getIndexOf(params, "param_1");
   int to_index = getIndexOf(params, "param_2");
   if (from_index > 0) {

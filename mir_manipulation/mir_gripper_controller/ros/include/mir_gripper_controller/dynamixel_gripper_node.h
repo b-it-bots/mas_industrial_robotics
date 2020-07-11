@@ -24,7 +24,8 @@
 #include <std_msgs/Float64.h>
 #include <string>
 
-class DynamixelGripperNode {
+class DynamixelGripperNode
+{
  public:
   explicit DynamixelGripperNode(ros::NodeHandle &nh);
   ~DynamixelGripperNode();
@@ -33,8 +34,7 @@ class DynamixelGripperNode {
   ros::Duration wait_duration_;
 
   void jointStatesCallback(const dynamixel_msgs::JointState::Ptr &msg);
-  void gripperCommandCallback(
-      const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
+  void gripperCommandCallback(const mcr_manipulation_msgs::GripperCommand::Ptr &msg);
   void followJointTrajectoryGoalCallback();
   void gripperCommandGoalCallback();
 
@@ -47,8 +47,7 @@ class DynamixelGripperNode {
   ros::Subscriber sub_dynamixel_motor_states_;
   ros::Subscriber sub_gripper_command_;
 
-  actionlib::SimpleActionServer<control_msgs::GripperCommandAction>
-      gripper_action_server_;
+  actionlib::SimpleActionServer<control_msgs::GripperCommandAction> gripper_action_server_;
   control_msgs::GripperCommandFeedback gripper_feedback_;
   control_msgs::GripperCommandResult gripper_result_;
 

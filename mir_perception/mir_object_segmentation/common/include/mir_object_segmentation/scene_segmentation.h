@@ -28,7 +28,8 @@
 
 using namespace mir_perception_utils::object;
 
-class SceneSegmentation {
+class SceneSegmentation
+{
  private:
   pcl::PassThrough<PointT> pass_through_;
   pcl::VoxelGrid<PointT> voxel_grid_;
@@ -59,17 +60,15 @@ class SceneSegmentation {
   PointCloud::Ptr segmentScene(const PointCloud::ConstPtr &cloud,
                                std::vector<PointCloud::Ptr> &clusters,
                                std::vector<BoundingBox> &boxes,
-                               pcl::ModelCoefficients::Ptr &coefficients,
-                               double &workspace_height);
+                               pcl::ModelCoefficients::Ptr &coefficients, double &workspace_height);
   /** \brief Find plane
    * \param[in] Point cloud
    * \param[out] Convex hull
    * \param[out] Model coefficients
    * \param[out] Workspace height
    * */
-  PointCloud::Ptr findPlane(const PointCloud::ConstPtr &cloud,
-                            PointCloud::Ptr &hull, PointCloud::Ptr &plane,
-                            pcl::ModelCoefficients::Ptr &coefficients,
+  PointCloud::Ptr findPlane(const PointCloud::ConstPtr &cloud, PointCloud::Ptr &hull,
+                            PointCloud::Ptr &plane, pcl::ModelCoefficients::Ptr &coefficients,
                             double &workspace_height);
 
   /** \brief Set voxel grid parameters
@@ -78,25 +77,23 @@ class SceneSegmentation {
    * \param[in] The minimum allowed the field value
    * \param[in] The maximum allowed the field value
    * */
-  void setVoxelGridParams(double leaf_size, const std::string &field_name,
-                          double limit_min, double limit_max);
+  void setVoxelGridParams(double leaf_size, const std::string &field_name, double limit_min,
+                          double limit_max);
   /** \brief Set passthrough filter parameters
    * \param[in] Enable or disable passthrough filter
    * \param[in] Field name, on which axis the filter will be applied
    * \param[in] The minimum allowed the field value
    * \param[in] The maximum allowed the field value
    * */
-  void setPassthroughParams(bool enable_passthrough_filter,
-                            const std::string &field_name, double limit_min,
-                            double limit_max);
+  void setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name,
+                            double limit_min, double limit_max);
   /** \brief Set Normal param using radius
    * \param[in] Radius search
    * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu
    * (default False)
    * \param[in] Number of cores to use for computing normal with OMP (default=4)
    * */
-  void setNormalParams(double radius_search, bool use_omp = false,
-                       int num_cores = 4);
+  void setNormalParams(double radius_search, bool use_omp = false, int num_cores = 4);
   /** \brief Set SAC parameters
    * \param[in] The maximum number of iterations the algorithm will run for
    * \param[in] The distance to model threshold
@@ -107,9 +104,8 @@ class SceneSegmentation {
    * \param[in] The relative weight (between 0 and 1) to give to the angular
    * distance (0 to pi/2) between point normals and the plane normal.
    * */
-  void setSACParams(int max_iterations, double distance_threshold,
-                    bool optimize_coefficients, Eigen::Vector3f axis,
-                    double eps_angle, double normal_distance_weight);
+  void setSACParams(int max_iterations, double distance_threshold, bool optimize_coefficients,
+                    Eigen::Vector3f axis, double eps_angle, double normal_distance_weight);
   /** \brief Set prism parameters
    * \param[in] The minimum height above the plane from which to construct the
    * polygonal prism
@@ -135,9 +131,8 @@ class SceneSegmentation {
    * \param[in] The maximum length of the cluster
    * \param[in] The minimum height of the cluster above the given polygon
    * */
-  void setClusterParams(double cluster_tolerance, int cluster_min_size,
-                        int cluster_max_size, double cluster_min_height,
-                        double cluster_max_height, double max_length,
+  void setClusterParams(double cluster_tolerance, int cluster_min_size, int cluster_max_size,
+                        double cluster_min_height, double cluster_max_height, double max_length,
                         double cluster_min_distance_to_polygon);
 
  private:

@@ -1,24 +1,22 @@
 #ifndef PLANAR_POLYGON_VISUALIZER_HPP
 #define PLANAR_POLYGON_VISUALIZER_HPP
 
-namespace mir_perception_utils {
-
-namespace visualization {
-
-PlanarPolygonVisualizer::PlanarPolygonVisualizer(const std::string &topic_name,
-                                                 Color color,
-                                                 bool check_subscribers,
-                                                 double thickness)
-    : color_(color),
-      check_subscribers_(check_subscribers),
-      thickness_(thickness) {
+namespace mir_perception_utils
+{
+namespace visualization
+{
+PlanarPolygonVisualizer::PlanarPolygonVisualizer(const std::string &topic_name, Color color,
+                                                 bool check_subscribers, double thickness)
+    : color_(color), check_subscribers_(check_subscribers), thickness_(thickness)
+{
   ros::NodeHandle nh("~");
   marker_publisher_ = nh.advertise<visualization_msgs::Marker>(topic_name, 1);
 }
 
 template <typename PointT>
 void PlanarPolygonVisualizer::publish(const pcl::PlanarPolygon<PointT> &polygon,
-                                      const std::string &frame_id) {
+                                      const std::string &frame_id)
+{
   if (marker_publisher_.getNumSubscribers() == 0) return;
   visualization_msgs::Marker marker;
   buildPolygonMarker<PointT>(polygon.getContour(), marker, frame_id);
@@ -27,8 +25,9 @@ void PlanarPolygonVisualizer::publish(const pcl::PlanarPolygon<PointT> &polygon,
 
 template <typename PointT>
 void PlanarPolygonVisualizer::buildPolygonMarker(
-    const typename pcl::PointCloud<PointT>::VectorType &points,
-    visualization_msgs::Marker &marker, const std::string &frame_id, int id) {
+    const typename pcl::PointCloud<PointT>::VectorType &points, visualization_msgs::Marker &marker,
+    const std::string &frame_id, int id)
+{
   if (!points.size()) return;
 
   marker.type = visualization_msgs::Marker::LINE_LIST;

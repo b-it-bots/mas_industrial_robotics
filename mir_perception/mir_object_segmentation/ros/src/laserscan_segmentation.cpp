@@ -4,18 +4,18 @@
 #include <mir_object_segmentation/laserscan_segmentation.h>
 #include <vector>
 
-LaserScanSegmentation::LaserScanSegmentation(
-    double dThresholdDistanceBetweenAdajecentPoints,
-    unsigned int unMinimumPointsPerSegment) {
-  this->_dThresholdDistanceBetweenAdajecentPoints =
-      dThresholdDistanceBetweenAdajecentPoints;
+LaserScanSegmentation::LaserScanSegmentation(double dThresholdDistanceBetweenAdajecentPoints,
+                                             unsigned int unMinimumPointsPerSegment)
+{
+  this->_dThresholdDistanceBetweenAdajecentPoints = dThresholdDistanceBetweenAdajecentPoints;
   this->_unMinimumPointsPerSegment = unMinimumPointsPerSegment;
 }
 
 LaserScanSegmentation::~LaserScanSegmentation() = default;
 
 mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
-    const sensor_msgs::LaserScan::ConstPtr &inputScan, bool store_data_points) {
+    const sensor_msgs::LaserScan::ConstPtr &inputScan, bool store_data_points)
+{
   mas_perception_msgs::LaserScanSegmentList segments;
   std::vector<geometry_msgs::Point> data_points;
 
@@ -23,9 +23,8 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
   unsigned int unSegmentStartPoint = 0;
   unsigned int unSegmentEndPoint = 0;
 
-  auto scan_size =
-      static_cast<uint32_t>(ceil((inputScan->angle_max - inputScan->angle_min) /
-                                 inputScan->angle_increment));
+  auto scan_size = static_cast<uint32_t>(
+      ceil((inputScan->angle_max - inputScan->angle_min) / inputScan->angle_increment));
 
   if (scan_size == 0) return segments;
 
@@ -38,8 +37,7 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
 
     double dAngleCur = inputScan->angle_min + (i * inputScan->angle_increment);
     double dDistanceCur = inputScan->ranges[i];
-    double dAngleNext =
-        inputScan->angle_min + ((i + 1) * inputScan->angle_increment);
+    double dAngleNext = inputScan->angle_min + ((i + 1) * inputScan->angle_increment);
     double dDistanceNext = inputScan->ranges[i + 1];
 
     if (store_data_points) {
@@ -49,8 +47,7 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
       data_points.push_back(cur_point);
     }
 
-    if ((getEuclideanDistance(dDistanceCur, dAngleCur, dDistanceNext,
-                              dAngleNext) >
+    if ((getEuclideanDistance(dDistanceCur, dAngleCur, dDistanceNext, dAngleNext) >
          this->_dThresholdDistanceBetweenAdajecentPoints) ||
         (i == (scan_size - 2))) {
       if (i < (scan_size - 2))
@@ -60,13 +57,10 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
 
       // if number of points between start and end point is lesser then 3 , it
       // is not a segment
-      if (dNumberofPointsBetweenStartAndEnd >=
-          this->_unMinimumPointsPerSegment) {
+      if (dNumberofPointsBetweenStartAndEnd >= this->_unMinimumPointsPerSegment) {
         geometry_msgs::Point centerPoint;
-        centerPoint = getCenterOfGravity(unSegmentStartPoint, unSegmentEndPoint,
-                                         inputScan);
-        double dDistanceToSegment =
-            sqrt(pow(centerPoint.x, 2.0) + pow(centerPoint.y, 2.0));
+        centerPoint = getCenterOfGravity(unSegmentStartPoint, unSegmentEndPoint, inputScan);
+        double dDistanceToSegment = sqrt(pow(centerPoint.x, 2.0) + pow(centerPoint.y, 2.0));
 
         if (dDistanceToSegment < 5.0) {
           mas_perception_msgs::LaserScanSegment seg;
@@ -98,17 +92,17 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
   return segments;
 }
 
-double LaserScanSegmentation::getEuclideanDistance(double dDistanceA,
-                                                   double dAngleA,
-                                                   double dDistanceB,
-                                                   double dAngleB) {
+double LaserScanSegmentation::getEuclideanDistance(double dDistanceA, double dAngleA,
+                                                   double dDistanceB, double dAngleB)
+{
   return sqrt((dDistanceA * dDistanceA) + (dDistanceB * dDistanceB) -
               (2 * dDistanceA * dDistanceB) * cos(fabs(dAngleA - dAngleB)));
 }
 
 geometry_msgs::Point LaserScanSegmentation::getCenterOfGravity(
     unsigned int indexStart, unsigned int indexEnd,
-    const sensor_msgs::LaserScan::ConstPtr &inputScan) {
+    const sensor_msgs::LaserScan::ConstPtr &inputScan)
+{
   geometry_msgs::Point centerPoint;
 
   centerPoint.x = 0;
