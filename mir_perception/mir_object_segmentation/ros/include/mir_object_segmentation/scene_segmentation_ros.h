@@ -66,9 +66,14 @@ class SceneSegmentationROS
    * \param[out] Object list with unknown labels
    * \param[out] 3D table top object clusters
    * \param[out] Bounding boxes of the clusters
+   * \param[in] Center cluster so that it has zero mean
+   * \param[in] Pad cluster so that the cluster does not have variable point
+   * size
+   * \param[in] Number of padded points
    * */
   void segmentCloud(const PointCloud::ConstPtr &cloud, mas_perception_msgs::ObjectList &obj_list,
-                    std::vector<PointCloud::Ptr> &clusters, std::vector<BoundingBox> &boxes);
+                    std::vector<PointCloud::Ptr> &clusters, std::vector<BoundingBox> &boxes,
+                    bool center_cluster, bool pad_cluster, bool num_points);
 
   /** \brief Find plane
    * \param[in] Input point cloud

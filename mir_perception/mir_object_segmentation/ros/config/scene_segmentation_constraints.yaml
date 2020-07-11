@@ -30,5 +30,8 @@ scene_segmentation:
     cluster_max_height: 0.09
     cluster_max_length: 0.25
     cluster_min_distance_to_polygon: 0.04
+    center_cluster: True
+    pad_cluster: False
+    padded_cluster_size: 2048
     octree_resolution: 0.0025
     object_height_above_workspace: 0.052
