@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
-#define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
+#ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_ROS_H
+#define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_ROS_H
 
 #include <ros/ros.h>
 
@@ -65,4 +65,4 @@ void getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, const PointCloud
 }
 };
 
-#endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
+#endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_ROS_H
