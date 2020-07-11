@@ -19,7 +19,8 @@
 #include "rosplan_knowledge_msgs/GetInstanceService.h"
 #include "rosplan_knowledge_msgs/GetMetricService.h"
 
-class PDDLProblemGenerator {
+class PDDLProblemGenerator
+{
  public:
   PDDLProblemGenerator();
   ~PDDLProblemGenerator();
@@ -45,8 +46,7 @@ class PDDLProblemGenerator {
   float getPointsObject(const std::string &obj);
   float getPointsLocation(const std::string &loc);
   float getGoalScore(const std::map<std::string, std::string> &goal);
-  std::string getSourceLocation(
-      const rosplan_knowledge_msgs::KnowledgeItem &ki);
+  std::string getSourceLocation(const rosplan_knowledge_msgs::KnowledgeItem &ki);
 
   bool makeHeader(std::ofstream &pFile);
   bool makeObjects(std::ofstream &pFile);
@@ -55,9 +55,9 @@ class PDDLProblemGenerator {
   bool makeMetric(std::ofstream &pFile);
 
   struct goal_sort_ {
-    inline bool operator()(
-        const std::tuple<std::map<std::string, std::string>, float> &a,
-        const std::tuple<std::map<std::string, std::string>, float> &b) {
+    inline bool operator()(const std::tuple<std::map<std::string, std::string>, float> &a,
+                           const std::tuple<std::map<std::string, std::string>, float> &b)
+    {
       return std::get<1>(a) >= std::get<1>(b);
     }
   };

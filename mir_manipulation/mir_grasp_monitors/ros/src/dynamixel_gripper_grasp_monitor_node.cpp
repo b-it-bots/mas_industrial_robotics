@@ -11,19 +11,17 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode()
     : joint_states_received_(false),
       event_in_received_(false),
       current_state_(INIT),
-      loop_rate_init_state_(ros::Rate(100.0)) {
+      loop_rate_init_state_(ros::Rate(100.0))
+{
   ros::NodeHandle nh("~");
   nh.param("position_error_threshold", position_error_threshold_, 0.1);
   nh.param("load_threshold", load_threshold_, 0.15);
   pub_event_ = nh.advertise<std_msgs::String>("event_out", 1);
-  sub_event_ = nh.subscribe(
-      "event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
+  sub_event_ = nh.subscribe("event_in", 10, &DynamixelGripperGraspMonitorNode::eventCallback, this);
   sub_dynamixel_motor_states_ = nh.subscribe(
-      "dynamixel_motor_states", 10,
-      &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
+      "dynamixel_motor_states", 10, &DynamixelGripperGraspMonitorNode::jointStatesCallback, this);
   sub_object_name_ =
-      nh.subscribe("object_name", 10,
-                   &DynamixelGripperGraspMonitorNode::objectNameCallback, this);
+      nh.subscribe("object_name", 10, &DynamixelGripperGraspMonitorNode::objectNameCallback, this);
 
   // addThreshold("bearing", position_error_threshold_ );
   // addThreshold("distance_tube", position_error_threshold_);
@@ -36,13 +34,15 @@ DynamixelGripperGraspMonitorNode::DynamixelGripperGraspMonitorNode()
   // addThreshold("r20", position_error_threshold_);
 }
 
-DynamixelGripperGraspMonitorNode::~DynamixelGripperGraspMonitorNode() {
+DynamixelGripperGraspMonitorNode::~DynamixelGripperGraspMonitorNode()
+{
   pub_event_.shutdown();
   sub_event_.shutdown();
   sub_dynamixel_motor_states_.shutdown();
 }
 
-void DynamixelGripperGraspMonitorNode::addThreshold(std::string str, float f) {
+void DynamixelGripperGraspMonitorNode::addThreshold(std::string str, float f)
+{
   object_threshold_map[str] = f;
   for (int i = 0; i < 100; i++) {
     std::ostringstream stringStream1;
@@ -57,26 +57,27 @@ void DynamixelGripperGraspMonitorNode::addThreshold(std::string str, float f) {
 }
 
 void DynamixelGripperGraspMonitorNode::jointStatesCallback(
-    const dynamixel_msgs::JointState::Ptr &msg) {
+    const dynamixel_msgs::JointState::Ptr &msg)
+{
   joint_states_ = msg;
   joint_states_received_ = true;
 }
 
-void DynamixelGripperGraspMonitorNode::eventCallback(
-    const std_msgs::String::ConstPtr &msg) {
+void DynamixelGripperGraspMonitorNode::eventCallback(const std_msgs::String::ConstPtr &msg)
+{
   event_in_ = *msg;
   event_in_received_ = true;
 }
 
-void DynamixelGripperGraspMonitorNode::objectNameCallback(
-    const std_msgs::String::ConstPtr &msg) {
+void DynamixelGripperGraspMonitorNode::objectNameCallback(const std_msgs::String::ConstPtr &msg)
+{
   object_name_ = msg->data;
-  std::transform(object_name_.begin(), object_name_.end(), object_name_.begin(),
-                 tolower);
+  std::transform(object_name_.begin(), object_name_.end(), object_name_.begin(), tolower);
   ROS_DEBUG("object_name: %s", object_name_.c_str());
 }
 
-void DynamixelGripperGraspMonitorNode::update() {
+void DynamixelGripperGraspMonitorNode::update()
+{
   checkForNewEvent();
 
   switch (current_state_) {
@@ -92,7 +93,8 @@ void DynamixelGripperGraspMonitorNode::update() {
   }
 }
 
-void DynamixelGripperGraspMonitorNode::checkForNewEvent() {
+void DynamixelGripperGraspMonitorNode::checkForNewEvent()
+{
   if (!event_in_received_) return;
 
   ROS_INFO_STREAM("Received event: " << event_in_.data);
@@ -105,18 +107,17 @@ void DynamixelGripperGraspMonitorNode::checkForNewEvent() {
   event_in_received_ = false;
 }
 
-void DynamixelGripperGraspMonitorNode::init_state() {
-  loop_rate_init_state_.sleep();
-}
-
-void DynamixelGripperGraspMonitorNode::idle_state() {
+void DynamixelGripperGraspMonitorNode::init_state() { loop_rate_init_state_.sleep(); }
+void DynamixelGripperGraspMonitorNode::idle_state()
+{
   // wait for incoming data
   if (joint_states_received_) current_state_ = RUN;
 
   joint_states_received_ = false;
 }
 
-void DynamixelGripperGraspMonitorNode::run_state() {
+void DynamixelGripperGraspMonitorNode::run_state()
+{
   std_msgs::String event_out;
 
   if (isObjectGrasped())
@@ -129,15 +130,16 @@ void DynamixelGripperGraspMonitorNode::run_state() {
   current_state_ = INIT;
 }
 
-bool DynamixelGripperGraspMonitorNode::isObjectGrasped() {
+bool DynamixelGripperGraspMonitorNode::isObjectGrasped()
+{
   if (object_threshold_map.find(object_name_) == object_threshold_map.end()) {
     return true;
   }
 
   ROS_INFO("[GRASP_MONITOR] Position Error Values: %f, Position Threshold: %f",
            std::abs(joint_states_->error), object_threshold_map[object_name_]);
-  ROS_INFO("[GRASP_MONITOR] Load Values: %f, Load Threshold: %f",
-           std::abs(joint_states_->load), load_threshold_);
+  ROS_INFO("[GRASP_MONITOR] Load Values: %f, Load Threshold: %f", std::abs(joint_states_->load),
+           load_threshold_);
 
   if ((std::abs(joint_states_->error) >= object_threshold_map[object_name_]) and
       (std::abs(joint_states_->load) >= load_threshold_)) {
@@ -146,7 +148,8 @@ bool DynamixelGripperGraspMonitorNode::isObjectGrasped() {
   return false;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "grasp_monitor");
   ros::NodeHandle nh("~");
 

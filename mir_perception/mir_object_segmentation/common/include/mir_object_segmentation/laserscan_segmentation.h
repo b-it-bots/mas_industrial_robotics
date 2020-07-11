@@ -9,7 +9,8 @@
 #include <mas_perception_msgs/LaserScanSegmentList.h>
 #include <sensor_msgs/LaserScan.h>
 
-class LaserScanSegmentation {
+class LaserScanSegmentation
+{
  public:
   /* dThresholdDistanceBetweenAdajecentPoints in meters */
   LaserScanSegmentation(double dThresholdDistanceBetweenAdajecentPoints,
@@ -17,8 +18,7 @@ class LaserScanSegmentation {
   ~LaserScanSegmentation();
 
   mas_perception_msgs::LaserScanSegmentList getSegments(
-      const sensor_msgs::LaserScan::ConstPtr &inputScan,
-      bool store_data_points = false);
+      const sensor_msgs::LaserScan::ConstPtr &inputScan, bool store_data_points = false);
 
  private:
   /* distance threshold between two adjacent laser scan points to determine
@@ -26,12 +26,10 @@ class LaserScanSegmentation {
   double _dThresholdDistanceBetweenAdajecentPoints;
   unsigned int _unMinimumPointsPerSegment;
 
-  double getEuclideanDistance(double dDistanceA, double dAngleA,
-                              double dDistanceB, double dAngleB);
+  double getEuclideanDistance(double dDistanceA, double dAngleA, double dDistanceB, double dAngleB);
 
-  geometry_msgs::Point getCenterOfGravity(
-      unsigned int indexStart, unsigned int indexEnd,
-      const sensor_msgs::LaserScan::ConstPtr &inputScan);
+  geometry_msgs::Point getCenterOfGravity(unsigned int indexStart, unsigned int indexEnd,
+                                          const sensor_msgs::LaserScan::ConstPtr &inputScan);
 };
 
 #endif  // MIR_OBJECT_SEGMENTATION_LASERSCAN_SEGMENTATION_H

@@ -27,7 +27,8 @@
 #include <Eigen/Eigenvalues>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PCloudT;
-class DrawerHandlePerceiver {
+class DrawerHandlePerceiver
+{
  public:
   DrawerHandlePerceiver();
   virtual ~DrawerHandlePerceiver();
@@ -63,10 +64,8 @@ class DrawerHandlePerceiver {
   bool transformPC(const sensor_msgs::PointCloud2::ConstPtr &msg,
                    sensor_msgs::PointCloud2 &msg_transformed);
   void passthroughFilterPC(const PCloudT::Ptr &input, PCloudT::Ptr output);
-  void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input,
-                           PCloudT::Ptr output,
+  void extractPlaneOutlier(const PCloudT::Ptr &input, PCloudT::Ptr dense_input, PCloudT::Ptr output,
                            geometry_msgs::PoseStamped &pose_stamped);
-  bool getClosestCluster(const PCloudT::Ptr &input,
-                         Eigen::Vector4f &closest_centroid);
+  bool getClosestCluster(const PCloudT::Ptr &input, Eigen::Vector4f &closest_centroid);
 };
 #endif

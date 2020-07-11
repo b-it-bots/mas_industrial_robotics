@@ -10,19 +10,17 @@
 #include <pcl/point_types.h>
 #include <std_msgs/ColorRGBA.h>
 
-namespace mir_perception_utils {
-
-namespace visualization {
-
+namespace mir_perception_utils
+{
+namespace visualization
+{
 struct Color {
   uint8_t r;
   uint8_t g;
   uint8_t b;
 
   Color(float nr, float ng, float nb) : r(nr * 255), g(ng * 255), b(nb * 255) {}
-
   Color(uint8_t nr, uint8_t ng, uint8_t nb) : r(nr), g(ng), b(nb) {}
-
   enum Name {
     SALMON,
     TEAL,
@@ -37,7 +35,8 @@ struct Color {
     GAINSBORO,
   };
 
-  explicit Color(Name name) {
+  explicit Color(Name name)
+  {
     switch (name) {
       case SALMON:
         r = 0xFA, g = 0x80, b = 0x72;
@@ -78,12 +77,14 @@ struct Color {
     }
   }
 
-  operator float() const {
+  operator float() const
+  {
     pcl::PointXYZRGB point(r, g, b);
     return point.rgb;
   }
 
-  operator std_msgs::ColorRGBA() const {
+  operator std_msgs::ColorRGBA() const
+  {
     std_msgs::ColorRGBA color;
     color.r = r / 255.0;
     color.g = g / 255.0;

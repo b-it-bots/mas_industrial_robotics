@@ -13,7 +13,8 @@
 using namespace mas_perception_msgs;
 using namespace mir_navigation_msgs;
 
-class OrientToLaserReadingAction {
+class OrientToLaserReadingAction
+{
  protected:
   ros::NodeHandle nh_;
   actionlib::SimpleActionServer<OrientToBaseAction> as_;
@@ -41,12 +42,10 @@ class OrientToLaserReadingAction {
   ros::ServiceClient client;
 
  public:
-  OrientToLaserReadingAction(ros::NodeHandle nh, std::string name,
-                             std::string cmd_vel_topic,
+  OrientToLaserReadingAction(ros::NodeHandle nh, std::string name, std::string cmd_vel_topic,
                              std::string linreg_service_name)
-      : as_(nh, name,
-            boost::bind(&OrientToLaserReadingAction::executeActionCB, this, _1),
-            false) {
+      : as_(nh, name, boost::bind(&OrientToLaserReadingAction::executeActionCB, this, _1), false)
+  {
     this->action_name_ = name;
     this->service_name = linreg_service_name;
     this->cmd_vel_topic = cmd_vel_topic;
@@ -55,10 +54,8 @@ class OrientToLaserReadingAction {
 
     target_distance = 0.05;
 
-    ros::param::param<float>("~max_linear_velocity", max_linear_velocity,
-                             0.075);
-    ros::param::param<float>("~max_angular_velocity", max_angular_velocity,
-                             0.1);
+    ros::param::param<float>("~max_linear_velocity", max_linear_velocity, 0.075);
+    ros::param::param<float>("~max_angular_velocity", max_angular_velocity, 0.1);
 
     ROS_DEBUG("Register publisher");
 
@@ -71,9 +68,9 @@ class OrientToLaserReadingAction {
     as_.start();
   }
 
-  geometry_msgs::Twist calculateVelocityCommand(double center, double a,
-                                                double b, bool &oriented,
-                                                int &iterator) {
+  geometry_msgs::Twist calculateVelocityCommand(double center, double a, double b, bool &oriented,
+                                                int &iterator)
+  {
     geometry_msgs::Twist cmd;
 
     double lin_p;
@@ -99,8 +96,7 @@ class OrientToLaserReadingAction {
     error_angle_d = error_angle - last_error_angular;
     last_error_angular = error_angle;
 
-    cmd.angular.z = (-1) * (error_angle * ang_p + error_angle_int * ang_i +
-                            error_angle_d * ang_d);
+    cmd.angular.z = (-1) * (error_angle * ang_p + error_angle_int * ang_i + error_angle_d * ang_d);
 
     // linear velocity calculation
     error_lin_int += error_lin;
@@ -108,8 +104,7 @@ class OrientToLaserReadingAction {
     error_lin_d = error_lin - last_error_lin;
     last_error_lin = error_lin;
 
-    double calculated_velocity =
-        error_lin * lin_p + error_lin_int * lin_i + error_lin_d * lin_d;
+    double calculated_velocity = error_lin * lin_p + error_lin_int * lin_i + error_lin_d * lin_d;
     std::string laser_axis;
     ros::param::param<std::string>("~laser_axis", laser_axis, "+x");
     if (laser_axis == "+x") {
@@ -155,7 +150,8 @@ class OrientToLaserReadingAction {
     return cmd;
   }
 
-  void executeActionCB(const OrientToBaseGoalConstPtr &goal) {
+  void executeActionCB(const OrientToBaseGoalConstPtr &goal)
+  {
     BaseScanLinearRegression srv;
 
     srv.request.filter_minAngle = -M_PI_4;
@@ -180,10 +176,8 @@ class OrientToLaserReadingAction {
 
     double translation_error_tolerance = 0.0;
     double angular_error_tolerance = 0.0;
-    ros::param::param<double>("~translation_error_tolerance",
-                              translation_error_tolerance, 0.04);
-    ros::param::param<double>("~angular_error_tolerance",
-                              angular_error_tolerance, 0.04);
+    ros::param::param<double>("~translation_error_tolerance", translation_error_tolerance, 0.04);
+    ros::param::param<double>("~angular_error_tolerance", angular_error_tolerance, 0.04);
 
     while (true) {
       ROS_DEBUG("Call service Client");
@@ -193,9 +187,8 @@ class OrientToLaserReadingAction {
         // std::cout << "result: " << srv.response.center << ", " <<
         // srv.response.a << ", " << srv.response.b << std::endl;
 
-        geometry_msgs::Twist cmd =
-            calculateVelocityCommand(srv.response.center, srv.response.a,
-                                     srv.response.b, oriented, iterator);
+        geometry_msgs::Twist cmd = calculateVelocityCommand(srv.response.center, srv.response.a,
+                                                            srv.response.b, oriented, iterator);
         cmd_pub.publish(cmd);
 
         // std::cout << "cmd x:" << cmd.linear.x << ", y: "  << cmd.linear.y <<
@@ -236,7 +229,8 @@ class OrientToLaserReadingAction {
   }
 };
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "base_placement");
   ros::NodeHandle n("~");
 
@@ -249,8 +243,7 @@ int main(int argc, char **argv) {
   n.getParam("linear_regression_service", service_name);
   ROS_DEBUG("Using linear_regression_service: %s", service_name.c_str());
 
-  OrientToLaserReadingAction orientAction(n, "adjust_to_workspace",
-                                          cmd_vel_name, service_name);
+  OrientToLaserReadingAction orientAction(n, "adjust_to_workspace", cmd_vel_name, service_name);
 
   ROS_DEBUG("Action Service is ready");
 

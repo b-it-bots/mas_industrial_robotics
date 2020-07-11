@@ -16,23 +16,21 @@
 
 #include <mir_perception_utils/color.h>
 
-namespace mir_perception_utils {
-
-namespace visualization {
-
-class ClusteredPointCloudVisualizer {
+namespace mir_perception_utils
+{
+namespace visualization
+{
+class ClusteredPointCloudVisualizer
+{
  public:
   ClusteredPointCloudVisualizer(const boost::shared_ptr<ros::NodeHandle> &nh,
-                                const std::string &topic_name,
-                                bool check_subscribers = true);
+                                const std::string &topic_name, bool check_subscribers = true);
 
-  ClusteredPointCloudVisualizer(const std::string &topic_name,
-                                bool check_subscribers = true);
+  ClusteredPointCloudVisualizer(const std::string &topic_name, bool check_subscribers = true);
 
   template <typename PointT>
-  void publish(
-      const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
-      const std::string &frame_id);
+  void publish(const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
+               const std::string &frame_id);
   int getNumSubscribers();
 
  private:

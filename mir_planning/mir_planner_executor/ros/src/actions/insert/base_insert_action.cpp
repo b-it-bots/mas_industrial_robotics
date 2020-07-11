@@ -8,8 +8,9 @@
 #include <mir_planner_executor/actions/insert/base_insert_action.h>
 #include <utility>
 
-void BaseInsertAction::update_knowledge_base(
-    bool success, std::vector<diagnostic_msgs::KeyValue> &params) {
+void BaseInsertAction::update_knowledge_base(bool success,
+                                             std::vector<diagnostic_msgs::KeyValue> &params)
+{
   std::string robot = getValueOf(params, "robot_name");
   std::string platform = getValueOf(params, "platform");
   std::string location = getValueOf(params, "location");
@@ -38,8 +39,8 @@ void BaseInsertAction::update_knowledge_base(
   }
 }
 
-void BaseInsertAction::updateParamsBasedOnContext(
-    std::vector<diagnostic_msgs::KeyValue> &params) {
+void BaseInsertAction::updateParamsBasedOnContext(std::vector<diagnostic_msgs::KeyValue> &params)
+{
   int platform_index = getIndexOf(params, "param_1");
   int location_index = getIndexOf(params, "param_2");
   int peg_index = getIndexOf(params, "param_3");

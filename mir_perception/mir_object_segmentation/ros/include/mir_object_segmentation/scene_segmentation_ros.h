@@ -30,7 +30,8 @@
  * \author Mohammad Wasil, Santosh Thoduka
  */
 
-class SceneSegmentationROS {
+class SceneSegmentationROS
+{
  public:
   /** \brief Constructor
    * \param[in] NodeHandle in order for this to have access to parameters
@@ -66,17 +67,14 @@ class SceneSegmentationROS {
    * \param[out] 3D table top object clusters
    * \param[out] Bounding boxes of the clusters
    * */
-  void segmentCloud(const PointCloud::ConstPtr &cloud,
-                    mas_perception_msgs::ObjectList &obj_list,
-                    std::vector<PointCloud::Ptr> &clusters,
-                    std::vector<BoundingBox> &boxes);
+  void segmentCloud(const PointCloud::ConstPtr &cloud, mas_perception_msgs::ObjectList &obj_list,
+                    std::vector<PointCloud::Ptr> &clusters, std::vector<BoundingBox> &boxes);
 
   /** \brief Find plane
    * \param[in] Input point cloud
    * \param[out] Point cloud debug output
    * */
-  void findPlane(const PointCloud::ConstPtr &cloud_in,
-                 PointCloud::Ptr &cloud_debug);
+  void findPlane(const PointCloud::ConstPtr &cloud_in, PointCloud::Ptr &cloud_debug);
 
   /** \brief Reset accumulated cloud */
   void resetCloudAccumulation();
@@ -106,10 +104,8 @@ class SceneSegmentationROS {
    * \param[in] The minimum allowed the field value
    * \param[in] The maximum allowed the field value
    * */
-  void setVoxelGridParams(double voxel_leaf_size,
-                          std::string voxel_filter_field_name,
-                          double voxel_filter_limit_min,
-                          double voxel_filter_limit_max);
+  void setVoxelGridParams(double voxel_leaf_size, std::string voxel_filter_field_name,
+                          double voxel_filter_limit_min, double voxel_filter_limit_max);
 
   /** \brief Set passthrough filter parameters
    * \param[in] Enable or disable passthrough filter
@@ -128,8 +124,7 @@ class SceneSegmentationROS {
    * (default False)
    * \param[in] Number of cores to use for computing normal with OMP (default=4)
    * */
-  void setNormalParams(double normal_radius_search, bool use_omp = false,
-                       int num_cores = 4);
+  void setNormalParams(double normal_radius_search, bool use_omp = false, int num_cores = 4);
 
   /** \brief Set SAC parameters
    * \param[in] The maximum number of iterations the algorithm will run for
@@ -142,8 +137,8 @@ class SceneSegmentationROS {
    * distance (0 to pi/2) between point normals and the plane normal.
    * */
   void setSACParams(int sac_max_iterations, double sac_distance_threshold,
-                    bool sac_optimize_coefficients, Eigen::Vector3f axis,
-                    double sac_eps_angle, double sac_normal_distance_weight);
+                    bool sac_optimize_coefficients, Eigen::Vector3f axis, double sac_eps_angle,
+                    double sac_normal_distance_weight);
 
   /** \brief Set prism parameters
    * \param[in] The minimum height above the plane from which to construct the
@@ -159,8 +154,7 @@ class SceneSegmentationROS {
    * \param[in] The number of neighbors that need to be present in order to be
    * classified as an inlier.
    * */
-  void setOutlierParams(double outlier_radius_search,
-                        double outlier_min_neighbors);
+  void setOutlierParams(double outlier_radius_search, double outlier_min_neighbors);
 
   /** \brief Set cluster parameters
    * \param[in] The spatial tolerance as a measure in the L2 Euclidean space
@@ -173,10 +167,9 @@ class SceneSegmentationROS {
    * \param[in] The maximum length of the cluster
    * \param[in] The minimum height of the cluster above the given polygon
    * */
-  void setClusterParams(double cluster_tolerance, int cluster_min_size,
-                        int cluster_max_size, double cluster_min_height,
-                        double cluster_max_height, double cluster_max_length,
-                        double cluster_min_distance_to_polygon);
+  void setClusterParams(double cluster_tolerance, int cluster_min_size, int cluster_max_size,
+                        double cluster_min_height, double cluster_max_height,
+                        double cluster_max_length, double cluster_min_distance_to_polygon);
 };
 
 #endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_H

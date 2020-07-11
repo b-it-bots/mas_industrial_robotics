@@ -9,7 +9,8 @@
 
 #include <mir_planner_executor/actions/insert/base_insert_action.h>
 
-class InsertAction : public BaseInsertAction {
+class InsertAction : public BaseInsertAction
+{
  public:
   InsertAction();
 };

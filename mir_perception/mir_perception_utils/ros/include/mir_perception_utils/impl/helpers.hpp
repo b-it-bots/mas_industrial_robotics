@@ -10,9 +10,9 @@
 using namespace mir_perception_utils::object;
 
 /** Convert from PCL PlanarPolygon to ROS message. */
-inline void convertPlanarPolygon(
-    const PlanarPolygon &polygon,
-    mas_perception_msgs::PlanarPolygon &polygon_msg) {
+inline void convertPlanarPolygon(const PlanarPolygon &polygon,
+                                 mas_perception_msgs::PlanarPolygon &polygon_msg)
+{
   for (int i = 0; i < 4; ++i) {
     polygon_msg.coefficients[i] = polygon.getCoefficients()[i];
   }
@@ -28,9 +28,9 @@ inline void convertPlanarPolygon(
 }
 
 /** Convert from ROS message to PCL PlanarPolygon. */
-inline void convertPlanarPolygon(
-    const mas_perception_msgs::PlanarPolygon &polygon_msg,
-    PlanarPolygon &polygon) {
+inline void convertPlanarPolygon(const mas_perception_msgs::PlanarPolygon &polygon_msg,
+                                 PlanarPolygon &polygon)
+{
   PointCloud::VectorType contour;
   Eigen::Vector4f coefficients(polygon_msg.coefficients.elems);
   for (size_t i = 0; i < polygon_msg.contour.size(); i++) {
@@ -43,7 +43,8 @@ inline void convertPlanarPolygon(
   polygon = PlanarPolygon(contour, coefficients);
 }
 
-inline double computePlanarPolygonArea(const PlanarPolygon &polygon) {
+inline double computePlanarPolygonArea(const PlanarPolygon &polygon)
+{
   const Eigen::Vector4f &normal = polygon.getCoefficients();
   const PointCloud::VectorType &points = polygon.getContour();
 
@@ -67,9 +68,9 @@ inline double computePlanarPolygonArea(const PlanarPolygon &polygon) {
 }
 
 /** Convert from BoundingBox object to ROS message. */
-inline void convertBoundingBox(
-    const BoundingBox &bounding_box,
-    mas_perception_msgs::BoundingBox &bounding_box_msg) {
+inline void convertBoundingBox(const BoundingBox &bounding_box,
+                               mas_perception_msgs::BoundingBox &bounding_box_msg)
+{
   const BoundingBox::Point &center = bounding_box.getCenter();
   bounding_box_msg.center.x = center[0];
   bounding_box_msg.center.y = center[1];

@@ -29,24 +29,20 @@
 
 SceneSegmentationNode::SceneSegmentationNode()
     : nh_("~"),
-      bounding_box_visualizer_("output/bounding_boxes",
-                               Color(Color::SEA_GREEN)),
+      bounding_box_visualizer_("output/bounding_boxes", Color(Color::SEA_GREEN)),
       cluster_visualizer_("output/tabletop_clusters"),
       label_visualizer_("output/labels", Color(Color::TEAL)),
       add_to_octree_(false),
       object_id_(0),
-      scene_segmentation_ros_(0.0025) {
-  sub_event_in_ =
-      nh_.subscribe("event_in", 1, &SceneSegmentationNode::eventCallback, this);
+      scene_segmentation_ros_(0.0025)
+{
+  sub_event_in_ = nh_.subscribe("event_in", 1, &SceneSegmentationNode::eventCallback, this);
   pub_event_out_ = nh_.advertise<std_msgs::String>("event_out", 1);
-  pub_object_list_ =
-      nh_.advertise<mas_perception_msgs::ObjectList>("output/object_list", 1);
-  pub_workspace_height_ =
-      nh_.advertise<std_msgs::Float64>("output/workspace_height", 1);
+  pub_object_list_ = nh_.advertise<mas_perception_msgs::ObjectList>("output/object_list", 1);
+  pub_workspace_height_ = nh_.advertise<std_msgs::Float64>("output/workspace_height", 1);
   pub_debug_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud", 1);
 
-  dynamic_reconfigure::Server<
-      mir_object_segmentation::SceneSegmentationConfig>::CallbackType f =
+  dynamic_reconfigure::Server<mir_object_segmentation::SceneSegmentationConfig>::CallbackType f =
       boost::bind(&SceneSegmentationNode::configCallback, this, _1, _2);
   server_.setCallback(f);
 
@@ -57,13 +53,12 @@ SceneSegmentationNode::SceneSegmentationNode()
 }
 
 SceneSegmentationNode::~SceneSegmentationNode() {}
-
-void SceneSegmentationNode::pointcloudCallback(
-    const sensor_msgs::PointCloud2::Ptr &msg) {
+void SceneSegmentationNode::pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg)
+{
   if (add_to_octree_) {
     sensor_msgs::PointCloud2 msg_transformed;
-    if (!mpu::pointcloud::transformPointCloudMsg(tf_listener_, target_frame_id_,
-                                                 *msg, msg_transformed))
+    if (!mpu::pointcloud::transformPointCloudMsg(tf_listener_, target_frame_id_, *msg,
+                                                 msg_transformed))
       return;
 
     PointCloud::Ptr cloud = boost::make_shared<PointCloud>();
@@ -80,7 +75,8 @@ void SceneSegmentationNode::pointcloudCallback(
   }
 }
 
-void SceneSegmentationNode::segmentPointCloud() {
+void SceneSegmentationNode::segmentPointCloud()
+{
   PointCloud::Ptr cloud(new PointCloud);
   cloud->header.frame_id = target_frame_id_;
   scene_segmentation_ros_.getCloudAccumulation(cloud);
@@ -102,14 +98,12 @@ void SceneSegmentationNode::segmentPointCloud() {
     mpu::object::convertBboxToMsg(boxes[i], bounding_boxes.bounding_boxes[i]);
     labels.push_back(object_list.objects[i].name);
     // make the object height dynamically reconfigurable
-    object_list.objects[i].pose.pose.position.z +=
-        object_height_above_workspace_;
+    object_list.objects[i].pose.pose.position.z += object_height_above_workspace_;
     poses.poses.push_back(object_list.objects[i].pose.pose);
   }
   ROS_INFO_STREAM("Publishing object list and workspace height");
   pub_object_list_.publish(object_list);
-  bounding_box_visualizer_.publish(bounding_boxes.bounding_boxes,
-                                   target_frame_id_);
+  bounding_box_visualizer_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
   cluster_visualizer_.publish<PointT>(clusters, target_frame_id_);
   label_visualizer_.publish(labels, poses);
 
@@ -118,7 +112,8 @@ void SceneSegmentationNode::segmentPointCloud() {
   pub_workspace_height_.publish(workspace_height_msg);
 }
 
-void SceneSegmentationNode::findPlane() {
+void SceneSegmentationNode::findPlane()
+{
   PointCloud::Ptr cloud(new PointCloud);
   cloud->header.frame_id = target_frame_id_;
   scene_segmentation_ros_.getCloudAccumulation(cloud);
@@ -133,12 +128,11 @@ void SceneSegmentationNode::findPlane() {
   pub_debug_.publish(*cloud_debug);
 }
 
-void SceneSegmentationNode::eventCallback(
-    const std_msgs::String::ConstPtr &msg) {
+void SceneSegmentationNode::eventCallback(const std_msgs::String::ConstPtr &msg)
+{
   std_msgs::String event_out;
   if (msg->data == "e_start") {
-    sub_cloud_ = nh_.subscribe(
-        "input", 1, &SceneSegmentationNode::pointcloudCallback, this);
+    sub_cloud_ = nh_.subscribe("input", 1, &SceneSegmentationNode::pointcloudCallback, this);
     event_out.data = "e_started";
   } else if (msg->data == "e_add_cloud_start") {
     add_to_octree_ = true;
@@ -167,36 +161,35 @@ void SceneSegmentationNode::eventCallback(
   pub_event_out_.publish(event_out);
 }
 
-void SceneSegmentationNode::configCallback(
-    mir_object_segmentation::SceneSegmentationConfig &config, uint32_t level) {
-  scene_segmentation_ros_.setVoxelGridParams(
-      config.voxel_leaf_size, config.voxel_filter_field_name,
-      config.voxel_filter_limit_min, config.voxel_filter_limit_max);
+void SceneSegmentationNode::configCallback(mir_object_segmentation::SceneSegmentationConfig &config,
+                                           uint32_t level)
+{
+  scene_segmentation_ros_.setVoxelGridParams(config.voxel_leaf_size, config.voxel_filter_field_name,
+                                             config.voxel_filter_limit_min,
+                                             config.voxel_filter_limit_max);
   scene_segmentation_ros_.setPassthroughParams(
       config.enable_passthrough_filter, config.passthrough_filter_field_name,
       config.passthrough_filter_limit_min, config.passthrough_filter_limit_max);
-  scene_segmentation_ros_.setNormalParams(config.normal_radius_search,
-                                          config.use_omp, config.num_cores);
+  scene_segmentation_ros_.setNormalParams(config.normal_radius_search, config.use_omp,
+                                          config.num_cores);
   Eigen::Vector3f axis(config.sac_x_axis, config.sac_y_axis, config.sac_z_axis);
-  scene_segmentation_ros_.setSACParams(
-      config.sac_max_iterations, config.sac_distance_threshold,
-      config.sac_optimize_coefficients, axis, config.sac_eps_angle,
-      config.sac_normal_distance_weight);
-  scene_segmentation_ros_.setPrismParams(config.prism_min_height,
-                                         config.prism_max_height);
+  scene_segmentation_ros_.setSACParams(config.sac_max_iterations, config.sac_distance_threshold,
+                                       config.sac_optimize_coefficients, axis, config.sac_eps_angle,
+                                       config.sac_normal_distance_weight);
+  scene_segmentation_ros_.setPrismParams(config.prism_min_height, config.prism_max_height);
   scene_segmentation_ros_.setOutlierParams(config.outlier_radius_search,
                                            config.outlier_min_neighbors);
-  scene_segmentation_ros_.setClusterParams(
-      config.cluster_tolerance, config.cluster_min_size,
-      config.cluster_max_size, config.cluster_min_height,
-      config.cluster_max_height, config.cluster_max_length,
-      config.cluster_min_distance_to_polygon);
+  scene_segmentation_ros_.setClusterParams(config.cluster_tolerance, config.cluster_min_size,
+                                           config.cluster_max_size, config.cluster_min_height,
+                                           config.cluster_max_height, config.cluster_max_length,
+                                           config.cluster_min_distance_to_polygon);
 
   octree_resolution_ = config.octree_resolution;
   object_height_above_workspace_ = config.object_height_above_workspace;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "scene_segmentation_node");
   SceneSegmentationNode scene_seg;
   ROS_INFO_STREAM("\033[1;32m[scene_segmentation_node] node started \033[0m\n");

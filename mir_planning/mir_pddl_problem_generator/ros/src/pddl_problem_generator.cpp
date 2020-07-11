@@ -1,18 +1,16 @@
 #include <mir_pddl_generator_node/pddl_problem_generator.h>
 #include <boost/filesystem.hpp>
 
-PDDLProblemGenerator::PDDLProblemGenerator() : nh_("~") {
+PDDLProblemGenerator::PDDLProblemGenerator() : nh_("~")
+{
   std::string knowledge_base;
-  nh_.param<std::string>("knowledge_base", knowledge_base,
-                         "rosplan_knowledge_base");
+  nh_.param<std::string>("knowledge_base", knowledge_base, "rosplan_knowledge_base");
 
   nh_.param<int>("max_goals", max_goals_, 3);
-  nh_.param<bool>("prefer_goals_with_same_source_ws",
-                  prefer_goals_with_same_source_ws_, true);
+  nh_.param<bool>("prefer_goals_with_same_source_ws", prefer_goals_with_same_source_ws_, true);
 
   nh_.getParam("points", points_map_);
-  if (points_map_.size() == 0)
-    ROS_ERROR("Points for objects and location not defined.");
+  if (points_map_.size() == 0) ROS_ERROR("Points for objects and location not defined.");
 
   std::stringstream ss;
 
@@ -44,9 +42,8 @@ PDDLProblemGenerator::PDDLProblemGenerator() : nh_("~") {
 }
 
 PDDLProblemGenerator::~PDDLProblemGenerator() {}
-
-bool PDDLProblemGenerator::generatePDDLProblemFile(
-    const std::string &problem_path) {
+bool PDDLProblemGenerator::generatePDDLProblemFile(const std::string &problem_path)
+{
   boost::filesystem::path boost_problem_file((problem_path).c_str());
   boost::filesystem::path boost_problem_dir = boost_problem_file.parent_path();
 
@@ -98,11 +95,11 @@ bool PDDLProblemGenerator::generatePDDLProblemFile(
   return true;
 }
 
-bool PDDLProblemGenerator::makeHeader(std::ofstream &pFile) {
+bool PDDLProblemGenerator::makeHeader(std::ofstream &pFile)
+{
   // get domain name
   ros::ServiceClient getNameClient =
-      nh_.serviceClient<rosplan_knowledge_msgs::GetDomainNameService>(
-          domain_name_service_);
+      nh_.serviceClient<rosplan_knowledge_msgs::GetDomainNameService>(domain_name_service_);
   rosplan_knowledge_msgs::GetDomainNameService name_srv;
   if (!getNameClient.call(name_srv)) {
     ROS_ERROR("[mir_pddl_problem_generator] Failed to call service %s",
@@ -113,20 +110,18 @@ bool PDDLProblemGenerator::makeHeader(std::ofstream &pFile) {
   pFile << ";This PDDL problem definition was made automatically from a KB "
            "snapshot"
         << std::endl;
-  pFile << "(define (problem " << name_srv.response.domain_name << "_task)"
-        << std::endl;
+  pFile << "(define (problem " << name_srv.response.domain_name << "_task)" << std::endl;
   pFile << "(:domain " << name_srv.response.domain_name << ")" << std::endl;
   pFile << "" << std::endl;
   return true;
 }
 
-bool PDDLProblemGenerator::makeObjects(std::ofstream &pFile) {
+bool PDDLProblemGenerator::makeObjects(std::ofstream &pFile)
+{
   ros::ServiceClient getTypesClient =
-      nh_.serviceClient<rosplan_knowledge_msgs::GetDomainTypeService>(
-          domain_type_service_);
+      nh_.serviceClient<rosplan_knowledge_msgs::GetDomainTypeService>(domain_type_service_);
   ros::ServiceClient getInstancesClient =
-      nh_.serviceClient<rosplan_knowledge_msgs::GetInstanceService>(
-          state_instance_service_);
+      nh_.serviceClient<rosplan_knowledge_msgs::GetInstanceService>(state_instance_service_);
 
   bool is_there_objects = false;
 
@@ -147,8 +142,7 @@ bool PDDLProblemGenerator::makeObjects(std::ofstream &pFile) {
 
     if (!getInstancesClient.call(instance_srv)) {
       ROS_ERROR("[mir_pddl_problem_generator] Failed to call service %s: %s",
-                state_instance_service_.c_str(),
-                instance_srv.request.type_name.c_str());
+                state_instance_service_.c_str(), instance_srv.request.type_name.c_str());
     } else {
       if (instance_srv.response.instances.size() == 0) continue;
       pFile << "    ";
@@ -165,13 +159,13 @@ bool PDDLProblemGenerator::makeObjects(std::ofstream &pFile) {
   return is_there_objects;
 }
 
-bool PDDLProblemGenerator::makeInitialState(std::ofstream &pFile) {
+bool PDDLProblemGenerator::makeInitialState(std::ofstream &pFile)
+{
   ros::ServiceClient getDomainPropsClient =
       nh_.serviceClient<rosplan_knowledge_msgs::GetDomainAttributeService>(
           domain_predicate_service_);
   ros::ServiceClient getPropsClient =
-      nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
-          state_proposition_service_);
+      nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(state_proposition_service_);
 
   // note the time now for TILs
   ros::Time time = ros::Time::now() + ros::Duration(1);
@@ -197,12 +191,10 @@ bool PDDLProblemGenerator::makeInitialState(std::ofstream &pFile) {
       attr_srv.request.predicate_name = ait->name;
       if (!getPropsClient.call(attr_srv)) {
         ROS_ERROR("[mir_pddl_problem_generator] Failed to call service %s: %s",
-                  state_proposition_service_.c_str(),
-                  attr_srv.request.predicate_name.c_str());
+                  state_proposition_service_.c_str(), attr_srv.request.predicate_name.c_str());
       } else {
         for (size_t i = 0; i < attr_srv.response.attributes.size(); i++) {
-          rosplan_knowledge_msgs::KnowledgeItem attr =
-              attr_srv.response.attributes[i];
+          rosplan_knowledge_msgs::KnowledgeItem attr = attr_srv.response.attributes[i];
 
           pFile << "    (";
 
@@ -236,10 +228,10 @@ bool PDDLProblemGenerator::makeInitialState(std::ofstream &pFile) {
   return is_there_facts;
 }
 
-bool PDDLProblemGenerator::makeGoals(std::ofstream &pFile) {
+bool PDDLProblemGenerator::makeGoals(std::ofstream &pFile)
+{
   ros::ServiceClient getCurrentGoalsClient =
-      nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
-          state_goal_service_);
+      nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(state_goal_service_);
 
   pFile << "(:goal" << std::endl;
   pFile << "    (and" << std::endl;
@@ -254,8 +246,7 @@ bool PDDLProblemGenerator::makeGoals(std::ofstream &pFile) {
               state_goal_service_.c_str());
   } else {
     for (size_t i = 0; i < current_goal_srv.response.attributes.size(); i++) {
-      rosplan_knowledge_msgs::KnowledgeItem attr =
-          current_goal_srv.response.attributes[i];
+      rosplan_knowledge_msgs::KnowledgeItem attr = current_goal_srv.response.attributes[i];
 
       if (attr.knowledge_type != rosplan_knowledge_msgs::KnowledgeItem::FACT) {
         continue;
@@ -284,8 +275,7 @@ bool PDDLProblemGenerator::makeGoals(std::ofstream &pFile) {
     /* for debugging */
     for (auto goal : goals) {
       std::cout << std::get<1>(goal) << " " << std::get<0>(goal)["obj"] << " "
-                << std::get<0>(goal)["src"] << " -> "
-                << std::get<0>(goal)["dest"] << std::endl;
+                << std::get<0>(goal)["src"] << " -> " << std::get<0>(goal)["dest"] << std::endl;
     }
     std::cout << std::endl;
     has_goals = goals.size() > 0;
@@ -331,15 +321,16 @@ bool PDDLProblemGenerator::makeGoals(std::ofstream &pFile) {
   return has_goals;
 }
 
-bool PDDLProblemGenerator::makeMetric(std::ofstream &pFile) {
+bool PDDLProblemGenerator::makeMetric(std::ofstream &pFile)
+{
   pFile << "(:metric minimize (total-cost))" << std::endl;
   pFile << "" << std::endl;
 
   return true;
 }
 
-float PDDLProblemGenerator::getGoalScore(
-    const std::map<std::string, std::string> &goal) {
+float PDDLProblemGenerator::getGoalScore(const std::map<std::string, std::string> &goal)
+{
   float score = 0.0;
   score += getPointsLocation(goal.at("src"));
   score += getPointsLocation(goal.at("dest"));
@@ -347,29 +338,24 @@ float PDDLProblemGenerator::getGoalScore(
   return score;
 }
 
-std::string PDDLProblemGenerator::getSourceLocation(
-    const rosplan_knowledge_msgs::KnowledgeItem &ki) {
-  if (ki.attribute_name.compare("in") != 0 and
-      ki.attribute_name.compare("on") != 0)
-    return "";
+std::string PDDLProblemGenerator::getSourceLocation(const rosplan_knowledge_msgs::KnowledgeItem &ki)
+{
+  if (ki.attribute_name.compare("in") != 0 and ki.attribute_name.compare("on") != 0) return "";
 
   std::string obj = ki.values[0].value;
 
   ros::ServiceClient getPropsClient =
-      nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
-          state_proposition_service_);
+      nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(state_proposition_service_);
 
   rosplan_knowledge_msgs::GetAttributeService attr_srv;
   attr_srv.request.predicate_name = ki.attribute_name;
   if (!getPropsClient.call(attr_srv)) {
     ROS_ERROR("[mir_pddl_problem_generator] Failed to call service %s: %s",
-              state_proposition_service_.c_str(),
-              attr_srv.request.predicate_name.c_str());
+              state_proposition_service_.c_str(), attr_srv.request.predicate_name.c_str());
     return "";
   } else {
     for (size_t i = 0; i < attr_srv.response.attributes.size(); i++) {
-      rosplan_knowledge_msgs::KnowledgeItem attr =
-          attr_srv.response.attributes[i];
+      rosplan_knowledge_msgs::KnowledgeItem attr = attr_srv.response.attributes[i];
       if (attr.values[0].value.compare(obj) == 0) {
         return attr.values[1].value;
       }
@@ -378,19 +364,21 @@ std::string PDDLProblemGenerator::getSourceLocation(
   return "XXXX";  // dummy location
 }
 
-float PDDLProblemGenerator::getPoints(const std::string &key) {
+float PDDLProblemGenerator::getPoints(const std::string &key)
+{
   std::string key_lower(key.length(), 'X');
   std::transform(key.begin(), key.end(), key_lower.begin(), ::tolower);
   auto it = points_map_.find(key_lower);
   return (it == points_map_.end()) ? 0.0f : it->second;
 }
 
-float PDDLProblemGenerator::getPointsObject(const std::string &obj) {
+float PDDLProblemGenerator::getPointsObject(const std::string &obj)
+{
   size_t minus_pos = obj.find_first_of("-");
-  return (minus_pos == obj.npos) ? getPoints(obj)
-                                 : getPoints(obj.substr(0, minus_pos));
+  return (minus_pos == obj.npos) ? getPoints(obj) : getPoints(obj.substr(0, minus_pos));
 }
 
-float PDDLProblemGenerator::getPointsLocation(const std::string &loc) {
+float PDDLProblemGenerator::getPointsLocation(const std::string &loc)
+{
   return (loc.size() > 2) ? getPoints(loc.substr(0, 2)) : 0.0f;
 }

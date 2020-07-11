@@ -2,7 +2,8 @@
 #include <rosplan_knowledge_msgs/GetAttributeService.h>
 #include <std_msgs/String.h>
 
-class KnowledgeBaseQueries {
+class KnowledgeBaseQueries
+{
  public:
   KnowledgeBaseQueries(ros::NodeHandle &nh);
   virtual ~KnowledgeBaseQueries();

@@ -8,12 +8,14 @@
 #include <mir_planner_executor/actions/stage/stage_action.h>
 #include <utility>
 
-StageAction::StageAction() : ExecutorAction("/stage_object_server") {
+StageAction::StageAction() : ExecutorAction("/stage_object_server")
+{
   // client_.waitForServer();
 }
 
-void StageAction::update_knowledge_base(
-    bool success, std::vector<diagnostic_msgs::KeyValue> &params) {
+void StageAction::update_knowledge_base(bool success,
+                                        std::vector<diagnostic_msgs::KeyValue> &params)
+{
   std::string robot = getValueOf(params, "robot_name");
   std::string platform = getValueOf(params, "platform");
   std::string object = getValueOf(params, "object");
@@ -23,8 +25,7 @@ void StageAction::update_knowledge_base(
     knowledge_updater_->addKnowledge("gripper_is_free", {{"r", robot}});
     knowledge_updater_->remGoal("gripper_is_free", {{"r", robot}});
 
-    knowledge_updater_->addKnowledge("stored",
-                                     {{"rp", platform}, {"o", object}});
+    knowledge_updater_->addKnowledge("stored", {{"rp", platform}, {"o", object}});
     knowledge_updater_->remGoal("stored", {{"rp", platform}, {"o", object}});
 
     knowledge_updater_->addKnowledge("occupied", {{"rp", platform}});
@@ -34,8 +35,8 @@ void StageAction::update_knowledge_base(
   }
 }
 
-void StageAction::updateParamsBasedOnContext(
-    std::vector<diagnostic_msgs::KeyValue> &params) {
+void StageAction::updateParamsBasedOnContext(std::vector<diagnostic_msgs::KeyValue> &params)
+{
   int platform_index = getIndexOf(params, "param_1");
   int object_index = getIndexOf(params, "param_2");
   if (platform_index > 0) {

@@ -2,7 +2,8 @@
 #include <avr/io.h>
 #include "misc.h"
 
-void uart_init(void) {
+void uart_init(void)
+{
   // set baud rate
   UBRR0H = UBRRH_VALUE;
   UBRR0L = UBRRL_VALUE;
@@ -16,13 +17,15 @@ void uart_init(void) {
   SETBIT1(UCSR0C, UCSZ00);
 }
 
-void uart_write(char c) {
+void uart_write(char c)
+{
   // wait for previous transmission to be finished
   loop_until_bit_is_set(UCSR0A, UDRE0);
   UDR0 = c;
 }
 
-static char to_hex(char b) {
+static char to_hex(char b)
+{
   b = 0x0F & b;
   if (b > 9) {
     return b + 0x37;
@@ -31,7 +34,8 @@ static char to_hex(char b) {
   }
 }
 
-void uart_write_hex(char b) {
+void uart_write_hex(char b)
+{
   uart_write('0');
   uart_write('x');
   uart_write(to_hex(b >> 4));

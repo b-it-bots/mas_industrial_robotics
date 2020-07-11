@@ -11,18 +11,20 @@
 #include <mir_planner_executor/to_be_removed_constants.h>
 #include <utility>
 
-CombinedPickAction::CombinedPickAction() {
+CombinedPickAction::CombinedPickAction()
+{
   default_pick_ = new PickAction();
   pick_from_shelf_ = new PickFromShelfAction();
 }
 
-void CombinedPickAction::initialize(KnowledgeUpdater *knowledge_updater) {
+void CombinedPickAction::initialize(KnowledgeUpdater *knowledge_updater)
+{
   default_pick_->initialize(knowledge_updater);
   pick_from_shelf_->initialize(knowledge_updater);
 }
 
-bool CombinedPickAction::execute(
-    std::string &name, std::vector<diagnostic_msgs::KeyValue> &params) {
+bool CombinedPickAction::execute(std::string &name, std::vector<diagnostic_msgs::KeyValue> &params)
+{
   std::string location = getValueOf(params, "param_1");
   std::transform(location.begin(), location.end(), location.begin(), ::toupper);
   std::string location_type = location.substr(0, 2);

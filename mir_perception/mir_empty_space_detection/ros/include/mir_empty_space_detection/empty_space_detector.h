@@ -17,7 +17,8 @@
 
 namespace mpu = mir_perception_utils;
 
-class EmptySpaceDetector {
+class EmptySpaceDetector
+{
  public:
   EmptySpaceDetector();
   virtual ~EmptySpaceDetector();

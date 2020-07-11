@@ -15,14 +15,13 @@
 
 using namespace mir_perception_utils::object;
 
-BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud,
-                                const Eigen::Vector3f &normal) {
+BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud, const Eigen::Vector3f &normal)
+{
   BoundingBox box;
 
   // Step 1: transform the cloud so that z-axis as aligned with plane normal.
   Eigen::Vector3f perpendicular(-normal[1], normal[0], normal[2]);
-  Eigen::Affine3f transform =
-      pcl::getTransFromUnitVectorsZY(normal, perpendicular);
+  Eigen::Affine3f transform = pcl::getTransFromUnitVectorsZY(normal, perpendicular);
   Eigen::Affine3f inverse_transform = transform.inverse(Eigen::Isometry);
   PointCloud cloud_transformed;
   pcl::transformPointCloud(*cloud, cloud_transformed, transform);
@@ -33,8 +32,7 @@ BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud,
   // Initialization example taken from:
   // http://opencv.willowgarage.com/documentation/dynamic_structures.html#seqsort
   CvMemStorage *storage = cvCreateMemStorage(0);
-  CvSeq *points =
-      cvCreateSeq(CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), storage);
+  CvSeq *points = cvCreateSeq(CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), storage);
 
   // CvPoints are made of integers, so we will need to scale our points (which
   // are in meters).
@@ -81,8 +79,8 @@ BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud,
   return box;
 }
 
-BoundingBox BoundingBox::create(const PointCloud::VectorType &points,
-                                const Eigen::Vector3f &normal) {
+BoundingBox BoundingBox::create(const PointCloud::VectorType &points, const Eigen::Vector3f &normal)
+{
   PointCloud::Ptr cloud(new PointCloud);
   cloud->points = points;
   cloud->width = points.size();

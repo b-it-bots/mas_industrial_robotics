@@ -10,24 +10,20 @@
 #include <rosplan_knowledge_msgs/GetAttributeService.h>
 #include <rosplan_knowledge_msgs/KnowledgeUpdateService.h>
 
-KnowledgeUpdater::KnowledgeUpdater(ros::NodeHandle &nh) {
-  rosplan_update_client_ =
-      nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>(
-          "/rosplan_knowledge_base/update");
-  rosplan_get_goals_client_ =
-      nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
-          "/rosplan_knowledge_base/state/goals");
-  rosplan_get_knowledge_client_ =
-      nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
-          "/rosplan_knowledge_base/state/propositions");
-  re_add_goals_server_ = nh.advertiseService(
-      "re_add_goals", &KnowledgeUpdater::re_add_goals, this);
+KnowledgeUpdater::KnowledgeUpdater(ros::NodeHandle &nh)
+{
+  rosplan_update_client_ = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>(
+      "/rosplan_knowledge_base/update");
+  rosplan_get_goals_client_ = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
+      "/rosplan_knowledge_base/state/goals");
+  rosplan_get_knowledge_client_ = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(
+      "/rosplan_knowledge_base/state/propositions");
+  re_add_goals_server_ = nh.advertiseService("re_add_goals", &KnowledgeUpdater::re_add_goals, this);
 }
 KnowledgeUpdater::~KnowledgeUpdater() {}
-
-bool KnowledgeUpdater::update_knowledge(
-    uint8_t type, std::string name,
-    std::vector<std::pair<std::string, std::string>> values) {
+bool KnowledgeUpdater::update_knowledge(uint8_t type, std::string name,
+                                        std::vector<std::pair<std::string, std::string>> values)
+{
   rosplan_knowledge_msgs::KnowledgeItem msg;
   msg.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
   msg.instance_type = "";
@@ -46,46 +42,45 @@ bool KnowledgeUpdater::update_knowledge(
   return rosplan_update_client_.call(srv);
 }
 
-bool KnowledgeUpdater::remKnowledge(
-    std::string name, std::vector<std::pair<std::string, std::string>> values) {
-  return update_knowledge(
-      rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::REMOVE_KNOWLEDGE,
-      name, values);
+bool KnowledgeUpdater::remKnowledge(std::string name,
+                                    std::vector<std::pair<std::string, std::string>> values)
+{
+  return update_knowledge(rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::REMOVE_KNOWLEDGE,
+                          name, values);
 }
 
-bool KnowledgeUpdater::addKnowledge(
-    std::string name, std::vector<std::pair<std::string, std::string>> values) {
-  return update_knowledge(
-      rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::ADD_KNOWLEDGE,
-      name, values);
+bool KnowledgeUpdater::addKnowledge(std::string name,
+                                    std::vector<std::pair<std::string, std::string>> values)
+{
+  return update_knowledge(rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::ADD_KNOWLEDGE,
+                          name, values);
 }
 
-bool KnowledgeUpdater::remGoal(
-    std::string name, std::vector<std::pair<std::string, std::string>> values) {
-  return update_knowledge(
-      rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::REMOVE_GOAL, name,
-      values);
+bool KnowledgeUpdater::remGoal(std::string name,
+                               std::vector<std::pair<std::string, std::string>> values)
+{
+  return update_knowledge(rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::REMOVE_GOAL, name,
+                          values);
 }
 
-bool KnowledgeUpdater::addGoal(
-    std::string name, std::vector<std::pair<std::string, std::string>> values) {
-  return update_knowledge(
-      rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::ADD_GOAL, name,
-      values);
+bool KnowledgeUpdater::addGoal(std::string name,
+                               std::vector<std::pair<std::string, std::string>> values)
+{
+  return update_knowledge(rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::ADD_GOAL, name,
+                          values);
 }
 
-bool KnowledgeUpdater::remGoalsWithObject(std::string object_name) {
+bool KnowledgeUpdater::remGoalsWithObject(std::string object_name)
+{
   rosplan_knowledge_msgs::GetAttributeService srv;
   if (!rosplan_get_goals_client_.call(srv)) {
     ROS_ERROR("Failed to call rosplan GetAttributeService");
     return false;
   }
-  const std::vector<rosplan_knowledge_msgs::KnowledgeItem> &goals =
-      srv.response.attributes;
+  const std::vector<rosplan_knowledge_msgs::KnowledgeItem> &goals = srv.response.attributes;
   for (auto const &goal : goals) {
     for (auto const &item : goal.values) {
-      if ((toUpper(item.key) == toUpper("o") ||
-           toUpper(item.key) == toUpper("peg")) &&
+      if ((toUpper(item.key) == toUpper("o") || toUpper(item.key) == toUpper("peg")) &&
           (toUpper(item.value) == toUpper(object_name))) {
         rosplan_knowledge_msgs::KnowledgeUpdateService srv_del;
         srv_del.request.update_type =
@@ -102,18 +97,17 @@ bool KnowledgeUpdater::remGoalsWithObject(std::string object_name) {
   return true;
 }
 
-bool KnowledgeUpdater::remGoalsWithLocation(std::string location) {
+bool KnowledgeUpdater::remGoalsWithLocation(std::string location)
+{
   rosplan_knowledge_msgs::GetAttributeService srv;
   if (!rosplan_get_goals_client_.call(srv)) {
     ROS_ERROR("Failed to call rosplan GetAttributeService");
     return false;
   }
-  const std::vector<rosplan_knowledge_msgs::KnowledgeItem> &goals =
-      srv.response.attributes;
+  const std::vector<rosplan_knowledge_msgs::KnowledgeItem> &goals = srv.response.attributes;
   for (auto const &goal : goals) {
     for (auto const &item : goal.values) {
-      if (toUpper(item.key) == toUpper("l") &&
-          (toUpper(item.value) == toUpper(location))) {
+      if (toUpper(item.key) == toUpper("l") && (toUpper(item.value) == toUpper(location))) {
         rosplan_knowledge_msgs::KnowledgeUpdateService srv_del;
         srv_del.request.update_type =
             rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::REMOVE_GOAL;
@@ -129,15 +123,15 @@ bool KnowledgeUpdater::remGoalsWithLocation(std::string location) {
   return true;
 }
 
-bool KnowledgeUpdater::remGoalsRelatedToLocation(std::string location) {
+bool KnowledgeUpdater::remGoalsRelatedToLocation(std::string location)
+{
   remGoalsWithLocation(location);
   rosplan_knowledge_msgs::GetAttributeService srv;
   if (!rosplan_get_knowledge_client_.call(srv)) {
     ROS_ERROR("Failed to call rosplan GetAttributeService");
     return false;
   }
-  const std::vector<rosplan_knowledge_msgs::KnowledgeItem> &facts =
-      srv.response.attributes;
+  const std::vector<rosplan_knowledge_msgs::KnowledgeItem> &facts = srv.response.attributes;
   for (auto const &fact : facts) {
     std::string name = fact.attribute_name;
     if (toUpper(name) == toUpper("on")) {
@@ -151,15 +145,14 @@ bool KnowledgeUpdater::remGoalsRelatedToLocation(std::string location) {
   return true;
 }
 
-bool KnowledgeUpdater::re_add_goals(
-    mir_planning_msgs::ReAddGoals::Request &req,
-    mir_planning_msgs::ReAddGoals::Response &res) {
+bool KnowledgeUpdater::re_add_goals(mir_planning_msgs::ReAddGoals::Request &req,
+                                    mir_planning_msgs::ReAddGoals::Response &res)
+{
   ROS_INFO("Going to re-add removed goals!");
   while (!removed_goals_.empty()) {
     auto goal = removed_goals_[0];
     rosplan_knowledge_msgs::KnowledgeUpdateService srv_add;
-    srv_add.request.update_type =
-        rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::ADD_GOAL;
+    srv_add.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateServiceRequest::ADD_GOAL;
     srv_add.request.knowledge = goal;
     if (!rosplan_update_client_.call(srv_add)) {
       res.success = false;
@@ -171,7 +164,8 @@ bool KnowledgeUpdater::re_add_goals(
   return true;
 }
 
-std::string KnowledgeUpdater::toUpper(std::string str) {
+std::string KnowledgeUpdater::toUpper(std::string str)
+{
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
   return str;
 }

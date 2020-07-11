@@ -12,7 +12,8 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 
-class DynamixelGripperGraspMonitorNode {
+class DynamixelGripperGraspMonitorNode
+{
  public:
   DynamixelGripperGraspMonitorNode();
   ~DynamixelGripperGraspMonitorNode();

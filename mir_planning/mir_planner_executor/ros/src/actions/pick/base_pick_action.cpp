@@ -8,8 +8,9 @@
 #include <mir_planner_executor/actions/pick/base_pick_action.h>
 #include <utility>
 
-void BasePickAction::update_knowledge_base(
-    bool success, std::vector<diagnostic_msgs::KeyValue> &params) {
+void BasePickAction::update_knowledge_base(bool success,
+                                           std::vector<diagnostic_msgs::KeyValue> &params)
+{
   std::string robot = getValueOf(params, "robot_name");
   std::string location = getValueOf(params, "location");
   std::string object = getValueOf(params, "object");
@@ -27,8 +28,7 @@ void BasePickAction::update_knowledge_base(
     ROS_WARN("Pick for object \"%s\" failed %d times", object.c_str(), count);
     if (count > N) {
       knowledge_updater_->remGoalsWithObject(object);
-      ROS_WARN("Pick failed %d times, remove goals with object \"%s\"", count,
-               object.c_str());
+      ROS_WARN("Pick failed %d times, remove goals with object \"%s\"", count, object.c_str());
       failure_count_[object] = 0;
     } else {
       knowledge_updater_->remKnowledge("perceived", {{"l", location}});
@@ -37,8 +37,8 @@ void BasePickAction::update_knowledge_base(
   }
 }
 
-void BasePickAction::updateParamsBasedOnContext(
-    std::vector<diagnostic_msgs::KeyValue> &params) {
+void BasePickAction::updateParamsBasedOnContext(std::vector<diagnostic_msgs::KeyValue> &params)
+{
   int location_index = getIndexOf(params, "param_1");
   int object_index = getIndexOf(params, "param_2");
   if (location_index > 0) {

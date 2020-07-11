@@ -7,7 +7,7 @@
 
 #include <mir_planner_executor/actions/perceive/perceive_action.h>
 
-PerceiveAction::PerceiveAction()
-    : BasePerceiveAction("/perceive_location_server") {
+PerceiveAction::PerceiveAction() : BasePerceiveAction("/perceive_location_server")
+{
   // client_.waitForServer();
 }

@@ -13,7 +13,8 @@
 
 // #define UART_DEBUG
 
-int main(void) {
+int main(void)
+{
   // Onboard LED Pin as output
   SETBIT1(DDRB, DDB5);
 
@@ -29,7 +30,8 @@ int main(void) {
 }
 
 // 16MHz / 1024 / 256  ca 60 Hz
-ISR(TIMER0_OVF_vect) {
+ISR(TIMER0_OVF_vect)
+{
   // read both adc values and send them via uart
   uint8_t adc0 = adc_read(3);
   uint8_t adc1 = adc_read(4);
