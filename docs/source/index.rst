@@ -8,7 +8,7 @@ MAS Industrial Robotics
 
 .. toctree::
   :maxdepth: 2
-    
+
   introduction
   getting_started
   contributing/index.rst

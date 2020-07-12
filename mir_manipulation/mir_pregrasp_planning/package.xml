@@ -29,7 +29,7 @@
   <run_depend>mcr_manipulation_pose_selector</run_depend>
   <run_depend>mcr_manipulation_monitors</run_depend>
   <run_depend>mcr_arm_motions</run_depend>
-  <run_depend>mcr_topic_tools</run_depend> 
+  <run_depend>mcr_topic_tools</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>visualization_msgs</run_depend>

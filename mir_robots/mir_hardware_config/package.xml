@@ -17,6 +17,6 @@
   <run_depend>mir_description</run_depend>
   <run_depend>youbot_description</run_depend>
 
-  <test_depend>roslaunch</test_depend>  
+  <test_depend>roslaunch</test_depend>
 
 </package>

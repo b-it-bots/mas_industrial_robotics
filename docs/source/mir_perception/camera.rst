@@ -69,7 +69,7 @@ How to use the RealSense2 camera
     cd *catkin workspace*/src/mas_perception/mcr_scene_segmentation/ros/launch
     gedit scene_segmentation.launch
 
-  Change the value of "dataset_collection" from "false" to "true". Change value of "logdir" from "/temp/ 
+  Change the value of "dataset_collection" from "false" to "true". Change value of "logdir" from "/temp/
   to the path in your computer where you want to save the files.
 
   Run the following to get access to the point clouds given by the camera:
@@ -81,20 +81,20 @@ How to use the RealSense2 camera
   Publish the message 'e-start':
 
   .. code-block:: bash
-  
+
     rostopic pub /mcr_perception/scene_segmentation/event_in std_msgs/String "data: 'e_start'"
 
   Publish the message 'e-add-cloud-start':
 
   .. code-block:: bash
-  
+
     rostopic pub /mcr_perception/scene_segmentation/event_in std_msgs/String "data: 'e_add_cloud_start'"
 
   This last one will save the current point cloud of the observed object in your system.
 
   .. warning::
-  
-    Sometimes the camera won't save the point cloud (don't worry, not your fault). 
+
+    Sometimes the camera won't save the point cloud (don't worry, not your fault).
     Just try a different position for the object until it works.
 
 6. Visualize Point Cloud

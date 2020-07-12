@@ -22,23 +22,23 @@ C/C++
 
 * Class names
 
-  Class names should be nouns in `UpperCamelCase <https://www.wikiwand.com/en/Camel_case>`_, 
-  i.e. the first letter of every word capitalised. Use whole words and avoid acronyms or 
+  Class names should be nouns in `UpperCamelCase <https://www.wikiwand.com/en/Camel_case>`_,
+  i.e. the first letter of every word capitalised. Use whole words and avoid acronyms or
   abbreviations (unless the abbreviation is much more widely used than the long form, such as SVM or ROS).
 
 * Function names
 
-  Regular functions have mixed case. The first word (which is usually a verb) starts 
-  with lowercase and the remaining words follow the `CamelCase <https://www.wikiwand.com/en/Camel_case>`_ practice. 
+  Regular functions have mixed case. The first word (which is usually a verb) starts
+  with lowercase and the remaining words follow the `CamelCase <https://www.wikiwand.com/en/Camel_case>`_ practice.
   For instance:
 
   .. code-block:: cpp
-    
+
     getEuclideanDistance2d ( double x1 , double y1 , double x2 , double y2 )
 
 * Variable Names
 
-  Variable names are all lowercase, with underscores between words. Class member 
+  Variable names are all lowercase, with underscores between words. Class member
   variables have trailing underscores. For instance:
 
   .. code-block:: cpp

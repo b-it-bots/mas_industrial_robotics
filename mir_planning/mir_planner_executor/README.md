@@ -22,7 +22,7 @@ roslaunch mir_planner_executor planner_executor_test.launch
   function.
 - Most of the time, this `execute` function will change the names of the
   parameters obtained from planner to something that makes sense. After that, it
-  will call `run` function which 
+  will call `run` function which
   - creates a goal of the action server
   - sends this goal to action server
   - wait for the server to respond within certain time duration

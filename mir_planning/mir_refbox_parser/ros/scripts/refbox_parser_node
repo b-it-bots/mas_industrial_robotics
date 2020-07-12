@@ -2,5 +2,5 @@
 
 import mir_refbox_parser_ros.refbox_parser
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mir_refbox_parser_ros.refbox_parser.main()

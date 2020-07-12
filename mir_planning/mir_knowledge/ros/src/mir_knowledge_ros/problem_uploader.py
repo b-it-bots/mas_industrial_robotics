@@ -33,14 +33,17 @@ KnowledgeUpdateServiceArray.
 
 from __future__ import print_function
 
+import mercury_planner.pddl as pddl  # for parsing pddl file
 import rospy
-from rosplan_knowledge_msgs.srv import KnowledgeUpdateService, KnowledgeUpdateServiceArray
-from rosplan_knowledge_msgs.srv import KnowledgeUpdateServiceRequest as Req
-from rosplan_knowledge_msgs.srv import GetDomainAttributeService
-from rosplan_knowledge_msgs.msg import KnowledgeItem
 from diagnostic_msgs.msg import KeyValue
+from rosplan_knowledge_msgs.msg import KnowledgeItem
+from rosplan_knowledge_msgs.srv import (
+    GetDomainAttributeService,
+    KnowledgeUpdateService,
+    KnowledgeUpdateServiceArray,
+)
+from rosplan_knowledge_msgs.srv import KnowledgeUpdateServiceRequest as Req
 
-import mercury_planner.pddl as pddl # for parsing pddl file
 
 class ProblemUploader(object):
 
@@ -54,14 +57,18 @@ class ProblemUploader(object):
 
     def __init__(self, problem_file):
         self._problem_file = problem_file
-        pddl_problem = pddl.pddl_file.parse_pddl_file('problem', self._problem_file)
+        pddl_problem = pddl.pddl_file.parse_pddl_file("problem", self._problem_file)
         self._instances = ProblemUploader.parse_objects(pddl_problem[3])
-        self._attr_to_obj_type = ProblemUploader.get_attr_to_obj_type(self._instances.keys())
+        self._attr_to_obj_type = ProblemUploader.get_attr_to_obj_type(
+            self._instances.keys()
+        )
         self._facts = self._parse_facts(pddl_problem[4])
         self._goals = self._parse_facts(pddl_problem[5][1])
 
     def upload(self):
-        instance_ki_list = ProblemUploader.get_instance_knowledge_item_list(self._instances)
+        instance_ki_list = ProblemUploader.get_instance_knowledge_item_list(
+            self._instances
+        )
         success_1 = ProblemUploader.update_kb_array(instance_ki_list, Req.ADD_KNOWLEDGE)
 
         fact_ki_list = ProblemUploader.get_fact_knowledge_item_list(self._facts)
@@ -85,9 +92,13 @@ class ProblemUploader(object):
         ki_list = []
         for instance_type, instance_names in instances.iteritems():
             for instance_name in instance_names:
-                ki_list.append(KnowledgeItem(knowledge_type=KnowledgeItem.INSTANCE,
-                                             instance_type=instance_type,
-                                             instance_name=instance_name.upper()))
+                ki_list.append(
+                    KnowledgeItem(
+                        knowledge_type=KnowledgeItem.INSTANCE,
+                        instance_type=instance_type,
+                        instance_name=instance_name.upper(),
+                    )
+                )
         return ki_list
 
     @staticmethod
@@ -102,10 +113,13 @@ class ProblemUploader(object):
         """
         ki_list = []
         for attr_name, kv_list in facts:
-            ki_list.append(KnowledgeItem(knowledge_type=KnowledgeItem.FACT,
-                                         attribute_name=attr_name,
-                                         values=[KeyValue(k, v.upper())
-                                                 for k, v in kv_list]))
+            ki_list.append(
+                KnowledgeItem(
+                    knowledge_type=KnowledgeItem.FACT,
+                    attribute_name=attr_name,
+                    values=[KeyValue(k, v.upper()) for k, v in kv_list],
+                )
+            )
         return ki_list
 
     @staticmethod
@@ -120,21 +134,22 @@ class ProblemUploader(object):
         :return: None
 
         """
-        update_kb_topic = '/rosplan_knowledge_base/update_array'
-        rospy.loginfo('Waiting for ' + update_kb_topic)
+        update_kb_topic = "/rosplan_knowledge_base/update_array"
+        rospy.loginfo("Waiting for " + update_kb_topic)
         rospy.wait_for_service(update_kb_topic)
 
         try:
             update_kb = rospy.ServiceProxy(update_kb_topic, KnowledgeUpdateServiceArray)
-            response = update_kb(update_type=[update_type]*len(ki_list),
-                                 knowledge=ki_list)
+            response = update_kb(
+                update_type=[update_type] * len(ki_list), knowledge=ki_list
+            )
             if response.success:
-                rospy.loginfo('Upload succeeded')
+                rospy.loginfo("Upload succeeded")
             else:
-                rospy.logerr('Upload failed')
+                rospy.logerr("Upload failed")
             return response.success
         except rospy.ServiceException as e:
-            rospy.logerr('Service call failed: %s'%e)
+            rospy.logerr("Service call failed: %s" % e)
 
     @staticmethod
     def parse_objects(pddl_objects):
@@ -153,9 +168,9 @@ class ProblemUploader(object):
         curr_list = []
         obj_dict = {}
         while len(objects) > 0:
-            string = objects.pop(0).encode('utf-8')
-            if string == '-':
-                type_name = objects.pop(0).encode('utf-8')
+            string = objects.pop(0).encode("utf-8")
+            if string == "-":
+                type_name = objects.pop(0).encode("utf-8")
                 obj_dict[type_name] = curr_list
                 curr_list = list()
             else:
@@ -173,12 +188,15 @@ class ProblemUploader(object):
         """
         facts = []
         for fact in pddl_facts[1:]:
-            attr_name = fact[0].encode('utf-8')
-            if attr_name not in self._attr_to_obj_type or \
-                    len(fact)-1 != len(self._attr_to_obj_type[attr_name]):
+            attr_name = fact[0].encode("utf-8")
+            if attr_name not in self._attr_to_obj_type or len(fact) - 1 != len(
+                self._attr_to_obj_type[attr_name]
+            ):
                 continue
-            kv_list = [(key, value.encode('utf-8'))
-                       for key, value in zip(self._attr_to_obj_type[attr_name], fact[1:])]
+            kv_list = [
+                (key, value.encode("utf-8"))
+                for key, value in zip(self._attr_to_obj_type[attr_name], fact[1:])
+            ]
             facts.append((attr_name, kv_list))
         return facts
 
@@ -197,16 +215,18 @@ class ProblemUploader(object):
         :rtype: dict
 
         """
-        domain_attr_kb_topic = '/rosplan_knowledge_base/domain/predicates'
-        rospy.loginfo('Waiting for ' + domain_attr_kb_topic)
+        domain_attr_kb_topic = "/rosplan_knowledge_base/domain/predicates"
+        rospy.loginfo("Waiting for " + domain_attr_kb_topic)
         rospy.wait_for_service(domain_attr_kb_topic)
-        rospy.loginfo('Wait complete.')
+        rospy.loginfo("Wait complete.")
         response = None
         try:
-            get_domain_attr = rospy.ServiceProxy(domain_attr_kb_topic, GetDomainAttributeService)
+            get_domain_attr = rospy.ServiceProxy(
+                domain_attr_kb_topic, GetDomainAttributeService
+            )
             response = get_domain_attr()
         except rospy.ServiceException as e:
-            rospy.logerr('Service call failed: %s'%e)
+            rospy.logerr("Service call failed: %s" % e)
             return None
 
         attr_to_obj_type = {}
@@ -215,10 +235,14 @@ class ProblemUploader(object):
         return attr_to_obj_type
 
     @staticmethod
-    def make_srv_req_to_KB(knowledge_type_is_instance=True,
-                           instance_type='', instance_name='',
-                           attribute_name='', values=[],
-                           update_type_is_knowledge=True):
+    def make_srv_req_to_KB(
+        knowledge_type_is_instance=True,
+        instance_type="",
+        instance_name="",
+        attribute_name="",
+        values=[],
+        update_type_is_knowledge=True,
+    ):
         """
         make a service call to ``rosplan_knowledge_base`` (mongodb)
 
@@ -295,8 +319,8 @@ class ProblemUploader(object):
             msg.attribute_name = attribute_name
             msg.values = [KeyValue(i[0], i[1].upper()) for i in values]
 
-        update_kb_topic = '/rosplan_knowledge_base/update'
-        rospy.loginfo('Waiting for ' + update_kb_topic)
+        update_kb_topic = "/rosplan_knowledge_base/update"
+        rospy.loginfo("Waiting for " + update_kb_topic)
         rospy.wait_for_service(update_kb_topic)
 
         try:
@@ -307,11 +331,11 @@ class ProblemUploader(object):
                 response = update_kb(Req.ADD_GOAL, msg)
 
         except rospy.ServiceException as e:
-            rospy.logerr('Service call failed: %s'%e)
+            rospy.logerr("Service call failed: %s" % e)
 
         if response.success:
-            rospy.loginfo('KB updated successfully.')
+            rospy.loginfo("KB updated successfully.")
             return True
         else:
-            rospy.logerror('KB update failed.')
+            rospy.logerror("KB update failed.")
             return False

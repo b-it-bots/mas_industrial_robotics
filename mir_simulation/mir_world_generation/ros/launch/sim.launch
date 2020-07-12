@@ -8,7 +8,7 @@
     <arg name="debug" default="false"/>
 
     <!-- model args -->
-    
+
     <arg name="generation_dir" default="/tmp"/>
     <arg name="world_model" default="$(arg generation_dir)/at_work_arena.xacro"/>
     <arg name="map_file" default="$(arg generation_dir)/map.yaml"/>

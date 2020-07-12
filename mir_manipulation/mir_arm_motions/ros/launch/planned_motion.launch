@@ -5,7 +5,7 @@
 
         <!-- the cycle rate of the node (in hz) -->
         <param name="~loop_rate"  type="double" value="10.0"/>
-        
+
         <param name="~move_group"  type="string" value="/move_group"/>
         <param name="~arm"  type="string" value="arm_1"/>
 

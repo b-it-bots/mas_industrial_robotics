@@ -6,7 +6,7 @@
 
     <group ns="mir_perception">
         <node pkg="mir_handle_detection" type="drawer_handle_perceiver" name="drawer_handle_perceiver" output="screen">
-            <remap from="~input_point_cloud" to="$(arg input_pointcloud_topic)" />  
+            <remap from="~input_point_cloud" to="$(arg input_pointcloud_topic)" />
             <rosparam file="$(arg params_file)" command="load" />
         </node>
     </group>

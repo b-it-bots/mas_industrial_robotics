@@ -1,6 +1,6 @@
 .. _mir_simulation:
 
-Simulation 
+Simulation
 ###########
 
 .. toctree::

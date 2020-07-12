@@ -5,7 +5,7 @@ Dataset
 
 .. _dataset_collection:
 
-Dataset collection 
+Dataset collection
 ----------------------
 
 .. _3d_dataset_collection:
@@ -28,7 +28,7 @@ Setup:
     * Launch the camera
 
       Go to :ref:`realsense2_camera` for more information about the camera.
-    
+
     * Apply static transform from camera_frame to base_link as explained in :ref:`realsense2_camera`
 
       Make sure the pointcloud of the plane is parallel to the gorund on rviz by transforming/rotating it.
@@ -77,7 +77,7 @@ Setup:
 
 .. _dataset_preprocessing:
 
-Dataset preprocessing 
+Dataset preprocessing
 -----------------------
 
 .. _2d_dataset_preprocessing:
@@ -91,4 +91,4 @@ Dataset preprocessing
   * Label the data
   * Augment data
   * Convert to a particular format: VOC, KITTI etc
-  
+

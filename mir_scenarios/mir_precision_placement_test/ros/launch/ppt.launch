@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
- 
+
   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
   <arg name="sim" default="false"/>
 
@@ -12,5 +12,5 @@
 
   <!-- hole detection -->
   <include file="$(find mcr_cavity_recognition)/ros/launch/cavity_recognition.launch"/>
- 
+
 </launch>

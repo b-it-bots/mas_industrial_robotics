@@ -5,6 +5,6 @@
   <include file="$(find youbot_gazebo_control)/launch/arm_controller.launch" />
 
   <include file="$(find youbot_gazebo_control)/launch/gripper_controller.launch" />
-  <!-- <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" /> -->	
+  <!-- <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" /> -->
 
 </launch>

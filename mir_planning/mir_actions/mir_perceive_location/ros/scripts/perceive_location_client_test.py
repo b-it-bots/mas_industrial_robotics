@@ -1,25 +1,25 @@
 #! /usr/bin/env python
 
 import sys
+
 import rospy
 from actionlib import SimpleActionClient
-
 from actionlib_msgs.msg import GoalStatus
-from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteGoal
 from diagnostic_msgs.msg import KeyValue
+from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteGoal
 
-if __name__ == '__main__':
-    rospy.init_node('perceive_location_client_tester')
+if __name__ == "__main__":
+    rospy.init_node("perceive_location_client_tester")
 
-    client = SimpleActionClient('perceive_location_server', GenericExecuteAction)
+    client = SimpleActionClient("perceive_location_server", GenericExecuteAction)
     client.wait_for_server()
 
     goal = GenericExecuteGoal()
     if len(sys.argv) > 1:
         location = str(sys.argv[1]).upper()
-        goal.parameters.append(KeyValue(key='location', value=location))
+        goal.parameters.append(KeyValue(key="location", value=location))
 
-    rospy.loginfo('Sending following goal to perceive location server')
+    rospy.loginfo("Sending following goal to perceive location server")
     rospy.loginfo(goal)
 
     client.send_goal(goal)
@@ -32,11 +32,11 @@ if __name__ == '__main__':
     state = client.get_state()
     result = client.get_result()
     if state == GoalStatus.SUCCEEDED:
-        rospy.loginfo('Action SUCCESS')
+        rospy.loginfo("Action SUCCESS")
         for kv in result.results:
             rospy.loginfo(kv.value)
     elif state == GoalStatus.ABORTED:
-        rospy.logerr('Action FAILED')
+        rospy.logerr("Action FAILED")
     else:
-        rospy.logwarn('State: ' + str(state))
+        rospy.logwarn("State: " + str(state))
         rospy.loginfo(result)

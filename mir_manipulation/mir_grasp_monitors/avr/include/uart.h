@@ -8,4 +8,3 @@ void uart_write(char c);
 void uart_write_hex(char b);
 
 #endif
-

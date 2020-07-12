@@ -11,15 +11,14 @@
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "teleop_joypad");
-    ros::NodeHandle nh("~");
+  ros::init(argc, argv, "teleop_joypad");
+  ros::NodeHandle nh("~");
 
-    TeleOpJoypad* teleop = new TeleOpJoypad(nh);
+  TeleOpJoypad *teleop = new TeleOpJoypad(nh);
 
-    ros::Rate loop_rate(50);
+  ros::Rate loop_rate(50);
 
-    ros::spin();
+  ros::spin();
 
-    delete teleop;
+  delete teleop;
 }
-

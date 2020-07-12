@@ -6,7 +6,7 @@
 
   <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
   <author email="alexander.moriarty@gmail.com">Alexander Moriarty</author>
-  
+
   <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
   <maintainer email="alexander.moriarty@gmail.com">Alexander Moriarty</maintainer>
 
@@ -26,5 +26,5 @@
   <run_depend>serial</run_depend>
 
   <test_depend>roslaunch</test_depend>
-  
+
 </package>

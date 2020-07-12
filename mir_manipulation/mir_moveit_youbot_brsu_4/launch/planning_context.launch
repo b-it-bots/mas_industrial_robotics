@@ -13,7 +13,7 @@
 
   <!-- The semantic description that corresponds to the URDF -->
   <param name="$(arg robot_description)_semantic" textfile="$(find mir_moveit_youbot_brsu_4)/config/youbot.srdf" />
-  
+
   <!-- Load updated joint limits (override information from URDF) -->
   <group unless="$(arg joint_limit_fast)" ns="$(arg robot_description)_planning">
     <rosparam command="load" file="$(find mir_moveit_youbot_brsu_4)/config/joint_limits.yaml"/>
@@ -28,5 +28,5 @@
   <group ns="$(arg robot_description)_kinematics">
     <rosparam command="load" file="$(find mir_moveit_youbot_brsu_4)/config/kinematics.yaml"/>
   </group>
-  
+
 </launch>

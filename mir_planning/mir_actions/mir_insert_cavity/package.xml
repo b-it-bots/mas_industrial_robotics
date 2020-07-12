@@ -3,7 +3,7 @@
   <name>mir_insert_cavity</name>
   <version>1.0.0</version>
   <description>
-  After perceiving a cavity workstation, this package tries to insert an object 
+  After perceiving a cavity workstation, this package tries to insert an object
   in correct cavity.
   </description>
 

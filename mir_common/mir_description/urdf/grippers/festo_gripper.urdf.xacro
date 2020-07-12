@@ -20,7 +20,7 @@
                 <mass value="0.1"/>
                 <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
             </inertial>
-            
+
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
@@ -28,7 +28,7 @@
                 </geometry>
                 <material name="Black" />
             </visual>
-            
+
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
@@ -37,7 +37,7 @@
             </collision>
         </link>
 
-        
+
         <!-- Center point of linkage for festo gripper mechanics -->
         <joint name="${name}_linkage" type="fixed">
             <origin xyz="0.0 0.0 0.036" rpy="0 0 ${M_PI}" />
@@ -52,7 +52,7 @@
                 <mass value="0.01"/>
                 <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
             </inertial>
-            
+
             <visual>
                 <origin xyz="0.051 0.062 -0.01" rpy="${M_PI/2} 0 ${-M_PI/2}" />
                 <geometry>
@@ -60,7 +60,7 @@
                 </geometry>
                 <material name="Black" />
             </visual>
-            
+
             <collision>
                 <origin xyz="0.012 0.062 -0.026" rpy="${M_PI/2} 0 ${-M_PI/2}" />
                 <geometry>
@@ -68,16 +68,16 @@
                 </geometry>
             </collision>
         </link>
-    
-        <!-- Left finger from original youbot_gripper to keep things happy -->      
+
+        <!-- Left finger from original youbot_gripper to keep things happy -->
         <joint name="${name}_finger_joint_l" type="prismatic">
             <origin xyz="0.004 0.008 0.046" rpy="0 0 ${M_PI}" />
             <parent link="${name}_palm_link"/>
             <child link="${name}_finger_link_l"/>
             <axis xyz="0 -1 0" />
-            
+
             <dynamics damping="1.0" friction="1.0" />
-            <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/> 
+            <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/>
                         <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${threshold}" soft_upper_limit="${finger_joint_soft}" />
         </joint>
 
@@ -96,7 +96,7 @@
             <child link="${name}_finger_link_r"/>
             <axis xyz="0 -1 0" />
             <dynamics damping="1.0" friction="1.0" />
-            <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/> 
+            <limit effort="1" velocity="0.1" lower="0" upper="${finger_joint}"/>
             <safety_controller k_position="20" k_velocity="25" soft_lower_limit="${threshold}" soft_upper_limit="${finger_joint_soft}" />
         </joint>
 
@@ -107,7 +107,7 @@
                 <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
             </inertial>
         </link>
-    
+
         <!-- Joint at end of festo fingers in closed position -->
         <joint name="${name}_tip_joint" type="fixed">
             <origin xyz="0.0 0.0 0.13" rpy="0 0 ${M_PI}" />

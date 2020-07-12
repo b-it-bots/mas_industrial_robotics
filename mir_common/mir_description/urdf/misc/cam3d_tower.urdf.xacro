@@ -9,7 +9,7 @@
   <xacro:property name="cam3d_tower_width" value="0.03" />
   <xacro:property name="cam3d_tower_depth" value="0.03" />
   <xacro:property name="cam3d_tower_collision_offset" value="0.03" />
-  
+
   <xacro:macro name="cam3d_tower" params="name parent *origin">
   	<link name="${name}_link">
       <inertial>
@@ -33,7 +33,7 @@
         </geometry>
       </collision >
     </link>
-    
+
     <joint name="${name}_joint" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent}"/>

@@ -19,14 +19,14 @@
 				<mass value="2.062"/>
 				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
 			</inertial>
-			
+
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
 					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_base.dae" scale="0.001 0.001 0.001" />
 				</geometry>
 			</visual>
-			
+
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -34,8 +34,8 @@
 				</geometry>
 			</collision>
 		</link>
-		
-		
+
+
 		<!-- fence -->
 		<joint name="${name}_fence_joint" type="fixed" >
 			<parent link="${name}_base_link" />
@@ -48,14 +48,14 @@
 				<mass value="${4 * 0.204}"/>
 				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
 			</inertial>
-			
+
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
 					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_fence.dae" scale="0.001 0.001 0.001" />
 				</geometry>
 			</visual>
-			
+
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>

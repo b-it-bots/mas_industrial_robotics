@@ -18,31 +18,28 @@
 
 namespace mir_perception_utils
 {
-
 namespace visualization
 {
-
 class ClusteredPointCloudVisualizer
 {
-public:
-    ClusteredPointCloudVisualizer(const boost::shared_ptr<ros::NodeHandle> &nh, const std::string& topic_name,
-                                  bool check_subscribers = true);
+ public:
+  ClusteredPointCloudVisualizer(const boost::shared_ptr<ros::NodeHandle> &nh,
+                                const std::string &topic_name, bool check_subscribers = true);
 
-    ClusteredPointCloudVisualizer(const std::string& topic_name,
-                                  bool check_subscribers = true);
+  ClusteredPointCloudVisualizer(const std::string &topic_name, bool check_subscribers = true);
 
-    template<typename PointT>
-    void publish(const std::vector<typename pcl::PointCloud<PointT>::Ptr>& clusters,
-                 const std::string& frame_id);
-    int getNumSubscribers();
+  template <typename PointT>
+  void publish(const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
+               const std::string &frame_id);
+  int getNumSubscribers();
 
-private:
-    ros::Publisher cloud_publisher_;
+ private:
+  ros::Publisher cloud_publisher_;
 
-    bool check_subscribers_;
+  bool check_subscribers_;
 
-    static const size_t COLORS_NUM = 32;
-    float COLORS[COLORS_NUM];
+  static const size_t COLORS_NUM = 32;
+  float COLORS[COLORS_NUM];
 };
 
 }  // namespace visualization

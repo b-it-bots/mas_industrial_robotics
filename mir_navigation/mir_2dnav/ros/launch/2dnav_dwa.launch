@@ -14,20 +14,20 @@
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
     <rosparam file="$(find mir_2dnav)/ros/config/dwa/$(arg speed_mode)/move_base_params.yaml" command="load" />
     <rosparam file="$(find mir_hardware_config)/$(arg robot)/config/base_footprint.yaml" command="load"/>
-    
+
     <rosparam file="$(find mir_2dnav)/ros/config/dwa/costmap_common_params.yaml" command="load" ns="global_costmap"/>
     <rosparam file="$(find mir_hardware_config)/$(arg robot)/config/base_footprint.yaml" command="load" ns="global_costmap"/>
     <rosparam file="$(find mir_2dnav)/ros/config/dwa/global_costmap_params.yaml" command="load" />
-    
+
     <rosparam file="$(find mir_2dnav)/ros/config/dwa/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find mir_hardware_config)/$(arg robot)/config/base_footprint.yaml" command="load" ns="local_costmap"/>
-    <rosparam file="$(find mir_2dnav)/ros/config/dwa/local_costmap_params.yaml" command="load" />    
+    <rosparam file="$(find mir_2dnav)/ros/config/dwa/local_costmap_params.yaml" command="load" />
 
     <rosparam file="$(find mir_2dnav)/ros/config/dwa/$(arg speed_mode)/dwa_local_planner_params.yaml" command="load" ns="DWAPlannerROS" />
-    
-    <!-- Upload recovery behavior parameters-->    
-    <rosparam file="$(find mir_2dnav)/ros/config/recovery_behaviors/force_field_parameters.yaml" command="load" ns="force_field_recovery"/>    
-    <rosparam file="$(find mir_2dnav)/ros/config/recovery_behaviors/clear_costmap_parameters.yaml" command="load" ns="clear_costmap_recovery"/>    
+
+    <!-- Upload recovery behavior parameters-->
+    <rosparam file="$(find mir_2dnav)/ros/config/recovery_behaviors/force_field_parameters.yaml" command="load" ns="force_field_recovery"/>
+    <rosparam file="$(find mir_2dnav)/ros/config/recovery_behaviors/clear_costmap_parameters.yaml" command="load" ns="clear_costmap_recovery"/>
 
     <!-- Remap force field cmd_vel to twist mux cmd_vel -->
     <remap from="cmd_vel" to="/cmd_vel_prio_medium"/>

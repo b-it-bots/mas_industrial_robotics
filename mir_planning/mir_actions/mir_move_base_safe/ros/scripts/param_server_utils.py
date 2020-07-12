@@ -1,15 +1,22 @@
 #!/usr/bin/python
-import rospy
 import geometry_msgs.msg
+import rospy
 import tf
 
-def get_orientation_from_param_server(orientation_goal, frame_id='/map', param_ns='/script_server/base_orientations/'):
-    assert type(orientation_goal) == str, "'orientation_goal' must be a string." 
+
+def get_orientation_from_param_server(
+    orientation_goal, frame_id="/map", param_ns="/script_server/base_orientations/"
+):
+    assert type(orientation_goal) == str, "'orientation_goal' must be a string."
 
     parameter_name = param_ns + orientation_goal
-    if not rospy.has_param(parameter_name):                                                                             
-        rospy.logerr("parameter '{}' does not exist on ROS Parameter Server, aborting...".format(parameter_name))       
-        return None                                                                                                     
+    if not rospy.has_param(parameter_name):
+        rospy.logerr(
+            "parameter '{}' does not exist on ROS Parameter Server, aborting...".format(
+                parameter_name
+            )
+        )
+        return None
     else:
         angle = rospy.get_param(parameter_name)
 
@@ -20,10 +27,12 @@ def get_orientation_from_param_server(orientation_goal, frame_id='/map', param_n
         orientation.z = quat[2]
         orientation.w = quat[3]
 
-        return orientation 
+        return orientation
 
 
-def get_pose_from_param_server(navigation_goal, frame_id='/map', param_ns='/script_server/base/'):
+def get_pose_from_param_server(
+    navigation_goal, frame_id="/map", param_ns="/script_server/base/"
+):
     """
     param navigation_goal: the name of the navigation goal to obtain the pose.
     type navigation_goal: str
@@ -37,25 +46,29 @@ def get_pose_from_param_server(navigation_goal, frame_id='/map', param_ns='/scri
     return: the pose specified by name; or None if the pose name is not
         in the param server.
     return type: geometry_msgs.msg.PoseStamped or None
-    
+
     """
     assert type(navigation_goal) == str, "'navigation_goal' must be a string."
-        
+
     parameter_name = param_ns + navigation_goal
     if not rospy.has_param(parameter_name):
-        rospy.logerr("parameter '{}' does not exist on ROS Parameter Server, aborting...".format(parameter_name))
+        rospy.logerr(
+            "parameter '{}' does not exist on ROS Parameter Server, aborting...".format(
+                parameter_name
+            )
+        )
         return None
     else:
         pose = geometry_msgs.msg.PoseStamped()
         pose_2d = rospy.get_param(parameter_name)
 
         # TODO: Oscar fix this... No Jose i will not fix it
-        #pose.header.stamp = rospy.Time.now()
+        # pose.header.stamp = rospy.Time.now()
         pose.header.frame_id = frame_id
         pose.pose.position.x = pose_2d[0]
         pose.pose.position.y = pose_2d[1]
         pose.pose.position.z = 0.0
-        
+
         q = tf.transformations.quaternion_from_euler(0, 0, pose_2d[2])
         pose.pose.orientation.x = q[0]
         pose.pose.orientation.y = q[1]
@@ -67,9 +80,12 @@ def get_pose_from_param_server(navigation_goal, frame_id='/map', param_ns='/scri
 
 if __name__ == "__main__":
     import sys
+
     while True:
-        nav_goal = raw_input("Please specify the name of the navigation_goal ('q' to quit): ")
-        if nav_goal == 'q':
+        nav_goal = raw_input(
+            "Please specify the name of the navigation_goal ('q' to quit): "
+        )
+        if nav_goal == "q":
             print("Quitting...")
             sys.exit(0)
         pose = get_pose_from_param_server(nav_goal)

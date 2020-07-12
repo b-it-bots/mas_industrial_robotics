@@ -1,6 +1,6 @@
 .. _mir_navigation:
 
-Navigation 
+Navigation
 #############
 
 On workstation or your PC
@@ -9,9 +9,9 @@ On workstation or your PC
 * To shh the youbot (in all terminals):
 
   .. code-block:: bash
-      
+
       yb4
-  
+
   .. note::
 
       alias yb4=ssh -X robocup@youbot-brsu-4-pc2
@@ -24,7 +24,7 @@ On workstation or your PC
 
   .. note::
 
-      alias export_yb4=export ROS_MASTER_URI=http://youbot-brsu-4-pc2:11311 
+      alias export_yb4=export ROS_MASTER_URI=http://youbot-brsu-4-pc2:11311
 
 * Run rviz
 
@@ -42,13 +42,13 @@ On workstation or your PC
 * Run roscore
 
   .. code-block:: bash
-    
+
       roscore
 
 * Launch the robot
 
   .. code-block:: bash
-    
+
       roslaunch mir_bringup robot.launch
 
 * Run 2D SLAM
@@ -58,22 +58,22 @@ On workstation or your PC
       roslaunch mir_2dslam 2dslam.launch
 
   .. note::
-      
+
       The map is built using the front laser's only
 
 * Run the map saver
 
   Go to the map configuration directory
-  
+
   .. code-block:: bash
-    
+
       roscd mcr_default_env_config
 
-  By using `ls` you can see several folders corresponding to existing environments. 
+  By using `ls` you can see several folders corresponding to existing environments.
   You can either use an existing map or create a new one:
 
   .. code-block:: bash
-      
+
       mkdir [map_name]
       cd [map_name]
 
@@ -88,17 +88,17 @@ On workstation or your PC
   Finally, to use the map that you just created you need to check which map will be loaded by the navigation stack:
 
   .. code-block:: bash
-  
+
       echo $ROBOT_ENV
 
   If you need to change it:
 
   .. code-block:: bash
-      
+
       export ROBOT_ENV=[map_name]
 
   .. note::
-  
+
       Usually the `.rosc` script is used to set the environment, among other variables.
 
 .. _2d_navigation:
@@ -108,10 +108,10 @@ On workstation or your PC
 
 * Bringup the robot
 
-  First export the environment to be used: 
-  
+  First export the environment to be used:
+
   .. code-block:: bash
-      
+
       export ROBOT_ENV=brsu-C025
 
   Launch the robot:
@@ -123,7 +123,7 @@ On workstation or your PC
 * Launch the navigation node
 
   .. code-block:: bash
-      
+
       roslaunch mir_2dnav 2Dnav.launch
 
 * Create navigation goals and orientations
@@ -137,11 +137,11 @@ On workstation or your PC
 
 * Localize the robot
 
-  In rviz: 
+  In rviz:
 
-  1. Select the 2D pose estimate 
-  2. Click the position near the robot 
-  3. Move with joystick 
+  1. Select the 2D pose estimate
+  2. Click the position near the robot
+  3. Move with joystick
   4. Launch navigation tools in yb2
 
 * Save the navigation and orientation goals
@@ -162,5 +162,5 @@ On workstation or your PC
 * Navigation test using refbox
 
 .. code-block:: bash
-    
+
     roslaunch mir_basic_navigation_test refbox_parser.py

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
- 
+
   <!-- Launch all required components for planning approach -->
-  
-  <!-- Launch file arguments -->    
+
+  <!-- Launch file arguments -->
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="sim" default="false"/>
     <arg name="object_perception_target_frame" default="/base_link_static"/>
@@ -26,13 +26,13 @@
       <arg name="pose_in" value="/mcr_perception/object_selector/output/object_pose" />
       <arg name="cmd_vel_out" value="$(arg base_cmd_topic)" />
     </include>
-    
+
 
     <!-- dynamic reconfigure from code, receive string and params and does the request NOT TESTED -->
     <include file="$(find mcr_dynamic_reconfigure_client)/ros/launch/dynamic_reconfigure_client.launch">
         <arg name="config_file" value="$(find mir_yb_actions)/ros/config/yb_manipulation_params.yaml" />
     </include>
-    
+
   <!-- perception -->
     <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch"/>
     <!-- <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" > -->
@@ -54,5 +54,5 @@
     <node pkg="mir_perceive_location" type="perceive_location_server_arm_poses.py" name="perceive_location_server" output="screen" />
     <node pkg="mir_pick_object" type="pick_object_server_whole_body_control.py" name="wbc_pick_object_server"
             output="screen"/>
-    
+
 </launch>
