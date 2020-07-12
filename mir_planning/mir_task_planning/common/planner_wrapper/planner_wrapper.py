@@ -10,9 +10,8 @@ import subprocess
 import sys
 import time
 
-import yaml
-
 import rospkg
+import yaml
 
 
 class PlannerWrapper(object):
@@ -24,7 +23,8 @@ class PlannerWrapper(object):
     :type planner_commands: dict
     :param plan_dir: directory path where the plan files should be generated (optional)
     :type plan_dir: string
-    :param plan_backup_dir: directory path where the best plan's backup copy should be placed (optional)
+    :param plan_backup_dir: directory path where the best plan's backup copy should be
+                            placed (optional)
     :type plan_backup_dir: string
     :param plan_file_name: name of the generated plan files (optional)
     :type plan_file_name: string
@@ -74,9 +74,7 @@ class PlannerWrapper(object):
             return None
 
         print("[planner_wrapper] Trying to plan...")
-        command = self._get_valid_planner_command(
-            planner, domain_file, problem_file
-        )
+        command = self._get_valid_planner_command(planner, domain_file, problem_file)
         if not command:
             return None
         print(command)
@@ -90,22 +88,16 @@ class PlannerWrapper(object):
                 with open(plan_file) as file_object:
                     raw_plan = file_object.read().split("\n")
                     # remove comments
-                    task_plan = [
-                        line
-                        for line in raw_plan
-                        if len(line) > 0 and line[0] != ";"
-                    ]
+                    task_plan = [line for line in raw_plan if line and line[0] != ";"]
 
                 # delete all files in plan directory
-                self._clean_plan_dir()
+                self.clean_plan_dir()
 
                 # take a backup of plan file in desired directory
                 with open(
                     os.path.join(self._plan_backup_dir, "task_plan.plan"), "w"
                 ) as file_obj:
-                    file_obj.writelines(
-                        ["%s\n" % action for action in task_plan]
-                    )
+                    file_obj.writelines(["%s\n" % action for action in task_plan])
 
                 return task_plan
         print("[planner_wrapper] Plan call failed")
@@ -151,13 +143,13 @@ class PlannerWrapper(object):
                     proc_obj.kill()
             with open("command_output.txt", "r") as output_file:
                 output_text = output_file.read()
-                if len(output_text) > 0:
+                if output_text:
                     success = True
             os.chdir(pwd)
-        except Exception as e:
+        except Exception as err:
             print(
                 "[planner_wrapper] Encountered following error while executing command\n"
-                + str(e)
+                + str(err)
             )
         return success
 
@@ -170,15 +162,13 @@ class PlannerWrapper(object):
         plan_file_list = [
             filename for filename in files_list if "task_plan" in filename
         ]
-        if len(plan_file_list) == 0:
+        if plan_file_list:
             print("[planner_wrapper] No plan files found.")
             return None
-        best_plan = sorted(
-            plan_file_list, key=lambda x: int(x.split(".")[-1])
-        )[-1]
+        best_plan = sorted(plan_file_list, key=lambda x: int(x.split(".")[-1]))[-1]
         return os.path.join(self._plan_dir, best_plan)
 
-    def _clean_plan_dir(self):
+    def clean_plan_dir(self):
         """Remove all files that are unnecessary.
         :returns: None
 
@@ -187,10 +177,10 @@ class PlannerWrapper(object):
         for text_file in ls_output:
             try:
                 os.remove(os.path.join(self._plan_dir, text_file))
-            except Exception as e:
+            except Exception as err:
                 print(
                     "[planner_wrapper] Encountered following error while cleaning plan dir\n"
-                    + str(e)
+                    + str(err)
                 )
 
     def _get_valid_planner_command(self, planner, domain_file, problem_file):
@@ -220,10 +210,10 @@ class PlannerWrapper(object):
             )
             # use executable of planner
             command = command.replace("EXECUTABLE", executable)
-        except Exception as e:
+        except Exception as err:
             print(
                 "[planner_wrapper] Encountered following error while creating command\n"
-                + str(e)
+                + str(err)
             )
         return command
 
@@ -256,12 +246,10 @@ def get_planner_commands():
     main_dir = os.path.dirname(common_dir)
     config_file = os.path.join(main_dir, "ros/config/planner_commands.yaml")
     planner_commands = None
-    try:
-        with open(config_file, "r") as file_handle:
-            data = yaml.load(file_handle)
-            planner_commands = data["planner_commands"]
-    except Exception as e:
-        pass
+    with open(config_file, "r") as file_handle:
+        data = yaml.load(file_handle)
+        planner_commands = data["planner_commands"]
+
     return planner_commands
 
 
@@ -278,15 +266,12 @@ def get_domain_and_problem_file():
     domain_file = os.path.join(common_dir, "pddl/domain.pddl")
     problem_file = os.path.join(common_dir, "pddl/problem.pddl")
     files = {"domain": None, "problem": None}
-    try:
-        with open(domain_file, "r") as file_handle:
-            _ = file_handle.read()
-        files["domain"] = domain_file
-        with open(problem_file, "r") as file_handle:
-            _ = file_handle.read()
-        files["problem"] = problem_file
-    except Exception as e:
-        pass
+    with open(domain_file, "r") as file_handle:
+        _ = file_handle.read()
+    files["domain"] = domain_file
+    with open(problem_file, "r") as file_handle:
+        _ = file_handle.read()
+    files["problem"] = problem_file
     return files
 
 
@@ -305,6 +290,6 @@ if __name__ == "__main__":
     PLANNER_WRAPPER = PlannerWrapper(PLANNER_COMMANDS)
 
     # try to plan with the default problem and domain file
-    task_plan = PLANNER_WRAPPER.plan("lama", FILES["domain"], FILES["problem"])
-    if task_plan:
-        print(len(task_plan))
+    TASK_PLAN = PLANNER_WRAPPER.plan("lama", FILES["domain"], FILES["problem"])
+    if TASK_PLAN:
+        print(len(TASK_PLAN))

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- based on: https://github.com/JenniferBuehler/jaco-arm-pkgs/blob/master/jaco_arm/jaco_gazebo/urdf/gzplugin_grasp_fix.urdf.xacro -->
-<root 
+<root
  xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
  xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
@@ -10,7 +10,7 @@
 <xacro:macro name="gzplugin_grasp_fix">
 	<gazebo>
 		<plugin name="gazebo_grasp_fix" filename="libgazebo_grasp_fix.so">
-      <!-- See https://github.com/JenniferBuehler/gazebo-pkgs/wiki/The-Gazebo-grasp-fix-plugin 
+      <!-- See https://github.com/JenniferBuehler/gazebo-pkgs/wiki/The-Gazebo-grasp-fix-plugin
          for more info
             -->
         <arm>

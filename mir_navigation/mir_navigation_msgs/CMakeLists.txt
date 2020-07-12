@@ -14,14 +14,14 @@ add_action_files(
 )
 
 generate_messages(
-  DEPENDENCIES 
-    actionlib_msgs 
+  DEPENDENCIES
+    actionlib_msgs
     std_msgs
 )
 
 catkin_package(
   CATKIN_DEPENDS
     actionlib_msgs
-    message_runtime    
+    message_runtime
     std_msgs
 )

@@ -8,4 +8,3 @@ uint8_t adc_value(void);
 void adc_select(uint8_t pin);
 uint8_t adc_read(uint8_t pin);
 #endif
-

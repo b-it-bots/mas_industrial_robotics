@@ -1,5 +1,5 @@
 # how many workstation of each type is required
-ws_type_to_num: 
+ws_type_to_num:
     ws: 8
     sh: 2
     pp: 1

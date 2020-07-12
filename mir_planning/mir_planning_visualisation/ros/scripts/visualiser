@@ -3,11 +3,10 @@
 from __future__ import print_function
 
 import rospy
-
-from visualization_msgs.msg import MarkerArray, Marker
-
 from mir_planning_visualisation.kb_visualiser import KnowledgeBaseVisualiser
 from mir_planning_visualisation.plan_visualiser import PlanVisualiser
+from visualization_msgs.msg import Marker, MarkerArray
+
 
 class Visualiser(object):
 
@@ -17,7 +16,7 @@ class Visualiser(object):
 
     def __init__(self):
         # Publishers
-        self._marker_pub = rospy.Publisher('~markers', MarkerArray, queue_size=1)
+        self._marker_pub = rospy.Publisher("~markers", MarkerArray, queue_size=1)
 
         # class variables
         self._kb_visualiser = KnowledgeBaseVisualiser()
@@ -25,7 +24,7 @@ class Visualiser(object):
 
         rospy.sleep(1.0)
         self._marker_pub.publish(MarkerArray(markers=[Marker(action=Marker.DELETEALL)]))
-        rospy.loginfo('Initialised')
+        rospy.loginfo("Initialised")
 
     def visualise(self):
         kb_markers, kb_data = self._kb_visualiser.visualise()
@@ -42,11 +41,12 @@ class Visualiser(object):
         # publish all markers
         self._marker_pub.publish(MarkerArray(markers=markers))
 
-if __name__ == '__main__':
-    rospy.init_node('planning_visualiser')
+
+if __name__ == "__main__":
+    rospy.init_node("planning_visualiser")
     VISUALISER = Visualiser()
-    RATE = rospy.Rate(rospy.get_param('~rate', 0.5))
+    RATE = rospy.Rate(rospy.get_param("~rate", 0.5))
     while not rospy.is_shutdown():
         VISUALISER.visualise()
         RATE.sleep()
-    rospy.loginfo('Exiting...')
+    rospy.loginfo("Exiting...")

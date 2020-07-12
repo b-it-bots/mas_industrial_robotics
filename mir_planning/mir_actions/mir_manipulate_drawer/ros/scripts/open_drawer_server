@@ -1,36 +1,46 @@
 #!/usr/bin/python
 
 from __future__ import print_function
-import tf
-import copy
-import rospy
-import smach
 
-# import of generic states
-import mir_states.common.manipulation_states as gms
+import copy
+
 import mcr_states.common.basic_states as gbs
 import mir_states.common.action_states as gas
-
-# action lib
-from smach_ros import ActionServerWrapper, IntrospectionServer
-
-from std_msgs.msg import Float32MultiArray
+import mir_states.common.manipulation_states as gms
+import rospy
+import smach
+import tf
 from geometry_msgs.msg import PoseStamped, Quaternion
-from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteResult, GenericExecuteFeedback
 from mir_actions.utils import Utils
-from mir_manipulate_drawer.manipulate_drawer_utils import ManipulateDrawerUtils
-from mir_manipulate_drawer.manipulate_drawer_utils import Setup, SendSafePoseToDBC, SendPoseToDBC
-        
-#===============================================================================
+from mir_planning_msgs.msg import (
+    GenericExecuteAction,
+    GenericExecuteFeedback,
+    GenericExecuteResult,
+)
+from smach_ros import ActionServerWrapper, IntrospectionServer
+from std_msgs.msg import Float32MultiArray
+
+from mir_manipulate_drawer.manipulate_drawer_utils import (
+    ManipulateDrawerUtils,
+    SendPoseToDBC,
+    SendSafePoseToDBC,
+    Setup,
+)
+
+# ===============================================================================
+
 
 class AddPoseToUserdata(smach.State):
     def __init__(self, topic_name):
-        smach.State.__init__(self, outcomes=['succeeded', 'timeout'],
-                                   input_keys=['handle_pose'],
-                                   output_keys=['handle_pose'])
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded", "timeout"],
+            input_keys=["handle_pose"],
+            output_keys=["handle_pose"],
+        )
         _pose_sub = rospy.Subscriber(topic_name, PoseStamped, self._pose_cb)
         self._pose = None
-        rospy.sleep(0.1) # time for the publisher to register in ros network
+        rospy.sleep(0.1)  # time for the publisher to register in ros network
 
     def _pose_cb(self, msg):
         self._pose = msg
@@ -41,21 +51,23 @@ class AddPoseToUserdata(smach.State):
             print("\nadding pose to userdata\n")
             rospy.loginfo(self._pose)
             self._pose = None
-            return 'succeeded'
+            return "succeeded"
         else:
             rospy.loginfo("Timeout")
-            return 'timeout'
+            return "timeout"
 
-#===============================================================================
+
+# ===============================================================================
+
 
 class SendPoseToMoveIt(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded'],
-                                   input_keys=['handle_pose'])
-        self._moveit_pose_pub = rospy.Publisher('/arm_moveit_client/target_pose',
-                                                PoseStamped, queue_size=10)
+        smach.State.__init__(self, outcomes=["succeeded"], input_keys=["handle_pose"])
+        self._moveit_pose_pub = rospy.Publisher(
+            "/arm_moveit_client/target_pose", PoseStamped, queue_size=10
+        )
         self.utils = ManipulateDrawerUtils()
-        rospy.sleep(0.1) # time for the publisher to register in ros network
+        rospy.sleep(0.1)  # time for the publisher to register in ros network
 
     def execute(self, userdata):
         arm_target_pose = copy.deepcopy(userdata.handle_pose)
@@ -68,253 +80,404 @@ class SendPoseToMoveIt(smach.State):
         rospy.loginfo("Arm pose")
         rospy.loginfo(arm_target_pose)
         self._moveit_pose_pub.publish(arm_target_pose)
-        return 'succeeded'
+        return "succeeded"
 
-#===============================================================================
+
+# ===============================================================================
+
 
 class ValidateDrawerOpened(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded', 'failed'])
-        laser_dist_sub = rospy.Subscriber('/mcr_navigation/laser_distances/distances',
-                                          Float32MultiArray, self._laser_dist_cb)
+        smach.State.__init__(self, outcomes=["succeeded", "failed"])
+        laser_dist_sub = rospy.Subscriber(
+            "/mcr_navigation/laser_distances/distances",
+            Float32MultiArray,
+            self._laser_dist_cb,
+        )
         self._front_laser_dist = 0.0
-        self._ideal_dist = rospy.get_param('~dbc_params/open_drawer/x_offset', None)
-        rospy.sleep(0.1) # time for the publisher to register in ros network
+        self._ideal_dist = rospy.get_param("~dbc_params/open_drawer/x_offset", None)
+        rospy.sleep(0.1)  # time for the publisher to register in ros network
 
     def _laser_dist_cb(self, msg):
         self._front_laser_dist = msg.data[0]
 
     def execute(self, userdata):
         if self._ideal_dist is None:
-            rospy.logerr('dbc params not available')
-            return 'failed'
+            rospy.logerr("dbc params not available")
+            return "failed"
 
         # dist_from_base_link_to_drawer - dist_from_front_laser_to_drawer - dist_from_base_link_to_front_laser < 5 cm
         if abs(abs(self._ideal_dist) - self._front_laser_dist - 0.3) < 0.05:
-            return 'succeeded'
+            return "succeeded"
         else:
-            rospy.logerr('Drawer open validation failed.')
-            return 'failed'
+            rospy.logerr("Drawer open validation failed.")
+            return "failed"
 
-#===============================================================================
+
+# ===============================================================================
+
 
 def main():
     # Open the container
-    rospy.init_node('open_drawer_server')
+    rospy.init_node("open_drawer_server")
     # Construct state machine
     sm = smach.StateMachine(
-            outcomes=['OVERALL_SUCCESS','OVERALL_FAILED'],
-            input_keys = ['goal'],
-            output_keys = ['feedback', 'result'])
+        outcomes=["OVERALL_SUCCESS", "OVERALL_FAILED"],
+        input_keys=["goal"],
+        output_keys=["feedback", "result"],
+    )
 
     with sm:
-        # ASSUMPTION: the robot is aligned perpendicular to a closed perceived drawer 
+        # ASSUMPTION: the robot is aligned perpendicular to a closed perceived drawer
         smach.StateMachine.add(
-                'SETUP',
-                Setup(),
-                transitions={'succeeded':'SELECT_OBJECT'})
-        
+            "SETUP", Setup(), transitions={"succeeded": "SELECT_OBJECT"}
+        )
+
         smach.StateMachine.add(
-                'SELECT_OBJECT',
-                gbs.send_event([('/mcr_perception/object_selector/input/object_name', 'DRAWER_HANDLE')]),
-                transitions={'success':'GENERATE_OBJECT_POSE'})
+            "SELECT_OBJECT",
+            gbs.send_event(
+                [
+                    (
+                        "/mcr_perception/object_selector/input/object_name",
+                        "DRAWER_HANDLE",
+                    )
+                ]
+            ),
+            transitions={"success": "GENERATE_OBJECT_POSE"},
+        )
 
         # generates a pose of object
-        smach.StateMachine.add('GENERATE_OBJECT_POSE', gbs.send_and_wait_events_combined(
-                event_in_list=[('/mcr_perception/object_selector/event_in','e_trigger')],
-                event_out_list=[('/mcr_perception/object_selector/event_out','e_selected', True)],
-                timeout_duration=10),
-                transitions={'success':'SET_DBC_PARAMS',
-                             'timeout':'OVERALL_FAILED',
-                             'failure':'OVERALL_FAILED'})
+        smach.StateMachine.add(
+            "GENERATE_OBJECT_POSE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    ("/mcr_perception/object_selector/event_in", "e_trigger")
+                ],
+                event_out_list=[
+                    ("/mcr_perception/object_selector/event_out", "e_selected", True,)
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "SET_DBC_PARAMS",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
 
         # publish a static frame which will be used as reference for perceived objs
         smach.StateMachine.add(
-                'SET_DBC_PARAMS',
-                gbs.set_named_config('dbc_pick_object'),
-                transitions={'success': 'ADD_HANDLE_POSE_TO_USERDATA',
-                             'timeout': 'OVERALL_FAILED',
-                             'failure': 'OVERALL_FAILED'})
+            "SET_DBC_PARAMS",
+            gbs.set_named_config("dbc_pick_object"),
+            transitions={
+                "success": "ADD_HANDLE_POSE_TO_USERDATA",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
 
         smach.StateMachine.add(
-                'ADD_HANDLE_POSE_TO_USERDATA',
-                AddPoseToUserdata(topic_name='/mcr_perception/object_selector/output/object_pose'),
-                transitions={'succeeded': 'SEND_SAFE_POSE_TO_DBC',
-                             'timeout': 'OVERALL_FAILED'})
+            "ADD_HANDLE_POSE_TO_USERDATA",
+            AddPoseToUserdata(
+                topic_name="/mcr_perception/object_selector/output/object_pose"
+            ),
+            transitions={
+                "succeeded": "SEND_SAFE_POSE_TO_DBC",
+                "timeout": "OVERALL_FAILED",
+            },
+        )
 
         # - Move base back for perceive drawer handle
         smach.StateMachine.add(
-                'SEND_SAFE_POSE_TO_DBC',
-                SendSafePoseToDBC(target_dist=0.52),
-                transitions={'succeeded': 'START_DBC_SAFE_POSE'})
+            "SEND_SAFE_POSE_TO_DBC",
+            SendSafePoseToDBC(target_dist=0.52),
+            transitions={"succeeded": "START_DBC_SAFE_POSE"},
+        )
 
         smach.StateMachine.add(
-                'START_DBC_SAFE_POSE',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('/mcr_navigation/direct_base_controller/coordinator/event_in','e_start')],
-                    event_out_list=[('/mcr_navigation/direct_base_controller/coordinator/event_out','e_success', True)],
-                    timeout_duration=10),
-                transitions={'success': 'MOVE_ARM_TO_DRAWER_HANDLE_PRE_GRASP',
-                             'timeout': 'STOP_DBC',
-                             'failure': 'STOP_DBC'})
+            "START_DBC_SAFE_POSE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_start",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "MOVE_ARM_TO_DRAWER_HANDLE_PRE_GRASP",
+                "timeout": "STOP_DBC",
+                "failure": "STOP_DBC",
+            },
+        )
 
         # - Move arm to drawer_handle_pre_grasp
         smach.StateMachine.add(
-                'MOVE_ARM_TO_DRAWER_HANDLE_PRE_GRASP',
-                gms.move_arm("drawer_handle_pre_grasp"),
-                transitions={'succeeded': 'SEND_DBC_POSE_OPEN_DRAWER',
-                             'failed': 'MOVE_ARM_TO_DRAWER_HANDLE_PRE_GRASP'})
+            "MOVE_ARM_TO_DRAWER_HANDLE_PRE_GRASP",
+            gms.move_arm("drawer_handle_pre_grasp"),
+            transitions={
+                "succeeded": "SEND_DBC_POSE_OPEN_DRAWER",
+                "failed": "MOVE_ARM_TO_DRAWER_HANDLE_PRE_GRASP",
+            },
+        )
 
         # - Move base a forward so that the gripper can reach handle without
         # extending a lot
         smach.StateMachine.add(
-                'SEND_DBC_POSE_OPEN_DRAWER',
-                SendPoseToDBC(param_name='open_drawer'),
-                transitions={'succeeded': 'START_DBC_OPEN_DRAWER'})
+            "SEND_DBC_POSE_OPEN_DRAWER",
+            SendPoseToDBC(param_name="open_drawer"),
+            transitions={"succeeded": "START_DBC_OPEN_DRAWER"},
+        )
 
         smach.StateMachine.add(
-                'START_DBC_OPEN_DRAWER',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('/mcr_navigation/direct_base_controller/coordinator/event_in','e_start')],
-                    event_out_list=[('/mcr_navigation/direct_base_controller/coordinator/event_out','e_success', True)],
-                    timeout_duration=10),
-                transitions={'success': 'SEND_MOVEIT_POSE_DRAWER_HANDLE',
-                             'timeout': 'STOP_DBC',
-                             'failure': 'STOP_DBC'})
+            "START_DBC_OPEN_DRAWER",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_start",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "SEND_MOVEIT_POSE_DRAWER_HANDLE",
+                "timeout": "STOP_DBC",
+                "failure": "STOP_DBC",
+            },
+        )
 
         # - Move the arm to drawer handle pose
         smach.StateMachine.add(
-                'SEND_MOVEIT_POSE_DRAWER_HANDLE',
-                SendPoseToMoveIt(),
-                transitions={'succeeded': 'TRIGGER_MOVEIT_DRAWER_HANDLE'})
+            "SEND_MOVEIT_POSE_DRAWER_HANDLE",
+            SendPoseToMoveIt(),
+            transitions={"succeeded": "TRIGGER_MOVEIT_DRAWER_HANDLE"},
+        )
 
         smach.StateMachine.add(
-                'TRIGGER_MOVEIT_DRAWER_HANDLE',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('arm_moveit_client/event_in','e_start')],
-                    event_out_list=[('arm_moveit_client/event_out','e_success', True)],
-                    timeout_duration=10),
-                transitions={'success': 'CLOSE_GRIPPER_HANDLE',
-                             'timeout': 'OVERALL_FAILED',
-                             'failure': 'OVERALL_FAILED'})
+            "TRIGGER_MOVEIT_DRAWER_HANDLE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("arm_moveit_client/event_in", "e_start")],
+                event_out_list=[("arm_moveit_client/event_out", "e_success", True)],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "CLOSE_GRIPPER_HANDLE",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
 
         # - Close gripper
         smach.StateMachine.add(
-                'CLOSE_GRIPPER_HANDLE',
-                gms.control_gripper('close'),
-                transitions={'succeeded': 'SEND_DBC_POSE_OPEN_DRAWER_POST'})
+            "CLOSE_GRIPPER_HANDLE",
+            gms.control_gripper("close"),
+            transitions={"succeeded": "SEND_DBC_POSE_OPEN_DRAWER_POST"},
+        )
 
         # - Move base backwards to open drawer
         smach.StateMachine.add(
-                'SEND_DBC_POSE_OPEN_DRAWER_POST',
-                SendPoseToDBC(param_name='open_drawer_post'),
-                transitions={'succeeded': 'START_DBC_OPEN_DRAWER_POST'})
+            "SEND_DBC_POSE_OPEN_DRAWER_POST",
+            SendPoseToDBC(param_name="open_drawer_post"),
+            transitions={"succeeded": "START_DBC_OPEN_DRAWER_POST"},
+        )
 
         smach.StateMachine.add(
-                'START_DBC_OPEN_DRAWER_POST',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('/mcr_navigation/direct_base_controller/coordinator/event_in','e_start')],
-                    event_out_list=[('/mcr_navigation/direct_base_controller/coordinator/event_out','e_success', True)],
-                    timeout_duration=10),
-                transitions={'success': 'OPEN_GRIPPER',
-                             'timeout': 'STOP_DBC',
-                             'failure': 'STOP_DBC'})
+            "START_DBC_OPEN_DRAWER_POST",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_start",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "OPEN_GRIPPER",
+                "timeout": "STOP_DBC",
+                "failure": "STOP_DBC",
+            },
+        )
 
         # - Open gripper
         smach.StateMachine.add(
-                'OPEN_GRIPPER',
-                gms.control_gripper('open'),
-                transitions={'succeeded': 'VALIDATE_DRAWER_OPENED'})
+            "OPEN_GRIPPER",
+            gms.control_gripper("open"),
+            transitions={"succeeded": "VALIDATE_DRAWER_OPENED"},
+        )
 
         smach.StateMachine.add(
-                'VALIDATE_DRAWER_OPENED',
-                ValidateDrawerOpened(),
-                transitions={'succeeded': 'MOVE_ARM_TO_DRAWER_HANDLE_POST_OPEN',
-                             'failed': 'STOP_DBC'})
+            "VALIDATE_DRAWER_OPENED",
+            ValidateDrawerOpened(),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_DRAWER_HANDLE_POST_OPEN",
+                "failed": "STOP_DBC",
+            },
+        )
 
         # - Move arm to drawer_handle_pre_grasp
         smach.StateMachine.add(
-                'MOVE_ARM_TO_DRAWER_HANDLE_POST_OPEN',
-                gms.move_arm("drawer_handle_pre_grasp"),
-                transitions={'succeeded': 'SEND_DBC_POSE_OPEN_DRAWER_POST_SAFE',
-                             'failed': 'MOVE_ARM_TO_DRAWER_HANDLE_POST_OPEN'})
+            "MOVE_ARM_TO_DRAWER_HANDLE_POST_OPEN",
+            gms.move_arm("drawer_handle_pre_grasp"),
+            transitions={
+                "succeeded": "SEND_DBC_POSE_OPEN_DRAWER_POST_SAFE",
+                "failed": "MOVE_ARM_TO_DRAWER_HANDLE_POST_OPEN",
+            },
+        )
 
         # - Move base a bit back so that the arm can move up without collision
         smach.StateMachine.add(
-                'SEND_DBC_POSE_OPEN_DRAWER_POST_SAFE',
-                SendPoseToDBC(param_name='open_drawer_post_safe'),
-                transitions={'succeeded': 'START_DBC_OPEN_DRAWER_POST_SAFE'})
+            "SEND_DBC_POSE_OPEN_DRAWER_POST_SAFE",
+            SendPoseToDBC(param_name="open_drawer_post_safe"),
+            transitions={"succeeded": "START_DBC_OPEN_DRAWER_POST_SAFE"},
+        )
 
         smach.StateMachine.add(
-                'START_DBC_OPEN_DRAWER_POST_SAFE',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('/mcr_navigation/direct_base_controller/coordinator/event_in','e_start')],
-                    event_out_list=[('/mcr_navigation/direct_base_controller/coordinator/event_out','e_success', True)],
-                    timeout_duration=10),
-                transitions={'success': 'MOVE_ARM_TO_NEUTRAL',
-                             'timeout': 'STOP_DBC',
-                             'failure': 'STOP_DBC'})
+            "START_DBC_OPEN_DRAWER_POST_SAFE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_start",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "MOVE_ARM_TO_NEUTRAL",
+                "timeout": "STOP_DBC",
+                "failure": "STOP_DBC",
+            },
+        )
 
         # - Move arm to some neutral position
         smach.StateMachine.add(
-                'MOVE_ARM_TO_NEUTRAL',
-                gms.move_arm("look_at_workspace_from_near"),
-                transitions={'succeeded': 'SEND_DBC_POSE_PERCEIVE_DRAWER',
-                             'failed': 'MOVE_ARM_TO_NEUTRAL'})
+            "MOVE_ARM_TO_NEUTRAL",
+            gms.move_arm("look_at_workspace_from_near"),
+            transitions={
+                "succeeded": "SEND_DBC_POSE_PERCEIVE_DRAWER",
+                "failed": "MOVE_ARM_TO_NEUTRAL",
+            },
+        )
 
         # - Move base in front of the drawer
         smach.StateMachine.add(
-                'SEND_DBC_POSE_PERCEIVE_DRAWER',
-                SendPoseToDBC(param_name='perceive_drawer'),
-                transitions={'succeeded': 'START_DBC_PERCEIVE_DRAWER'})
+            "SEND_DBC_POSE_PERCEIVE_DRAWER",
+            SendPoseToDBC(param_name="perceive_drawer"),
+            transitions={"succeeded": "START_DBC_PERCEIVE_DRAWER"},
+        )
 
         smach.StateMachine.add(
-                'START_DBC_PERCEIVE_DRAWER',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('/mcr_navigation/direct_base_controller/coordinator/event_in','e_start')],
-                    event_out_list=[('/mcr_navigation/direct_base_controller/coordinator/event_out','e_success', True)],
-                    timeout_duration=10),
-                transitions={'success': 'OVERALL_SUCCESS',
-                             'timeout': 'STOP_DBC',
-                             'failure': 'STOP_DBC'})
+            "START_DBC_PERCEIVE_DRAWER",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_start",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "OVERALL_SUCCESS",
+                "timeout": "STOP_DBC",
+                "failure": "STOP_DBC",
+            },
+        )
 
         smach.StateMachine.add(
-                'STOP_DBC',
-                gbs.send_and_wait_events_combined(
-                    event_in_list=[('/mcr_navigation/direct_base_controller/coordinator/event_in','e_stop')],
-                    event_out_list=[('/mcr_navigation/direct_base_controller/coordinator/event_out','e_stopped', True)],
-                    timeout_duration=10),
-                transitions={'success': 'MOVE_ARM_TO_NEUTRAL_FAILURE',
-                             'timeout': 'OVERALL_FAILED',
-                             'failure': 'OVERALL_FAILED'})
+            "STOP_DBC",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_stop",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_stopped",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "MOVE_ARM_TO_NEUTRAL_FAILURE",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
 
         # - Move arm to some neutral position for failure
         smach.StateMachine.add(
-                'MOVE_ARM_TO_NEUTRAL_FAILURE',
-                gms.move_arm("look_at_workspace_from_near"),
-                transitions={'succeeded': 'OVERALL_FAILED',
-                             'failed': 'MOVE_ARM_TO_NEUTRAL_FAILURE'})
- 
+            "MOVE_ARM_TO_NEUTRAL_FAILURE",
+            gms.move_arm("look_at_workspace_from_near"),
+            transitions={
+                "succeeded": "OVERALL_FAILED",
+                "failed": "MOVE_ARM_TO_NEUTRAL_FAILURE",
+            },
+        )
+
     # smach viewer
-    if rospy.get_param('~viewer_enabled', False):
-        sis = IntrospectionServer('open_drawer_viewer', sm,
-                                  '/OPEN_DRAWER_SMACH_VIEWER')
+    if rospy.get_param("~viewer_enabled", False):
+        sis = IntrospectionServer("open_drawer_viewer", sm, "/OPEN_DRAWER_SMACH_VIEWER")
         sis.start()
-    
+
     # Construct action server wrapper
     asw = ActionServerWrapper(
-        server_name = 'open_drawer_server',
-        action_spec = GenericExecuteAction,
-        wrapped_container = sm,
-        succeeded_outcomes = ['OVERALL_SUCCESS'],
-        aborted_outcomes   = ['OVERALL_FAILED'],
-        preempted_outcomes = ['PREEMPTED'],
-        goal_key     = 'goal',
-        feedback_key = 'feedback',
-        result_key   = 'result')
+        server_name="open_drawer_server",
+        action_spec=GenericExecuteAction,
+        wrapped_container=sm,
+        succeeded_outcomes=["OVERALL_SUCCESS"],
+        aborted_outcomes=["OVERALL_FAILED"],
+        preempted_outcomes=["PREEMPTED"],
+        goal_key="goal",
+        feedback_key="feedback",
+        result_key="result",
+    )
     # Run the server in a background thread
     asw.run_server()
     rospy.spin()
-        
-if __name__ == '__main__':
-   main()
+
+
+if __name__ == "__main__":
+    main()

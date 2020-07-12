@@ -10,7 +10,7 @@ Related to: ``mir_perceive_aruco_cube``
 Goal parameter description
 --------------------------
 
-- ``location``: name of known/mapped location (e.g. ``WS01``, ``SH02``, ``PP01``) 
+- ``location``: name of known/mapped location (e.g. ``WS01``, ``SH02``, ``PP01``)
 
 Usage
 -----

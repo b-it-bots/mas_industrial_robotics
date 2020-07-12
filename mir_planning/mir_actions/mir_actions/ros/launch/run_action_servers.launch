@@ -22,7 +22,7 @@
 
     <!-- pick from shelf action server -->
     <include file="$(find mir_pick_from_shelf)/ros/launch/pick_from_shelf.launch" />
-    
+
     <!-- place object action server -->
     <node pkg="mir_place_object" type="place_object_server.py" name="place_object_server" output="screen" />
 

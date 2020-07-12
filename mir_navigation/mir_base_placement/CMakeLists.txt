@@ -25,7 +25,7 @@ include_directories(
 
 
 ### EXECUTABLES
-add_executable(base_placement_node 
+add_executable(base_placement_node
   ros/src/base_placement_node.cpp
 )
 add_dependencies(base_placement_node
@@ -35,7 +35,7 @@ target_link_libraries(base_placement_node
   ${catkin_LIBRARIES}
 )
 
-add_executable(basescan_orientation_test 
+add_executable(basescan_orientation_test
   ros/tools/basescan_orientation_test.cpp
 )
 add_dependencies(basescan_orientation_test

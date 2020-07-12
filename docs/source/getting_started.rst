@@ -20,11 +20,11 @@ Git - Version Control
 =====================
 
 * Install Git Software
-    
+
   Install the Git core components and some additional GUI's for the version control:
 
   .. code-block:: bash
-     
+
     sudo apt-get install git-core gitg gitk
 
 * Set Up Git
@@ -42,7 +42,7 @@ Git - Version Control
      git config --global user.email "your-email@youremail.com"
 
 * GIT Tutorial
-  If you have never worked with git before, we recommend to go through the 
+  If you have never worked with git before, we recommend to go through the
   `basic git tutorial <http://excess.org/article/2008/07/ogre-git-tutorial/>`_.
 
 .. _robot_operating_system:
@@ -52,19 +52,19 @@ ROS - Robot Operating System
 
 * Install ROS
 
-  The repository has been tested successfully with the following ROS distributions. 
-  Use the link behind a ROS distribution to get to the particular 
+  The repository has been tested successfully with the following ROS distributions.
+  Use the link behind a ROS distribution to get to the particular
   `ROS Kinetic installation instructions <http://wiki.ros.org/kinetic/Installation/Ubuntu>`_.
 
   .. note::
     Do not forget to update your .bashrc!
 
 * ROS Tutorials
-  
-  If you have never worked with ROS before, we recommend to go through 
+
+  If you have never worked with ROS before, we recommend to go through
   `the beginner tutorials provided by ROS <http://wiki.ros.org/ROS/Tutorials>`_.
 
-  In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters"). 
+  In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters").
 
 .. _setup_catkin_workspace:
 
@@ -109,9 +109,9 @@ Setup catkin workspace
   If no errors appear everything is ready to use. Great job!
 
 * Setting the Environment Variables
-  
+
   * ROBOT variable
-    
+
     With the ROBOT variable you can choose which hardware configuration should be loaded when starting the robot. The following line will add the variable to your .bashrc:
 
     .. code-block:: bash
@@ -122,16 +122,16 @@ Setup catkin workspace
   * ROBOT_ENV Variable
 
     The ROBOT_ENV variable can be used to switch between different environments. The following line will add the variable to your .bashrc:
-    
+
     * Real robot
-    
+
     .. code-block:: bash
 
       echo "export ROBOT_ENV=brsu-c025" >> ~/.bashrc
       source ~/.bashrc
-  
+
     * Simulation
-    
+
     .. code-block:: bash
 
       echo "export ROBOT_ENV=brsu-c025-sim" >> ~/.bashrc
@@ -147,11 +147,11 @@ Bring up the robot and its basic components
   .. code-block:: bash
 
      roslaunch mir_bringup_sim robot.launch
-        
+
   In a new terminal you can open the Gazebo GUI to see the environment and the robot
 
   .. code-block:: bash
-	    
+
      rosrun gazebo_ros gzclient
 
 * At the Real Robot
@@ -159,14 +159,14 @@ Bring up the robot and its basic components
   .. code-block:: bash
 
      roslaunch mir_bringup robot.launch
-     
+
 
 * Test the base
 
   .. code-block:: bash
 
      roslaunch mir_teleop teleop_keyboard.launch
-     
+
 
 * Visualize the robot state and sensor data
 
@@ -180,10 +180,10 @@ Bring up the robot and its basic components
   .. code-block:: bash
 
      roslaunch mir_2dslam 2dslam.launch
-     
+
 
 * Use autonomous navigation
-  
+
   * Omni-directional navigation
 
     .. code-block:: bash
