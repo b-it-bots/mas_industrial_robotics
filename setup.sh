@@ -14,17 +14,16 @@ function fancy_print {
     echo "################################################################################"
 }
 
-# Install ROS Kinetic
+# Install ROS Melodic
 function update_keys {
-    sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu xenial main\" > /etc/apt/sources.list.d/ros-latest.list"
-    sudo curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | sudo apt-key add -
-    sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+    sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+    sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
     sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" -u
 }
 
-function install_ros_kinetic_base {
-    sudo apt-get update -qq
-    sudo apt-get install -y -qq ros-kinetic-ros-base
+function install_ros_melodic_base {
+    sudo apt update -qq
+    sudo apt install -y -qq ros-melodic-ros-base
 }
 
 function install_ros_dependencies {
@@ -41,11 +40,11 @@ function install_ros {
     if $1
         then
             fancy_print "Installing ROS"
-            install_ros_kinetic_base
+            install_ros_melodic_base
     fi
     fancy_print "Installing ROS Dependencies"
     install_ros_dependencies
-    source /opt/ros/kinetic/setup.bash
+    source /opt/ros/melodic/setup.bash
 }
 
 # Setup catkin workspace in the home directory
@@ -54,7 +53,7 @@ function setup_catkin_ws {
     mkdir -p $INSTALL_DIR/catkin_ws/src
     cd $INSTALL_DIR/catkin_ws
     catkin init
-    catkin config --extend /opt/ros/kinetic/
+    catkin config --extend /opt/ros/melodic/
     catkin build
     source $INSTALL_DIR/catkin_ws/devel/setup.bash
 }
@@ -73,7 +72,7 @@ function install_mas_dependencies {
     fancy_print "Installing MAS Dependencies"
     rosdep update -q
     sudo apt-get update
-    rosdep install --from-paths src --ignore-src --rosdistro=kinetic --skip-keys rosplan_demos -y
+    rosdep install --from-paths src --ignore-src --rosdistro=melodic --skip-keys rosplan_demos -y
 }
 
 function build_mas_industrial_robotics {

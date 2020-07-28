@@ -1,4 +1,6 @@
-FROM ros:kinetic
+FROM ros:melodic
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -qq && \
     apt install -y -qq sudo software-properties-common && \
