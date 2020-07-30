@@ -17,6 +17,6 @@
   <run_depend>gmapping</run_depend>
   <run_depend>cob_scan_unifier</run_depend>
 
-  <test_depend>roslaunch</test_depend>  
+  <test_depend>roslaunch</test_depend>
 
 </package>

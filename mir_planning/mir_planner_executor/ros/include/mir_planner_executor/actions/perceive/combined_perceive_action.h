@@ -7,15 +7,17 @@
 
 #pragma once
 
-#include <mir_planner_executor/actions/executor_action.h>
 #include <mir_planner_executor/actions/base_executor_action.h>
+#include <mir_planner_executor/actions/executor_action.h>
 
-class CombinedPerceiveAction : public BaseExecutorAction {
-private:
-    ExecutorAction* default_perceive_;
-    ExecutorAction* cavity_perceive_;
-public:
-    CombinedPerceiveAction();
-    virtual void initialize(KnowledgeUpdater* knowledge_updater);
-    virtual bool execute(std::string& name, std::vector<diagnostic_msgs::KeyValue>& params);
+class CombinedPerceiveAction : public BaseExecutorAction
+{
+ private:
+  ExecutorAction *default_perceive_;
+  ExecutorAction *cavity_perceive_;
+
+ public:
+  CombinedPerceiveAction();
+  void initialize(KnowledgeUpdater *knowledge_updater) override;
+  bool execute(std::string &name, std::vector<diagnostic_msgs::KeyValue> &params) override;
 };

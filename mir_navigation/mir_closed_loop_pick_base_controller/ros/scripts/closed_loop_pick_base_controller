@@ -2,33 +2,46 @@
 
 from __future__ import print_function
 
+import mcr_manipulation_measurers_ros.pose_transformer
 import rospy
 from geometry_msgs.msg import PoseStamped, Twist
-from std_msgs.msg import String, Float32MultiArray
-import mcr_manipulation_measurers_ros.pose_transformer
+from std_msgs.msg import Float32MultiArray, String
+
 
 class ClosedLoopPickBaseController(object):
     """ Convert from cluster (from segmentation node) to images for varied purposes.
     """
-    
+
     def __init__(self):
-        self._obj_pose_sub = rospy.Subscriber('~input_pose', PoseStamped, self.obj_pose_cb)
-        self._event_in_sub = rospy.Subscriber('~event_in', String, self.event_in_cb)
-        self._initial_obj_pose_sub = rospy.Subscriber('~initial_obj_pose', PoseStamped, self.initial_obj_pose_cb)
-        self._laser_distances_sub = rospy.Subscriber('~laser_distances', Float32MultiArray, self.laser_distances_cb)
+        self._obj_pose_sub = rospy.Subscriber(
+            "~input_pose", PoseStamped, self.obj_pose_cb
+        )
+        self._event_in_sub = rospy.Subscriber("~event_in", String, self.event_in_cb)
+        self._initial_obj_pose_sub = rospy.Subscriber(
+            "~initial_obj_pose", PoseStamped, self.initial_obj_pose_cb
+        )
+        self._laser_distances_sub = rospy.Subscriber(
+            "~laser_distances", Float32MultiArray, self.laser_distances_cb
+        )
 
-        self._cmd_vel_pub = rospy.Publisher('~cmd_vel', Twist, queue_size=1)
-        self._event_out_pub = rospy.Publisher('~event_out', String, queue_size=1)
-        self._closest_obj_event_in_pub = rospy.Publisher('~closest_obj_event_in', String, queue_size=1)
-        self._debug_pose_pub = rospy.Publisher('~debug_pose', PoseStamped, queue_size=1)
+        self._cmd_vel_pub = rospy.Publisher("~cmd_vel", Twist, queue_size=1)
+        self._event_out_pub = rospy.Publisher("~event_out", String, queue_size=1)
+        self._closest_obj_event_in_pub = rospy.Publisher(
+            "~closest_obj_event_in", String, queue_size=1
+        )
+        self._debug_pose_pub = rospy.Publisher("~debug_pose", PoseStamped, queue_size=1)
 
-        self._camera_link = rospy.get_param('~camera_link')
-        self.pose_transformer = mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
-        self._target_frame = 'base_link_static'
+        self._camera_link = rospy.get_param("~camera_link")
+        self.pose_transformer = (
+            mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
+        )
+        self._target_frame = "base_link_static"
         self._target_pose = None
         self._moving = False
         self._initial_target_pose = None
-        self._front_laser_distance_threshold = rospy.get_param('front_laser_distance_threshold', 0.1)
+        self._front_laser_distance_threshold = rospy.get_param(
+            "front_laser_distance_threshold", 0.1
+        )
         self.front_laser_distance = 1.0
 
         # controller parameters
@@ -48,16 +61,21 @@ class ClosedLoopPickBaseController(object):
         if self._target_pose is not None:
             self._debug_pose_pub.publish(self._target_pose)
         if self._moving and self._target_pose is not None:
-            transformed_pose = self.pose_transformer.get_transformed_pose(self._target_pose, self._camera_link)
+            transformed_pose = self.pose_transformer.get_transformed_pose(
+                self._target_pose, self._camera_link
+            )
             dist_z = transformed_pose.pose.position.z
             dist_y = transformed_pose.pose.position.y
             print(self.front_laser_distance)
-            if dist_z < self._stopping_threshold or self.front_laser_distance < self._front_laser_distance_threshold:
+            if (
+                dist_z < self._stopping_threshold
+                or self.front_laser_distance < self._front_laser_distance_threshold
+            ):
                 self._moving = False
                 self._target_pose = None
                 self._publish_zero_vel()
-                self._event_out_pub.publish(String(data='e_done'))
-                self._closest_obj_event_in_pub.publish(String(data='e_stop'))
+                self._event_out_pub.publish(String(data="e_done"))
+                self._closest_obj_event_in_pub.publish(String(data="e_stop"))
                 return
             vel_x = ((dist_z * self.p_x) + self.c_x) / (1.0 + (abs(dist_y) * self.c_y))
             vel_y = dist_y * self.p_y
@@ -72,14 +90,14 @@ class ClosedLoopPickBaseController(object):
     def event_in_cb(self, msg):
         if msg.data == "e_start":
             self._moving = True
-            self._closest_obj_event_in_pub.publish(String(data='e_start'))
+            self._closest_obj_event_in_pub.publish(String(data="e_start"))
             self._target_pose = self._initial_target_pose
         elif msg.data == "e_stop":
             self._moving = False
             self._target_pose = None
             self._initial_target_pose = None
-            self._closest_obj_event_in_pub.publish(String(data='e_stop'))
-            self._publish_zero_vel() # for safety
+            self._closest_obj_event_in_pub.publish(String(data="e_stop"))
+            self._publish_zero_vel()  # for safety
 
     def initial_obj_pose_cb(self, msg):
         print("got initial target pose")
@@ -119,13 +137,20 @@ class ClosedLoopPickBaseController(object):
         """
         if self._target_pose is None:
             return 0.0
-        new_pose_in_target_frame = self.pose_transformer.get_transformed_pose(new_pose, self._target_frame)
-        delta_x = new_pose_in_target_frame.pose.position.x - self._target_pose.pose.position.x
-        delta_y = new_pose_in_target_frame.pose.position.y - self._target_pose.pose.position.y
-        return (delta_x**2 + delta_y**2)**0.5
+        new_pose_in_target_frame = self.pose_transformer.get_transformed_pose(
+            new_pose, self._target_frame
+        )
+        delta_x = (
+            new_pose_in_target_frame.pose.position.x - self._target_pose.pose.position.x
+        )
+        delta_y = (
+            new_pose_in_target_frame.pose.position.y - self._target_pose.pose.position.y
+        )
+        return (delta_x ** 2 + delta_y ** 2) ** 0.5
 
-if __name__ == '__main__':
-    rospy.init_node('closed_loop_pick_base_controller')
+
+if __name__ == "__main__":
+    rospy.init_node("closed_loop_pick_base_controller")
     CLPBC = ClosedLoopPickBaseController()
 
     rospy.spin()

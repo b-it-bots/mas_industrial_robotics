@@ -65,8 +65,9 @@
   <!-- xacro:intel_realsense_f200_camera name="arm_cam3d" parent="camera_mount_link">
     <origin xyz="-0.05 -0.01 0.03" rpy="0.0 -${M_PI/2 - 0.03} 0.0" />
   </xacro:intel_realsense_f200_camera -->
+
    <xacro:realsense_d435 name="arm_cam3d" parent="camera_mount_link">
        <origin xyz="0.010 -0.022 0.017" rpy="0 ${M_PI/2 - 0.18} -${M_PI/2}" />  
    </xacro:realsense_d435>
-  
+
 </robot>

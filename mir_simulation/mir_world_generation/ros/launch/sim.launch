@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- gazebo server args -->
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="debug" default="false"/>
+
+    <!-- model args -->
+
+    <arg name="generation_dir" default="/tmp"/>
+    <arg name="world_model" default="$(arg generation_dir)/at_work_arena.xacro"/>
+    <arg name="map_file" default="$(arg generation_dir)/map.yaml"/>
+    <arg name="nav_goal_file" default="$(arg generation_dir)/navigation_goals.yaml"/>
+
+    <!-- launch empty world in gazebo -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="debug" value="$(arg debug)" />
+		<arg name="gui" value="$(arg gui)" />
+		<arg name="paused" value="$(arg paused)"/>
+		<arg name="use_sim_time" value="$(arg use_sim_time)"/>
+	</include>
+
+    <!-- send world urdf to param server -->
+    <param name="robot_description" command="rosrun xacro xacro --inorder $(arg world_model)" />
+
+    <!-- spawn uploaded world model -->
+    <node pkg="gazebo_ros" type="spawn_model" name="gazebo_world_model" respawn="false" output="screen"
+          args="-urdf -param robot_description -model world -x 0.0 -y 0.0 -z 0.0" />
+
+    <!-- robot state publisher for visualisation -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="world_st_pub" />
+
+    <!-- rviz for visualisation -->
+    <node pkg="rviz" type="rviz" name="world_generation_rviz"
+          args="-d $(find mir_world_generation)/ros/config/world_generation.rviz" />
+
+    <!-- Run the map server -->
+    <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)" output="screen"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="map_2_world" args="0 0 0 0 0 0 1 map origin 10" />
+
+    <!-- visualize navigation goals -->
+    <node pkg="mcr_navigation_tools" name="pose_visualiser" type="pose_visualiser" output="screen">
+        <param name="pose_frame" value="map" />
+        <param name="pose_description_file" value="$(arg nav_goal_file)" />
+    </node>
+
+
+</launch>

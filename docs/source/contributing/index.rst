@@ -1,6 +1,6 @@
 .. _contributing:
 
-Contributing 
+Contributing
 ############
 
 .. toctree::

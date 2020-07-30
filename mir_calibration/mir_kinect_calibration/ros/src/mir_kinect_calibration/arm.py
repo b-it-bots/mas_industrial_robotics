@@ -1,28 +1,31 @@
 import math
 
-PACKAGE = 'kinect_calibration'
-NODE = 'calibrate_kinect'
-
 import roslib
-roslib.load_manifest(PACKAGE)
-
-import tf
 import rospy
+import tf
 from actionlib import SimpleActionClient
+from arm_navigation_msgs.msg import (
+    MoveArmAction,
+    MoveArmGoal,
+    OrientationConstraint,
+    PositionConstraint,
+)
 from simple_script_server import simple_script_server
-from arm_navigation_msgs.msg import MoveArmAction, MoveArmGoal, \
-                                    PositionConstraint, OrientationConstraint
+
+PACKAGE = "kinect_calibration"
+NODE = "calibrate_kinect"
+
+roslib.load_manifest(PACKAGE)
 
 
 class Arm(object):
 
-    CART_SERVER = '/arm_controller/move_arm_cart'
+    CART_SERVER = "/arm_controller/move_arm_cart"
 
     def __init__(self, default_pitch=(math.pi / 2.0)):
-        rospy.loginfo('Initializing arm control.')
-        rospy.loginfo('Waiting for [%s] server...' % (self.CART_SERVER))
-        self.move_arm_cart_server = SimpleActionClient(self.CART_SERVER,
-                                                       MoveArmAction)
+        rospy.loginfo("Initializing arm control.")
+        rospy.loginfo("Waiting for [%s] server..." % (self.CART_SERVER))
+        self.move_arm_cart_server = SimpleActionClient(self.CART_SERVER, MoveArmAction)
         self.move_arm_cart_server.wait_for_server()
         self.script_server = simple_script_server()
         self.pitch = default_pitch
@@ -36,7 +39,7 @@ class Arm(object):
             self._move_to_cartesian(where)
 
     def _move_to_joints(self, joints):
-        self.script_server.move('arm', [joints])
+        self.script_server.move("arm", [joints])
 
     def _move_to_cartesian(self, coordinates):
         """
@@ -64,18 +67,18 @@ class Arm(object):
         oc.orientation.w = qw
         g.motion_plan_request.goal_constraints.orientation_constraints.append(oc)
         self.move_arm_cart_server.send_goal(g)
-        rospy.loginfo('Sent move arm goal, waiting for result...')
+        rospy.loginfo("Sent move arm goal, waiting for result...")
         self.move_arm_cart_server.wait_for_result()
         rv = self.move_arm_cart_server.get_result().error_code.val
         print rv
         if not rv == 1:
-            raise Exception('Failed to move the arm to the given pose.')
+            raise Exception("Failed to move the arm to the given pose.")
 
     def _move_to_pose(self, pose):
-        self.script_server.move('arm', pose)
+        self.script_server.move("arm", pose)
 
     def open_gripper(self):
-        self.script_server.move('gripper', 'open')
+        self.script_server.move("gripper", "open")
 
     def close_gripper(self):
-        self.script_server.move('gripper', 'close')
+        self.script_server.move("gripper", "close")

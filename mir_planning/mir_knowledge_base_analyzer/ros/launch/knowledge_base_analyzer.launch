@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
- 
+
     <!-- informs if there is pending goals, or new knowledge in the knowledge base -->
-    
-    <node   pkg="mir_knowledge_base_analyzer" type="knowledge_base_analyzer" name="knowledge_base_analyzer" 
+
+    <node   pkg="mir_knowledge_base_analyzer" type="knowledge_base_analyzer" name="knowledge_base_analyzer"
             respawn="false" output="screen"/>
 
 </launch>

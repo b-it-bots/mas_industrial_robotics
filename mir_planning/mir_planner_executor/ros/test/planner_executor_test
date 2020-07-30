@@ -6,6 +6,7 @@ import rospy
 from actionlib import SimpleActionClient
 from mir_planning_msgs.msg import ExecutePlanAction, ExecutePlanGoal, ExecutePlanResult
 from rosplan_dispatch_msgs.msg import CompletePlan
+
 from mir_task_planning.utils import Utils
 
 # This is a made up plan which has all 7 actions
@@ -36,23 +37,25 @@ SMALL_PLAN = """\
 
 
 def get_complete_plan_from_string(string):
-    """Create and return CompletePlan obj from a multiline string 
+    """Create and return CompletePlan obj from a multiline string
 
     :string: string
     :returns: rosplan_dispatch_msgs/CompletePlan
 
     """
     complete_plan = CompletePlan()
-    for line_num, line in enumerate(string.split('\n')):
-        action_msg = Utils.get_action_msg_from_string(line, line_num+1)
+    for line_num, line in enumerate(string.split("\n")):
+        action_msg = Utils.get_action_msg_from_string(line, line_num + 1)
         complete_plan.plan.append(action_msg)
     return complete_plan
+
 
 def main():
     complete_plan = get_complete_plan_from_string(PLAN)
     # complete_plan = get_complete_plan_from_string(SMALL_PLAN)
-    planner_executor_client = SimpleActionClient('/task_planning/execute_plan',
-                                                 ExecutePlanAction)
+    planner_executor_client = SimpleActionClient(
+        "/task_planning/execute_plan", ExecutePlanAction
+    )
     rospy.loginfo("Waiting for planner executor...")
     planner_executor_client.wait_for_server()
     rospy.loginfo("Wait complete. Sending goal.")
@@ -63,6 +66,7 @@ def main():
     rospy.loginfo("Got result")
     print(result)
 
+
 if __name__ == "__main__":
-    rospy.init_node('planner_executor_test')
+    rospy.init_node("planner_executor_test")
     main()

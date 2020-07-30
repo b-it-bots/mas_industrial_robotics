@@ -4,15 +4,15 @@ Integration test for the 'object_perception_functionality' node.
 
 """
 
-import rospy
-import numpy.testing as testing
 import unittest
+
+import at_work_robot_example_ros.msg
+import numpy.testing as testing
+import rospy
 import rostest
 import std_msgs.msg
-import at_work_robot_example_ros.msg
 
-
-PKG = 'mir_object_perception_functionality'
+PKG = "mir_object_perception_functionality"
 
 
 class TestObjectPerceptionFunctionality(unittest.TestCase):
@@ -29,22 +29,24 @@ class TestObjectPerceptionFunctionality(unittest.TestCase):
         self.wait_for_event = None
 
         # publishers
-        self.event_out = rospy.Publisher('~event_out', std_msgs.msg.String)
+        self.event_out = rospy.Publisher("~event_out", std_msgs.msg.String)
         self.benchmark_state = rospy.Publisher(
-            '~benchmark_state', at_work_robot_example_ros.msg.BenchmarkState
+            "~benchmark_state", at_work_robot_example_ros.msg.BenchmarkState
         )
 
         # subscribers
         self.component_output = rospy.Subscriber(
-            '~component_output', at_work_robot_example_ros.msg.BenchmarkFeedback, self.result_callback
+            "~component_output",
+            at_work_robot_example_ros.msg.BenchmarkFeedback,
+            self.result_callback,
         )
 
         self.logging_output = rospy.Subscriber(
-            '~logging_output', std_msgs.msg.String, self.logging_callback
+            "~logging_output", std_msgs.msg.String, self.logging_callback
         )
 
         self.event_in = rospy.Subscriber(
-            '~event_in', std_msgs.msg.String, self.event_in_callback
+            "~event_in", std_msgs.msg.String, self.event_in_callback
         )
 
     def tearDown(self):
@@ -62,10 +64,12 @@ class TestObjectPerceptionFunctionality(unittest.TestCase):
 
         """
         benchmark_state_msg = at_work_robot_example_ros.msg.BenchmarkState()
-        benchmark_state_msg.state.data = at_work_robot_example_ros.msg.BenchmarkState.RUNNING
+        benchmark_state_msg.state.data = (
+            at_work_robot_example_ros.msg.BenchmarkState.RUNNING
+        )
 
         while not self.wait_for_result:
-            self.event_out.publish('e_trigger')
+            self.event_out.publish("e_trigger")
             self.benchmark_state.publish(benchmark_state_msg)
 
         self.assertEqual(self.result.object_instance_name.data, "EM-01")
@@ -89,8 +93,9 @@ class TestObjectPerceptionFunctionality(unittest.TestCase):
         expected = "Containers EM-01 0.52 -0.2 0.0"
         self.assertEqual(self.log_msg.data, expected)
 
-
-        benchmark_state_msg.state.data = at_work_robot_example_ros.msg.BenchmarkState.FINISHED
+        benchmark_state_msg.state.data = (
+            at_work_robot_example_ros.msg.BenchmarkState.FINISHED
+        )
 
         while not self.wait_for_event:
             self.benchmark_state.publish(benchmark_state_msg)
@@ -109,7 +114,8 @@ class TestObjectPerceptionFunctionality(unittest.TestCase):
         self.event_in_msg = msg
 
 
-if __name__ == '__main__':
-    rospy.init_node('object_perception_functionality_test')
-    rostest.rosrun(PKG, 'object_perception_functionality_test', TestObjectPerceptionFunctionality)
-
+if __name__ == "__main__":
+    rospy.init_node("object_perception_functionality_test")
+    rostest.rosrun(
+        PKG, "object_perception_functionality_test", TestObjectPerceptionFunctionality
+    )

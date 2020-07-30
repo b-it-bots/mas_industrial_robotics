@@ -454,21 +454,21 @@
         <joint name="arm_joint_3" value="-3.7517841947"  />
         <joint name="arm_joint_4" value="0.362809703706" />
         <joint name="arm_joint_5" value="2.90365019592" />
-    </group_state> 
+    </group_state>
     <group_state name="drop_2" group="arm_1">
         <joint name="arm_joint_1" value="0.660862208463" />
         <joint name="arm_joint_2" value="0.310353105029" />
         <joint name="arm_joint_3" value="-3.13069132708" />
         <joint name="arm_joint_4" value="0.131924767559" />
         <joint name="arm_joint_5" value="2.90393780651" />
-    </group_state>   
+    </group_state>
     <group_state name="drop_3" group="arm_1">
         <joint name="arm_joint_1" value="1.00689051468" />
         <joint name="arm_joint_2" value="0.438191759932" />
         <joint name="arm_joint_3" value="-3.38266276586" />
         <joint name="arm_joint_4" value="0.15329644716" />
         <joint name="arm_joint_5" value="2.90391568262" />
-    </group_state>       
+    </group_state>
     <group_state name="close" group="arm_1_gripper">
         <joint name="gripper_motor_left_joint" value="0.43" />
         <joint name="gripper_motor_right_joint" value="0.43" />

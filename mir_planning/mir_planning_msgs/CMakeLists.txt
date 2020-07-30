@@ -15,7 +15,7 @@ add_message_files(
     DIRECTORY
         ros/msg
     FILES
-        ObjectsAtLocation.msg    
+        ObjectsAtLocation.msg
 )
 
 add_action_files(

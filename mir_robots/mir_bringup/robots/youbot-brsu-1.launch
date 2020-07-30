@@ -27,10 +27,10 @@
     <arg name="robot" value="$(arg robot)"/>
   </include>
 
-  <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />	
+  <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" />
   <include file="$(find mir_gripper_controller)/ros/launch/dynamixel_gripper.launch" />
 
-  <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />	
+  <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
   <group if="$(arg is_camera_required)" >

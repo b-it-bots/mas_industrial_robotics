@@ -1,49 +1,50 @@
 #!/usr/bin/env python
-#-*- encoding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 """
 Add boxes to planning scene to represent the workspace walls.
 #TODO this should be replaced in the future with the octomap
 Currently planning with octomap is too slow.
 """
 
-__author__ = 'moriarty'
+__author__ = "moriarty"
 
-import rospy
-import std_msgs.msg
 import geometry_msgs.msg
-import shape_msgs.msg
 import moveit_msgs.msg
+import rospy
+import shape_msgs.msg
+import std_msgs.msg
 import tf
+
 
 class ArmWorkspaceRestricter(object):
     """
     """
+
     def __init__(self):
         # params
         self.event_in = None
         self.is_restricted = False
 
         # node cycle rate (in seconds)
-        self.cycle_time = rospy.get_param('~cycle_time', 0.1)
+        self.cycle_time = rospy.get_param("~cycle_time", 0.1)
         # frame which walls and workspace are added wrt
-        self.wall_frame_id = rospy.get_param('~wall_frame_id', "/base_link")
+        self.wall_frame_id = rospy.get_param("~wall_frame_id", "/base_link")
         # wall height wrt wall_frame_id (m)
-        self.wall_height = rospy.get_param('~wall_height', 0.35)
+        self.wall_height = rospy.get_param("~wall_height", 0.35)
         # distance from wall_frame_id to side walls (m)
-        self.wall_distance = rospy.get_param('~wall_distance', 0.35)
+        self.wall_distance = rospy.get_param("~wall_distance", 0.35)
         # distance to platform from base wall_frame_id (m)
-        self.platform_distance = rospy.get_param('~platform_distance', 0.6)
+        self.platform_distance = rospy.get_param("~platform_distance", 0.6)
         # height of platform with respect to wall_frame_id (m)
-        self.platform_height = rospy.get_param('~platform_height', 0.05)
+        self.platform_height = rospy.get_param("~platform_height", 0.05)
 
         # publishers
-        self.planning_scene_diff_publisher = rospy.Publisher('~planning_scene',
-            moveit_msgs.msg.PlanningScene)
+        self.planning_scene_diff_publisher = rospy.Publisher(
+            "~planning_scene", moveit_msgs.msg.PlanningScene
+        )
 
         # subscriber
-        rospy.Subscriber('~event_in',
-            std_msgs.msg.String,
-            self.event_in_cb)
+        rospy.Subscriber("~event_in", std_msgs.msg.String, self.event_in_cb)
 
     def event_in_cb(self, msg):
         """
@@ -59,15 +60,15 @@ class ArmWorkspaceRestricter(object):
 
         """
         rospy.loginfo("Ready to start...")
-        state = 'INIT'
+        state = "INIT"
 
         while not rospy.is_shutdown():
 
-            if state == 'INIT':
+            if state == "INIT":
                 state = self.init_state()
-            elif state == 'IDLE':
+            elif state == "IDLE":
                 state = self.idle_state()
-            elif state == 'RUNNING':
+            elif state == "RUNNING":
                 state = self.running_state()
 
             rospy.logdebug("State: {0}".format(state))
@@ -83,9 +84,9 @@ class ArmWorkspaceRestricter(object):
         This state waits for moveit to be up.
         """
         if self.planning_scene_diff_publisher.get_num_connections() < 1:
-            return 'INIT'
+            return "INIT"
         else:
-            return 'IDLE'
+            return "IDLE"
 
     def idle_state(self):
         """
@@ -95,12 +96,12 @@ class ArmWorkspaceRestricter(object):
         :rtype: str
 
         """
-        if self.event_in == 'e_start':
-            return 'RUNNING'
-        elif self.event_in == 'e_stop':
-            return 'INIT'
+        if self.event_in == "e_start":
+            return "RUNNING"
+        elif self.event_in == "e_stop":
+            return "INIT"
         else:
-            return 'IDLE'
+            return "IDLE"
 
     def running_state(self):
         """
@@ -110,24 +111,42 @@ class ArmWorkspaceRestricter(object):
         :rtype: str
 
         """
-        if self.event_in == 'e_stop':
+        if self.event_in == "e_stop":
             self.remove_walls()
-            return 'INIT'
+            return "INIT"
         else:
             if not self.is_restricted:
                 self.add_walls()
-            return 'RUNNING'
+            return "RUNNING"
 
     def add_walls(self):
-        self.add_box("restricter_left_wall",
-            0.25, self.wall_distance, self.wall_height / 2.0,
-            1.0, 0.04, self.wall_height)
-        self.add_box("restricter_right_wall",
-            0.25, -self.wall_distance, self.wall_height / 2.0,
-            1.0, 0.04, self.wall_height)
-        self.add_box("restricter_platform",
-            self.platform_distance, 0.0, 0.0,
-            0.5 , self.wall_distance * 2.0, self.platform_height / 2.0)
+        self.add_box(
+            "restricter_left_wall",
+            0.25,
+            self.wall_distance,
+            self.wall_height / 2.0,
+            1.0,
+            0.04,
+            self.wall_height,
+        )
+        self.add_box(
+            "restricter_right_wall",
+            0.25,
+            -self.wall_distance,
+            self.wall_height / 2.0,
+            1.0,
+            0.04,
+            self.wall_height,
+        )
+        self.add_box(
+            "restricter_platform",
+            self.platform_distance,
+            0.0,
+            0.0,
+            0.5,
+            self.wall_distance * 2.0,
+            self.platform_height / 2.0,
+        )
         self.is_restricted = True
 
     def remove_walls(self):
@@ -141,7 +160,7 @@ class ArmWorkspaceRestricter(object):
         """
         rospy.loginfo("Adding walls to moveit scene")
 
-        box_object = moveit_msgs.msg.CollisionObject();
+        box_object = moveit_msgs.msg.CollisionObject()
         box_object.header.frame_id = self.wall_frame_id
         box_object.id = name
         box_pose = geometry_msgs.msg.Pose()
@@ -174,12 +193,12 @@ class ArmWorkspaceRestricter(object):
         """
         rospy.loginfo("removing wall from moveit scene")
 
-        box_object = moveit_msgs.msg.CollisionObject();
+        box_object = moveit_msgs.msg.CollisionObject()
         box_object.header.frame_id = self.wall_frame_id
         box_object.id = name
-        
+
         box_object.operation = box_object.REMOVE
-        
+
         planning_scene = moveit_msgs.msg.PlanningScene()
         planning_scene.world.collision_objects.append(box_object)
         planning_scene.is_diff = True
@@ -190,7 +209,7 @@ class ArmWorkspaceRestricter(object):
 def main():
     """
     Listens to event_in.
-    When recieves "e_start", and walls haven't been added, 
+    When recieves "e_start", and walls haven't been added,
     they are added to planning scene.
     When recieves "e_stop" removes the walls which were added.
     """
@@ -198,5 +217,6 @@ def main():
     workspace_restricter = ArmWorkspaceRestricter()
     workspace_restricter.start()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

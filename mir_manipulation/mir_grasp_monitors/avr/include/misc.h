@@ -7,13 +7,12 @@
 #define SETBIT1(var, num) ((var) |= (_BV(num)))
 
 #define SETBIT(var, num, val) \
-    {\
-        if(val) {\
-            SETBIT1(var, num);\
-        } else {\
-            SETBIT0(var, num);\
-        }\
-    }
+  {                           \
+    if (val) {                \
+      SETBIT1(var, num);      \
+    } else {                  \
+      SETBIT0(var, num);      \
+    }                         \
+  }
 
 #endif
-

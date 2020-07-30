@@ -12,7 +12,7 @@
 
         <!-- Should be less than sensor range -->
         <param name="goal_aliasing" value="2.0"/>
-    
+
         <rosparam file="$(find mir_2dexplore)/ros/config/costmap_common.yaml" command="load" ns="explore_costmap" />
         <rosparam file="$(find mir_2dexplore)/ros/config/costmap_exploration.yaml" command="load" ns="explore_costmap" />
         <rosparam file="$(find mir_hardware_config)/$(arg robot)/config/base_footprint.yaml" command="load" ns="explore_costmap"/>

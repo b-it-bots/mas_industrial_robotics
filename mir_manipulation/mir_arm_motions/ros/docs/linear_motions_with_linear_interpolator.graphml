@@ -157,7 +157,7 @@ interpolator<y:LabelModel>
               <y:Geometry height="57.0" width="133.9999999999999" x="1547.5663667199997" y="493.70719999999994"/>
               <y:Fill color="#993300" transparent="false"/>
               <y:BorderStyle color="#993300" type="line" width="1.0"/>
-              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="45.90625" modelName="custom" textColor="#FFFFFF" visible="true" width="62.388671875" x="35.8056640625" y="5.546875">IK 
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="45.90625" modelName="custom" textColor="#FFFFFF" visible="true" width="62.388671875" x="35.8056640625" y="5.546875">IK
 trajectory
 solver<y:LabelModel>
                   <y:SmartNodeLabelModel distance="4.0"/>

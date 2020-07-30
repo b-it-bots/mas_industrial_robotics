@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
- 
+
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="sim" default="false"/>
 
@@ -23,8 +23,8 @@
 
     <!-- manipulation -->
     <!--include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch" /-->
-    <!--include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" /--> 
-    
+    <!--include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" /-->
+
     <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
       <param name="video_device" value="/dev/video3" />
       <param name="image_width" value="640" />

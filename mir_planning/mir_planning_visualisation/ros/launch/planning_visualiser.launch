@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="model_path" default="$(find mir_planning_visualisation)/resource"/>
+    <arg name="model_path" default="$(find mcr_gazebo_objects)/common/models"/>
     <arg name="model_to_marker_config"
          default="$(find mir_planning_visualisation)/ros/config/model_to_marker.yaml"/>
     <arg name="plan_marker_color_config"

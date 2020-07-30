@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
- 
+
     <node   pkg="mir_knowledge_base_analyzer" type="knowledge_base_queries" name="knowledge_base_queries"  ns="mir_knowledge_base_analyzer"
             respawn="false" output="screen"/>
 

@@ -4,4 +4,3 @@
 void timer_init(void);
 
 #endif
-

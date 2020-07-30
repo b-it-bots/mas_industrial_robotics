@@ -17,3 +17,8 @@ MAS industrial robotics - task planning tutorial
   knowledge_base_analyzer
   mir_knowledge
   mir_actions
+  planning_visualisation
+
+.. image:: ../../../mir_planning/mir_planning_visualisation/docs/kb_and_plan_vis.gif
+
+See :ref:`mir_planning_visualisation` for further info on the gif.
