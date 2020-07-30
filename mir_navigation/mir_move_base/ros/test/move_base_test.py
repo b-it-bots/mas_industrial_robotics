@@ -5,12 +5,13 @@ Integration test for the 'move_base' node.
 """
 
 import unittest
+
+import geometry_msgs.msg
 import rospy
 import rostest
 import std_msgs.msg
-import geometry_msgs.msg
 
-PKG = 'mir_move_base'
+PKG = "mir_move_base"
 
 
 class TestMoveBase(unittest.TestCase):
@@ -24,14 +25,12 @@ class TestMoveBase(unittest.TestCase):
         self.wait_for_result = None
 
         # Publishers
-        self.event_out = rospy.Publisher(
-            '~event_out', std_msgs.msg.String, latch=True
-        )
-        self.pose_in = rospy.Publisher('~pose_in', geometry_msgs.msg.PoseStamped)
+        self.event_out = rospy.Publisher("~event_out", std_msgs.msg.String, latch=True)
+        self.pose_in = rospy.Publisher("~pose_in", geometry_msgs.msg.PoseStamped)
 
         # Subscribers
         self.component_output = rospy.Subscriber(
-            '~component_output', std_msgs.msg.String, self.component_output_cb
+            "~component_output", std_msgs.msg.String, self.component_output_cb
         )
 
     def tearDown(self):
@@ -57,10 +56,10 @@ class TestMoveBase(unittest.TestCase):
         pose_in.pose.orientation.w = 1.0
 
         while not self.wait_for_result:
-            self.event_out.publish('e_start')
+            self.event_out.publish("e_start")
             self.pose_in.publish(pose_in)
 
-        self.assertIn(self.result.data, ['e_success', 'e_failure'])
+        self.assertIn(self.result.data, ["e_success", "e_failure"])
 
     def component_output_cb(self, msg):
         """
@@ -71,6 +70,6 @@ class TestMoveBase(unittest.TestCase):
         self.wait_for_result = True
 
 
-if __name__ == '__main__':
-    rospy.init_node('move_base_test')
-    rostest.rosrun(PKG, 'move_base_test', TestMoveBase)
+if __name__ == "__main__":
+    rospy.init_node("move_base_test")
+    rostest.rosrun(PKG, "move_base_test", TestMoveBase)

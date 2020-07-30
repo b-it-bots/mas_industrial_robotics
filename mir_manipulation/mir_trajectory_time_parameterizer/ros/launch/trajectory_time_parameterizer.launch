@@ -11,6 +11,6 @@
 
         <!-- Loop rate in Hz -->
         <param name="loop_rate" type="double" value="10.0"/>
-        <param name="group_name" type="str" value="arm_1"/> 
+        <param name="group_name" type="str" value="arm_1"/>
     </node>
 </launch>

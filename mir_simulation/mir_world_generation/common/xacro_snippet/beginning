@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<!--
+This file is computer generated.
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="{NAME}">
+
+    <xacro:include filename="$(find mcr_gazebo_worlds)/common/worlds/atwork_macros.xacro" />
+
+    <link name="origin"/>
+

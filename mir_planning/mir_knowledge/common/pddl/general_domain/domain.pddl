@@ -3,8 +3,9 @@
  (:types
   	location      		; service areas, points of interest, navigation goals
   	robot         		; your amazing yet powerful robot
-  	object				    ; objects to be manipulated by the robot
+  	object				; objects to be manipulated by the robot
   	robot_platform		; platform slots for the robot to store objects
+	drawer              ; drawer to store objects
  )
 
  (:predicates
@@ -43,6 +44,17 @@
 	; gets lost if the robot moves the base
 	(perceived ?l - location)
 
+	; specifies whether the gripper has opened the drawer ?d
+	(opened ?d - drawer)
+
+	; object ?o is located inside drawer ?d
+	(inside ?o - object ?d - drawer)
+
+	; contents of drawer ?d are perceived
+	(perceived_inside ?d - drawer)
+
+	; draw ?d is located at location ?l
+	(located_at ?d - drawer ?l - location)
  )
 
  (:functions
@@ -56,7 +68,7 @@
  (:action move_base
     :parameters (?r - robot ?source ?destination - location)
     :precondition (and (at ?r ?source)
-     					    (gripper_is_free ?r)
+     				   (gripper_is_free ?r)
      			  )
     :effect (and (not (at ?r ?source))
      			        (at ?r ?destination)
@@ -169,4 +181,88 @@
    					(increase (total-cost) 5)
    			)
  )
-)
+
+ ; open a drawer ?d using the robot gripper
+ ; with robot ?r that is at location ?draw_loc
+ (:action open
+     :parameters (?r - robot ?draw_loc - location ?d - drawer)
+     :precondition 	(and 	(at ?r ?draw_loc)
+	 						(located_at ?d ?draw_loc)
+							(perceived ?draw_loc)
+                      		(gripper_is_free ?r)
+							(not (opened ?d))
+                   	)
+     :effect (and  	(opened ?d)
+                   	(gripper_is_free ?r)
+                   	(increase (total-cost) 2)
+             )
+ )
+
+ ; close a drawer ?d using the robot gripper
+ ; with robot ?r that is at location ?draw_loc
+ (:action close
+     :parameters (?r - robot ?draw_loc - location ?d - drawer)
+     :precondition 	(and 	(at ?r ?draw_loc)
+	 						(located_at ?d ?draw_loc)
+                      		(gripper_is_free ?r)
+							(opened ?d)
+                   	)
+     :effect (and  	(not (opened ?d))
+                   	(gripper_is_free ?r)
+                   	(increase (total-cost) 2)
+             )
+ )
+
+; perceive a an object ?o in a drawer ?d with an empty robot gripper
+ ; to find the pose of this object before it can be picked
+ (:action perceive_inside_drawer
+   :parameters (?r - robot ?draw_loc - location ?d - drawer)
+   :precondition 	(and 	(at ?r ?draw_loc)
+							(located_at ?d ?draw_loc)
+							(opened ?d)
+   							(gripper_is_free ?r)
+   							(not (perceived_inside ?d))
+   					)
+   :effect 	(and 	(perceived_inside ?d)
+                    (increase (total-cost) 10)
+  			)
+ )
+
+ ; pick an object ?o which is inside a drawer ?d at location ?draw_loc with a free gripper
+ ; with robot ?r that is at location ?draw_loc
+ (:action pick_from_drawer
+     :parameters (?r - robot ?draw_loc - location ?d - drawer ?o - object)
+     :precondition 	(and 	(inside ?o ?d)
+                      		(at ?r ?draw_loc)
+							(located_at ?d ?draw_loc)
+                      		(perceived_inside ?d)
+                      		(gripper_is_free ?r)
+                      		(not (holding ?r ?o))
+                      		(not (heavy ?o))
+							(opened ?d)
+                   	)
+     :effect (and  	(holding ?r ?o)
+                   	(not (inside ?o ?d))
+                   	(not (gripper_is_free ?r))
+                   	(increase (total-cost) 2)
+             )
+ )
+
+ ; place an object ?o inside a drawer ?d at location ?drawer
+ ; with robot ?r that is at location ?draw_loc
+ (:action place_inside_drawer
+     :parameters (?r - robot ?draw_loc - location ?d - drawer ?o - object)
+     :precondition  (and  (at ?r ?draw_loc)
+	 					  (located_at ?d ?draw_loc)
+                          (holding ?r ?o)
+                          (not (insertable ?o ))
+                          (not (gripper_is_free ?r))
+						  (opened ?d)
+                    )
+     :effect (and   (inside ?o ?d)
+                    (not (holding ?r ?o))
+                    (gripper_is_free ?r)
+                    (increase (total-cost) 2)
+             )
+ )
+ )

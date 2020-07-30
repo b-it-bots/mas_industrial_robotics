@@ -4,16 +4,17 @@ Test unit for the functions in the simple_pregrasp_planner_utils.py module.
 
 """
 
-import math
-import numpy
-import numpy.testing
 import copy
+import math
 import unittest
-import rosunit
+
 import geometry_msgs.msg
 import mir_pregrasp_planning_ros.simple_pregrasp_planner_utils as pregrasp_planner_utils
+import numpy
+import numpy.testing
+import rosunit
 
-PKG = 'mir_pregrasp_planning'
+PKG = "mir_pregrasp_planning"
 
 
 class TestSimplePregraspPlanner(unittest.TestCase):
@@ -21,6 +22,7 @@ class TestSimplePregraspPlanner(unittest.TestCase):
     Tests functions used in the simple_pregrasp_planner_utils.py module.
 
     """
+
     def test_modify_pose_no_changes(self):
         """
         Tests that the 'modify_pose' function returns the same pose, since
@@ -285,71 +287,79 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         )
 
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.x, zero_degrees.pose.orientation.x,
-            places=5
+            actual_zero.pose.orientation.x, zero_degrees.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.y, zero_degrees.pose.orientation.y,
-            places=5
+            actual_zero.pose.orientation.y, zero_degrees.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.z, zero_degrees.pose.orientation.z,
-            places=5
+            actual_zero.pose.orientation.z, zero_degrees.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.w, zero_degrees.pose.orientation.w,
-            places=5
+            actual_zero.pose.orientation.w, zero_degrees.pose.orientation.w, places=5
         )
 
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.x, ninety_degrees.pose.orientation.x,
-            places=5
+            actual_ninety.pose.orientation.x,
+            ninety_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.y, ninety_degrees.pose.orientation.y,
-            places=5
+            actual_ninety.pose.orientation.y,
+            ninety_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.z, ninety_degrees.pose.orientation.z,
-            places=5
+            actual_ninety.pose.orientation.z,
+            ninety_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.w, ninety_degrees.pose.orientation.w,
-            places=5
-        )
-
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.x, one_eighty_degrees.pose.orientation.x,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.y, one_eighty_degrees.pose.orientation.y,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.z, one_eighty_degrees.pose.orientation.z,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.w, one_eighty_degrees.pose.orientation.w,
-            places=5
+            actual_ninety.pose.orientation.w,
+            ninety_degrees.pose.orientation.w,
+            places=5,
         )
 
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.x, two_seventy_degrees.pose.orientation.x,
-            places=5
+            actual_one_eighty.pose.orientation.x,
+            one_eighty_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.y, two_seventy_degrees.pose.orientation.y,
-            places=5
+            actual_one_eighty.pose.orientation.y,
+            one_eighty_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.z, two_seventy_degrees.pose.orientation.z,
-            places=5
+            actual_one_eighty.pose.orientation.z,
+            one_eighty_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.w, two_seventy_degrees.pose.orientation.w,
-            places=5
+            actual_one_eighty.pose.orientation.w,
+            one_eighty_degrees.pose.orientation.w,
+            places=5,
+        )
+
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.x,
+            two_seventy_degrees.pose.orientation.x,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.y,
+            two_seventy_degrees.pose.orientation.y,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.z,
+            two_seventy_degrees.pose.orientation.z,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.w,
+            two_seventy_degrees.pose.orientation.w,
+            places=5,
         )
 
     def test_modify_pose_rotation_add_offset(self):
@@ -397,71 +407,79 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         )
 
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.x, zero_degrees.pose.orientation.x,
-            places=5
+            actual_zero.pose.orientation.x, zero_degrees.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.y, zero_degrees.pose.orientation.y,
-            places=5
+            actual_zero.pose.orientation.y, zero_degrees.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.z, zero_degrees.pose.orientation.z,
-            places=5
+            actual_zero.pose.orientation.z, zero_degrees.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.w, zero_degrees.pose.orientation.w,
-            places=5
+            actual_zero.pose.orientation.w, zero_degrees.pose.orientation.w, places=5
         )
 
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.x, ninety_degrees.pose.orientation.x,
-            places=5
+            actual_ninety.pose.orientation.x,
+            ninety_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.y, ninety_degrees.pose.orientation.y,
-            places=5
+            actual_ninety.pose.orientation.y,
+            ninety_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.z, ninety_degrees.pose.orientation.z,
-            places=5
+            actual_ninety.pose.orientation.z,
+            ninety_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.w, ninety_degrees.pose.orientation.w,
-            places=5
-        )
-
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.x, one_eighty_degrees.pose.orientation.x,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.y, one_eighty_degrees.pose.orientation.y,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.z, one_eighty_degrees.pose.orientation.z,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.w, one_eighty_degrees.pose.orientation.w,
-            places=5
+            actual_ninety.pose.orientation.w,
+            ninety_degrees.pose.orientation.w,
+            places=5,
         )
 
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.x, two_seventy_degrees.pose.orientation.x,
-            places=5
+            actual_one_eighty.pose.orientation.x,
+            one_eighty_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.y, two_seventy_degrees.pose.orientation.y,
-            places=5
+            actual_one_eighty.pose.orientation.y,
+            one_eighty_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.z, two_seventy_degrees.pose.orientation.z,
-            places=5
+            actual_one_eighty.pose.orientation.z,
+            one_eighty_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.w, two_seventy_degrees.pose.orientation.w,
-            places=5
+            actual_one_eighty.pose.orientation.w,
+            one_eighty_degrees.pose.orientation.w,
+            places=5,
+        )
+
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.x,
+            two_seventy_degrees.pose.orientation.x,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.y,
+            two_seventy_degrees.pose.orientation.y,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.z,
+            two_seventy_degrees.pose.orientation.z,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.w,
+            two_seventy_degrees.pose.orientation.w,
+            places=5,
         )
 
     def test_modify_pose_rotation_limited_range(self):
@@ -509,71 +527,79 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         )
 
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.x, zero_degrees.pose.orientation.x,
-            places=5
+            actual_zero.pose.orientation.x, zero_degrees.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.y, zero_degrees.pose.orientation.y,
-            places=5
+            actual_zero.pose.orientation.y, zero_degrees.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.z, zero_degrees.pose.orientation.z,
-            places=5
+            actual_zero.pose.orientation.z, zero_degrees.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.w, zero_degrees.pose.orientation.w,
-            places=5
+            actual_zero.pose.orientation.w, zero_degrees.pose.orientation.w, places=5
         )
 
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.x, ninety_degrees.pose.orientation.x,
-            places=5
+            actual_ninety.pose.orientation.x,
+            ninety_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.y, ninety_degrees.pose.orientation.y,
-            places=5
+            actual_ninety.pose.orientation.y,
+            ninety_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.z, ninety_degrees.pose.orientation.z,
-            places=5
+            actual_ninety.pose.orientation.z,
+            ninety_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.w, ninety_degrees.pose.orientation.w,
-            places=5
-        )
-
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.x, one_eighty_degrees.pose.orientation.x,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.y, one_eighty_degrees.pose.orientation.y,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.z, one_eighty_degrees.pose.orientation.z,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.w, one_eighty_degrees.pose.orientation.w,
-            places=5
+            actual_ninety.pose.orientation.w,
+            ninety_degrees.pose.orientation.w,
+            places=5,
         )
 
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.x, ninety_degrees.pose.orientation.x,
-            places=5
+            actual_one_eighty.pose.orientation.x,
+            one_eighty_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.y, ninety_degrees.pose.orientation.y,
-            places=5
+            actual_one_eighty.pose.orientation.y,
+            one_eighty_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.z, ninety_degrees.pose.orientation.z,
-            places=5
+            actual_one_eighty.pose.orientation.z,
+            one_eighty_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.w, ninety_degrees.pose.orientation.w,
-            places=5
+            actual_one_eighty.pose.orientation.w,
+            one_eighty_degrees.pose.orientation.w,
+            places=5,
+        )
+
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.x,
+            ninety_degrees.pose.orientation.x,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.y,
+            ninety_degrees.pose.orientation.y,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.z,
+            ninety_degrees.pose.orientation.z,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.w,
+            ninety_degrees.pose.orientation.w,
+            places=5,
         )
 
     def test_modify_pose_rotation_complete(self):
@@ -621,71 +647,79 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         )
 
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.x, ninety_degrees.pose.orientation.x,
-            places=5
+            actual_zero.pose.orientation.x, ninety_degrees.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.y, ninety_degrees.pose.orientation.y,
-            places=5
+            actual_zero.pose.orientation.y, ninety_degrees.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.z, ninety_degrees.pose.orientation.z,
-            places=5
+            actual_zero.pose.orientation.z, ninety_degrees.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_zero.pose.orientation.w, ninety_degrees.pose.orientation.w,
-            places=5
+            actual_zero.pose.orientation.w, ninety_degrees.pose.orientation.w, places=5
         )
 
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.x, one_eighty_degrees.pose.orientation.x,
-            places=5
+            actual_ninety.pose.orientation.x,
+            one_eighty_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.y, one_eighty_degrees.pose.orientation.y,
-            places=5
+            actual_ninety.pose.orientation.y,
+            one_eighty_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.z, one_eighty_degrees.pose.orientation.z,
-            places=5
+            actual_ninety.pose.orientation.z,
+            one_eighty_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_ninety.pose.orientation.w, one_eighty_degrees.pose.orientation.w,
-            places=5
-        )
-
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.x, two_seventy_degrees.pose.orientation.x,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.y, two_seventy_degrees.pose.orientation.y,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.z, two_seventy_degrees.pose.orientation.z,
-            places=5
-        )
-        self.assertAlmostEqual(
-            actual_one_eighty.pose.orientation.w, two_seventy_degrees.pose.orientation.w,
-            places=5
+            actual_ninety.pose.orientation.w,
+            one_eighty_degrees.pose.orientation.w,
+            places=5,
         )
 
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.x, one_eighty_degrees.pose.orientation.x,
-            places=5
+            actual_one_eighty.pose.orientation.x,
+            two_seventy_degrees.pose.orientation.x,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.y, one_eighty_degrees.pose.orientation.y,
-            places=5
+            actual_one_eighty.pose.orientation.y,
+            two_seventy_degrees.pose.orientation.y,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.z, one_eighty_degrees.pose.orientation.z,
-            places=5
+            actual_one_eighty.pose.orientation.z,
+            two_seventy_degrees.pose.orientation.z,
+            places=5,
         )
         self.assertAlmostEqual(
-            actual_two_seventy.pose.orientation.w, one_eighty_degrees.pose.orientation.w,
-            places=5
+            actual_one_eighty.pose.orientation.w,
+            two_seventy_degrees.pose.orientation.w,
+            places=5,
+        )
+
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.x,
+            one_eighty_degrees.pose.orientation.x,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.y,
+            one_eighty_degrees.pose.orientation.y,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.z,
+            one_eighty_degrees.pose.orientation.z,
+            places=5,
+        )
+        self.assertAlmostEqual(
+            actual_two_seventy.pose.orientation.w,
+            one_eighty_degrees.pose.orientation.w,
+            places=5,
         )
 
     def test_modify_pose_rotation_random_angles(self):
@@ -768,71 +802,55 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         desired_4.pose.orientation.w = -0.90631
 
         self.assertAlmostEqual(
-            actual_first.pose.orientation.x, desired_1.pose.orientation.x,
-            places=5
+            actual_first.pose.orientation.x, desired_1.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_first.pose.orientation.y, desired_1.pose.orientation.y,
-            places=5
+            actual_first.pose.orientation.y, desired_1.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_first.pose.orientation.z, desired_1.pose.orientation.z,
-            places=5
+            actual_first.pose.orientation.z, desired_1.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_first.pose.orientation.w, desired_1.pose.orientation.w,
-            places=5
+            actual_first.pose.orientation.w, desired_1.pose.orientation.w, places=5
         )
 
         self.assertAlmostEqual(
-            actual_second.pose.orientation.x, desired_2.pose.orientation.x,
-            places=5
+            actual_second.pose.orientation.x, desired_2.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_second.pose.orientation.y, desired_2.pose.orientation.y,
-            places=5
+            actual_second.pose.orientation.y, desired_2.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_second.pose.orientation.z, desired_2.pose.orientation.z,
-            places=5
+            actual_second.pose.orientation.z, desired_2.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_second.pose.orientation.w, desired_2.pose.orientation.w,
-            places=5
+            actual_second.pose.orientation.w, desired_2.pose.orientation.w, places=5
         )
 
         self.assertAlmostEqual(
-            actual_third.pose.orientation.x, desired_3.pose.orientation.x,
-            places=5
+            actual_third.pose.orientation.x, desired_3.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_third.pose.orientation.y, desired_3.pose.orientation.y,
-            places=5
+            actual_third.pose.orientation.y, desired_3.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_third.pose.orientation.z, desired_3.pose.orientation.z,
-            places=5
+            actual_third.pose.orientation.z, desired_3.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_third.pose.orientation.w, desired_3.pose.orientation.w,
-            places=5
+            actual_third.pose.orientation.w, desired_3.pose.orientation.w, places=5
         )
 
         self.assertAlmostEqual(
-            actual_fourth.pose.orientation.x, desired_4.pose.orientation.x,
-            places=5
+            actual_fourth.pose.orientation.x, desired_4.pose.orientation.x, places=5
         )
         self.assertAlmostEqual(
-            actual_fourth.pose.orientation.y, desired_4.pose.orientation.y,
-            places=5
+            actual_fourth.pose.orientation.y, desired_4.pose.orientation.y, places=5
         )
         self.assertAlmostEqual(
-            actual_fourth.pose.orientation.z, desired_4.pose.orientation.z,
-            places=5
+            actual_fourth.pose.orientation.z, desired_4.pose.orientation.z, places=5
         )
         self.assertAlmostEqual(
-            actual_fourth.pose.orientation.w, desired_4.pose.orientation.w,
-            places=5
+            actual_fourth.pose.orientation.w, desired_4.pose.orientation.w, places=5
         )
 
     def test_restrict_angle_to_range_no_changes(self):
@@ -846,7 +864,9 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         test_angles = numpy.radians([0, 30, 45, 90, 100, 150, 180, 270, 300, 360])
         desired = numpy.radians([0, 30, 45, 90, 100, 150, 180, 270, 300, 0])
         actual = [
-            pregrasp_planner_utils.restrict_angle_to_range(angle, offset, rotation_range)
+            pregrasp_planner_utils.restrict_angle_to_range(
+                angle, offset, rotation_range
+            )
             for angle in test_angles
         ]
         numpy.testing.assert_almost_equal(actual, desired)
@@ -863,7 +883,9 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         test_angles = numpy.radians([0, 30, 45, 90, 100, 150, 180, 270, 300, 360])
         desired = numpy.radians([180, 210, 225, 270, 100, 150, 180, 270, 300, 0])
         actual = [
-            pregrasp_planner_utils.restrict_angle_to_range(angle, offset, rotation_range)
+            pregrasp_planner_utils.restrict_angle_to_range(
+                angle, offset, rotation_range
+            )
             for angle in test_angles
         ]
         numpy.testing.assert_almost_equal(actual, desired)
@@ -880,7 +902,9 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         test_angles = numpy.radians([0, 30, 45, 90, 100, 150, 180, 270, 300, 360])
         desired = numpy.radians([0, 30, 45, 90, 100, 150, 180, 90, 120, 180])
         actual = [
-            pregrasp_planner_utils.restrict_angle_to_range(angle, offset, rotation_range)
+            pregrasp_planner_utils.restrict_angle_to_range(
+                angle, offset, rotation_range
+            )
             for angle in test_angles
         ]
         numpy.testing.assert_almost_equal(actual, desired)
@@ -897,11 +921,13 @@ class TestSimplePregraspPlanner(unittest.TestCase):
         test_angles = numpy.radians([0, 30, 45, 90, 100, 150, 180, 270, 300, 360])
         desired = numpy.radians([0, 30, 45, 90, 280, 330, 0, 270, 300, 0])
         actual = [
-            pregrasp_planner_utils.restrict_angle_to_range(angle, offset, rotation_range)
+            pregrasp_planner_utils.restrict_angle_to_range(
+                angle, offset, rotation_range
+            )
             for angle in test_angles
         ]
         numpy.testing.assert_almost_equal(actual, desired)
 
 
-if __name__ == '__main__':
-    rosunit.unitrun(PKG, 'test_simple_pregrasp_planner', TestSimplePregraspPlanner)
+if __name__ == "__main__":
+    rosunit.unitrun(PKG, "test_simple_pregrasp_planner", TestSimplePregraspPlanner)

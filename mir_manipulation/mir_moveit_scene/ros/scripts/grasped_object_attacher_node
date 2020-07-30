@@ -2,5 +2,5 @@
 
 import mir_moveit_scene_ros.attach_grasped_object
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mir_moveit_scene_ros.attach_grasped_object.main()

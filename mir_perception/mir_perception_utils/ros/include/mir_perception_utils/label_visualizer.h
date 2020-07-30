@@ -10,8 +10,8 @@
 #include <string>
 #include <vector>
 
-#include <ros/ros.h>
 #include <geometry_msgs/PoseArray.h>
+#include <ros/ros.h>
 
 #include <mir_perception_utils/color.h>
 
@@ -19,30 +19,25 @@ using mir_perception_utils::visualization::Color;
 
 namespace mir_perception_utils
 {
-
 namespace visualization
 {
-
 class LabelVisualizer
 {
-public:
-    LabelVisualizer(const ros::NodeHandle &nh, const std::string& topic_name,
-                          Color color,
-                          bool check_subscribers = true);
+ public:
+  LabelVisualizer(const ros::NodeHandle &nh, const std::string &topic_name, Color color,
+                  bool check_subscribers = true);
 
-    LabelVisualizer(const std::string& topic_name,
-                          Color color,
-                          bool check_subscribers = true);
+  LabelVisualizer(const std::string &topic_name, Color color, bool check_subscribers = true);
 
-    void publish(const std::vector<std::string> &labels, const geometry_msgs::PoseArray &poses);
+  void publish(const std::vector<std::string> &labels, const geometry_msgs::PoseArray &poses);
 
-    int getNumSubscribers();
+  int getNumSubscribers();
 
-private:
-    ros::Publisher marker_publisher_;
+ private:
+  ros::Publisher marker_publisher_;
 
-    const Color color_;
-    bool check_subscribers_;
+  const Color color_;
+  bool check_subscribers_;
 };
 
 }  // namespace visualization

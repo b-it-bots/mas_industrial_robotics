@@ -18,7 +18,7 @@
 				<origin xyz="0 0 0" rpy="0 0 0"/>
 				<inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
 	  		</inertial>
-	
+
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -26,7 +26,7 @@
 				</geometry>
 				<material name="Black" />
 			</visual>
-	
+
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -35,20 +35,20 @@
 			</collision >
 		</link>
 
-		
+
 		<joint name="${name}_bottom_joint" type="fixed">
 			<xacro:insert_block name="origin" />
 			<parent link="${parent}"/>
 			<child link="${name}_bottom_link"/>
 		</joint>
-		
+
 		<link name="${name}_top_link">
 	  		<inertial>
 				<mass value="0.8" />
 				<origin xyz="0 0 0" rpy="0 0 0"/>
 				<inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
 	  		</inertial>
-	
+
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -56,7 +56,7 @@
 				</geometry>
 				<material name="Black" />
 			</visual>
-	
+
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -77,7 +77,7 @@
 				<origin xyz="0 0 0" rpy="0 0 0"/>
 				<inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
 	  		</inertial>
-	
+
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -85,7 +85,7 @@
 				</geometry>
 				<material name="Black" />
 			</visual>
-	
+
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -106,7 +106,7 @@
 				<origin xyz="0 0 0" rpy="0 0 0"/>
 				<inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
 	  		</inertial>
-	
+
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -114,7 +114,7 @@
 				</geometry>
 				<material name="Black" />
 			</visual>
-	
+
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>

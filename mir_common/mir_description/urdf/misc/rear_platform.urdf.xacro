@@ -4,8 +4,8 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-	
-	
+
+
 	<xacro:macro name="rear_platform" params="parent name *origin">
 
 		<joint name="${name}_joint" type="fixed" >
@@ -20,7 +20,7 @@
 				<mass value="1"/>
 				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
 			</inertial>
-			
+
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
@@ -28,7 +28,7 @@
 				</geometry>
 				<material name="DarkGrey"/>
 			</visual>
-			
+
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>

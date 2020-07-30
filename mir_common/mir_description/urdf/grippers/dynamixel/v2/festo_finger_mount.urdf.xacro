@@ -33,7 +33,7 @@
         </geometry>
       </collision>
     </link>
-    
+
   </xacro:macro>
 
 </robot>

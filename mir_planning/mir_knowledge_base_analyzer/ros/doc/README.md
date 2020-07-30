@@ -10,10 +10,10 @@ how to run?
 
 You can open png file to see terminal arrange for testing this component
 
-Basically you run the anaylizer node and you publish in 
+Basically you run the anaylizer node and you publish in
 
         /pending_goals_analyzer/pending_goals/event_in
-        
+
 any information and then you get the result in the topic
 
         /pending_goals_analyzer/pending_goals/event_out

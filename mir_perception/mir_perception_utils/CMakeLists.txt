@@ -46,6 +46,7 @@ add_definitions(-fpermissive)
 ### LIBRARIES ####################################################
 add_library(${PROJECT_NAME}
   common/src/bounding_box.cpp
+  common/src/pointcloud_utils.cpp
   ros/src/object_utils_ros.cpp
   ros/src/pointcloud_utils_ros.cpp
 )

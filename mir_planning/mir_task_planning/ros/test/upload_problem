@@ -8,26 +8,28 @@ to knowledge base.
 
 from __future__ import print_function
 
-NODE = 'upload_problem'
-
 import os.path
-import rospy
 
+import rospy
 from mir_knowledge_ros.problem_uploader import ProblemUploader
 
-def main():
-    rospy.init_node('test_problem_uploader')
+NODE = "upload_problem"
 
-    problem_file = rospy.get_param('~problem_file', None)
+
+def main():
+    rospy.init_node("test_problem_uploader")
+
+    problem_file = rospy.get_param("~problem_file", None)
     print(problem_file)
 
     if problem_file is None or not os.path.exists(problem_file):
-        rospy.logfatal('Either domain file or problem file does not exist. Exiting.')
+        rospy.logfatal("Either domain file or problem file does not exist. Exiting.")
         sys.exit(1)
 
     uploader = ProblemUploader(problem_file)
     uploader.upload()
     rospy.sleep(1.0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

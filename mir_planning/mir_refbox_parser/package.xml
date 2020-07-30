@@ -21,5 +21,6 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>mir_planning_msgs</run_depend>
   <run_depend>tf</run_depend>
 </package>

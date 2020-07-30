@@ -1,5 +1,5 @@
 base_max_linear_x_vel: 0.3          # m per second in run mode
-base_max_linear_y_vel: 0.3          # m per second in run mode 
-base_max_angular_vel: 0.6           # rad per second in run mode 
-arm_max_vel: 0.4                    # rad per second in run mode 
+base_max_linear_y_vel: 0.3          # m per second in run mode
+base_max_angular_vel: 0.6           # rad per second in run mode
+arm_max_vel: 0.4                    # rad per second in run mode
 soft_joint_limit_threshold: 0.1     # rad

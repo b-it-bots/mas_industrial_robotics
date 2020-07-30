@@ -16,7 +16,7 @@ The robocup @work domain is partitioned into 6 basic actions
 
 Each action is implemented as SMACH state machines which are wrapped with
 ``ActionServer``. An ``ActionClient`` needs to send request using
-``GenericExecuteGoal``. 
+``GenericExecuteGoal``.
 
 This request message contains a single dictionary kind of
 message called ``parameters`` of type ``diagnostic_msgs/KeyValue[]``.

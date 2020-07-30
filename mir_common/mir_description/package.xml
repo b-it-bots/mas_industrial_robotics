@@ -7,7 +7,7 @@
   <maintainer email="frederik.hegger@h-brs.de">Frederik Hegger</maintainer>
 
   <license>GPLv3</license>
- 
+
   <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
 
   <buildtool_depend>catkin</buildtool_depend>

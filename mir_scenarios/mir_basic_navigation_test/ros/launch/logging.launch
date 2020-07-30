@@ -17,7 +17,7 @@
   <node pkg="tf" type="static_transform_publisher" name="robot_marker_pub" args="0 0 0.25 0 0 0 /base_link /rockin_marker 100"/>
 
   <!-- rockin/trajectory -->
-  <node pkg="topic_tools" type="relay" name="nav_path_relay" args="/move_base/DWAPlannerROS/global_plan /rockin/trajectory" output="screen" /> 
+  <node pkg="topic_tools" type="relay" name="nav_path_relay" args="/move_base/DWAPlannerROS/global_plan /rockin/trajectory" output="screen" />
 
   <!-- rockin/robot_pose -->
   <node pkg="mcr_common_converters" type="transform_to_pose_converter_node"

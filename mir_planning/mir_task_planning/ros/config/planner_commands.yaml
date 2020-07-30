@@ -1,11 +1,11 @@
 # shell commands to execute planners
 planner_commands:
     # all CAPS words will be replaced in the code
-    mercury: 
+    mercury:
         command: 'timeout TIMELIMIT EXECUTABLE DOMAIN PROBLEM FILENAME'
         rospkg_name: 'mercury_planner'
         executable_path: 'build/Mercury-fixed/seq-sat-mercury/plan'
-    lama: 
+    lama:
         command: 'EXECUTABLE --search-time-limit TIMELIMIT --alias seq-sat-lama-2011 --plan-file FILENAME DOMAIN PROBLEM'
         rospkg_name: 'lama_planner'
         executable_path: 'fast-downward/fast-downward.py'
