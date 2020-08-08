@@ -7,7 +7,8 @@ Coding guidelines
 
   Make sure that your text editor is properly configured to use **spaces** instead of tabs.
   All C/C++ code should be written and formatted according to the **Google style guide** (with an exception to column limit
-  and breaking braces. See .clang-format for more details).
+  and breaking braces.
+  See `.clang-format <https://github.com/b-it-bots/mas_industrial_robotics/blob/kinetic/.clang-format>`_ for more details).
   All Python code should adhere to the **PEP-8 style guide**.
 
 .. _style-label:
@@ -18,45 +19,11 @@ Coding style
 C/C++
 ^^^^^
 
-* Filenames
-
-  Filenames should be all lowercase and words are separated by underscores \( \_ \). For instance:
-
-  .. code-block:: bash
-
-    whole_body_controller.cpp
-    whole_body_controller.h
-
-* Class names
-
-  Class names should be nouns in `UpperCamelCase <https://www.wikiwand.com/en/Camel_case>`_,
-  i.e. the first letter of every word capitalised. Use whole words and avoid acronyms or
-  abbreviations (unless the abbreviation is much more widely used than the long form, such as SVM or ROS).
-
-* Function names
-
-  Regular functions have mixed case. The first word (which is usually a verb) starts
-  with lowercase and the remaining words follow the `CamelCase <https://www.wikiwand.com/en/Camel_case>`_ practice.
-  For instance:
-
-  .. code-block:: cpp
-
-    getEuclideanDistance2d ( double x1 , double y1 , double x2 , double y2 )
-
-* Variable Names
-
-  Variable names are all lowercase, with underscores between words. Class member
-  variables have trailing underscores. For instance:
-
-  .. code-block:: cpp
-
-    double current_velocity_joint_1 = 0 . 0 ; // non member class variable
-    double current_velocity_joint_1_ = 0 . 0 ; // member class variable
-
 * Linting
 
   `cpplint <https://github.com/cpplint/cpplint>`_ is used to lint C++ code according to the
-  Google style guide. cpplint can be installed using pip (in a python 3.7 environment)
+  `Google style guide <https://google.github.io/styleguide/cppguide.html>`_.
+  cpplint can be installed using pip (in a python 3.7 environment)
 
   .. code-block:: bash
 
@@ -78,9 +45,10 @@ C/C++
 
     sudo apt-get install clang-format
 
-  All configurations are present in .clang-format file and the code in this repository should be
-  formatted using this configuration.
-  To fun clang-format on a single C++ file, use
+  All configurations are present in .clang-format file and its is mandatory to use this file to format
+  the code in this repository.
+  Please note that it is necessary to run clang-format from the repository's root folder so that it
+  uses the repository's .clang-format file. To run clang-format on a single C++ file, use
 
   .. code-block:: bash
 
@@ -169,8 +137,10 @@ Python
   checks in the .pre-commit-config.yaml pass. Some serious violations of the standard coding
   guidelines will result in errors while running git commit and have to be manually fixed.
   **Users will not be able to commit their code, until these errors are fixed.**
-  Please ensure that git commit or pre-commit hooks is run in a **python 3.7 environment**
+  Please ensure that **git commit** or **pre-commit hooks** (and not the code itself) is run in a **python 3.7 environment**
   as configured in .pre-commit-config.yaml.
+
+.. warning::
 
   Alternatively, one could also verify if the pre-commit hooks pass before actually committing
   the code to git. To do so please run the following command after making necessary changes to
@@ -191,30 +161,31 @@ Editors for software development
 * Vim
 * Pycharm
 
-Install the necessary python, C++ and ROS plugins after installing the desired editor.
+Install the necessary python, C++ and ROS plugins after installing a desired editor.
 Other editors which support ROS are listed `here <http://wiki.ros.org/IDEs>`_.
 
 Configuring editors
 ^^^^^^^^^^^^^^^^^^^
 
-It is important to configure the editor settings so that linters, code formatters and
+It is important to configure your editor settings so that linters, code formatters and
 code checkers check for errors (and solve them if possible) automatically upon saving
 your changes in a file.
-Below we illustrate the settings that need to modified in Visual Studio Code to avoid
-manually performing the checks described :ref:`style-label`.
+Below is an illustration of the settings configurations that need to modified in Visual Studio Code to avoid
+manually performing the checks described in :ref:`style-label`. Similar configurations can be done in
+other editors too.
 
-The settings can be configured through the Settings option in File menu or in the
-settings.json file.
+The settings can be configured through the Settings option in File menu or in
+settings.json.
 
 * Python linting
     By default pylint is enabled in Visual Studio Code, however pylint has to be installed
     using pip in your chosen python interpreter path. Please do not enable other linters as
-    this could create a conflict while running the pre-commit hooks. For more information
-    on `linting in VS Code <https://code.visualstudio.com/docs/python/linting>`_ refer here.
+    this could create a conflict while running pre-commit hooks. Please checkout the
+    `VS Code website <https://code.visualstudio.com/docs/python/linting>`_ for more information.
 
 * Python code formatting
     Since pre-commit hooks uses black to format python code, this can be very conveniently
-    added to the editor so that the file is auto-formatted upon saving by black. Add this
+    added to your editor so that the file is auto-formatted by black upon saving. Add the following
     to your settings.json to enable black code formatting.
 
     .. code-block:: bash
@@ -234,9 +205,9 @@ settings.json file.
     errors in the C++ code with squiggly lines.
 
 * C++ code formatting
-    Clang-format is used to format C++ code. This can be configured in the settings.json file
+    Clang-format is used to format C++ code. This can be configured in settings.json
     after installing the official Microsoft C/C++ extension. Add the following lines to your
-    settings.json file so that the configurations from .clang-format in the repository is
+    settings.json file so that the configurations from .clang-format in the repository are
     used by VS Code to format the C++ files.
 
     .. code-block:: bash
