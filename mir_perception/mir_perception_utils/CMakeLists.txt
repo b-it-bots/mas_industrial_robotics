@@ -1,12 +1,7 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(mir_perception_utils)
 
-# Compile as C++11 for ROS Kinetic and newer
-# use -O3 for performance mode
-# use -g for debug
-add_compile_options(-std=c++11
-  -O3
-)
+add_compile_options(-std=c++14)
 
 find_package(catkin REQUIRED
   COMPONENTS
@@ -22,6 +17,9 @@ find_package(catkin REQUIRED
 find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
 find_package(OpenCV REQUIRED)
+#find_package(Boost REQUIRED python)
+#message(STATUS "opencv version ${OpenCV_VERSION}")
+#find_package(OpenCV REQUIRED COMPONENTS core imgcodecs videoio)
 
 catkin_package(
   INCLUDE_DIRS
