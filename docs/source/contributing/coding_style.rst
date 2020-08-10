@@ -145,6 +145,7 @@ Python
   Alternatively, one could also verify if the pre-commit hooks pass before actually committing
   the code to git. To do so please run the following command after making necessary changes to
   your code.
+
   .. code-block:: bash
 
     pre-commit run --all-files
