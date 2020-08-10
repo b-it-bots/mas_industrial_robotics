@@ -2,5 +2,5 @@
 
 import mir_pregrasp_planning_ros.pose_mock_up_gui
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mir_pregrasp_planning_ros.pose_mock_up_gui.main()

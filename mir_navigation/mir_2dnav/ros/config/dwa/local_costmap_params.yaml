@@ -1,5 +1,5 @@
 local_costmap:
-  global_frame: /map                    #default : "/map"
+  global_frame: map                    #default : "/map"
   inflation_radius: 0.46                #default: 0.55
   robot_base_frame: base_footprint      #default : "base_link"
   update_frequency: 2.0                 #default : 5.0

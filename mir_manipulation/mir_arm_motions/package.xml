@@ -4,7 +4,7 @@
   <version>0.1.0</version>
 
   <description>
-     Provides launcher for mcr_arm_motions package 
+     Provides launcher for mcr_arm_motions package
      to use planned motion component for arm motion execution.
   </description>
 
@@ -27,6 +27,6 @@
   <run_depend>mcr_twist_controller</run_depend>
   <run_depend>mcr_twist_limiter</run_depend>
 
-  <test_depend>roslaunch</test_depend>  
+  <test_depend>roslaunch</test_depend>
 
 </package>

@@ -24,7 +24,7 @@
     <!-- Goal pose -->
     <node pkg="mcr_common_converters" type="pose_shifter_node"
           name="move_backward_pose_shifter" output="screen">
-      
+
       <param name="reference_frame" type="string" value="base_link"/>
 
       <!-- Linear offset in X, Y and Z (in meters) -->

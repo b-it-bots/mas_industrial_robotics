@@ -4,5 +4,5 @@
   <include file="$(find mir_moveit_youbot_brsu_1)/launch/move_group.launch">
      <arg name="planner_pipeline" value="$(arg planner_pipeline)" />
   </include>
-  
+
 </launch>

@@ -72,20 +72,20 @@
   <!-- xacro:intel_realsense_f200_camera name="arm_cam3d" parent="camera_mount_link">
     <origin xyz="-0.05 -0.01 0.03" rpy="0.0 -${M_PI/2 - 0.03} 0.0" />
   </xacro:intel_realsense_f200_camera -->
-  <!-- <xacro:asus_xtion_camera name="arm_cam3d" parent="camera_mount_link"--> 
+  <!-- <xacro:asus_xtion_camera name="arm_cam3d" parent="camera_mount_link"-->
        <!--origin xyz="-0.01 -0.012 0.05" rpy="0 ${M_PI/2 - 0.25} 0.00" /-->
        <!--origin xyz="0.016 0 0.01" rpy="0 ${M_PI/2 - 0} -0.09" />  -->
-  <!--     <origin xyz="0.025 -0.012 0.013" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /-->  
-       <!-- <origin xyz="0.022 -0.0 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
-       <!-- <origin xyz="0.025 -0.010 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->  
-       <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->  
+  <!--     <origin xyz="0.025 -0.012 0.013" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /-->
+       <!-- <origin xyz="0.022 -0.0 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->
+       <!-- <origin xyz="0.025 -0.010 0.017" rpy="0.02 ${M_PI/2 - 0.20} -${M_PI/2}" /> -->
+       <!--origin xyz="0.023 -0.015 0.03" rpy="0 0 0" /-->
   <!-- </xacro:asus_xtion_camera-->
-  
+
    <xacro:realsense_d435  name="d435_back" parent="base_link">
-       <origin xyz="-0.263 0.0 0.0875" rpy="0.0 0.61 ${M_PI}" />  
+       <origin xyz="-0.263 0.0 0.0875" rpy="0.0 0.61 ${M_PI}" />
    </xacro:realsense_d435>
 
    <xacro:realsense_d435  name="arm_cam3d" parent="arm_link_5">
-       <origin xyz="0.0 -0.011 0.009" rpy="0.0 ${-M_PI / 2} ${-M_PI / 2}" />  
+       <origin xyz="0.0 -0.011 0.009" rpy="0.0 ${-M_PI / 2} ${-M_PI / 2}" />
    </xacro:realsense_d435>
 </robot>

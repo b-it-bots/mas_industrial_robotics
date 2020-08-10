@@ -4,7 +4,7 @@
 m20:
     file_name: 'm20.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -18,7 +18,7 @@ m20:
 m30:
     file_name: 'm30.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -32,7 +32,7 @@ m30:
 f20_20_b:
     file_name: 'f20_20.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -46,7 +46,7 @@ f20_20_b:
 f20_20_g:
     file_name: 'f20_20.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.5
         g: 0.5
         b: 0.5
@@ -60,7 +60,7 @@ f20_20_g:
 s40_40_b:
     file_name: 's40_40.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -74,7 +74,7 @@ s40_40_b:
 s40_40_g:
     file_name: 's40_40.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.5
         g: 0.5
         b: 0.5
@@ -88,7 +88,7 @@ s40_40_g:
 m20_100:
     file_name: 'm20_100.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -102,7 +102,7 @@ m20_100:
 r20:
     file_name: 'r20.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -116,7 +116,7 @@ r20:
 motor:
     file_name: 'motor.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -130,7 +130,7 @@ motor:
 distance_tube:
     file_name: 'distance_tube.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.5
         g: 0.5
         b: 0.5
@@ -144,7 +144,7 @@ distance_tube:
 bearing:
     file_name: 'bearing.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.6
         g: 0.6
         b: 0.6
@@ -158,7 +158,7 @@ bearing:
 bearing_box:
     file_name: 'bearing_box.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.5
         g: 0.5
         b: 0.5
@@ -172,7 +172,7 @@ bearing_box:
 axis:
     file_name: 'axis.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.5
         g: 0.5
         b: 0.5
@@ -186,7 +186,7 @@ axis:
 container_box_red:
     file_name: 'container.stl'
     scale: 0.001
-    color: 
+    color:
         r: 1.0
         g: 0.0
         b: 0.0
@@ -200,7 +200,7 @@ container_box_red:
 container_box_blue:
     file_name: 'container.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.0
         g: 0.0
         b: 1.0
@@ -218,7 +218,7 @@ container_box_blue:
 ws:
     file_name: 'workstation.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.9
         g: 0.9
         b: 0.9
@@ -232,7 +232,7 @@ ws:
 sh:
     file_name: 'shelf.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.9
         g: 0.9
         b: 0.9
@@ -246,7 +246,7 @@ sh:
 pp:
     file_name: 'ppt_platform.stl'
     scale: 0.001
-    color: 
+    color:
         r: 0.9
         g: 0.9
         b: 0.9
@@ -260,7 +260,7 @@ pp:
 cb:
     file_name: 'workstation.stl'
     scale: 1.0
-    color: 
+    color:
         r: 0.9
         g: 0.9
         b: 0.9
@@ -278,7 +278,7 @@ cb:
 youbot:
     file_name: 'base.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.2
         g: 0.2
         b: 0.2
@@ -292,7 +292,7 @@ youbot:
 arm_0:
     file_name: 'arm0.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -306,7 +306,7 @@ arm_0:
 arm_1:
     file_name: 'arm1.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -320,7 +320,7 @@ arm_1:
 arm_2:
     file_name: 'arm2.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -334,7 +334,7 @@ arm_2:
 arm_3:
     file_name: 'arm3.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -348,7 +348,7 @@ arm_3:
 arm_4:
     file_name: 'arm4.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -362,7 +362,7 @@ arm_4:
 arm_5:
     file_name: 'arm5.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -376,7 +376,7 @@ arm_5:
 arm_palm:
     file_name: 'palm.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.1
         g: 0.1
         b: 0.1
@@ -390,7 +390,7 @@ arm_palm:
 youbot_plate:
     file_name: 'plate.dae'
     scale: 1.0
-    color: 
+    color:
         r: 0.6
         g: 0.6
         b: 0.6
@@ -404,7 +404,7 @@ youbot_plate:
 yb_wheel_lf:
     file_name: 'palm.dae'
     scale: 0.1
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -418,7 +418,7 @@ yb_wheel_lf:
 yb_wheel_rf:
     file_name: 'palm.dae'
     scale: 0.1
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -432,7 +432,7 @@ yb_wheel_rf:
 yb_wheel_lb:
     file_name: 'palm.dae'
     scale: 0.1
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -446,7 +446,7 @@ yb_wheel_lb:
 yb_wheel_rb:
     file_name: 'palm.dae'
     scale: 0.1
-    color: 
+    color:
         r: 0.85
         g: 0.34
         b: 0.11
@@ -461,10 +461,10 @@ yb_wheel_rb:
 # =======
 # DEFAULT
 # =======
-default: 
+default:
     file_name: ''
     scale: 0.05
-    color: 
+    color:
         r: 1.0
         g: 0.0
         b: 0.0

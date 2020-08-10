@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=kinetic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=melodic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
 
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
-- ROS Kinetic: Ubuntu 16.04
+- ROS Melodic: Ubuntu 18.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -42,22 +42,22 @@ Please refer [here](https://github.com/b-it-bots/docker/blob/master/industrial/R
 ## ROS - Robot Operating System
 ### Install ROS
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
-Alternatively, you can skip this step, as ROS Kinetic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
+Alternatively, you can skip this step, as ROS Melodic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
 
 
-- ROS Kinetic - http://wiki.ros.org/kinetic/Installation/Ubuntu
+- ROS Melodic - http://wiki.ros.org/melodic/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
-  
+
 
 ### ROS Tutorials
 If you have never worked with ROS before, we recommend to go through the beginner tutorials provided by ROS:
 
      http://wiki.ros.org/ROS/Tutorials
 
-In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters"). 
+In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters").
 
-    
+
 ## Clone and compile the MAS industrial robotics software
 First of all you have to clone the repository.
 
@@ -115,8 +115,8 @@ The ROBOT_ENV variable can be used to switch between different environments. The
 ### In Simulation
 
      roslaunch mir_bringup_sim robot.launch
-     
-     
+
+
 In a new terminal you can open the Gazebo GUI to see the environment and the robot
 
 	     rosrun gazebo_ros gzclient
@@ -124,12 +124,12 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ### At the Real Robot
 
      roslaunch mir_bringup robot.launch
-     
+
 
 ## Test the base
 
      roslaunch mir_teleop teleop_keyboard.launch
-     
+
 
 ## Visualize the robot state and sensor data
 
@@ -139,14 +139,20 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ## Build a map for base navigation
 
      roslaunch mir_2dslam 2dslam.launch
-     
+
 
 ## Use autonomous navigation
 ### Omni-directional navigation
 
      roslaunch mir_2dnav 2dnav.launch nav_mode:=dwa
 
-     
-
-
 Click on the menu bar "File -> Open Config", navigate to "~/indigo/src/mas_industrial_robotics" and select the "youbot.rviz" file.
+
+# Note on Contributions:
+
+[Pre-commit](https://pre-commit.com/#intro) hooks has been added to this repository. Please note that you will not be able to locally commit your changes to git until all the checks in the .pre-commit-config.yaml pass. Although, cpp and python code formatters are present in .pre-commit-config.yaml, some serious violations of the standard coding guidelines will not be automatically fixed while running the pre-commit hooks. These errors will be displayed while running git commit and have to be manually fixed. Users will not be able to commit their code, until these errors are fixed. Alternatively, one could also verify if the pre-commit hooks pass before actually committing the code to git. To do so please run the following command after making necessary changes to your code.
+```
+pre-commit run --all-files
+```
+
+

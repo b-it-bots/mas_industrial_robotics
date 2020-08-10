@@ -5,9 +5,9 @@
     <arg name="target_pose" default="/move_base_wrapper/pose_in" />
 
 <group ns="mcr_navigation/direct_base_controller">
-        
+
     <node pkg="mcr_common_converters" type="transform_to_pose_converter_node" name="pose_converter" output="screen">
-    
+
         <!-- the cycle rate of the node (in Hz) -->
         <param name="loop_rate" type="double" value="20"/>
 
@@ -17,7 +17,7 @@
         <param name="reference_frame" type="str" value="base_link"/>
         <param name="target_frame" type="str" value="base_link"/>
     </node>
-    
+
     <node pkg="mcr_manipulation_measurers" type="component_wise_pose_error_calculator_node" name="pose_error_calculator" output="screen">
 
         <remap from="~pose_1" to="pose_converter/converted_pose" />
@@ -91,13 +91,13 @@
 
             <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
             <param name="angular_synchronization" type="bool" value="true"/>
-   
+
         </node>
 
 	<!-- remove stamped from twist synchronizer -->
 	<node pkg="topic_tools" type="transform" name="velocity_republisher_without_stamp" output="screen"
         args="/cmd_vel_prio_low_stamped /cmd_vel_safe geometry_msgs/Twist 'm.twist' --wait-for-start" />
- 
+
         <node pkg="mcr_direct_base_controller" type="direct_base_controller_coordinator_node" name="coordinator" output="screen">
 
             <remap from="~pose_converter_event_in" to="pose_converter/event_in" />
@@ -106,7 +106,7 @@
             <remap from="~twist_controller_event_in" to="twist_controller/event_in" />
             <remap from="~twist_limiter_event_in" to="twist_limiter/event_in" />
             <remap from="~twist_synchronizer_event_in" to="twist_synchronizer/event_in" />
-            
+
             <remap from="~pose_monitor_feedback" to="pose_error_monitor/feedback" />
             <remap from="~twist" to="/cmd_vel_safe" />
 
@@ -115,9 +115,9 @@
 
             <!-- Maximum linear velocities in the axes X, Y and Z (in meters/second) -->
             <param name="angular_synchronization" type="bool" value="true"/>
-   
+
         </node>
 
     </group>
-    
+
 </launch>

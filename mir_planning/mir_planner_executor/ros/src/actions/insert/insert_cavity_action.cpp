@@ -7,6 +7,7 @@
 
 #include <mir_planner_executor/actions/insert/insert_cavity_action.h>
 
-InsertCavityAction::InsertCavityAction() : BaseInsertAction("/insert_cavity_server") {
-    //client_.waitForServer();
+InsertCavityAction::InsertCavityAction() : BaseInsertAction("/insert_cavity_server")
+{
+  // client_.waitForServer();
 }

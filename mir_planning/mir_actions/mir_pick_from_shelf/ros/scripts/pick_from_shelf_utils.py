@@ -1,11 +1,13 @@
 #! usr/bin/env python
 from __future__ import print_function
 
-import tf
 import copy
 import math
+
 import rospy
+import tf
 from geometry_msgs.msg import PoseStamped, Quaternion
+
 
 class PickFromShelfUtils(object):
 
@@ -13,14 +15,16 @@ class PickFromShelfUtils(object):
 
     def __init__(self):
         # ros params
-        self.frame_id = rospy.get_param('~frame_id', 'base_link_static')
-        self.y_pos_movement_threshold = rospy.get_param('~y_pos_movement_threshold', 0.15)
-        self.start_base_pose_offset = rospy.get_param('~start_base_pose_offset', -0.7)
-        self.pitch = rospy.get_param('~pitch', 2.0)
-        self.arm_link_0_offset_x = rospy.get_param('~arm_link_0_offset_x', 0.223)
-        self.arm_link_0_offset_y = rospy.get_param('~arm_link_0_offset_y', 0.0)
-        self.intermediate_perc = rospy.get_param('~intermediate_perc', 0.8)
-        self.retract_base_pose_x = rospy.get_param('~retract_base_pose_x', -0.2)
+        self.frame_id = rospy.get_param("~frame_id", "base_link_static")
+        self.y_pos_movement_threshold = rospy.get_param(
+            "~y_pos_movement_threshold", 0.15
+        )
+        self.start_base_pose_offset = rospy.get_param("~start_base_pose_offset", -0.7)
+        self.pitch = rospy.get_param("~pitch", 2.0)
+        self.arm_link_0_offset_x = rospy.get_param("~arm_link_0_offset_x", 0.223)
+        self.arm_link_0_offset_y = rospy.get_param("~arm_link_0_offset_y", 0.0)
+        self.intermediate_perc = rospy.get_param("~intermediate_perc", 0.8)
+        self.retract_base_pose_x = rospy.get_param("~retract_base_pose_x", -0.2)
 
     def calc_pose_for_dbc(self, obj_pose):
         """Assumption: object pose is in `base_link_static`.
@@ -38,10 +42,13 @@ class PickFromShelfUtils(object):
         dbc_target_pose = PoseStamped()
         dbc_target_pose.header.stamp = rospy.Time.now()
         dbc_target_pose.header.frame_id = self.frame_id
-        dbc_target_pose.pose.position.x = self.start_base_pose_offset + obj_pose.pose.position.x
-        dbc_target_pose.pose.position.y = min(self.y_pos_movement_threshold,
-                                              max(-self.y_pos_movement_threshold,
-                                                  obj_pose.pose.position.y))
+        dbc_target_pose.pose.position.x = (
+            self.start_base_pose_offset + obj_pose.pose.position.x
+        )
+        dbc_target_pose.pose.position.y = min(
+            self.y_pos_movement_threshold,
+            max(-self.y_pos_movement_threshold, obj_pose.pose.position.y),
+        )
         dbc_target_pose.pose.orientation.w = 1.0
         return dbc_target_pose
 
@@ -71,10 +78,10 @@ class PickFromShelfUtils(object):
         arm_pose = copy.deepcopy(obj_pose)
         arm_pose.pose.orientation = Quaternion(*quat)
         if is_intermediate:
-            arm_pose.pose.position.x = arm_link_0_x + (self.intermediate_perc*delta_x)
-            arm_pose.pose.position.y = arm_link_0_y + (self.intermediate_perc*delta_y)
+            arm_pose.pose.position.x = arm_link_0_x + (self.intermediate_perc * delta_x)
+            arm_pose.pose.position.y = arm_link_0_y + (self.intermediate_perc * delta_y)
         return arm_pose
-        
+
     def get_retracted_dbc_pose(self):
         """Return a pose in `base_link_static` frame for the robot to back up
 

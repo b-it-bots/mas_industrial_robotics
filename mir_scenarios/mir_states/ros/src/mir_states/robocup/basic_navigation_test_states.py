@@ -21,42 +21,46 @@ class select_target_pose(smach.State):
     """
 
     def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['pose_selected',
-                                       'unknown_pose',
-                                       'no_more_targets'],
-                             input_keys=['task_list'],
-                             output_keys=['base_pose_to_approach',
-                                          'task_list',
-                                          'subtask'])
+        smach.State.__init__(
+            self,
+            outcomes=["pose_selected", "unknown_pose", "no_more_targets"],
+            input_keys=["task_list"],
+            output_keys=["base_pose_to_approach", "task_list", "subtask"],
+        )
 
     def execute(self, userdata):
         try:
             subtask = userdata.task_list.pop(0)
         except IndexError:
-            return 'no_more_targets'
+            return "no_more_targets"
 
         location_param = "script_server/base/" + subtask[0]
         orientation_param = "script_server/base_orientations/" + subtask[1]
 
         if not rospy.has_param(location_param):
             rospy.logerr("Location <<%s>> is not on the parameter server" % subtask[0])
-            return 'unknown_pose'
+            return "unknown_pose"
 
         if not rospy.has_param(orientation_param):
-            rospy.logerr("Orientation <<%s>> is not on the parameter server" % subtask[1])
-            return 'unknown_pose'
+            rospy.logerr(
+                "Orientation <<%s>> is not on the parameter server" % subtask[1]
+            )
+            return "unknown_pose"
 
         position = rospy.get_param(location_param)
         orientation = rospy.get_param(orientation_param)
 
         # modify the pose stored on the server with new orientation
-        rospy.set_param("script_server/base/" + subtask[0], [position[0], position[1], orientation])
+        rospy.set_param(
+            "script_server/base/" + subtask[0], [position[0], position[1], orientation]
+        )
 
-        rospy.loginfo('Selected position: %s, orientation: %s' % (subtask[0], subtask[1]))
+        rospy.loginfo(
+            "Selected position: %s, orientation: %s" % (subtask[0], subtask[1])
+        )
         userdata.base_pose_to_approach = subtask[0]
         userdata.subtask = subtask
-        return 'pose_selected'
+        return "pose_selected"
 
 
 class wait_for_desired_duration(smach.State):
@@ -71,12 +75,10 @@ class wait_for_desired_duration(smach.State):
     """
 
     def __init__(self):
-        smach.State.__init__(self,
-                             outcomes=['succeeded'],
-                             input_keys=['subtask'])
+        smach.State.__init__(self, outcomes=["succeeded"], input_keys=["subtask"])
 
     def execute(self, userdata):
         timeout = userdata.subtask[2]
-        rospy.loginfo('Waiting for %s seconds...' % timeout)
+        rospy.loginfo("Waiting for %s seconds..." % timeout)
         rospy.sleep(int(timeout))
-        return 'succeeded'
+        return "succeeded"

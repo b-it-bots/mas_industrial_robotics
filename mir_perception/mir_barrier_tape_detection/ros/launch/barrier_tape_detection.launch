@@ -2,15 +2,15 @@
 <launch>
   <!-- Barrier tape detection node -->
   <group ns="mir_perception/front_camera">
-      <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection" output="screen" respawn="true"> 
-          <remap from="~input_rgb_image" to="/arm_cam3d/rgb/image_raw"/> 
-          <remap from="~input_pointcloud" to="/arm_cam3d/depth_registered/points"/> 
-          <remap from="~camera_info" to="/arm_cam3d/rgb/camera_info"/> 
-          <param name="loop_rate" type="int" value="30" /> 
-          <param name="target_frame" value="map"/> 
-          <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/> 
-          <remap from="~output/yellow_barrier_tape_pointcloud" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/> 
-      </node> 
+      <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection" output="screen" respawn="true">
+          <remap from="~input_rgb_image" to="/arm_cam3d/rgb/image_raw"/>
+          <remap from="~input_pointcloud" to="/arm_cam3d/depth_registered/points"/>
+          <remap from="~camera_info" to="/arm_cam3d/rgb/camera_info"/>
+          <param name="loop_rate" type="int" value="30" />
+          <param name="target_frame" value="map"/>
+          <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/>
+          <remap from="~output/yellow_barrier_tape_pointcloud" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
+      </node>
       <!-- Point cloud to laser scan conversion-->
       <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
           <remap from="cloud_in" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
@@ -47,10 +47,10 @@
           <param name="target_frame" value="map"/>
           <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/>
           <remap from="~output/yellow_barrier_tape_pointcloud" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
-          <rosparam> 
+          <rosparam>
         color_thresh_min_h: 30
         color_thresh_min_v: 28
-          </rosparam> 
+          </rosparam>
       </node>
 
       <!-- Point cloud to laser scan conversion-->

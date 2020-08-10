@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
- 	
+
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="sim" default="false"/>
 
@@ -22,10 +22,10 @@
 
     <!-- navigation -->
     <include file="$(find mir_2dnav)/ros/launch/2dnav_mockup.launch" />
-   
+
     <!-- base placement -->
     <include file="$(find mir_base_placement)/ros/launch/base_placement_mockup.launch" />
-    
+
     <!-- relative base controller -->
     <!--include file="$(find mcr_twist_synchronizer)/ros/launch/twist_synchronizer_mockup.launch" /-->
 

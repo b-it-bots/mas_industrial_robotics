@@ -5,14 +5,14 @@
 
     <include file="$(find mir_2dexplore)/ros/launch/slam_with_move_base.launch" />
 
-    <node pkg="frontier_exploration" type="explore_client" name="explore_client" output="screen"/>
+    <node pkg="exploration_server" type="explore_client" name="explore_client" output="screen"/>
 
-    <node pkg="frontier_exploration" type="explore_server" name="explore_server" output="screen">
+    <node pkg="exploration_server" type="explore_server" name="explore_server" output="screen">
          <param name="frequency" value="1.0"/>
 
         <!-- Should be less than sensor range -->
         <param name="goal_aliasing" value="2.0"/>
-    
+
         <rosparam file="$(find mir_2dexplore)/ros/config/costmap_common.yaml" command="load" ns="explore_costmap" />
         <rosparam file="$(find mir_2dexplore)/ros/config/costmap_exploration.yaml" command="load" ns="explore_costmap" />
         <rosparam file="$(find mir_hardware_config)/$(arg robot)/config/base_footprint.yaml" command="load" ns="explore_costmap"/>

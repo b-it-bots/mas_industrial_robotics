@@ -9,7 +9,7 @@ catkin_package(
     mir_bringup
     mir_bringup_sim
     mir_states
-    rospy 
+    rospy
     smach
     smach_ros
 )

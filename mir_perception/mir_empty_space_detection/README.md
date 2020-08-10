@@ -20,7 +20,7 @@ present in its circle.
 
 - See the response with
   ```
-  rostopic echo /mir_perception/empty_space_detector/event_out 
+  rostopic echo /mir_perception/empty_space_detector/event_out
   ```
 
 - Add cloud with

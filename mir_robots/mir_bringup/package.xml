@@ -27,11 +27,11 @@
   <run_depend>rgbd_launch</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>youbot_dashboard</run_depend>
-  <run_depend>youbot_description</run_depend> 
+  <run_depend>youbot_description</run_depend>
   <run_depend>youbot_diagnostic_aggregator</run_depend>
   <run_depend>youbot_driver_ros_interface</run_depend>
   <run_depend>usb_cam</run_depend>
 
-  <test_depend>roslaunch</test_depend>  
+  <test_depend>roslaunch</test_depend>
 
 </package>

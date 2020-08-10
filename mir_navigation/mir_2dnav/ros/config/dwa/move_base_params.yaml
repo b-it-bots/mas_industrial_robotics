@@ -20,7 +20,6 @@ GlobalPlannerWithOrientations:
     default_tolerance: 0.0          #previous value: 0.2
     visualize_potential: True
     use_quadratic: True
-    use_grid_path: False
     old_navfn_behavior: False
     # Only for global planner with orientations:
     min_pose_distance: 0.05             # Minimum distance between poses

@@ -140,13 +140,13 @@
     <group if="$(arg logging)" >
         <include file="$(find mir_planning_bringup)/ros/launch/logging.launch" />
     </group>
-    
+
     <group if="$(arg debug_logging)" >
         <include file="$(find mir_planning_bringup)/ros/launch/debug_logging.launch" />
     </group>
 
     <include file="$(find mir_insert_object)/ros/launch/insert_object_workaround.launch" />
-    
+
     <!-- <include file="$(find mir_data_logger)/ros/launch/data_logger.launch" /> -->
 
 </launch>
