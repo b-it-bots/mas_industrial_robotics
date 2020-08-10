@@ -19,7 +19,7 @@ find_package(catkin REQUIRED
     visualization_msgs
 )
 
-find_package(PCL 1.7 REQUIRED)
+find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
 find_package(OpenCV REQUIRED)
 
