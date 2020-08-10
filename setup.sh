@@ -22,9 +22,9 @@ function update_keys {
     sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo $(lsb_release -sc) main" -u
 }
 
-function install_ros_melodic_base {
+function install_ros_noetic_base {
     sudo apt update -qq
-    sudo apt install -y -qq ros-melodic-ros-base
+    sudo apt install -y -qq ros-noetic-ros-base
 }
 
 function install_ros_dependencies {
@@ -41,11 +41,11 @@ function install_ros {
     if $1
         then
             fancy_print "Installing ROS"
-            install_ros_melodic_base
+            install_ros_noetic_base
     fi
     fancy_print "Installing ROS Dependencies"
     install_ros_dependencies
-    source /opt/ros/melodic/setup.bash
+    source /opt/ros/noetic/setup.bash
 }
 
 # Setup catkin workspace in the home directory
@@ -54,7 +54,7 @@ function setup_catkin_ws {
     mkdir -p $INSTALL_DIR/catkin_ws/src
     cd $INSTALL_DIR/catkin_ws
     catkin init
-    catkin config --extend /opt/ros/melodic/
+    catkin config --extend /opt/ros/noetic/
     catkin build
     source $INSTALL_DIR/catkin_ws/devel/setup.bash
 }
@@ -73,7 +73,7 @@ function install_mas_dependencies {
     fancy_print "Installing MAS Dependencies"
     rosdep update -q
     sudo apt-get update
-    rosdep install --from-paths src --ignore-src --rosdistro=melodic --skip-keys rosplan_demos -y
+    rosdep install --from-paths src --ignore-src --rosdistro=noetic --skip-keys rosplan_demos -y
 }
 
 function build_mas_industrial_robotics {

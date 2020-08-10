@@ -1,7 +1,7 @@
 - git:
     local-name: mas_common_robotics
     uri: https://github.com/b-it-bots/mas_common_robotics.git
-    version: melodic
+    version: noetic
 
 - git:
     local-name: youbot_driver
@@ -46,12 +46,12 @@
 - git:
     local-name: mas_perception
     uri: https://github.com/b-it-bots/mas_perception.git
-    version: melodic
+    version: noetic
 
 - git:
     local-name: mas_perception_msgs
     uri: https://github.com/b-it-bots/mas_perception_msgs.git
-    version: melodic
+    version: noetic
 
 - git:
     local-name: ROSPlan
