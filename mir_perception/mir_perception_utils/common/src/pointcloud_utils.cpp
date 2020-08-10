@@ -68,14 +68,13 @@ unsigned int pointcloud::padPointCloud(PointCloud::Ptr &cloud_in,
     {
         unsigned int point_diff = point_count - num_points;
 
-        std::random_device rd; // get ran
-        std::mt19937 eng(rd()); // seed the generator
-        std::uniform_int_distribution<> distr(0, point_count); 
+        boost::random::mt19937 rd; 
+        boost::random::uniform_int_distribution<> distr(0,point_count);
 
         pcl::PointIndices::Ptr random_indices(new pcl::PointIndices());
 
         for(int n=0; n<num_points; ++n)
-            random_indices->indices.push_back(distr(eng));
+            random_indices->indices.push_back(distr(rd));
 
         pcl::ExtractIndices<PointT> extract;
         extract.setInputCloud(cloud_in);
