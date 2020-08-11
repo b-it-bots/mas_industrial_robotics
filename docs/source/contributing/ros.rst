@@ -182,6 +182,6 @@ See Also:
 
 Proposed linters:
 
-* `C++ <http://clang.llvm.org/extra/clang-tidy/>`_
-* `Python <https://pypi.python.org/pypi/pep8>`_
+* `C++ <https://github.com/cpplint/cpplint>`_
+* `Python <https://www.pylint.org/>`_
 * `ROS <http://wiki.ros.org/roslint>`_
