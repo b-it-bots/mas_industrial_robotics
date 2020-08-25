@@ -76,6 +76,9 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     // Pub workspace height
     pub_workspace_height_ = nh_.advertise<std_msgs::Float64>("output/workspace_height", 1);
 
+    //debug topics
+    pub_debug_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud", 1);
+
     nh_.param<bool>("debug_mode", debug_mode_, false);
     ROS_WARN_STREAM("[multimodal_object_recognition] Debug mode: " <<debug_mode_);
     // Pub pose array
@@ -88,7 +91,6 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     nh_.param<std::string>("logdir", logdir_, "/tmp/");
     nh_.param<std::string>("object_info", object_info_path_, "None");
     loadObjectInfo(object_info_path_);
-
 
 }
 
@@ -201,6 +203,15 @@ void MultimodalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::Obje
     workspace_height_msg.data = scene_segmentation_ros_->getWorkspaceHeight();
     pub_workspace_height_.publish(workspace_height_msg);
 
+    if (debug_mode_)
+    {
+        PointCloud::Ptr cloud_debug(new PointCloud);
+        cloud_debug = scene_segmentation_ros_->getCloudDebug();
+        sensor_msgs::PointCloud2 ros_pc2;
+        pcl::toROSMsg(*cloud_debug,ros_pc2);
+        ros_pc2.header.frame_id = target_frame_id_;
+        pub_debug_.publish(ros_pc2);
+    }
 }
 
 void MultimodalObjectRecognitionROS::recognizeCloudAndImage()

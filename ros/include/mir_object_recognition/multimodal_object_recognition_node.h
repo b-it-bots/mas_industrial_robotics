@@ -109,6 +109,8 @@ class MultimodalObjectRecognitionROS
         // Publisher pose array (debug_mode only)
         ros::Publisher pub_pcl_object_pose_array_;
         ros::Publisher pub_rgb_object_pose_array_;
+        // Publisher debug
+        ros::Publisher pub_debug_;
 
         // Synchronize callback for image and pointcloud
         message_filters::Subscriber<sensor_msgs::Image> *image_sub_;
