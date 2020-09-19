@@ -1,0 +1,22 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 0 issues that require attention
+--------------------------------------------------------------------------------
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'dgcnn_classifier.py'
+ outputting to 'dgcnn_classifier_v2.py'
+--------------------------------------------------------------------------------
+
+26:28: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+27:29: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+33:26: INFO: Added keywords to args of function 'tf.argmax'
+40:20: INFO: Renamed 'tf.train.Saver' to 'tf.compat.v1.train.Saver'
+42:21: INFO: Renamed 'tf.ConfigProto' to 'tf.compat.v1.ConfigProto'
+44:24: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+--------------------------------------------------------------------------------
+

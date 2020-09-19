@@ -1,0 +1,6 @@
+model_checkpoint_path: "/scratch/mwasil2s/log_train/model.ckpt-495500"
+all_model_checkpoint_paths: "/scratch/mwasil2s/log_train/model.ckpt-493500"
+all_model_checkpoint_paths: "/scratch/mwasil2s/log_train/model.ckpt-494000"
+all_model_checkpoint_paths: "/scratch/mwasil2s/log_train/model.ckpt-494500"
+all_model_checkpoint_paths: "/scratch/mwasil2s/log_train/model.ckpt-495000"
+all_model_checkpoint_paths: "/scratch/mwasil2s/log_train/model.ckpt-495500"
