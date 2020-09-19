@@ -99,7 +99,7 @@ class PointcloudObjectRecognizer():
                     name = name[0]
                 elif self.model == "cnn_based":
                     cloud = self.extract_pointcloud(object.pointcloud, color="rgb")
-                    label, probability = self.classifier.classify(cloud, center=False, rotate=True, pad=True)
+                    label, probability = self.classifier.classify(cloud, center=True, rotate=True, pad=True)
                     name = self.label_to_name[label]
 
                 object.name = name
