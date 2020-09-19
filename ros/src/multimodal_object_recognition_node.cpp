@@ -39,11 +39,11 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     rgb_bbox_min_diag_(21),
     rgb_bbox_max_diag_(250),
     rgb_min_bbox_z_(0.03),
-    bounding_box_visualizer_pcl_("output/bounding_boxes", Color(Color::SALMON)),
+    bounding_box_visualizer_pcl_("output/bounding_boxes", Color(Color::IVORY)),
     cluster_visualizer_rgb_("output/tabletop_cluster_rgb"),
     cluster_visualizer_pcl_("output/tabletop_cluster_pcl"),
-    label_visualizer_rgb_("output/rgb_labels", Color(Color::SALMON)),
-    label_visualizer_pcl_("output/pcl_labels", Color(Color::TEAL)),
+    label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
+    label_visualizer_pcl_("output/pcl_labels", Color(Color::IVORY)),
     data_collection_(false)
     
 {
@@ -77,7 +77,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     pub_workspace_height_ = nh_.advertise<std_msgs::Float64>("output/workspace_height", 1);
 
     //debug topics
-    pub_debug_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud", 1);
+    pub_debug_cloud_plane_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud_plane", 1);
 
     nh_.param<bool>("debug_mode", debug_mode_, false);
     ROS_WARN_STREAM("[multimodal_object_recognition] Debug mode: " <<debug_mode_);
@@ -196,8 +196,10 @@ void MultimodalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::Obje
     PointCloud::Ptr cloud(new PointCloud);
     cloud->header.frame_id = target_frame_id_;
     scene_segmentation_ros_->getCloudAccumulation(cloud);
+
+    //if the cluster is centered,it looses the correct location of the object
     scene_segmentation_ros_->segmentCloud(cloud, object_list, clusters, boxes, 
-                                          center_cluster_, pad_cluster_, padded_cluster_size_);
+                                          center_cluster_=false, pad_cluster_, padded_cluster_size_);
 
     std_msgs::Float64 workspace_height_msg;
     workspace_height_msg.data = scene_segmentation_ros_->getWorkspaceHeight();
@@ -210,7 +212,7 @@ void MultimodalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::Obje
         sensor_msgs::PointCloud2 ros_pc2;
         pcl::toROSMsg(*cloud_debug,ros_pc2);
         ros_pc2.header.frame_id = target_frame_id_;
-        pub_debug_.publish(ros_pc2);
+        pub_debug_cloud_plane_.publish(ros_pc2);
     }
 }
 
@@ -436,10 +438,10 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             {
                 ROS_WARN_STREAM("This object "<<combined_object_list.objects[i].name<<" out of RoI");
                 ROS_WARN_STREAM("You are a DECOY now");
-                std::cout<<"#########Filtering: "<<combined_object_list.objects[i].name<<std::endl;
-                std::cout<<"base link to laser: "<<rgb_base_link_to_laser_distance_<<std::endl;
-                std::cout<<"rgb max object pose to baselink: "<<rgb_max_object_pose_x_to_base_link_<<std::endl;
-                std::cout<<"Pose X:  "<<current_object_pose_x<<std::endl;                
+                //std::cout<<"#########Filtering: "<<combined_object_list.objects[i].name<<std::endl;
+                //std::cout<<"base link to laser: "<<rgb_base_link_to_laser_distance_<<std::endl;
+                //std::cout<<"rgb max object pose to baselink: "<<rgb_max_object_pose_x_to_base_link_<<std::endl;
+                //std::cout<<"Pose X:  "<<current_object_pose_x<<std::endl;                
                 combined_object_list.objects[i].name = "DECOY";
             }
         }
