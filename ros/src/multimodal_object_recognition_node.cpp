@@ -38,12 +38,12 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     rgb_roi_adjustment_(2),
     rgb_bbox_min_diag_(21),
     rgb_bbox_max_diag_(250),
-    rgb_min_bbox_z_(0.03),
-    bounding_box_visualizer_pcl_("output/bounding_boxes", Color(Color::IVORY)),
+    roi_min_bbox_z_(0.03),
+    bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
     cluster_visualizer_rgb_("output/tabletop_cluster_rgb"),
-    cluster_visualizer_pcl_("output/tabletop_cluster_pcl"),
+    cluster_visualizer_pc_("output/tabletop_cluster_pc"),
     label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
-    label_visualizer_pcl_("output/pcl_labels", Color(Color::IVORY)),
+    label_visualizer_pc_("output/pc_labels", Color(Color::IVORY)),
     data_collection_(false)
     
 {
@@ -60,12 +60,12 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     
     // Publish cloud and images to cloud and rgb recognition topics
     pub_cloud_to_recognizer_  = nh_.advertise<mas_perception_msgs::ObjectList>(
-                                "recognizer/pcl/input/object_list", 1);
+                                "recognizer/pc/input/object_list", 1);
     pub_image_to_recognizer_  = nh_.advertise<mas_perception_msgs::ImageList>(
                                 "recognizer/rgb/input/images", 1);
 
     // Subscribe to cloud and rgb recognition topics
-    sub_recognized_cloud_list_ = nh_.subscribe("recognizer/pcl/output/object_list", 1, 
+    sub_recognized_cloud_list_ = nh_.subscribe("recognizer/pc/output/object_list", 1, 
                             &MultimodalObjectRecognitionROS::recognizedCloudCallback, this);
     sub_recognized_image_list_ = nh_.subscribe("recognizer/rgb/output/object_list", 1, 
                             &MultimodalObjectRecognitionROS::recognizedImageCallback, this);
@@ -82,7 +82,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
     nh_.param<bool>("debug_mode", debug_mode_, false);
     ROS_WARN_STREAM("[multimodal_object_recognition] Debug mode: " <<debug_mode_);
     // Pub pose array
-    pub_pcl_object_pose_array_  = nh_.advertise<geometry_msgs::PoseArray>("output/pcl_object_pose_array", 10);
+    pub_pc_object_pose_array_  = nh_.advertise<geometry_msgs::PoseArray>("output/pc_object_pose_array", 10);
     pub_rgb_object_pose_array_  = nh_.advertise<geometry_msgs::PoseArray>("output/rgb_object_pose_array", 10);
 
     nh_.param<std::string>("target_frame_id", target_frame_id_, "base_link");
@@ -264,18 +264,18 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     {
         while(!received_recognized_cloud_list_flag_)
         {
-            ROS_INFO_STREAM("["<<loop_rate_count<<"] [PCL] Waiting message from PCL recognizer node");
+            ROS_INFO_STREAM("["<<loop_rate_count<<"] [Cloud] Waiting message from PCL recognizer node");
             loop_rate_count += 1;
             ros::spinOnce();
             loop_rate.sleep();
             if (received_recognized_cloud_list_flag_ == true)
             {
-                ROS_WARN("[PCL] Received %d objects from pcl recognizer", recognized_cloud_list_.objects.size());
+                ROS_WARN("[Cloud] Received %d objects from pcl recognizer", recognized_cloud_list_.objects.size());
             }
             if (loop_rate_count > loop_rate_hz * timeout_wait)
             {
                 received_recognized_cloud_list_flag_ = false;
-                ROS_ERROR("[PCL] No message received from PCL recognizer. ");
+                ROS_ERROR("[Cloud] No message received from PCL recognizer. ");
                 break;
             }
         }
@@ -431,16 +431,16 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         for (int i=0; i<combined_object_list.objects.size(); i++)
         {
             double current_object_pose_x = combined_object_list.objects[i].pose.pose.position.x;
-            if (current_object_pose_x < rgb_base_link_to_laser_distance_ ||
-                current_object_pose_x > rgb_max_object_pose_x_to_base_link_)
+            if (current_object_pose_x < roi_base_link_to_laser_distance_ ||
+                current_object_pose_x > roi_max_object_pose_x_to_base_link_)
                 /* combined_object_list.objects[i].pose.pose.position.z < scene_segmentation_ros_ */
                 /* ->object_height_above_workspace_ - 0.05) */
             {
                 ROS_WARN_STREAM("This object "<<combined_object_list.objects[i].name<<" out of RoI");
                 ROS_WARN_STREAM("You are a DECOY now");
                 //std::cout<<"#########Filtering: "<<combined_object_list.objects[i].name<<std::endl;
-                //std::cout<<"base link to laser: "<<rgb_base_link_to_laser_distance_<<std::endl;
-                //std::cout<<"rgb max object pose to baselink: "<<rgb_max_object_pose_x_to_base_link_<<std::endl;
+                //std::cout<<"base link to laser: "<<roi_base_link_to_laser_distance_<<std::endl;
+                //std::cout<<"rgb max object pose to baselink: "<<roi_max_object_pose_x_to_base_link_<<std::endl;
                 //std::cout<<"Pose X:  "<<current_object_pose_x<<std::endl;                
                 combined_object_list.objects[i].name = "DECOY";
             }
@@ -469,7 +469,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         filename.append("rgb_debug_");
         filename.append(std::to_string(time_now.toSec()));
         mpu::object::saveCVImage(cv_image, logdir_, filename); 
-        ROS_INFO("Image saved to ", logdir_);
+        ROS_INFO_STREAM("Image:"<<filename<<" saved to " << logdir_);
 
         cv_bridge::CvImagePtr raw_cv_image;
         if (mpu::object::getCVImage(image_msg_, raw_cv_image))
@@ -478,7 +478,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             filename.append("rgb_raw_");
             filename.append(std::to_string(time_now.toSec()));
             mpu::object::saveCVImage(raw_cv_image, logdir_, filename); 
-            ROS_INFO("Image saved to ", logdir_);
+            ROS_INFO_STREAM("Image:" <<filename<<" saved to " << logdir_);
         }
         else
         {
@@ -492,7 +492,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             filename.append("pcd_cluster_");
             filename.append(std::to_string(time_now.toSec()));
             mpu::object::savePcd(cluster, logdir_, filename);
-            ROS_INFO("Point cloud saved to ", logdir_);
+            ROS_INFO_STREAM("Point cloud:"<<filename<<" saved to " << logdir_);
         }
     }
 }
@@ -514,7 +514,7 @@ void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectLis
         if (clusters_3d.size() > 0)
         {
             mas_perception_msgs::BoundingBoxList bounding_boxes;
-            cluster_visualizer_pcl_.publish<PointT>(clusters_3d, target_frame_id_);
+            cluster_visualizer_pc_.publish<PointT>(clusters_3d, target_frame_id_);
             bounding_boxes.bounding_boxes.resize(clusters_3d.size());
             for (int i=0; i<clusters_3d.size(); i++)
             {
@@ -523,7 +523,7 @@ void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectLis
             }
             if (bounding_boxes.bounding_boxes.size() > 0)
             {
-                bounding_box_visualizer_pcl_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
+                bounding_box_visualizer_pc_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
             }
         }
         // PCL Pose array for debug mode only
@@ -537,7 +537,7 @@ void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectLis
         {
             if (combined_object_list.objects[i].database_id < 99)
             {
-                std::cout<<"[PCL] Class: "<<combined_object_list.objects[i].name<<std::endl;
+                std::cout<<"[Cloud] Class: "<<combined_object_list.objects[i].name<<std::endl;
                 pcl_object_pose_array.poses[pcl_count] = combined_object_list.objects[i].pose.pose;
                 pcl_labels.push_back(combined_object_list.objects[i].name);
                 pcl_count ++;
@@ -545,12 +545,12 @@ void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectLis
         }
         if (pcl_object_pose_array.poses.size() > 0)
         {
-            pub_pcl_object_pose_array_.publish(pcl_object_pose_array);
+            pub_pc_object_pose_array_.publish(pcl_object_pose_array);
         }
         if ((pcl_labels.size() == pcl_object_pose_array.poses.size()) &&
                 (pcl_labels.size() > 0) && (pcl_object_pose_array.poses.size() > 0))
         {
-            label_visualizer_pcl_.publish(pcl_labels, pcl_object_pose_array);
+            label_visualizer_pc_.publish(pcl_labels, pcl_object_pose_array);
         }
     }
     if (clusters_2d.size() > 0)
@@ -752,9 +752,9 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
     rgb_bbox_max_diag_ = config.rgb_bbox_max_diag;
     rgb_cluster_filter_limit_min_ = config.rgb_cluster_filter_limit_min;
     rgb_cluster_filter_limit_max_ = config.rgb_cluster_filter_limit_max;
-    rgb_base_link_to_laser_distance_ = config.rgb_base_link_to_laser_distance;
-    rgb_max_object_pose_x_to_base_link_= config.rgb_max_object_pose_x_to_base_link;
-    rgb_min_bbox_z_ = config.rgb_min_bbox_z;
+    roi_base_link_to_laser_distance_ = config.roi_base_link_to_laser_distance;
+    roi_max_object_pose_x_to_base_link_= config.roi_max_object_pose_x_to_base_link;
+    roi_min_bbox_z_ = config.roi_min_bbox_z;
 }
 
 int main(int argc, char **argv)

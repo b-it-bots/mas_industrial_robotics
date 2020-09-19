@@ -108,7 +108,7 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
     pcl_conversions::fromPCL(*cloud_cl, ros_pointcloud);
 
     //ros_pointcloud.header.frame_id = target_frame_id_;    
-    //pub_pcl_cluster_.publish(ros_pointcloud);
+    //pub_pc_cluster_.publish(ros_pointcloud);
 
     Eigen::Vector4f centroid;
     unsigned int valid_points = pcl::compute3DCentroid(*cloud_filtered, centroid);

@@ -30,7 +30,7 @@ pc_object_segmentation:
     cluster_max_height: 0.09
     cluster_max_length: 0.25
     cluster_min_distance_to_polygon: 0.04
-    center_cluster: True
+    center_cluster: False
     pad_cluster: False
     padded_cluster_size: 2048
     octree_resolution: 0.0025
@@ -41,6 +41,6 @@ pc_object_segmentation:
     rgb_bbox_max_diag: 175
     rgb_cluster_filter_limit_min: 0.0060
     rgb_cluster_filter_limit_max: 0.35
-    rgb_base_link_to_laser_distance: 0.350
-    rgb_max_object_pose_x_to_base_link: 0.650
-    rgb_min_bbox_z: 0.03
+    roi_base_link_to_laser_distance: 0.350
+    roi_max_object_pose_x_to_base_link: 0.650
+    roi_min_bbox_z: 0.03

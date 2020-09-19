@@ -107,7 +107,7 @@ class MultimodalObjectRecognitionROS
         ros::Publisher pub_object_list_;
         ros::Publisher pub_workspace_height_;
         // Publisher pose array (debug_mode only)
-        ros::Publisher pub_pcl_object_pose_array_;
+        ros::Publisher pub_pc_object_pose_array_;
         ros::Publisher pub_rgb_object_pose_array_;
         // Publisher debug
         ros::Publisher pub_debug_cloud_plane_;
@@ -151,11 +151,11 @@ class MultimodalObjectRecognitionROS
         mas_perception_msgs::ObjectList recognized_cloud_list_;
 
         // Visualization
-        BoundingBoxVisualizer bounding_box_visualizer_pcl_;
+        BoundingBoxVisualizer bounding_box_visualizer_pc_;
         ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        ClusteredPointCloudVisualizer cluster_visualizer_pcl_;
+        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
         LabelVisualizer label_visualizer_rgb_;
-        LabelVisualizer label_visualizer_pcl_;
+        LabelVisualizer label_visualizer_pc_;
 
         // Parameters
         bool debug_mode_;
@@ -172,9 +172,9 @@ class MultimodalObjectRecognitionROS
         int rgb_bbox_max_diag_;
         int rgb_cluster_filter_limit_min_;
         int rgb_cluster_filter_limit_max_;
-        double rgb_base_link_to_laser_distance_;
-        double rgb_max_object_pose_x_to_base_link_;
-        double rgb_min_bbox_z_;
+        double roi_base_link_to_laser_distance_;
+        double roi_max_object_pose_x_to_base_link_;
+        double roi_min_bbox_z_;
 
         //cluster
         bool center_cluster_;
