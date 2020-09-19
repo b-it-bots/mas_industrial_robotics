@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import os
 
-import pcl_object_recognition.utils.tf_util as dgcnn_util
+import pc_object_recognition.utils.tf_util as dgcnn_util
 
 def input_transform_net(edge_feature, is_training, K=3, is_dist=False):
     """

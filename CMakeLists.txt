@@ -81,7 +81,7 @@ roslint_cpp()
 
 ### INSTALLS
 install(PROGRAMS
-  ros/scripts/pcl_object_recognizer_node
+  ros/scripts/pc_object_recognizer_node
   ros/scripts/rgb_object_recognizer_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

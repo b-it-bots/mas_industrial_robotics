@@ -3,9 +3,9 @@ import pickle
 import numpy as np
 import tensorflow as tf
 
-import pcl_object_recognition.models.dgcnn as dgcnn
-import pcl_object_recognition.utils.pc_utils as pc_utils
-from pcl_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
+import pc_object_recognition.models.dgcnn as dgcnn
+import pc_object_recognition.utils.pc_utils as pc_utils
+from pc_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
 
 class DGCNNClassifier(CNNBasedClassifiers):
     """

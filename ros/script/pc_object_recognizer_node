@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 PACKAGE = 'mir_object_recognition'
-NODE = 'pcl_object_recognizer'
+NODE = 'pc_object_recognizer'
 
 import os
 import struct
@@ -13,11 +13,11 @@ import importlib
 import roslib
 import rospy
 
-from pcl_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
-from pcl_object_recognition.utils.features import FVRDDFeatureExtraction
-from pcl_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
-from pcl_object_recognition.dgcnn_classifier import DGCNNClassifier
-import pcl_object_recognition.utils.pc_utils as pc_utils
+from pc_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
+from pc_object_recognition.utils.features import FVRDDFeatureExtraction
+from pc_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
+from pc_object_recognition.dgcnn_classifier import DGCNNClassifier
+import pc_object_recognition.utils.pc_utils as pc_utils
 
 from mas_perception_msgs.msg import ObjectList
 import sensor_msgs.point_cloud2
@@ -69,7 +69,7 @@ class PointcloudObjectRecognizer():
 
         elif model == "cnn_based":
             checkpoint = os.path.join(cfg_folder, dataset_dir , 'model.ckpt')
-            module_name = "pcl_object_recognition" + "." + model_id.lower()+"_"+"classifier"
+            module_name = "pc_object_recognition" + "." + model_id.lower()+"_"+"classifier"
             class_name = model_id.upper()+"Classifier"
             ClassifierClass = getattr(importlib.import_module(module_name), class_name)
             model_configs = configs['model'][model][model_id.lower()]

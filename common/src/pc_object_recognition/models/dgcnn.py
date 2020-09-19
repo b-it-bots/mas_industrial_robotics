@@ -5,7 +5,7 @@ import math
 import tensorflow as tf
 import numpy as np
 
-import pcl_object_recognition.utils.tf_util as tf_util
+import pc_object_recognition.utils.tf_util as tf_util
 from transform_nets import input_transform_net
 
 def get_model(pointcloud, num_classes, is_training, base=False):
