@@ -26,6 +26,7 @@ SceneSegmentationROS::SceneSegmentationROS(double octree_resolution)
   cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
   scene_segmentation_ = SceneSegmentationUPtr(new SceneSegmentation());
   model_coefficients_ = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients);
+  cloud_debug_ = PointCloud::Ptr(new PointCloud);
 }
 
 SceneSegmentationROS::~SceneSegmentationROS() {}
@@ -36,9 +37,9 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
                                         bool pad_cluster, bool num_points)
 {
   std::string frame_id = cloud->header.frame_id;
-  PointCloud::Ptr debug = scene_segmentation_->segmentScene(cloud, clusters, boxes,
-                                                            model_coefficients_, workspace_height_);
-  debug->header.frame_id = frame_id;
+  cloud_debug_ = scene_segmentation_->segmentScene(cloud, clusters, boxes,
+                                                   model_coefficients_, workspace_height_);
+  cloud_debug_->header.frame_id = frame_id;
 
   object_list.objects.resize(boxes.size());
   ros::Time now = ros::Time::now();
@@ -152,4 +153,12 @@ void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluste
   scene_segmentation_->setClusterParams(cluster_tolerance, cluster_min_size, cluster_max_size,
                                         cluster_min_height, cluster_max_height, cluster_max_length,
                                         cluster_min_distance_to_polygon);
+}
+
+PointCloud::Ptr SceneSegmentationROS::getCloudDebug()
+{
+  if (cloud_debug_->points.size() < 0)
+    ROS_WARN("Debug cloud is empty");
+
+  return(cloud_debug_);
 }
