@@ -18,8 +18,8 @@ class CNNBasedClassifiers(object):
         """
         A classify method to be implemented
 
-        :param pointcloud:  The input pointcloud
-        :type:              numpy.array
+        :param pointcloud:    The input pointcloud
+        :type:                numpy.array
 
         :return:            Predicted label and probability
         """

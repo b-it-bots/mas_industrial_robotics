@@ -3,34 +3,33 @@
 PACKAGE = 'mir_object_recognition'
 NODE = 'pc_object_recognizer'
 
+import colorsys
+import importlib
 import os
 import struct
-import colorsys
-import yaml
-import numpy as np
-import importlib
 
+import numpy as np
+import pc_object_recognition.utils.pc_utils as pc_utils
 import roslib
 import rospy
-
-from pc_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
-from pc_object_recognition.utils.features import FVRDDFeatureExtraction
+import sensor_msgs.point_cloud2
+import yaml
+from mas_perception_msgs.msg import ObjectList
 from pc_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
 from pc_object_recognition.dgcnn_classifier import DGCNNClassifier
-import pc_object_recognition.utils.pc_utils as pc_utils
+from pc_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
+from pc_object_recognition.utils.features import FVRDDFeatureExtraction
 
-from mas_perception_msgs.msg import ObjectList
-import sensor_msgs.point_cloud2
 
 class PointcloudObjectRecognizer():
     """
     PointCloud object recognizer class. The inference can be invoked through \
     ros topic and it publishes back the recognized object list via ros topic.
 
-    :param model:       Model name (featured_based / cnn_based)
+    :param model:         Model name (featured_based / cnn_based)
     :param model_id:    Model id (FVRDD / RDD or DGCNN)
     :param dataset:     Dataset
-    :param ngaussians:  Number of gaussians of FV
+    :param ngaussians:    Number of gaussians of FV
     :param variance:    Variance of gmm model for FV
     """
 
@@ -74,16 +73,16 @@ class PointcloudObjectRecognizer():
             ClassifierClass = getattr(importlib.import_module(module_name), class_name)
             model_configs = configs['model'][model][model_id.lower()]
             self.classifier = ClassifierClass(checkpoint_path=checkpoint, 
-                                              num_classes=model_configs['num_classes'], 
-                                              num_points=model_configs['num_points'], 
-                                              cloud_dim=model_configs['cloud_dim'])
+                                                num_classes=model_configs['num_classes'], 
+                                                num_points=model_configs['num_points'], 
+                                                cloud_dim=model_configs['cloud_dim'])
 
     def recognize_object_topic_cb(self, object_list):
         """
         Reocgnize object callback
 
         :param object_list:     Object list
-        :type:                  mas_perception_msgs.object_list
+        :type:                    mas_perception_msgs.object_list
         """
         
         if object_list.objects:
@@ -92,13 +91,13 @@ class PointcloudObjectRecognizer():
             recognized_object_list = object_list.objects
             for object in recognized_object_list:
                 if self.model == "feature_based":
-                    cloud = self.extract_pointcloud(object.pointcloud, color="hsv")
+                    cloud = self.extract_pointcloud(object.views[0].point_cloud, color="hsv")
                     features = self.fe_method(cloud)
                     features = np.reshape(features, (1,-1))
                     name, probability = self.classifier.classify(features)
                     name = name[0]
                 elif self.model == "cnn_based":
-                    cloud = self.extract_pointcloud(object.pointcloud, color="rgb")
+                    cloud = self.extract_pointcloud(object.views[0].point_cloud, color="rgb")
                     label, probability = self.classifier.classify(cloud, center=True, rotate=True, pad=True)
                     name = self.label_to_name[label]
 
@@ -111,13 +110,13 @@ class PointcloudObjectRecognizer():
         """
         Generator for x,y,z,rgb fields from pointcloud
 
-        :param pc:      The input pointcloud
-        :type:          sensor_msgs.point_cloud2
-        :param color:   The choice of color (hsv/rgb)
-        :type:          numpy.array
+        :param pc:        The input pointcloud
+        :type:            sensor_msgs.point_cloud2
+        :param color:     The choice of color (hsv/rgb)
+        :type:            numpy.array
 
         :return:        Extracted pointcloud
-        :return type:   numpy.array
+        :return type:     numpy.array
         """
         xyzrgb_gen = sensor_msgs.point_cloud2.read_points(pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
 

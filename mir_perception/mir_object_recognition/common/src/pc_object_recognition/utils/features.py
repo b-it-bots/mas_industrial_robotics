@@ -6,8 +6,8 @@ class FVRDDFeatureExtraction():
     PointCloud feature extraction. Available methods are fisher vector and \
     radial density distribution.
 
-    :param method:      feature extraction method to use
-    :type method:       string
+    :param method:        feature extraction method to use
+    :type method:         string
     """
     def __init__(self, method="fvrdd"):
         if method == "fvrdd":
@@ -19,7 +19,7 @@ class FVRDDFeatureExtraction():
         """
         Get feature extraction method
 
-        :return method:   a funtion to extract the feature
+        :return method:     a funtion to extract the feature
         :type use_rdd:    function
         """
         return self.method
@@ -28,9 +28,9 @@ class FVRDDFeatureExtraction():
         """
         Set fisher vector (3DmFV) params
 
-        :param gmm_grid:  The gmm grid (e.g. [2,2,2])
-        :type gmm_grid:   numpy.array
-        :param use_rdd:   whether to combine fv with rdd
+        :param gmm_grid:    The gmm grid (e.g. [2,2,2])
+        :type gmm_grid:     numpy.array
+        :param use_rdd:     whether to combine fv with rdd
         :type use_rdd:    bool
         """
         self.gmm = gmm_grid
@@ -40,8 +40,8 @@ class FVRDDFeatureExtraction():
         """
         Set radial density distribution feature param
 
-        :param color:  The input pointcloud
-        :type color:   numpy.array
+        :param color:    The input pointcloud
+        :type color:     numpy.array
         """
         self.use_color = color
 
@@ -50,8 +50,8 @@ class FVRDDFeatureExtraction():
         Returns difference between centre of gravity of the pointcloud
         in the x-axis and the origin
 
-        :param pointcloud:  The input pointcloud
-        :type pointcloud:   numpy.array
+        :param pointcloud:    The input pointcloud
+        :type pointcloud:     numpy.array
 
         :return:            The centre of gravity offset
         :rtype:             float
@@ -71,8 +71,8 @@ class FVRDDFeatureExtraction():
         """
         Returns mean H, S and V components of colour
 
-        :param pointcloud:  The input pointcloud
-        :type pointcloud:   numpy.array
+        :param pointcloud:    The input pointcloud
+        :type pointcloud:     numpy.array
 
         :return:            mean H, S and V components of colour
         :rtype:             numpy.array
@@ -90,8 +90,8 @@ class FVRDDFeatureExtraction():
         """
         Returns median H, S and V components of colour
 
-        :param pointcloud:  the input pointcloud
-        :type pointcloud:   numpy.array
+        :param pointcloud:    the input pointcloud
+        :type pointcloud:     numpy.array
 
         :return:            median H, S and V components colour
         :rtype:             numpy.array
@@ -109,8 +109,8 @@ class FVRDDFeatureExtraction():
         """
         Returns length of pointcloud in x, y and z axes
 
-        :param pointcloud:  the input pointcloud
-        :type pointcloud:   numpy.array
+        :param pointcloud:    the input pointcloud
+        :type pointcloud:     numpy.array
 
         :return:            lengths of pointcloud in x, y and z axes
         :rtype:             numpy.array
@@ -129,8 +129,8 @@ class FVRDDFeatureExtraction():
         of pointcloud on the plane defined by the axes dim1 and dim2
         A visual representation of the radial density feature can be seen in common/doc/
 
-        :param pointcloud:      the input pointcloud
-        :type pointcloud:       numpy.array
+        :param pointcloud:        the input pointcloud
+        :type pointcloud:         numpy.array
 
         :param dim1:            index of first axis defining the plane
         :type dim1:             int
@@ -139,13 +139,13 @@ class FVRDDFeatureExtraction():
         :type dim2:             int
 
         :return radius:         radius of mean circle
-        :rtype radius:          float
+        :rtype radius:            float
 
-        :return inlier_error:   inlier error (circle fit error of points lying inside the mean circle)
+        :return inlier_error:     inlier error (circle fit error of points lying inside the mean circle)
         :rtype inlier_error:    float
 
         :return outerr:         outlier error (circle fit error of points lying outside the mean circle)
-        :rtype outerr:          float
+        :rtype outerr:            float
 
         :return radial_density: mean normalized radial density for the pointcloud
         :rtype: radial_density: float
@@ -202,8 +202,8 @@ class FVRDDFeatureExtraction():
         Calculates mean circle radius, inlier and outlier error and radial density
         for slices of the pointcloud taken along the x-axis (first principal axis)
 
-        :param pointcloud:  the input pointcloud
-        :type pointcloud:   numpy.array
+        :param pointcloud:    the input pointcloud
+        :type pointcloud:     numpy.array
 
         :param number_of_slices:    number of slices to be created along x-axis
         :type number_of_slices:     int
@@ -266,10 +266,10 @@ class FVRDDFeatureExtraction():
 
         A visual representation of some of these features can be seen in common/doc/
 
-        :param pointcloud:      the input pointcloud
-        :type pointcloud:       numpy.array
+        :param pointcloud:        the input pointcloud
+        :type pointcloud:         numpy.array
 
-        :param enable_colour:   flag to specify if colour is specified and is to be used as a feature
+        :param enable_colour:     flag to specify if colour is specified and is to be used as a feature
         :type enable_colour:    boolean
 
         :return:                feature vector with the features mentioned above
@@ -319,11 +319,11 @@ class FVRDDFeatureExtraction():
 
         :param pointcloud:            the input pointcloud
         :type pointcloud:             numpy.array
-        :param number_of_slices:      number of slices
-        :type number_of_slices:       int
+        :param number_of_slices:        number of slices
+        :type number_of_slices:         int
 
-        :return:                      slice features
-        :rtype:                       numpy.array
+        :return:                        slice features
+        :rtype:                         numpy.array
 
         """
         axis_features = []
@@ -380,8 +380,8 @@ class FVRDDFeatureExtraction():
         """
         Calculates fisher vector and multi axes radial density distribution features
 
-        :param pointcloud:      the input pointcloud
-        :type pointcloud:       numpy.array
+        :param pointcloud:        the input pointcloud
+        :type pointcloud:         numpy.array
 
         :return:                combined feature vector
         :rtype:                 numpy.array
@@ -401,7 +401,7 @@ class FVRDDFeatureExtraction():
                     s_feature.append(np.zeros([3]))
                 else:
                     s_feature.append(slice[-1, :])
-            s_feature = np.asarray(s_feature).flatten()  
+            s_feature = np.asarray(s_feature).flatten()    
             features.extend(s_feature)
         
         # Also compute additional radial density distribution feature feature 
@@ -484,22 +484,22 @@ class FVRDDFeatureExtraction():
         D = mu.shape[1]
 
         # Expand dimension for batch compatibility
-        batch_sig = np.tile(np.expand_dims(sigma, 0), [n_points, 1, 1])  
+        batch_sig = np.tile(np.expand_dims(sigma, 0), [n_points, 1, 1])    
         batch_sig = np.tile(np.expand_dims(batch_sig, 0), [n_batches, 1, 1, 1]) 
         batch_mu = np.tile(np.expand_dims(mu, 0), [n_points, 1, 1]) 
-        batch_mu = np.tile(np.expand_dims(batch_mu, 0), [n_batches, 1, 1, 1])  
-        batch_w = np.tile(np.expand_dims(np.expand_dims(w, 0), 0), [n_batches, n_points, 1])  
+        batch_mu = np.tile(np.expand_dims(batch_mu, 0), [n_batches, 1, 1, 1])    
+        batch_w = np.tile(np.expand_dims(np.expand_dims(w, 0), 0), [n_batches, n_points, 1])    
         batch_points = np.tile(np.expand_dims(points, -2), [1, 1, n_gaussians, 1]) 
         # Compute derivatives
         w_per_batch_per_d = np.tile(np.expand_dims(np.expand_dims(w, 0), -1),
-                                    [n_batches, 1, 3*D])  
+                                    [n_batches, 1, 3*D])    
         # Define multivariate noraml distributions
         # Compute probability per point
         p_per_point = (1.0 / (np.power(2.0 * np.pi, D / 2.0) * np.power(batch_sig[:, :, :, 0], D))) * np.exp(
             -0.5 * np.sum(np.square((batch_points - batch_mu) / batch_sig), axis=3))
 
         w_p = p_per_point
-        Q = w_p  # enforcing the assumption that the sum is 1
+        Q = w_p    # enforcing the assumption that the sum is 1
         Q_per_d = np.tile(np.expand_dims(Q, -1), [1, 1, 1, D])
 
         d_pi_all = np.expand_dims((Q - batch_w) / (np.sqrt(batch_w)), -1)
@@ -513,7 +513,7 @@ class FVRDDFeatureExtraction():
         d_sigma = (1 / (np.sqrt(2 * w_per_batch_per_d))) * np.concatenate([np.max(d_sig_all, axis=1), 
                     np.min(d_sig_all, axis=1), np.sum(d_sig_all, axis=1)], axis=2)
 
-        # number of points  normaliation
+        # number of points    normaliation
         d_pi = d_pi / n_points
         d_mu = d_mu / n_points
         d_sigma =d_sigma / n_points

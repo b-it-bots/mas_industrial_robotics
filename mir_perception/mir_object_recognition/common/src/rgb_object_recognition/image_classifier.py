@@ -15,9 +15,9 @@ class ImageClassifier(object):
         """
         A classify method to be implemented
 
-        :param image:  The input rgb image
+        :param image:    The input rgb image
         :type name:         numpy.array
 
-        :return:  bounding boxes, probabilities and classes
+        :return:    bounding boxes, probabilities and classes
         """
         pass

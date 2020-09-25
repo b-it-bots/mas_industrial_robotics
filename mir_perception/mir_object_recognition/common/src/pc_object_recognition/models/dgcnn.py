@@ -12,7 +12,7 @@ def get_model(pointcloud, num_classes, is_training, base=False):
     """ 
     Classification model DGCNN, input is BxNx3, output Bxnum_classes 
 
-    :param pointcloud:  The input pointcloud (BxNxD), D can be XYZ or XYZRGB
+    :param pointcloud:    The input pointcloud (BxNxD), D can be XYZ or XYZRGB
     :type name:         Array
     :param num_classes: The number of classes
     :type name:         Int
@@ -21,7 +21,7 @@ def get_model(pointcloud, num_classes, is_training, base=False):
     :param base:        If true, return DGCNN backbone
     :type name:         Bool
 
-    :return:  Logits and endpoints
+    :return:    Logits and endpoints
     """
     batch_size = pointcloud.get_shape()[0].value
     end_points = {}
@@ -65,7 +65,7 @@ def get_model(pointcloud, num_classes, is_training, base=False):
 
     adj_matrix = tf_util.pairwise_distance(net)
     nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)    
 
     net = tf_util.conv2d(edge_feature, 128, [1,1],
                         padding='VALID', stride=[1,1],
@@ -106,16 +106,16 @@ def get_model(pointcloud, num_classes, is_training, base=False):
 def get_model_with_tfnet(pointcloud, num_classes, is_training, base=False):
     """ 
     Classification model DGCNN with tfnet, input is BxNx3, output Bxnum_classes 
-    :param pointcloud:  The input pointcloud
+    :param pointcloud:    The input pointcloud
     :type name: Array
-    :param num_classes:  The number of classes
+    :param num_classes:    The number of classes
     :type name: Int
-    :param is_training:  True indicating training mode
+    :param is_training:    True indicating training mode
     :type name: Bool
-    :param base:  If true, return DGCNN backbone
+    :param base:    If true, return DGCNN backbone
     :type name: Bool
 
-    :return:  Logits and endpoints
+    :return:    Logits and endpoints
     """
     batch_size = pointcloud.get_shape()[0].value
     pc_dim = pointcloud.get_shape()[2].value
@@ -169,7 +169,7 @@ def get_model_with_tfnet(pointcloud, num_classes, is_training, base=False):
 
     adj_matrix = tf_util.pairwise_distance(net)
     nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)  
+    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)    
 
     net = tf_util.conv2d(edge_feature, 128, [1,1],
                         padding='VALID', stride=[1,1],
