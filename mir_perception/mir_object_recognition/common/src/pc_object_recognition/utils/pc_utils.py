@@ -9,8 +9,8 @@ def float_to_rgb(p_rgb):
     """
     Get rgb color from float rgb
     
-    :param p_rgb:       24 bit packed rgb 
-    :type:              numpy.array
+    :param p_rgb:         24 bit packed rgb 
+    :type:                numpy.array
     
     :return:            The rgb color
     :rtype:             numpy.array
@@ -19,8 +19,8 @@ def float_to_rgb(p_rgb):
     rgb_bytes = struct.pack('f', p_rgb)
     rgb = struct.unpack('I', rgb_bytes)[0]
     r = (rgb >> 16) & 0x0000ff
-    g = (rgb >> 8)  & 0x0000ff
-    b = (rgb)       & 0x0000ff
+    g = (rgb >> 8)    & 0x0000ff
+    b = (rgb)         & 0x0000ff
 
     return (r/255.0),(g/255.0),(b/255.0)
 
@@ -28,10 +28,10 @@ def scale_to_unit_sphere(pointcloud, normalize=True):
     """
     Scale point cloud to unit sphere
 
-    :param pointcloud:  The input pointcloud
-    :type:              numpy.array
-    :param normalize:   True if pointcloud needs to be normalized
-    :type:              bool
+    :param pointcloud:    The input pointcloud
+    :type:                numpy.array
+    :param normalize:     True if pointcloud needs to be normalized
+    :type:                bool
     
     :return:            The rotated pointcloud
     :rtype:             numpy.array
@@ -44,14 +44,14 @@ def scale_to_unit_sphere(pointcloud, normalize=True):
     if scale > 0.0:
         pointcloud = pointcloud / scale
 
-    return pointcloud  
+    return pointcloud    
 
 def pca_compress(pointcloud, n_components=3):
     """
     Find principal axes of the pointcloud
 
-    :param pointcloud:  The input pointcloud
-    :type pointcloud:   numpy.array
+    :param pointcloud:    The input pointcloud
+    :type pointcloud:     numpy.array
 
     :return:            PCA object fit to the given pointcloud
     :rtype:             sklearn.decomposition.PCA
@@ -68,8 +68,8 @@ def rotate_pointcloud(normalized_pointcloud):
     component is aligned along the x-axis, 2nd principal component along y-axis and the
     third along the z-axis
 
-    :param pointcloud:  The input pointcloud
-    :type pointcloud:   numpy.array
+    :param pointcloud:    The input pointcloud
+    :type pointcloud:     numpy.array
 
     :return:            The rotated pointcloud
     :rtype:             numpy.array
@@ -97,8 +97,8 @@ def rotate_pointcloud(normalized_pointcloud):
 def center_pointcloud(pointcloud):
     """
     Center pointcloud
-    :param pointcloud:  The input pointcloud
-    :type pointcloud:   numpy.array
+    :param pointcloud:    The input pointcloud
+    :type pointcloud:     numpy.array
 
     :return:            The rotated pointcloud
     :rtype:             numpy.array
@@ -121,8 +121,8 @@ def center_and_rotate_pointcloud(pointcloud):
     Transforms pointcloud so it is centered at (0,0,0) and
     its first three principal components are aligned along the x,y and z axes
 
-    :param pointcloud:  The input pointcloud
-    :type pointcloud:   numpy.array
+    :param pointcloud:    The input pointcloud
+    :type pointcloud:     numpy.array
 
     :return:            The centered and rotated pointcloud
     :rtype:             numpy.array
@@ -145,11 +145,11 @@ def get_3d_grid_gmm(subdivisions=[5,5,5], variance=0.04):
     """
     # n_gaussians = reduce(lambda x, y: x*y,subdivisions)
     n_gaussians = np.prod(np.array(subdivisions))
-    step = [1.0/(subdivisions[0]),  1.0/(subdivisions[1]),  1.0/(subdivisions[2])]
+    step = [1.0/(subdivisions[0]),    1.0/(subdivisions[1]),    1.0/(subdivisions[2])]
 
     means = np.mgrid[ step[0]-1: 1.0-step[0]: complex(0, subdivisions[0]),
-                      step[1]-1: 1.0-step[1]: complex(0, subdivisions[1]),
-                      step[2]-1: 1.0-step[2]: complex(0, subdivisions[2])]
+                        step[1]-1: 1.0-step[1]: complex(0, subdivisions[1]),
+                        step[2]-1: 1.0-step[2]: complex(0, subdivisions[2])]
     means = np.reshape(means, [3, -1]).T
     covariances = variance*np.ones_like(means)
     weights = (1.0/n_gaussians)*np.ones(n_gaussians)

@@ -3,13 +3,13 @@
 
   <arg name="input_pointcloud_topic" default="/arm_cam3d/depth_registered/points" />
   <arg name="target_frame" default="odom" />
-  <arg name="model" default="cnn_based" />
-  <arg name="model_id" default="dgcnn" />
+  <arg name="model" default="feature_based" />
+  <arg name="model_id" default="fvrdd" />
   <arg name="dataset" default="asus" />
 
   <group ns="mir_perception">
     <node pkg="mir_object_recognition" type="pc_object_recognizer_node" name="pc_object_recognizer" output="screen" 
-          respawn="false" ns="multimodal_object_recognition/recognizer/pc">
+        respawn="false" ns="multimodal_object_recognition/recognizer/pc">
       <param name="model" value="$(arg model)" type="str" />
       <param name="model_id" value="$(arg model_id)" type="str" />
       <param name="dataset" value="$(arg dataset)" type="str" />

@@ -7,16 +7,16 @@ import pc_object_recognition.utils.tf_util as dgcnn_util
 
 def input_transform_net(edge_feature, is_training, K=3, is_dist=False):
     """
-    :param pointcloud:  Edge feature input (BxNxkxD), k=num of neighbors, D=cloud dimension
+    :param pointcloud:    Edge feature input (BxNxkxD), k=num of neighbors, D=cloud dimension
     :type name: Array 
-    :param is_training:  True indicating training mode
+    :param is_training:    True indicating training mode
     :type name: Bool
-    :param K:  Number of cloud dimension
+    :param K:    Number of cloud dimension
     :type name: Int
-    :param is_dist:  True indicating distributed training scheme
+    :param is_dist:    True indicating distributed training scheme
     
     Return:
-      Transformation matrix of size 3xK 
+        Transformation matrix of size 3xK 
     """
     batch_size = edge_feature.get_shape()[0].value
     num_point = edge_feature.get_shape()[1].value

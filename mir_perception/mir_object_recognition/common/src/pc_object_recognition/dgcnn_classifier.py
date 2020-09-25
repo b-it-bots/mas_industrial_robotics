@@ -48,16 +48,16 @@ class DGCNNClassifier(CNNBasedClassifiers):
         """
         Classify point cloud
 
-        :param pointcloud:  The input pointcloud (BxNxD), D can be XYZ or XYZRGB
+        :param pointcloud:    The input pointcloud (BxNxD), D can be XYZ or XYZRGB
         :type name:         numpy.array
-        :param center:      If true, pointcloud will be centered
+        :param center:        If true, pointcloud will be centered
         :type name:         Bool
-        :param rotate:      If true, pointcloud will be rotated to their principal axes
+        :param rotate:        If true, pointcloud will be rotated to their principal axes
         :type name:         Bool
         :param pad:         If true, pointcloud will be padded
         :type name:         Bool
 
-        :return:  Predicted label and probablity
+        :return:    Predicted label and probablity
         """
         
         if center:

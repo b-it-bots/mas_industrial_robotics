@@ -2,29 +2,24 @@
 
 PACKAGE = "mir_object_recognition"
 
-import os
-import sys
-import struct
 import colorsys
-import yaml
-
-import roslib
-import rospy
-
-import cv2
-from cv_bridge import CvBridge, CvBridgeError
-
+import os
 import pickle
-import numpy as np
+import struct
+import sys
 import time
 
+import cv2
+import numpy as np
+import roslib
+import rospy
+import yaml
+from cv_bridge import CvBridge, CvBridgeError
+from mas_perception_msgs.msg import ImageList, Object, ObjectList
 from mas_perception_msgs.srv import RecognizeImage, RecognizeImageResponse
-from mas_perception_msgs.msg import ImageList, ObjectList, Object
+from rgb_object_recognition import SqueezeDetClassifier, SSDLiteMobilenet, util
 from sensor_msgs.msg import Image, RegionOfInterest
 
-from rgb_object_recognition import SqueezeDetClassifier
-from rgb_object_recognition import SSDLiteMobilenet
-from rgb_object_recognition import util
 
 class RGBObjectRecognizer():
     def __init__(self, model_dir, net='detection', model_name='squeezeDet', debug_mode=False):
@@ -51,7 +46,7 @@ class RGBObjectRecognizer():
             if self.net == 'detection':
                 if self.model_name == 'squeezeDet':
                     self.model = SqueezeDetClassifier(config=model_config,
-                                                      checkpoint_path=model_dir)
+                                                        checkpoint_path=model_dir)
                 elif self.model_name == 'ssdLiteMobilenet':
                     self.model = SSDLiteMobilenet(model_dir)
             elif self.net == 'classification':
@@ -90,8 +85,7 @@ class RGBObjectRecognizer():
                         debug_img = cv_image
                         debug_img = debug_img.astype(np.float32, copy=False)
                         debug_img = cv2.resize(debug_img, (img_msg.images[0].width, 
-                                                           img_msg.images[0].height)
-                                              )
+                                                                     img_msg.images[0].height))
                         # Get display labels
                         classes = [self.classes[label] for label in labels]
                         util.draw_box_on_img(debug_img, bboxes, probs, classes, self.colors)

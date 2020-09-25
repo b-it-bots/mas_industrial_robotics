@@ -17,25 +17,25 @@ import numpy as np
 import tensorflow as tf
 
 class SqueezeDet(ModelSkeleton):
-  def __init__(self, mc):
+    def __init__(self, mc):
     with tf.device('/cpu:0'):
-      ModelSkeleton.__init__(self, mc)
+        ModelSkeleton.__init__(self, mc)
 
-      self._add_forward_graph()
-      self._add_interpretation_graph()
-      self._add_loss_graph()
-      self._add_train_graph()
-      self._add_viz_graph()
+        self._add_forward_graph()
+        self._add_interpretation_graph()
+        self._add_loss_graph()
+        self._add_train_graph()
+        self._add_viz_graph()
 
-  def _add_forward_graph(self):
+    def _add_forward_graph(self):
     """NN architecture."""
 
     mc = self.mc
     if mc.LOAD_PRETRAINED_MODEL:
-      assert tf.gfile.Exists(mc.PRETRAINED_MODEL_PATH), \
-          'Cannot find pretrained model at the given path:' \
-          '  {}'.format(mc.PRETRAINED_MODEL_PATH)
-      self.caffemodel_weight = joblib.load(mc.PRETRAINED_MODEL_PATH)
+        assert tf.gfile.Exists(mc.PRETRAINED_MODEL_PATH), \
+            'Cannot find pretrained model at the given path:' \
+            '    {}'.format(mc.PRETRAINED_MODEL_PATH)
+        self.caffemodel_weight = joblib.load(mc.PRETRAINED_MODEL_PATH)
 
     conv1 = self._conv_layer(
         'conv1', self.image_input, filters=64, size=3, stride=2,
@@ -78,19 +78,19 @@ class SqueezeDet(ModelSkeleton):
         'conv12', dropout11, filters=num_output, size=3, stride=1,
         padding='SAME', xavier=False, relu=False, stddev=0.0001)
 
-  def _fire_layer(self, layer_name, inputs, s1x1, e1x1, e3x3, stddev=0.01,
-      freeze=False):
+    def _fire_layer(self, layer_name, inputs, s1x1, e1x1, e3x3, stddev=0.01,
+        freeze=False):
     """Fire layer constructor.
 
     Args:
-      layer_name: layer name
-      inputs: input tensor
-      s1x1: number of 1x1 filters in squeeze layer.
-      e1x1: number of 1x1 filters in expand layer.
-      e3x3: number of 3x3 filters in expand layer.
-      freeze: if true, do not train parameters in this layer.
+        layer_name: layer name
+        inputs: input tensor
+        s1x1: number of 1x1 filters in squeeze layer.
+        e1x1: number of 1x1 filters in expand layer.
+        e3x3: number of 3x3 filters in expand layer.
+        freeze: if true, do not train parameters in this layer.
     Returns:
-      fire layer operation.
+        fire layer operation.
     """
 
     sq1x1 = self._conv_layer(

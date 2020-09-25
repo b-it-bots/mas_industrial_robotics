@@ -1,21 +1,18 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
+
+import glob
+import os
+import sys
+import time
 
 import cv2
-import time
-import sys
-import os
-import glob
-import yaml
-
 import numpy as np
 import tensorflow as tf
-
+import yaml
 from rgb_object_recognition.config import kitti_squeezeDet_config
+from rgb_object_recognition.image_classifier import ImageClassifier
 from rgb_object_recognition.nets import SqueezeDet
 
-from rgb_object_recognition.image_classifier import ImageClassifier 
 
 class SqueezeDetClassifier(ImageClassifier):
     """
@@ -51,15 +48,15 @@ class SqueezeDetClassifier(ImageClassifier):
         """
         Preprocess image: resize, subtract with bgr means.
 
-        :param image:  The input rgb image to be preprocessed
+        :param image:    The input rgb image to be preprocessed
         :type name:         numpy.array
 
-        :return:  preprocessed image
+        :return:    preprocessed image
 
         """
         image = image.astype(np.float32, copy=False)
         image = cv2.resize(image, (self.squeezedet_config.IMAGE_WIDTH, 
-                                   self.squeezedet_config.IMAGE_HEIGHT))
+                                     self.squeezedet_config.IMAGE_HEIGHT))
         image = image - self.squeezedet_config.BGR_MEANS
 
         return image
@@ -68,10 +65,10 @@ class SqueezeDetClassifier(ImageClassifier):
         """
         Detect and classify image
 
-        :param image:  The input rgb image
+        :param image:    The input rgb image
         :type name:         numpy.array
 
-        :return:  bounding boxes, probabilities and classes
+        :return:    bounding boxes, probabilities and classes
         """
 
         image = self.preprocess_image(image)
@@ -85,7 +82,7 @@ class SqueezeDetClassifier(ImageClassifier):
                                                              det_class[0])
 
         keep_idx    = [idx for idx in range(len(probs)) \
-                       if probs[idx] > self.squeezedet_config.PLOT_PROB_THRESH]
+                         if probs[idx] > self.squeezedet_config.PLOT_PROB_THRESH]
 
         keep_boxes = [boxes[idx] for idx in keep_idx]
         keep_probs = [probs[idx] for idx in keep_idx]
