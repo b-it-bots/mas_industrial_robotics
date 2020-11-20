@@ -164,6 +164,8 @@ class GraspedObjectAttacher(object):
             return "RUNNING"
 
     def attach_object(self):
+        """
+        """
         tf_time = self.listener.getLatestCommonTime(
             self.attachment_frame_id, self.fixed_frame_id
         )
@@ -189,9 +191,11 @@ class GraspedObjectAttacher(object):
             rospy.logwarn("Object to attach was not in object list")
 
     def detach_object(self):
+        """"
+        """
         self.detach_box(self.attached_object_name)
 
-    def attach_box(self, name, dx, dy, dz, pitch):
+    def attach_box(self, name, dimension_x, dimension_y, dimension_z, pitch):
         """
         attaches a box to the robot at the attachment frame
         """
@@ -210,9 +214,9 @@ class GraspedObjectAttacher(object):
         box_pose.orientation.z = quat[3]
         box_shape = shape_msgs.msg.SolidPrimitive()
         box_shape.type = box_shape.BOX
-        box_shape.dimensions.append(dx)
-        box_shape.dimensions.append(dy)
-        box_shape.dimensions.append(dz)
+        box_shape.dimensions.append(dimension_x)
+        box_shape.dimensions.append(dimension_y)
+        box_shape.dimensions.append(dimension_z)
         box_object.object.primitives.append(box_shape)
         box_object.object.primitive_poses.append(box_pose)
         box_object.object.operation = box_object.object.ADD
