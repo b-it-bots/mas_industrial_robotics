@@ -4,11 +4,6 @@ language: cpp
 services:
   - docker
 
-addons:
-  apt:
-    packages:
-      - libhdf5-serial-dev
-
 env:
   global:
     - COMPOSE_VERSION: 1.22.0
@@ -63,6 +58,6 @@ jobs:
 stages:
   - build
   - name: deploy
-    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
+    if: (branch IN (indigo, kinetic, kinetic-devel, melodic, travis-tests) AND type != "pull_request") OR tag = true
   - name: docs
-    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
+    if: (branch IN (indigo, kinetic, kinetic-devel, melodic, travis-tests) AND type != "pull_request") OR tag = true
