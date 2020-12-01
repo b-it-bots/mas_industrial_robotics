@@ -1,49 +1,49 @@
-import numpy as np
 import os
-import six.moves.urllib as urllib
 import sys
 import tarfile
-import tensorflow as tf
 import time
 import zipfile
 
+import numpy as np
+import six.moves.urllib as urllib
+import tensorflow as tf
 from rgb_object_recognition.utils import util
 
 
 class SSDLiteMobilenet():
     def __init__(self, checkpoint_dir): 
-    # Path to frozen detection graph. This is the actual model that is used for the object detection.
-    self.PATH_TO_FROZEN_GRAPH = os.path.join(checkpoint_dir, 'frozen_inference_graph.pb')
-    # List of the strings that is used to add correct label for each box.
-    PATH_TO_LABELS = os.path.join(checkpoint_dir, 'atwork_label_map.json')
+        # Path to frozen detection graph. This is the actual model that is used for the object detection.
+        self.PATH_TO_FROZEN_GRAPH = os.path.join(checkpoint_dir, 'frozen_inference_graph.pb')
+        # List of the strings that is used to add correct label for each box.
+        PATH_TO_LABELS = os.path.join(checkpoint_dir, 'atwork_label_map.json')
 
-    self.cat_idx = util.category_index_from_label_map(PATH_TO_LABELS)
+        self.cat_idx = util.category_index_from_label_map(PATH_TO_LABELS)
 
-    detection_graph = tf.Graph()
-    with detection_graph.as_default():
-        od_graph_def = tf.GraphDef()
-        with tf.gfile.GFile(self.PATH_TO_FROZEN_GRAPH, 'rb') as fid:
-        serialized_graph = fid.read()
-        od_graph_def.ParseFromString(serialized_graph)
-        tf.import_graph_def(od_graph_def, name='')
+        detection_graph = tf.Graph()
+        with detection_graph.as_default():
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(self.PATH_TO_FROZEN_GRAPH, 'rb') as fid:
+            serialized_graph = fid.read()
+            od_graph_def.ParseFromString(serialized_graph)
+            tf.import_graph_def(od_graph_def, name='')
 
-        self.sess = tf.Session()
-        # Get handles to input and output tensors
-        ops = tf.get_default_graph().get_operations()
-        all_tensor_names = {output.name for op in ops for output in op.outputs}
-        self.tensor_dict = {}
-        for key in [
-            'num_detections', 'detection_boxes', 'detection_scores',
-            'detection_classes'
-        ]:
-        tensor_name = key + ':0'
-        if tensor_name in all_tensor_names:
-            self.tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(
-                tensor_name)
+            self.sess = tf.Session()
+            # Get handles to input and output tensors
+            ops = tf.get_default_graph().get_operations()
+            all_tensor_names = {output.name for op in ops for output in op.outputs}
+            self.tensor_dict = {}
+            for key in [
+                'num_detections', 'detection_boxes', 'detection_scores',
+                'detection_classes'
+            ]:
+            tensor_name = key + ':0'
+            if tensor_name in all_tensor_names:
+                self.tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(
+                    tensor_name)
 
-        self.image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
+            self.image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
 
-        print ('\033[92m'+"SSDLiteMobilenet model is loaded")
+            print ('\033[92m'+"SSDLiteMobilenet model is loaded")
 
     
     def infer_one_image(self, input_img):
