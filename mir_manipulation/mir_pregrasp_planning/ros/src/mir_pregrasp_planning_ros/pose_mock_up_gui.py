@@ -27,18 +27,18 @@ MAX_ORIENTATION = 359  # in degrees
 
 TRANSPARENCY = 0.5
 
-pose_marker = visualization_msgs.msg.Marker()
-pose = geometry_msgs.msg.PoseStamped()
+POSE_MARKER = visualization_msgs.msg.Marker()
+POSE = geometry_msgs.msg.PoseStamped()
 
-global roll_value
-roll_value = 0.0
-global pitch_value
-pitch_value = 0.0
-global yaw_value
-yaw_value = 0.0
+global ROLL_VALUE
+ROLL_VALUE = 0.0
+global PITCH_VALUE
+PITCH_VALUE = 0.0
+global YAW_VALUE
+YAW_VALUE = 0.0
 
-global lock
-lock = threading.Lock()
+global LOCK
+LOCK = threading.Lock()
 
 
 def create_window():
@@ -120,11 +120,11 @@ def position_x(slider):
     Sets slider as the target's position in the X axis.
 
     """
-    global lock
-    lock.acquire()
-    pose.pose.position.x = float(slider)
-    pose_marker.pose.position.x = float(slider)
-    lock.release()
+    global LOCK
+    LOCK.acquire()
+    POSE.pose.position.x = float(slider)
+    POSE_MARKER.pose.position.x = float(slider)
+    LOCK.release()
 
 
 def position_y(slider):
@@ -132,11 +132,11 @@ def position_y(slider):
     Sets slider as the target's position in the Y axis.
 
     """
-    global lock
-    lock.acquire()
-    pose.pose.position.y = float(slider)
-    pose_marker.pose.position.y = float(slider)
-    lock.release()
+    global LOCK
+    LOCK.acquire()
+    POSE.pose.position.y = float(slider)
+    POSE_MARKER.pose.position.y = float(slider)
+    LOCK.release()
 
 
 def position_z(slider):
@@ -144,11 +144,11 @@ def position_z(slider):
     Sets slider as the target's position in the Z axis.
 
     """
-    global lock
-    lock.acquire()
-    pose.pose.position.z = float(slider)
-    pose_marker.pose.position.z = float(slider)
-    lock.release()
+    global LOCK
+    LOCK.acquire()
+    POSE.pose.position.z = float(slider)
+    POSE_MARKER.pose.position.z = float(slider)
+    LOCK.release()
 
 
 def orientation_roll(slider):
@@ -156,11 +156,11 @@ def orientation_roll(slider):
     Sets slider as the target's orientation about the X axis.
 
     """
-    global lock
-    lock.acquire()
-    global roll_value
-    roll_value = math.radians(float(slider))
-    lock.release()
+    global LOCK
+    LOCK.acquire()
+    global ROLL_VALUE
+    ROLL_VALUE = math.radians(float(slider))
+    LOCK.release()
 
 
 def orientation_pitch(slider):
@@ -168,11 +168,11 @@ def orientation_pitch(slider):
     Sets slider as the target's orientation about the Y axis.
 
     """
-    global lock
-    lock.acquire()
-    global pitch_value
-    pitch_value = math.radians(float(slider))
-    lock.release()
+    global LOCK
+    LOCK.acquire()
+    global PITCH_VALUE
+    PITCH_VALUE = math.radians(float(slider))
+    LOCK.release()
 
 
 def orientation_yaw(slider):
@@ -180,11 +180,11 @@ def orientation_yaw(slider):
     Sets slider as the target's orientation about the Z axis.
 
     """
-    global lock
-    lock.acquire()
-    global yaw_value
-    yaw_value = math.radians(float(slider))
-    lock.release()
+    global LOCK
+    LOCK.acquire()
+    global YAW_VALUE
+    YAW_VALUE = math.radians(float(slider))
+    LOCK.release()
 
 
 def publish_pose():
@@ -209,38 +209,38 @@ def publish_pose():
         "~mock_up_pose_marker", visualization_msgs.msg.Marker, queue_size=1
     )
 
-    pose.header.stamp = rospy.Time.now()
-    pose.header.frame_id = reference_frame
+    POSE.header.stamp = rospy.Time.now()
+    POSE.header.frame_id = reference_frame
 
-    pose_marker.header.stamp = rospy.Time.now()
-    pose_marker.header.frame_id = reference_frame
+    POSE_MARKER.header.stamp = rospy.Time.now()
+    POSE_MARKER.header.frame_id = reference_frame
 
     # create a rectangular prism for visualization
-    pose_marker.type = 1
-    pose_marker.scale.x = 0.05  # in centimeters
-    pose_marker.scale.y = 0.02  # in centimeters
-    pose_marker.scale.z = 0.01  # in centimeters
-    pose_marker.color.r = 0.0
-    pose_marker.color.g = 0.0
-    pose_marker.color.b = 1.0
-    pose_marker.color.a = transparency
+    POSE_MARKER.type = 1
+    POSE_MARKER.scale.x = 0.05  # in centimeters
+    POSE_MARKER.scale.y = 0.02  # in centimeters
+    POSE_MARKER.scale.z = 0.01  # in centimeters
+    POSE_MARKER.color.r = 0.0
+    POSE_MARKER.color.g = 0.0
+    POSE_MARKER.color.b = 1.0
+    POSE_MARKER.color.a = transparency
 
     while not rospy.is_shutdown():
         quaternion = tf.transformations.quaternion_from_euler(
-            roll_value, pitch_value, yaw_value
+            ROLL_VALUE, PITCH_VALUE, YAW_VALUE
         )
-        pose.pose.orientation.x = quaternion[0]
-        pose.pose.orientation.y = quaternion[1]
-        pose.pose.orientation.z = quaternion[2]
-        pose.pose.orientation.w = quaternion[3]
+        POSE.pose.orientation.x = quaternion[0]
+        POSE.pose.orientation.y = quaternion[1]
+        POSE.pose.orientation.z = quaternion[2]
+        POSE.pose.orientation.w = quaternion[3]
 
-        pose_marker.pose.orientation.x = quaternion[0]
-        pose_marker.pose.orientation.y = quaternion[1]
-        pose_marker.pose.orientation.z = quaternion[2]
-        pose_marker.pose.orientation.w = quaternion[3]
+        POSE_MARKER.pose.orientation.x = quaternion[0]
+        POSE_MARKER.pose.orientation.y = quaternion[1]
+        POSE_MARKER.pose.orientation.z = quaternion[2]
+        POSE_MARKER.pose.orientation.w = quaternion[3]
 
-        pub_pose.publish(pose)
-        pub_pose_marker.publish(pose_marker)
+        pub_pose.publish(POSE)
+        pub_pose_marker.publish(POSE_MARKER)
         loop_rate.sleep()
 
 
