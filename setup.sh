@@ -25,6 +25,7 @@ function update_keys {
 function install_ros_kinetic_base {
     sudo apt-get update -qq
     sudo apt-get install -y -qq ros-kinetic-ros-base
+    sudo apt-get install libhdf5-openmpi-dev
 }
 
 function install_ros_dependencies {
@@ -34,6 +35,14 @@ function install_ros_dependencies {
     sudo apt install -y -qq python-rosinstall python-rosinstall-generator python-wstool build-essential python-catkin-tools python-pip
     sudo pip install catkin_pkg empy
     sudo rm -rf /var/lib/apt/lists/*
+}
+
+function install_perception_dependencies {
+    fancy_print "Installing perception dependencies"
+    sudo pip install --no-cache-dir --ignore-installed enum34
+    sudo pip install --no-cache-dir -U numpy==1.16.5
+    sudo pip install --no-cache-dir -U tensorflow==1.14.0
+    sudo pip install --no-cache-dir -U scikit-learn easydict joblib
 }
 
 function install_ros {
@@ -106,6 +115,7 @@ fi
 
 install_basic_packages
 install_ros $FULL_INSTALL
+install_perception_dependencies
 setup_catkin_ws
 get_mas_industrial_robotics
 install_mas_dependencies
