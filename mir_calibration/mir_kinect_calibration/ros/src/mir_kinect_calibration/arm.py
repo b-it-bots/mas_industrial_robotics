@@ -19,6 +19,10 @@ roslib.load_manifest(PACKAGE)
 
 
 class Arm(object):
+    """
+    Constants:
+        CART_SERVER:
+    """
 
     CART_SERVER = "/arm_controller/move_arm_cart"
 
@@ -31,6 +35,9 @@ class Arm(object):
         self.pitch = default_pitch
 
     def move_to(self, where):
+        """
+        Function to move the arm as described by variable where
+        """
         if isinstance(where, str):
             self._move_to_pose(where)
         elif len(where) == 5:
@@ -46,39 +53,60 @@ class Arm(object):
         Move the arm to the pose given by (x, y, z, pitch) tuple. The pitch is
         optional and can be omitted.
         """
-        g = MoveArmGoal()
-        pc = PositionConstraint()
-        pc.header.frame_id = "/base_link"
-        pc.header.stamp = rospy.Time.now()
-        pc.position.x = coordinates[0]
-        pc.position.y = coordinates[1]
-        pc.position.z = coordinates[2]
-        g.motion_plan_request.goal_constraints.position_constraints.append(pc)
-        oc = OrientationConstraint()
-        r = 0.0
-        p = coordinates[3] if len(coordinates) == 4 else self.pitch
-        y = 0.0
-        (qx, qy, qz, qw) = tf.transformations.quaternion_from_euler(r, p, y)
-        oc.header.frame_id = "/base_link"
-        oc.header.stamp = rospy.Time.now()
-        oc.orientation.x = qx
-        oc.orientation.y = qy
-        oc.orientation.z = qz
-        oc.orientation.w = qw
-        g.motion_plan_request.goal_constraints.orientation_constraints.append(oc)
-        self.move_arm_cart_server.send_goal(g)
+        move_arm_to_goal = MoveArmGoal()
+        position_constraint_msg = PositionConstraint()
+        position_constraint_msg.header.frame_id = "/base_link"
+        position_constraint_msg.header.stamp = rospy.Time.now()
+        position_constraint_msg.position.x = coordinates[0]
+        position_constraint_msg.position.y = coordinates[1]
+        position_constraint_msg.position.z = coordinates[2]
+        move_arm_to_goal.motion_plan_request.goal_constraints.position_constraints.append(
+            position_constraint_msg)
+
+        orientation_constraint_msg = OrientationConstraint()
+        roll_euler = 0.0
+        pitch_euler = coordinates[3] if len(coordinates) == 4 else self.pitch
+        yaw_euler = 0.0
+
+        (quaternion_x,
+         quaternion_y,
+         quaternion_z,
+         quaternion_w) = tf.transformations.quaternion_from_euler(
+             roll_euler,
+             pitch_euler,
+             yaw_euler)
+
+        orientation_constraint_msg.header.frame_id = "/base_link"
+        orientation_constraint_msg.header.stamp = rospy.Time.now()
+        orientation_constraint_msg.orientation.x = quaternion_x
+        orientation_constraint_msg.orientation.y = quaternion_y
+        orientation_constraint_msg.orientation.z = quaternion_z
+        orientation_constraint_msg.orientation.w = quaternion_w
+        move_arm_to_goal.motion_plan_request.goal_constraints.orientation_constraints.append(
+            orientation_constraint_msg)
+
+        self.move_arm_cart_server.send_goal(move_arm_to_goal)
         rospy.loginfo("Sent move arm goal, waiting for result...")
         self.move_arm_cart_server.wait_for_result()
-        rv = self.move_arm_cart_server.get_result().error_code.val
-        print rv
-        if not rv == 1:
+        result_value = self.move_arm_cart_server.get_result().error_code.val
+        print result_value
+        if not result_value == 1:
             raise Exception("Failed to move the arm to the given pose.")
 
     def _move_to_pose(self, pose):
+        """
+        Function to move arm to a pose
+        """
         self.script_server.move("arm", pose)
 
     def open_gripper(self):
+        """
+        Function to open the gripper
+        """
         self.script_server.move("gripper", "open")
 
     def close_gripper(self):
+        """
+        Function to close the gripper
+        """
         self.script_server.move("gripper", "close")
