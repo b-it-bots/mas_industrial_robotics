@@ -60,6 +60,8 @@ class SceneSegmentationROS
   double octree_resolution_;
   double workspace_height_;
 
+  PointCloud::Ptr cloud_debug_;
+
  public:
   /** \brief Find plane, segment table top point cloud and cluster them
    * \param[in] Input point cloud
@@ -175,6 +177,10 @@ class SceneSegmentationROS
   void setClusterParams(double cluster_tolerance, int cluster_min_size, int cluster_max_size,
                         double cluster_min_height, double cluster_max_height,
                         double cluster_max_length, double cluster_min_distance_to_polygon);
+  
+  /** \brief Get debug cloud**/
+  PointCloud::Ptr getCloudDebug();
+
 };
 
 #endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_H
