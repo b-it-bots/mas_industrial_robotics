@@ -1,0 +1,26 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 0 issues that require attention
+--------------------------------------------------------------------------------
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'dgcnn.py'
+ outputting to 'dgcnn_v2.py'
+--------------------------------------------------------------------------------
+
+38:10: INFO: Added keywords to args of function 'tf.reduce_max'
+38:10: INFO: Renamed keyword argument for tf.reduce_max from keep_dims to keepdims
+50:10: INFO: Added keywords to args of function 'tf.reduce_max'
+50:10: INFO: Renamed keyword argument for tf.reduce_max from keep_dims to keepdims
+62:10: INFO: Added keywords to args of function 'tf.reduce_max'
+62:10: INFO: Renamed keyword argument for tf.reduce_max from keep_dims to keepdims
+74:10: INFO: Added keywords to args of function 'tf.reduce_max'
+74:10: INFO: Renamed keyword argument for tf.reduce_max from keep_dims to keepdims
+83:10: INFO: Added keywords to args of function 'tf.reduce_max'
+83:10: INFO: Renamed keyword argument for tf.reduce_max from keep_dims to keepdims
+--------------------------------------------------------------------------------
+

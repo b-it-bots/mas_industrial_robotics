@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 """
 Add boxes to planning scene to represent the workspace walls.
-#TODO this should be replaced in the future with the octomap
+//TODO this should be replaced in the future with the octomap
 Currently planning with octomap is too slow.
 """
 
@@ -18,6 +18,7 @@ import tf
 
 class ArmWorkspaceRestricter(object):
     """
+    Class to restrict the arm in a given workspace
     """
 
     def __init__(self):
@@ -120,6 +121,9 @@ class ArmWorkspaceRestricter(object):
             return "RUNNING"
 
     def add_walls(self):
+        """
+        Function to add walls.
+        """
         self.add_box(
             "restricter_left_wall",
             0.25,
@@ -150,11 +154,15 @@ class ArmWorkspaceRestricter(object):
         self.is_restricted = True
 
     def remove_walls(self):
+        """
+        Function to remove the walls
+        """
         self.remove_box("restricter_left_wall")
         self.remove_box("restricter_right_wall")
         self.is_restricted = False
 
-    def add_box(self, name, x, y, z, dx, dy, dz, yaw=0):
+    def add_box(self, name, position_x, position_y, position_z, 
+                dimension_x, dimension_y, dimension_z, yaw=0):
         """
         Adds two boxes to represent the walls
         """
@@ -169,14 +177,14 @@ class ArmWorkspaceRestricter(object):
         box_pose.orientation.x = quat[1]
         box_pose.orientation.y = quat[2]
         box_pose.orientation.z = quat[3]
-        box_pose.position.x = x
-        box_pose.position.y = y
-        box_pose.position.z = z
+        box_pose.position.x = position_x
+        box_pose.position.y = position_y
+        box_pose.position.z = position_z
         box_shape = shape_msgs.msg.SolidPrimitive()
         box_shape.type = box_shape.BOX
-        box_shape.dimensions.append(dx)
-        box_shape.dimensions.append(dy)
-        box_shape.dimensions.append(dz)
+        box_shape.dimensions.append(dimension_x)
+        box_shape.dimensions.append(dimension_y)
+        box_shape.dimensions.append(dimension_z)
         box_object.primitives.append(box_shape)
         box_object.primitive_poses.append(box_pose)
         box_object.operation = box_object.ADD

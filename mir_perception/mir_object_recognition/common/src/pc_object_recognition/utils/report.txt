@@ -1,0 +1,93 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 1 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: tf_util.py
+--------------------------------------------------------------------------------
+tf_util.py:24:10: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'tf_util.py'
+ outputting to 'tf_util_v2.py'
+--------------------------------------------------------------------------------
+
+24:10: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+24:10: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+45:18: INFO: Changing tf.contrib.layers xavier initializer to a tf.compat.v1.keras.initializers.VarianceScaling and converting arguments.
+
+47:18: INFO: tf.truncated_normal_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+47:18: INFO: Renamed 'tf.truncated_normal_initializer' to 'tf.compat.v1.truncated_normal_initializer'
+51:4: INFO: Renamed 'tf.add_to_collection' to 'tf.compat.v1.add_to_collection'
+88:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+97:14: INFO: Added keywords to args of function 'tf.nn.conv1d'
+97:14: INFO: Renamed keyword argument for tf.nn.conv1d from value to input
+101:30: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+101:30: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+146:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+157:16: INFO: Added keywords to args of function 'tf.nn.conv2d'
+157:16: INFO: Renamed keyword argument for tf.nn.conv2d from filter to filters
+161:32: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+161:32: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+208:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+240:32: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+240:32: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+285:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+300:30: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+300:30: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+331:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+340:29: INFO: tf.constant_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+340:29: INFO: Renamed 'tf.constant_initializer' to 'tf.compat.v1.constant_initializer'
+365:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+368:14: INFO: Added keywords to args of function 'tf.nn.max_pool'
+368:14: INFO: Renamed keyword argument for tf.nn.max_pool from value to input
+368:14: INFO: Renamed 'tf.nn.max_pool' to 'tf.nn.max_pool2d'
+390:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+393:14: INFO: Added keywords to args of function 'tf.nn.avg_pool'
+393:14: INFO: Renamed keyword argument for tf.nn.avg_pool from value to input
+393:14: INFO: Renamed 'tf.nn.avg_pool' to 'tf.nn.avg_pool2d'
+415:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+440:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+463:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+469:28: INFO: Added keywords to args of function 'tf.nn.moments'
+473:19: INFO: Added keywords to args of function 'tf.cond'
+483:16: INFO: Added keywords to args of function 'tf.cond'
+501:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+503:64: INFO: tf.zeros_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+503:64: INFO: Renamed 'tf.zeros_initializer' to 'tf.compat.v1.zeros_initializer'
+504:66: INFO: tf.ones_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+504:66: INFO: Renamed 'tf.ones_initializer' to 'tf.compat.v1.ones_initializer'
+506:72: INFO: tf.zeros_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+506:72: INFO: Renamed 'tf.zeros_initializer' to 'tf.compat.v1.zeros_initializer'
+507:70: INFO: tf.ones_initializer requires manual check. Initializers no longer have the dtype argument in the constructor or partition_info argument in the __call__ method.
+The calls have been converted to compat.v1 for safety (even though they may already have been correct).
+507:70: INFO: Renamed 'tf.ones_initializer' to 'tf.compat.v1.ones_initializer'
+510:30: INFO: Added keywords to args of function 'tf.nn.moments'
+512:19: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+513:18: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+520:13: INFO: Added keywords to args of function 'tf.cond'
+612:7: INFO: Renamed 'tf.variable_scope' to 'tf.compat.v1.variable_scope'
+613:14: INFO: Added keywords to args of function 'tf.cond'
+614:30: INFO: Changing keep_prob arg of tf.nn.dropout to rate, and recomputing value.
+
+632:26: INFO: Added keywords to args of function 'tf.transpose'
+635:23: INFO: Added keywords to args of function 'tf.reduce_sum'
+635:23: INFO: Renamed keyword argument for tf.reduce_sum from keep_dims to keepdims
+636:32: INFO: Added keywords to args of function 'tf.transpose'
+696:11: INFO: Renamed 'tf.ConfigProto' to 'tf.compat.v1.ConfigProto'
+706:9: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+--------------------------------------------------------------------------------
+
