@@ -1,6 +1,5 @@
+os: linux
 dist: bionic
-
-sudo: required
 
 services:
   - docker
@@ -10,9 +9,6 @@ language: cpp
 env:
   global:
     - COMPOSE_VERSION: 1.22.0
-    - CONTAINER_RELEASE_IMAGE: bitbots/bitbots-industrial:$TRAVIS_BRANCH
-    - CACHE_FOLDER=$HOME/docker-images
-    - CACHE_FILE=${CACHE_FOLDER}/bitbots-industrial.tgz
 
 before_install:
   - sudo pip install --upgrade pip
@@ -22,39 +18,35 @@ before_install:
   - sudo curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
   - sudo chmod +x /usr/local/bin/docker-compose
   - docker-compose -v
+  - ROS_DIST="$(cut -d'-' -f1 <<<$TRAVIS_BRANCH)"
+  - DEVEL_BRANCH="$(cut -d'-' -f2 <<<$TRAVIS_BRANCH)"
+  - if [[ $DEVEL_BRANCH == "devel"  ]] ; then TAG=devel; else TAG=latest ; fi
+  - echo $ROS_DIST
+  - echo $TAG
+  - CONTAINER_RELEASE_IMAGE=bitbots/industrial-$ROS_DIST:$TAG
   - echo $CONTAINER_RELEASE_IMAGE
-
-stages:
-  - build
-  - name: deploy
-    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
-  - name: docs
-    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
 
 jobs:
   include:
     - stage: build
-      name: "Complete Build"
+      name: "Build mas industrial image"
       script:
-        - docker-compose build travis
-        - mkdir -p ${CACHE_FOLDER}
-        - docker save ${CONTAINER_RELEASE_IMAGE} | gzip -c > ${CACHE_FILE}
-      workspaces:
-        create:
-          name: build_workspace
-          paths:
-            - ${CACHE_FILE}
+        - echo $CONTAINER_RELEASE_IMAGE
+        - ROS_DIST=$ROS_DIST TAG=$TAG docker-compose build mas_industrial_robotics
+        - docker images
+        - echo "Build successful"
+
     - stage: deploy
-      workspaces:
-        use: build_workspace
-      name: "Docker Hub Deployment"
+      name: "Build and deploy mas industrial image to dockerhub"
       skip_cleanup: true
       script:
-        - ls -la ${CACHE_FOLDER}
-        - if [[ -f ${CACHE_FILE} ]]; then docker load -i ${CACHE_FILE}; fi
+        - echo $CONTAINER_RELEASE_IMAGE
+        - ROS_DIST=$ROS_DIST TAG=$TAG docker-compose build mas_industrial_robotics
         - docker images
         - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
         - docker push $CONTAINER_RELEASE_IMAGE
+        - echo "Build and push successful"
+
     - stage: docs
       name: "Build and deploy documentation"
       script:
@@ -64,3 +56,11 @@ jobs:
         - cp -r $DOCS_DIR/html/ /tmp/wiki/work/ && cd wiki
         - git checkout $BRANCH && git add * && git commit -m "Update mas_industrial_robotics documentation via Travis CI" || true
         - git push origin $BRANCH
+
+stages:
+  - name: build
+    if: (branch IN (kinetic-devel, melodic-devel) AND type = "pull_request")
+  - name: deploy
+    if: (branch IN (devel, indigo, kinetic, kinetic-devel, melodic, melodic-devel, travis-tests) AND type != "pull_request") OR tag = true
+  - name: docs
+    if: (branch IN (devel, indigo, kinetic, kinetic-devel, melodic, melodic-devel, travis-tests) AND type != "pull_request") OR tag = true
