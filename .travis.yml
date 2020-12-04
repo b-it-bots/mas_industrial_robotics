@@ -33,7 +33,7 @@ jobs:
     - stage: build
       name: "Complete build"
       script:
-        - docker-compose build mas_industrial_robotics
+        - ROS_DIST=$ROS_DIST TAG=$TAG docker-compose build mas_industrial_robotics
         - mkdir -p ${CACHE_FOLDER}
         - docker save ${CONTAINER_RELEASE_IMAGE} | gzip -c > ${CACHE_FILE}
       workspaces:
