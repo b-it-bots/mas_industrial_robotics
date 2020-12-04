@@ -9,8 +9,6 @@ language: cpp
 env:
   global:
     - COMPOSE_VERSION: 1.22.0
-    - CACHE_FOLDER=$HOME/docker-images
-    - CACHE_FILE=${CACHE_FOLDER}/industrial-$TRAVIS_BRANCH.tgz
 
 before_install:
   - sudo pip install --upgrade pip
@@ -31,28 +29,23 @@ before_install:
 jobs:
   include:
     - stage: build
-      name: "Complete build"
+      name: "Build mas industrial image"
       script:
+        - echo $CONTAINER_RELEASE_IMAGE
         - ROS_DIST=$ROS_DIST TAG=$TAG docker-compose build mas_industrial_robotics
-        - mkdir -p ${CACHE_FOLDER}
-        - docker save ${CONTAINER_RELEASE_IMAGE} | gzip -c > ${CACHE_FILE}
-      workspaces:
-        create:
-          name: build_workspace
-          paths:
-            - ${CACHE_FILE}
+        - docker images
+        - echo "Build successful"
 
     - stage: deploy
-      workspaces:
-        use: build_workspace
-      name: "Deploy latest stable image to dockerhub"
+      name: "Build and deploy mas industrial image to dockerhub"
       skip_cleanup: true
       script:
-        - ls -la ${CACHE_FOLDER}
-        - if [[ -f ${CACHE_FILE} ]]; then docker load -i ${CACHE_FILE}; fi
+        - echo $CONTAINER_RELEASE_IMAGE
+        - ROS_DIST=$ROS_DIST TAG=$TAG docker-compose build mas_industrial_robotics
         - docker images
         - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
         - docker push $CONTAINER_RELEASE_IMAGE
+        - echo "Build and push successful"
 
     - stage: docs
       name: "Build and deploy documentation"
@@ -66,6 +59,7 @@ jobs:
 
 stages:
   - build
+    if: (branch IN (devel, indigo, kinetic, kinetic-devel, melodic, melodic-devel, travis-tests) AND type == "pull_request")
   - name: deploy
     if: (branch IN (devel, indigo, kinetic, kinetic-devel, melodic, melodic-devel, travis-tests) AND type != "pull_request") OR tag = true
   - name: docs
