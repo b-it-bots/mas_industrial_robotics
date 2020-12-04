@@ -5,5 +5,5 @@ services:
       dockerfile: .travis/Dockerfile
       context: .
       args:
-        ROS_DISTRO: $ROS_DIST
-    image: bitbots/industrial-melodic:$TAG
+        ROS_DISTRO: "${ROS_DIST}"
+    image: "bitbots/industrial-melodic:${TAG}"
