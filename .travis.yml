@@ -58,8 +58,8 @@ jobs:
         - git push origin $BRANCH
 
 stages:
-  - build
-    if: (branch IN (devel, indigo, kinetic, kinetic-devel, melodic, melodic-devel, travis-tests) AND type == "pull_request")
+  - name: build
+    if: (branch IN (kinetic-devel, melodic-devel) AND type = "pull_request")
   - name: deploy
     if: (branch IN (devel, indigo, kinetic, kinetic-devel, melodic, melodic-devel, travis-tests) AND type != "pull_request") OR tag = true
   - name: docs
