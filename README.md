@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=melodic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+[<!--lint ignore no-dead-urls-->![Build Status](https://github.com/b-it-bots/mas_industrial_robotics/workflows/CI/badge.svg)](https://github.com/b-it-bots/mas_industrial_robotics/actions?workflow=CI)
 
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
