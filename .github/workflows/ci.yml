@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      ros_distro: ${{ setps.install_deps.outputs.ros_distro }}
-      image_tag: ${{ setps.install_deps.outputs.image_tag }}
+      ros_distro: ${{ steps.install_deps.outputs.ros_distro }}
+      image_tag: ${{ steps.install_deps.outputs.image_tag }}
 
     steps:
     - uses: actions/checkout@v2
