@@ -19,16 +19,23 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      ros_distro: ${{ setps.install_deps.outputs.ros_distro }}
-      image_tag: ${{ setps.install_deps.outputs.image_tag }}
+      ros_distro: ${{ steps.setup_image.outputs.ros_distro }}
+      image_tag: ${{ steps.setup_image.outputs.image_tag }}
+      owner: ${{ steps.setup_image.outputs.owner }}
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Get ros distro and image tag
-      id: ros_distro
+    - name: Setup image
+      id: setup_image
       run: |
-        GH_BRANCH=${GITHUB_REF##*/}
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]
+        then
+          GH_BRANCH=$GITHUB_BASE_REF
+        else
+          GH_BRANCH=${GITHUB_REF##*/}
+        fi
+
         ROS_DISTRO="$(cut -d'-' -f1 <<<$GH_BRANCH)"
         DEVEL_BRANCH="$(cut -d'-' -f2 <<<$GH_BRANCH)"
         if [[ $DEVEL_BRANCH == "devel"  ]] ; then IMAGE_TAG=devel; else IMAGE_TAG=latest ; fi
@@ -36,6 +43,7 @@ jobs:
         echo $IMAGE_TAG
         echo "::set-output name=ros_distro::$ROS_DISTRO"
         echo "::set-output name=image_tag::$IMAGE_TAG"
+        echo "::set-output name=owner::ghcr.io/b-it-bots/mas_industrial_robotics"
 
   build:
     name: Build
@@ -68,7 +76,9 @@ jobs:
       run: |
         ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
-        ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        OWNER=${{ needs.setup.outputs.owner }}
+        #sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO -f images/mas_industrial_robotics/Dockerfile .
 
     - name: Docker image list
       run: docker images
@@ -99,8 +109,10 @@ jobs:
         # GitHub container registry is still beta
         ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
-        ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
-        docker push ghcr.io/b-it-bots/mas_industrial_robotics/industrial-$ROS_DISTRO:$IMAGE_TAG
+        OWNER=${{ needs.setup.outputs.owner }}
+        #sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO -f images/mas_industrial_robotics/Dockerfile .
+        docker push $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG
 
     - name: Docker image list
       run: docker images
