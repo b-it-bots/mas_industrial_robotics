@@ -29,7 +29,6 @@ jobs:
     - name: Setup image
       id: setup_image
       run: |
-        #echo "$GITHUB_BASE_REF"  #e.g. melodic-devel. Only available on pr
         if [ "$GITHUB_EVENT_NAME" = "pull_request" ]
         then
           GH_BRANCH=$GITHUB_BASE_REF
@@ -79,7 +78,7 @@ jobs:
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
         OWNER=${{ needs.setup.outputs.owner }}
         #sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
-        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO images/mas_industrial_robotics
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO -f images/mas_industrial_robotics/Dockerfile .
 
     - name: Docker image list
       run: docker images
@@ -112,8 +111,7 @@ jobs:
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
         OWNER=${{ needs.setup.outputs.owner }}
         #sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
-        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO images/mas_industrial_robotics
-        #sudo docker push ghcr.io/b-it-bots/mas_industrial_robotics/industrial-$ROS_DISTRO:$IMAGE_TAG
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO -f images/mas_industrial_robotics/Dockerfile .
         docker push $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG
 
     - name: Docker image list
