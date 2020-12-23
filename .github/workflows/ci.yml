@@ -29,9 +29,8 @@ jobs:
     - name: Setup image
       id: setup_image
       run: |
-        echo "$GITHUB_REF"
-        echo "$GITHUB_HEAD_REF"
-        echo "$GITHUB_BASE_REF"
+        echo "$GITHUB_BASE_REF"  #e.g. melodic-devel. Only available on pr
+        echo "$GITHUB_EVENT_NAME"
         GH_BRANCH=${GITHUB_REF##*/}
         ROS_DISTRO="$(cut -d'-' -f1 <<<$GH_BRANCH)"
         DEVEL_BRANCH="$(cut -d'-' -f2 <<<$GH_BRANCH)"
