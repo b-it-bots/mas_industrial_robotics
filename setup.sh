@@ -109,6 +109,7 @@ function build_mas_industrial_robotics {
     #source $WS_DIR/devel/setup.bash
     # Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
     touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
+    catkin build mercury_planner
     catkin build
 }
 
