@@ -2,8 +2,8 @@ version: '2'
 services:
   mas_industrial_robotics:
     build:
-      dockerfile: .travis/Dockerfile
+      dockerfile: images/mas_industrial_robotics/Dockerfile
       context: .
       args:
-        ROS_DISTRO: "${ROS_DIST}"
-    image: "bitbots/industrial-melodic:${TAG}"
+        ROS_DISTRO: ${ROS_DISTRO}
+    image: ghcr.io/b-it-bots/mas_industrial_robotics/industrial-${ROS_DISTRO}:${IMAGE_TAG}
