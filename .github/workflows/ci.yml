@@ -21,6 +21,7 @@ jobs:
     outputs:
       ros_distro: ${{ steps.install_deps.outputs.ros_distro }}
       image_tag: ${{ steps.install_deps.outputs.image_tag }}
+      owner: ${{ steps.install_deps.outputs.owner }}
 
     steps:
     - uses: actions/checkout@v2
@@ -36,6 +37,7 @@ jobs:
         echo $IMAGE_TAG
         echo "::set-output name=ros_distro::$ROS_DISTRO"
         echo "::set-output name=image_tag::$IMAGE_TAG"
+        echo "::set-output name=owner::ghcr.io/b-it-bots/mas_industrial_robotics"
 
   build:
     name: Build
@@ -68,7 +70,9 @@ jobs:
       run: |
         ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
-        sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        OWNER=${{ needs.setup.outputs.owner }}
+        #sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO images/mas_industrial_robotics
 
     - name: Docker image list
       run: docker images
@@ -99,8 +103,11 @@ jobs:
         # GitHub container registry is still beta
         ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
-        sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
-        sudo docker push ghcr.io/b-it-bots/mas_industrial_robotics/industrial-$ROS_DISTRO:$IMAGE_TAG
+        OWNER=${{ needs.setup.outputs.owner }}
+        #sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO images/mas_industrial_robotics
+        #sudo docker push ghcr.io/b-it-bots/mas_industrial_robotics/industrial-$ROS_DISTRO:$IMAGE_TAG
+        docker push $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG
 
     - name: Docker image list
       run: docker images
