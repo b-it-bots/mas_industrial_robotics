@@ -59,8 +59,8 @@ RUN useradd -m -s /bin/bash -N -u $UID $UNAME && \
 
 WORKDIR $WS_DIR
 USER $UNAME
-COPY .travis/bashrc /home/$UNAME/.bashrc
-COPY .travis/bash_profile /home/$UNAME/.bash_profile
+COPY images/mas_industrial_robotics/bashrc /home/$UNAME/.bashrc
+COPY images/mas_industrial_robotics/bash_profile /home/$UNAME/.bash_profile
 
 WORKDIR $WS_DIR/src/mas_industrial_robotics
 COPY . $WS_DIR/src/mas_industrial_robotics
@@ -75,6 +75,6 @@ ENV ROBOT_ENV=brsu-c025
 
 RUN ./setup.sh -ros_install base -ws_dir $WS_DIR -docker 1
 
-COPY .travis/entrypoint.sh /usr/sbin/entrypoint.sh
+COPY images/mas_industrial_robotics/entrypoint.sh /usr/sbin/entrypoint.sh
 RUN sudo chmod +x /usr/sbin/entrypoint.sh
 ENTRYPOINT /usr/sbin/entrypoint.sh
