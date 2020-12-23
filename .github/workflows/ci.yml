@@ -19,15 +19,15 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      ros_distro: ${{ steps.install_deps.outputs.ros_distro }}
-      image_tag: ${{ steps.install_deps.outputs.image_tag }}
-      owner: ${{ steps.install_deps.outputs.owner }}
+      ros_distro: ${{ steps.setup_image.outputs.ros_distro }}
+      image_tag: ${{ steps.setup_image.outputs.image_tag }}
+      owner: ${{ steps.setup_image.outputs.owner }}
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Get ros distro and image tag
-      id: ros_distro
+    - name: Setup image
+      id: setup_image
       run: |
         GH_BRANCH=${GITHUB_REF##*/}
         ROS_DISTRO="$(cut -d'-' -f1 <<<$GH_BRANCH)"
