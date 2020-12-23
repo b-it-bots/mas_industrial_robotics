@@ -68,7 +68,7 @@ jobs:
       run: |
         ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
-        ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
 
     - name: Docker image list
       run: docker images
@@ -99,8 +99,8 @@ jobs:
         # GitHub container registry is still beta
         ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
-        ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
-        docker push ghcr.io/b-it-bots/mas_industrial_robotics/industrial-$ROS_DISTRO:$IMAGE_TAG
+        sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+        sudo docker push ghcr.io/b-it-bots/mas_industrial_robotics/industrial-$ROS_DISTRO:$IMAGE_TAG
 
     - name: Docker image list
       run: docker images
