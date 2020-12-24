@@ -1,12 +1,9 @@
 version: '2'
 services:
-  travis:
-    build:
-      dockerfile: .travis/Dockerfile
-      context: .
-    image: $CONTAINER_RELEASE_IMAGE
   mas_industrial_robotics:
     build:
-      dockerfile: .travis/Dockerfile
+      dockerfile: images/mas_industrial_robotics/Dockerfile
       context: .
-    image: b-it-bots/mas_industrial_robotics
+      args:
+        ROS_DISTRO: ${ROS_DISTRO}
+    image: ghcr.io/b-it-bots/mas_industrial_robotics/industrial-${ROS_DISTRO}:${IMAGE_TAG}

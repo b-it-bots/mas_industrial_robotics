@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=melodic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+[<!--lint ignore no-dead-urls-->![Build Status](https://github.com/b-it-bots/mas_industrial_robotics/workflows/CI/badge.svg)](https://github.com/b-it-bots/mas_industrial_robotics/actions?workflow=CI)
 
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
@@ -67,7 +67,9 @@ First of all you have to clone the repository.
 
 Navigate into the cloned repository and run setup.sh file.
 
-     ./setup.sh full <optional arg for catkin_ws parent dir>
+     ./setup.sh -ros_install full -ws_dir path/to/ws/dir -docker 0
+
+Or `./setup.sh --help` will show available arguments.
 
 **Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
 
