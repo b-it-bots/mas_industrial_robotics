@@ -10,6 +10,9 @@ ENV NVIDIA_VISIBLE_DEVICES \
 ENV NVIDIA_DRIVER_CAPABILITIES \
     ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
+ENV IS_CI=1
+    
+
 user root
 RUN apt-get update -qq \
     && sudo apt-get install -y -qq \
