@@ -2,7 +2,8 @@
 <launch>
 
   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
-  <arg name="is_camera_required" default="false" />
+  <arg name="is_ci" default="$(optenv IS_CI 0)"/>
+  <arg name="is_camera_required" default="$(eval 1-arg('is_ci'))"/>
   <arg name="is_camera_intel" default="true" />
 
   <!-- upload robot description and params (joint configurations) -->
