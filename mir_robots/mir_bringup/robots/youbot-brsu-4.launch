@@ -47,6 +47,6 @@
   <!-- back camera -->
   <!-- <include file="$(find realsense2_camera)/launch/rs_rgbd.launch" /> -->
 
-  <node pkg="mir_debug_leds" type="debug_leds.py" name="debug_leds" output="screen"/>
+  <!-- <node pkg="mir_debug_leds" type="debug_leds.py" name="debug_leds" output="screen"/> -->
 
 </launch>
