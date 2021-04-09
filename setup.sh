@@ -151,7 +151,7 @@ while test $# -gt 0; do
       shift
       ;;
     -rd|--ros_distro)
-      ROS_INSTALL="$2"
+      ROS_DISTRO="$2"
       shift
       shift
       ;;
@@ -170,7 +170,6 @@ while test $# -gt 0; do
       ;;
   esac
 done
-
 
 # Begin shell command executions from here
 # Store the root directory path in a variable
