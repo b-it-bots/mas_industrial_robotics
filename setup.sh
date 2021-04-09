@@ -114,19 +114,6 @@ function build_mas_industrial_robotics {
     catkin build
 }
 
-
-if [ $# -eq 0 ]
-then
-  echo "Usage: bash setup.sh"
-  echo " "
-  echo "options:"
-  echo "-h, --help                      show brief help"
-  echo "-ros_install (str)              whether to install desktop full or base (default = base)"
-  echo "-ws_dir  (str)                  workspace dir (default = "")"
-  echo "-docker (0 or 1)                whether to install in docker mode or system wide (default = 0 / system wide)"
-  exit 0
-fi
-
 ROS_INSTALL=base
 ROS_DISTRO=melodic
 WS_DIR=""
@@ -142,7 +129,7 @@ while test $# -gt 0; do
       echo "-ri, --ros_install (str)              whether to install desktop-full or base (default: base)"
       echo "-rd, --ros_distro (str)               whether to install desktop-full or base (default: melodic)"
       echo "-ws, --ws_dir  (str)                  workspace dir"
-      echo "-d, --docker (0 or 1)                whether to install in docker mode or system wide (default: 0 / system wide)"
+      echo "-d, --docker (0 or 1)                 whether to install in docker mode or system wide (default: 0 / system wide)"
       exit 0
       ;;
     -ri|--ros_install)
