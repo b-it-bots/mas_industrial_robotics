@@ -52,10 +52,7 @@ function install_ros_dependencies {
 
 function install_perception_dependencies {
     fancy_print "Installing perception dependencies"
-    sudo pip install --no-cache-dir --ignore-installed enum34
-    sudo pip install --no-cache-dir numpy==1.16.2
-    sudo pip install --no-cache-dir -U tensorflow==1.14.0
-    sudo pip install --no-cache-dir -U scikit-learn easydict joblib
+    sudo pip install --no-cache-dir -r $WS_DIR/src/mas_industrial_robotics/images/mas_industrial_robotics/$ROS_DISTRO-perception-requirements.txt
 }
 
 function install_ros {
