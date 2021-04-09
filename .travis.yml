@@ -1,9 +1,8 @@
-sudo: required
+dist: xenial
+language: cpp
 
 services:
   - docker
-
-language: cpp
 
 env:
   global:
@@ -21,13 +20,6 @@ before_install:
   - sudo chmod +x /usr/local/bin/docker-compose
   - docker-compose -v
   - echo $CONTAINER_RELEASE_IMAGE
-
-stages:
-  - build
-  - name: deploy
-    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
-  - name: docs
-    if: (branch IN (devel, indigo, kinetic, melodic, travis-tests) AND type != "pull_request") OR tag = true
 
 jobs:
   include:
@@ -62,3 +54,10 @@ jobs:
         - cp -r $DOCS_DIR/html/ /tmp/wiki/work/ && cd wiki
         - git checkout $BRANCH && git add * && git commit -m "Update mas_industrial_robotics documentation via Travis CI" || true
         - git push origin $BRANCH
+
+stages:
+  - build
+  - name: deploy
+    if: (branch IN (indigo, kinetic, kinetic-devel, melodic, travis-tests) AND type != "pull_request") OR tag = true
+  - name: docs
+    if: (branch IN (indigo, kinetic, kinetic-devel, melodic, travis-tests) AND type != "pull_request") OR tag = true

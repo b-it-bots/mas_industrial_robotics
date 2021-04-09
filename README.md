@@ -67,7 +67,7 @@ First of all you have to clone the repository.
 
 Navigate into the cloned repository and run setup.sh file.
 
-     ./setup.sh full <optional arg for catkin_ws parent dir>
+     ./setup.sh --ros_install <full|base> --ros_distro <melodic|kinetic|noetic> ws_dir <$HOME/ws_dir>
 
 **Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
 
