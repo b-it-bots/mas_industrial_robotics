@@ -77,8 +77,6 @@ function setup_catkin_ws {
     cd $WS_DIR
     catkin init
     catkin config --extend /opt/ros/$ROS_DISTRO/
-    #catkin build
-    #source $WS_DIR/devel/setup.bash
 }
 
 # Clone mas_industrial_robotics and other repos
@@ -106,14 +104,17 @@ function build_mas_industrial_robotics {
     fancy_print "Building ROS packages"
     #source $WS_DIR/devel/setup.bash
     # Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
-    touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
+    if [ $DOCKER_INSTALL = 1 ];
+      then
+        touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
+    fi
     # Build mercury planner first for CI to avoid crashing due to socket conn error
     catkin build mercury_planner
     catkin build
 }
 
 ROS_INSTALL=base
-ROS_DISTRO=melodic
+ROS_DISTRO=kinetic
 WS_DIR=""
 DOCKER_INSTALL=0
 
