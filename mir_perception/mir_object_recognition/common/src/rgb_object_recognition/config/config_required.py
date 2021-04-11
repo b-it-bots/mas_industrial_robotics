@@ -17,17 +17,17 @@ def base_model_config(dataset='PASCAL_VOC'):
     cfg.DATASET = dataset.upper()
 
     if cfg.DATASET == 'PASCAL_VOC':
-    # object categories to classify
-    cfg.CLASS_NAMES = ('aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
-                         'car', 'cat', 'chair', 'cow', 'diningtable', 'dog',
-                         'horse', 'motorbike', 'person', 'pottedplant', 'sheep',
-                         'sofa', 'train', 'tvmonitor')
+        # object categories to classify
+        cfg.CLASS_NAMES = ('aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
+                             'car', 'cat', 'chair', 'cow', 'diningtable', 'dog',
+                             'horse', 'motorbike', 'person', 'pottedplant', 'sheep',
+                             'sofa', 'train', 'tvmonitor')
     elif cfg.DATASET == 'KITTI':
-    cfg.CLASS_NAMES =('s40_40_G', 's40_40_B', 'r20','motor',
-                        'm30', 'm20_100', 'm20', 'f20_20_G', 'f20_20_B',
-                        'em_02', 'em_01', 'distance_tube', 'container_box_red',
-                        'container_box_blue', 'bearing_box_ax16',
-                        'bearing_box_ax01', 'bearing', 'axis')
+        cfg.CLASS_NAMES =('s40_40_G', 's40_40_B', 'r20','motor',
+                            'm30', 'm20_100', 'm20', 'f20_20_G', 'f20_20_B',
+                            'em_02', 'em_01', 'distance_tube', 'container_box_red',
+                            'container_box_blue', 'bearing_box_ax16',
+                            'bearing_box_ax01', 'bearing', 'axis')
 
     # number of categories to classify
     cfg.CLASSES = len(cfg.CLASS_NAMES)    
