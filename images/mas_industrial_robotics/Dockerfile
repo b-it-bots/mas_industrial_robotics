@@ -12,7 +12,8 @@ ENV NVIDIA_DRIVER_CAPABILITIES \
 
 ENV IS_CI=1
     
-user root
+USER root
+
 RUN apt-get update -qq \
     && sudo apt-get install -y -qq \
       apt-utils \
