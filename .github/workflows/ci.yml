@@ -77,7 +77,7 @@ jobs:
         ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
         IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
         OWNER=${{ needs.setup.outputs.owner }}
-        #sudo ROS_DISTRO=$ROS_DISTRO IMAGE_TAG=$IMAGE_TAG docker-compose build mas_industrial_robotics
+
         docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO -f images/mas_industrial_robotics/Dockerfile .
 
     - name: Docker image list

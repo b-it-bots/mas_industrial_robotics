@@ -4,6 +4,7 @@
  * Author: Mohammad Wasil
  *
  */
+#include <random>
 #include <mir_perception_utils/pointcloud_utils.h>
 #include <pcl/PointIndices.h>
 #include <pcl/common/centroid.h>

@@ -56,6 +56,7 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
     }
 
     // Assign unknown name for every object by default then recognize it later
+    object_list.objects[i].views.resize(1);
     object_list.objects[i].views[0].point_cloud = ros_cloud;
     object_list.objects[i].name = "unknown";
     object_list.objects[i].probability = 0.0;
