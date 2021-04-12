@@ -102,14 +102,21 @@ function install_mas_dependencies {
 
 function build_mas_industrial_robotics {
     fancy_print "Building ROS packages"
-    #source $WS_DIR/devel/setup.bash
-    # Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
     if [ $DOCKER_INSTALL = 1 ];
       then
+        #Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
         touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
+        
+        # Download mercury planner due to socket io error in CI and
+        sudo apt-get install -y -qq bison flex gawk g++-multilib pypy
+        mkdir $WS_DIR/src/mercury_planner/build
+        cd $WS_DIR/src/mercury_planner/build
+        wget https://helios.hud.ac.uk/scommv/IPC-14/repo_planners/Mercury-fixed.zip
+        unzip Mercury-fixed.zip -x seq-agl-mercury.tar.gz && tar -xf seq-sat-mercury.tar.gz
+        #cd seq-sat-mercury && ./build
+        catkin build mercury_planner
+        cd $WS_DIR
     fi
-    # Build mercury planner first for CI to avoid crashing due to socket conn error
-    catkin build mercury_planner
     catkin build
 }
 
