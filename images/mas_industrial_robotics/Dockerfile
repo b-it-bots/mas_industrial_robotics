@@ -12,12 +12,14 @@ ENV NVIDIA_DRIVER_CAPABILITIES \
 
 ENV IS_CI=1
     
+USER root
 
-user root
 RUN apt-get update -qq \
     && sudo apt-get install -y -qq \
       apt-utils \
       cmake \
+      gdb \
+      less \
       checkinstall \
       software-properties-common \
       curl \
@@ -76,7 +78,7 @@ USER $UNAME
 ENV ROBOT=youbot-brsu-4
 ENV ROBOT_ENV=brsu-c025
 
-RUN ./setup.sh -ros_install base -ws_dir $WS_DIR -docker 1
+RUN ./setup.sh --ros_install base --ros_distro $ROS_DISTRO --ws_dir $WS_DIR --docker 1
 
 COPY images/mas_industrial_robotics/entrypoint.sh /usr/sbin/entrypoint.sh
 RUN sudo chmod +x /usr/sbin/entrypoint.sh
