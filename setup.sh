@@ -28,16 +28,16 @@ function update_keys {
 }
 
 # not required in docker
-function install_ros_melodic_base {
+function install_ros_base {
     sudo apt update -qq
     if [[ $ROS_INSTALL = "full" ]]
         then
             echo "Installing ROS desktop full"
-            sudo apt install -y -qq ros-melodic-desktop-full
+            sudo apt install -y -qq ros-$ROS_DISTRO-desktop-full
     elif [[ $ROS_INSTALL = "base" ]]
         then
             echo "Installing ROS base"
-            sudo apt install -y -qq ros-melodic-ros-base
+            sudo apt install -y -qq ros-$ROS_DISTRO-ros-base
     fi
 }
 
@@ -52,18 +52,16 @@ function install_ros_dependencies {
 
 function install_perception_dependencies {
     fancy_print "Installing perception dependencies"
-    sudo pip install --no-cache-dir --ignore-installed enum34
-    sudo pip install --no-cache-dir -U tensorflow==1.14.0
-    sudo pip install --no-cache-dir -U scikit-learn easydict joblib
+    sudo pip install --no-cache-dir -r $WS_DIR/src/mas_industrial_robotics/images/mas_industrial_robotics/$ROS_DISTRO-perception-requirements.txt
 }
 
 function install_ros {
     update_keys
     fancy_print "Installing ROS"
-    install_ros_melodic_base
+    install_ros_base
     fancy_print "Installing ROS Dependencies"
     install_ros_dependencies
-    source /opt/ros/melodic/setup.bash
+    source /opt/ros/$ROS_DISTRO/setup.bash
 }
 
 # Setup catkin workspace in the home directory
@@ -78,9 +76,7 @@ function setup_catkin_ws {
 
     cd $WS_DIR
     catkin init
-    catkin config --extend /opt/ros/melodic/
-    #catkin build
-    #source $WS_DIR/devel/setup.bash
+    catkin config --extend /opt/ros/$ROS_DISTRO/
 }
 
 # Clone mas_industrial_robotics and other repos
@@ -101,33 +97,31 @@ function install_mas_dependencies {
     fancy_print "Installing MAS Dependencies"
     rosdep update -q
     sudo apt-get update
-    rosdep install --from-paths src --ignore-src --rosdistro=melodic --skip-keys rosplan_demos -y
+    rosdep install --from-paths src --ignore-src --rosdistro=$ROS_DISTRO --skip-keys rosplan_demos -y
 }
 
 function build_mas_industrial_robotics {
     fancy_print "Building ROS packages"
-    #source $WS_DIR/devel/setup.bash
-    # Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
-    touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
-    # Build mercury planner first for CI to avoid crashing due to socket conn error
-    catkin build mercury_planner
+    if [ $DOCKER_INSTALL = 1 ];
+      then
+        #Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
+        touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
+        
+        # Download mercury planner due to socket io error in CI and
+        sudo apt-get install -y -qq bison flex gawk g++-multilib pypy
+        mkdir $WS_DIR/src/mercury_planner/build
+        cd $WS_DIR/src/mercury_planner/build
+        wget https://helios.hud.ac.uk/scommv/IPC-14/repo_planners/Mercury-fixed.zip
+        unzip Mercury-fixed.zip -x seq-agl-mercury.tar.gz && tar -xf seq-sat-mercury.tar.gz
+        #cd seq-sat-mercury && ./build
+        catkin build mercury_planner
+        cd $WS_DIR
+    fi
     catkin build
 }
 
-
-if [ $# -eq 0 ]
-then
-  echo "Usage: bash setup.sh"
-  echo " "
-  echo "options:"
-  echo "-h, --help                      show brief help"
-  echo "-ros_install (str)              whether to install desktop-full or base (default = base)"
-  echo "-ws_dir  (str)                  workspace dir (default = "")"
-  echo "-docker (0 or 1)                whether to install in docker mode or system wide (default = 0 / system wide)"
-  exit 0
-fi
-
 ROS_INSTALL=base
+ROS_DISTRO=kinetic
 WS_DIR=""
 DOCKER_INSTALL=0
 
@@ -137,23 +131,29 @@ while test $# -gt 0; do
       echo "Usage: bash setup.sh"
       echo " "
       echo "options:"
-      echo "-h, --help                      show brief help"
-      echo "-ros_install (str)              whether to install desktop-full or base (default: base)"
-      echo "-ws_dir  (str)                  workspace dir"
-      echo "-docker (0 or 1)                whether to install in docker mode or system wide (default: 0 / system wide)"
+      echo "-h, --help                            show brief help"
+      echo "-ri, --ros_install (str)              whether to install desktop-full or base (default: base)"
+      echo "-rd, --ros_distro (str)               whether to install desktop-full or base (default: melodic)"
+      echo "-ws, --ws_dir  (str)                  workspace dir"
+      echo "-d, --docker (0 or 1)                 whether to install in docker mode or system wide (default: 0 / system wide)"
       exit 0
       ;;
-    -ros_install)
+    -ri|--ros_install)
       ROS_INSTALL="$2"
       shift
       shift
       ;;
-    -ws_dir)
+    -rd|--ros_distro)
+      ROS_DISTRO="$2"
+      shift
+      shift
+      ;;
+    -ws|--ws_dir)
       WS_DIR="$2"
       shift
       shift
       ;;
-    -docker)
+    -d|--docker)
       DOCKER_INSTALL=$2
       shift
       shift
@@ -163,7 +163,6 @@ while test $# -gt 0; do
       ;;
   esac
 done
-
 
 # Begin shell command executions from here
 # Store the root directory path in a variable

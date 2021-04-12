@@ -385,6 +385,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         pcl_conversions::fromPCL(*pc2, ros_pc2);
         ros_pc2.header.frame_id = target_frame_id_;
         ros_pc2.header.stamp = ros::Time::now();
+
+        rgb_object_list.objects[i].views.resize(1);
         rgb_object_list.objects[i].views[0].point_cloud = ros_pc2;
 
         clusters_2d.push_back(cloud_roi);
