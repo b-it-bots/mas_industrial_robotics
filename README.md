@@ -3,6 +3,7 @@
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
+- ROS Kinetic: Ubuntu 16.04
 - ROS Melodic: Ubuntu 18.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
@@ -32,12 +33,31 @@ If you have never worked with git before, we recommend to go through the followi
 
 ## Docker (Recommended, Optional)
 ### Getting started with docker
-The docker images available [here](https://hub.docker.com/r/bitbots/bitbots-industrial/tags) provide a proper development environment -with ros pre-installed and without any missing dependencies- for the MAS industrial software. It is highly recommended that you use docker containers to build and run your nodes rather than directly installing ROS and working with the MAS industrial software on your PC.
+The latest versions of docker-engine and docker-compose have to be installed before getting started. Please have a look at [docker's official website](https://docs.docker.com/get-started/overview/) for more insights into the working and usage of docker images and docker containers.
 
-The latest versions of docker-engine and docker-compose have to be installed before getting started.
-Please have a look at [docker's official website](https://docs.docker.com/get-started/overview/) for more insights into the working and usage of docker images and docker containers.
-Please refer [here](https://github.com/b-it-bots/docker/blob/master/industrial/README.md) for more detailed instructions on the usage of bitbots-industrial docker images.
+The docker images available [here](https://github.com/orgs/b-it-bots/packages) provide a proper development environment -with ros pre-installed and without any missing dependencies- for the MAS industrial software. It is highly recommended that you use docker containers to build and run your nodes rather than directly installing ROS and working with the MAS industrial software on your PC.
 
+First, you need to pull the corresponding image you want to use:
+```bash
+#kinetic image
+docker pull  ghcr.io/b-it-bots/mas_industrial_robotics/industrial-kinetic:latest
+
+#melodic image
+docker pull ghcr.io/b-it-bots/mas_industrial_robotics/industrial-melodic:latest
+```
+
+The main branch of the ros distro should always reflect `latest` tag in the github registry, for example `kinetic` branch reflects `mas_industrial_robotics/industrial-kinetic:latest`. 
+The ros distro `devel` branch always reflects `devel` tag, for example `kinetic` branch reflects `mas_industrial_robotics/industrial-kinetic:devel`
+
+Start container with `docker-compose`:
+```bash
+docker-compose -f start-container.yaml up <industrial_kinetic|industrial_melodic>
+```
+
+Log in to the container:
+```bash
+docker exec -it mas_industrial_robotics_industrial_kinetic_1 /bin/bash
+```
 
 ## ROS - Robot Operating System
 ### Install ROS
@@ -67,9 +87,7 @@ First of all you have to clone the repository.
 
 Navigate into the cloned repository and run setup.sh file.
 
-     ./setup.sh -ros_install full -ws_dir path/to/ws/dir -docker 0
-
-Or `./setup.sh --help` will show available arguments.
+     ./setup.sh --ros_install <full|base> --ros_distro <melodic|kinetic|noetic> ws_dir <$HOME/catkin_ws>
 
 **Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
 
@@ -156,5 +174,3 @@ Click on the menu bar "File -> Open Config", navigate to "~/indigo/src/mas_indus
 ```
 pre-commit run --all-files
 ```
-
-
