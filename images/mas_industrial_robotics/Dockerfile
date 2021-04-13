@@ -38,6 +38,8 @@ RUN apt-get install -y libopencv-dev ros-$ROS_DISTRO-vision-opencv \
         libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev \
         x264 v4l-utils pkg-config
 
+RUN pip install --upgrade pip==20.3
+
 RUN apt-get update --fix-missing
 
 # Install mesa libary for HW acceleration 

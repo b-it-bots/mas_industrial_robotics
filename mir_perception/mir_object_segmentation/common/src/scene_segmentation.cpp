@@ -111,9 +111,7 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
   convex_hull_.setInputCloud(plane);
   convex_hull_.reconstruct(*hull);
 
-  // not sure if this is necessary
-  hull->points.push_back(hull->points.front());
-  hull->width += 1;
+  // determine workspace height based on the mean of z axis 
   double z = 0.0;
   for (int i = 0; i < hull->points.size(); i++) {
     z += hull->points[i].z;
