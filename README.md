@@ -130,17 +130,11 @@ The ROBOT_ENV variable can be used to switch between different environments. The
      source ~/.bashrc
 
 
-
 ## Bring up the robot and it's basic components
 ### In Simulation
 
      roslaunch mir_bringup_sim robot.launch
-
-
-In a new terminal you can open the Gazebo GUI to see the environment and the robot
-
-	     rosrun gazebo_ros gzclient
-
+	     
 ### At the Real Robot
 
      roslaunch mir_bringup robot.launch
