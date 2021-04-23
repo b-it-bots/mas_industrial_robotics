@@ -121,7 +121,7 @@ function build_mas_industrial_robotics {
 }
 
 ROS_INSTALL=base
-ROS_DISTRO=kinetic
+ROS_DISTRO=melodic
 WS_DIR=""
 DOCKER_INSTALL=0
 
