@@ -46,7 +46,7 @@
 - git:
     local-name: dynamixel_motor
     uri: https://github.com/mas-group/dynamixel_motor.git
-    version: master
+    version: noetic
 
 - git:
     local-name: mas_navigation
