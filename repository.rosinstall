@@ -1,12 +1,22 @@
 - git:
     local-name: mas_common_robotics
     uri: https://github.com/b-it-bots/mas_common_robotics.git
-    version: melodic
+    version: noetic
 
 - git:
     local-name: youbot_driver
     uri: https://github.com/mas-group/youbot_driver.git
     version: indigo-devel
+
+- git:
+    local-name: brics_actuator
+    uri: https://github.com/wnowak/brics_actuator.git
+    version: master
+
+- git:
+    local-name: pr2_power_drivers
+    uri: https://github.com/PR2/pr2_power_drivers.git
+    version: kinetic-devel
 
 - git:
     local-name: youbot_driver_ros_interface
@@ -21,7 +31,7 @@
 - git:
     local-name: youbot_simulation
     uri: https://github.com/mas-group/youbot_simulation.git
-    version: kinetic-devel
+    version: noetic-devel
 
 - git:
     local-name: youbot_diagnostics

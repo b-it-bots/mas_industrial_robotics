@@ -14,7 +14,7 @@ function fancy_print {
     echo "################################################################################"
 }
 
-# Install ROS Melodic
+# Install ROS Noetic
 function update_keys {
     if [ $DOCKER_INSTALL = 0 ];
       then
@@ -42,17 +42,18 @@ function install_ros_base {
 }
 
 function install_ros_dependencies {
+    sudo apt install python3-rosdep
     sudo rm -rf /etc/ros/rosdep/sources.list.d/*
     sudo rosdep init -q
     rosdep update -q
-    sudo apt install -y -qq python-rosinstall python-rosinstall-generator python-wstool build-essential python-catkin-tools python-pip
-    sudo pip install catkin_pkg empy
+    sudo apt install -y -qq python3-rosinstall python3-rosinstall-generator python3-wstool build-essential python3-catkin-tools python3-pip
+    sudo pip3 install catkin_pkg empy
     #sudo rm -rf /var/lib/apt/lists/*
 }
 
 function install_perception_dependencies {
     fancy_print "Installing perception dependencies"
-    sudo pip install --no-cache-dir -r $WS_DIR/src/mas_industrial_robotics/images/mas_industrial_robotics/$ROS_DISTRO-perception-requirements.txt
+    sudo pip3 install --no-cache-dir -r $WS_DIR/src/mas_industrial_robotics/images/mas_industrial_robotics/$ROS_DISTRO-perception-requirements.txt
 }
 
 function install_ros {
@@ -96,6 +97,7 @@ function get_mas_industrial_robotics {
 function install_mas_dependencies {
     fancy_print "Installing MAS Dependencies"
     rosdep update -q
+    cd $WS_DIR
     sudo apt-get update
     rosdep install --from-paths src --ignore-src --rosdistro=$ROS_DISTRO --skip-keys rosplan_demos -y
 }
@@ -121,7 +123,7 @@ function build_mas_industrial_robotics {
 }
 
 ROS_INSTALL=base
-ROS_DISTRO=melodic
+ROS_DISTRO=noetic
 WS_DIR=""
 DOCKER_INSTALL=0
 
@@ -173,6 +175,6 @@ install_ros
 setup_catkin_ws
 get_mas_industrial_robotics
 install_mas_dependencies
-install_perception_dependencies
+#install_perception_dependencies
 build_mas_industrial_robotics
 fancy_print "Build Complete"

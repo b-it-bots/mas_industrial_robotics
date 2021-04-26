@@ -1,15 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mir_kinect_calibration)
 
-#...: gnu++0x
-if(CMAKE_COMPILER_IS_GNUCXX)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-    if(GCC_VERSION VERSION_GREATER 4.6 OR GCC_VERSION VERSION_EQUAL 4.6)
-        add_definitions(-std=gnu++0x)
-    else()
-        message(SEND_ERROR "You need GCC version 4.6 or greater to compile this package.")
-    endif()
-endif()
+set(CMAKE_CXX_STANDARD 14)
 
 #...: enable all but certain warnings
 add_definitions(-Wall)
@@ -28,7 +20,7 @@ find_package(catkin REQUIRED
     tf
 )
 
-find_package(PCL 1.6 REQUIRED)
+find_package(PCL 1.10 REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS

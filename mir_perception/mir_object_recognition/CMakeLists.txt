@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mir_object_recognition)
 
-# Compile as C++11 for ROS Kinetic and newer
-# use -O3 for performance mode
-# use -g for debug
-add_compile_options(-std=c++11
+set(CMAKE_CXX_STANDARD 14)
+add_compile_options(
   -O3
 )
 
@@ -23,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
     mir_perception_utils
 )
 catkin_python_setup()
-find_package(PCL 1.7 REQUIRED)
+find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
 find_package(OpenCV REQUIRED)
 

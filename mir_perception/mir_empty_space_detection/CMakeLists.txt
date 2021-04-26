@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mir_empty_space_detection)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 find_package(catkin REQUIRED
   COMPONENTS
@@ -14,9 +14,8 @@ find_package(catkin REQUIRED
   mir_perception_utils
 )
 
-add_compile_options(-std=c++11
+add_compile_options(
   -O3
-  -march=native
 )
 
 catkin_package()

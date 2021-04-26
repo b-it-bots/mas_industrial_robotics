@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8.3)
-set (CMAKE_CXX_STANDARD 11)
 project(mir_barrier_tape_detection)
 
 find_package(catkin REQUIRED
@@ -15,8 +14,13 @@ find_package(catkin REQUIRED
     tf
 )
 
-find_package(OpenCV 3.2 REQUIRED)
-find_package(PCL 1.7 REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(PCL 1.10 REQUIRED)
+
+set (CMAKE_CXX_STANDARD 14)
+add_compile_options(
+    -O3
+)
 
 generate_dynamic_reconfigure_options(
   ros/config/BarrierTapeDetection.cfg

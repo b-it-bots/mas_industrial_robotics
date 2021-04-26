@@ -1,3 +1,16 @@
+## Noetic status
+The code currently compiles, but there's no guarantee that the code works (e.g. Python/Tensorflow related code will not work since the dependencies are not installed etc.). However, you should be able to launch the robot in simulation and run the navigation stack.
+
+- The following packages are ignored/not compiled for various reasons:
+  - mir_grasp_monitors ([ros-noetic-serial](https://github.com/wjwwood/serial/issues/222) package is not available)
+  - mir_knowledge ([ros-noetic-mongodb-store-msgs](https://github.com/strands-project/mongodb_store/issues/267) package is not available)
+  - mir_pddl_problem_generator ([ros-noetic-mongodb-store](https://github.com/strands-project/mongodb_store/issues/267) package is not available)
+- Perception dependencies (tensorflow etc.) are not installed (line 179 in setup.sh). Perhaps we need to upgrade to tensorflow 2?
+- The following packages are compiled locally (via repository.rosinstall) because they have not been released for noetic yet:
+  - [brics_actuator](https://github.com/wnowak/brics_actuator)
+  - [pr2_power_drivers](https://github.com/PR2/pr2_power_drivers)
+- Several warnings to be fixed, especially for packages that use PCL
+
 [<!--lint ignore no-dead-urls-->![Build Status](https://github.com/b-it-bots/mas_industrial_robotics/workflows/CI/badge.svg)](https://github.com/b-it-bots/mas_industrial_robotics/actions?workflow=CI)
 
 ## Install Ubuntu
@@ -5,6 +18,7 @@ The repository and its related components have been tested under the following U
 
 - ROS Kinetic: Ubuntu 16.04
 - ROS Melodic: Ubuntu 18.04
+- ROS Noetic: Ubuntu 20.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -65,7 +79,7 @@ The repository has been tested successfully with the following ROS distributions
 Alternatively, you can skip this step, as ROS Melodic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
 
 
-- ROS Melodic - http://wiki.ros.org/melodic/Installation/Ubuntu
+- ROS Noetic - http://wiki.ros.org/noetic/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
 

@@ -12,8 +12,10 @@
 
     <buildtool_depend>catkin</buildtool_depend>
 
-    <run_depend>mongodb_store</run_depend>
-    <run_depend>mongodb_store_msgs</run_depend>
+    <!-- temporarily disabled because this package is not
+          available for noetic yet -->
+    <!--run_depend>mongodb_store</run_depend>
+    <run_depend>mongodb_store_msgs</run_depend-->
     <run_depend>rosplan_knowledge_base</run_depend>
 
     <test_depend>roslaunch</test_depend>

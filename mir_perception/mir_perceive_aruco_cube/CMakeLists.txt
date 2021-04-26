@@ -9,7 +9,7 @@ find_package(catkin REQUIRED
     tf
 )
 
-find_package(OpenCV 3.2 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS

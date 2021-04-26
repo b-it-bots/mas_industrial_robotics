@@ -13,7 +13,6 @@ catkin_package(
     mir_gripper_controller
     mir_hardware_config
     mir_teleop
-    openni_launch
     openni2_launch
     robot_state_publisher
     tf
