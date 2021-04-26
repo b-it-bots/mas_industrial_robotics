@@ -1,6 +1,11 @@
 ## Noetic status
 The code currently compiles, but there's no guarantee that the code works (e.g. Python/Tensorflow related code will not work since the dependencies are not installed etc.). However, you should be able to launch the robot in simulation and run the navigation stack.
 
+- You may need to install the following packages:
+  - ros-noetic-octomap
+  - ros-noetic-octomap-ros
+  - libboost-python1.71-dev
+- Add `-Wno-error=deprecated-copy` to the `RDDL_CMAKE_CXX_FLAGS` in ROSPlan/rosplan_dependencies/CMakeLists.txt temporarily until ROSPlan for noetic is released
 - The following packages are ignored/not compiled for various reasons:
   - mir_grasp_monitors ([ros-noetic-serial](https://github.com/wjwwood/serial/issues/222) package is not available)
   - mir_knowledge ([ros-noetic-mongodb-store-msgs](https://github.com/strands-project/mongodb_store/issues/267) package is not available)
