@@ -59,6 +59,8 @@ Log in to the container:
 docker exec -it mas_industrial_robotics_industrial_kinetic_1 /bin/bash
 ```
 
+More detailed tutorials on how to use MAS Industrial Robotics softwares with docker are available [here](https://b-it-bots.readthedocs.io/en/melodic/docker.html)
+
 ## ROS - Robot Operating System
 ### Install ROS
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
