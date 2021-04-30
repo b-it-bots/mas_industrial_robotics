@@ -11,6 +11,7 @@ Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
 - ROS Kinetic: Ubuntu 16.04
+- ROS Melodic: Ubuntu 18.04
 
 If you do not have a Ubuntu distribution on your computer you can download it `here <http://www.ubuntu.com/download>`_.
 
@@ -41,9 +42,19 @@ Git - Version Control
 
      git config --global user.email "your-email@youremail.com"
 
+
 * GIT Tutorial
   If you have never worked with git before, we recommend to go through the
   `basic git tutorial <http://excess.org/article/2008/07/ogre-git-tutorial/>`_.
+
+.. _getting_started_docker:
+
+Docker (Recommended)
+====================
+
+To be able to use our software independent of the operating system and/or ROS 
+distribution, it is recommended to use docker. You can follow 
+:ref:`this tutorial <docker>` to use docker.
 
 .. _robot_operating_system:
 
