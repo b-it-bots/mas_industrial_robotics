@@ -26,12 +26,12 @@ def get_git_short_hash():
 
 # -- Project information -----------------------------------------------------
 project = "MAS Industrial Robotics"
-copyright = "2019, www.b-it-bots.de"
+copyright = "2021, www.b-it-bots.de"
 author = "www.b-it-bots.de"
 
 # The full version, including alpha/beta/rc tags
 # current_hash = get_git_short_hash()
-current_hash = "Kinetic"
+current_hash = "Melodic"
 version = "latest ({})".format(current_hash)
 release = version
 

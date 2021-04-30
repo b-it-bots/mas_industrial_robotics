@@ -3,8 +3,8 @@
 
   <arg name="input_pointcloud_topic" default="/arm_cam3d/depth_registered/points" />
   <arg name="target_frame" default="odom" />
-  <arg name="model" default="feature_based" />
-  <arg name="model_id" default="fvrdd" />
+  <arg name="model" default="cnn_based" />
+  <arg name="model_id" default="dgcnn" />
   <arg name="dataset" default="asus" />
 
   <group ns="mir_perception">
