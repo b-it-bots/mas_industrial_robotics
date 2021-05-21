@@ -127,7 +127,7 @@ Navigation
 
   .. code-block:: bash
 
-    roslaunch mir_2dnav 2Dnav.launch
+    roslaunch mir_2dnav 2dnav.launch
 
 * Open RViz
 
