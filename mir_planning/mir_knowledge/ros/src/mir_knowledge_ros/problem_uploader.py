@@ -159,6 +159,14 @@ class ProblemUploader(object):
         :type pddl_objects: list (str)
         :rtype: dict {str: [str, str, ...], ...}
 
+        example returned object
+            {
+                robot_platform: ['platform_middle', 'platform_left', 'platform_right'],
+                object: ['r20', 'm20', 'm30-00', 'm30-01', 'axis', 'bearing'],
+                location: ['sh01', 'cb01', 'ws01', 'ws02', 'start', 'end'],
+                robot: ['youbot-brsu']
+            }
+
         """
         # ignore first element
         objects = pddl_objects[1:]
@@ -182,6 +190,15 @@ class ProblemUploader(object):
         :param pddl_facts: list of pddl facts
         :type pddl_facts: list (str)
         :rtype: list (tuple (str, [(str, str), ...]) )
+
+        example returned object
+            [
+                ('at', [('r', 'youbot-brsu'), ('l', 'start')]),
+                ('gripper_is_free', [('r', 'youbot-brsu')]),
+                ('on', [('o', 'r20'), ('l', 'sh01')]),
+                ('on', [('o', 'bearing'), ('l', 'cb01')]),
+                ('on', [('o', 'm30-00'), ('l', 'ws01')]),
+            ]
 
         """
         facts = []
