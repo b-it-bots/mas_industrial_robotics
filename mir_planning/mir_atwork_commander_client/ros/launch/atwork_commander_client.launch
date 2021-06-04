@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="debug" default="true" />
+
+    <group ns="mir_task_planning">
+
+        <node pkg="mir_atwork_commander_client" type="atwork_commander_client_node"
+              name="atwork_commander_client" output="screen" >
+
+            <param name="debug" type="bool" value="$(arg debug)"/>
+        </node>
+
+    </group>
+
+</launch>
