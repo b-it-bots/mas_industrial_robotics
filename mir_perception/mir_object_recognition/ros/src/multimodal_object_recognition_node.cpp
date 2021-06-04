@@ -465,7 +465,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       filename.append("rgb_debug_");
       filename.append(std::to_string(time_now.toSec()));
       mpu::object::saveCVImage(cv_image, logdir_, filename);
-     // ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
+      ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
     }
     else
     {
