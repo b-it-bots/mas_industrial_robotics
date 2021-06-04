@@ -300,7 +300,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       loop_rate.sleep();
       if (received_recognized_image_list_flag_ == true)
       {
-        ROS_WARN("[RGB] Received %d objects from rgb recognizer", recognized_image_list_.objects.size());
+        ROS_WARN("[RGB] Received %d objects from rgb recognizer", (int)(recognized_image_list_.objects.size()));
       }
       if (loop_rate_count > loop_rate_hz * timeout_wait)
       {
@@ -459,16 +459,23 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     ros::Time time_now = ros::Time::now();
 
     // Save debug image
-    std::string filename = "";
-    filename.append("rgb_debug_");
-    filename.append(std::to_string(time_now.toSec()));
-    mpu::object::saveCVImage(cv_image, logdir_, filename);
-    ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
-
+    if(recognized_image_list_.objects.size() > 0)
+    {
+      std::string filename = "";
+      filename.append("rgb_debug_");
+      filename.append(std::to_string(time_now.toSec()));
+      mpu::object::saveCVImage(cv_image, logdir_, filename);
+      ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
+    }
+    else
+    {
+      ROS_WARN_STREAM("No Objects found. Cannot save debug image...");
+    }
     // Save raw image
     cv_bridge::CvImagePtr raw_cv_image;
     if (mpu::object::getCVImage(image_msg_, raw_cv_image))
     {
+      std::string filename = "";
       filename = "";
       filename.append("rgb_raw_");
       filename.append(std::to_string(time_now.toSec()));
@@ -483,6 +490,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     // Save pointcloud debug
     for (auto& cluster : clusters_3d)
     {
+      std::string filename = "";
       filename = "";
       filename.append("pcd_cluster_");
       filename.append(std::to_string(time_now.toSec()));
