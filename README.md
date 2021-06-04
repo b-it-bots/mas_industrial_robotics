@@ -59,6 +59,8 @@ Log in to the container:
 docker exec -it mas_industrial_robotics_industrial_kinetic_1 /bin/bash
 ```
 
+More detailed tutorials on how to use MAS Industrial Robotics softwares with docker are available [here](https://b-it-bots.readthedocs.io/en/melodic/docker.html)
+
 ## ROS - Robot Operating System
 ### Install ROS
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
@@ -87,7 +89,7 @@ First of all you have to clone the repository.
 
 Navigate into the cloned repository and run setup.sh file.
 
-     ./setup.sh --ros_install <full|base> --ros_distro <melodic|kinetic|noetic> ws_dir <$HOME/catkin_ws>
+     ./setup.sh --ros_install <full|base> --ros_distro <melodic|kinetic|noetic> --ws_dir <$HOME/catkin_ws> --docker 0
 
 **Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
 
@@ -130,17 +132,11 @@ The ROBOT_ENV variable can be used to switch between different environments. The
      source ~/.bashrc
 
 
-
 ## Bring up the robot and it's basic components
 ### In Simulation
 
      roslaunch mir_bringup_sim robot.launch
-
-
-In a new terminal you can open the Gazebo GUI to see the environment and the robot
-
-	     rosrun gazebo_ros gzclient
-
+	     
 ### At the Real Robot
 
      roslaunch mir_bringup robot.launch

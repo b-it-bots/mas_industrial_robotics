@@ -17,6 +17,7 @@ MAS Industrial Robotics
   :maxdepth: 2
   :caption: Tutorial
 
+  docker
   mir_perception/index.rst
   mir_manipulation/index.rst
   mir_navigation/index.rst
