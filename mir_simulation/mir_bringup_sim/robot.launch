@@ -6,7 +6,7 @@
 
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
-  <arg name="gui" default="false"/>
+  <arg name="gui" default="true"/>
 
   <arg name="init_pos_x" default="-0.5"/>
   <arg name="init_pos_y" default="0.0"/>

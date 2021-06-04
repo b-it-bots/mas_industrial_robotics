@@ -10,7 +10,7 @@ import smach
 import tf.transformations
 from actionlib import SimpleActionClient
 from geometry_msgs.msg import PoseStamped
-from mcr_perception_msgs.msg import Cavity
+from mas_perception_msgs.msg import Cavity
 from mir_actions.utils import Utils
 from mir_planning_msgs.msg import (
     GenericExecuteAction,
