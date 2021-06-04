@@ -107,13 +107,7 @@ function build_mas_industrial_robotics {
         #Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
         touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
         
-        # Download mercury planner due to socket io error in CI and
-        sudo apt-get install -y -qq bison flex gawk g++-multilib pypy
-        mkdir $WS_DIR/src/mercury_planner/build
-        cd $WS_DIR/src/mercury_planner/build
-        wget https://helios.hud.ac.uk/scommv/IPC-14/repo_planners/Mercury-fixed.zip
-        unzip Mercury-fixed.zip -x seq-agl-mercury.tar.gz && tar -xf seq-sat-mercury.tar.gz
-        #cd seq-sat-mercury && ./build
+        # build mercury_planner first in CI, otherwise it will fails due to socket error 
         catkin build mercury_planner
         cd $WS_DIR
     fi
@@ -121,7 +115,7 @@ function build_mas_industrial_robotics {
 }
 
 ROS_INSTALL=base
-ROS_DISTRO=kinetic
+ROS_DISTRO=melodic
 WS_DIR=""
 DOCKER_INSTALL=0
 

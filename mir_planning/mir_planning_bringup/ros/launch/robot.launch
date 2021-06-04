@@ -130,11 +130,12 @@
 
   <!-- Refbox -->
 
-    <!-- receives task spec from refbox, uploads the knowledge into knowledge base (old refbox interface only) -->
-    <include file="$(find mir_refbox_parser)/ros/launch/refbox_parser.launch"/>
 
     <!-- refbox pc communication node -->
     <group if="$(arg refbox)" >
+        <!-- receives task spec from refbox, uploads the knowledge into knowledge base (old refbox interface only) -->
+        <include file="$(find mir_refbox_parser)/ros/launch/refbox_parser.launch"/>
+
         <include file="$(find atwork_refbox_ros_client)/ros/launch/b-it-bots-$(arg official_refbox).launch" />
     </group>
     <group if="$(arg logging)" >
