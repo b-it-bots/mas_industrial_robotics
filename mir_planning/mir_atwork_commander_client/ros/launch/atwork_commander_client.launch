@@ -8,6 +8,7 @@
         <node pkg="mir_atwork_commander_client" type="atwork_commander_client_node"
               name="atwork_commander_client" output="screen" >
 
+            <remap from="~task" to="/atwork_commander/task"/>
             <param name="debug" type="bool" value="$(arg debug)"/>
         </node>
 

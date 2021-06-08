@@ -11,4 +11,5 @@ catkin_package(
   CATKIN_DEPENDS
   rospy
   atwork_commander_msgs
+  mir_knowledge
 )

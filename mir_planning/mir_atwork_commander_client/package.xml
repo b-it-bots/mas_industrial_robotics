@@ -15,5 +15,6 @@
 
   <depend>rospy</depend>
   <depend>atwork_commander_msgs</depend>
+  <depend>mir_knowledge</depend>
 
 </package>
