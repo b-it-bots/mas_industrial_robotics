@@ -18,21 +18,58 @@ from smach_ros import ActionServerWrapper, IntrospectionServer
 # ===============================================================================
 
 
+class SetupMoveArm(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["pose_set", "tried_all"],
+            input_keys=["arm_pose_index", "arm_pose_list"],
+            output_keys=["arm_pose_index", "move_arm_to"],
+        )
+
+    def execute(self, userdata):
+        if userdata.arm_pose_index >= len(userdata.arm_pose_list):
+            return "tried_all"
+        # set arm pose to next pose in list
+        userdata.move_arm_to = userdata.arm_pose_list[userdata.arm_pose_index]
+        userdata.arm_pose_index += 1
+
+        return "pose_set"
+
+
+# ===============================================================================
+# ===============================================================================
+
+
 class Setup(smach.State):
     def __init__(self):
         smach.State.__init__(
             self,
             outcomes=["succeeded"],
-            input_keys=[],
-            output_keys=["feedback", "result"],
+            input_keys=["goal", "arm_pose_list"],
+            output_keys=["feedback", "result", "arm_pose_index", "arm_pose_list"],
         )
 
     def execute(self, userdata):
+        userdata.arm_pose_index = 0  # reset arm position for new request
         # Add empty result msg (because if none of the state do it, action server gives error)
         userdata.result = GenericExecuteResult()
         userdata.feedback = GenericExecuteFeedback(
             current_state="Setup", text="Setting up"
         )
+	# This server runs in two modes: 
+        # 1. three_view mode - perceive using motion of arm in three directions <straight, left, right>
+        # 2. single_view mode - only perceiving in one direction <straight>
+        perception_mode = Utils.get_value_of(userdata.goal.parameters, "perception_mode")
+        if perception_mode is not None and perception_mode == "single_view":
+            userdata.arm_pose_list = ["look_at_workspace_from_near"]
+        else:
+            userdata.arm_pose_list = [
+                "look_at_workspace_from_near",
+                "look_at_workspace_from_near_left",
+                "look_at_workspace_from_near_right",
+            ]
+
         return "succeeded"
 
 
@@ -55,7 +92,12 @@ class PopulateResultWithCavities(smach.State):
         self.perceived_cavity_names = []
 
     def objects_callback(self, msg):
-        self.perceived_cavity_names = [str(obj.name) for obj in msg.objects]
+       # self.perceived_cavity_names.extend([str(obj.name) for obj in msg.objects])
+       for obj in msg.objects:
+            if str(obj.name) not in self.perceived_cavity_names:
+                self.perceived_cavity_names.append(str(obj.name))
+            else:
+                pass 
 
     def execute(self, userdata):
         result = GenericExecuteResult()
@@ -64,7 +106,7 @@ class PopulateResultWithCavities(smach.State):
         rospy.loginfo(result)
         userdata.result = result
 
-        self.perceived_obj_names = []  # clear perceived objects for next call
+        self.perceived_cavity_names = []  # clear perceived objects for next call
         return "succeeded"
 
 
@@ -79,8 +121,14 @@ def main():
         input_keys=["goal"],
         output_keys=["feedback", "result"],
     )
-    sm.userdata.next_arm_pose_index = 0
-    # Open the container
+    # sm.userdata.next_arm_pose_index = 0
+
+    #+++
+    # this array is populated in the Setup state
+    sm.userdata.arm_pose_list = []
+    sm.userdata.arm_pose_index = 0
+    #+++
+
     with sm:
         # approach to platform
         smach.StateMachine.add(
@@ -102,23 +150,47 @@ def main():
             gbs.send_event(
                 [("/mcr_perception/cavity_pose_selector/event_in", "e_start")]
             ),
-            transitions={"success": "LOOK_AROUND"},
+            transitions={"success": "SET_APPROPRIATE_ARM_POSE"},
         )
 
-        # move arm to selected pose
+        #+++
+        # move arm to appropriate position
         smach.StateMachine.add(
-            "LOOK_AROUND",
-            gms.move_arm("look_at_workspace_from_near", blocking=True),
-            transitions={"succeeded": "RECOGNIZE_CAVITIES", "failed": "LOOK_AROUND",},
+            "SET_APPROPRIATE_ARM_POSE",
+            SetupMoveArm(),
+            transitions={
+                "pose_set": "MOVE_ARM_TO_SELECTED_POSE",
+                "tried_all": "POPULATE_RESULT_WITH_CAVITIES",
+            },
         )
+
+        
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_SELECTED_POSE",
+            gms.move_arm_and_gripper("open"),
+            transitions={
+                "succeeded": "RECOGNIZE_CAVITIES",
+                "failed": "MOVE_ARM_TO_SELECTED_POSE",
+            },
+        )
+        #+++
+
+        #---
+        # move arm to selected pose
+        # smach.StateMachine.add(
+        #     "LOOK_AROUND",
+        #     gms.move_arm("look_at_workspace_from_near", blocking=True),
+        #     transitions={"succeeded": "RECOGNIZE_CAVITIES", "failed": "LOOK_AROUND",},
+        # )
+        #---
 
         # trigger perception pipeline
         smach.StateMachine.add(
             "RECOGNIZE_CAVITIES",
             gps.find_cavities(retries=1),
             transitions={
-                "cavities_found": "POPULATE_RESULT_WITH_CAVITIES",
-                "no_cavities_found": "OVERALL_FAILED",
+                "cavities_found": "SET_APPROPRIATE_ARM_POSE",
+                "no_cavities_found": "SET_APPROPRIATE_ARM_POSE",
             },
         )
 
