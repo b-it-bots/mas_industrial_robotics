@@ -260,7 +260,7 @@ def main():
         # perceive cavity again after moving in front of the desired cavity
         smach.StateMachine.add(
             "PERCEIVE_CAVITY",
-            gas.perceive_cavity(),
+            gas.perceive_cavity(perception_mode='single_view'),
             transitions={"success": "SELECT_OBJECT_AGAIN", "failed": "OVERALL_FAILED",},
         )
 
