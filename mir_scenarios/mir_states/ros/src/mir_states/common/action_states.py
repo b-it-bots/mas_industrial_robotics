@@ -177,11 +177,12 @@ class unstage_object(smach.State):
 
 
 class perceive_cavity(smach.State):
-    def __init__(self):
+    def __init__(self, perception_mode='three_view'):
         smach.State.__init__(self, outcomes=["success", "failed"])
         self.client = SimpleActionClient("perceive_cavity_server", GenericExecuteAction)
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
+        self.goal.parameters.append(KeyValue(key='perception_mode', value=perception_mode))
 
     def execute(self, userdata):
         self.client.send_goal(self.goal)
