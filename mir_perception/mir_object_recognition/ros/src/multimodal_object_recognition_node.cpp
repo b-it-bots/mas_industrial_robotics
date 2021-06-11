@@ -233,6 +233,22 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       mpu::object::savePcd(cluster, logdir_, filename);
       ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m" << logdir_);
     }
+        // Save raw image
+    cv_bridge::CvImagePtr raw_cv_image;
+    if (mpu::object::getCVImage(image_msg_, raw_cv_image))
+    {
+      std::string filename = "";
+      filename = "";
+      filename.append("rgb_raw_");
+      filename.append(std::to_string(ros::Time::now().toSec()));
+      mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
+      ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
+    }
+    else
+    {
+      ROS_ERROR("Cannot generate cv image...");
+    }
+
     return;
   }
 
