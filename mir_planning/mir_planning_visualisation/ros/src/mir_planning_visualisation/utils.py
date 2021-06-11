@@ -78,11 +78,11 @@ class Utils(object):
                 marker = self.get_marker_from_obj_name_and_pos(
                     "pp", x=pos[0], y=pos[1], yaw=pos[2]
                 )
-            elif "cb" in ws:
+            elif "tt" in ws:
                 marker = self.get_marker_from_obj_name_and_pos(
-                    "cb", x=pos[0], y=pos[1], yaw=pos[2]
+                    "tt", x=pos[0], y=pos[1], yaw=pos[2]
                 )
-                config = self.marker_config["cb"]
+                config = self.marker_config["tt"]
                 marker.type = Marker.CYLINDER
                 marker.scale.x = marker.scale.y = config["scale"]
                 marker.scale.z = 0.02
