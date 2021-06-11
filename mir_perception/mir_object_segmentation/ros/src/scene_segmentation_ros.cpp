@@ -34,7 +34,7 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
                                         mas_perception_msgs::ObjectList &object_list,
                                         std::vector<PointCloud::Ptr> &clusters,
                                         std::vector<BoundingBox> &boxes, bool center_cluster,
-                                        bool pad_cluster, bool num_points)
+                                        bool pad_cluster, int num_points)
 {
   std::string frame_id = cloud->header.frame_id;
   cloud_debug_ = scene_segmentation_->segmentScene(cloud, clusters, boxes,
@@ -46,10 +46,12 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
   for (int i = 0; i < clusters.size(); i++) {
     sensor_msgs::PointCloud2 ros_cloud;
     ros_cloud.header.frame_id = frame_id;
+    if (pad_cluster) {
+      mpu::pointcloud::padPointCloud(clusters[i], num_points);
+    }
     if (center_cluster) {
       PointCloud::Ptr centered_cluster(new PointCloud);
-      unsigned int num_points = mpu::pointcloud::centerPointCloud(*clusters[i], *centered_cluster);
-      if (pad_cluster) num_points = mpu::pointcloud::padPointCloud(centered_cluster, num_points);
+      mpu::pointcloud::centerPointCloud(*clusters[i], *centered_cluster);
       pcl::toROSMsg(*centered_cluster, ros_cloud);
     } else {
       pcl::toROSMsg(*clusters[i], ros_cloud);
