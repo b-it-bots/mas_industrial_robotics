@@ -417,6 +417,41 @@
         <joint name="arm_joint_4" value="2.72031" />
         <joint name="arm_joint_5" value="2.86783" />
     </group_state>
+    <group_state name="ppt_cavity_middle" group="arm_1">
+        <joint name="arm_joint_1" value="2.28522" />
+        <joint name="arm_joint_2" value="1.6709" />
+        <joint name="arm_joint_3" value="-1.607" />
+        <joint name="arm_joint_4" value="3.296" />
+        <joint name="arm_joint_5" value="1.475" />
+    </group_state>
+    <group_state name="ppt_cavity_left" group="arm_1">
+        <joint name="arm_joint_1" value="1.8167" />
+        <joint name="arm_joint_2" value="1.6752" />
+        <joint name="arm_joint_3" value="-1.60999" />
+        <joint name="arm_joint_4" value="3.296" />
+        <joint name="arm_joint_5" value="1.01139" />
+    </group_state>
+    <group_state name="ppt_cavity_right" group="arm_1">
+        <joint name="arm_joint_1" value="2.65444" />
+        <joint name="arm_joint_2" value="1.59154" />
+        <joint name="arm_joint_3" value="-1.2725" />
+        <joint name="arm_joint_4" value="2.89533" />
+        <joint name="arm_joint_5" value="1.76604" />
+    </group_state>
+    <group_state name="ppt_cavity_far_left" group="arm_1">
+        <joint name="arm_joint_1" value="1.49282" />
+        <joint name="arm_joint_2" value="1.94042" />
+        <joint name="arm_joint_3" value="-1.77693" />
+        <joint name="arm_joint_4" value="3.00834" />
+        <joint name="arm_joint_5" value="0.698429" />
+    </group_state>
+    <group_state name="ppt_cavity_far_right" group="arm_1">
+        <joint name="arm_joint_1" value="2.93516" />
+        <joint name="arm_joint_2" value="2.12887" />
+        <joint name="arm_joint_3" value="-2.2121" />
+        <joint name="arm_joint_4" value="3.26144" />
+        <joint name="arm_joint_5" value="2.00752" />
+    </group_state>
     <group_state name="place_horizontal" group="arm_1">
         <joint name="arm_joint_1" value="2.1642" />
         <joint name="arm_joint_2" value="1.5847" />
