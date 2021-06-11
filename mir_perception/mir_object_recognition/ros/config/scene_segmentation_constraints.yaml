@@ -31,7 +31,7 @@ multimodal_object_recognition:
   cluster_max_length: 0.25
   cluster_min_distance_to_polygon: 0.04
   center_cluster: False
-  pad_cluster: False
+  pad_cluster: True
   padded_cluster_size: 2048
   octree_resolution: 0.0025
   object_height_above_workspace: 0.017
