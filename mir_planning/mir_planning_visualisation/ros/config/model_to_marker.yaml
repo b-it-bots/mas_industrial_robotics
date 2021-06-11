@@ -257,7 +257,7 @@ pp:
         roll: 0.0
         pitch: 0.0
         yaw: 180.0
-cb:
+tt:
     file_name: 'workstation.stl'
     scale: 1.0
     color:
