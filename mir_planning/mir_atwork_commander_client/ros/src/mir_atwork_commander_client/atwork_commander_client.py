@@ -327,4 +327,11 @@ class AtworkCommanderClient(object):
         :rtype: str
 
         """
-        return object_name + "-" + str(count-1).zfill(2)
+        name = ""
+        if object_name == "container_red":
+            name = "container_box_red"
+        elif object_name == "container_blue":
+            name = "container_box_blue"
+        else:
+            name = object_name
+        return name + "-" + str(count-1).zfill(2)
