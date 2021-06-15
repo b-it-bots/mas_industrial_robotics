@@ -188,8 +188,8 @@ class Utils(object):
             obj_pose_offsets = [
                 (x, y) for x in [0.05, 0.2] for y in [0.0, 0.15, -0.15, 0.3, -0.3]
             ]
-        elif "cb" in ws:
-            cb_radius = self.marker_config["cb"]["scale"] / 2.0
+        elif "tt" in ws:
+            cb_radius = self.marker_config["tt"]["scale"] / 2.0
             obj_pose_offsets = [
                 (
                     math.cos(math.radians(theta)) * cb_radius * 0.8 + cb_radius,
