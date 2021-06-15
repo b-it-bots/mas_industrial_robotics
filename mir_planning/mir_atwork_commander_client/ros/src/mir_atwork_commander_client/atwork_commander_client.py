@@ -34,12 +34,27 @@ class AtworkCommanderClient(object):
 
         self._processed_task_ids.append(task.id)
 
+        start_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_start_state)
+        target_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_target_state)
+
+        obj_dicts = self._get_entire_knowledge_from_obj_dicts(start_obj_dicts, target_obj_dicts)
+
+        # read facts and add them to the knowledge base
+        facts = self._get_facts_from_obj_dicts(obj_dicts)
+        fact_ki_list = ProblemUploader.get_fact_knowledge_item_list(facts)
+        fact_update_success = ProblemUploader.update_kb_array(fact_ki_list, Req.ADD_KNOWLEDGE)
+
+        # read goals and add them to the knowledge base
+        goals = self._get_goals_from_obj_dicts(obj_dicts)
+        goal_ki_list = ProblemUploader.get_fact_knowledge_item_list(goals)
+        goal_update_success = ProblemUploader.update_kb_array(goal_ki_list, Req.ADD_GOAL)
+
         # populate instances
-        objects = self._get_objects_from_workstations(task.arena_start_state)
+        objects = [obj_dict["object_full_name"] for obj_dict in obj_dicts]
         locations = [workstation.workstation_name for workstation in task.arena_start_state]
-        print("objects", objects)
-        print("locations", locations)
+
         instances = {"object": objects, "location": locations}
+        # print(instances)
         instance_ki_list = ProblemUploader.get_instance_knowledge_item_list(
             instances
         )
@@ -48,35 +63,112 @@ class AtworkCommanderClient(object):
             Req.ADD_KNOWLEDGE
         )
 
-        start_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_start_state)
-        target_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_target_state)
+        self._print_task(obj_dicts)
+
+    def _get_entire_knowledge_from_obj_dicts(self, start_obj_dicts, target_obj_dicts):
+        """TODO: 
+
+        :param start_obj_dicts: dictionary containing object info at the start
+        :type start_obj_dicts: list of dict
+        :param target_obj_dicts: dictionary containing object info at the end
+        :type target_obj_dicts: list of dict
+        :return: obj_dicts
+        :rtype: obj_dicts: list of dict
+
+        """
+        obj_dicts = []
+
+        cavity_included = False
         for obj_dict in start_obj_dicts:
-            print(obj_dict)
-        # read facts and add them to the knowledge base
-        facts, valid_objects = self._get_facts_from_start_obj_dicts(start_obj_dicts)
-        fact_ki_list = ProblemUploader.get_fact_knowledge_item_list(facts)
-        fact_update_success = ProblemUploader.update_kb_array(fact_ki_list, Req.ADD_KNOWLEDGE)
-        print("facts:")
-        for fact in facts:
-            print(fact)
-        print(valid_objects)
+            new_obj_dict = copy.deepcopy(obj_dict)
+            # reset target field
+            new_obj_dict["target"] = "empty"
+            # remove repeated occurence of pp01_cavity
+            if "cavity" in new_obj_dict["object"]:
+                if cavity_included:
+                    continue
+                else:
+                    cavity_included = True
+            obj_dicts.append(new_obj_dict)
 
-        # read goals and add them to the knowledge base
-        goals = self._get_goals_from_target_obj_dicts_and_valid_objects(target_obj_dicts, valid_objects)
-        goal_ki_list = ProblemUploader.get_fact_knowledge_item_list(goals)
-        goal_update_success = ProblemUploader.update_kb_array(goal_ki_list, Req.ADD_GOAL)
-        print("goals:")
-        for goal in goals:
-            print(goal)
+        # initialise full name in dict
+        objects_count = {}
+        for obj_dict in obj_dicts:
+            object_name = obj_dict["object"]
+            if object_name in objects_count:
+                objects_count[object_name] += 1
+            else:
+                objects_count[object_name] = 1
+            object_full_name = AtworkCommanderClient.get_object_full_name(
+                    object_name, objects_count[object_name])
+            obj_dict["object_full_name"] = object_full_name
+
+        # set target for decoys and heavy objects
+        for obj_dict in obj_dicts:
+            if obj_dict["decoy"]:
+                obj_dict["target"] = obj_dict["location"]
+
+            if "container" in obj_dict["object"] or "cavity" in obj_dict["object"]:
+                obj_dict["target"] = obj_dict["location"]
+
+        # match target obj dicts with obj dicts
+        for target_obj_dict in target_obj_dicts:
+            if target_obj_dict["decoy"]:
+                continue
+
+            target_object_name = target_obj_dict["object"]
+
+            if "container" in target_object_name or "cavity" in target_object_name:
+                continue
+
+            obj_dict_index = self._find_obj_dict_with(obj_dicts, target="empty",
+                                                      object_name=target_object_name)
+            if obj_dict_index == -1:
+                rospy.logwarn("Did not find matching object for" + target_object_name)
+                continue
+
+            if target_obj_dict["target"] == "empty":
+                obj_dicts[obj_dict_index]["target"] = target_obj_dict["location"]
+            elif "container" in target_obj_dict["target"]:
+                container_obj_dict_index = self._find_obj_dict_with(obj_dicts,
+                        location=target_obj_dict["location"],
+                        object_name=target_obj_dict["target"])
+                if container_obj_dict_index == -1:
+                    rospy.logwarn("Did not find a container " + target_obj_dict["target"] +\
+                          " on " + target_obj_dict["location"] + " for " + target_object_name)
+                    continue
+                obj_dicts[obj_dict_index]["target"] = obj_dicts[container_obj_dict_index]["object_full_name"]
+            elif "cavity" in target_obj_dict["target"]:
+                cavity_obj_dict_index = self._find_obj_dict_with(obj_dicts,
+                        object_name=target_obj_dict["target"])
+                if cavity_obj_dict_index == -1:
+                    rospy.logwarn("Did not find a cavity " + target_obj_dict["target"] +\
+                                  " for " + target_object_name)
+                    continue
+                obj_dicts[obj_dict_index]["target"] = obj_dicts[cavity_obj_dict_index]["object_full_name"]
+        return obj_dicts
+
+    def _find_obj_dict_with(self, obj_dicts, object_name=None, object_full_name=None,
+                            decoy=None, location=None, target=None):
+        for i, obj_dict in enumerate(obj_dicts):
+            bool_list = []
+            bool_list.append(object_name is None or object_name == obj_dict["object"])
+            bool_list.append(object_full_name is None or object_full_name == obj_dict["object_full_name"])
+            bool_list.append(decoy is None or decoy == obj_dict["decoy"])
+            bool_list.append(location is None or location == obj_dict["location"])
+            bool_list.append(target is None or target == obj_dict["target"])
+            if all(bool_list):
+                return i
+        return -1
 
 
-    def _get_facts_from_start_obj_dicts(self, start_obj_dicts):
+    def _get_facts_from_obj_dicts(self, obj_dicts):
         """TODO: Docstring for _get_objects_and_locations.
 
-        :param start_obj_dicts: dictionary containing object info 
-        :type start_obj_dicts: list of dict
-        :return: facts and valid objects (ones that are not decoy)
-        :rtype: tuple ( list (list [str, [[str, str], ...]] ), list (str) )
+        :param obj_dicts: dictionary containing object info 
+        :type obj_dicts: list of dict
+        :return: facts
+        :rtype: list (list [str, [[str, str], ...]] )
 
         example of returned facts
             [
@@ -85,41 +177,33 @@ class AtworkCommanderClient(object):
                 ['on', [['o', 'm30-00'], ['l', 'WS01']]],
             ]
         """
-        valid_objects = []
-        objects_count = {}
         facts = []
-        for obj_dict in start_obj_dicts:
-            object_name = obj_dict["object"]
-            if object_name in objects_count:
-                objects_count[object_name] += 1
-            else:
-                objects_count[object_name] = 1
-            object_full_name = AtworkCommanderClient.get_object_full_name(
-                    object_name, objects_count[object_name])
+        for obj_dict in obj_dicts:
+            if "container" in obj_dict["object"] or "cavity" in obj_dict["object"]:
+                facts.append(self._get_fact_from_attr_and_values(
+                    "container",
+                    [obj_dict["object_full_name"]]))
+                facts.append(self._get_fact_from_attr_and_values(
+                    "heavy",
+                    [obj_dict["object_full_name"]]))
 
-            # TODO: remove this
-            if "container" in object_full_name:
-                continue
+            if "container" in obj_dict["target"] or "cavity" in obj_dict["target"]:
+                facts.append(self._get_fact_from_attr_and_values(
+                    "insertable",
+                    [obj_dict["object_full_name"]]))
 
-            if not obj_dict["decoy"]:
-                valid_objects.append(object_full_name)
+            facts.append(self._get_fact_from_attr_and_values(
+                "on",
+                [obj_dict["object_full_name"], obj_dict["location"]])
+            )
 
-            attr_name = "on" # FIXME: deduce from object code and context
-            fact = [object_full_name, obj_dict["location"]]
-            kv_list = [
-                [key, value.encode("utf-8")]
-                for key, value in zip(self._attr_to_obj_type[attr_name], fact)
-            ]
-            facts.append([attr_name, kv_list])
-        return facts, valid_objects
+        return facts
 
-    def _get_goals_from_target_obj_dicts_and_valid_objects(self, target_obj_dicts, valid_objects):
-        """TODO: Docstring for _get_objects_and_locations.
+    def _get_goals_from_obj_dicts(self, obj_dicts):
+        """TODO: 
 
-        :param target_obj_dicts: dictionary containing object info 
-        :type target_obj_dicts: list of dict
-        :param valid_objects: Objects that are not decoy
-        :type valid_objects: list (str)
+        :param obj_dicts: dictionary containing object info 
+        :type obj_dicts: list of dict
         :return: facts
         :rtype: list (list [str, [[str, str], ...]] )
 
@@ -130,99 +214,117 @@ class AtworkCommanderClient(object):
                 ['on', [['o', 'm30-00'], ['l', 'WS01']]],
             ]
         """
-        objects_count = {}
         goals = []
-        for obj_dict in target_obj_dicts:
-            if obj_dict["decoy"]:
+        for obj_dict in obj_dicts:
+            if obj_dict["target"] == obj_dict["location"]:
                 continue
 
-            object_name = obj_dict["object"]
-            if object_name in objects_count:
-                objects_count[object_name] += 1
+            if obj_dict["target"] == "empty":
+                continue
+
+            if "container" in obj_dict["target"] or "cavity" in obj_dict["target"]:
+                goals.append(self._get_fact_from_attr_and_values(
+                    "in",
+                    [obj_dict["object_full_name"], obj_dict["target"]])
+                )
             else:
-                objects_count[object_name] = 1
-            object_full_name = AtworkCommanderClient.get_object_full_name(
-                    object_name, objects_count[object_name])
+                goals.append(self._get_fact_from_attr_and_values(
+                    "on",
+                    [obj_dict["object_full_name"], obj_dict["target"]])
+                )
 
-            # TODO: remove this
-            if "container" in object_full_name:
-                continue
-
-            while True:
-                object_full_name = AtworkCommanderClient.get_object_full_name(
-                        object_name, objects_count[object_name])
-                if object_full_name in valid_objects:
-                    break
-
-                if objects_count[object_name] > 20: # Sanity check. Should never succeed
-                    rospy.logerr("Count exceeded 100 for " + object_name +\
-                                 ". There is something wrong")
-                    break
-                objects_count[object_name] += 1
-
-            attr_name = "on" # FIXME: deduce from object code and context
-            fact = [object_full_name, obj_dict["location"]]
-            kv_list = [
-                [key, value.encode("utf-8")]
-                for key, value in zip(self._attr_to_obj_type[attr_name], fact)
-            ]
-            goals.append([attr_name, kv_list])
         return goals
 
+
     def _get_obj_dicts_from_workstations(self, workstations):
+        """TODO: 
+
+        :param workstations: workstations from task message
+        :type workstations: list (atwork_commander_msgs.msg.Workstation)
+        :return: object strings
+        :rtype: list (dict)
+
+        """
         obj_dicts = []
         for workstation in workstations:
             for obj in workstation.objects:
 
-                # ignore cavities
-                if self._cavity_start_code <= obj.object < self._cavity_end_code:
-                    continue
-
                 if obj.object not in self._obj_code_to_name:
                     rospy.logwarn("Could not find " + str(obj.object) + " in object codes")
                     continue
-                object_name = self._obj_code_to_name[obj.object]
 
-                # TODO: check target
-                target_name = None
+                if self._cavity_start_code <= obj.object < self._cavity_end_code:
+                    object_name = "pp01_cavity"
+                else:
+                    object_name = self._obj_code_to_name[obj.object]
+
+                if obj.target not in self._obj_code_to_name:
+                    rospy.logwarn("Could not find " + str(obj.target) + " in object codes")
+                    continue
+
+                if self._cavity_start_code <= obj.target < self._cavity_end_code:
+                    target_name = "pp01_cavity"
+                else:
+                    target_name = self._obj_code_to_name[obj.target]
 
                 obj_dict = {
                         "object": object_name,
                         "location": workstation.workstation_name,
                         "target": target_name,
                         "decoy": obj.decoy
-                        }
+                }
                 obj_dicts.append(obj_dict)
         return obj_dicts
 
-    def _get_objects_from_workstations(self, workstations):
-        """TODO: Docstring for _get_objects_from_workstations.
+    def _get_fact_from_attr_and_values(self, attr_name, values):
+        """TODO: 
 
-        :param workstations: workstations from task message
-        :type workstations: list (atwork_commander_msgs.msg.Workstation)
-        :return: object strings
-        :rtype: list (str)
+        :param attr_name: name of attribute
+        :type attr_name: str
+        :param values: values for key value pair
+        :type values: list [str, ...]
+        :return: fact
+        :rtype: list [str, [[str, str], ...]]
 
+        example of returned fact
+                ['on', [['o', 'r20'], ['l', 'SH01']]],
         """
-        objects_count = {}
-        for workstation in workstations:
-            for obj in workstation.objects:
-                if obj.object not in self._obj_code_to_name:
-                    rospy.logwarn("Could not find " + str(obj.object) + " in object codes")
-                    continue
+        kv_list = [
+            [key, value.encode("utf-8")]
+            for key, value in zip(self._attr_to_obj_type[attr_name], values)
+        ]
+        return [attr_name, kv_list]
 
-                object_name = self._obj_code_to_name[obj.object]
-                if object_name in objects_count:
-                    objects_count[object_name] += 1
-                else:
-                    objects_count[object_name] = 1
-        objects = []
-        for object_name in objects_count:
-            for i in range(objects_count[object_name]):
-                object_full_name = AtworkCommanderClient.get_object_full_name(object_name, objects_count[object_name])
-                objects.append(object_full_name)
-        return objects
+    def _print_task(self, obj_dicts):
+        string = ""
+        for obj_dict in obj_dicts:
+            if obj_dict["target"] == obj_dict["location"]:
+                continue
+
+            if obj_dict["target"] == "empty":
+                continue
+
+            string += obj_dict["object_full_name"].ljust(20) + " : "
+            string += obj_dict["location"] + " -> " + obj_dict["target"].ljust(20)
+
+            if "container" in obj_dict["target"] or "cavity" in obj_dict["target"]:
+                container_obj_dict_index = self._find_obj_dict_with(obj_dicts,
+                        object_full_name=obj_dict["target"])
+                if container_obj_dict_index != -1:
+                    string += " (" + obj_dicts[container_obj_dict_index]["location"] + ")"
+            string += "\n"
+        print(string.upper())
 
     @staticmethod
     def get_object_full_name(object_name, count):
+        """TODO: 
+
+        :param object_name: name of object
+        :type object_name: str
+        :param count: unique num to be added as suffix
+        :type count: int
+        :return: object_full_name
+        :rtype: str
+
+        """
         return object_name + "-" + str(count-1).zfill(2)
