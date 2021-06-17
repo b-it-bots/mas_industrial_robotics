@@ -14,16 +14,20 @@ class AtworkCommanderClient(object):
     """TODO: Docstring for AtworkCommanderClient. """
 
     def __init__(self):
+        # ros params
+        self._debug = rospy.get_param("~debug", False)
+        self._ignore_pick_locations = rospy.get_param("~ignore_pick_location", [])
+        self._ignore_place_locations = rospy.get_param("~ignore_place_location", [])
+        
+        # subscribers
         self._task_sub = rospy.Subscriber("~task", Task, self._task_cb)
+
+        # class variables
         self._processed_task_ids = []
         self._attr_to_obj_type = ProblemUploader.get_attr_to_obj_type()
 
         # read object codes from Object.msg class
-        self._obj_code_to_name = {}
-        object_class_attributes = dir(Object)
-        for attr in object_class_attributes:
-            if attr.isupper() and "START" not in attr and "END" not in attr:
-                self._obj_code_to_name[getattr(Object, attr)] = attr.lower()
+        self._obj_code_to_name = AtworkCommanderClient.get_obj_code_to_name_dict()
         self._cavity_start_code = getattr(Object, "CAVITY_START")
         self._cavity_end_code = getattr(Object, "CAVITY_END")
         
@@ -38,8 +42,11 @@ class AtworkCommanderClient(object):
         target_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_target_state)
 
         obj_dicts = self._get_entire_knowledge_from_obj_dicts(start_obj_dicts, target_obj_dicts)
-        # for obj_dict in obj_dicts:
-        #     print(obj_dict)
+        if self._debug:
+            for obj_dict in obj_dicts:
+                print(obj_dict)
+
+        self._ignore_knowledge(obj_dicts)
 
         # read facts and add them to the knowledge base
         facts = self._get_facts_from_obj_dicts(obj_dicts)
@@ -116,6 +123,7 @@ class AtworkCommanderClient(object):
             if target_obj_dict["decoy"]:
                 continue
 
+            # ignore container and cavity objects
             if "container" in target_obj_dict["object"] or\
                   "cavity" in target_obj_dict["object"]:
                 continue
@@ -224,7 +232,7 @@ class AtworkCommanderClient(object):
             if obj_dict["target"] == obj_dict["location"]:
                 continue
 
-            if obj_dict["target"] == "empty":
+            if obj_dict["target"] == "empty": # mostly used for ignored tasks
                 continue
 
             if "container" in obj_dict["target"] or "cavity" in obj_dict["target"]:
@@ -319,6 +327,38 @@ class AtworkCommanderClient(object):
                     string += " (" + obj_dicts[container_obj_dict_index]["location"] + ")"
             string += "\n"
         print(string.upper())
+
+    def _ignore_knowledge(self, obj_dicts):
+        for obj_dict in obj_dicts:
+            if obj_dict["decoy"]:
+                continue
+
+            ignore = False
+            for location in self._ignore_pick_locations:
+                if location.upper() in obj_dict["location"].upper():
+                    ignore = True
+                    if self._debug:
+                        print("ignoring", obj_dict, "because of pick location", location)
+                    break
+
+            for location in self._ignore_place_locations:
+                if location.upper() in obj_dict["target"].upper():
+                    ignore = True
+                    if self._debug:
+                        print("ignoring", obj_dict, "because of place location", location)
+                    break
+
+            if ignore:
+                obj_dict["target"] = "empty"
+
+    @staticmethod
+    def get_obj_code_to_name_dict():
+        obj_code_to_name = {}
+        object_class_attributes = dir(Object)
+        for attr in object_class_attributes:
+            if attr.isupper() and "START" not in attr and "END" not in attr:
+                obj_code_to_name[getattr(Object, attr)] = attr.lower()
+        return obj_code_to_name
 
     @staticmethod
     def get_object_full_name(object_name, count):

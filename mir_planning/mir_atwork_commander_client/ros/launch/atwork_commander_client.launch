@@ -2,6 +2,8 @@
 <launch>
 
     <arg name="debug" default="true" />
+    <arg name="ignore_pick_location" default="['sh']" />
+    <arg name="ignore_place_location" default="[]" />
 
     <group ns="mir_task_planning">
 
@@ -10,6 +12,12 @@
 
             <remap from="~task" to="/atwork_commander/task"/>
             <param name="debug" type="bool" value="$(arg debug)"/>
+            <rosparam param="ignore_pick_location" subst_value="True">
+                $(arg ignore_pick_location)
+            </rosparam>
+            <rosparam param="ignore_place_location" subst_value="True">
+                $(arg ignore_place_location)
+            </rosparam>
         </node>
 
     </group>
