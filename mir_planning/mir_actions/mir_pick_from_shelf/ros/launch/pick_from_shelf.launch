@@ -11,7 +11,7 @@
     <arg name="start_base_pose_offset" default="-0.7" />
 
     <!-- angle at which the obj is grasped -->
-    <arg name="pitch" default="2.0" />
+    <arg name="pitch" default="2.5" />
 
     <!-- distance between base link and arm link 0 -->
     <arg name="arm_link_0_offset_x" default="0.223" />
