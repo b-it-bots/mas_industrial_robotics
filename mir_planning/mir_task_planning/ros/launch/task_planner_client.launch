@@ -2,8 +2,8 @@
 <launch>
 
     <arg name="domain_file_name" default="domain.pddl" />
-    <arg name="problem_file_name" default="problems/p1.pddl" />
-    <arg name="file_path" default="$(find mir_knowledge)/common/pddl/general_domain" />
+    <arg name="problem_file_name" default="smaller_problem.pddl" />
+    <arg name="file_path" default="$(find mir_task_planning)/common/pddl" />
 
     <group ns="mir_task_planning">
 
