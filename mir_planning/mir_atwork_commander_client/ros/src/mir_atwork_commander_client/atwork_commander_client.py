@@ -38,6 +38,8 @@ class AtworkCommanderClient(object):
         target_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_target_state)
 
         obj_dicts = self._get_entire_knowledge_from_obj_dicts(start_obj_dicts, target_obj_dicts)
+        # for obj_dict in obj_dicts:
+        #     print(obj_dict)
 
         # read facts and add them to the knowledge base
         facts = self._get_facts_from_obj_dicts(obj_dicts)
@@ -81,8 +83,6 @@ class AtworkCommanderClient(object):
         cavity_included = False
         for obj_dict in start_obj_dicts:
             new_obj_dict = copy.deepcopy(obj_dict)
-            # reset target field
-            new_obj_dict["target"] = "empty"
             # remove repeated occurence of pp01_cavity
             if "cavity" in new_obj_dict["object"]:
                 if cavity_included:
@@ -116,15 +116,16 @@ class AtworkCommanderClient(object):
             if target_obj_dict["decoy"]:
                 continue
 
-            target_object_name = target_obj_dict["object"]
-
-            if "container" in target_object_name or "cavity" in target_object_name:
+            if "container" in target_obj_dict["object"] or\
+                  "cavity" in target_obj_dict["object"]:
                 continue
 
-            obj_dict_index = self._find_obj_dict_with(obj_dicts, target="empty",
-                                                      object_name=target_object_name)
+            obj_dict_index = self._find_obj_dict_with(
+                    obj_dicts, target=target_obj_dict["target"],
+                    object_name=target_obj_dict["object"])
             if obj_dict_index == -1:
-                rospy.logwarn("Did not find matching object for" + target_object_name)
+                rospy.logwarn("Did not find matching object for " +\
+                        target_obj_dict["object"])
                 continue
 
             if target_obj_dict["target"] == "empty":
@@ -134,18 +135,22 @@ class AtworkCommanderClient(object):
                         location=target_obj_dict["location"],
                         object_name=target_obj_dict["target"])
                 if container_obj_dict_index == -1:
-                    rospy.logwarn("Did not find a container " + target_obj_dict["target"] +\
-                          " on " + target_obj_dict["location"] + " for " + target_object_name)
+                    rospy.logwarn("Did not find a container " +\
+                            target_obj_dict["target"] + " on " +\
+                            target_obj_dict["location"] + " for " +\
+                            target_obj_dict["object"])
                     continue
-                obj_dicts[obj_dict_index]["target"] = obj_dicts[container_obj_dict_index]["object_full_name"]
+                obj_dicts[obj_dict_index]["target"] = \
+                        obj_dicts[container_obj_dict_index]["object_full_name"]
             elif "cavity" in target_obj_dict["target"]:
                 cavity_obj_dict_index = self._find_obj_dict_with(obj_dicts,
                         object_name=target_obj_dict["target"])
                 if cavity_obj_dict_index == -1:
                     rospy.logwarn("Did not find a cavity " + target_obj_dict["target"] +\
-                                  " for " + target_object_name)
+                                  " for " + target_obj_dict["object"])
                     continue
-                obj_dicts[obj_dict_index]["target"] = obj_dicts[cavity_obj_dict_index]["object_full_name"]
+                obj_dicts[obj_dict_index]["target"] = \
+                        obj_dicts[cavity_obj_dict_index]["object_full_name"]
         return obj_dicts
 
     def _find_obj_dict_with(self, obj_dicts, object_name=None, object_full_name=None,
