@@ -44,7 +44,8 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   cluster_visualizer_pc_("output/tabletop_cluster_pc"),
   label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
   label_visualizer_pc_("output/pc_labels", Color(Color::IVORY)),
-  data_collection_(false)
+  data_collection_(false),
+  enable_roi_(true)
 {
   tf_listener_.reset(new tf::TransformListener);
   scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
@@ -443,16 +444,19 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
   if (!combined_object_list.objects.empty())
   {
-    for (int i = 0; i < combined_object_list.objects.size(); i++)
+    if (enable_roi_)
     {
-      double current_object_pose_x = combined_object_list.objects[i].pose.pose.position.x;
-      if (current_object_pose_x < roi_base_link_to_laser_distance_ ||
-          current_object_pose_x > roi_max_object_pose_x_to_base_link_)
-        /* combined_object_list.objects[i].pose.pose.position.z < scene_segmentation_ros_ */
-        /* ->object_height_above_workspace_ - 0.05) */
+      for (int i = 0; i < combined_object_list.objects.size(); i++)
       {
-        ROS_WARN_STREAM("This object " << combined_object_list.objects[i].name << " out of RoI");
-        combined_object_list.objects[i].name = "DECOY";
+        double current_object_pose_x = combined_object_list.objects[i].pose.pose.position.x;
+        if (current_object_pose_x < roi_base_link_to_laser_distance_ ||
+            current_object_pose_x > roi_max_object_pose_x_to_base_link_)
+          /* combined_object_list.objects[i].pose.pose.position.z < scene_segmentation_ros_ */
+          /* ->object_height_above_workspace_ - 0.05) */
+        {
+          ROS_WARN_STREAM("This object " << combined_object_list.objects[i].name << " out of RoI");
+          combined_object_list.objects[i].name = "DECOY";
+        }
       }
     }
     // Adjust RPY to make pose flat, adjust container pose
@@ -613,6 +617,7 @@ void MultimodalObjectRecognitionROS::publishObjectList(mas_perception_msgs::Obje
   {
     // Empty cloud
     sensor_msgs::PointCloud2 empty_ros_cloud;
+    object_list.objects[i].views.resize(1);
     object_list.objects[i].views[0].point_cloud = empty_ros_cloud;
     // Rename container to match refbox naming
     if (object_list.objects[i].name == "BLUE_CONTAINER")
@@ -780,6 +785,7 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
   rgb_cluster_filter_limit_min_ = config.rgb_cluster_filter_limit_min;
   rgb_cluster_filter_limit_max_ = config.rgb_cluster_filter_limit_max;
   // ROI params
+  enable_roi_ = config.enable_roi;
   roi_base_link_to_laser_distance_ = config.roi_base_link_to_laser_distance;
   roi_max_object_pose_x_to_base_link_ = config.roi_max_object_pose_x_to_base_link;
   roi_min_bbox_z_ = config.roi_min_bbox_z;
