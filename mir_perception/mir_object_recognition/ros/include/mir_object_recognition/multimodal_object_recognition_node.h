@@ -172,6 +172,7 @@ class MultimodalObjectRecognitionROS
     int rgb_bbox_max_diag_;
     int rgb_cluster_filter_limit_min_;
     int rgb_cluster_filter_limit_max_;
+    bool enable_roi_;
     double roi_base_link_to_laser_distance_;
     double roi_max_object_pose_x_to_base_link_;
     double roi_min_bbox_z_;
