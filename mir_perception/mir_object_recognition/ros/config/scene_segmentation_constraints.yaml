@@ -41,6 +41,7 @@ multimodal_object_recognition:
   rgb_bbox_max_diag: 175
   rgb_cluster_filter_limit_min: 0.0060
   rgb_cluster_filter_limit_max: 0.35
+  enable_roi: True
   roi_base_link_to_laser_distance: 0.350
   roi_max_object_pose_x_to_base_link: 0.650
   roi_min_bbox_z: 0.03
