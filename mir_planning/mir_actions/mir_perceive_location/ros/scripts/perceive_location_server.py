@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import mcr_states.common.basic_states as gbs
+import mir_states.common.basic_states as mir_gbs
 import mir_states.common.manipulation_states as gms
 import mir_states.common.navigation_states as gns
 import rospy
@@ -275,7 +276,7 @@ def main():
             SetupMoveArm(),
             transitions={
                 "pose_set": "MOVE_ARM",
-                "tried_all": "POPULATE_RESULT_WITH_OBJECTS",
+                "tried_all": "STOP_OBJECT_LIST_MERGER",
             },
         )
 
@@ -284,8 +285,17 @@ def main():
             "MOVE_ARM",
             gms.move_arm_and_gripper("open"),
             transitions={
-                "succeeded": "START_OBJECT_RECOGNITION",
+                "succeeded": "WAIT_FOR_ARM_TO_STABILIZE",
                 "failed": "MOVE_ARM",
+            },
+        )
+
+        # move arm to appropriate position
+        smach.StateMachine.add(
+            "WAIT_FOR_ARM_TO_STABILIZE",
+            mir_gbs.wait_for(0.5),
+            transitions={
+                "succeeded": "START_OBJECT_RECOGNITION",
             },
         )
 
@@ -334,9 +344,9 @@ def main():
                 timeout_duration=5,
             ),
             transitions={
-                "success": "STOP_OBJECT_LIST_MERGER",
-                "timeout": "STOP_OBJECT_LIST_MERGER",
-                "failure": "STOP_OBJECT_LIST_MERGER",
+                "success": "GET_MOTION_TYPE",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
             },
         )
 
@@ -371,8 +381,8 @@ def main():
             ),
             transitions={
                 "success": "CHECK_IF_OBJECTS_FOUND",
-                "timeout": "CHECK_IF_OBJECTS_FOUND",
-                "failure": "CHECK_IF_OBJECTS_FOUND",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
             },
         )
 
@@ -392,12 +402,12 @@ def main():
                         True,
                     )
                 ],
-                timeout_duration=10.0,
+                timeout_duration=5.0,
             ),
             transitions={
                 "success": "POPULATE_RESULT_WITH_OBJECTS",
                 "timeout": "OVERALL_FAILED",
-                "failure": "GET_MOTION_TYPE",
+                "failure": "OVERALL_FAILED",
             },
         )
 
