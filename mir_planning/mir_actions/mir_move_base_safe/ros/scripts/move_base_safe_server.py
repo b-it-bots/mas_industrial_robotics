@@ -88,9 +88,9 @@ class SetupMoveArmAfterMoveBase(smach.State):
 
     def execute(self, userdata):
         if Utils.get_value_of(userdata.goal.parameters, "next_action") == "PERCEIVE":
-            arm_goal = "look_at_workspace_from_far"
+            arm_goal = "look_at_workspace_from_near"
         elif Utils.get_value_of(userdata.goal.parameters, "next_action") == "UNSTAGE":
-            arm_goal = "platform_middle_pre"
+            arm_goal = "stage_intermediate"
         else:
             return "skipped"
         # giving feedback to the user
