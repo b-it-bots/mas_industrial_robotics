@@ -9,7 +9,7 @@
     </node>
 
     <!-- stage action server -->
-    <node pkg="mir_stage_object" type="stage_object_server.py" name="stage_object_server" output="screen" />
+    <include file="$(find mir_stage_object)/ros/launch/stage_object_server.launch" />
 
     <!-- unstage action server -->
     <node pkg="mir_unstage_object" type="unstage_object_server.py" name="unstage_object_server" output="screen" />
