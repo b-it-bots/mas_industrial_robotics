@@ -144,7 +144,10 @@ def main():
         smach.StateMachine.add(
             "MOVE_ARM_STAGE",
             gms.move_arm(),
-            transitions={"succeeded": "OPEN_GRIPPER", "failed": "MOVE_ARM_STAGE"},
+            transitions={
+                "succeeded": "OPEN_GRIPPER",
+                "failed": "MOVE_ARM_STAGE"
+            },
         )
 
         smach.StateMachine.add(
@@ -182,6 +185,7 @@ def main():
                 "failed": "MOVE_ARM_STAGE_HEAVY"
             },
         )
+
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
