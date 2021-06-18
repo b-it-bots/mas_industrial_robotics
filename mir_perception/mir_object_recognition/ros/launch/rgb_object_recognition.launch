@@ -2,7 +2,7 @@
 <launch>
   <arg name="net" default="detection" />
   <arg name="classifier" default="squeezeDet" />
-  <arg name="dataset_type" default="atwork_sydney" />
+  <arg name="dataset_type" default="atwork_2021" />
 
   <group ns="mir_perception">
     <node pkg="mir_object_recognition" type="rgb_object_recognizer_node" name="rgb_object_recognizer" output="screen" 

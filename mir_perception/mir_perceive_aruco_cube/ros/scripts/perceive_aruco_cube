@@ -116,7 +116,7 @@ class ArucoCubePerceiver(object):
             self._check_failure()
             return
 
-        rot, trans, _ = cv2.aruco.estimatePoseSingleMarkers(
+        rot, trans = cv2.aruco.estimatePoseSingleMarkers(
             corners, self._marker_length, self._camera_mat, self._dist_coeff
         )
         rot = np.squeeze(rot)
