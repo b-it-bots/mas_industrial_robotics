@@ -25,6 +25,7 @@ class PickFromShelfUtils(object):
         self.arm_link_0_offset_y = rospy.get_param("~arm_link_0_offset_y", 0.0)
         self.intermediate_perc = rospy.get_param("~intermediate_perc", 0.8)
         self.retract_base_pose_x = rospy.get_param("~retract_base_pose_x", -0.2)
+        self.intermediate_arm_height = rospy.get_param("~intermediate_arm_height", 0.1)
 
     def calc_pose_for_dbc(self, obj_pose):
         """Assumption: object pose is in `base_link_static`.
@@ -52,7 +53,7 @@ class PickFromShelfUtils(object):
         dbc_target_pose.pose.orientation.w = 1.0
         return dbc_target_pose
 
-    def get_arm_pose(self, obj_pose, is_intermediate=False):
+    def get_arm_pose(self, obj_pose, modification_name="intermediate"):
         """Return a pose the youbot arm's end effector should go to based on object pose.
         The orientation is modified such that roll is always 0.0.
         Pitch is based on parameter (leaning forward for the youbot arm to be able to pick)
@@ -64,7 +65,7 @@ class PickFromShelfUtils(object):
         considering z position.
 
         :obj_pose: geometry_msgs.PoseStamped
-        :is_intermediate: bool
+        :modification_name: str
         :returns: geometry_msgs.PoseStamped
 
         """
@@ -77,9 +78,12 @@ class PickFromShelfUtils(object):
         quat = tf.transformations.quaternion_from_euler(0.0, self.pitch, yaw)
         arm_pose = copy.deepcopy(obj_pose)
         arm_pose.pose.orientation = Quaternion(*quat)
-        if is_intermediate:
+        if modification_name == "intermediate":
             arm_pose.pose.position.x = arm_link_0_x + (self.intermediate_perc * delta_x)
             arm_pose.pose.position.y = arm_link_0_y + (self.intermediate_perc * delta_y)
+            arm_pose.pose.position.z = self.intermediate_arm_height
+        elif modification_name == "intermediate_post":
+            arm_pose.pose.position.z = self.intermediate_arm_height
         return arm_pose
 
     def get_retracted_dbc_pose(self):

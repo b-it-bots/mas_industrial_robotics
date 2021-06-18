@@ -128,7 +128,9 @@
     <!-- <include file="$(find mcr_multimodal_object_identification)/ros/launch/multimodal_object_identification.launch"/> -->
 
     <!-- Multimodal object recognition-->
-    <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch"/>
+    <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch">
+        <arg name="target_frame" value="base_link_static"/>
+    </include>
     <!-- trims 3 last characters of objects in case they come with count information -->
     <!--include file="$(find mcr_poses_along_object)/ros/launch/poses_along_object.launch"/-->
 
