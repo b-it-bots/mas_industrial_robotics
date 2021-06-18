@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="heavy_objects" default="['m20_100']" />
+
+    <node pkg="mir_stage_object" type="stage_object_server.py"
+          name="stage_object_server" output="screen">
+        <rosparam param="heavy_objects" subst_value="True">
+            $(arg heavy_objects)
+        </rosparam>
+    </node>
+
+</launch>
