@@ -5,10 +5,13 @@
 // PCL specific includes
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Float32MultiArray.h>
+#include <std_msgs/String.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseArray.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <Eigen/Dense>
+#include <mas_perception_msgs/Cavity.h>
 
 #include <mir_ppt_detection/Cavity.h>
 #include <mir_ppt_detection/Cavities.h>
@@ -104,6 +107,10 @@ class PPTDetector
 
         bool readObjectShapeParams();
 
+        void publish_cavity_msg(const mir_ppt_detection::Cavities& cavities);
+
+        void eventInCallback(const std_msgs::String &msg);
+
         ros::NodeHandle nh_;
         ros::Subscriber pc_sub_;
 
@@ -119,9 +126,17 @@ class PPTDetector
 
         ros::Publisher cloud_pub0, cloud_pub1, cloud_pub2;
         ros::Publisher cavity_pub;
+        ros::Publisher cavity_msg_pub_;
+        ros::Publisher debug_pose_pub_;
+        ros::Publisher event_out_pub_;
+        ros::Subscriber event_in_sub_;
         MinDistanceToHullCalculator dist_to_hull;
 
         std::map<std::string, LearnedObjectParams> learned_obj_params_map_;
+
+        tf::TransformListener listener_;
+
+        std::string target_frame_, source_frame_;
 
 };
 

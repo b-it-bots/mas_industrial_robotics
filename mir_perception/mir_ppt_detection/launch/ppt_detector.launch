@@ -4,12 +4,25 @@
     <arg name="object_shape_learned_params_file"
          default="$(find mir_ppt_detection)/config/object_shape_learned_params.yaml"/>
 
-    <node pkg="mir_ppt_detection" type="ppt_detector" name="ppt_detector" output="screen">
-        <remap from="~points" to="/arm_cam3d/depth_registered/points"/>
-        <param name="object_shape_learned_params_file" value="$(arg object_shape_learned_params_file)"/>
-    </node>
+    <group ns="mcr_perception">
+        <node pkg="mcr_perception_selectors" type="cavity_pose_selector_node" name="cavity_pose_selector" output="screen">
+            <remap from="~cavity_pose" to="/mcr_perception/object_selector/output/object_pose" />
+            <param name="loop_rate" type="double" value="10.0"/>
+            <rosparam command="load" file="$(find mcr_perception_selectors)/ros/config/object_cavity_pairs.yaml"/>
+        </node>
 
-    <!-- <node pkg="mir_ppt_detection" type="ppt_classifier_node" name="ppt_classifier_node" output="screen"> -->
-    <!--     <remap from="~cavities" to="/ppt_detector/cavities"/> -->
-    <!-- </node> -->
+        <node pkg="mir_ppt_detection" type="ppt_detector" name="ppt_detector" output="screen">
+
+            <remap from="~points" to="/arm_cam3d/depth_registered/points"/>
+            <remap from="~output_cavity" to="/mcr_perception/cavity_pose_selector/cavity" />
+            <remap from="~event_in" to="/mcr_perception/cavity_finder/input/event_in" />
+            <remap from="~event_out" to="/mcr_perception/cavity_finder/output/event_out" />
+
+            <param name="object_shape_learned_params_file" value="$(arg object_shape_learned_params_file)"/>
+            <param name="target_frame" type="string" value="base_link_static"/>
+
+        </node>
+
+    </group>
+
 </launch>

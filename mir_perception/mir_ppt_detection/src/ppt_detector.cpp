@@ -4,13 +4,18 @@ PPTDetector::PPTDetector():
     nh_("~")
 {
     // Create a ROS subscriber for the input point cloud
-    pc_sub_ = nh_.subscribe<PointCloud> ("points", 1, &PPTDetector::cloud_cb, this);
+    // pc_sub_ = nh_.subscribe<PointCloud> ("points", 1, &PPTDetector::cloud_cb, this);
+    event_in_sub_ = nh_.subscribe("event_in", 1, &PPTDetector::eventInCallback, this);
 
     // Create a ROS publisher for the output point cloud
     cloud_pub0 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_non_planar", 1);
     cloud_pub1 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_planar", 1);
     cloud_pub2 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_cavity_clusters", 1);
     cavity_pub = nh_.advertise<mir_ppt_detection::Cavities> ("cavities", 1);
+
+    cavity_msg_pub_ = nh_.advertise<mas_perception_msgs::Cavity>("output_cavity", 10);
+    debug_pose_pub_ = nh_.advertise<geometry_msgs::PoseArray>("output_debug_pose", 1);
+    event_out_pub_ = nh_.advertise<std_msgs::String>("event_out", 1);
 
     // read ros param
     bool success = readObjectShapeParams();
@@ -19,6 +24,10 @@ PPTDetector::PPTDetector():
         ROS_FATAL("Failed to read object_shape_learned_params_file.");
         ros::shutdown();
     }
+
+    nh_.param<std::string>("target_frame", target_frame_, "base_link");
+    nh_.param<std::string>("source_frame", source_frame_, "arm_cam3d_camera_color_optical_frame");
+
 }
 
 bool PPTDetector::readObjectShapeParams()
@@ -453,6 +462,55 @@ std::string PPTDetector::predictCavityName(const mir_ppt_detection::Cavity& cavi
     return obj_name;
 }
 
+
+void PPTDetector::publish_cavity_msg(const mir_ppt_detection::Cavities& cavities)
+{
+    geometry_msgs::PoseArray pose_array_msg;
+    pose_array_msg.header.stamp = ros::Time::now();
+    pose_array_msg.header.frame_id = target_frame_;
+
+
+    for ( size_t i = 0; i < cavities.cavities.size(); i ++ )
+    {
+        std::string cavity_name = predictCavityName(cavities.cavities[i]);
+        std::cout << "i:" << i << " winner cavity:" << cavity_name << std::endl;
+        
+        if ( cavity_name == "unknown" )
+        {
+            continue;
+        }
+
+        geometry_msgs::PoseStamped pose_in_source_frame;
+        pose_in_source_frame.pose = cavities.cavities[i].pose;
+        pose_in_source_frame.header.frame_id = source_frame_;
+        pose_in_source_frame.header.stamp = ros::Time::now();
+
+        geometry_msgs::PoseStamped pose_in_target_frame;
+        try
+        {
+            listener_.waitForTransform(target_frame_, source_frame_, pose_in_source_frame.header.stamp, ros::Duration(3.0));
+            listener_.transformPose(target_frame_, pose_in_source_frame, pose_in_target_frame);
+        }
+        catch (tf::TransformException ex)
+        {
+            ROS_ERROR("%s", ex.what());
+        }
+
+        std::cout << pose_in_target_frame << std::endl;
+
+        mas_perception_msgs::Cavity cavity;
+
+        cavity.pose = pose_in_target_frame;
+        //ROS_INFO_STREAM("pose fream id in for loop " <<pose_array.header.frame_id);
+        //std::cout<<" inside for loop frame id "<<cavity.pose.header.frame_id<<std::endl;
+        cavity.name = cavity_name;
+        cavity_msg_pub_.publish(cavity);
+
+        pose_array_msg.poses.push_back(pose_in_target_frame.pose);
+    }
+    debug_pose_pub_.publish(pose_array_msg);
+}
+
 void PPTDetector::cloud_cb (const PointCloud::ConstPtr& input)
 {
     mir_ppt_detection::Cavities cavities;
@@ -462,12 +520,8 @@ void PPTDetector::cloud_cb (const PointCloud::ConstPtr& input)
 
     detectCavities(input, cavities, non_planar_cloud, planar_cloud, cavity_cloud);
 
+    publish_cavity_msg(cavities);
 
-    for ( size_t i = 0; i < cavities.cavities.size(); i ++ )
-    {
-        std::string cavity_name = predictCavityName(cavities.cavities[i]);
-        std::cout << "i:" << i << " winner cavity:" << cavity_name << std::endl;
-    }
     cavity_pub.publish(cavities);
 
     if (debug_pub)
@@ -488,6 +542,20 @@ void PPTDetector::cloud_cb (const PointCloud::ConstPtr& input)
         output.header.frame_id = input->header.frame_id ;
         output.header.stamp = ros::Time::now();
         cloud_pub2.publish (output);
+    }
+    pc_sub_.shutdown();
+
+    std_msgs::String output_msg;
+    output_msg.data = std::string("e_done");
+    event_out_pub_.publish(output_msg);
+}
+
+void PPTDetector::eventInCallback(const std_msgs::String &msg)
+{
+    if (msg.data == "e_trigger")
+    {
+        pc_sub_ = nh_.subscribe<PointCloud> ("points", 1, &PPTDetector::cloud_cb, this);
+        ROS_INFO("Subscribed to pointcloud");
     }
 }
 
