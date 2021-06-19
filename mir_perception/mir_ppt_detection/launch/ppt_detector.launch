@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_ppt_detection" type="ppt_detector" name="ppt_detector" output="screen">
+            <remap from="~points" to="/arm_cam3d/depth_registered/points"/>
+        </node>
+</launch>
