@@ -8,6 +8,7 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <Eigen/Dense>
 
 #include <mir_ppt_detection/Cavity.h>
 #include <mir_ppt_detection/Cavities.h>
@@ -35,16 +36,29 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/kdtree/kdtree.h>
 
+#include <yaml-cpp/yaml.h>
+
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::PointXYZRGBA PointRGBA;
 typedef pcl::PointCloud<PointT> PointCloud;
 typedef pcl::PointCloud<PointRGBA> PointCloudRGBA;
 typedef pcl::PointIndices PointIndices;
 
+struct LearnedObjectParams
+{
+    Eigen::Vector2f mu;
+    Eigen::Matrix2f cov;
+};
+
 class PPTDetector
 {
     public:
         PPTDetector();
+        void detectCavities(const PointCloud::ConstPtr& input,
+                             mir_ppt_detection::Cavities& cavities_msg,
+                             PointCloudRGBA::Ptr& non_planar_cloud,
+                             PointCloudRGBA::Ptr& planar_cloud,
+                             PointCloudRGBA::Ptr& cavity_cloud);
 
     protected:
 
@@ -84,6 +98,12 @@ class PPTDetector
 
         void cloud_cb (const PointCloud::ConstPtr& input);
 
+        float get_mahalanobis_distance(Eigen::Vector2f x, Eigen::Vector2f mu, Eigen::Matrix2f cov);
+
+        std::string predictCavityName(const mir_ppt_detection::Cavity& cavity);
+
+        bool readObjectShapeParams();
+
         ros::NodeHandle nh_;
         ros::Subscriber pc_sub_;
 
@@ -100,6 +120,8 @@ class PPTDetector
         ros::Publisher cloud_pub0, cloud_pub1, cloud_pub2;
         ros::Publisher cavity_pub;
         MinDistanceToHullCalculator dist_to_hull;
+
+        std::map<std::string, LearnedObjectParams> learned_obj_params_map_;
 
 };
 

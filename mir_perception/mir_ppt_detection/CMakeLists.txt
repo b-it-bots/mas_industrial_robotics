@@ -39,4 +39,5 @@ add_executable(ppt_detector
 )
 target_link_libraries(ppt_detector
     ${catkin_LIBRARIES}
+    yaml-cpp
 )
