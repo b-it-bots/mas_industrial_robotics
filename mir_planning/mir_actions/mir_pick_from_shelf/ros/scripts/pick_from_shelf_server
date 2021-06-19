@@ -85,7 +85,7 @@ class SendPoseToDBC(smach.State):
 
 
 class SendPoseToMoveIt(smach.State):
-    def __init__(self, is_intermediate=False):
+    def __init__(self, modification_name="intermediate"):
         smach.State.__init__(self, outcomes=["succeeded"])
         self._moveit_pose_pub = rospy.Publisher(
             "/arm_moveit_client/target_pose", PoseStamped, queue_size=10
@@ -96,7 +96,7 @@ class SendPoseToMoveIt(smach.State):
             self._obj_pose_cb,
         )
         self._obj_pose = None
-        self._is_intermediate = is_intermediate
+        self._modification_name = modification_name
         self.utils = PickFromShelfUtils()
         rospy.sleep(0.1)  # time for the publisher to register in ros network
 
@@ -105,7 +105,7 @@ class SendPoseToMoveIt(smach.State):
 
     def execute(self, userdata):
         modified_obj_pose = self.utils.get_arm_pose(
-            self._obj_pose, self._is_intermediate
+            self._obj_pose, self._modification_name
         )
         rospy.loginfo("Modified pose")
         rospy.loginfo(modified_obj_pose)
@@ -195,7 +195,6 @@ def main():
             },
         )
 
-        # If location is a shelf, go to "shelf_intermediate" arm pose first
         smach.StateMachine.add(
             "MOVE_ARM_TO_PRE_GRASP",
             gms.move_arm("shelf_pre_grasp_lower"),
@@ -213,7 +212,7 @@ def main():
 
         smach.StateMachine.add(
             "SEND_MOVEIT_POSE_INTERMEDIATE",
-            SendPoseToMoveIt(is_intermediate=True),
+            SendPoseToMoveIt(modification_name="intermediate"),
             transitions={"succeeded": "MOVE_ARM_USING_MOVEIT_INTERMEDIATE"},
         )
 
@@ -234,7 +233,7 @@ def main():
 
         smach.StateMachine.add(
             "SEND_MOVEIT_POSE",
-            SendPoseToMoveIt(is_intermediate=False),
+            SendPoseToMoveIt(modification_name="object"),
             transitions={"succeeded": "MOVE_ARM_USING_MOVEIT"},
         )
 
@@ -256,7 +255,28 @@ def main():
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
-            transitions={"succeeded": "MOVE_ARM_TO_PRE_GRASP_RETRACT"},
+            transitions={"succeeded": "SEND_MOVEIT_POSE_INTERMEDIATE_POST"},
+        )
+
+        smach.StateMachine.add(
+            "SEND_MOVEIT_POSE_INTERMEDIATE_POST",
+            SendPoseToMoveIt(modification_name="intermediate_post"),
+            transitions={"succeeded": "MOVE_ARM_USING_MOVEIT_INTERMEDIATE_POST"},
+        )
+
+        # Move arm using mir_moveit_client to an intermediate pose before obj
+        smach.StateMachine.add(
+            "MOVE_ARM_USING_MOVEIT_INTERMEDIATE_POST",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("arm_moveit_client/event_in", "e_start")],
+                event_out_list=[("arm_moveit_client/event_out", "e_success", True)],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "MOVE_ARM_TO_PRE_GRASP_RETRACT",
+                "timeout": "MOVE_ARM_TO_PRE_GRASP_FAILED",
+                "failure": "MOVE_ARM_TO_PRE_GRASP_FAILED",
+            },
         )
 
         smach.StateMachine.add(
