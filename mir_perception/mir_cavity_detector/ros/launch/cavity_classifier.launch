@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+     <include file="$(find mcr_cavity_detector)/ros/launch/detector_selector_cavity.launch" />
+        <node pkg = "mcr_cavity_detector" type="cavity_classifier_node.py" name="cavity_classifier" output="screen">
+    	</node>
+</launch>
