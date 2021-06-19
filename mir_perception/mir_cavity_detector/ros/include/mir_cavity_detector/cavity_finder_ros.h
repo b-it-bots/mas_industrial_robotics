@@ -2,7 +2,7 @@
 #define CONTOUR_FINDER_ROS_H_
 
 #include <ros/ros.h>
-#include <mcr_cavity_detector/cavity_finder.h>
+#include <mir_cavity_detector/cavity_finder.h>
 
 #include <image_transport/image_transport.h>
 #include <tf/transform_broadcaster.h>
@@ -10,7 +10,7 @@
 #include <std_msgs/String.h>
 
 #include <dynamic_reconfigure/server.h>
-#include <mcr_cavity_detector/CavityFinderConfig.h>
+#include <mir_cavity_detector/CavityFinderConfig.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseArray.h>
 #include <mas_perception_msgs/ImageList.h>
@@ -88,7 +88,7 @@ private:
     /**
      * Callback for dynamic reconfigure server to set canny threshold and multiplier
      */
-    void dynamicReconfigCallback(mcr_cavity_detector::CavityFinderConfig &config, uint32_t level);
+    void dynamicReconfigCallback(mir_cavity_detector::CavityFinderConfig &config, uint32_t level);
 
     /**
      * Finds 2D cavities and the corresponding 3D cavities and publishes the array of 3D cavities as pointclouds
@@ -183,7 +183,7 @@ private:
     /**
      * Dynamic reconfigure server
      */
-    dynamic_reconfigure::Server<mcr_cavity_detector::CavityFinderConfig> dynamic_reconfigure_server_;
+    dynamic_reconfigure::Server<mir_cavity_detector::CavityFinderConfig> dynamic_reconfigure_server_;
 
     /**
      * Flag indicating whether pointcloud has been received

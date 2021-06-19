@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-PACKAGE = "mcr_cavity_detector"
+PACKAGE = "mir_cavity_detector"
 NODE = "cavity_classifier"
 
 import os
@@ -22,7 +22,7 @@ from sensor_msgs.msg import Image, RegionOfInterest
 
 import struct
 import colorsys
-from mcr_cavity_detector.mobileNet_classification import mobileNet
+from mir_cavity_detector.mobileNet_classification import mobileNet
 from datetime import datetime
 
 
@@ -33,9 +33,9 @@ class CavityRecognizer():
 
         self.cvbridge = CvBridge()
         self.debug = debug_mode
-        self.pub_result = rospy.Publisher("/mcr_perception/cavity_finder/output/cavities_list", ObjectList, queue_size=1)
-        self.sub_img = rospy.Subscriber("/mcr_perception/cavity_finder/output/cropped_cavities", ImageList, self.image_recognition_cb)
-        self.pub_debug = rospy.Publisher("/mcr_perception/cavity_finder/output/classifier_debug_image", Image, queue_size=1)
+        self.pub_result = rospy.Publisher("/mir_perception/cavity_finder/output/cavities_list", ObjectList, queue_size=1)
+        self.sub_img = rospy.Subscriber("/mir_perception/cavity_finder/output/cropped_cavities", ImageList, self.image_recognition_cb)
+        self.pub_debug = rospy.Publisher("/mir_perception/cavity_finder/output/classifier_debug_image", Image, queue_size=1)
         self.model_name = model_name
         self.model_path = model_dir
         self.model = mobileNet(model_dir + model_name)
