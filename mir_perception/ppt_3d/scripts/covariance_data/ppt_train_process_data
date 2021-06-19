@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+import numpy as np
+import matplotlib.pyplot as plt
+import glob
+import json
+import rospkg
+
+distribution_dict = dict()
+folder_name = rospkg.RosPack().get_path('ppt_3d') + '/scripts/covariance_data/'
+
+for filename in glob.glob(folder_name + 'data**/*.npy'):
+    data_raw = np.load(filename)
+    #data = np.array([data_pt for data_pt in data_raw if (data_pt[0]>2.5e-5 and data_pt[1]<0.0014)])
+    data = np.array([data_pt for data_pt in data_raw])
+    object_name = filename[len(folder_name)+5:-4]
+    distribution_dict[object_name] = {'mu':list(np.mean(data, axis=0)), 'cov':list(np.cov(data.T).reshape((1,4))[0])}
+    print filename
+    print np.mean(data, axis=0)
+    print np.cov(data.T)
+    print "--------------------"
+    
+    plt.scatter(data[:,0], data[:,1], label=object_name, c=np.random.rand(3,))
+
+with open('distribution_dict.json', 'w') as fp:
+    json.dump(distribution_dict, fp)
+
+#with open('distribution_dict.json', 'r') as fp:
+#    json.load(fp)
+
+plt.legend()
+plt.show()
