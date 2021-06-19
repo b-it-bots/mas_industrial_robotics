@@ -16,11 +16,16 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         platform = str(sys.argv[1]).upper()
+        if len(sys.argv) > 2:
+            obj = str(sys.argv[2]).upper()
+        else:
+            obj = "M20"
     else:
         platform = "PLATFORM_MIDDLE"
 
     goal = GenericExecuteGoal()
     goal.parameters.append(KeyValue(key="platform", value=platform))
+    goal.parameters.append(KeyValue(key="object", value=obj))
     rospy.loginfo("Sending following goal to stage object server")
     rospy.loginfo(goal)
 

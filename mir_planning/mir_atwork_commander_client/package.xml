@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mir_atwork_commander_client</name>
+  <version>0.1.0</version>
+  <description>
+  Client for atwork commander
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rospy</depend>
+  <depend>atwork_commander_msgs</depend>
+  <depend>mir_knowledge</depend>
+
+</package>

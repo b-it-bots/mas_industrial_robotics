@@ -59,9 +59,7 @@ class ProblemUploader(object):
         self._problem_file = problem_file
         pddl_problem = pddl.pddl_file.parse_pddl_file("problem", self._problem_file)
         self._instances = ProblemUploader.parse_objects(pddl_problem[3])
-        self._attr_to_obj_type = ProblemUploader.get_attr_to_obj_type(
-            self._instances.keys()
-        )
+        self._attr_to_obj_type = ProblemUploader.get_attr_to_obj_type()
         self._facts = self._parse_facts(pddl_problem[4])
         self._goals = self._parse_facts(pddl_problem[5][1])
 
@@ -161,6 +159,14 @@ class ProblemUploader(object):
         :type pddl_objects: list (str)
         :rtype: dict {str: [str, str, ...], ...}
 
+        example returned object
+            {
+                robot_platform: ['platform_middle', 'platform_left', 'platform_right'],
+                object: ['r20', 'm20', 'm30-00', 'm30-01', 'axis', 'bearing'],
+                location: ['sh01', 'cb01', 'ws01', 'ws02', 'start', 'end'],
+                robot: ['youbot-brsu']
+            }
+
         """
         # ignore first element
         objects = pddl_objects[1:]
@@ -185,6 +191,15 @@ class ProblemUploader(object):
         :type pddl_facts: list (str)
         :rtype: list (tuple (str, [(str, str), ...]) )
 
+        example returned object
+            [
+                ('at', [('r', 'youbot-brsu'), ('l', 'start')]),
+                ('gripper_is_free', [('r', 'youbot-brsu')]),
+                ('on', [('o', 'r20'), ('l', 'sh01')]),
+                ('on', [('o', 'bearing'), ('l', 'cb01')]),
+                ('on', [('o', 'm30-00'), ('l', 'ws01')]),
+            ]
+
         """
         facts = []
         for fact in pddl_facts[1:]:
@@ -201,7 +216,7 @@ class ProblemUploader(object):
         return facts
 
     @staticmethod
-    def get_attr_to_obj_type(obj_names):
+    def get_attr_to_obj_type():
         """
         Create a dict to look up from attribute name to object keys
 
@@ -209,8 +224,6 @@ class ProblemUploader(object):
         where 'o' stands for object and 'l' stands for location according to the
         domain file.
 
-        :param obj_names: names of objects
-        :type obj_names: list (str)
         :return: a dict to map attribute name to object keys
         :rtype: dict
 
