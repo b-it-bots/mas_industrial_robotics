@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
     rospy
     std_msgs
     sensor_msgs
+    mas_perception_msgs
 )
 
 add_message_files(
