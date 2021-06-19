@@ -4,8 +4,8 @@
 #include <std_msgs/Float32MultiArray.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <ppt_3d/Cavity.h>
-#include <ppt_3d/Cavities.h>
+#include <mir_ppt_detection/Cavity.h>
+#include <mir_ppt_detection/Cavities.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -262,7 +262,7 @@ cloud_cb (const PointCloud::ConstPtr& input)
     pcl::ConvexHull<PointRGBA> convex_hull;
     convex_hull.setComputeAreaVolume(true);
     PointCloudRGBA::Ptr cavity_hull(new PointCloudRGBA);
-    ppt_3d::Cavities cavities_msg;
+    mir_ppt_detection::Cavities cavities_msg;
     for (std::vector<pcl::PointIndices>::const_iterator cluster_it = cavity_clusters->begin (); cluster_it != cavity_clusters->end (); ++cluster_it)
     {
       PointIndices::Ptr cavity_indices (new PointIndices (*cluster_it));
@@ -305,7 +305,7 @@ cloud_cb (const PointCloud::ConstPtr& input)
           eigenVectorsPCA.col(2) = eigenVectorsPCA.col(0).cross(eigenVectorsPCA.col(1));
 
           
-          ppt_3d::Cavity cavity_msg;
+          mir_ppt_detection::Cavity cavity_msg;
           cavity_msg.cov_minor = eigen_solver.eigenvalues()[1];
           cavity_msg.cov_major = eigen_solver.eigenvalues()[2];
           geometry_msgs::Pose pose;
@@ -377,7 +377,7 @@ main (int argc, char** argv)
   cloud_pub0 = nh.advertise<sensor_msgs::PointCloud2> ("cloud_non_planar", 1);
   cloud_pub1 = nh.advertise<sensor_msgs::PointCloud2> ("cloud_planar", 1);
   cloud_pub2 = nh.advertise<sensor_msgs::PointCloud2> ("cloud_cavity_clusters", 1);
-  cavity_pub = nh.advertise<ppt_3d::Cavities> ("cavities", 1);
+  cavity_pub = nh.advertise<mir_ppt_detection::Cavities> ("cavities", 1);
 
   // Spin
   ros::spin ();
