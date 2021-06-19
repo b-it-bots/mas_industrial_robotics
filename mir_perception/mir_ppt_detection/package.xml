@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ppt_3d</name>
+  <name>mir_ppt_detection</name>
   <version>0.0.0</version>
   <description>The ppt_3d package</description>
 
