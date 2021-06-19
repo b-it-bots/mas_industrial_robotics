@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-    <group ns="mcr_perception">
-        <node pkg="mcr_cavity_detector" type="cavity_finder" name="cavity_finder" output="screen" respawn="false">
+    <group ns="mir_perception">
+        <node pkg="mir_cavity_detector" type="cavity_finder" name="cavity_finder" output="screen" respawn="false">
             <remap from="~input/pointcloud" to="/arm_cam3d/depth_registered/points" />
             <remap from="~image" to="/arm_cam3d/rgb/image_raw" />
             <param name="offset_in_z" type="double" value="0.055" />

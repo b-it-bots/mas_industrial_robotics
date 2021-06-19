@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>mcr_cavity_detector</name>
+  <name>mir_cavity_detector</name>
   <version>0.1.0</version>
   <description>
       Node to find 2D cavities in an image and convert to 3D cavities.

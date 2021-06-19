@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <mcr_cavity_detector/cavity_finder_ros.h>
+#include <mir_cavity_detector/cavity_finder_ros.h>
 
 int main(int argc, char **argv)
 {
