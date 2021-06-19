@@ -397,11 +397,11 @@ cloud_cb (const PointCloud::ConstPtr& input)
 int main (int argc, char** argv)
 {
     // Initialize ROS
-    ros::init (argc, argv, "ppt_3d_detection_node");
-    ros::NodeHandle nh;
+    ros::init (argc, argv, "ppt_3d_detector");
+    ros::NodeHandle nh("~");
 
     // Create a ROS subscriber for the input point cloud
-    ros::Subscriber sub = nh.subscribe<PointCloud> ("camera/depth_registered/points", 1, cloud_cb);
+    ros::Subscriber sub = nh.subscribe<PointCloud> ("points", 1, cloud_cb);
 
     // Create a ROS publisher for the output point cloud
     cloud_pub0 = nh.advertise<sensor_msgs::PointCloud2> ("cloud_non_planar", 1);
