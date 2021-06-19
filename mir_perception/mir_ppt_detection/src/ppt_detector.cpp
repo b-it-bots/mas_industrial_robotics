@@ -1,57 +1,20 @@
-#include <math.h>
-// PCL specific includes
-#include <sensor_msgs/PointCloud2.h>
-#include <std_msgs/Float32MultiArray.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <mir_ppt_detection/Cavity.h>
-#include <mir_ppt_detection/Cavities.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include "pcl_ros/point_cloud.h"
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/ModelCoefficients.h>
-#include <pcl/filters/project_inliers.h>
-#include <pcl/surface/convex_hull.h>
-#include <pcl/segmentation/extract_polygonal_prism_data.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/segmentation/extract_clusters.h>
-#include <pcl_ros/transforms.h>
-#include <eigen_conversions/eigen_msg.h>
-#include <min_distance_to_hull_calculator.hpp>
+#include <mir_ppt_detection/ppt_detector.h>
 
-#include <pcl/filters/conditional_removal.h>
-#include <pcl/segmentation/region_growing_rgb.h>
-#include <pcl/segmentation/conditional_euclidean_clustering.h>
-#include <pcl/filters/statistical_outlier_removal.h>
-#include <pcl/kdtree/kdtree.h>
+PPTDetector::PPTDetector():
+    nh_("~")
+{
+    // Create a ROS subscriber for the input point cloud
+    pc_sub_ = nh_.subscribe<PointCloud> ("points", 1, &PPTDetector::cloud_cb, this);
 
-typedef pcl::PointXYZRGB PointT;
-typedef pcl::PointXYZRGBA PointRGBA;
-typedef pcl::PointCloud<PointT> PointCloud;
-typedef pcl::PointCloud<PointRGBA> PointCloudRGBA;
-typedef pcl::PointIndices PointIndices;
+    // Create a ROS publisher for the output point cloud
+    cloud_pub0 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_non_planar", 1);
+    cloud_pub1 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_planar", 1);
+    cloud_pub2 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_cavity_clusters", 1);
+    cavity_pub = nh_.advertise<mir_ppt_detection::Cavities> ("cavities", 1);
 
-bool debug_pub = true;
+}
 
-int downsample_scale = 3;
-float planar_projection_thresh = 0.015; 
-float cam_cx = 320.0;
-float cam_cy = 245.1;
-float cam_fx = 615.8;
-float cam_fy = 615.6;
-float min_cavity_area = 1e-4;
-
-ros::Publisher cloud_pub0, cloud_pub1, cloud_pub2;
-ros::Publisher cavity_pub;
-MinDistanceToHullCalculator dist_to_hull;
-
-PointRGBA get_point_rgba(const pcl::PointXYZRGB& pt_rgb){
+PointRGBA PPTDetector::get_point_rgba(const pcl::PointXYZRGB& pt_rgb){
     PointRGBA pt_rgba;
     pt_rgba.x = pt_rgb.x;
     pt_rgba.y = pt_rgb.y;
@@ -62,7 +25,7 @@ PointRGBA get_point_rgba(const pcl::PointXYZRGB& pt_rgb){
     return pt_rgba;
 }
 
-PointCloudRGBA::Ptr get_point_cloud_rgba(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_rgb){
+PointCloudRGBA::Ptr PPTDetector::get_point_cloud_rgba(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_rgb){
     PointCloudRGBA::Ptr cloud_rgba(new PointCloudRGBA);
     for( size_t i = 0;  i < cloud_rgb->points.size(); i++){
         cloud_rgba->points.push_back(get_point_rgba(cloud_rgb->points[i]));
@@ -71,7 +34,7 @@ PointCloudRGBA::Ptr get_point_cloud_rgba(const pcl::PointCloud<pcl::PointXYZRGB>
 }
 
 template<typename T>
-void downsample_organized_cloud(T cloud_in, PointCloud::Ptr cloud_downsampled, int scale) {
+void PPTDetector::downsample_organized_cloud(T cloud_in, PointCloud::Ptr cloud_downsampled, int scale) {
     cloud_downsampled->width = cloud_in->width / scale;
     cloud_downsampled->height = cloud_in->height / scale;
     cloud_downsampled->points.resize(cloud_downsampled->width * cloud_downsampled->height);
@@ -82,7 +45,7 @@ void downsample_organized_cloud(T cloud_in, PointCloud::Ptr cloud_downsampled, i
     }
 }
 
-bool compute_dominant_plane_and_hull(PointCloud::Ptr cloud_in,
+bool PPTDetector::compute_dominant_plane_and_hull(PointCloud::Ptr cloud_in,
                                      pcl::ModelCoefficients::Ptr plane_coeffs,
                                      PointCloud::Ptr hull){
     //Estimate most dominant plane coefficients and inliers
@@ -117,7 +80,7 @@ bool compute_dominant_plane_and_hull(PointCloud::Ptr cloud_in,
     }
 }
 
-void project_points_to_plane(PointCloud::Ptr cloud_in,
+void PPTDetector::project_points_to_plane(PointCloud::Ptr cloud_in,
                              pcl::ModelCoefficients::Ptr plane_coeffs,
                              PointIndices::Ptr planar_indices, 
                              PointIndices::Ptr non_planar_indices,
@@ -150,7 +113,7 @@ void project_points_to_plane(PointCloud::Ptr cloud_in,
     }
 }
 
-void extract_polygonal_prism_inliers(PointCloudRGBA::Ptr cloud_in,
+void PPTDetector::extract_polygonal_prism_inliers(PointCloudRGBA::Ptr cloud_in,
                                      PointIndices::Ptr indices_in,
                                      PointCloud::Ptr cloud_hull,
                                      PointIndices::Ptr hull_inlier_indices){
@@ -165,7 +128,7 @@ void extract_polygonal_prism_inliers(PointCloudRGBA::Ptr cloud_in,
     epp.segment(*hull_inlier_indices);
 }
 
-bool customRegionGrowing1 (const PointRGBA& point_a, const PointRGBA& point_b,
+bool PPTDetector::customRegionGrowing1 (const PointRGBA& point_a, const PointRGBA& point_b,
                            float squared_distance){
     float thresh = 5;
     if (fabs(point_a.r-point_b.r) < thresh && fabs(point_a.g-point_b.g) < thresh && fabs(point_a.b-point_b.b) < thresh){
@@ -174,7 +137,7 @@ bool customRegionGrowing1 (const PointRGBA& point_a, const PointRGBA& point_b,
     return false;
 }
 
-bool customRegionGrowing2 (const PointRGBA& point_a, const PointRGBA& point_b,
+bool PPTDetector::customRegionGrowing2 (const PointRGBA& point_a, const PointRGBA& point_b,
                            float squared_distance){
     if (point_a.a == 1 && point_b.a == 1){
         return true; 
@@ -187,7 +150,7 @@ bool customRegionGrowing2 (const PointRGBA& point_a, const PointRGBA& point_b,
     return false;
 }
 
-float get_non_planar_pt_frac(PointCloudRGBA::Ptr cloud_in){
+float PPTDetector::get_non_planar_pt_frac(PointCloudRGBA::Ptr cloud_in){
     int non_planar_pt_cnt = 0;
     for( size_t i= 0;  i < cloud_in->points.size(); i++){
         if (cloud_in->points[i].a == 1) {non_planar_pt_cnt++;}
@@ -195,7 +158,7 @@ float get_non_planar_pt_frac(PointCloudRGBA::Ptr cloud_in){
     return (float)non_planar_pt_cnt/cloud_in->points.size();
 }
 
-void compute_cavity_clusters(PointCloudRGBA::Ptr cloud_in,
+void PPTDetector::compute_cavity_clusters(PointCloudRGBA::Ptr cloud_in,
                              PointIndices::Ptr planar_idx,
                              PointIndices::Ptr non_planar_idx,
                              pcl::IndicesClustersPtr clusters){
@@ -207,26 +170,26 @@ void compute_cavity_clusters(PointCloudRGBA::Ptr cloud_in,
     cec.setClusterTolerance (0.005);
     cec.setMinClusterSize (1);
     cec.setMaxClusterSize (cloud_in->points.size() / 50);
-    cec.setConditionFunction (&customRegionGrowing1);
+    cec.setConditionFunction (&PPTDetector::customRegionGrowing1);
     cec.segment (*planar_cavity_candidate_idx_clusters);
 
     pcl::PointIndices::Ptr cavity_candidate_indices (new pcl::PointIndices (*non_planar_idx));
     for (std::vector<PointIndices>::const_iterator cluster_it = planar_cavity_candidate_idx_clusters->begin (); 
             cluster_it != planar_cavity_candidate_idx_clusters->end (); ++cluster_it) {
-        cavity_candidate_indices->indices.insert(cavity_candidate_indices->indices.end(), cluster_it->indices.begin(), cluster_it->indices.end());
+        cavity_candidate_indices->indices.insert(cavity_candidate_indices->indices.end(),
+                                                 cluster_it->indices.begin(),
+                                                 cluster_it->indices.end());
     }
 
     cec.setIndices (cavity_candidate_indices);
     cec.setClusterTolerance (0.01);
     cec.setMinClusterSize (cloud_in->points.size() / 400);
     cec.setMaxClusterSize (cloud_in->points.size() / 10);
-    cec.setConditionFunction (&customRegionGrowing2);
+    cec.setConditionFunction (&PPTDetector::customRegionGrowing2);
     cec.segment (*clusters);
 }
 
-void 
-//cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
-cloud_cb (const PointCloud::ConstPtr& input)
+void PPTDetector::cloud_cb (const PointCloud::ConstPtr& input)
 {
     ros::Time t = ros::Time::now();
     //Downsample by downsample_scale
@@ -398,17 +361,7 @@ int main (int argc, char** argv)
 {
     // Initialize ROS
     ros::init (argc, argv, "ppt_3d_detector");
-    ros::NodeHandle nh("~");
-
-    // Create a ROS subscriber for the input point cloud
-    ros::Subscriber sub = nh.subscribe<PointCloud> ("points", 1, cloud_cb);
-
-    // Create a ROS publisher for the output point cloud
-    cloud_pub0 = nh.advertise<sensor_msgs::PointCloud2> ("cloud_non_planar", 1);
-    cloud_pub1 = nh.advertise<sensor_msgs::PointCloud2> ("cloud_planar", 1);
-    cloud_pub2 = nh.advertise<sensor_msgs::PointCloud2> ("cloud_cavity_clusters", 1);
-    cavity_pub = nh.advertise<mir_ppt_detection::Cavities> ("cavities", 1);
-
+    PPTDetector ppt_detector;
     // Spin
     ros::spin ();
 }
