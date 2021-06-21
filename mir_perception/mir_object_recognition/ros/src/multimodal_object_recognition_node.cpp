@@ -34,7 +34,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   received_recognized_cloud_list_flag_(false),
   received_recognized_image_list_flag_(false),
   rgb_object_id_(100),
-  rgb_container_height_(0.05),
+  container_height_(0.05),
   rgb_roi_adjustment_(2),
   rgb_bbox_min_diag_(21),
   rgb_bbox_max_diag_(250),
@@ -389,6 +389,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       {
         PointCloud::Ptr cloud_roi(new PointCloud);
         // get3DObject(roi_2d, cloud_, pcl_object_cluster);
+        std::cout << "cloud res: " << cloud_->height << " " << cloud_->width << std::endl;
         mpu::pointcloud::getPointCloudROI(roi_2d, cloud_, cloud_roi, rgb_roi_adjustment_, true);
         // ToDo: Filter big objects from 2d proposal, if the height is less than 3 mm
         // pcl::PointXYZRGB min_pt;
@@ -652,12 +653,12 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     }
     // Update container pose
     if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
-      object_list.objects[i].name == "CONTAINER_BOX_BLUE")
+        object_list.objects[i].name == "CONTAINER_BOX_BLUE")
     {
       if (object_list.objects[i].database_id > 100)
       {
-        ROS_INFO_STREAM("Updating container pose");
-        mm_object_recognition_utils_->adjustContainerPose(object_list.objects[i], rgb_container_height_);
+        ROS_INFO_STREAM("Updating RGB container pose");
+        mm_object_recognition_utils_->adjustContainerPose(object_list.objects[i], container_height_);
       }
     }
     // Make pose flat
@@ -672,6 +673,13 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     {
       object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
                               object_height_above_workspace_;
+      if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
+          object_list.objects[i].name == "CONTAINER_BOX_BLUE")
+      {
+        ROS_INFO_STREAM("Updating container height");
+        object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
+                              container_height_;
+      }
     }
     // Update axis or bolt pose
     if (object_list.objects[i].name == "M20_100" || object_list.objects[i].name == "AXIS")
@@ -777,7 +785,7 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
   padded_cluster_size_ = config.padded_cluster_size;
   // Workspace and object height
   object_height_above_workspace_ = config.object_height_above_workspace;
-  rgb_container_height_ = config.rgb_container_height;
+  container_height_ = config.container_height;
   // RGB proposal params
   rgb_roi_adjustment_ = config.rgb_roi_adjustment;
   rgb_bbox_min_diag_ = config.rgb_bbox_min_diag;

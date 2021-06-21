@@ -166,7 +166,7 @@ class MultimodalObjectRecognitionROS
 
     // Dynamic parameter
     double object_height_above_workspace_;
-    double rgb_container_height_;
+    double container_height_;
     int rgb_roi_adjustment_;
     int rgb_bbox_min_diag_;
     int rgb_bbox_max_diag_;
