@@ -90,11 +90,160 @@ def main():
             "SET_DBC_PARAMS",
             gbs.set_named_config("dbc_pick_object"),
             transitions={
-                "success": "MOVE_ROBOT_AND_PICK",
+                "success": "MOVE_ROBOT_AND_TRY_PICKING",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
         )
+
+        # whole body control command. It moves direct base controller and
+        # checks if an IK soln exists for the arm.
+        smach.StateMachine.add(
+            "MOVE_ROBOT_AND_TRY_PICKING",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/wbc/event_in", "e_try")],
+                event_out_list=[("/wbc/event_out", "e_success", True)],
+                timeout_duration=50,
+            ),
+            transitions={
+                "success": "MOVE_ARM",
+                "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+                "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+            },
+        )
+
+        # move arm to appropriate position
+        smach.StateMachine.add(
+            "MOVE_ARM",
+            gms.move_arm("look_at_workspace_from_near"),
+            transitions={
+                "succeeded": "START_OBJECT_LIST_MERGER",
+                "failed": "MOVE_ARM",
+            },
+        )
+
+        smach.StateMachine.add(
+            "START_OBJECT_LIST_MERGER",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_start")],
+                event_out_list=[("/mcr_perception/object_list_merger/event_out", "e_started", True)],
+                timeout_duration=5,
+            ),
+            transitions={
+                "success": "START_OBJECT_RECOGNITION",
+                "timeout": "TRY_PICKING",
+                "failure": "TRY_PICKING",
+            },
+        )
+
+        # New perception pipeline state machine
+        smach.StateMachine.add(
+            "START_OBJECT_RECOGNITION",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mir_perception/multimodal_object_recognition/event_in", "e_start")],
+                event_out_list=[("/mir_perception/multimodal_object_recognition/event_out", "e_done", True)],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "STOP_RECOGNITION",
+                "timeout": "TRY_PICKING",
+                "failure": "TRY_PICKING",
+            },
+        )
+
+        smach.StateMachine.add(
+            "STOP_RECOGNITION",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mir_perception/multimodal_object_recognition/event_in", "e_stop")],
+                event_out_list=[("/mir_perception/multimodal_object_recognition/event_out", "e_stopped", True)],
+                timeout_duration=5,
+            ),
+            transitions={
+                "success": "STOP_OBJECT_LIST_MERGER",
+                "timeout": "TRY_PICKING",
+                "failure": "TRY_PICKING",
+            },
+        )
+
+        smach.StateMachine.add(
+            "STOP_OBJECT_LIST_MERGER",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_stop")],
+                event_out_list=[("/mcr_perception/object_list_merger/event_out", "e_stopped", True)],
+                timeout_duration=5,
+            ),
+            transitions={
+                "success": "PUBLISH_MERGED_OBJECT_LIST",
+                "timeout": "TRY_PICKING",
+                "failure": "TRY_PICKING",
+            },
+        )
+
+        smach.StateMachine.add(
+            "PUBLISH_MERGED_OBJECT_LIST",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_trigger")],
+                event_out_list=[("/mcr_perception/object_list_merger/event_out", "e_done", True)],
+                timeout_duration=5,
+            ),
+            transitions={
+                "success": "SELECT_OBJECT_AGAIN",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "SELECT_OBJECT_AGAIN",
+            SelectObject("/mcr_perception/object_selector/input/object_name"),
+            transitions={"succeeded": "GENERATE_UPDATED_OBJECT_POSE"},
+        )
+
+        # generates a pose of object
+        smach.StateMachine.add(
+            "GENERATE_UPDATED_OBJECT_POSE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mcr_perception/object_selector/event_in", "e_trigger")],
+                event_out_list=[("/mcr_perception/object_selector/event_out", "e_selected", True)],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "TRY_PICKING",
+                "timeout": "GENERATE_OBJECT_POSE_AGAIN",
+                "failure": "GENERATE_OBJECT_POSE_AGAIN",
+            },
+        )
+
+        # generates a pose of object
+        smach.StateMachine.add(
+            "GENERATE_OBJECT_POSE_AGAIN",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mcr_perception/object_selector/event_in", "e_re_trigger")],
+                event_out_list=[("/mcr_perception/object_selector/event_out", "e_selected", True)],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "TRY_PICKING",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        # move only arm for wbc
+        smach.StateMachine.add(
+            "TRY_PICKING",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/wbc/event_in", "e_start_arm_only")],
+                event_out_list=[("/wbc/event_out", "e_success", True)],
+                timeout_duration=20,
+            ),
+            transitions={
+                "success": "CLOSE_GRIPPER",
+                "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+                "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+            },
+        )
+
 
         # whole body control command. It moves direct base controller and
         # calls pre-grasp planner, and (optionally) moves arm to object pose
