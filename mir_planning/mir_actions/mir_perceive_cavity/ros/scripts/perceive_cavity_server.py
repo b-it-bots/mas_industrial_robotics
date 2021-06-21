@@ -62,12 +62,12 @@ class Setup(smach.State):
         # 2. single_view mode - only perceiving in one direction <straight>
         perception_mode = Utils.get_value_of(userdata.goal.parameters, "perception_mode")
         if perception_mode is not None and perception_mode == "single_view":
-            userdata.arm_pose_list = ["look_at_workspace_from_near"]
+            userdata.arm_pose_list = ["ppt_cavity_middle"]
         else:
             userdata.arm_pose_list = [
-                "look_at_workspace_from_near",
-                "look_at_workspace_from_near_left",
-                "look_at_workspace_from_near_right",
+                "ppt_cavity_middle",
+                "ppt_cavity_left",
+                "ppt_cavity_right",
             ]
 
         return "succeeded"
@@ -198,7 +198,16 @@ def main():
         smach.StateMachine.add(
             "POPULATE_RESULT_WITH_CAVITIES",
             PopulateResultWithCavities(),
-            transitions={"succeeded": "OVERALL_SUCCESS"},
+            transitions={"succeeded": "VISUALIZE_CAVITIES"},
+        )
+
+        # populate action server result with perceived objects
+        smach.StateMachine.add(
+            "VISUALIZE_CAVITIES",
+            gbs.send_event(
+                [("/mcr_perception/cavity_pose_selector/event_in", "e_start")]
+            ),
+            transitions={"success": "OVERALL_SUCCESS"},
         )
 
     # smach viewer
