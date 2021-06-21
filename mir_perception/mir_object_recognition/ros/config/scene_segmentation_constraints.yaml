@@ -35,7 +35,7 @@ multimodal_object_recognition:
   padded_cluster_size: 2048
   octree_resolution: 0.0025
   object_height_above_workspace: 0.017
-  rgb_container_height: 0.0335
+  container_height: 0.0335
   rgb_roi_adjustment: 2
   rgb_bbox_min_diag: 21
   rgb_bbox_max_diag: 175
