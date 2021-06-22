@@ -127,19 +127,24 @@ class PopulateResultWithObjects(smach.State):
             self.objects_callback,
         )
         self.perceived_obj_names = []
+        self.perceived_obj_db_id = []
 
     def objects_callback(self, msg):
         self.perceived_obj_names = [str(obj.name) for obj in msg.objects]
+        self.perceived_obj_db_id = [str(obj.database_id) for obj in msg.objects]
 
     def execute(self, userdata):
         result = GenericExecuteResult()
         for i, obj in enumerate(self.perceived_obj_names):
             result.results.append(KeyValue(key="obj_" + str(i + 1), value=obj))
+            result.results.append(KeyValue(key="obj_" + str(i + 1) + "_id",
+                                           value=self.perceived_obj_db_id[i]))
         userdata.result = result
 
         userdata.feedback = GenericExecuteFeedback()  # place holder
 
         self.perceived_obj_names = []  # clear perceived objects for next call
+        self.perceived_obj_db_id = []  # clear perceived objects for next call
         return "succeeded"
 
 
