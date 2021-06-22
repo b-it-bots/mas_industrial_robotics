@@ -228,7 +228,7 @@ bool PPTDetector::customRegionGrowing2 (const PointRGBA& point_a, const PointRGB
                            float squared_distance){
     if (point_a.a == 1 && point_b.a == 1){
         return true; 
-    } else if (point_a.a == 1 || point_b.a == 1){
+    } else {
         float thresh = 5;
         if (fabs(point_a.r-point_b.r) < thresh && fabs(point_a.g-point_b.g) < thresh && fabs(point_a.b-point_b.b) < thresh){
             return true;
@@ -269,7 +269,7 @@ void PPTDetector::compute_cavity_clusters(PointCloudRGBA::Ptr cloud_in,
     }
 
     cec.setIndices (cavity_candidate_indices);
-    cec.setClusterTolerance (0.01);
+    cec.setClusterTolerance (0.005);
     cec.setMinClusterSize (cloud_in->points.size() / 400);
     cec.setMaxClusterSize (cloud_in->points.size() / 10);
     cec.setConditionFunction (&PPTDetector::customRegionGrowing2);
