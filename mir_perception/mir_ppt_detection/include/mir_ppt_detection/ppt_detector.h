@@ -114,7 +114,7 @@ class PPTDetector
         ros::NodeHandle nh_;
         ros::Subscriber pc_sub_;
 
-        bool debug_pub = true;
+        bool debug_pub_;
 
         int downsample_scale = 3;
         float planar_projection_thresh = 0.015; 

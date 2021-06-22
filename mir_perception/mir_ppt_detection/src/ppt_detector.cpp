@@ -27,7 +27,7 @@ PPTDetector::PPTDetector():
 
     nh_.param<std::string>("target_frame", target_frame_, "base_link");
     nh_.param<std::string>("source_frame", source_frame_, "arm_cam3d_camera_color_optical_frame");
-
+    nh_.param<bool>("debug_pub", debug_pub_, true);
 }
 
 bool PPTDetector::readObjectShapeParams()
@@ -59,7 +59,7 @@ bool PPTDetector::readObjectShapeParams()
         return false;
     }
 
-    std::cout << object_shape_learned_params_yaml << std::endl;
+    // std::cout << object_shape_learned_params_yaml << std::endl;
     for ( YAML::const_iterator it = object_shape_learned_params_yaml.begin();
             it != object_shape_learned_params_yaml.end(); ++it )
     {
@@ -89,14 +89,14 @@ bool PPTDetector::readObjectShapeParams()
         learned_obj_params_map_[obj_name] = learned_obj_params;
     }
 
-    for ( auto itr = learned_obj_params_map_.begin();
-          itr != learned_obj_params_map_.end();
-          itr ++ )
-    {
-        std::cout << itr->first << std::endl;
-        std::cout << "mu: " << itr->second.mu << std::endl;
-        std::cout << "cov: " << itr->second.cov << std::endl;
-    }
+    // for ( auto itr = learned_obj_params_map_.begin();
+    //       itr != learned_obj_params_map_.end();
+    //       itr ++ )
+    // {
+    //     std::cout << itr->first << std::endl;
+    //     std::cout << "mu: " << itr->second.mu << std::endl;
+    //     std::cout << "cov: " << itr->second.cov << std::endl;
+    // }
 
     return true;
 }
@@ -495,8 +495,7 @@ void PPTDetector::publish_cavity_msg(const mir_ppt_detection::Cavities& cavities
         {
             ROS_ERROR("%s", ex.what());
         }
-
-        std::cout << pose_in_target_frame << std::endl;
+        pose_in_target_frame.pose.position.z = 0.025; //TODO: do not hardcode this; use workspace height + object_height_above_workspace
 
         mas_perception_msgs::Cavity cavity;
 
@@ -524,7 +523,7 @@ void PPTDetector::cloud_cb (const PointCloud::ConstPtr& input)
 
     cavity_pub.publish(cavities);
 
-    if (debug_pub)
+    if ( debug_pub_ )
     {
         sensor_msgs::PointCloud2 output;
 
