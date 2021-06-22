@@ -182,7 +182,7 @@ def main():
         smach.StateMachine.add(
             "PUBLISH_MERGED_OBJECT_LIST",
             gbs.send_and_wait_events_combined(
-                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_trigger")],
+                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_trigger_local")],
                 event_out_list=[("/mcr_perception/object_list_merger/event_out", "e_done", True)],
                 timeout_duration=5,
             ),
@@ -195,7 +195,7 @@ def main():
 
         smach.StateMachine.add(
             "SELECT_OBJECT_AGAIN",
-            SelectObject("/mcr_perception/object_selector/input/object_name"),
+            SelectObject("/mcr_perception/local_object_selector/input/object_name"),
             transitions={"succeeded": "GENERATE_UPDATED_OBJECT_POSE"},
         )
 
@@ -203,8 +203,8 @@ def main():
         smach.StateMachine.add(
             "GENERATE_UPDATED_OBJECT_POSE",
             gbs.send_and_wait_events_combined(
-                event_in_list=[("/mcr_perception/object_selector/event_in", "e_trigger")],
-                event_out_list=[("/mcr_perception/object_selector/event_out", "e_selected", True)],
+                event_in_list=[("/mcr_perception/local_object_selector/event_in", "e_trigger")],
+                event_out_list=[("/mcr_perception/local_object_selector/event_out", "e_selected", True)],
                 timeout_duration=10,
             ),
             transitions={
@@ -265,7 +265,7 @@ def main():
             "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
             gbs.send_event(
                 [
-                    ("/waypoint_trajectory_generation/event_in", "e_start"),
+                    ("/waypoint_trajectory_generation/event_in", "e_stop"),
                     ("/wbc/event_in", "e_stop"),
                 ]
             ),
