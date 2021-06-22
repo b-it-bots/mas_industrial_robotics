@@ -2,6 +2,7 @@
 
 import mcr_perception_states.common.perception_states as gps
 import mcr_states.common.basic_states as gbs
+import mir_states.common.basic_states as mir_gbs
 import mir_states.common.manipulation_states as gms
 import rospy
 import smach
@@ -67,7 +68,9 @@ class Setup(smach.State):
             userdata.arm_pose_list = [
                 "ppt_cavity_middle",
                 "ppt_cavity_left",
+                "ppt_cavity_far_left",
                 "ppt_cavity_right",
+                "ppt_cavity_far_right"
             ]
 
         return "succeeded"
@@ -169,8 +172,16 @@ def main():
             "MOVE_ARM_TO_SELECTED_POSE",
             gms.move_arm_and_gripper("open"),
             transitions={
-                "succeeded": "RECOGNIZE_CAVITIES",
+                "succeeded": "WAIT_FOR_ARM_TO_STABILIZE",
                 "failed": "MOVE_ARM_TO_SELECTED_POSE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "WAIT_FOR_ARM_TO_STABILIZE",
+            mir_gbs.wait_for(0.5),
+            transitions={
+                "succeeded": "RECOGNIZE_CAVITIES",
             },
         )
         #+++
@@ -205,7 +216,7 @@ def main():
         smach.StateMachine.add(
             "VISUALIZE_CAVITIES",
             gbs.send_event(
-                [("/mcr_perception/cavity_pose_selector/event_in", "e_start")]
+                [("/mcr_perception/cavity_pose_selector/event_in", "e_visualize")]
             ),
             transitions={"success": "OVERALL_SUCCESS"},
         )
