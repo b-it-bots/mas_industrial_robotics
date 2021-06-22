@@ -220,8 +220,8 @@ def main():
             ),
             transitions={
                 "success": "SET_DBC_PARAMS",
-                "timeout": "UNSTAGE_OBJECT",
-                "failure": "UNSTAGE_OBJECT",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
             },
         )
 
