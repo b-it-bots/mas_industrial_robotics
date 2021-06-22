@@ -495,7 +495,7 @@ void PPTDetector::publish_cavity_msg(const mir_ppt_detection::Cavities& cavities
         {
             ROS_ERROR("%s", ex.what());
         }
-        pose_in_target_frame.pose.position.z = 0.025; //TODO: do not hardcode this; use workspace height + object_height_above_workspace
+        pose_in_target_frame.pose.position.z = 0.035; //TODO: do not hardcode this; use workspace height + object_height_above_workspace
 
         mas_perception_msgs::Cavity cavity;
 
