@@ -223,7 +223,7 @@ def main():
                 timeout_duration=10,
             ),
             transitions={
-                "success": "TRY_PICKING",
+                "success": "MOVE_ROBOT_AND_PICK",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
