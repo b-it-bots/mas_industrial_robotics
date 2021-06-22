@@ -116,6 +116,7 @@
     <!-- Object selector used for planning in pick and insert actions NOT TESTED -->
     <include file="$(find mcr_perception_selectors)/ros/launch/object_selector.launch">
         <arg name="input_topic" value="/mcr_perception/object_list_merger/output_object_list" />
+        <arg name="local_input_topic" value="/mcr_perception/object_list_merger/local_output_object_list" />
     </include>
 
     <!-- pose selector for placing objects -->
