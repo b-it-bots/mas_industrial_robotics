@@ -2,6 +2,7 @@
 <launch>
 
     <arg name="refbox" default="true" />
+    <arg name="visualise" default="true" />
 
     <!-- knowledge base args, they are reused by other components as well -->
     <arg name="domain" default="general_domain" />
@@ -50,6 +51,13 @@
          task descriptions -->
     <group if="$(arg refbox)" >
         <include file="$(find mir_atwork_commander_client)/ros/launch/atwork_commander_client.launch"/>
+    </group>
+
+    <group if="$(arg visualise)" >
+        <include file="$(find mir_planning_visualisation)/ros/launch/planning_visualiser.launch">
+            <arg name="alpha" value="0.5"/>
+            <arg name="visualise_robot" value="false"/>
+        </include>
     </group>
 
 </launch>
