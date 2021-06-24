@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import mcr_states.common.basic_states as gbs
 import mir_states.common.basic_states as mir_gbs
 import mir_states.common.manipulation_states as gms
 import mir_states.common.navigation_states as gns
+import mir_states.common.action_states as gas
 import rospy
 import smach
 import tf
@@ -17,6 +19,45 @@ from mir_planning_msgs.msg import (
     GenericExecuteResult,
 )
 from smach_ros import ActionServerWrapper, IntrospectionServer
+
+# ===============================================================================
+
+
+class CheckIfBaseCentered(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["yes", "no", "unavailable"],
+            input_keys=["goal"]
+        )
+        self.tf_listener = tf.TransformListener()
+        self.distance_threshold = 0.1
+
+    def get_robot_pose(self):
+        for i in range(10):
+            try:
+                trans, rot = self.tf_listener.lookupTransform('map', 'base_link', rospy.Time(0))
+                _, _, yaw = tf.transformations.euler_from_quaternion(rot)
+                return (trans[0], trans[1], yaw)
+            except Exception as e:
+                rospy.logerr(str(e))
+        return None
+
+    def execute(self, userdata):
+        target_location = Utils.get_value_of(userdata.goal.parameters, 'location')
+        if target_location is not None:
+            target_pose = Utils.get_pose_from_param_server(target_location)
+            robot_pose = self.get_robot_pose()
+            xdiff = target_pose.pose.position.x - robot_pose[0]
+            ydiff = target_pose.pose.position.y - robot_pose[1]
+            print('xydiff %.2f %.2f ' % (xdiff, ydiff))
+            if (xdiff > self.distance_threshold or ydiff > self.distance_threshold):
+                return 'no'
+            else:
+                return 'yes'
+
+        else:
+            return 'unavailable'
 
 # ===============================================================================
 
@@ -84,7 +125,6 @@ class SetupMoveBaseWithDBC(smach.State):
         self._dbc_pose_pub.publish(dbc_pose)
         userdata.move_arm_to = userdata.arm_pose_list[userdata.arm_pose_index]
         return "pose_set"
-
 
 # ===============================================================================
 
@@ -193,7 +233,22 @@ def main():
     with sm:
         # approach to platform
         smach.StateMachine.add(
-            "SETUP", Setup(), transitions={"succeeded": "PUBLISH_REFERENCE_FRAME"},
+            "SETUP", Setup(), transitions={"succeeded": "CHECK_IF_BASE_CENTERED"},
+        )
+
+        smach.StateMachine.add(
+            "CHECK_IF_BASE_CENTERED",
+            CheckIfBaseCentered(),
+            transitions={"yes": "PUBLISH_REFERENCE_FRAME",
+                         "unavailable": "PUBLISH_REFERENCE_FRAME",
+                         "no" : "MOVE_BASE_TO_CENTER"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_BASE_TO_CENTER",
+            gas.move_base(None),
+            transitions={"success": "PUBLISH_REFERENCE_FRAME",
+                         "failed" : "PUBLISH_REFERENCE_FRAME"},
         )
 
         # publish a static frame which will be used as reference for perceived objs
