@@ -32,7 +32,7 @@
             scan_time: 0.03333
             range_min: 0.001
             range_max: 5.0
-            use_inf: true
+            use_inf: false
 
             # Concurrency level, affects number of pointclouds queued for processing, thread number governed by nodelet manager
             # 0 : Detect number of cores
@@ -46,9 +46,9 @@
   <group ns="mir_perception/back_camera">
       
       <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection"  output="screen" respawn="true">
-          <remap from="~input_rgb_image" to="/camera/color/image_rect_color"/>
-          <remap from="~input_pointcloud" to="/camera/depth_registered/points"/>
-          <remap from="~camera_info" to="/camera/color/camera_info"/>
+          <remap from="~input_rgb_image" to="/d435_back/rgb/image_raw"/>
+          <remap from="~input_pointcloud" to="/d435_back/depth_registered/points"/>
+          <remap from="~camera_info" to="/d435_back/rgb/camera_info"/>
           <param name="loop_rate" type="int" value="1" />
           <param name="target_frame" value="map"/>
           <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/>
@@ -71,7 +71,7 @@
             scan_time: 0.03333
             range_min: 0.001
             range_max: 5.0
-            use_inf: true
+            use_inf: false
 
             # Concurrency level, affects number of pointclouds queued for processing, thread number governed by nodelet manager
             # 0 : Detect number of cores
