@@ -150,6 +150,10 @@ class MultimodalObjectRecognitionROS
     mas_perception_msgs::ObjectList recognized_image_list_;
     mas_perception_msgs::ObjectList recognized_cloud_list_;
 
+    // Enable recognizer
+    bool enable_rgb_recognizer_;
+    bool enable_pc_recognizer_ ;
+
     // Visualization
     BoundingBoxVisualizer bounding_box_visualizer_pc_;
     ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
@@ -160,6 +164,7 @@ class MultimodalObjectRecognitionROS
     // Parameters
     bool debug_mode_;
     std::string target_frame_id_;
+    std::string pointcloud_source_frame_id_;
     std::set<std::string> round_objects_;
     ObjectInfo object_info_;
     std::string object_info_path_;
@@ -176,6 +181,7 @@ class MultimodalObjectRecognitionROS
     double roi_base_link_to_laser_distance_;
     double roi_max_object_pose_x_to_base_link_;
     double roi_min_bbox_z_;
+    bool rgb_cluster_remove_outliers_;
 
     //cluster
     bool center_cluster_;
