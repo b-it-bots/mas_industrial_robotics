@@ -14,17 +14,14 @@ function fancy_print {
     echo "################################################################################"
 }
 
-# Install ROS Melodic
 function update_keys {
-    if [ $DOCKER_INSTALL = 0 ];
-      then
-        echo "Setting up keys"
-        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-        sudo curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | sudo apt-key add -
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
-        #sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo $(lsb_release -sc) main" -u
-    fi
-    sudo apt-key adv --keyserver keys.gnupg.net --recv-key C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C8B3A55A6F3EFCDE
+    echo "Setting up ROS keys"
+    sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+
+    #realsense public key
+    sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+    sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
 }
 
 # not required in docker
@@ -47,6 +44,13 @@ function install_ros_dependencies {
     rosdep update -q
     sudo apt install -y -qq python-rosinstall python-rosinstall-generator python-wstool build-essential python-catkin-tools python-pip
     sudo pip install catkin_pkg empy
+
+    sudo apt install -y -qq libopencv-dev ros-$ROS_DISTRO-vision-opencv \
+        yasm libjpeg-dev libavcodec-dev libavformat-dev libswscale-dev \
+        libdc1394-22-dev libv4l-dev python-dev python-numpy libtbb-dev \
+        qt5-default libgtk2.0-dev libmp3lame-dev libopencore-amrnb-dev \
+        libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev \
+        x264 v4l-utils pkg-config
     #sudo rm -rf /var/lib/apt/lists/*
 }
 
