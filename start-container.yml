@@ -8,8 +8,8 @@ services:
         environment:
             - DISPLAY=$DISPLAY
             - QT_X11_NO_MITSHM=1
-            - ROBOT=youbot-brsu-4   # Can be modified here if necessary
-            - ROBOT_ENV=brsu-c025-sim # For youbot simulation
+            - ROBOT=youbot-brsu-4   # setup robot
+            - ROBOT_ENV=brsu-c025-sim # setup environement
         devices:
             - /dev/dri:/dev/dri
         privileged: true
@@ -24,10 +24,11 @@ services:
         environment:
             - DISPLAY=$DISPLAY
             - QT_X11_NO_MITSHM=1
-            - ROBOT=youbot-brsu-4   # Can be modified here if necessary
-            - ROBOT_ENV=brsu-c025-sim # For youbot simulation
+            - ROBOT=youbot-brsu-4   # setup robot
+            - ROBOT_ENV=brsu-c025-sim # setup environement
         devices:
             - /dev/dri:/dev/dri
         privileged: true
         tty: true
         network_mode: "host"
+
