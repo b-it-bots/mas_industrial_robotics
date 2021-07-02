@@ -17,8 +17,8 @@
     <!-- perceive location action server -->
     <include file="$(find mir_perceive_location)/ros/launch/perceive_location_server.launch" />
 
-    <!-- wbc pick object action server -->
-    <node pkg="mir_pick_object" type="pick_object_server.py" name="wbc_pick_object_server" output="screen"/>
+    <!-- wbc pick action server -->
+    <include file="$(find mir_pick_object)/ros/launch/pick_object_server.launch" />
 
     <!-- pick from shelf action server -->
     <include file="$(find mir_pick_from_shelf)/ros/launch/pick_from_shelf.launch" />
