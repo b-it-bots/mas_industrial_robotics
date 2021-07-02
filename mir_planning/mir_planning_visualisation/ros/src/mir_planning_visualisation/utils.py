@@ -25,6 +25,7 @@ class Utils(object):
         self._alpha = rospy.get_param("~alpha", 1.0)
 
         self._model_path = rospy.get_param("~model_path", None)
+        self._model_pkg_path = rospy.get_param("~model_pkg_path", None)
         if self._model_path is None:
             raise Exception("Model path not provided.")
         if not os.path.exists(self._model_path):
@@ -270,17 +271,10 @@ class Utils(object):
             config = self.marker_config["default"]
         else:
             config = self.marker_config[model_name]
-            file_path = os.path.join(self._model_path, config["file_name"])
-            if os.path.exists(file_path):
-                resource_file = "file://" + file_path
-                marker.type = Marker.MESH_RESOURCE
-                marker.mesh_resource = resource_file
-            else:
-                rospy.logwarn(
-                    "Could not find file " + str(file_path) + ". Using default marker"
-                )
-                marker.type = Marker.CUBE
-                config = self.marker_config["default"]
+            file_path = os.path.join(self._model_pkg_path, config["file_name"])
+            resource_file = "package://" + file_path
+            marker.type = Marker.MESH_RESOURCE
+            marker.mesh_resource = resource_file
 
         marker.header.stamp = rospy.Time.now()
 

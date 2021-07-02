@@ -2,6 +2,7 @@
 <launch>
 
     <arg name="model_path" default="$(find mcr_gazebo_objects)/common/models"/>
+    <arg name="model_pkg_path" default="mcr_gazebo_objects/common/models"/>
     <arg name="model_to_marker_config"
          default="$(find mir_planning_visualisation)/ros/config/model_to_marker.yaml"/>
     <arg name="plan_marker_color_config"
@@ -34,6 +35,7 @@
             <param name="debug" type="bool" value="$(arg debug)" />
             <param name="global_frame" type="str" value="$(arg global_frame)" />
             <param name="model_path" type="str" value="$(arg model_path)" />
+            <param name="model_pkg_path" type="str" value="$(arg model_pkg_path)" />
             <param name="alpha" type="double" value="$(arg alpha)" />
             <param name="base_link_to_ws_edge" type="double" value="$(arg base_link_to_ws_edge)" />
             <param name="model_to_marker_config" type="str" value="$(arg model_to_marker_config)" />
