@@ -147,6 +147,13 @@ class stage_object(smach.State):
             self.goal.parameters.append(
                 KeyValue(key="platform", value=str(self.platform).upper())
             )
+
+        obj = Utils.get_value_of(userdata.goal.parameters, "peg")
+        if obj is not None:
+            self.goal.parameters.append(
+                KeyValue(key="object", value=str(obj).upper())
+            )
+
         # initialise platform in goal if not already initialised
         current_platform = Utils.get_value_of(self.goal.parameters, "platform")
         if current_platform is None:
@@ -181,6 +188,13 @@ class unstage_object(smach.State):
             self.goal.parameters.append(
                 KeyValue(key="platform", value=str(self.platform).upper())
             )
+
+        obj = Utils.get_value_of(userdata.goal.parameters, "peg")
+        if obj is not None:
+            self.goal.parameters.append(
+                KeyValue(key="object", value=str(obj).upper())
+            )
+
         # initialise platform in goal if not already initialised
         current_platform = Utils.get_value_of(self.goal.parameters, "platform")
         if current_platform is None:
