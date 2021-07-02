@@ -100,7 +100,7 @@ def main():
     with sm:
         smach.StateMachine.add(
             "SELECT_OBJECT",
-            SelectObject("/mcr_perception/object_selector/input/object_name"),
+            SelectObject("/mcr_perception/local_object_selector/input/object_name"),
             transitions={"succeeded": "GENERATE_OBJECT_POSE"},
         )
 
@@ -109,10 +109,10 @@ def main():
             "GENERATE_OBJECT_POSE",
             gbs.send_and_wait_events_combined(
                 event_in_list=[
-                    ("/mcr_perception/object_selector/event_in", "e_trigger")
+                    ("/mcr_perception/local_object_selector/event_in", "e_trigger")
                 ],
                 event_out_list=[
-                    ("/mcr_perception/object_selector/event_out", "e_selected", True,)
+                    ("/mcr_perception/local_object_selector/event_out", "e_selected", True,)
                 ],
                 timeout_duration=10,
             ),
@@ -135,7 +135,7 @@ def main():
 
         smach.StateMachine.add(
             "OPEN_GRIPPER",
-            gms.control_gripper("open"),
+            gms.control_gripper("open_narrow"),
             transitions={"succeeded": "SEND_MOVEIT_POSE_OBJECT"},
         )
 
