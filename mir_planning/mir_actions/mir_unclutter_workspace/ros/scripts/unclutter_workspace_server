@@ -1,0 +1,171 @@
+#!/usr/bin/env python
+
+import mir_states.common.manipulation_states as gms  # move the arm, and gripper
+import rospy
+import smach
+import smach_ros
+from mir_actions.utils import Utils
+from mir_planning_msgs.msg import (
+    GenericExecuteAction,
+    GenericExecuteFeedback,
+    GenericExecuteResult,
+)
+from smach_ros import ActionServerWrapper
+
+# ===============================================================================
+
+
+def main():
+    rospy.init_node("unclutter_workspace_server")
+    # Construct state machine
+    sm = smach.StateMachine(
+        outcomes=["OVERALL_SUCCESS", "OVERALL_FAILED"],
+        input_keys=["goal", "feedback", "result"],
+        output_keys=["feedback", "result"],
+    )
+
+    with sm:
+        # add states to the container
+        smach.StateMachine.add(
+            "CLOSE_GRIPPER_INITIAL",
+            gms.control_gripper("close"),
+            transitions={"succeeded": "MOVE_ARM_TO_UNCLUTTER_MIDDLE_HIGH"},
+        )
+
+        # smach.StateMachine.add(
+        #     "MOVE_ARM_TO_STAGE_INTERMEDIATE_INITIAL",
+        #     gms.move_arm("stage_intermediate"),
+        #     transitions={
+        #         "succeeded": "MOVE_ARM_TO_UNCLUTTER_MIDDLE_HIGH",
+        #         "failed": "OVERALL_FAILED",
+        #     },
+        # )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_UNCLUTTER_MIDDLE_HIGH",
+            gms.move_arm("unclutter_middle_high"),
+            transitions={
+                "succeeded": "OPEN_GRIPPER_MIDDLE_HIGH",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_MIDDLE_HIGH",
+            gms.control_gripper("open_narrow"),
+            transitions={"succeeded": "MOVE_ARM_TO_UNCLUTTER_MIDDLE"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_UNCLUTTER_MIDDLE",
+            gms.move_arm("unclutter_middle"),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_UNCLUTTER_MIDDLE_PERP",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_UNCLUTTER_MIDDLE_PERP",
+            gms.move_arm("unclutter_middle_perp"),
+            transitions={
+                "succeeded": "CLOSE_GRIPPER_MIDDLE_PERP",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "CLOSE_GRIPPER_MIDDLE_PERP",
+            gms.control_gripper("close"),
+            transitions={"succeeded": "MOVE_ARM_TO_UNCLUTTER_LEFT"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_UNCLUTTER_LEFT",
+            gms.move_arm("unclutter_left"),
+            transitions={
+                "succeeded": "OPEN_GRIPPER_LEFT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_LEFT",
+            gms.control_gripper("open_narrow"),
+            transitions={"succeeded": "MOVE_ARM_TO_UNCLUTTER_LEFT_PERP"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_UNCLUTTER_LEFT_PERP",
+            gms.move_arm("unclutter_left_perp"),
+            transitions={
+                "succeeded": "CLOSE_GRIPPER_LEFT_PERP",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "CLOSE_GRIPPER_LEFT_PERP",
+            gms.control_gripper("close"),
+            transitions={"succeeded": "MOVE_ARM_TO_UNCLUTTER_RIGHT"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_UNCLUTTER_RIGHT",
+            gms.move_arm("unclutter_right"),
+            transitions={
+                "succeeded": "OPEN_GRIPPER_RIGHT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_RIGHT",
+            gms.control_gripper("open_narrow"),
+            transitions={"succeeded": "MOVE_ARM_TO_UNCLUTTER_RIGHT_PERP"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_UNCLUTTER_RIGHT_PERP",
+            gms.move_arm("unclutter_right_perp"),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
+            gms.move_arm("stage_intermediate"),
+            transitions={
+                "succeeded": "OVERALL_SUCCESS",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+    # smach viewer
+    if rospy.get_param("~viewer_enabled", False):
+        sis = smach_ros.IntrospectionServer(
+            "unclutter_workspace_smach_viewer", sm, "/STAGE_OBJECT_SMACH_VIEWER"
+        )
+        sis.start()
+
+    # Construct action server wrapper
+    asw = ActionServerWrapper(
+        server_name="unclutter_workspace_server",
+        action_spec=GenericExecuteAction,
+        wrapped_container=sm,
+        succeeded_outcomes=["OVERALL_SUCCESS"],
+        aborted_outcomes=["OVERALL_FAILED"],
+        preempted_outcomes=["PREEMPTED"],
+        goal_key="goal",
+        feedback_key="feedback",
+        result_key="result",
+    )
+    # Run the server in a background thread
+    asw.run_server()
+    rospy.spin()
+
+
+if __name__ == "__main__":
+    main()
