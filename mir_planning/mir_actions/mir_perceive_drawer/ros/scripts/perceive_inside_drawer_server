@@ -49,7 +49,7 @@ class PopulateResultWithObjects(smach.State):
             output_keys=["feedback", "result"],
         )
         self.objects_sub = rospy.Subscriber(
-            "/mcr_perception/object_list_merger/output_object_list",
+            "/mcr_perception/object_list_merger/local_output_object_list",
             ObjectList,
             self.objects_callback,
         )
@@ -109,26 +109,88 @@ def main():
             "MOVE_ARM_TO_LOOK_INSIDE_DRAWER",
             gms.move_arm("look_inside_drawer"),
             transitions={
-                "succeeded": "PERCEIVE_OBJECT",
+                "succeeded": "START_OBJECT_LIST_MERGER",
                 "failed": "MOVE_ARM_TO_LOOK_INSIDE_DRAWER",
             },
         )
 
-        # - Call perceive inside drawer
+        # Uncomment you want to perceive aruco cube instead of atwork objects
+        # smach.StateMachine.add(
+        #     "PERCEIVE_OBJECT",
+        #     gbs.send_and_wait_events_combined(
+        #         event_in_list=[("/mir_perception/aruco_cube_perceiver/event_in", "e_trigger")],
+        #         event_out_list=[("/mir_perception/aruco_cube_perceiver/event_out", "e_success", True)],
+        #         timeout_duration=10,
+        #     ),
+        #     transitions={
+        #         "success": "MOVE_ARM_TO_NEUTRAL",
+        #         "timeout": "OVERALL_FAILED",
+        #         "failure": "OVERALL_FAILED",
+        #     },
+        # )
+
         smach.StateMachine.add(
-            "PERCEIVE_OBJECT",
+            "START_OBJECT_LIST_MERGER",
             gbs.send_and_wait_events_combined(
-                event_in_list=[
-                    ("/mir_perception/aruco_cube_perceiver/event_in", "e_trigger",)
-                ],
-                event_out_list=[
-                    (
-                        "/mir_perception/aruco_cube_perceiver/event_out",
-                        "e_success",
-                        True,
-                    )
-                ],
+                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_start")],
+                event_out_list=[("/mcr_perception/object_list_merger/event_out", "e_started", True)],
+                timeout_duration=5,
+            ),
+            transitions={
+                "success": "START_OBJECT_RECOGNITION",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "START_OBJECT_RECOGNITION",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mir_perception/multimodal_object_recognition/event_in", "e_start")],
+                event_out_list=[("/mir_perception/multimodal_object_recognition/event_out", "e_done", True)],
                 timeout_duration=10,
+            ),
+            transitions={
+                "success": "STOP_RECOGNITION",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "STOP_RECOGNITION",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mir_perception/multimodal_object_recognition/event_in", "e_stop")],
+                event_out_list=[("/mir_perception/multimodal_object_recognition/event_out", "e_stopped", True)],
+                timeout_duration=5,
+            ),
+            transitions={
+                "success": "STOP_OBJECT_LIST_MERGER",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "STOP_OBJECT_LIST_MERGER",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_stop")],
+                event_out_list=[("/mcr_perception/object_list_merger/event_out", "e_stopped", True)],
+                timeout_duration=5,
+            ),
+            transitions={
+                "success": "PUBLISH_MERGED_OBJECT_LIST",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "PUBLISH_MERGED_OBJECT_LIST",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mcr_perception/object_list_merger/event_in", "e_trigger_local")],
+                event_out_list=[("/mcr_perception/object_list_merger/event_out", "e_done", True)],
+                timeout_duration=5,
             ),
             transitions={
                 "success": "MOVE_ARM_TO_NEUTRAL",
