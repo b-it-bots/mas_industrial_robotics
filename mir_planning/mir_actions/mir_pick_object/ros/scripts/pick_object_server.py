@@ -3,6 +3,7 @@ import sys
 
 import mcr_states.common.basic_states as gbs
 import mir_states.common.manipulation_states as gms
+import mir_states.common.basic_states as mir_gbs
 import rospy
 import smach
 from mir_actions.utils import Utils
@@ -40,9 +41,46 @@ class SelectObject(smach.State):
         rospy.sleep(0.2)  # let the topic to survive for some time
         return "succeeded"
 
+# ===============================================================================
+
+class IsObjectLarge(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["large", "small"],
+            input_keys=["goal", "large_objects"],
+            output_keys=[],
+        )
+
+    def execute(self, userdata):
+        obj = Utils.get_value_of(userdata.goal.parameters, "object")
+        if obj is None:
+            rospy.logwarn('Missing parameter "object". Using default.')
+            return "large"
+        for large_object in userdata.large_objects:
+            if large_object.upper() in obj.upper():
+                return "large"
+        return "small"
+
 
 # ===============================================================================
 
+class ShouldReperceive(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["yes", "no"],
+            input_keys=["reperceive"],
+            output_keys=[],
+        )
+
+    def execute(self, userdata):
+        if userdata.reperceive:
+            return 'yes'
+        else:
+            return 'no'
+
+# ===============================================================================
 
 def main():
     # Open the container
@@ -53,6 +91,10 @@ def main():
         input_keys=["goal"],
         output_keys=["feedback", "result"],
     )
+
+    # read large object list
+    sm.userdata.large_objects = rospy.get_param("~large_objects", ["S40_40_B", "S40_40_G", "M30", "BEARING_BOX", "MOTOR"])
+    sm.userdata.reperceive = rospy.get_param("~reperceive", True)
 
     with sm:
         smach.StateMachine.add(
@@ -74,16 +116,10 @@ def main():
                 timeout_duration=10,
             ),
             transitions={
-                "success": "OPEN_GRIPPER",
+                "success": "SET_DBC_PARAMS",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
-        )
-
-        smach.StateMachine.add(
-            "OPEN_GRIPPER",
-            gms.control_gripper("open"),
-            transitions={"succeeded": "SET_DBC_PARAMS"},
         )
 
         smach.StateMachine.add(
@@ -106,10 +142,25 @@ def main():
                 timeout_duration=50,
             ),
             transitions={
-                "success": "MOVE_ARM",
+                "success": "CHECK_IF_REPERCEIVE",
                 "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
                 "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
             },
+        )
+
+        smach.StateMachine.add(
+            "CHECK_IF_REPERCEIVE",
+            ShouldReperceive(),
+            transitions={
+                "yes": "OPEN_GRIPPER_FOR_REPERCEIVE",
+                "no": "GENERATE_OBJECT_POSE_AGAIN",
+            },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_FOR_REPERCEIVE",
+            gms.control_gripper("open"),
+            transitions={"succeeded": "MOVE_ARM"},
         )
 
         # move arm to appropriate position
@@ -130,11 +181,20 @@ def main():
                 timeout_duration=5,
             ),
             transitions={
-                "success": "START_OBJECT_RECOGNITION",
+                "success": "WAIT_FOR_ARM_TO_STABILIZE",
                 "timeout": "TRY_PICKING",
                 "failure": "TRY_PICKING",
             },
         )
+
+        smach.StateMachine.add(
+            "WAIT_FOR_ARM_TO_STABILIZE",
+            mir_gbs.wait_for(0.5),
+            transitions={
+                "succeeded": "START_OBJECT_RECOGNITION",
+            },
+        )
+
 
         # New perception pipeline state machine
         smach.StateMachine.add(
@@ -208,7 +268,7 @@ def main():
                 timeout_duration=10,
             ),
             transitions={
-                "success": "TRY_PICKING",
+                "success": "CHECK_IF_OBJECT_LARGE_LOCAL",
                 "timeout": "GENERATE_OBJECT_POSE_AGAIN",
                 "failure": "GENERATE_OBJECT_POSE_AGAIN",
             },
@@ -223,11 +283,34 @@ def main():
                 timeout_duration=10,
             ),
             transitions={
-                "success": "MOVE_ROBOT_AND_PICK",
+                "success": "CHECK_IF_OBJECT_LARGE",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
         )
+
+        smach.StateMachine.add(
+            "CHECK_IF_OBJECT_LARGE_LOCAL",
+            IsObjectLarge(),
+            transitions={
+                "large": "OPEN_GRIPPER_WIDE_LOCAL",
+                "small": "OPEN_GRIPPER_NARROW_LOCAL",
+            },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_WIDE_LOCAL",
+            gms.control_gripper("open"),
+            transitions={"succeeded": "TRY_PICKING"},
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_NARROW_LOCAL",
+            gms.control_gripper("open_narrow"),
+            transitions={"succeeded": "TRY_PICKING"},
+        )
+
+
 
         # move only arm for wbc
         smach.StateMachine.add(
@@ -242,6 +325,27 @@ def main():
                 "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
                 "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
             },
+        )
+
+        smach.StateMachine.add(
+            "CHECK_IF_OBJECT_LARGE",
+            IsObjectLarge(),
+            transitions={
+                "large": "OPEN_GRIPPER_WIDE",
+                "small": "OPEN_GRIPPER_NARROW",
+            },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_WIDE",
+            gms.control_gripper("open"),
+            transitions={"succeeded": "MOVE_ROBOT_AND_PICK"},
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_NARROW",
+            gms.control_gripper("open_narrow"),
+            transitions={"succeeded": "MOVE_ROBOT_AND_PICK"},
         )
 
 
