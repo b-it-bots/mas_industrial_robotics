@@ -13,7 +13,7 @@ dbc_params:
         x_offset: -0.32
         drawer_length_factor: -1.0
     close_drawer:
-        x_offset: -0.05
+        x_offset: -0.03
         drawer_length_factor: 1.0
     close_drawer_safe:
         x_offset: -0.15
