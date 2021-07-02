@@ -131,7 +131,14 @@ def main():
         smach.StateMachine.add(
             "PUBLISH_TEMP_REFERENCE_FRAME",
             gbs.send_event([("/static_transform_publisher_node/event_in", "e_start")]),
-            transitions={"success": "SET_DBC_PARAMS"},
+            transitions={"success": "OPEN_GRIPPER_HANDLE"},
+        )
+
+        # Open gripper
+        smach.StateMachine.add(
+            "OPEN_GRIPPER_HANDLE",
+            gms.control_gripper("open"),
+            transitions={"succeeded": "SET_DBC_PARAMS"},
         )
 
         smach.StateMachine.add(
