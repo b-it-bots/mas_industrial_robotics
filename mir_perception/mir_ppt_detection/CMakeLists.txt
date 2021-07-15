@@ -42,3 +42,4 @@ target_link_libraries(ppt_detector
     ${catkin_LIBRARIES}
     yaml-cpp
 )
+add_dependencies(ppt_detector mir_ppt_detection_generate_messages_cpp)
