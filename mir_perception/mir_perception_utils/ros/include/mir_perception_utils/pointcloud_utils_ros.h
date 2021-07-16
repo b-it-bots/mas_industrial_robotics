@@ -60,7 +60,7 @@ bool transformPointCloud2(const boost::shared_ptr<tf::TransformListener> &tf_lis
  * \param[in] Adjust the rgb roi proposal (in pixel)
  * \param[in] Remove 3D ROI outliers
 */
-void getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, const PointCloud::Ptr &cloud_id,
+bool getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, const PointCloud::Ptr &cloud_id,
                       PointCloud::Ptr &cloud_roi, float roi_size_adjustment, bool remove_outliers);
 }
 };

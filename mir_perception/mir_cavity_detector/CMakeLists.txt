@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mcr_cavity_detector)
+project(mir_cavity_detector)
 set (CMAKE_BUILD_TYPE Debug)
 find_package(catkin REQUIRED
   COMPONENTS

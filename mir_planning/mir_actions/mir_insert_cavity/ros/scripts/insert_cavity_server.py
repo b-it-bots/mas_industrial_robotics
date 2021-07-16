@@ -220,8 +220,8 @@ def main():
             ),
             transitions={
                 "success": "SET_DBC_PARAMS",
-                "timeout": "UNSTAGE_OBJECT",
-                "failure": "UNSTAGE_OBJECT",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
             },
         )
 
@@ -243,25 +243,25 @@ def main():
                 timeout_duration=50,
             ),
             transitions={
-                "success": "STOP_POSE_SELECTOR",
-                "timeout": "STOP_POSE_SELECTOR",
-                "failure": "STOP_POSE_SELECTOR",
+                "success": "MOVE_ARM_TO_MIDDLE_POSE",
+                "timeout": "MOVE_ARM_TO_MIDDLE_POSE",
+                "failure": "MOVE_ARM_TO_MIDDLE_POSE",
             },
         )
 
         smach.StateMachine.add(
-            "STOP_POSE_SELECTOR",
-            gbs.send_event(
-                [("/mcr_perception/cavity_pose_selector/event_in", "e_stop")]
-            ),
-            transitions={"success": "PERCEIVE_CAVITY"},
+            "MOVE_ARM_TO_MIDDLE_POSE",
+            gms.move_arm("ppt_cavity_middle"),
+            transitions={
+                "succeeded": "PERCEIVE_CAVITY",
+                "failed": "MOVE_ARM_TO_MIDDLE_POSE",
+            },
         )
-
         # perceive cavity again after moving in front of the desired cavity
         smach.StateMachine.add(
             "PERCEIVE_CAVITY",
-            gas.perceive_cavity(perception_mode='single_view'),
-            transitions={"success": "SELECT_OBJECT_AGAIN", "failed": "OVERALL_FAILED",},
+            gps.find_cavities(retries=1),
+            transitions={"cavities_found": "SELECT_OBJECT_AGAIN", "no_cavities_found": "OVERALL_FAILED",},
         )
 
         smach.StateMachine.add(
@@ -339,20 +339,11 @@ def main():
         # move arm to HOLD position
         smach.StateMachine.add(
             "MOVE_ARM_TO_HOLD",
-            gms.move_arm("look_at_turntable"),
+            gms.move_arm("ppt_cavity_middle"),
             transitions={
-                "succeeded": "STOP_POSE_SELECTOR_FINAL",
+                "succeeded": "OVERALL_SUCCESS",
                 "failed": "MOVE_ARM_TO_HOLD",
             },
-        )
-
-        # sending e_stop to pose selector
-        smach.StateMachine.add(
-            "STOP_POSE_SELECTOR_FINAL",
-            gbs.send_event(
-                [("/mcr_perception/cavity_pose_selector/event_in", "e_stop")]
-            ),
-            transitions={"success": "OVERALL_SUCCESS"},
         )
 
     # smach viewer

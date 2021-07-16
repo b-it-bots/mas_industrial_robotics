@@ -234,6 +234,8 @@ def publish_pose():
         POSE.pose.orientation.z = quaternion[2]
         POSE.pose.orientation.w = quaternion[3]
 
+        POSE.header.stamp = rospy.Time.now()
+
         POSE_MARKER.pose.orientation.x = quaternion[0]
         POSE_MARKER.pose.orientation.y = quaternion[1]
         POSE_MARKER.pose.orientation.z = quaternion[2]

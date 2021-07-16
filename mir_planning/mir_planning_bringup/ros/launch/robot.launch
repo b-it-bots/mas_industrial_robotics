@@ -116,13 +116,15 @@
     <!-- Object selector used for planning in pick and insert actions NOT TESTED -->
     <include file="$(find mcr_perception_selectors)/ros/launch/object_selector.launch">
         <arg name="input_topic" value="/mcr_perception/object_list_merger/output_object_list" />
+        <arg name="local_input_topic" value="/mcr_perception/object_list_merger/local_output_object_list" />
     </include>
 
     <!-- pose selector for placing objects -->
     <include file="$(find mir_place_pose_selector)/ros/launch/place_pose_selector.launch"/>
 
     <!-- cavity finder -->
-    <include file="$(find mcr_cavity_detector)/ros/launch/detector_selector_cavity.launch"/>
+    <!-- <include file="$(find mcr_cavity_detector)/ros/launch/detector_selector_cavity.launch"/> -->
+    <include file="$(find mir_ppt_detection)/launch/ppt_detector.launch"/>
 
     <!-- RGB image recognition finder -->
     <!-- <include file="$(find mcr_multimodal_object_identification)/ros/launch/multimodal_object_identification.launch"/> -->

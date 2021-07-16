@@ -85,6 +85,11 @@ def main():
     sm.userdata.heavy_objects = rospy.get_param("~heavy_objects", ["m20_100"])
 
     with sm:
+        smach.StateMachine.add(
+            "OPEN_GRIPPER",
+            gms.control_gripper("open_narrow"),
+            transitions={"succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE"},
+        )
         # add states to the container
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",

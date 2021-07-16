@@ -12,7 +12,7 @@ RNG rng(12345);
 void extract_features(string image_path, ofstream &output, string image_name);
 int main()
 {
-    string dirName = "/home/deebuls/ros/indigo/src/unmerged_packages_for_testing/perception/mcr_cavity_detector/tools/dataset_new/";
+    string dirName = "/home/deebuls/ros/indigo/src/unmerged_packages_for_testing/perception/mir_cavity_detector/tools/dataset_new/";
     DIR *dir;
     dir = opendir(dirName.c_str());
     string obj_name;

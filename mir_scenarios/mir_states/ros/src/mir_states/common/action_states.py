@@ -68,20 +68,41 @@ class perceive_location(smach.State):
 
 class move_base(smach.State):
     def __init__(self, destination_location):
-        smach.State.__init__(self, outcomes=["success", "failed"])
+        smach.State.__init__(self,
+                             outcomes=["success", "failed"],
+                             input_keys=["goal"])
         self.client = SimpleActionClient("move_base_safe_server", GenericExecuteAction)
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
+        self.destination_location = destination_location
+
+
+    def execute(self, userdata):
+        self.goal.parameters = []
         self.goal.parameters.append(
             KeyValue(key="arm_safe_position", value="barrier_tape")
         )
-        self.goal.parameters.append(
-            KeyValue(
-                key="destination_location", value=str(destination_location).upper()
+        # if location is sent as an argument to this state, set it here
+        if self.destination_location is not None:
+            self.goal.parameters.append(
+                KeyValue(
+                    key="destination_location", value=str(self.destination_location).upper()
+                )
             )
-        )
+        current_destination_location = Utils.get_value_of(self.goal.parameters, "destination_location")
+        # if location has not  been set  read it from userdata (either
+        # destination_location or location)
+        if current_destination_location is None:
+            location = Utils.get_value_of(userdata.goal.parameters, "destination_location")
+            if location is None:
+                location = Utils.get_value_of(userdata.goal.parameters, "location")
+                if location is None:
+                    rospy.logerr("Location not specified. Not calling move_base")
+                    return 'failed'
+                self.goal.parameters.append(
+                    KeyValue(key="destination_location", value=str(location).upper())
+                )
 
-    def execute(self, userdata):
         self.client.send_goal(self.goal)
         self.client.wait_for_result(rospy.Duration.from_sec(int(15.0)))
         state = self.client.get_state()
@@ -118,12 +139,21 @@ class stage_object(smach.State):
         self.client = SimpleActionClient("stage_object_server", GenericExecuteAction)
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
-        if platform is not None:
-            self.goal.parameters.append(
-                KeyValue(key="platform", value=str(platform).upper())
-            )
+        self.platform = platform
 
     def execute(self, userdata):
+        self.goal.parameters = []
+        if self.platform is not None:
+            self.goal.parameters.append(
+                KeyValue(key="platform", value=str(self.platform).upper())
+            )
+
+        obj = Utils.get_value_of(userdata.goal.parameters, "peg")
+        if obj is not None:
+            self.goal.parameters.append(
+                KeyValue(key="object", value=str(obj).upper())
+            )
+
         # initialise platform in goal if not already initialised
         current_platform = Utils.get_value_of(self.goal.parameters, "platform")
         if current_platform is None:
@@ -150,12 +180,21 @@ class unstage_object(smach.State):
         self.client = SimpleActionClient("unstage_object_server", GenericExecuteAction)
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
-        if platform is not None:
-            self.goal.parameters.append(
-                KeyValue(key="platform", value=str(platform).upper())
-            )
+        self.platform = platform
 
     def execute(self, userdata):
+        self.goal.parameters = []
+        if self.platform is not None:
+            self.goal.parameters.append(
+                KeyValue(key="platform", value=str(self.platform).upper())
+            )
+
+        obj = Utils.get_value_of(userdata.goal.parameters, "peg")
+        if obj is not None:
+            self.goal.parameters.append(
+                KeyValue(key="object", value=str(obj).upper())
+            )
+
         # initialise platform in goal if not already initialised
         current_platform = Utils.get_value_of(self.goal.parameters, "platform")
         if current_platform is None:

@@ -105,15 +105,17 @@ class TaskPlannerServer(object):
 
             # filter consecutive move_base actions
             if i < len(plan) - 1 and plan[i].name == plan[i + 1].name == "MOVE_BASE":
+                # copy source from removed move_base action to repeated move_base
+                plan[i+1].parameters[1].value = plan[i].parameters[1].value
                 i += 1
                 continue
 
             # filter move_base > perceive > move_base actions
-            if (
-                i < len(plan) - 2
-                and plan[i].name == plan[i + 2].name == "MOVE_BASE"
-                and plan[i + 1] == "PERCEIVE"
-            ):
+            if ( i < len(plan) - 2
+                 and plan[i].name == plan[i + 2].name == "MOVE_BASE"
+                 and plan[i + 1] == "PERCEIVE" ):
+                # copy source from removed move_base action to repeated move_base
+                plan[i+2].parameters[1].value = plan[i].parameters[1].value
                 i += 2
                 continue
 

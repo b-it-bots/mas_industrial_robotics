@@ -74,7 +74,7 @@ class KnowledgeBaseVisualiser(object):
             get_response = rospy.ServiceProxy(server_topic, GetAttributeService)
             response = get_response()
             if len(response.attributes) == 0:
-                rospy.logwarn("No propositions in KB")
+                # rospy.logwarn("No propositions in KB")
                 return None
             else:
                 if self._debug:

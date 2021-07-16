@@ -16,12 +16,12 @@ if __name__ == "__main__":
 
     goal = GenericExecuteGoal()
 
-    rospy.loginfo("Sending following goal to pick from drawer server")
+    rospy.loginfo("Sending following goal to open drawer server")
     rospy.loginfo(goal)
 
     client.send_goal(goal)
 
-    timeout = 30.0
+    timeout = 60.0
     finished_within_time = client.wait_for_result(rospy.Duration.from_sec(int(timeout)))
     if not finished_within_time:
         client.cancel_goal()
