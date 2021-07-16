@@ -1,21 +1,19 @@
 ARG ROS_DISTRO
 
-FROM bitbots/bitbots-base:$ROS_DISTRO
+FROM osrf/ros:$ROS_DISTRO-desktop-full
 
-ARG DEBIAN_FRONTEND=noninteractive
+USER root
 
-ENV NVIDIA_VISIBLE_DEVICES \
-    ${NVIDIA_VISIBLE_DEVICES:-all}
-
-ENV NVIDIA_DRIVER_CAPABILITIES \
-    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+#update ROS GPG key: https://discourse.ros.org/t/ros-gpg-key-expiration-incident/20669
+RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 
 ENV IS_CI=1
     
 USER root
 
-RUN apt-get update -qq \
-    && sudo apt-get install -y -qq \
+RUN apt-get update -y -qq \
+    && apt upgrade -y -qq \
+    && apt-get install -y -qq \
       apt-utils \
       cmake \
       gdb \
@@ -28,27 +26,13 @@ RUN apt-get update -qq \
       nmap \
       unzip \
       gcc-multilib \
-      g++-multilib \
-      python3-pip
-
-RUN apt-get install -y libopencv-dev ros-$ROS_DISTRO-vision-opencv \
-        yasm libjpeg-dev libavcodec-dev libavformat-dev libswscale-dev \
-        libdc1394-22-dev libv4l-dev python-dev python-numpy libtbb-dev \
-        qt5-default libgtk2.0-dev libmp3lame-dev libopencore-amrnb-dev \
-        libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev \
-        x264 v4l-utils pkg-config
+      g++-multilib \ 
+      python-pip 
 
 RUN pip install --upgrade pip==20.3
 
 RUN apt-get update --fix-missing
 
-# Install mesa libary for HW acceleration 
-# Intel graphic cards
-RUN apt-get update &&\
-    apt-get install -y \
-        libgl1-mesa-glx \
-        libgl1-mesa-dri 
-  
 # Some QT-Apps/Gazebo don't show controls without this
 ENV QT_X11_NO_MITSHM 1
 
@@ -82,6 +66,11 @@ ENV ROBOT_ENV=brsu-c025
 
 RUN ./setup.sh --ros_install base --ros_distro $ROS_DISTRO --ws_dir $WS_DIR --docker 1
 
+#remove cache
+USER root
+RUN rm -rf /var/lib/apt/lists/*
+
+USER $UNAME
 COPY images/mas_industrial_robotics/entrypoint.sh /usr/sbin/entrypoint.sh
 RUN sudo chmod +x /usr/sbin/entrypoint.sh
 ENTRYPOINT /usr/sbin/entrypoint.sh
