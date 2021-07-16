@@ -1,8 +1,12 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="serial_num" default="727212070700"/>
+    <arg name="camera_name" default="arm_cam3d"/>
+
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
-        <arg name="camera" value="arm_cam3d" />
-        <arg name="tf_prefix" value="arm_cam3d_camera" />
+        <arg name="camera" value="$(arg camera_name)" />
+        <arg name="tf_prefix" value="$(arg camera_name)_camera" />
         <arg name="rgb" value="rgb" />
+        <arg name="serial_no" value="$(arg serial_num)" />
     </include>
 </launch>

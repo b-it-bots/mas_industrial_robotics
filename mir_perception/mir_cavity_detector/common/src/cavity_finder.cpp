@@ -1,4 +1,4 @@
-#include <mcr_cavity_detector/cavity_finder.h>
+#include <mir_cavity_detector/cavity_finder.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <pcl/PCLPointCloud2.h>

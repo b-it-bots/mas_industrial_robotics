@@ -1,4 +1,4 @@
-#include <mcr_cavity_detector/cavity_finder_ros.h>
+#include <mir_cavity_detector/cavity_finder_ros.h>
 
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/image_encodings.h>
@@ -121,7 +121,7 @@ void CavityFinderROS::eventInCallback(const std_msgs::String &msg)
     }
 }
 
-void CavityFinderROS::dynamicReconfigCallback(mcr_cavity_detector::CavityFinderConfig &config, uint32_t level)
+void CavityFinderROS::dynamicReconfigCallback(mir_cavity_detector::CavityFinderConfig &config, uint32_t level)
 {
     cavity_finder_.setCannyThreshold(config.canny_threshold);
     cavity_finder_.setCannyMultiplier(config.canny_multiplier);

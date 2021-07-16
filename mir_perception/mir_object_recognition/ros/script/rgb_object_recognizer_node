@@ -32,7 +32,7 @@ class RGBObjectRecognizer():
         self.model_name = model_name
 
         config_file = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 
-                            'ros', 'config', "image_classifier_config.yaml")
+                            'ros', 'config', "rgb_classifier_config.yaml")
         
         if os.path.isfile(config_file):
             configs = {}
@@ -76,6 +76,12 @@ class RGBObjectRecognizer():
                         result.roi = roi
                         objects.append(result)
 
+                    # remove overlapping bboxes 
+                    idxs_to_remove, objects = self.remove_overlapping_bbox(objects)
+                    bboxes = [bbox for i,bbox in enumerate(bboxes) if i not in idxs_to_remove]
+                    probs = [prob for i,prob in enumerate(probs) if i not in idxs_to_remove]
+                    labels = [label for i,label in enumerate(labels) if i not in idxs_to_remove]
+
                     # Publish result_list
                     result_list.objects = objects
                     self.pub_result.publish(result_list)
@@ -98,6 +104,66 @@ class RGBObjectRecognizer():
 
             elif self.net == 'classification':
                 print "TODO: MobileNet"
+
+    def remove_overlapping_bbox(self, objects):
+        """
+        Remove object which has bigger intersection areas
+        Args:
+          objects: object_list
+        Returns:
+          indices: object indices to remove
+          filtered_objects: objects filtered
+        """
+        object_to_remove_idxs = []
+        for i,object_1 in enumerate(objects):
+            for j,object_2 in enumerate(objects):
+                if i != j:
+                    bbox1 = [object_1.roi.x_offset,object_1.roi.y_offset,
+                             object_1.roi.width,object_1.roi.height]
+                    bbox2 = [object_2.roi.x_offset,object_2.roi.y_offset,
+                             object_2.roi.width,object_2.roi.height]
+
+                    intersection = float(self.compute_intersection(bbox1, bbox2))
+                    if intersection > 1e-2:
+                        intersection_over_area1 = intersection / (object_1.roi.height * object_1.roi.width)
+                        intersection_over_area2 = intersection / (object_2.roi.height * object_2.roi.width)
+                       
+                        if intersection_over_area1 >= intersection_over_area2:
+                            if i not in object_to_remove_idxs:
+                                object_to_remove_idxs.append(i)
+                        else:
+                            if i not in object_to_remove_idxs:
+                                object_to_remove_idxs.append(j)
+
+        filtered_objects = []
+        for i,obj in enumerate(objects):
+            if i not in object_to_remove_idxs:
+                filtered_objects.append(obj)
+
+        return object_to_remove_idxs, filtered_objects
+
+    def compute_intersection(self, box1, box2):
+        """
+        Compute iou
+        Args:
+          box1: array of 4 elements [cx, cy, width, height].
+          box2: same as above
+        Returns:
+          iou: a float number in range [0, 1]. iou of the two boxes.
+        """
+
+        lr = min(box1[0]+box1[2], box2[0]+box2[2]) - \
+             max(box1[0], box2[0])
+        if lr > 0:
+            tb = min(box1[1]+box1[3], box2[1]+box2[3]) - \
+                max(box1[1], box2[1])
+            if tb > 0:
+                intersection = tb*lr
+                union = box1[2]*box1[3]+box2[2]*box2[3]-intersection
+
+                return float(intersection)
+
+        return 0
                 
     def publish_debug_img(self, debug_img):
         debug_img = np.array(debug_img, dtype=np.uint8)

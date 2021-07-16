@@ -2,6 +2,7 @@
 
 import mcr_perception_states.common.perception_states as gps
 import mcr_states.common.basic_states as gbs
+import mir_states.common.basic_states as mir_gbs
 import mir_states.common.manipulation_states as gms
 import rospy
 import smach
@@ -62,12 +63,14 @@ class Setup(smach.State):
         # 2. single_view mode - only perceiving in one direction <straight>
         perception_mode = Utils.get_value_of(userdata.goal.parameters, "perception_mode")
         if perception_mode is not None and perception_mode == "single_view":
-            userdata.arm_pose_list = ["look_at_workspace_from_near"]
+            userdata.arm_pose_list = ["ppt_cavity_middle"]
         else:
             userdata.arm_pose_list = [
-                "look_at_workspace_from_near",
-                "look_at_workspace_from_near_left",
-                "look_at_workspace_from_near_right",
+                "ppt_cavity_middle",
+                "ppt_cavity_left",
+                "ppt_cavity_far_left",
+                "ppt_cavity_right",
+                "ppt_cavity_far_right"
             ]
 
         return "succeeded"
@@ -169,8 +172,16 @@ def main():
             "MOVE_ARM_TO_SELECTED_POSE",
             gms.move_arm_and_gripper("open"),
             transitions={
-                "succeeded": "RECOGNIZE_CAVITIES",
+                "succeeded": "WAIT_FOR_ARM_TO_STABILIZE",
                 "failed": "MOVE_ARM_TO_SELECTED_POSE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "WAIT_FOR_ARM_TO_STABILIZE",
+            mir_gbs.wait_for(0.5),
+            transitions={
+                "succeeded": "RECOGNIZE_CAVITIES",
             },
         )
         #+++
@@ -198,7 +209,16 @@ def main():
         smach.StateMachine.add(
             "POPULATE_RESULT_WITH_CAVITIES",
             PopulateResultWithCavities(),
-            transitions={"succeeded": "OVERALL_SUCCESS"},
+            transitions={"succeeded": "VISUALIZE_CAVITIES"},
+        )
+
+        # populate action server result with perceived objects
+        smach.StateMachine.add(
+            "VISUALIZE_CAVITIES",
+            gbs.send_event(
+                [("/mcr_perception/cavity_pose_selector/event_in", "e_visualize")]
+            ),
+            transitions={"success": "OVERALL_SUCCESS"},
         )
 
     # smach viewer

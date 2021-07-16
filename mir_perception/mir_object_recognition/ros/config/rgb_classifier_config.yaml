@@ -3,7 +3,7 @@ model:
     image:
       width: 640
       height: 480
-    bbox_prob_output_to_keep: 0.4
+    bbox_prob_output_to_keep: 0.5
   SSDLiteMobileNet:
 classes:
   0: 'S40_40_G'

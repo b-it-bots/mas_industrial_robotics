@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_unclutter_workspace</name>
+  <version>1.0.0</version>
+  <description>
+      TODO
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

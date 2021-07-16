@@ -37,6 +37,6 @@ class MultimodalObjectRecognitionUtils
      * \param[in] object.views[0].point_cloud
      * \param[in] the height adjustment of the container, default 10cm
     */
-    void adjustContainerPose(mas_perception_msgs::Object &container_object, float rgb_container_height=0.1);
+    void adjustContainerPose(mas_perception_msgs::Object &container_object, float container_height=0.1);
 };
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_UTILS_H

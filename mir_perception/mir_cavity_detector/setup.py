@@ -4,8 +4,8 @@ from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 d = generate_distutils_setup(
-            packages=['mcr_cavity_detector'],
-            package_dir={'mcr_cavity_detector': 'common/src/mcr_cavity_detector'}
+            packages=['mir_cavity_detector'],
+            package_dir={'mir_cavity_detector': 'common/src/mir_cavity_detector'}
             )
 
 setup(**d)

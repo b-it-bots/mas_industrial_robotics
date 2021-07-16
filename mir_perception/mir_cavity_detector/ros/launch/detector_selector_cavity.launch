@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <launch>
-    <group ns="mcr_perception">
-        <node pkg="mcr_perception_selectors" type="cavity_pose_selector_node" name="cavity_pose_selector" output="screen">
-            <remap from="~cavity_pose" to="/mcr_perception/object_selector/output/object_pose" />
+    <group ns="mir_perception">
+        <node pkg="mir_perception_selectors" type="cavity_pose_selector_node" name="cavity_pose_selector" output="screen">
+            <remap from="~cavity_pose" to="/mir_perception/object_selector/output/object_pose" />
             <param name="loop_rate" type="double" value="10.0"/>
-            <rosparam command="load" file="$(find mcr_perception_selectors)/ros/config/object_cavity_pairs.yaml"/>
+            <rosparam command="load" file="$(find mir_perception_selectors)/ros/config/object_cavity_pairs.yaml"/>
         </node>
-        <node pkg="mcr_cavity_detector" type="cavity_finder" name="cavity_finder" output="screen" respawn="false" >
+        <node pkg="mir_cavity_detector" type="cavity_finder" name="cavity_finder" output="screen" respawn="false" >
             <remap from="~input/pointcloud" to="/arm_cam3d/depth_registered/points" />
             <remap from="~image" to="/arm_cam3d/rgb/image_raw" />
-            <remap from="~output/cavity" to="/mcr_perception/cavity_pose_selector/cavity" />
+            <remap from="~output/cavity" to="/mir_perception/cavity_pose_selector/cavity" />
             <remap from="~image" to="/arm_cam3d/rgb/image_raw" />
             <param name="target_frame" type="string" value="base_link_static"/>
         </node>
       
-        <node pkg = "mcr_cavity_detector" type="cavity_classifier_node.py" name="cavity_classifier" output="screen">
+        <node pkg = "mir_cavity_detector" type="cavity_classifier_node.py" name="cavity_classifier" output="screen">
         </node>
     </group>
 </launch>

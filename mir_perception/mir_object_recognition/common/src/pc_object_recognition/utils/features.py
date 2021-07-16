@@ -403,7 +403,7 @@ class FVRDDFeatureExtraction():
                     s_feature.append(slice[-1, :])
             s_feature = np.asarray(s_feature).flatten()    
             features.extend(s_feature)
-        
+
         # Also compute additional radial density distribution feature feature 
         # such as color, BBox, outlier error
         if self.use_rdd:
@@ -450,9 +450,9 @@ class FVRDDFeatureExtraction():
         fv = np.concatenate([fv_color, fv])
         fv = fv.flatten()
 
-        rvrdd_features = np.hstack((rdd_features, fv))
+        fvrdd_features = np.hstack((rdd_features, fv))
         
-        return rvrdd_features
+        return fvrdd_features
 
 
     def l2_normalize(self, v, dim=1):

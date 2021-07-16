@@ -40,6 +40,10 @@ class PointcloudObjectRecognizer():
         
         model_config_file = os.path.join(roslib.packages.get_pkg_dir(PACKAGE), 
                             'ros', 'config', "pc_classifier_config.yaml")
+
+        #threshold for alu profile color
+        #black < 0.3, gray >= 03
+        self.alu_profile_color_th = 0.3
         
         if os.path.isfile(model_config_file):
             configs = {}
@@ -62,8 +66,8 @@ class PointcloudObjectRecognizer():
             elif model_id == "rdd":
                 feature_extraction.set_rdd_params(color=True)
             
-            classifier_file = os.path.join(cfg_folder, dataset_dir, 'classifier.pkl')
-            label_encoder = os.path.join(cfg_folder, dataset_dir, 'label_encoder.pkl')
+            classifier_file = os.path.join(cfg_folder, dataset_dir, 'classifier.joblib')
+            label_encoder = os.path.join(cfg_folder, dataset_dir, 'label_encoder.joblib')
             self.classifier = FeatureBasedClassifiers(classifier_file, label_encoder)
 
         elif model == "cnn_based":
@@ -91,19 +95,33 @@ class PointcloudObjectRecognizer():
             recognized_object_list = object_list.objects
             for object in recognized_object_list:
                 if self.model == "feature_based":
-                    cloud = self.extract_pointcloud(object.views[0].point_cloud, color="hsv")
+                    cloud = self.extract_pointcloud(object.views[0].point_cloud, color="rgb")
                     features = self.fe_method(cloud)
                     features = np.reshape(features, (1,-1))
                     name, probability = self.classifier.classify(features)
-                    name = name[0]
+                    name = self.label_to_name[name[0]]
                 elif self.model == "cnn_based":
                     cloud = self.extract_pointcloud(object.views[0].point_cloud, color="rgb")
                     label, probability = self.classifier.classify(cloud, center=True, rotate=True, pad=True)
                     name = self.label_to_name[label]
+                    
+                    # check if it's profile, replace the recognition result if
+                    # it's misclassified with color according to threshold
+                    if "S40_40" in name or "F20_20" in name:
+                        median_color = np.median(cloud[:,3:], axis=0)
+                        mean_median_color = np.mean(median_color)
+                        rospy.loginfo("Checking color for %s: mean_median_color= %s", name, mean_median_color)
+
+                        if mean_median_color < self.alu_profile_color_th and "G" in name:
+                            new_label = name.replace("G", "B", 1)
+                            name = new_label
+                        elif mean_median_color > self.alu_profile_color_th and "B" in name:
+                            new_label = name.replace("B", "G", 1)
+                            name = new_label
 
                 object.name = name
                 object.probability = probability
-
+                
             self.pub.publish(recognized_object_list)
 
     def extract_pointcloud(self, pc, color="hsv"):
