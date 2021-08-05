@@ -21,7 +21,7 @@
 MultimodalObjectRecognitionUtils::MultimodalObjectRecognitionUtils() {}
 MultimodalObjectRecognitionUtils::~MultimodalObjectRecognitionUtils() {}
 void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::Object &container_object,
-                               float rgb_container_height)
+                               float container_height)
 {
   PointCloud::Ptr cloud(new PointCloud);
   pcl::fromROSMsg(container_object.views[0].point_cloud, *cloud);
@@ -107,7 +107,7 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   // Change the center of object
   container_object.pose.pose.position.x = centroid[0];
   container_object.pose.pose.position.y = centroid[1];
-  container_object.pose.pose.position.z = max_pt.z + rgb_container_height;
+  container_object.pose.pose.position.z = max_pt.z + container_height;
 }
 void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::Object &object)
 {

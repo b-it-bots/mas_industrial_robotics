@@ -1,5 +1,5 @@
 # reasonable parameters to find planes of @Work workspaces
-pc_object_segmentation:
+multimodal_object_recognition:
   voxel_leaf_size: 0.009
   voxel_filter_field_name: z
   voxel_filter_limit_min: -0.15
@@ -31,16 +31,20 @@ pc_object_segmentation:
   cluster_max_length: 0.25
   cluster_min_distance_to_polygon: 0.04
   center_cluster: False
-  pad_cluster: False
+  pad_cluster: True
   padded_cluster_size: 2048
   octree_resolution: 0.0025
-  object_height_above_workspace: 0.020
-  rgb_container_height: 0.0335
+  object_height_above_workspace: 0.022
+  container_height: 0.07
+  enable_rgb_recognizer: true
+  enable_pc_recognizer: true
   rgb_roi_adjustment: 2
   rgb_bbox_min_diag: 21
   rgb_bbox_max_diag: 175
   rgb_cluster_filter_limit_min: 0.0060
   rgb_cluster_filter_limit_max: 0.35
+  rgb_cluster_remove_outliers: True
+  enable_roi: True
   roi_base_link_to_laser_distance: 0.350
-  roi_max_object_pose_x_to_base_link: 0.650
+  roi_max_object_pose_x_to_base_link: 0.700
   roi_min_bbox_z: 0.03

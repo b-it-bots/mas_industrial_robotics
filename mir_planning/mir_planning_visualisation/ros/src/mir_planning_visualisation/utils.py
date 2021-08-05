@@ -25,6 +25,7 @@ class Utils(object):
         self._alpha = rospy.get_param("~alpha", 1.0)
 
         self._model_path = rospy.get_param("~model_path", None)
+        self._model_pkg_path = rospy.get_param("~model_pkg_path", None)
         if self._model_path is None:
             raise Exception("Model path not provided.")
         if not os.path.exists(self._model_path):
@@ -78,11 +79,11 @@ class Utils(object):
                 marker = self.get_marker_from_obj_name_and_pos(
                     "pp", x=pos[0], y=pos[1], yaw=pos[2]
                 )
-            elif "cb" in ws:
+            elif "tt" in ws:
                 marker = self.get_marker_from_obj_name_and_pos(
-                    "cb", x=pos[0], y=pos[1], yaw=pos[2]
+                    "tt", x=pos[0], y=pos[1], yaw=pos[2]
                 )
-                config = self.marker_config["cb"]
+                config = self.marker_config["tt"]
                 marker.type = Marker.CYLINDER
                 marker.scale.x = marker.scale.y = config["scale"]
                 marker.scale.z = 0.02
@@ -188,8 +189,8 @@ class Utils(object):
             obj_pose_offsets = [
                 (x, y) for x in [0.05, 0.2] for y in [0.0, 0.15, -0.15, 0.3, -0.3]
             ]
-        elif "cb" in ws:
-            cb_radius = self.marker_config["cb"]["scale"] / 2.0
+        elif "tt" in ws:
+            cb_radius = self.marker_config["tt"]["scale"] / 2.0
             obj_pose_offsets = [
                 (
                     math.cos(math.radians(theta)) * cb_radius * 0.8 + cb_radius,
@@ -270,17 +271,10 @@ class Utils(object):
             config = self.marker_config["default"]
         else:
             config = self.marker_config[model_name]
-            file_path = os.path.join(self._model_path, config["file_name"])
-            if os.path.exists(file_path):
-                resource_file = "file://" + file_path
-                marker.type = Marker.MESH_RESOURCE
-                marker.mesh_resource = resource_file
-            else:
-                rospy.logwarn(
-                    "Could not find file " + str(file_path) + ". Using default marker"
-                )
-                marker.type = Marker.CUBE
-                config = self.marker_config["default"]
+            file_path = os.path.join(self._model_pkg_path, config["file_name"])
+            resource_file = "package://" + file_path
+            marker.type = Marker.MESH_RESOURCE
+            marker.mesh_resource = resource_file
 
         marker.header.stamp = rospy.Time.now()
 

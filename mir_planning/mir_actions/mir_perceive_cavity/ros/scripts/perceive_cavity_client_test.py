@@ -20,6 +20,7 @@ if __name__ == "__main__":
     else:
         location = "PP01"
     goal.parameters.append(KeyValue(key="location", value=location))
+    goal.parameters.append(KeyValue(key="perception_mode", value="three_view"))
 
     rospy.loginfo("Sending following goal to perceive cavity server")
     rospy.loginfo(goal)

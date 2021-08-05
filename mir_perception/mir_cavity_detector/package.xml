@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_cavity_detector</name>
+  <version>0.1.0</version>
+  <description>
+      Node to find 2D cavities in an image and convert to 3D cavities.
+      Node to match 3D cavities with a template.
+  </description>
+
+  <maintainer email="deebul.nair@smail.inf.h-brs.de">Deebul Nair</maintainer>
+
+  <author email="deebul.nair@smail.inf.h-brs.de">Deebul Nair</author>
+  <author email="santosh.thoduka@smail.inf.h-brs.de">Santosh Thoduka</author>
+  <author email="bipinkumar.badri@smail.inf.h-brs.de">Bipin Kumar</author>
+
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>mas_perception_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+
+</package>

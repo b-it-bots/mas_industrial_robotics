@@ -1,0 +1,23 @@
+#! /usr/bin/env python
+import rospy
+from ppt_3d.msg import Cavity
+import tf
+import sys
+import numpy as np
+import rospkg
+
+data = []
+
+def callback(msg,args):
+    if msg.cov_minor > 1e-5:
+        data.append([msg.cov_minor, msg.cov_major])
+        print ("length of data = " + str(len(data)))
+        np.save(rospkg.RosPack().get_path('ppt_3d') + '/scripts/covariance_data/data/'+args[0]+".npy", np.array(data))
+    
+if __name__ == '__main__':
+    if (len(sys.argv) == 2):
+        filename = sys.argv[1]
+        rospy.init_node('ppt_train_record_data')
+
+        rospy.Subscriber("cavity", Cavity, callback, [filename])
+        rospy.spin()    

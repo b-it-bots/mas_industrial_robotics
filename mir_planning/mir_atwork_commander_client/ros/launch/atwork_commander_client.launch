@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="debug" default="true" />
+    <arg name="ignore_pick_location" default="['tt']" />
+    <arg name="ignore_place_location" default="[]" />
+
+    <group ns="mir_task_planning">
+
+        <node pkg="mir_atwork_commander_client" type="atwork_commander_client_node"
+              name="atwork_commander_client" output="screen" >
+
+            <remap from="~task" to="/atwork_commander/task"/>
+            <param name="debug" type="bool" value="$(arg debug)"/>
+            <rosparam param="ignore_pick_location" subst_value="True">
+                $(arg ignore_pick_location)
+            </rosparam>
+            <rosparam param="ignore_place_location" subst_value="True">
+                $(arg ignore_place_location)
+            </rosparam>
+        </node>
+
+    </group>
+
+</launch>

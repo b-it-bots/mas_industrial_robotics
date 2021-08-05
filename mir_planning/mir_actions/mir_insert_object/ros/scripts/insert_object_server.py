@@ -99,8 +99,8 @@ def main():
             ),
             transitions={
                 "success": "UNSTAGE_OBJECT",
-                "timeout": "OVERALL_FAILED",
-                "failure": "OVERALL_FAILED",
+                "timeout": "UNSTAGE_OBJECT",
+                "failure": "UNSTAGE_OBJECT",
             },
         )
 

@@ -36,7 +36,7 @@ plan with those provided configuration and returns a `CompletePlan`.
   ```
   roscore
   roslaunch mir_task_planning task_planner.launch
-  roslaunch mir_task_planning task_planner_client_test.launch
+  roslaunch mir_task_planning task_planner_client.launch
   ```
 
 ## Additional files

@@ -162,7 +162,7 @@ class PlannerWrapper(object):
         plan_file_list = [
             filename for filename in files_list if "task_plan" in filename
         ]
-        if plan_file_list:
+        if len(plan_file_list) == 0:
             print("[planner_wrapper] No plan files found.")
             return None
         best_plan = sorted(plan_file_list, key=lambda x: int(x.split(".")[-1]))[-1]

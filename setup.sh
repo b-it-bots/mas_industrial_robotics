@@ -16,15 +16,13 @@ function fancy_print {
 
 # Install ROS Noetic
 function update_keys {
-    if [ $DOCKER_INSTALL = 0 ];
-      then
-        echo "Setting up keys"
-        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-        sudo curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | sudo apt-key add -
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
-        #sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo $(lsb_release -sc) main" -u
-    fi
-    sudo apt-key adv --keyserver keys.gnupg.net --recv-key C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C8B3A55A6F3EFCDE
+    echo "Setting up ROS keys"
+    sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+
+    #realsense public key
+    sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+    sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
 }
 
 # not required in docker
@@ -109,13 +107,7 @@ function build_mas_industrial_robotics {
         #Disable building the youbot_driver_ros_interface in travis CI as it expects a user input during build
         touch $WS_DIR/src/youbot_driver_ros_interface/CATKIN_IGNORE
         
-        # Download mercury planner due to socket io error in CI and
-        sudo apt-get install -y -qq bison flex gawk g++-multilib pypy
-        mkdir $WS_DIR/src/mercury_planner/build
-        cd $WS_DIR/src/mercury_planner/build
-        wget https://helios.hud.ac.uk/scommv/IPC-14/repo_planners/Mercury-fixed.zip
-        unzip Mercury-fixed.zip -x seq-agl-mercury.tar.gz && tar -xf seq-sat-mercury.tar.gz
-        #cd seq-sat-mercury && ./build
+        # build mercury_planner first in CI, otherwise it will fails due to socket error 
         catkin build mercury_planner
         cd $WS_DIR
     fi

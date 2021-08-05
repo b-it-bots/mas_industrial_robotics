@@ -75,7 +75,7 @@ class SceneSegmentationROS
    * */
   void segmentCloud(const PointCloud::ConstPtr &cloud, mas_perception_msgs::ObjectList &obj_list,
                     std::vector<PointCloud::Ptr> &clusters, std::vector<BoundingBox> &boxes,
-                    bool center_cluster, bool pad_cluster, bool num_points);
+                    bool center_cluster, bool pad_cluster, int num_points);
 
   /** \brief Find plane
    * \param[in] Input point cloud

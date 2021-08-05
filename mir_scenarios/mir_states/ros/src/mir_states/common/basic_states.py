@@ -108,3 +108,12 @@ class wait_for_open_door(smach.State):
         rospy.sleep(1)
 
         return "succeeded"
+
+class wait_for(smach.State):
+    def __init__(self, duration=1.0):
+        smach.State.__init__(self, outcomes=["succeeded"])
+        self._duration = duration
+
+    def execute(self, userdata):
+        rospy.sleep(self._duration)
+        return "succeeded"

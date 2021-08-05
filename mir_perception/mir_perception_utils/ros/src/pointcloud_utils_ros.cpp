@@ -99,13 +99,13 @@ bool pointcloud::transformPointCloud2(const boost::shared_ptr<tf::TransformListe
   return (true);
 }
 
-void pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi,
+bool pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi,
                                   const PointCloud::Ptr &cloud_in, PointCloud::Ptr &cloud_roi,
                                   float roi_size_adjustment, bool remove_outliers)
 {
-  if (!cloud_in->isOrganized()) {
-    ROS_ERROR("Pointcloud input is unorganized");
-    return;
+  if (cloud_in->height <= 1 || cloud_in->width <= 1) {
+    ROS_ERROR("Pointcloud input height is %d and width is %d",cloud_in->height, cloud_in->width );
+    return (false);
   }
   int min_x = roi.x_offset;
   int min_y = roi.y_offset;
@@ -144,4 +144,5 @@ void pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi,
       sor.filter(*cloud_roi);
     }
   }
+  return (true);
 }
