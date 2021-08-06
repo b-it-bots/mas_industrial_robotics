@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-  <include file="$(find mir_basic_manipulation_test)/ros/launch/bmt.launch">
-    <arg name="sim" value="true"/>
-  </include>
-
-</launch>
