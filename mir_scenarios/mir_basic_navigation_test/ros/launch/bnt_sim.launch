@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-  <include file="$(find mir_basic_navigation_test)/ros/launch/bnt.launch">
-    <arg name="sim" value="true"/>
-  </include>
-
-</launch>
