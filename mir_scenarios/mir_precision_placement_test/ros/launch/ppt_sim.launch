@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-  <include file="$(find mir_precision_placement_test)/ros/launch/ppt.launch">
-    <arg name="sim" value="true"/>
-  </include>
-
-</launch>
