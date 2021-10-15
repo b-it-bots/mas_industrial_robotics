@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<launch>
+
+   <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)" />
+
+   <node pkg="mir_gripper_controller" type="teensy_gripper_controller_ros" name="gripper_controller" output="screen" respawn="true" />
+
+
+</launch>
