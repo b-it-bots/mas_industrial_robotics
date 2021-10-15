@@ -62,7 +62,7 @@ Where:
 
 .. _mutlimodal_object_recognition:
 
-Multimodal Object Recognition
+Multimodal object recognition
 -----------------------------
 
 `multimodal_object_recognition_node <https://github.com/b-it-bots/mas_industrial_robotics/blob/melodic/mir_perception/mir_object_recognition/ros/src/multimodal_object_recognition_node.cpp>`_
