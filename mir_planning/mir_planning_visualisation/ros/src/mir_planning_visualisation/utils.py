@@ -53,7 +53,7 @@ class Utils(object):
         self.marker_counter = 0
         self._ws_pose = dict()
         # offset nav goal based on size of robot to initialise workstation poses
-        for ws, pos in navigation_goals.iteritems():
+        for ws, pos in navigation_goals.items():
             delta_x = math.cos(pos[2]) * self._base_link_to_ws_edge
             delta_y = math.sin(pos[2]) * self._base_link_to_ws_edge
             self._ws_pose[ws.lower()] = [pos[0] + delta_x, pos[1] + delta_y, pos[2]]
@@ -66,7 +66,7 @@ class Utils(object):
 
         """
         markers = []
-        for ws, pos in self._ws_pose.iteritems():
+        for ws, pos in self._ws_pose.items():
             if "ws" in ws:
                 marker = self.get_marker_from_obj_name_and_pos(
                     "ws", x=pos[0], y=pos[1], yaw=pos[2]
@@ -125,7 +125,7 @@ class Utils(object):
             key: self.get_marker_from_obj_name_and_pos(key, x=x, y=y, z=0.05, yaw=yaw)
             for key in keys
         }
-        for key, marker in marker_dict.iteritems():
+        for key, marker in marker_dict.items():
             if "wheel" in key:
                 marker.type = Marker.SPHERE
         return marker_dict.values()
