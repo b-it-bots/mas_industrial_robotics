@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_grasp_verification</name>
+  <version>0.1.0</version>
+  <description>Verifies if the gripper fingers have grasped any object or not</description>
+
+  <maintainer email="santosh.thoduka@h-brs.de">Santosh Thoduka</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>cv_bridge</run_depend>
+
+</package>
