@@ -82,7 +82,7 @@ class MoveitClient:
         target = self.move_arm_to or userdata.move_arm_to
 
         # do it twice because it probably fails the first time
-        for i in xrange(2):
+        for i in range(2):
             self.client_event = None
             self.pub_event.publish("e_start")
 
