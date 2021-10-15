@@ -25,7 +25,7 @@ from std_msgs.msg import String
 
 class cartesian_velocity_insert:
     def __init__(self):
-        print ("Node initiated.........")
+        rospy.loginfo("Node initiated.........")
         self.tf_listener = tf.TransformListener()
 
         self.cartesian_velocity_command_pub = (
@@ -100,14 +100,13 @@ class cartesian_velocity_insert:
             pose_stamped_2.pose.position.y,
             pose_stamped_2.pose.position.z,
         ]
-        print "Object pose received ", self.goal
+        rospy.logdebug("Object pose received [%.4f, %.4f. %.4f]" % (self.goal[0], self.goal[1], self.goal[2]))
 
     def event_in_cb(self, msg):
         """
         Starts a planned motion based on the specified arm position.
 
         """
-        print "event_in recieved"
         self.event = msg.data
 
     def start(self):
@@ -195,7 +194,7 @@ class cartesian_velocity_insert:
         self.points = None
 
     def move_arm_to_goal(self):
-        print "Moving arm to goal position"
+        rospy.logdebug("Moving arm to goal position")
         goal_point = self.goal
         while not rospy.is_shutdown() and self.event != "e_stop":
             try:
@@ -246,7 +245,8 @@ class cartesian_velocity_insert:
         current_pos = np.array([trans[0], trans[1], trans[2]])
 
         distance = np.linalg.norm((np.array(path[:, path.shape[1] - 1]) - current_pos))
-        print "final pos is ", path[:, path.shape[1] - 1]
+        final_pos = path[:, path.shape[1] - 1]
+        rospy.logdebug("final pos is [%.4f, %.4f, %.4f]" % (final_pos[0], final_pos[1], final_pos[2]))
         while (
             distance > self.goal_tolerance
             and self.event != "e_stop"
@@ -288,7 +288,6 @@ class cartesian_velocity_insert:
                 ind = index
             else:
                 ind = index + 1
-            # print index, ind, path.shape[1]
 
             vel_x = self.feedforward_gain * (
                 path_x[ind] - path_x[index]
@@ -317,7 +316,6 @@ class cartesian_velocity_insert:
         self.vel_publisher.publish(message)
 
     def execute(self):
-        print "executing ............."
         self.move_arm_to_goal()
 
 
