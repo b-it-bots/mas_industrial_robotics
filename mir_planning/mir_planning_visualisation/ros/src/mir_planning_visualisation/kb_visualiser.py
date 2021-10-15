@@ -91,7 +91,7 @@ class KnowledgeBaseVisualiser(object):
                     for fact in facts
                 ]
                 return resp
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr("Service call failed: %s" % e)
             return None
 
@@ -99,7 +99,7 @@ class KnowledgeBaseVisualiser(object):
         markers = []
 
         obj_on_ws = []
-        for ws_name, obj_list in data["obj_on_ws"].iteritems():
+        for ws_name, obj_list in data["obj_on_ws"].items():
             obj_markers = self._utils.get_markers_from_obj_on_ws(
                 obj_list, ws_name, data["obj_in_container"]
             )
@@ -108,7 +108,7 @@ class KnowledgeBaseVisualiser(object):
 
         if self._visualise_robot:
             obj_on_robot_markers = []
-            for platform, obj in data["obj_on_robot"].iteritems():
+            for platform, obj in data["obj_on_robot"].items():
                 obj_marker = self._utils.get_markers_from_obj_on_robot(
                     obj, platform, data["robot_ws"]
                 )
@@ -117,7 +117,7 @@ class KnowledgeBaseVisualiser(object):
             markers.append(obj_on_robot_markers)
 
         goal_obj_on_ws = []
-        for ws_name, obj_list in data["goal_obj_on_ws"].iteritems():
+        for ws_name, obj_list in data["goal_obj_on_ws"].items():
             obj_markers = self._utils.get_markers_from_obj_on_ws(
                 obj_list, ws_name, data["goal_obj_in_container"], is_goal=True
             )
