@@ -5,13 +5,15 @@
   <arg name="target_frame" default="odom" />
   <arg name="model" default="cnn_based" />
   <arg name="model_id" default="dgcnn" />
-  <arg name="dataset" default="asus" />
+  <arg name="dataset" default="all" />
+  <arg name="model_dir" default="$(find mir_pointcloud_object_recognition_models)/common/models/$(arg model_id)/$(arg dataset)" />
 
   <group ns="mir_perception">
     <node pkg="mir_object_recognition" type="pc_object_recognizer_node" name="pc_object_recognizer_node" output="screen" 
         respawn="false" ns="multimodal_object_recognition/recognizer/pc">
       <param name="model" value="$(arg model)" type="str" />
       <param name="model_id" value="$(arg model_id)" type="str" />
+      <param name="model_dir" value="$(arg model_dir)" type="str" />
       <param name="dataset" value="$(arg dataset)" type="str" />
       <remap from="~input/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/pc/input/object_list" />
       <remap from="~output/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/pc/output/object_list"/>
