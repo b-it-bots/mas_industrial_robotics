@@ -1,0 +1,477 @@
+# =======
+# OBJECTS
+# =======
+m20:
+    file_name: 'm20.stl'
+    scale: 0.001
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        roll: 0.0
+        pitch: -90.0
+        yaw: 180.0
+m30:
+    file_name: 'm30.stl'
+    scale: 0.001
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.02
+        y: 0.0
+        z: 0.0
+        roll: 0.0
+        pitch: -90.0
+        yaw: 0.0
+f20_20_b:
+    file_name: 'f20_20.stl'
+    scale: 0.001
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.01
+        roll: 0.0
+        pitch: -90.0
+        yaw: 180.0
+f20_20_g:
+    file_name: 'f20_20.stl'
+    scale: 0.001
+    color:
+        r: 0.5
+        g: 0.5
+        b: 0.5
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.01
+        roll: 0.0
+        pitch: -90.0
+        yaw: 180.0
+s40_40_b:
+    file_name: 's40_40.stl'
+    scale: 0.001
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.02
+        roll: 0.0
+        pitch: -90.0
+        yaw: 180.0
+s40_40_g:
+    file_name: 's40_40.stl'
+    scale: 0.001
+    color:
+        r: 0.5
+        g: 0.5
+        b: 0.5
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.02
+        roll: 0.0
+        pitch: -90.0
+        yaw: 180.0
+m20_100:
+    file_name: 'm20_100.stl'
+    scale: 0.001
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.013
+        y: 0.01
+        z: 0.0
+        roll: 30.0
+        pitch: 3.0
+        yaw: 0.0
+r20:
+    file_name: 'r20.stl'
+    scale: 0.001
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.015
+        roll: 0.0
+        pitch: -90.0
+        yaw: 180.0
+motor:
+    file_name: 'motor.stl'
+    scale: 0.001
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.02
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+distance_tube:
+    file_name: 'distance_tube.stl'
+    scale: 0.001
+    color:
+        r: 0.5
+        g: 0.5
+        b: 0.5
+    offset:
+        x: 0.015
+        y: 0.0
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+bearing:
+    file_name: 'bearing.stl'
+    scale: 0.001
+    color:
+        r: 0.6
+        g: 0.6
+        b: 0.6
+    offset:
+        x: 0.015
+        y: 0.0
+        z: 0.0
+        roll: 0.0
+        pitch: -90.0
+        yaw: 0.0
+bearing_box:
+    file_name: 'bearing_box.stl'
+    scale: 0.001
+    color:
+        r: 0.5
+        g: 0.5
+        b: 0.5
+    offset:
+        x: 0.0
+        y: -0.025
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+axis:
+    file_name: 'axis.stl'
+    scale: 0.001
+    color:
+        r: 0.5
+        g: 0.5
+        b: 0.5
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.015
+        roll: 0.0
+        pitch: 6.0
+        yaw: 0.0
+container_box_red:
+    file_name: 'container.stl'
+    scale: 0.001
+    color:
+        r: 1.0
+        g: 0.0
+        b: 0.0
+    offset:
+        x: 0.0
+        y: -0.07
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 180.0
+container_box_blue:
+    file_name: 'container.stl'
+    scale: 0.001
+    color:
+        r: 0.0
+        g: 0.0
+        b: 1.0
+    offset:
+        x: 0.0
+        y: -0.07
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 180.0
+
+# ============
+# WORKSTATIONS
+# ============
+ws:
+    file_name: 'workstation.stl'
+    scale: 0.001
+    color:
+        r: 0.9
+        g: 0.9
+        b: 0.9
+    offset:
+        x: 0.0
+        y: -0.4
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 180.0
+sh:
+    file_name: 'shelf.stl'
+    scale: 0.001
+    color:
+        r: 0.9
+        g: 0.9
+        b: 0.9
+    offset:
+        x: -0.5
+        y: -0.4
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 180.0
+pp:
+    file_name: 'ppt_platform.stl'
+    scale: 0.001
+    color:
+        r: 0.9
+        g: 0.9
+        b: 0.9
+    offset:
+        x: -0.25
+        y: -0.05
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 180.0
+tt:
+    file_name: 'workstation.stl'
+    scale: 1.0
+    color:
+        r: 0.9
+        g: 0.9
+        b: 0.9
+    offset:
+        x: 0.5
+        y: 0.0
+        z: 0.09
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+
+# ======
+# YOUBOT
+# ======
+youbot:
+    file_name: 'base.dae'
+    scale: 1.0
+    color:
+        r: 0.2
+        g: 0.2
+        b: 0.2
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+arm_0:
+    file_name: 'arm0.dae'
+    scale: 1.0
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.135
+        y: 0.0
+        z: 0.05
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+arm_1:
+    file_name: 'arm1.dae'
+    scale: 1.0
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: 0.155
+        y: 0.0
+        z: 0.145
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+arm_2:
+    file_name: 'arm2.dae'
+    scale: 1.0
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: 0.121
+        y: -0.03
+        z: 0.204
+        roll: 0.0
+        pitch: -60.0
+        yaw: 0.0
+arm_3:
+    file_name: 'arm3.dae'
+    scale: 1.0
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: 0.093
+        y: 0.03
+        z: 0.312
+        roll: 0.0
+        pitch: 30.0
+        yaw: 0.0
+arm_4:
+    file_name: 'arm4.dae'
+    scale: 1.0
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: 0.15
+        y: -0.008
+        z: 0.36
+        roll: 0.0
+        pitch: 90.0
+        yaw: 0.0
+arm_5:
+    file_name: 'arm5.dae'
+    scale: 1.0
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.216
+        y: 0.0
+        z: 0.36
+        roll: 0.0
+        pitch: 90.0
+        yaw: 0.0
+arm_palm:
+    file_name: 'palm.dae'
+    scale: 1.0
+    color:
+        r: 0.1
+        g: 0.1
+        b: 0.1
+    offset:
+        x: 0.25
+        y: 0.0
+        z: 0.363
+        roll: 0.0
+        pitch: 90.0
+        yaw: 0.0
+youbot_plate:
+    file_name: 'plate.dae'
+    scale: 1.0
+    color:
+        r: 0.6
+        g: 0.6
+        b: 0.6
+    offset:
+        x: -0.1
+        y: 0.0
+        z: 0.035
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+yb_wheel_lf:
+    file_name: 'palm.dae'
+    scale: 0.1
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: 0.228
+        y: 0.158
+        z: -0.03
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+yb_wheel_rf:
+    file_name: 'palm.dae'
+    scale: 0.1
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: 0.228
+        y: -0.158
+        z: -0.03
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+yb_wheel_lb:
+    file_name: 'palm.dae'
+    scale: 0.1
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: -0.228
+        y: 0.158
+        z: -0.03
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+yb_wheel_rb:
+    file_name: 'palm.dae'
+    scale: 0.1
+    color:
+        r: 0.85
+        g: 0.34
+        b: 0.11
+    offset:
+        x: -0.228
+        y: -0.158
+        z: -0.03
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0
+
+# =======
+# DEFAULT
+# =======
+default:
+    file_name: ''
+    scale: 0.05
+    color:
+        r: 1.0
+        g: 0.0
+        b: 0.0
+    offset:
+        x: 0.0
+        y: 0.0
+        z: 0.025
+        roll: 0.0
+        pitch: 0.0
+        yaw: 0.0

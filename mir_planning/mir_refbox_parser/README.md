@@ -7,7 +7,7 @@ World model is defined as the locations and properties of different moveable
 objects(eg: robot, box etc) in the environment.
 The world model node has to subscribe to the incoming data stream which informs
 of the current state of the world.(Eg : Refree box)
-It then has to store this value in the any format which can be utilized for 
+It then has to store this value in the any format which can be utilized for
 other components.
 
 
@@ -26,7 +26,7 @@ inside the respective directories
 
 
 **Input(s):**
-  * `event_in`: trigger to start the node. 
+  * `event_in`: trigger to start the node.
   * `refbox`: the ros topic string format on which the BTT, BNT, BPT, BMT, CBT messages is being published
 
 **Output(s):**
@@ -50,7 +50,7 @@ currently this node is available in the
 [unmerged_packages_for_testing](https://mas.b-it-center.de/gitgate/dnair2s/unmerged_packages_for_testing/tree/master/task_planning/mir_pddl_problem_generator)
 
 Domain used is
-[here](https://mas.b-it-center.de/gitgate/dnair2s/unmerged_packages_for_testing/blob/master/task_planning/mir_knowledge/common/pddl/general_domain/domain.pddl) 
+[here](https://mas.b-it-center.de/gitgate/dnair2s/unmerged_packages_for_testing/blob/master/task_planning/mir_knowledge/common/pddl/general_domain/domain.pddl)
 
 Before running the test the file has to be copied to the
 mir_pddl_problem_generator/ros/test/example_domain folder.

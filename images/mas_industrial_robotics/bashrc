@@ -1,0 +1,34 @@
+#
+# ~/.bashrc
+# borrowed from https://github.com/pierrekilly/docker-ros-box/blob/master/docker/bashrc
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+alias ls='ls --color=auto'
+export QT_X11_NO_MITSHM=1
+
+function returncode
+{
+  returncode=$?
+  if [ $returncode != 0 ]; then
+    echo "[$returncode]"
+  else
+    echo ""
+  fi
+}
+
+if [[ ${EUID} == 0 ]]
+then
+	PS1='\[\033[0;31m\]$(returncode)\[\033[01;31m\]\u\[\033[00m\]@\[\033[01;33m\]\h\[\033[01;34m\] ${PWD} \$\[\033[00m\] '
+else
+	PS1='\[\033[0;31m\]$(returncode)\[\033[01;32m\]\u\[\033[00m\]@\[\033[01;33m\]\h\[\033[01;34m\] ${PWD} \$\[\033[00m\] '
+fi
+
+export BUILDDIR=/tmp
+export MAKEFLAGS="-j$(nproc) $MAKEFLAGS"
+export LD_LIBRARY_PATH="/usr/lib:$LD_LIBRARY_PATH"
+source $HOME/$ROS_DISTRO/catkin_ws/devel/setup.bash
+
+#ALIAS b-it-bots
+alias bringup_sim='roslaunch mir_bringup_sim robot.launch'

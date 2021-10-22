@@ -6,5 +6,5 @@
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mir_hardware_config)/$(arg robot)/urdf/robot.urdf.xacro" />
 
   <rosparam command="load" ns="arm_1" file="$(find mir_hardware_config)/$(arg robot)/config/arm.yaml"/>
-	
+
 </launch>

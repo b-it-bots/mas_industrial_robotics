@@ -1,0 +1,19 @@
+mir_perception/front_camera/barrier_tape_detection:
+    min_area: 10
+    color_thresh_min_h: 40
+    color_thresh_min_s: 50
+    color_thresh_min_v: 70
+    color_thresh_max_h: 70
+    color_thresh_max_s: 100
+    color_thresh_max_v: 100
+    is_debug_mode: True
+    
+mir_perception/back_camera/barrier_tape_detection:
+    min_area: 10
+    color_thresh_min_h: 30
+    color_thresh_min_s: 50
+    color_thresh_min_v: 28
+    color_thresh_max_h: 70
+    color_thresh_max_s: 100
+    color_thresh_max_v: 100
+    is_debug_mode: True

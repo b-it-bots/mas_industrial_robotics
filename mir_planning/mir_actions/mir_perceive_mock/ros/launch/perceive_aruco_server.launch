@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <launch>
- 
+
     <arg name="static_transform_frame" default="base_link_static" />
     <arg name="base_motion_enabled" default="false" />
 
     <include file="$(find mir_perceive_aruco_cube)/ros/launch/perceive_aruco_cube.launch" >
       <arg name="target_frame" value="$(arg static_transform_frame)" />
     </include>
-    
+
 
     <node pkg="mir_perceive_mock" type="perceive_aruco_server" name="perceive_aruco_server" output="screen">
         <param name="base_motion_enabled" type="bool" value="$(arg base_motion_enabled)" />

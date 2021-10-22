@@ -4,7 +4,7 @@ Task planning
 =============
 
 `mir_task_planning <https://github.com/b-it-bots/mas_industrial_robotics/tree/kinetic/mir_planning/mir_task_planning>`_
-generates task plan using classical planner. 
+generates task plan using classical planner.
 
 This module provides
 
@@ -18,7 +18,7 @@ This module provides
     fresh start for next request.
 
 - ros wrapper on top of the previously mentioned module is available in
-  ``/ros`` folder. The ros wrapper is implemented as an ``ActionServer``. 
+  ``/ros`` folder. The ros wrapper is implemented as an ``ActionServer``.
 
     Upon request from an ``ActionClient`` containing ``domain_file``, ``problem_file``,
     ``planner`` and ``mode``, the server tries to plan with those provided configuration
@@ -29,10 +29,10 @@ This module provides
     - ``planner`` - name of planner to use (``lama`` or ``mercury``)
     - ``mode`` - ``PlanGoal.NORMAL`` or ``PlanGoal.FAST`` (fast mode implies that first
       plan found will be returned. No further optimisation will be performed by the
-      planner. 
+      planner.
 
       .. note::
-      
+
         This should only be use when a small number of goals are
         provided as it will produce a very bad and non optimal plan.
 
@@ -43,7 +43,7 @@ Requirements
 - `lama_planner <https://github.com/b-it-bots/lama_planner>`_
 
   .. note::
-      
+
      ``g++-multilib`` is needed to install these packages.
 
 Usage
@@ -92,9 +92,9 @@ Additional files
 
 - ``common/pddl`` contains robocup's domain file and a bunch of problem files for
   testing.
-  
+
   .. note::
-  
+
      This folder is needed by default if
      ``common/planner_wrapper/planner_wrapper.py`` is running standalone.
 

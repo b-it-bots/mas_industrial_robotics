@@ -22,10 +22,10 @@ parameters for all the components and starts/stops them accordingly.
   * `target_pose`: The pose where the manipulator's end effector is required to be.
 
 **Output(s):**
-  * `selected_pose`: The pose of the manipulator's last joint so that the end effector
-  reaches the `target_pose`.
-  * `configuration_out`: The joint position values for the manipulator to reach
-  the `selected_pose`.
+  * `selected_pose`: The pose of the manipulator's last joint so that the end\
+                     effector reaches the `target_pose`.
+  * `configuration_out`: The joint position values for the manipulator to reach\
+                         the `selected_pose`.
 
 **Relevant parameter(s):**
   * `simple_grasp_planner`
@@ -44,18 +44,19 @@ parameters for all the components and starts/stops them accordingly.
 # -*- encoding: utf-8 -*-
 
 import math
+
+import brics_actuator.msg
+import geometry_msgs.msg
+import mcr_common_converters_ros.joint_configuration_shifter
+import mcr_manipulation_measurers_ros.pose_transformer
+import mcr_manipulation_msgs.msg
+import mcr_manipulation_pose_selector_ros.reachability_pose_selector
+import mcr_pose_generation_ros.pose_generator
+import mir_pregrasp_planning.cfg.PregraspPlannerParamsConfig as PregraspPlannerParamsConfig
+import mir_pregrasp_planning_ros.simple_pregrasp_planner_utils as pregrasp_planner_utils
 import rospy
 import std_msgs.msg
-import geometry_msgs.msg
-import brics_actuator.msg
-import mcr_manipulation_measurers_ros.pose_transformer
-import mcr_common_converters_ros.joint_configuration_shifter
-import mir_pregrasp_planning_ros.simple_pregrasp_planner_utils as pregrasp_planner_utils
-import mcr_pose_generation_ros.pose_generator
-import mcr_manipulation_pose_selector_ros.reachability_pose_selector
-import mcr_manipulation_msgs.msg
 from dynamic_reconfigure.server import Server
-import mir_pregrasp_planning.cfg.PregraspPlannerParamsConfig as PregraspPlannerParamsConfig
 
 
 class PregraspPlannerPipeline(object):
@@ -64,12 +65,13 @@ class PregraspPlannerPipeline(object):
     and a set of given constraints.
 
     """
+
     def __init__(self):
         self.event = None
         self.pose_in = None
 
         # node cycle rate (in hz)
-        self.loop_rate = rospy.Rate(rospy.get_param('~loop_rate', 10.0))
+        self.loop_rate = rospy.Rate(rospy.get_param("~loop_rate", 10.0))
         # pose transformer
         self.target_frame = None
 
@@ -102,10 +104,10 @@ class PregraspPlannerPipeline(object):
         self.joint_offset = None
 
         # pose generator
-        self.gripper = rospy.get_param('~gripper_config_matrix', None)
+        self.gripper = rospy.get_param("~gripper_config_matrix", None)
         assert self.gripper is not None, "Gripper config matrix must be specified."
         # Configuration matrix of the gripper to be used (a real 4x4 matrix)
-        self.gripper_config_matrix = rospy.get_param('~' + self.gripper)
+        self.gripper_config_matrix = rospy.get_param("~" + self.gripper)
 
         # the sampling step for linear variables (in meters)
         self.linear_step = None
@@ -114,22 +116,33 @@ class PregraspPlannerPipeline(object):
         # the maximum amount of samples to be generated
         self.max_samples = None
 
-
-        self.pose_transformer = mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
+        self.pose_transformer = (
+            mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
+        )
         self.pose_generator = mcr_pose_generation_ros.pose_generator.PoseGenerator()
-        self.reachability_pose_selector = mcr_manipulation_pose_selector_ros.reachability_pose_selector.PoseSelector()
-        self.joint_config_shifter = mcr_common_converters_ros.joint_configuration_shifter.JointConfigurationShifter(None)
+        self.reachability_pose_selector = (
+            mcr_manipulation_pose_selector_ros.reachability_pose_selector.PoseSelector()
+        )
+        self.joint_config_shifter = mcr_common_converters_ros.joint_configuration_shifter.JointConfigurationShifter(
+            None
+        )
 
         self.pose_generator.set_gripper_config_matrix(self.gripper_config_matrix)
 
         # subscribers
         rospy.Subscriber("~event_in", std_msgs.msg.String, self.event_in_cb)
-        rospy.Subscriber('~pose_in', geometry_msgs.msg.PoseStamped, self.pose_cb)
+        rospy.Subscriber("~pose_in", geometry_msgs.msg.PoseStamped, self.pose_cb)
 
         # publishers
-        self.event_out = rospy.Publisher("~event_out", std_msgs.msg.String, queue_size=1)
-        self.grasp_type = rospy.Publisher('~grasp_type', std_msgs.msg.String, queue_size=1)
-        self.event_out = rospy.Publisher('~event_out', std_msgs.msg.String, queue_size=1)
+        self.event_out = rospy.Publisher(
+            "~event_out", std_msgs.msg.String, queue_size=1
+        )
+        self.grasp_type = rospy.Publisher(
+            "~grasp_type", std_msgs.msg.String, queue_size=1
+        )
+        self.event_out = rospy.Publisher(
+            "~event_out", std_msgs.msg.String, queue_size=1
+        )
         self.pose_samples_pub = rospy.Publisher(
             "~pose_samples", geometry_msgs.msg.PoseArray, queue_size=1
         )
@@ -141,14 +154,17 @@ class PregraspPlannerPipeline(object):
         )
 
         self.joint_waypoint_list_pub = rospy.Publisher(
-            "~waypoint_list", mcr_manipulation_msgs.msg.JointSpaceWayPointsList, queue_size=1
+            "~waypoint_list",
+            mcr_manipulation_msgs.msg.JointSpaceWayPointsList,
+            queue_size=1,
         )
 
-         # Dynamic reconguration server for PregraspPlannerParams
-        dynamic_reconfig_srv = Server(PregraspPlannerParamsConfig, self.dynamic_reconfig_cb)
+        # Dynamic reconguration server for PregraspPlannerParams
+        dynamic_reconfig_srv = Server(
+            PregraspPlannerParamsConfig, self.dynamic_reconfig_cb
+        )
 
-
-    def dynamic_reconfig_cb(self,config,level):
+    def dynamic_reconfig_cb(self, config, level):
         """
         Dynamic reconfiguration callback function
         """
@@ -171,15 +187,27 @@ class PregraspPlannerPipeline(object):
         self.reference_axis = config.reference_axis
         self.rotation_offset = config.rotation_offset
         self.angular_tolerance = config.angular_tolerance
-        self.linear_offset = [config.linear_offset_x, config.linear_offset_y, config.linear_offset_z]
+        self.linear_offset = [
+            config.linear_offset_x,
+            config.linear_offset_y,
+            config.linear_offset_z,
+        ]
         self.generate_pregrasp_waypoint = config.generate_pregrasp_waypoint
         self.ignore_orientation = config.ignore_orientation
-        self.joint_offset = [config.joint_1_offset, config.joint_2_offset, \
-                             config.joint_3_offset, config.joint_4_offset, \
-                             config.joint_5_offset]
-        self.joint_offset_side_grasp = [config.joint_1_offset_side_grasp, config.joint_2_offset_side_grasp, \
-                                         config.joint_3_offset_side_grasp, config.joint_4_offset_side_grasp, \
-                                         config.joint_5_offset_side_grasp]
+        self.joint_offset = [
+            config.joint_1_offset,
+            config.joint_2_offset,
+            config.joint_3_offset,
+            config.joint_4_offset,
+            config.joint_5_offset,
+        ]
+        self.joint_offset_side_grasp = [
+            config.joint_1_offset_side_grasp,
+            config.joint_2_offset_side_grasp,
+            config.joint_3_offset_side_grasp,
+            config.joint_4_offset_side_grasp,
+            config.joint_5_offset_side_grasp,
+        ]
         self.rotation_range = [config.rotation_range_min, config.rotation_range_max]
         return config
 
@@ -201,15 +229,15 @@ class PregraspPlannerPipeline(object):
 
         """
         rospy.loginfo("Ready to start...")
-        state = 'INIT'
+        state = "INIT"
 
         while not rospy.is_shutdown():
 
-            if state == 'INIT':
+            if state == "INIT":
                 state = self.init_state()
-            elif state == 'IDLE':
+            elif state == "IDLE":
                 state = self.idle_state()
-            elif state == 'RUNNING':
+            elif state == "RUNNING":
                 state = self.running_state()
 
             rospy.logdebug("State: {0}".format(state))
@@ -223,10 +251,10 @@ class PregraspPlannerPipeline(object):
         :rtype: str
 
         """
-        if self.event == 'e_start':
-            return 'IDLE'
+        if self.event == "e_start":
+            return "IDLE"
         else:
-            return 'INIT'
+            return "INIT"
 
     def idle_state(self):
         """
@@ -236,14 +264,14 @@ class PregraspPlannerPipeline(object):
         :rtype: str
 
         """
-        if self.event == 'e_stop':
+        if self.event == "e_stop":
             self.reset_component_data()
-            self.event_out.publish('e_stopped')
-            return 'INIT'
+            self.event_out.publish("e_stopped")
+            return "INIT"
         elif self.pose_in:
-            return 'RUNNING'
+            return "RUNNING"
         else:
-            return 'IDLE'
+            return "IDLE"
 
     def running_state(self):
         """
@@ -254,11 +282,11 @@ class PregraspPlannerPipeline(object):
 
         """
 
-        if self.event == 'e_stop':
-            status = 'e_stopped'
+        if self.event == "e_stop":
+            status = "e_stopped"
             self.event_out.publish(status)
             self.reset_component_data()
-            return 'INIT'
+            return "INIT"
 
         # 1. transform pose to target frame
         # 2. check if pose is for laying or standing object and modify accordingly
@@ -266,13 +294,15 @@ class PregraspPlannerPipeline(object):
         # 4. find a reachable pose from the generated samples (also get joint config for reachable pose)
         # 5. if joint waypoint list is required publish list of waypoints
 
-        transformed_pose = self.pose_transformer.get_transformed_pose(self.pose_in, self.target_frame)
+        transformed_pose = self.pose_transformer.get_transformed_pose(
+            self.pose_in, self.target_frame
+        )
         if not transformed_pose:
             rospy.logerr("Unable to transform pose to {0}".format(self.target_frame))
-            status = 'e_failure'
+            status = "e_failure"
             self.event_out.publish(status)
             self.reset_component_data()
-            return 'INIT'
+            return "INIT"
 
         if self.ignore_orientation:
             input_pose = geometry_msgs.msg.PoseStamped()
@@ -310,29 +340,39 @@ class PregraspPlannerPipeline(object):
                 return 'INIT'
 
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
-                transformed_pose, self.height_tolerance, angular_tolerance=self.angular_tolerance
-                )
+            transformed_pose,
+            self.height_tolerance,
+            angular_tolerance=self.angular_tolerance,
+        )
         if not object_is_upwards:
             rotated_pose = pregrasp_planner_utils.modify_pose_rotation(
-                modified_pose, offset=self.rotation_offset,
-                reference_axis=self.reference_axis, rotation_range=self.rotation_range
+                modified_pose,
+                offset=self.rotation_offset,
+                reference_axis=self.reference_axis,
+                rotation_range=self.rotation_range,
             )
             modified_pose = rotated_pose
-            grasp_type = 'top_grasp'
+            grasp_type = "top_grasp"
         else:
-            grasp_type = 'side_grasp'
+            grasp_type = "side_grasp"
 
         self.grasp_type.publish(grasp_type)
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
         self.pose_samples_pub.publish(pose_samples)
-        reachable_pose, brics_joint_config, joint_config = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, self.linear_offset)
+        (
+            reachable_pose,
+            brics_joint_config,
+            joint_config,
+        ) = self.reachability_pose_selector.get_reachable_pose_and_configuration(
+            pose_samples, self.linear_offset
+        )
 
         if not reachable_pose:
             rospy.logerr("Could not find IK solution")
-            status = 'e_failure'
+            status = "e_failure"
             self.event_out.publish(status)
             self.reset_component_data()
-            return 'INIT'
+            return "INIT"
 
         self.selected_pose.publish(reachable_pose)
         self.joint_configuration.publish(brics_joint_config)
@@ -340,10 +380,14 @@ class PregraspPlannerPipeline(object):
         # if we want to reach a pre-pregrasp pose (specified by joint offsets)
         # before reaching the final pose, generate a waypoint list
         if abs(max(self.joint_offset, key=abs)) > 0 and self.generate_pregrasp_waypoint:
-            if grasp_type == 'side_grasp':
-                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(joint_config, self.joint_offset_side_grasp)
-            elif grasp_type == 'top_grasp':
-                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(joint_config, self.joint_offset)
+            if grasp_type == "side_grasp":
+                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(
+                    joint_config, self.joint_offset_side_grasp
+                )
+            elif grasp_type == "top_grasp":
+                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(
+                    joint_config, self.joint_offset
+                )
             pregrasp_msg = std_msgs.msg.Float64MultiArray()
             pregrasp_msg.data = pregrasp_waypoint
             grasp_msg = std_msgs.msg.Float64MultiArray()
@@ -355,12 +399,11 @@ class PregraspPlannerPipeline(object):
 
         self.event_out.publish("e_success")
         self.reset_component_data()
-        return 'INIT'
+        return "INIT"
 
     def reset_component_data(self):
         self.pose_in = None
         self.event = None
-
 
 
 def main():

@@ -13,10 +13,9 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>mcr_description</run_depend>
-  <run_depend>mir_calibration_data</run_depend>
   <run_depend>mir_description</run_depend>
   <run_depend>youbot_description</run_depend>
 
-  <test_depend>roslaunch</test_depend>  
+  <test_depend>roslaunch</test_depend>
 
 </package>

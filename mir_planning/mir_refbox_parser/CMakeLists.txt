@@ -15,6 +15,7 @@ catkin_package(
     std_msgs
     sensor_msgs
     geometry_msgs
+    mir_planning_msgs
     tf
 )
 

@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+
+import colorsys
+import os
+import pickle
+import struct
+import sys
+import time
+
+import cv2
+import numpy as np
+import roslib
+import rospy
+import yaml
+from cv_bridge import CvBridge, CvBridgeError
+from mas_perception_msgs.msg import ImageList, Object, ObjectList
+from mas_perception_msgs.srv import RecognizeImage, RecognizeImageResponse
+from rgb_object_recognition import SqueezeDetClassifier, SSDLiteMobilenet, util
+from sensor_msgs.msg import Image, RegionOfInterest
+
+
+class RGBObjectRecognizer():
+    def __init__(self, model_dir, net='detection', model_name='squeezeDet', debug_mode=False):
+        self.cvbridge = CvBridge()
+        self.debug = debug_mode
+        self.pub_debug = rospy.Publisher("/mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image", Image, queue_size=1)
+        self.pub_result = rospy.Publisher("output/object_list", ObjectList, queue_size=1)
+        self.sub_img = rospy.Subscriber("input/images", ImageList, self.image_recognition_cb)
+        self.net = net
+        self.model_name = model_name
+
+        config_file = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"), 
+                            'ros', 'config', "rgb_classifier_config.yaml")
+        
+        if os.path.isfile(config_file):
+            configs = {}
+            with open(config_file, 'r') as infile:
+                configs = yaml.safe_load(infile)
+            
+            model_config = configs['model'][model_name]
+            self.classes = configs['classes']
+            self.colors = configs['colors']
+
+            if self.net == 'detection':
+                if self.model_name == 'squeezeDet':
+                    self.model = SqueezeDetClassifier(config=model_config,
+                                                        checkpoint_path=model_dir)
+                elif self.model_name == 'ssdLiteMobilenet':
+                    self.model = SSDLiteMobilenet(model_dir)
+            elif self.net == 'classification':
+                print "TODO: MobileNet"
+        else:
+            rospy.logerr("Config file: {} not found".format(config_file))
+
+    def image_recognition_cb(self, img_msg):
+        if img_msg.images:
+            result_list = ObjectList()
+            objects = []
+            rospy.loginfo("[{}] images received: {} ".format(len(img_msg.images), self.model_name))
+            if self.net == 'detection':
+                try:
+                    cv_image = self.cvbridge.imgmsg_to_cv2(img_msg.images[0], "bgr8")
+                    bboxes, probs, labels = self.model.classify(cv_image)
+                    for i in range(len(labels)):
+                        result = Object()
+                        result.name = self.classes[labels[i]]
+                        result.probability = probs[i]
+                        roi = RegionOfInterest()
+                        bbox = util.bbox_transform(bboxes[i])
+                        roi.x_offset = int(bbox[0])
+                        roi.y_offset = int(bbox[1])
+                        roi.width = int(bbox[2] - bbox[0])
+                        roi.height = int(bbox[3] - bbox[1])
+                        result.roi = roi
+                        objects.append(result)
+
+                    # Publish result_list
+                    result_list.objects = objects
+                    self.pub_result.publish(result_list)
+
+                    if self.debug:
+                        # Draw bounding box on image
+                        debug_img = cv_image
+                        debug_img = debug_img.astype(np.float32, copy=False)
+                        debug_img = cv2.resize(debug_img, (img_msg.images[0].width, 
+                                                                     img_msg.images[0].height))
+                        # Get display labels
+                        classes = [self.classes[label] for label in labels]
+                        util.draw_box_on_img(debug_img, bboxes, probs, classes, self.colors)
+                        # publish bbox and label
+                        self.publish_debug_img(debug_img)
+
+                except CvBridgeError as e:
+                    print(e)
+                    return
+
+            elif self.net == 'classification':
+                print "TODO: MobileNet"
+                
+    def publish_debug_img(self, debug_img):
+        debug_img = np.array(debug_img, dtype=np.uint8)
+        debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
+        self.pub_debug.publish(debug_img)
+
+if __name__ == '__main__':
+    rospy.init_node("rgb_object_recognizer")
+    rospy.loginfo('Started object recognition node.')
+    net = rospy.get_param("~net")
+    classifier_name = rospy.get_param("~classifier")
+    dataset = rospy.get_param("~dataset")
+    model_dir = rospy.get_param("~model_dir")
+    
+    object_recognizer = RGBObjectRecognizer(model_dir=model_dir, net=net, model_name=classifier_name, debug_mode=True)
+    rospy.loginfo('\033[92m'+"RGB Recognizer is ready using %s : %s , dataset: %s ", net, classifier_name, dataset)
+    rospy.spin()

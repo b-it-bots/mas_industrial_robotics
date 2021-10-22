@@ -24,6 +24,6 @@
   <run_depend>std_srvs</run_depend>
   <run_depend>topic_tools</run_depend>
 
-  <test_depend>roslaunch</test_depend>  
+  <test_depend>roslaunch</test_depend>
 
 </package>

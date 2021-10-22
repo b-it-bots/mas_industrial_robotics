@@ -2,16 +2,16 @@
 
 from __future__ import print_function
 
-NODE = 'task_planner_server'
-
-import rospy
-
-# action lib
 import actionlib
-from mir_task_planning.msg import PlanAction, PlanResult, PlanGoal
-from rosplan_dispatch_msgs.msg import ActionDispatch, CompletePlan
+import rospy
+from mir_planning_msgs.msg import PlanAction, PlanGoal, PlanResult
+from rosplan_dispatch_msgs.msg import CompletePlan
+
+from mir_task_planning.utils import Utils
 from planner_wrapper.planner_wrapper import PlannerWrapper
-from diagnostic_msgs.msg import KeyValue
+
+NODE = "task_planner_server"
+
 
 class TaskPlannerServer(object):
 
@@ -22,19 +22,19 @@ class TaskPlannerServer(object):
 
     def __init__(self):
         """
-        - initialising subscribers, publishers and action server, 
+        - initialising subscribers, publishers and action server,
         - reading ros parameters.
         """
 
         # read ros params
-        self._verbose = rospy.get_param('~verbose', False)
-        time_limit = rospy.get_param('~time_limit', 10)
+        self._verbose = rospy.get_param("~verbose", False)
+        time_limit = rospy.get_param("~time_limit", 10)
 
         # read config files
-        planner_commands = rospy.get_param('~planner_commands')
+        planner_commands = rospy.get_param("~planner_commands")
         self.verbose_print(planner_commands)
         if not planner_commands:
-            raise Exception('Command to execute planner not provided')
+            raise Exception("Command to execute planner not provided")
 
         # Subscribers
 
@@ -42,14 +42,12 @@ class TaskPlannerServer(object):
 
         # Action servers
         self._action_server = actionlib.SimpleActionServer(
-                '~plan_task',
-                PlanAction, 
-                execute_cb = self._plan_execute_cb, 
-                auto_start = False)
+            "~plan_task", PlanAction, execute_cb=self._plan_execute_cb, auto_start=False
+        )
         rospy.sleep(1)
         self._action_server.start()
         rospy.sleep(1)
-        self.verbose_print('Initialised server')
+        self.verbose_print("Initialised server")
 
         # class variables
         self.planner_wrapper = PlannerWrapper(planner_commands, time_limit=time_limit)
@@ -61,20 +59,23 @@ class TaskPlannerServer(object):
         :returns: None
 
         """
-        self.verbose_print('Plan request received')
+        self.verbose_print("Plan request received")
         plan = self.planner_wrapper.plan(
-            goal.planner, 
-            goal.domain_file, 
+            goal.planner,
+            goal.domain_file,
             goal.problem_file,
-            goal.mode==PlanGoal.FAST)
+            goal.mode == PlanGoal.FAST,
+        )
         if not plan:
+            rospy.logerr("Failed to plan.")
             self._action_server.set_aborted()
             return
 
         complete_plan = CompletePlan()
         for action_id, action_string in enumerate(plan):
             complete_plan.plan.append(
-                TaskPlannerServer.get_action_msg_from_string(action_string, action_id+1))
+                Utils.get_action_msg_from_string(action_string, action_id + 1)
+            )
 
         filtered_plan = TaskPlannerServer.post_process_plan(complete_plan)
 
@@ -82,24 +83,8 @@ class TaskPlannerServer(object):
         self._action_server.set_succeeded(self._plan_result)
 
     @staticmethod
-    def get_action_msg_from_string(string, action_id):
-        """Create and return Action obj from string of type '(word word word ...)'
-
-        :string: string
-        :action_id: int
-        :returns: rosplan_dispatch_msgs/ActionDispatch
-
-        """
-        # remove parenthesis, convert str to upper case and split at spaces
-        action_param_list = string[1:-1].upper().split()
-        name = action_param_list[0]
-        params = [KeyValue('param_'+str(i+1), param) for i, param in enumerate(action_param_list[2:])]
-        params.insert(0, KeyValue('robot_name', action_param_list[1]))
-        return ActionDispatch(action_id=action_id, name=name, parameters=params)
-
-    @staticmethod
     def post_process_plan(complete_plan):
-        """Post process the plan to remove repeated action. 
+        """Post process the plan to remove repeated action.
         e.g. if there is a move_base action right after another move_base action,
         the first move_base action will serve no purpose and thus should be removed.
 
@@ -119,12 +104,18 @@ class TaskPlannerServer(object):
         while i < len(plan):
 
             # filter consecutive move_base actions
-            if i < len(plan)-1 and plan[i].name == plan[i+1].name == 'MOVE_BASE':
+            if i < len(plan) - 1 and plan[i].name == plan[i + 1].name == "MOVE_BASE":
+                # copy source from removed move_base action to repeated move_base
+                plan[i+1].parameters[1].value = plan[i].parameters[1].value
                 i += 1
                 continue
 
             # filter move_base > perceive > move_base actions
-            if i < len(plan)-2 and plan[i].name == plan[i+2].name == 'MOVE_BASE' and plan[i+1] == 'PERCEIVE':
+            if ( i < len(plan) - 2
+                 and plan[i].name == plan[i + 2].name == "MOVE_BASE"
+                 and plan[i + 1] == "PERCEIVE" ):
+                # copy source from removed move_base action to repeated move_base
+                plan[i+2].parameters[1].value = plan[i].parameters[1].value
                 i += 2
                 continue
 
@@ -133,7 +124,7 @@ class TaskPlannerServer(object):
         rospy.loginfo("Filtered " + str(len(plan) - len(new_plan)) + " actions")
         return CompletePlan(plan=new_plan)
 
-    def verbose_print(self, *args) :
+    def verbose_print(self, *args):
         """
         Print the message as ros info if verbose is enabled, else print it as debug
         :args: list of arguments (just like print)
@@ -142,17 +133,18 @@ class TaskPlannerServer(object):
         """
         try:
             string_list = [str(i) for i in args]
-            string_list.insert(0, '[' + NODE + '] ')
+            string_list.insert(0, "[" + NODE + "] ")
         except Exception as e:
             string_list = []
-        if self._verbose :
+        if self._verbose:
             rospy.loginfo("".join(string_list))
         else:
             rospy.logdebug("".join(string_list))
 
+
 # =============================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     rospy.init_node(NODE)
     task_planner_server = TaskPlannerServer()
     rospy.spin()

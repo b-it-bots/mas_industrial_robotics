@@ -5,25 +5,26 @@ This module contains functions used by the simple_pregrasp_planner node.
 """
 # -*- encoding: utf-8 -*-
 
-import math
-import numpy
 import copy
+import math
+
+import numpy
 import tf.transformations as transformations
 from geometry_msgs.msg import Quaternion
 
 
-def modify_pose(pose_in, height_threshold, standing_angle=270., angular_tolerance=2.):
+def modify_pose(pose_in, height_threshold, standing_angle=270.0, angular_tolerance=2.0):
     """
     Computes a modified pose (of an object) only if the object is
     standing (vertically) on a surface, based on the following criteria:
 
-    - If the object's height is below the height_threshold, then a modified
-        pose is computed consisting of a rotation of 90 degrees of pose_in
-        (e.g. the new pose will have the object laying horizontally).
-    - If the object's height is not below the height_threshold, then the
-        orientation is preserved (i.e. still standing), but the rotation
-        will be set to zero degrees around the X axis (assuming the X axis
-        is pointing upwards, see module description of 'simple_grasp_planner').
+    - If the object's height is below the height_threshold, then a modified\
+      pose is computed consisting of a rotation of 90 degrees of pose_in\
+      (e.g. the new pose will have the object laying horizontally).
+    - If the object's height is not below the height_threshold, then the\
+      orientation is preserved (i.e. still standing), but the rotation\
+      will be set to zero degrees around the X axis (assuming the X axis\
+      is pointing upwards, see module description of 'simple_grasp_planner').
 
     It also returns whether the object is standing.
 
@@ -52,20 +53,30 @@ def modify_pose(pose_in, height_threshold, standing_angle=270., angular_toleranc
     # Checking if the orientation is 'standing':
     # if the pose's X axis of the pose is pointing upwards,
     # then it has a rotation of 'standing_angle' degrees around the Y axis
-    roll, pitch, yaw = transformations.euler_from_quaternion([
-        pose_in.pose.orientation.x, pose_in.pose.orientation.y,
-        pose_in.pose.orientation.z, pose_in.pose.orientation.w
-    ])
+    roll, pitch, yaw = transformations.euler_from_quaternion(
+        [
+            pose_in.pose.orientation.x,
+            pose_in.pose.orientation.y,
+            pose_in.pose.orientation.z,
+            pose_in.pose.orientation.w,
+        ]
+    )
 
     # to have the range of angles from 0-360
     decision_angle = math.degrees(pitch) % 360.0
 
-    if (standing_angle - angular_tolerance) <= decision_angle \
-            <= (standing_angle + angular_tolerance):
+    if (
+        (standing_angle - angular_tolerance)
+        <= decision_angle
+        <= (standing_angle + angular_tolerance)
+    ):
         standing = True
     # in case the object is upside down
-    if (standing_angle - angular_tolerance) <= (decision_angle + 180) \
-            <= (standing_angle + angular_tolerance):
+    if (
+        (standing_angle - angular_tolerance)
+        <= (decision_angle + 180)
+        <= (standing_angle + angular_tolerance)
+    ):
         standing = True
 
     if standing:
@@ -86,14 +97,14 @@ def modify_pose(pose_in, height_threshold, standing_angle=270., angular_toleranc
             pose_out.pose.orientation.y = math.cos(math.pi / 4)
             pose_out.pose.orientation.z = 0.0
             pose_out.pose.orientation.w = -math.cos(math.pi / 4)
-    else: # flatten the pose so that it is parallel to the ground
+    else:  # flatten the pose so that it is parallel to the ground
         new_orientation = transformations.quaternion_from_euler(0.0, 0.0, yaw)
         pose_out.pose.orientation = Quaternion(*new_orientation)
 
     return pose_out, standing
 
 
-def modify_pose_rotation(pose, offset=0.0, reference_axis='z', rotation_range=None):
+def modify_pose_rotation(pose, offset=0.0, reference_axis="z", rotation_range=None):
     """
     Modifies the orientation of a pose, for a single rotation axis (reference_axis),
     by adding an offset and limiting the rotation to be within certain range. If no
@@ -122,8 +133,10 @@ def modify_pose_rotation(pose, offset=0.0, reference_axis='z', rotation_range=No
     """
     pose_out = copy.deepcopy(pose)
     orientation_in = (
-        pose_out.pose.orientation.x, pose_out.pose.orientation.y,
-        pose_out.pose.orientation.z, pose_out.pose.orientation.w
+        pose_out.pose.orientation.x,
+        pose_out.pose.orientation.y,
+        pose_out.pose.orientation.z,
+        pose_out.pose.orientation.w,
     )
 
     angles_in = transformations.euler_from_quaternion(orientation_in)
@@ -132,9 +145,9 @@ def modify_pose_rotation(pose, offset=0.0, reference_axis='z', rotation_range=No
     angles_in = [(math.pi * 2) + angle if angle < 0.0 else angle for angle in angles_in]
 
     euler_angles = {
-        'x': angles_in[0],
-        'y': angles_in[1],
-        'z': angles_in[2],
+        "x": angles_in[0],
+        "y": angles_in[1],
+        "z": angles_in[2],
     }
 
     # Ensure the offset is not more than 360 degrees
@@ -147,7 +160,7 @@ def modify_pose_rotation(pose, offset=0.0, reference_axis='z', rotation_range=No
         )
 
     euler_angles[reference_axis] = target_angle
-    angles_out = [euler_angles['x'], euler_angles['y'], euler_angles['z']]
+    angles_out = [euler_angles["x"], euler_angles["y"], euler_angles["z"]]
 
     orientation_out = transformations.quaternion_from_euler(
         angles_out[0], angles_out[1], angles_out[2]
@@ -183,8 +196,8 @@ def restrict_angle_to_range(angle, offset, rotation_range):
     :return: The angle restricted to a range within a circle (in radians).
     :rtype: float
 
-    Examples
-    --------
+    :Examples:
+
     >>> angle = math.radians(60)
     >>> offset = math.radians(0)
     >>> rotation_range = list(numpy.radians([0, 180]))
@@ -211,8 +224,9 @@ def restrict_angle_to_range(angle, offset, rotation_range):
      4.8869    # 280 degrees
 
     """
-    inverted_range = (rotation_range[0] % math.radians(360)) > \
-                     (rotation_range[1] % math.radians(360))
+    inverted_range = (rotation_range[0] % math.radians(360)) > (
+        rotation_range[1] % math.radians(360)
+    )
     if inverted_range:
         if (offset + rotation_range[1]) < angle < (offset + rotation_range[0]):
             angle += math.radians(180.0)

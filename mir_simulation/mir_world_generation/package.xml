@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_world_generation</name>
+  <version>0.0.1</version>
+  <description>Procedurally generate world model with workstations and walls.</description>
+
+  <license>GPLv3</license>
+
+  <author email="dharmingeo@gmail.com">Dharmin B.</author>
+
+  <maintainer email="dharmingeo@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

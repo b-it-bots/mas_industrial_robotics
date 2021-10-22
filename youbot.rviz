@@ -5,12 +5,14 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /TF1/Status1
         - /TF1/Frames1
-        - /TF1/Tree1
-        - /MarkerArray1/Namespaces1
-      Splitter Ratio: 0.499109
-    Tree Height: 436
+        - /btt1
+        - /btt1/Perception1/perception_markers1/Namespaces1
+        - /btt1/New_Perception1/rgb_labels1/Namespaces1
+        - /btt1/Navigation1/nav goals1/Namespaces1
+        - /btt1/direct_base_ctrl1/base_link_as_pose1
+      Splitter Ratio: 0.524050653
+    Tree Height: 500
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -19,7 +21,7 @@ Panels:
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
-    Splitter Ratio: 0.588679
+    Splitter Ratio: 0.588679016
   - Class: rviz/Views
     Expanded:
       - /Current View1
@@ -29,17 +31,17 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: raw_image
 Visualization Manager:
   Class: ""
   Displays:
-    - Alpha: 0.5
+    - Alpha: 0.400000006
       Cell Size: 1
       Class: rviz/Grid
       Color: 160; 160; 164
       Enabled: true
       Line Style:
-        Line Width: 0.03
+        Line Width: 0.0299999993
         Value: Lines
       Name: Grid
       Normal Cell Count: 0
@@ -51,7 +53,7 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 1
+    - Alpha: 0.5
       Class: rviz/RobotModel
       Collision Enabled: false
       Enabled: true
@@ -61,15 +63,44 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        arm_cam3d_depth_optical_frame:
+        adapter_plate_arm_root_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        arm_cam3d_frame:
+        adapter_plate_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
+        arm_cam3d_depth_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        arm_cam3d_depth_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        arm_cam3d_laser_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        arm_cam3d_laser_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        arm_cam3d_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        arm_cam3d_rgb_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        arm_cam3d_rgb_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         arm_link_0:
           Alpha: 1
           Show Axes: false
@@ -100,16 +131,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        arm_sensor_angle_shortend_part1_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        arm_sensor_angle_shortend_part2_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         base_footprint:
           Alpha: 1
           Show Axes: false
@@ -130,6 +151,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        camera_mount_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         caster_link_bl:
           Alpha: 1
           Show Axes: false
@@ -146,133 +172,65 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        distance_screw_fl_link:
+        gripper_bracket_left_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        distance_screw_fr_link:
+        gripper_bracket_right_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        distance_screw_rl_link:
+        gripper_finger_left_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        distance_screw_rr_link:
+        gripper_finger_mount_left_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_distance_screw_fl_link:
+        gripper_finger_mount_right_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_distance_screw_fr_link:
+        gripper_finger_right_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_distance_screw_rl_link:
+        gripper_motor_left_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_distance_screw_rr_link:
+        gripper_motor_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gripper_motor_mount_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        front_plate_link:
+        gripper_motor_right_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gripper_finger_link_l:
+        gripper_motor_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rear_platform_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gripper_finger_link_r:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        gripper_palm_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_left_bottom_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_left_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_left_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_left_top_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_right_bottom_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_right_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_right_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        laptop_case_frame_right_top_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        rear_platform_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        arm_cam3d_depth_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        arm_cam3d_depth_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        arm_cam3d_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        arm_cam3d_rgb_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        arm_cam3d_rgb_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        tower_link:
+        rear_platform_fence_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -312,128 +270,1195 @@ Visualization Manager:
       Name: TF
       Show Arrows: true
       Show Axes: true
-      Show Names: false
+      Show Names: true
       Tree:
         {}
       Update Interval: 0
       Value: false
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/LaserScan
-      Color: 255; 255; 255
-      Color Transformer: FlatColor
-      Decay Time: 0
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: RGB8
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: raw_color_pcl
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: false
+              Size (Pixels): 3
+              Size (m): 0.0199999996
+              Style: Points
+              Topic: /arm_cam3d/depth_registered/points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: tabletop_clusters
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Points
+              Topic: /mcr_perception/scene_segmentation/tabletop_clusters
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Class: rviz/Marker
+              Enabled: true
+              Marker Topic: /mcr_perception/scene_segmentation/bounding_boxes
+              Name: perception_markers
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: true
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: RGB8
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: passthrough_x
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Flat Squares
+              Topic: /mcr_perception/passthrough_x/output
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /mcr_perception/scene_segmentation/labels
+              Name: pcl_labels
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+            - Alpha: 0.300000012
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 170; 255; 0
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: tabletop_accum
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Spheres
+              Topic: /mcr_perception/scene_segmentation_node/tabletop_clusters
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Class: rviz/Polygon
+              Color: 25; 255; 0
+              Enabled: true
+              Name: Polygon
+              Topic: /mcr_perception/convex_hull/output_polygon
+              Unreliable: false
+              Value: true
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /arm_cam3d/rgb/image_raw
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: Image
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/LaserScan
+              Color: 255; 255; 255
+              Color Transformer: ""
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: barrier_scan
+              Position Transformer: ""
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Flat Squares
+              Topic: /barrier_tape/scan
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: cloud_accumulator
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Boxes
+              Topic: /mcr_perception/scene_segmentation/output
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Arrow Length: 0.100000001
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: DetectedCavities
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /mcr_perception/cavity_finder/output/pose
+              Unreliable: false
+              Value: true
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /mcr_perception/cavity_finder/output/rgb_debug_image
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: cavity_debug
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Alpha: 1
+              Arrow Length: 0.300000012
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: detectedobjects
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /mcr_perception/multimodal_object_identification/output/pose
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: mm_pointcloud
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Points
+              Topic: /mcr_perception/multimodal_object_identification/output/pointclouds_combined
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: mm_platform
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Flat Squares
+              Topic: /mcr_perception/multimodal_object_identification/output/platform_pointcloud
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /mcr_perception/multimodal_object_identification/output/rgb_debug_image
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: mm_rgb_debug
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+          Enabled: false
+          Name: Perception
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /arm_cam3d/rgb/image_raw
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: raw_image
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Class: rviz/Image
+              Enabled: true
+              Image Topic: /mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: squeezeDet_debug
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: RGB8
+              Decay Time: 0
+              Enabled: false
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: raw_pointcloud2
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Points
+              Topic: /arm_cam3d/depth_registered/points
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: RGB8
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: rgb_tabletop_clusters
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Points
+              Topic: /mir_perception/multimodal_object_recognition/tabletop_cluster_rgb
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: pcl_tabletop_clusters
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Points
+              Topic: /mir_perception/multimodal_object_recognition/tabletop_cluster_pcl
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Alpha: 1
+              Arrow Length: 0.300000012
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: rgb_PoseArray
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /mir_perception/multimodal_object_recognition/output/rgb_object_pose_array
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Length: 0.300000012
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 255; 255
+              Enabled: true
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: pcl_PoseArray
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /mir_perception/multimodal_object_recognition/output/pcl_object_pose_array
+              Unreliable: false
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /mir_perception/multimodal_object_recognition/pcl_labels
+              Name: pcl_labels
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: false
+              Marker Topic: /mir_perception/multimodal_object_recognition/rgb_labels
+              Name: rgb_labels
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: false
+            - Class: rviz/Marker
+              Enabled: true
+              Marker Topic: /mir_perception/multimodal_object_recognition/bounding_boxes
+              Name: bounding_boxes_pcl
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 0; 170; 0
+              Enabled: true
+              Head Length: 0.0500000007
+              Head Radius: 0.0799999982
+              Name: pose_selector
+              Shaft Length: 0.400000006
+              Shaft Radius: 0.00899999961
+              Shape: Arrow
+              Topic: /mcr_perception/object_selector/output/object_pose
+              Unreliable: false
+              Value: true
+          Enabled: true
+          Name: New_Perception
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Class: rviz/Polygon
+              Color: 255; 85; 0
+              Enabled: false
+              Name: robot_footprint
+              Topic: /move_base/local_costmap/footprint
+              Unreliable: false
+              Value: false
+            - Alpha: 0.899999976
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/LaserScan
+              Color: 0; 85; 255
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: scan_front
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 5
+              Size (m): 0.00999999978
+              Style: Points
+              Topic: /scan_front
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Alpha: 0.899999976
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/LaserScan
+              Color: 255; 0; 0
+              Color Transformer: FlatColor
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: scan_rear
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 5
+              Size (m): 0.00999999978
+              Style: Points
+              Topic: /scan_rear
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Alpha: 0.5
+              Class: rviz/Map
+              Color Scheme: map
+              Draw Behind: true
+              Enabled: true
+              Name: map
+              Topic: /map
+              Unreliable: false
+              Use Timestamp: false
+              Value: true
+            - Alpha: 0.699999988
+              Class: rviz/Map
+              Color Scheme: costmap
+              Draw Behind: false
+              Enabled: true
+              Name: local_costmap
+              Topic: /move_base/local_costmap/costmap
+              Unreliable: false
+              Use Timestamp: false
+              Value: true
+            - Alpha: 0.200000003
+              Class: rviz/Map
+              Color Scheme: costmap
+              Draw Behind: false
+              Enabled: true
+              Name: global_costmap
+              Topic: /move_base/global_costmap/costmap
+              Unreliable: false
+              Use Timestamp: false
+              Value: true
+            - Alpha: 1
+              Arrow Length: 0.300000012
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: global_plan_wo
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /move_base/GlobalPlannerWithOrientations/plan
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Buffer Length: 1
+              Class: rviz/Path
+              Color: 170; 0; 127
+              Enabled: true
+              Head Diameter: 0.300000012
+              Head Length: 0.200000003
+              Length: 0.300000012
+              Line Style: Lines
+              Line Width: 0.0299999993
+              Name: global_plan_as_path
+              Offset:
+                X: 0
+                Y: 0
+                Z: 0
+              Pose Color: 255; 85; 255
+              Pose Style: None
+              Radius: 0.0299999993
+              Shaft Diameter: 0.100000001
+              Shaft Length: 0.100000001
+              Topic: /move_base/GlobalPlannerWithOrientations/path_plan
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Buffer Length: 1
+              Class: rviz/Path
+              Color: 25; 255; 0
+              Enabled: true
+              Head Diameter: 0.300000012
+              Head Length: 0.200000003
+              Length: 0.300000012
+              Line Style: Lines
+              Line Width: 0.0299999993
+              Name: dwa_global_plan
+              Offset:
+                X: 0
+                Y: 0
+                Z: 0
+              Pose Color: 255; 85; 255
+              Pose Style: None
+              Radius: 0.0299999993
+              Shaft Diameter: 0.100000001
+              Shaft Length: 0.100000001
+              Topic: /move_base/DWAPlannerROS/global_plan
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Buffer Length: 1
+              Class: rviz/Path
+              Color: 85; 85; 127
+              Enabled: true
+              Head Diameter: 0.300000012
+              Head Length: 0.200000003
+              Length: 0.300000012
+              Line Style: Lines
+              Line Width: 0.0299999993
+              Name: local_plan
+              Offset:
+                X: 0
+                Y: 0
+                Z: 0
+              Pose Color: 255; 85; 255
+              Pose Style: None
+              Radius: 0.0299999993
+              Shaft Diameter: 0.100000001
+              Shaft Length: 0.100000001
+              Topic: /move_base/DWAPlannerROS/local_plan
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Length: 0.300000012
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: amcl particles
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /particlecloud
+              Unreliable: false
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /visualization_marker_array
+              Name: nav goals
+              Namespaces:
+                {}
+              Queue Size: 100
+              Value: true
+            - Class: rviz/Group
+              Displays:
+                - Class: rviz/Marker
+                  Enabled: true
+                  Marker Topic: /move_base/force_field_recovery/force_field_vector
+                  Name: ff_vector
+                  Namespaces:
+                    {}
+                  Queue Size: 100
+                  Value: true
+                - Alpha: 1
+                  Autocompute Intensity Bounds: true
+                  Autocompute Value Bounds:
+                    Max Value: 10
+                    Min Value: -10
+                    Value: true
+                  Axis: Z
+                  Channel Name: intensity
+                  Class: rviz/PointCloud2
+                  Color: 255; 85; 0
+                  Color Transformer: FlatColor
+                  Decay Time: 0
+                  Enabled: true
+                  Invert Rainbow: false
+                  Max Color: 255; 255; 255
+                  Max Intensity: 4096
+                  Min Color: 0; 0; 0
+                  Min Intensity: 0
+                  Name: obstacle_cloud
+                  Position Transformer: XYZ
+                  Queue Size: 10
+                  Selectable: true
+                  Size (Pixels): 3
+                  Size (m): 0.0500000007
+                  Style: Spheres
+                  Topic: /move_base/force_field_recovery/obstacle_cloud
+                  Unreliable: false
+                  Use Fixed Frame: true
+                  Use rainbow: true
+                  Value: true
+                - Class: rviz/Marker
+                  Enabled: true
+                  Marker Topic: /move_base/force_field_recovery/obstacle_neighborhood
+                  Name: obst_neighbourhood
+                  Namespaces:
+                    {}
+                  Queue Size: 100
+                  Value: true
+              Enabled: false
+              Name: force_field
+          Enabled: true
+          Name: Navigation
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 85; 170; 0
+              Enabled: true
+              Head Length: 0.100000001
+              Head Radius: 0.0299999993
+              Name: random object pose
+              Shaft Length: 0.100000001
+              Shaft Radius: 0.00999999978
+              Shape: Arrow
+              Topic: /mcr_perception/random_object_selector/output/object_pose
+              Unreliable: false
+              Value: true
+            - Alpha: 0.899999976
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 170; 85; 255
+              Enabled: true
+              Head Length: 0.100000001
+              Head Radius: 0.100000001
+              Name: modified pose
+              Shaft Length: 0.5
+              Shaft Radius: 0.0500000007
+              Shape: Arrow
+              Topic: /move_base_relative/random_obj_selector_transformer_republisher/output/transformed_pose
+              Unreliable: false
+              Value: true
+          Enabled: false
+          Name: move_relative
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 0; 85; 0
+              Enabled: true
+              Head Length: 0.300000012
+              Head Radius: 0.100000001
+              Name: base_link_as_pose
+              Shaft Length: 1
+              Shaft Radius: 0.0500000007
+              Shape: Arrow
+              Topic: /mcr_navigation/direct_base_controller/pose_converter/converted_pose
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 85; 85; 255
+              Enabled: true
+              Head Length: 0.300000012
+              Head Radius: 0.100000001
+              Name: goal_pose
+              Shaft Length: 1
+              Shaft Radius: 0.0500000007
+              Shape: Arrow
+              Topic: /pose_transformer/transformed_pose
+              Unreliable: false
+              Value: true
+          Enabled: false
+          Name: direct_base_ctrl
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 0.899999976
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 0; 255; 0
+              Enabled: false
+              Head Length: 0.100000001
+              Head Radius: 0.0299999993
+              Name: winner_pose
+              Shaft Length: 0.100000001
+              Shaft Radius: 0.00999999978
+              Shape: Arrow
+              Topic: /pregrasp_planner_pipeline/grasp_planner/pose_out
+              Unreliable: false
+              Value: false
+            - Alpha: 1
+              Arrow Length: 0.300000012
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 25; 0
+              Enabled: false
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: generated_poses
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /pregrasp_planner_pipeline/pose_generator/poses_list
+              Unreliable: false
+              Value: false
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.300000012
+              Head Radius: 0.100000001
+              Name: pose_in_pregrasp_planner
+              Shaft Length: 1
+              Shaft Radius: 0.0500000007
+              Shape: Arrow
+              Topic: /mir_pregrasp_planner_pipeline/pose_in
+              Unreliable: false
+              Value: true
+          Enabled: false
+          Name: pregrasp_planner
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/Image
+              Enabled: false
+              Image Topic: /mcr_perception/barrier_tape_detection/debug_image
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: debug_image
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: false
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: PointCloud2
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Flat Squares
+              Topic: /mcr_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/LaserScan
+              Color: 255; 255; 255
+              Color Transformer: ""
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: LaserScan
+              Position Transformer: ""
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Flat Squares
+              Topic: /barrier_tape/scan
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+          Enabled: false
+          Name: barrier_tape
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Autocompute Intensity Bounds: true
+              Autocompute Value Bounds:
+                Max Value: 10
+                Min Value: -10
+                Value: true
+              Axis: Z
+              Channel Name: intensity
+              Class: rviz/PointCloud2
+              Color: 255; 255; 255
+              Color Transformer: Intensity
+              Decay Time: 0
+              Enabled: true
+              Invert Rainbow: false
+              Max Color: 255; 255; 255
+              Max Intensity: 4096
+              Min Color: 0; 0; 0
+              Min Intensity: 0
+              Name: line_tracing_3d
+              Position Transformer: XYZ
+              Queue Size: 10
+              Selectable: true
+              Size (Pixels): 3
+              Size (m): 0.00999999978
+              Style: Flat Squares
+              Topic: /mcr_perception/line_contour_detector/output/pointclouds_filtered
+              Unreliable: false
+              Use Fixed Frame: true
+              Use rainbow: true
+              Value: true
+            - Class: rviz/Image
+              Enabled: true
+              Image Topic: /mcr_perception/line_contour_detector/output/debug_image
+              Max Value: 1
+              Median window: 5
+              Min Value: 0
+              Name: line_tracing_rgb
+              Normalize Range: true
+              Queue Size: 2
+              Transport Hint: raw
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Buffer Length: 1
+              Class: rviz/Path
+              Color: 25; 255; 0
+              Enabled: true
+              Head Diameter: 0.300000012
+              Head Length: 0.200000003
+              Length: 0.300000012
+              Line Style: Lines
+              Line Width: 0.0299999993
+              Name: line_path
+              Offset:
+                X: 0
+                Y: 0
+                Z: 0
+              Pose Color: 255; 85; 255
+              Pose Style: None
+              Radius: 0.0299999993
+              Shaft Diameter: 0.100000001
+              Shaft Length: 0.100000001
+              Topic: /mir_manipulation/mir_trajectory_executor/line_tracing_path
+              Unreliable: false
+              Value: true
+          Enabled: false
+          Name: line_tracing
+        - Class: rviz/Group
+          Displays:
+            - Alpha: 1
+              Axes Length: 0.100000001
+              Axes Radius: 0.00999999978
+              Class: rviz/Pose
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.300000012
+              Head Radius: 0.100000001
+              Name: grasp_pose
+              Shaft Length: 1
+              Shaft Radius: 0.0500000007
+              Shape: Axes
+              Topic: /mir_pregrasp_planner_pipeline/pose_out
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Axes Length: 0.200000003
+              Axes Radius: 0.00999999978
+              Class: rviz/Pose
+              Color: 255; 25; 0
+              Enabled: true
+              Head Length: 0.300000012
+              Head Radius: 0.100000001
+              Name: object_pose
+              Shaft Length: 1
+              Shaft Radius: 0.0500000007
+              Shape: Axes
+              Topic: /mcr_perception/object_selector/output/object_pose
+              Unreliable: false
+              Value: true
+            - Alpha: 0.100000001
+              Axes Length: 0.100000001
+              Axes Radius: 0.00999999978
+              Class: rviz/Pose
+              Color: 255; 0; 255
+              Enabled: true
+              Head Length: 0.100000001
+              Head Radius: 0.00999999978
+              Name: base_goal_pose
+              Shaft Length: 0.100000001
+              Shaft Radius: 0.00999999978
+              Shape: Axes
+              Topic: /wbc_base_motion_calculator_pipeline/pose_transformer/transformed_pose
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.100000001
+              Class: rviz/Pose
+              Color: 0; 0; 0
+              Enabled: true
+              Head Length: 0.300000012
+              Head Radius: 0.100000001
+              Name: base_start_pose
+              Shaft Length: 0.100000001
+              Shaft Radius: 0.0500000007
+              Shape: Arrow
+              Topic: /base_motion_calculator/pose_out_1
+              Unreliable: false
+              Value: true
+            - Alpha: 1
+              Arrow Length: 0.300000012
+              Axes Length: 0.300000012
+              Axes Radius: 0.00999999978
+              Class: rviz/PoseArray
+              Color: 255; 25; 0
+              Enabled: false
+              Head Length: 0.0700000003
+              Head Radius: 0.0299999993
+              Name: PoseArray
+              Shaft Length: 0.230000004
+              Shaft Radius: 0.00999999978
+              Shape: Arrow (Flat)
+              Topic: /pregrasp_planner_pipeline/pose_generator/poses_list
+              Unreliable: false
+              Value: false
+          Enabled: false
+          Name: WBC
       Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 999999
-      Min Color: 0; 0; 0
-      Min Intensity: -999999
-      Name: LaserScan
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.01
-      Style: Points
-      Topic: /scan_front
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
+      Name: btt
     - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/LaserScan
-      Color: 255; 255; 255
-      Color Transformer: FlatColor
-      Decay Time: 0
-      Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 999999
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: LaserScan
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.01
-      Style: Points
-      Topic: /scan_rear
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /visualization_marker_array
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: RGB8
-      Decay Time: 0
+      Axes Length: 0.100000001
+      Axes Radius: 0.00999999978
+      Class: rviz/Pose
+      Color: 255; 25; 0
       Enabled: false
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: false
-      Size (Pixels): 3
-      Size (m): 0.01
-      Style: Points
-      Topic: /arm_cam3d/depth_registered/points
-      Use Fixed Frame: true
-      Use rainbow: true
+      Head Length: 0.300000012
+      Head Radius: 0.100000001
+      Name: Mockup_pose
+      Shaft Length: 1
+      Shaft Radius: 0.0500000007
+      Shape: Axes
+      Topic: /mir_states/object_selector/object_pose
+      Unreliable: false
       Value: false
-    - Class: rviz/Image
-      Enabled: true
-      Image Topic: /arm_cam3d/ir/image_raw
-      Max Value: 1
-      Median window: 5
-      Min Value: 0
-      Name: Image
-      Normalize Range: true
-      Queue Size: 2
-      Transport Hint: raw
-      Value: true
-    - Alpha: 0.7
-      Class: rviz/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: true
-      Name: Map
-      Topic: /map
-      Value: true
+    - Alpha: 1
+      Arrow Length: 0.300000012
+      Axes Length: 0.300000012
+      Axes Radius: 0.00999999978
+      Class: rviz/PoseArray
+      Color: 255; 25; 0
+      Enabled: false
+      Head Length: 0.0700000003
+      Head Radius: 0.0299999993
+      Name: updated_axis_bolt_poses
+      Shaft Length: 0.230000004
+      Shaft Radius: 0.00999999978
+      Shape: Arrow (Flat)
+      Topic: /mcr_perception/object_list_merger/updated_axis_bolt_pose
+      Unreliable: false
+      Value: false
+    - Alpha: 1
+      Arrow Length: 0.300000012
+      Axes Length: 0.300000012
+      Axes Radius: 0.00999999978
+      Class: rviz/PoseArray
+      Color: 255; 25; 0
+      Enabled: false
+      Head Length: 0.0700000003
+      Head Radius: 0.0299999993
+      Name: updated_container_pose
+      Shaft Length: 0.230000004
+      Shaft Radius: 0.00999999978
+      Shape: Arrow (Flat)
+      Topic: /mcr_perception/object_list_merger/updated_container_pose
+      Unreliable: false
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
+    Default Light: true
     Fixed Frame: base_link
     Frame Rate: 30
   Name: root
@@ -455,27 +1480,35 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 10.8175
+      Distance: 4.24583197
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.0599999987
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
       Focal Point:
-        X: -0.0830297
-        Y: 0.439065
-        Z: 1.06808
+        X: 0.428392589
+        Y: 0.0384034216
+        Z: 0.202103913
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.0500000007
+      Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.01
-      Pitch: 1.3398
+      Near Clip Distance: 0.00999999978
+      Pitch: 0.999799848
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.631633
+      Yaw: 2.17139602
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1000
+  Height: 1056
   Hide Left Dock: false
-  Hide Right Dock: false
+  Hide Right Dock: true
   Image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000021e0000035efc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000028000001f5000000dd00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d0061006700650100000223000001630000001600ffffff000000010000010f00000396fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000396000000b000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000005000000003efc0100000002fb0000000800540069006d0065010000000000000500000002f600fffffffb0000000800540069006d00650100000000000004500000000000000000000002dc0000035e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000024700000395fc0200000016fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000002800000235000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000020006c0069006e0065005f00740072006100630069006e0067005f00720067006200000002aa000001130000001600fffffffb0000001600640065006200750067005f0069006d00610067006500000002200000019b0000001600fffffffb000000140032006400200063006f006e0074006f0075007201000002f9000000c20000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e006700000002b1000002750000000000000000fb0000000a0049006d0061006700650000000163000000f10000001600fffffffb0000000a0049006d006100670065000000044e000000d80000000000000000fb00000018006300610076006900740079005f0064006500620075006700000002d3000001750000001600fffffffb00000018006d006d005f007200670062005f0064006500620075006700000001ea000001030000001600fffffffb0000000a0049006d0061006700650000000333000001f30000000000000000fb0000000a0049006d00610067006501000002d3000000ca0000000000000000fb0000000a0049006d00610067006501000002f0000000cb0000000000000000fb0000000a0049006d00610067006501000002ce000000ef0000000000000000fb0000002000730071007500650065007a0065004400650074005f0064006500620075006701000002630000015a0000001600fffffffb00000012007200610077005f0069006d00610067006500000002a7000001160000001600ffffff000000010000010f000004e2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000028000004e2000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003ffc0100000002fb0000000800540069006d00650100000000000007800000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000005330000039500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -483,7 +1516,19 @@ Window Geometry:
   Tool Properties:
     collapsed: false
   Views:
-    collapsed: false
-  Width: 1280
-  X: 1920
+    collapsed: true
+  Width: 1920
+  X: 0
   Y: 24
+  cavity_debug:
+    collapsed: false
+  debug_image:
+    collapsed: false
+  line_tracing_rgb:
+    collapsed: false
+  mm_rgb_debug:
+    collapsed: false
+  raw_image:
+    collapsed: false
+  squeezeDet_debug:
+    collapsed: false

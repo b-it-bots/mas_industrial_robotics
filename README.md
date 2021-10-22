@@ -1,9 +1,10 @@
-[![Build Status](https://travis-ci.com/b-it-bots/mas_industrial_robotics.svg?branch=kinetic)](https://travis-ci.com/b-it-bots/mas_industrial_robotics)
+[<!--lint ignore no-dead-urls-->![Build Status](https://github.com/b-it-bots/mas_industrial_robotics/workflows/CI/badge.svg)](https://github.com/b-it-bots/mas_industrial_robotics/actions?workflow=CI)
 
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
 
 - ROS Kinetic: Ubuntu 16.04
+- ROS Melodic: Ubuntu 18.04
 
 If you do not have a Ubuntu distribution on your computer you can download it here
 
@@ -30,26 +31,55 @@ If you have never worked with git before, we recommend to go through the followi
 
      http://excess.org/article/2008/07/ogre-git-tutorial/
 
+## Docker (Recommended, Optional)
+### Getting started with docker
+The latest versions of docker-engine and docker-compose have to be installed before getting started. Please have a look at [docker's official website](https://docs.docker.com/get-started/overview/) for more insights into the working and usage of docker images and docker containers.
+
+The docker images available [here](https://github.com/orgs/b-it-bots/packages) provide a proper development environment -with ros pre-installed and without any missing dependencies- for the MAS industrial software. It is highly recommended that you use docker containers to build and run your nodes rather than directly installing ROS and working with the MAS industrial software on your PC.
+
+First, you need to pull the corresponding image you want to use:
+```bash
+#kinetic image
+docker pull  ghcr.io/b-it-bots/mas_industrial_robotics/industrial-kinetic:latest
+
+#melodic image
+docker pull ghcr.io/b-it-bots/mas_industrial_robotics/industrial-melodic:latest
+```
+
+The main branch of the ros distro should always reflect `latest` tag in the github registry, for example `kinetic` branch reflects `mas_industrial_robotics/industrial-kinetic:latest`. 
+The ros distro `devel` branch always reflects `devel` tag, for example `kinetic` branch reflects `mas_industrial_robotics/industrial-kinetic:devel`
+
+Start container with `docker-compose`:
+```bash
+docker-compose -f start-container.yaml up <industrial_kinetic|industrial_melodic>
+```
+
+Log in to the container:
+```bash
+docker exec -it mas_industrial_robotics_industrial_kinetic_1 /bin/bash
+```
+
+More detailed tutorials on how to use MAS Industrial Robotics softwares with docker are available [here](https://b-it-bots.readthedocs.io/en/melodic/docker.html)
 
 ## ROS - Robot Operating System
 ### Install ROS
 The repository has been tested successfully with the following ROS distributions. Use the link behind a ROS distribution to get to the particular ROS installation instructions.
-Alternatively, you can skip this step, as ROS Kinetic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
+Alternatively, you can skip this step, as ROS Melodic is automatically installed by the setup.sh script described in this [section](#Clone-and-compile-the-MAS-industrial-robotics-software).
 
 
-- ROS Kinetic - http://wiki.ros.org/kinetic/Installation/Ubuntu
+- ROS Melodic - http://wiki.ros.org/melodic/Installation/Ubuntu
 
 NOTE: Do not forget to update your .bashrc!
-  
+
 
 ### ROS Tutorials
 If you have never worked with ROS before, we recommend to go through the beginner tutorials provided by ROS:
 
      http://wiki.ros.org/ROS/Tutorials
 
-In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters"). 
+In order to understand at least the different core components of ROS, you have to start from tutorial 1 ("Installing and Configuring Your ROS Environment") till tutorial 7 ("Understanding ROS Services and Parameters").
 
-    
+
 ## Clone and compile the MAS industrial robotics software
 First of all you have to clone the repository.
 
@@ -59,14 +89,18 @@ First of all you have to clone the repository.
 
 Navigate into the cloned repository and run setup.sh file.
 
-     ./setup.sh full <optional arg for catkin_ws parent dir>
+     ./setup.sh --ros_install <full|base> --ros_distro <melodic|kinetic|noetic> --ws_dir <$HOME/catkin_ws> --docker 0
+
+**Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
 
 This script does the following,
 
-* installs ROS, if not previously installed, provided the optional argument full is given
+* installs ROS, if not previously installed, provided the optional argument full is given. In case, you dont want to install ROS then replace full by none.
 * creates a catkin workspace folder in the directory specified in the argument or by default places it in home directory, i.e. ~/catkin_ws (if it does not exist)
-* copies the clone of the mas_industiral_robotics from your ~/temp to \<your folder\>/catkin_ws/src and installs the necessary ros dependencies and other related repositories
+* clones the mas_industiral_robotics repository along with other repositories mentioned in repository.rosinstall file to \<your folder\>/catkin_ws/src and installs the necessary ros dependencies
 * initiates a catkin build in the catkin workspace
+
+**Note:** A catkin_ws built inside docker container can be built only within docker containers having the same mounted directory in the container. Do not try to switch the catkin_ws build between docker containers and local PC, as it will produce errors due to conflicting paths.
 
 Add the following to your bashrc and source your bashrc, so that you need not execute ./setup.sh script each time you open your terminal
 
@@ -83,7 +117,7 @@ Finally delete the initially cloned mas_industrial_robotics in ~/temp, as all ne
 #### ROBOT variable
 With the ROBOT variable you can choose which hardware configuration should be loaded when starting the robot. The following line will add the variable to your .bashrc:
 
-     echo "export ROBOT=youbot-brsu-1" >> ~/.bashrc
+     echo "export ROBOT=youbot-brsu-4" >> ~/.bashrc
      source ~/.bashrc
 
 
@@ -98,26 +132,20 @@ The ROBOT_ENV variable can be used to switch between different environments. The
      source ~/.bashrc
 
 
-
 ## Bring up the robot and it's basic components
 ### In Simulation
 
      roslaunch mir_bringup_sim robot.launch
-     
-     
-In a new terminal you can open the Gazebo GUI to see the environment and the robot
-
-	     rosrun gazebo_ros gzclient
-
+	     
 ### At the Real Robot
 
      roslaunch mir_bringup robot.launch
-     
+
 
 ## Test the base
 
      roslaunch mir_teleop teleop_keyboard.launch
-     
+
 
 ## Visualize the robot state and sensor data
 
@@ -127,14 +155,18 @@ In a new terminal you can open the Gazebo GUI to see the environment and the rob
 ## Build a map for base navigation
 
      roslaunch mir_2dslam 2dslam.launch
-     
+
 
 ## Use autonomous navigation
 ### Omni-directional navigation
 
      roslaunch mir_2dnav 2dnav.launch nav_mode:=dwa
 
-     
-
-
 Click on the menu bar "File -> Open Config", navigate to "~/indigo/src/mas_industrial_robotics" and select the "youbot.rviz" file.
+
+# Note on Contributions:
+
+[Pre-commit](https://pre-commit.com/#intro) hooks has been added to this repository. Please note that you will not be able to locally commit your changes to git until all the checks in the .pre-commit-config.yaml pass. Although, cpp and python code formatters are present in .pre-commit-config.yaml, some serious violations of the standard coding guidelines will not be automatically fixed while running the pre-commit hooks. These errors will be displayed while running git commit and have to be manually fixed. Users will not be able to commit their code, until these errors are fixed. Alternatively, one could also verify if the pre-commit hooks pass before actually committing the code to git. To do so please run the following command after making necessary changes to your code.
+```
+pre-commit run --all-files
+```

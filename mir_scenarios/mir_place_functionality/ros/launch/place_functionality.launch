@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-    <node pkg="rosnode" name="mean_circle_recognizer_killer" type="rosnode" args="kill /mcr_perception/object_recognizer"/>
-    <node pkg="mir_place_functionality" type="place_functionality" name="place_functionality" output="screen"/>
-    
-</launch>

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_calibrate_pick</name>
+  <version>1.0.0</version>
+  <description>
+      Action server which assists in extrinsic calibration of the 3D camera
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="santosh.thoduka@gmail.com">Santosh Thoduka</author>
+  <maintainer email="santosh.thoduka@gmail.com">Santosh Thoduka</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

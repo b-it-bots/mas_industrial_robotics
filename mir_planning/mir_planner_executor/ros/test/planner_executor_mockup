@@ -12,17 +12,24 @@ class PlannerExecutorMockup(object):
 
     """Mockup servers for planner executor testing"""
 
-    _server_topics = ["/move_base_safe_server", "/place_object_server",
-                      "/perceive_location_server", "/perceive_cavity_server",
-                      "/wbc_pick_object_server", "pick_from_shelf_server",
-                      "/stage_object_server", "/unstage_object_server",
-                      "/insert_object_server", "/insert_cavity_server"]
+    _server_topics = [
+        "/move_base_safe_server",
+        "/place_object_server",
+        "/perceive_location_server",
+        "/perceive_cavity_server",
+        "/wbc_pick_object_server",
+        "pick_from_shelf_server",
+        "/stage_object_server",
+        "/unstage_object_server",
+        "/insert_object_server",
+        "/insert_cavity_server",
+    ]
 
     def __init__(self):
         self._action_servers = []
         self.start_servers()
         rospy.loginfo(str(len(self._action_servers)) + " servers started")
-        
+
     def start_servers(self):
         """ Start action servers for each topic in self.server_topics
 
@@ -30,53 +37,61 @@ class PlannerExecutorMockup(object):
 
         """
         for i, server_topic in enumerate(self._server_topics):
-            cb_name = 'server_execute_cb_'+str(i)
+            cb_name = "server_execute_cb_" + str(i)
             if hasattr(self, cb_name) and callable(getattr(self, cb_name)):
-                action_server = SimpleActionServer(server_topic,
-                                                   GenericExecuteAction,
-                                                   getattr(self, cb_name),
-                                                   False)
+                action_server = SimpleActionServer(
+                    server_topic, GenericExecuteAction, getattr(self, cb_name), False
+                )
                 action_server.start()
                 self._action_servers.append(action_server)
             else:
-                rospy.logerr('Ran out of callback functions')
+                rospy.logerr("Ran out of callback functions")
 
     def server_execute_cb_0(self, goal):
         self.server_execute_cb(goal, 0)
+
     def server_execute_cb_1(self, goal):
         self.server_execute_cb(goal, 1)
+
     def server_execute_cb_2(self, goal):
         self.server_execute_cb(goal, 2)
+
     def server_execute_cb_3(self, goal):
         self.server_execute_cb(goal, 3)
+
     def server_execute_cb_4(self, goal):
         self.server_execute_cb(goal, 4)
+
     def server_execute_cb_5(self, goal):
         self.server_execute_cb(goal, 5)
+
     def server_execute_cb_6(self, goal):
         self.server_execute_cb(goal, 6)
+
     def server_execute_cb_7(self, goal):
         self.server_execute_cb(goal, 7)
+
     def server_execute_cb_8(self, goal):
         self.server_execute_cb(goal, 8)
+
     def server_execute_cb_9(self, goal):
         self.server_execute_cb(goal, 9)
 
     def server_execute_cb(self, goal, action_server_index):
-        print('\n', '='*30)
-        print('Mockup: "'+ self._server_topics[action_server_index] + '"')
+        print("\n", "=" * 30)
+        print('Mockup: "' + self._server_topics[action_server_index] + '"')
         for param in goal.parameters:
-            print(param.key, ':', param.value)
+            if param.key != "next_action":
+                print(param.key, ":", param.value)
         plan_result = GenericExecuteResult()
-        success = raw_input('Succeed? (y|n)[y]? ')
-        if success in ['', 'y', 'Y']:
+        success = raw_input("Succeed? (y|n)[y]? ")
+        if success in ["", "y", "Y"]:
             self._action_servers[action_server_index].set_succeeded(plan_result)
         else:
             self._action_servers[action_server_index].set_aborted()
 
 
-
 if __name__ == "__main__":
-    rospy.init_node('planner_executor_mockup')
+    rospy.init_node("planner_executor_mockup")
     MOCKUP = PlannerExecutorMockup()
     rospy.spin()

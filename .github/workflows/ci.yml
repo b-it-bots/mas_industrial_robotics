@@ -1,0 +1,144 @@
+---
+name: CI 
+on:
+  pull_request:
+  push:
+    branches:
+      - indigo
+      - kinetic
+      - kinetic-devel
+      - melodic
+      - melodic-devel
+      - noetic
+  schedule:
+    - cron: "0 1 * * 0" # every 01.00 week 0 (sunday)
+
+jobs:
+  setup:
+    name: Setup 
+    runs-on: ubuntu-latest
+
+    outputs:
+      ros_distro: ${{ steps.setup_image.outputs.ros_distro }}
+      image_tag: ${{ steps.setup_image.outputs.image_tag }}
+      owner: ${{ steps.setup_image.outputs.owner }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup image
+      id: setup_image
+      run: |
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]
+        then
+          GH_BRANCH=$GITHUB_BASE_REF
+        else
+          GH_BRANCH=${GITHUB_REF##*/}
+        fi
+
+        ROS_DISTRO="$(cut -d'-' -f1 <<<$GH_BRANCH)"
+        DEVEL_BRANCH="$(cut -d'-' -f2 <<<$GH_BRANCH)"
+        if [[ $DEVEL_BRANCH == "devel"  ]] ; then IMAGE_TAG=devel; else IMAGE_TAG=latest ; fi
+        echo $ROS_DISTRO
+        echo $IMAGE_TAG
+        echo "::set-output name=ros_distro::$ROS_DISTRO"
+        echo "::set-output name=image_tag::$IMAGE_TAG"
+        echo "::set-output name=owner::ghcr.io/b-it-bots/mas_industrial_robotics"
+
+  build:
+    name: Build
+    needs: setup
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Install sphinx dependencies
+      run: |
+        sudo pip3 install --upgrade pip
+        sudo pip3 install sphinx
+        sudo pip3 install sphinx-rtd-theme
+
+    - name: Build docs
+      run: |
+        cd docs
+        DOCS_DIR=$(pwd)/build
+        rm -rf build
+        make html
+
+    - name: Build image
+      id: build_image
+      run: |
+        ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
+        IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
+        OWNER=${{ needs.setup.outputs.owner }}
+
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO -f images/mas_industrial_robotics/Dockerfile .
+
+    - name: Docker image list
+      run: docker images
+
+  deploy:
+    name: Deploy
+    needs: setup
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v1
+      
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GH_TOKEN }}
+
+    - name: Build and deploy image
+      id: build_and_deploy_image
+      run: |
+        # GitHub container registry is still beta
+        ROS_DISTRO=${{ needs.setup.outputs.ros_distro }}
+        IMAGE_TAG=${{ needs.setup.outputs.image_tag }}
+        OWNER=${{ needs.setup.outputs.owner }}
+
+        docker build -t $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG --build-arg ROS_DISTRO=$ROS_DISTRO -f images/mas_industrial_robotics/Dockerfile .
+        docker push $OWNER/industrial-$ROS_DISTRO:$IMAGE_TAG
+
+    - name: Docker image list
+      run: docker images
+
+  build-docs:
+    name: Build Docs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install sphinx dependencies
+      run: |
+        sudo pip3 install --upgrade pip
+        sudo pip3 install sphinx
+        sudo pip3 install sphinx-rtd-theme
+
+    - name: Build docs
+      run: |
+        cd docs
+        DOCS_DIR=$(pwd)/build
+        rm -rf build
+        make html
+        # MIR uses readthedocs, no need to push the docs to wiki
+        #- cd /tmp && git clone https://$GH_USERNAME:$GH_TOKEN@github.com/b-it-bots/wiki.git --branch $BRANCH
+        #- cp -r $DOCS_DIR/html/ /tmp/wiki/work/ && cd wiki
+        #- git checkout $BRANCH && git add * && git commit -m "Update mas_industrial_robotics documentation via Travis CI" || true
+        #- git push origin $BRANCH

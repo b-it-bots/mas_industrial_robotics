@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(mir_perception_utils)
 
 # Compile as C++11 for ROS Kinetic and newer
+# use -O3 for performance mode
+# use -g for debug
 add_compile_options(-std=c++11
   -O3
-  -march=native
 )
 
 find_package(catkin REQUIRED
@@ -46,6 +47,7 @@ add_definitions(-fpermissive)
 ### LIBRARIES ####################################################
 add_library(${PROJECT_NAME}
   common/src/bounding_box.cpp
+  common/src/pointcloud_utils.cpp
   ros/src/object_utils_ros.cpp
   ros/src/pointcloud_utils_ros.cpp
 )

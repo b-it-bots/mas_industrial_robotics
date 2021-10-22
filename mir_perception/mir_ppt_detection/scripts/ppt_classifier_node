@@ -1,0 +1,55 @@
+#! /usr/bin/env python
+
+import rospy
+import rospkg
+import tf
+from mir_ppt_detection.msg import Cavity, Cavities
+import json
+import numpy as np
+
+br = tf.TransformBroadcaster()
+
+with open(rospkg.RosPack().get_path('mir_ppt_detection') + '/scripts/covariance_data/distribution_dict.json', 'r') as fp:
+    distribution_dict = json.load(fp)
+    for key in distribution_dict.keys():
+        distribution_dict[key]['mu'] = np.array(distribution_dict[key]['mu'])
+        distribution_dict[key]['cov'] = 16*np.array(distribution_dict[key]['cov']).reshape((2,2))       
+
+def get_mahalanobis_distance(x, mu, cov):
+    return np.matmul(np.matmul((x-mu), np.linalg.pinv(cov)), (x-mu).T)**0.5
+
+def callback(msg):
+    print "recieved"
+    for cavity in msg.cavities: 
+      if cavity.cov_minor > 2.5e-5:
+          obj_name = 'unknown'
+          min_mahalanobis_distance = 1000
+          obj_cov = np.array([cavity.cov_minor, cavity.cov_major])
+          print "cov: " 
+          print obj_cov
+          for key in distribution_dict.keys():
+              target_distribution = distribution_dict[key]
+              mahalanobis_distance = get_mahalanobis_distance(obj_cov,
+                      target_distribution['mu'], target_distribution['cov'])            
+              if mahalanobis_distance < 2.0 and mahalanobis_distance <  min_mahalanobis_distance:
+                  obj_name = key
+                  min_mahalanobis_distance = mahalanobis_distance
+                  print mahalanobis_distance
+                  print key + ": " + str(mahalanobis_distance)
+              elif mahalanobis_distance < 4.0:
+                  print mahalanobis_distance
+                  print key + ": " + str(mahalanobis_distance)
+          obj_pose = (cavity.pose.position.x, cavity.pose.position.y,
+                      cavity.pose.position.z)
+          obj_quat = (cavity.pose.orientation.x, cavity.pose.orientation.y,
+                      cavity.pose.orientation.z, cavity.pose.orientation.w)
+
+          br.sendTransform(obj_pose, obj_quat, rospy.Time.now(), obj_name,
+                           'arm_cam3d_camera_color_optical_frame')
+          print "object detected is : " + obj_name + ": " + str(min_mahalanobis_distance)
+    
+if __name__ == '__main__':
+    rospy.init_node('ppt_classifier_node')
+
+    rospy.Subscriber("~cavities", Cavities, callback)
+    rospy.spin()    

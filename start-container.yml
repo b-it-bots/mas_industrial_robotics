@@ -1,0 +1,34 @@
+version: "3.0"
+services:
+    industrial_kinetic:
+        image: ghcr.io/b-it-bots/mas_industrial_robotics/industrial-kinetic:latest 
+        volumes:
+            - /tmp/.X11-unix:/tmp/.X11-unix:rw
+            - $HOME/.rviz:/home/robocup/.rviz  # include if any specific rviz settings are needed
+        environment:
+            - DISPLAY=$DISPLAY
+            - QT_X11_NO_MITSHM=1
+            - ROBOT=youbot-brsu-4   # setup robot
+            - ROBOT_ENV=brsu-c025-sim # setup environement
+        devices:
+            - /dev/dri:/dev/dri
+        privileged: true
+        tty: true
+        network_mode: "host"
+
+    industrial_melodic:
+        image: ghcr.io/b-it-bots/mas_industrial_robotics/industrial-melodic:latest
+        volumes:
+            - /tmp/.X11-unix:/tmp/.X11-unix:rw
+            - $HOME/.rviz:/home/robocup/.rviz  # include if any specific rviz settings are needed
+        environment:
+            - DISPLAY=$DISPLAY
+            - QT_X11_NO_MITSHM=1
+            - ROBOT=youbot-brsu-4   # setup robot
+            - ROBOT_ENV=brsu-c025-sim # setup environement
+        devices:
+            - /dev/dri:/dev/dri
+        privileged: true
+        tty: true
+        network_mode: "host"
+

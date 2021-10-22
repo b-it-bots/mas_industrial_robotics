@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import rospy
-import cv2
-import tf
+import mcr_manipulation_measurers_ros.pose_transformer
 import numpy as np
+import rospy
+import tf
+from geometry_msgs.msg import Point, PoseStamped, Quaternion
+from mas_perception_msgs.msg import Object, ObjectList
+from sensor_msgs.msg import CameraInfo, Image
+from std_msgs.msg import String
 
+import cv2
 from cv_bridge import CvBridge, CvBridgeError
 
-from sensor_msgs.msg import Image, CameraInfo
-from geometry_msgs.msg import Point, Quaternion, PoseStamped
-from std_msgs.msg import String
-from mas_perception_msgs.msg import ObjectList, Object
-import mcr_manipulation_measurers_ros.pose_transformer
 
 class ArucoCubePerceiver(object):
-
     def __init__(self):
         # class variables
         self._bridge = CvBridge()
@@ -25,44 +24,53 @@ class ArucoCubePerceiver(object):
         self._retry_attempts = 0
         self._camera_mat = None
         self._dist_coeff = None
-        self._pose_transformer = mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
+        self._pose_transformer = (
+            mcr_manipulation_measurers_ros.pose_transformer.PoseTransformer()
+        )
 
         # ros parameters
-        self._target_frame = rospy.get_param('~target_frame', 'base_link')
-        self._retry_threshold = rospy.get_param('~retry_attempts', 3)
-        self._marker_length = rospy.get_param('~marker_length', 0.04)
-        self._debug = rospy.get_param('~debug', False)
+        self._target_frame = rospy.get_param("~target_frame", "base_link")
+        self._retry_threshold = rospy.get_param("~retry_attempts", 3)
+        self._marker_length = rospy.get_param("~marker_length", 0.04)
+        self._debug = rospy.get_param("~debug", False)
 
         # publishers
-        self._output_pose_pub = rospy.Publisher('~output_pose', PoseStamped, queue_size=1)
-        self._output_obj_list_pub = rospy.Publisher('~output_object_list',
-                                                   ObjectList, queue_size=1)
-        self._event_out_pub = rospy.Publisher('~event_out', String, queue_size=1)
-        self._debug_image_pub = rospy.Publisher('~debug_image', Image, queue_size=1)
+        self._output_pose_pub = rospy.Publisher(
+            "~output_pose", PoseStamped, queue_size=1
+        )
+        self._output_obj_list_pub = rospy.Publisher(
+            "~output_object_list", ObjectList, queue_size=1
+        )
+        self._event_out_pub = rospy.Publisher("~event_out", String, queue_size=1)
+        self._debug_image_pub = rospy.Publisher("~debug_image", Image, queue_size=1)
 
         # subscribers
-        self._event_in_sub = rospy.Subscriber('~event_in', String, self._event_in_cb)
-        self._image_sub = rospy.Subscriber("~input_rgb_image", Image, self._input_image_cb)
-        self._camera_info_sub = rospy.Subscriber("~camera_info", CameraInfo, self._camera_info_cb)
+        self._event_in_sub = rospy.Subscriber("~event_in", String, self._event_in_cb)
+        self._image_sub = rospy.Subscriber(
+            "~input_rgb_image", Image, self._input_image_cb
+        )
+        self._camera_info_sub = rospy.Subscriber(
+            "~camera_info", CameraInfo, self._camera_info_cb
+        )
 
         rospy.loginfo("Initialised ArucoCubePerceiver")
 
     def _event_in_cb(self, msg):
-        if msg.data == 'e_start':
+        if msg.data == "e_start":
             self._listening = True
             self._publish_object = False
-            self._event_out_pub.publish(String(data='e_started'))
-        if msg.data == 'e_stop':
+            self._event_out_pub.publish(String(data="e_started"))
+        if msg.data == "e_stop":
             self._listening = False
             self._publish_object = False
-            self._event_out_pub.publish(String(data='e_stopped'))
-        if msg.data == 'e_trigger':
+            self._event_out_pub.publish(String(data="e_stopped"))
+        if msg.data == "e_trigger":
             self._listening = True
             self._publish_object = True
 
     def _camera_info_cb(self, msg):
         """
-        Callback for camera info. Initialises camera matrix and distortion 
+        Callback for camera info. Initialises camera matrix and distortion
         coefficient for the camera and unregisters the subscriber at the end.
 
         :msg: sensor_msgs.CameraInfo
@@ -71,7 +79,7 @@ class ArucoCubePerceiver(object):
         """
         camera_mat = []
         for i in range(3):
-            camera_mat.append(list(msg.K[i*3:i*3+3]))
+            camera_mat.append(list(msg.K[i * 3 : i * 3 + 3]))
         self._camera_mat = np.array(camera_mat)
         dist_coeff = list(msg.D)
         self._dist_coeff = np.array(dist_coeff)
@@ -108,10 +116,9 @@ class ArucoCubePerceiver(object):
             self._check_failure()
             return
 
-        rot, trans, _ = cv2.aruco.estimatePoseSingleMarkers(corners,
-                                                            self._marker_length,
-                                                            self._camera_mat,
-                                                            self._dist_coeff)
+        rot, trans = cv2.aruco.estimatePoseSingleMarkers(
+            corners, self._marker_length, self._camera_mat, self._dist_coeff
+        )
         rot = np.squeeze(rot)
         trans = np.squeeze(trans)
 
@@ -125,7 +132,9 @@ class ArucoCubePerceiver(object):
         output_pose.header.frame_id = msg.header.frame_id
 
         try:
-            target_pose = self._pose_transformer.get_transformed_pose(output_pose, self._target_frame)
+            target_pose = self._pose_transformer.get_transformed_pose(
+                output_pose, self._target_frame
+            )
         except Exception as e:
             rospy.logerr("Pose transformation failed.")
             rospy.logerr(str(e))
@@ -134,11 +143,11 @@ class ArucoCubePerceiver(object):
         self._output_pose_pub.publish(target_pose)
 
         if self._publish_object:
-            obj = Object(pose=target_pose, name='ARUCO_CUBE', database_id=150)
+            obj = Object(pose=target_pose, name="ARUCO_CUBE", database_id=150)
             self._output_obj_list_pub.publish(ObjectList(objects=[obj]))
             self._listening = False
             self._retry_attempts = 0
-            self._event_out_pub.publish(String(data='e_success'))
+            self._event_out_pub.publish(String(data="e_success"))
 
     def _check_failure(self):
         """
@@ -151,7 +160,7 @@ class ArucoCubePerceiver(object):
         if not self._publish_object:
             return
         if self._retry_attempts > self._retry_threshold:
-            self._event_out_pub.publish(String(data='e_failure'))
+            self._event_out_pub.publish(String(data="e_failure"))
             self._listening = False
             self._retry_attempts = 0
         else:
@@ -159,11 +168,11 @@ class ArucoCubePerceiver(object):
 
     def _get_pose_from_rvec_tvec(self, rvec, tvec):
         """
-        Return a Pose object from rvec and tvec. This function also applies a 
+        Return a Pose object from rvec and tvec. This function also applies a
         few transforms on the pose.
         1) opencv provides orientation such that the Z axis is facing up from the
            marker. Here, the Z axis is inverted so that it is facing inside the cube
-        2) opencv provides position of the marker, however, we are interested in 
+        2) opencv provides position of the marker, however, we are interested in
            center of aruco cube. Thus we shift the position by marker_length/2 meters
 
         :rvec: numpy.array (shape 3x1)
@@ -187,7 +196,7 @@ class ArucoCubePerceiver(object):
         quat = tf.transformations.quaternion_from_matrix(rot_mat)
 
         # offset marker pose by marker_length/2 meter towards the center
-        cube_center = np.array([0.0, 0.0, self._marker_length/2.0, 1.0])
+        cube_center = np.array([0.0, 0.0, self._marker_length / 2.0, 1.0])
         cube_center_transformed = rot_mat.dot(cube_center)
         cube_center_transformed_list = list(cube_center_transformed[:3])
 
@@ -207,7 +216,9 @@ class ArucoCubePerceiver(object):
         :returns: np.array of shape 4x2
 
         """
-        corners_set, ids, rejectedImgPoints = cv2.aruco.detectMarkers(img, self._aruco_dict)
+        corners_set, ids, rejectedImgPoints = cv2.aruco.detectMarkers(
+            img, self._aruco_dict
+        )
         if ids is None:
             return None
 
@@ -216,20 +227,21 @@ class ArucoCubePerceiver(object):
         best_corners = corners_set[max_variance_index]
 
         if self._publish_object:
-            rospy.loginfo('Detected aruco marker id: ' + str(ids[max_variance_index]))
+            rospy.loginfo("Detected aruco marker id: " + str(ids[max_variance_index]))
 
         if self._debug:
             debug_img = cv2.aruco.drawDetectedMarkers(img.copy(), corners_set, ids)
             try:
-                ros_debug_img = self._bridge.cv2_to_imgmsg(debug_img, 'bgr8')
+                ros_debug_img = self._bridge.cv2_to_imgmsg(debug_img, "bgr8")
                 self._debug_image_pub.publish(ros_debug_img)
             except CvBridgeError as e:
-                rospy.logwarn('Could not convert debug cv image to ros image')
+                rospy.logwarn("Could not convert debug cv image to ros image")
                 pass
         return best_corners
 
-if __name__ == '__main__':
-    rospy.init_node('aruco_cube_perceiver')
+
+if __name__ == "__main__":
+    rospy.init_node("aruco_cube_perceiver")
     ACP = ArucoCubePerceiver()
     rospy.spin()
     print("Exiting.")

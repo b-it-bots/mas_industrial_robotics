@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
-  <!-- Launch all required components for planning approach -->
+    <!-- Launch all required components for planning approach -->
 
-  <!-- Launch file arguments -->
+    <!-- Launch file arguments -->
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="robot_env" default="$(optenv ROBOT_ENV !!ROBOT_ENV NOT SET!!)" />
     <arg name="sim" default="false"/>
@@ -25,35 +25,49 @@
     <arg name="align_with_workspace" default="false"/>
     <!-- should WBC only move the base to align with the object and not use pregrasp planner?-->
     <arg name="base_motion_only" default="false"/>
-  <!-- bringup -->
-    <!-- real robot related launches  -->
-    <!--group unless="$(arg sim)">
-      <include file="$(find mir_bringup)/robot.launch" /-->   <!-- base components -->
-    <!--/group-->
+
+    <!-- =================================================================== -->
+
+    <!-- ======= -->
+    <!-- BRINGUP -->
+    <!-- ======= -->
+    <!-- real robot related launches -->
+    <!-- <group unless="$(arg sim)"> -->
+    <!--   <include file="$(find mir_bringup)/robot.launch" /> -->
+    <!-- </group> -->
 
     <!-- simulation related launches -->
     <group if="$(arg sim)">
-      <include file="$(find mir_bringup_sim)/robot.launch" />   <!-- base components -->
-      <include file="$(find mcr_gazebo_objects)/ros/launch/spawn_objects.launch"/>   <!-- spawn objects -->
+        <include file="$(find mir_bringup_sim)/robot.launch" />   <!-- base components -->
+        <include file="$(find mcr_gazebo_objects)/ros/launch/spawn_objects.launch"/>   <!-- spawn objects -->
     </group>
 
+
+    <!-- =================================================================== -->
+    <!-- ========== -->
+    <!-- NAVIGATION -->
+    <!-- ========== -->
+    <!-- move_base with dwa approach -->
+    <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
+
+    <!-- move_base action lib wrapper -->
+    <include file="$(find mir_move_base_safe)/ros/launch/move_base.launch" />
+
+
+    <!-- =================================================================== -->
+
+    <!-- ============ -->
+    <!-- MANIPULATION -->
+    <!-- ============ -->
     <!-- moveit! -->
     <include file="$(find mir_moveit_youbot)/$(arg robot)/move_group.launch">
-       <arg name="planner_pipeline" value="interpolation" />
+        <arg name="planner_pipeline" value="interpolation" />
     </include>
     <param name="/move_group/trajectory_execution/allowed_execution_duration_scaling" type="double" value="1.5"/>
     <!-- by setting this parameter we disable checking that the first point in the trajectory is the current state -->
     <param name="/move_group/trajectory_execution/allowed_start_tolerance" type="double" value="0.0"/>
 
     <include file="$(find mir_moveit_client)/ros/launch/moveit_client.launch" />
- <!-- navigation -->
-   <!-- move_base with dwa approach -->
-   <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
-
-    <!-- move_base action lib wrapper -->
-    <include file="$(find mir_move_base_safe)/ros/launch/move_base.launch" />
-
-  <!-- manipulation -->
 
     <!-- grasp monitoring NOT TESTED -->
     <include file="$(find mir_grasp_monitors)/ros/launch/dynamixel_gripper_grasp_monitor.launch" />
@@ -66,87 +80,82 @@
     <!-- whole body control which also includes pregrasp planner
        it automatically selects wbc pipeline/pregrasp planner pipeline.(see wbc pickup object server for help-->
     <include file="$(find mir_whole_body_motion_calculator)/ros/launch/whole_body_motion_calculator_standalone.launch" >
-      <arg name="static_transform_frame" value="$(arg object_perception_target_frame)" />
-      <arg name="base_motion_only" value="$(arg base_motion_only)" />
+        <arg name="static_transform_frame" value="$(arg object_perception_target_frame)" />
+        <arg name="base_motion_only" value="$(arg base_motion_only)" />
     </include>
 
     <!-- dynamic reconfigure from code, receive string and params and does the request NOT TESTED -->
     <include file="$(find mcr_dynamic_reconfigure_client)/ros/launch/dynamic_reconfigure_client.launch">
         <arg name="config_file" value="$(find mir_actions)/ros/config/youbot_dynamic_params.yaml" />
     </include>
+    <include file="$(find mir_insert_object)/ros/launch/insert_object_workaround.launch" />
 
-  <!-- perception -->
+
+    <!-- =================================================================== -->
+
+    <!-- ========== -->
+    <!-- PERCEPTION -->
+    <!-- ========== -->
     <!-- barrier tape detection -->
     <include file="$(find mir_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch" />
 
     <!-- <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" > -->
-    <!--   <arg name="target_frame" value="$(arg object_perception_target_frame)" /> -->
-    <!--   <arg name="classifier" value="asus-nagoya" /> -->
+    <!--     <arg name="target_frame" value="$(arg object_perception_target_frame)" /> -->
+    <!--     <arg name="classifier" value="asus-nagoya" /> -->
     <!-- </include> -->
+
     <!-- this is needed if perceive location with base motions is used -->
     <!--include file="$(find mir_perceive_location)/ros/launch/percieve_location_base_controller.launch">
         <arg name="pose_out" value="/move_base_wrapper/pose_in" />
     </include-->
 
     <!-- Object list merger -->
-    <!-- Use new object list merger -->
-        <include file="$(find mcr_object_list_merger)/ros/launch/object_list_merger_new.launch"/>
-        <!-- <include file="$(find mcr_object_list_merger)/ros/launch/object_list_merger.launch"/> -->
+    <include file="$(find mcr_object_list_merger)/ros/launch/object_list_merger_new.launch"/>
+    <!-- <include file="$(find mcr_object_list_merger)/ros/launch/object_list_merger.launch"/> -->
 
     <!-- Object selector used for planning in pick and insert actions NOT TESTED -->
     <include file="$(find mcr_perception_selectors)/ros/launch/object_selector.launch">
-       <arg name="input_topic" value="/mcr_perception/object_list_merger/output_object_list" />
+        <arg name="input_topic" value="/mcr_perception/object_list_merger/output_object_list" />
+        <arg name="local_input_topic" value="/mcr_perception/object_list_merger/local_output_object_list" />
     </include>
 
     <!-- pose selector for placing objects -->
     <include file="$(find mir_place_pose_selector)/ros/launch/place_pose_selector.launch"/>
 
     <!-- cavity finder -->
-    <include file="$(find mcr_cavity_detector)/ros/launch/detector_selector_cavity.launch"/>
+    <!-- <include file="$(find mcr_cavity_detector)/ros/launch/detector_selector_cavity.launch"/> -->
+    <include file="$(find mir_ppt_detection)/launch/ppt_detector.launch"/>
 
     <!-- RGB image recognition finder -->
     <!-- <include file="$(find mcr_multimodal_object_identification)/ros/launch/multimodal_object_identification.launch"/> -->
 
     <!-- Multimodal object recognition-->
-    <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch"/>
+    <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch">
+        <arg name="target_frame" value="base_link_static"/>
+    </include>
     <!-- trims 3 last characters of objects in case they come with count information -->
     <!--include file="$(find mcr_poses_along_object)/ros/launch/poses_along_object.launch"/-->
 
     <include file="$(find mir_perceive_mock)/ros/launch/perceive_aruco_server.launch"/>
 
-  <!-- Task planning -->
+
+    <!-- =================================================================== -->
+
+    <!-- ============= -->
+    <!-- TASK PLANNING -->
+    <!-- ============= -->
 
     <!-- uploads all task planning required components for the youbot to happily plan NO TESTED -->
     <include file="$(find mir_planning_core)/ros/launch/task_planning_components.launch">
-      <arg name="domain" value="$(arg domain)" />
-      <arg name="base_path" value="$(arg base_path)" />
-      <arg name="domain_path" value="$(arg domain_path)" />
+        <arg name="refbox" value="$(arg refbox)" />
+        <arg name="domain" value="$(arg domain)" />
+        <arg name="base_path" value="$(arg base_path)" />
+        <arg name="domain_path" value="$(arg domain_path)" />
     </include>
 
     <!-- youbot actions (action lib) : move base safe, perceive, pick, stage, unstage, insert -->
     <include file="$(find mir_actions)/ros/launch/run_action_servers.launch">
         <arg name="align_with_workspace" value="$(arg align_with_workspace)" />
     </include>
-
-  <!-- Refbox -->
-
-    <!-- receives task spec from refbox, uploads the knowledge into knowledge base (old refbox interface only) -->
-    <include file="$(find mir_refbox_parser)/ros/launch/refbox_parser.launch"/>
-
-    <!-- refbox pc communication node -->
-    <group if="$(arg refbox)" >
-        <include file="$(find atwork_refbox_ros_client)/ros/launch/b-it-bots-$(arg official_refbox).launch" />
-    </group>
-    <group if="$(arg logging)" >
-        <include file="$(find mir_planning_bringup)/ros/launch/logging.launch" />
-    </group>
-    
-    <group if="$(arg debug_logging)" >
-        <include file="$(find mir_planning_bringup)/ros/launch/debug_logging.launch" />
-    </group>
-
-    <include file="$(find mir_insert_object)/ros/launch/insert_object_workaround.launch" />
-    
-    <!-- <include file="$(find mir_data_logger)/ros/launch/data_logger.launch" /> -->
 
 </launch>

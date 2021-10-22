@@ -5,7 +5,7 @@ find_package(catkin REQUIRED)
 
 catkin_package(
   CATKIN_DEPENDS
-    hokuyo_node
+    urg_node
     mcr_collision_velocity_filter
     mcr_default_env_config
     mir_arm_cartesian_control
@@ -18,7 +18,7 @@ catkin_package(
     robot_state_publisher
     tf
     youbot_dashboard
-    youbot_description 
+    youbot_description
     youbot_diagnostic_aggregator
     youbot_driver_ros_interface
     usb_cam
@@ -37,16 +37,16 @@ endif()
 
 ### INSTALLS
 set(
-  INSTALL_DIRS 
+  INSTALL_DIRS
     components
     robots
     tools
-) 
-foreach(dir ${INSTALL_DIRS}) 
+)
+foreach(dir ${INSTALL_DIRS})
   install(DIRECTORY ${dir}
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
 endforeach()
 
 install(FILES robot.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  ) 
+  )

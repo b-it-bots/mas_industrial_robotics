@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_unclutter_workspace" type="unclutter_workspace_server"
+          name="unclutter_workspace" output="screen">
+    </node>
+
+</launch>

@@ -12,13 +12,13 @@ if(CATKIN_ENABLE_TESTING)
 endif()
 
 
-### INSTALLS 
+### INSTALLS
 install(FILES upload_param.launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-foreach(robot ${robot_list}) 
+foreach(robot ${robot_list})
   install(DIRECTORY ${robot}
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${robot}
   )
-endforeach() 
+endforeach()

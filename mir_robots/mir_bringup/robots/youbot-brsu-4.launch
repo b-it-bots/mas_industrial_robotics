@@ -32,7 +32,10 @@
   <group if="$(arg is_camera_required)" >
     <group if="$(arg is_camera_intel)" >
         <!-- <include file="$(find mir_realsense_camera_watchdog)/ros/launch/realsense_camera_watchdog.launch"/> -->
-        <include file="$(find mir_bringup)/components/realsense_camera.launch"/>
+        <include file="$(find mir_bringup)/components/realsense_camera.launch">
+            <arg name="serial_num" value="727212070700"/>
+            <arg name="camera_name" value="arm_cam3d"/>
+        </include>
     </group>
     <group unless="$(arg is_camera_intel)" >
        <include file="$(find mir_bringup)/components/openni2.launch">
@@ -45,8 +48,11 @@
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
   <!-- back camera -->
-  <!-- <include file="$(find realsense2_camera)/launch/rs_rgbd.launch" /> -->
+  <include file="$(find mir_bringup)/components/realsense_camera.launch">
+      <arg name="serial_num" value="827312073531"/>
+      <arg name="camera_name" value="d435_back"/>
+  </include>
 
-  <node pkg="mir_debug_leds" type="debug_leds.py" name="debug_leds" output="screen"/>
+  <!-- <node pkg="mir_debug_leds" type="debug_leds.py" name="debug_leds" output="screen"/> -->
 
 </launch>

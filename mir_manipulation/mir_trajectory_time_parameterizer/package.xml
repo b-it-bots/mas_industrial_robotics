@@ -5,7 +5,7 @@
     <version>0.1.0</version>
 
     <description>
-    	This package provides launching and configuration to 
+    	This package provides launching and configuration to
         use mcr_trajectory_time_parameterizer package.
     </description>
 

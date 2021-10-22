@@ -1,0 +1,74 @@
+[
+{
+  "id": 1,
+  "name": "axis"
+},
+{
+  "id": 2,
+  "name": "bearing"
+},
+{
+  "id": 3,
+  "name": "bearing_box_ax01"
+},
+{
+  "id": 4,
+  "name": "bearing_box_ax16"
+},
+{
+  "id": 5,
+  "name": "container_box_blue"
+},
+{
+  "id": 6,
+  "name": "container_box_red"
+},
+{
+  "id": 7,
+  "name": "distance_tube"
+},
+{
+  "id": 8,
+  "name": "em_01"
+},
+{
+  "id": 9,
+  "name": "em_02"
+},
+{
+  "id": 10,
+  "name": "f20_20_B"
+},
+{
+  "id": 11,
+  "name": "f20_20_G"
+},
+{
+  "id": 12,
+  "name": "m20"
+},
+{
+  "id": 13,
+  "name": "m20_100"
+},
+{
+  "id": 14,
+  "name": "m30"
+},
+{
+  "id": 15,
+  "name": "motor"
+},
+{
+  "id": 16,
+  "name": "r20"
+},
+{
+  "id": 17,
+  "name": "s40_40_B"
+},
+{
+  "id": 18,
+  "name": "s40_40_G"
+}
+]

@@ -2,8 +2,8 @@
 # using dynamic reconfigure. The named configurations set here
 # can be referred to from state machines in order to change a set of parameters
 # for a particular node based on the context. For example dbc_move_base
-# consists of all parameters for the direct base controller which is 
-# used by the move_base wrapper. dbc_pick_object consists of the parameters for the 
+# consists of all parameters for the direct base controller which is
+# used by the move_base wrapper. dbc_pick_object consists of the parameters for the
 # same direct base controller, but used in the context of picking objects (or inserting)
 dbc_move_base:
     /mcr_navigation/direct_base_controller/coordinator:
@@ -31,7 +31,7 @@ dbc_pick_object:
         p_gain_x: 2.0
         p_gain_y: 4.0
         p_gain_yaw: 4.0
-        max_velocity_x: 0.1
+        max_velocity_x: 0.05
         max_velocity_y: 0.2
         max_velocity_z: 0.0
         max_velocity_roll: 0.0

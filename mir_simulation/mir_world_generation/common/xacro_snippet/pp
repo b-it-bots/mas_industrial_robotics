@@ -1,0 +1,5 @@
+    <xacro:ppt_platform name="pp{ID}" parent="origin" cavity_1="m20_100" cavity_2="m30"
+                        cavity_3="s40_40" cavity_4="m20" cavity_5="f20_20">
+        <origin xyz="{X} {Y} 0.0" rpy="0.0 0.0 {YAW}"/>
+    </xacro:ppt_platform>
+

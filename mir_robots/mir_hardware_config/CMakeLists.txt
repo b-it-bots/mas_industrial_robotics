@@ -5,17 +5,16 @@ find_package(catkin REQUIRED)
 catkin_package(
   CATKIN_DEPENDS
     mcr_description
-    mir_calibration_data
     mir_description
     youbot_description
 )
 
 set(robot_list
-  youbot-brsu-1 
-  youbot-brsu-2 
-  youbot-brsu-3 
+  youbot-brsu-1
+  youbot-brsu-2
+  youbot-brsu-3
   youbot-brsu-4
-) 
+)
 
 
 ### TESTS
@@ -27,8 +26,8 @@ endif()
 
 
 ### INSTALLS
-foreach(robot ${robot_list}) 
+foreach(robot ${robot_list})
   install(DIRECTORY ${robot}
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${robot}
   )
-endforeach() 
+endforeach()

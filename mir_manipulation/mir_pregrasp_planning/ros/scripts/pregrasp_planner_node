@@ -2,5 +2,5 @@
 
 import mir_pregrasp_planning_ros.pregrasp_planner_node
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mir_pregrasp_planning_ros.pregrasp_planner_node.main()

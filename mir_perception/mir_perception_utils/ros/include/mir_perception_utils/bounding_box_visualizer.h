@@ -19,32 +19,28 @@ using mir_perception_utils::visualization::Color;
 
 namespace mir_perception_utils
 {
-
 namespace visualization
 {
-
 class BoundingBoxVisualizer
 {
-public:
-    BoundingBoxVisualizer(ros::NodeHandle *nh, const std::string& topic_name,
-                          Color color,
-                          bool check_subscribers = true);
+ public:
+  BoundingBoxVisualizer(ros::NodeHandle *nh, const std::string &topic_name, Color color,
+                        bool check_subscribers = true);
 
-    BoundingBoxVisualizer(const std::string& topic_name,
-                          Color color,
-                          bool check_subscribers = true);
+  BoundingBoxVisualizer(const std::string &topic_name, Color color, bool check_subscribers = true);
 
-    void publish(const mas_perception_msgs::BoundingBox& box, const std::string& frame_id);
+  void publish(const mas_perception_msgs::BoundingBox &box, const std::string &frame_id);
 
-    void publish(const std::vector<mas_perception_msgs::BoundingBox>& boxes, const std::string& frame_id);
+  void publish(const std::vector<mas_perception_msgs::BoundingBox> &boxes,
+               const std::string &frame_id);
 
-    int getNumSubscribers();
+  int getNumSubscribers();
 
-private:
-    ros::Publisher marker_publisher_;
+ private:
+  ros::Publisher marker_publisher_;
 
-    const Color color_;
-    bool check_subscribers_;
+  const Color color_;
+  bool check_subscribers_;
 };
 
 }  // namespace visualization

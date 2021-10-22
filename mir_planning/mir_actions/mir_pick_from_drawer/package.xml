@@ -4,7 +4,7 @@
   <version>1.0.0</version>
   <description>
       Assumes that the location is a drawer and it is opened and the object
-      requested for picking is perceived. 
+      requested for picking is perceived.
       The base and arm are controlled using direct_base_controller and
       mir_moveit_client.
   </description>
