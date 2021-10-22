@@ -21,6 +21,13 @@
       <parent link="${parent}" />
       <child link="${name}_motor_mount_link" />
     </joint>
+    <joint name="${name}_static_grasp_link_joint" type="fixed" >
+      <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>
+      <parent link="${parent}" />
+      <child link="${name}_static_grasp_link" />
+    </joint>
+    <link name="${name}_static_grasp_link">
+    </link>
 
     <joint name="${name}_static_grasp_link_joint" type="fixed" >
         <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>
@@ -63,11 +70,11 @@
     </xacro:dynamixel_motor_AX-12A>
 
     <!-- brackets -->
-    <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_left" parent="${name}_motor_left_link">
+    <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_left" parent="${name}_motor_left_base_link">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:dynamixel_bracket_FP04-F2>
 
-    <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_right" parent="${name}_motor_right_link">
+    <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_right" parent="${name}_motor_right_base_link">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:dynamixel_bracket_FP04-F2>
 

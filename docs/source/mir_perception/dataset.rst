@@ -13,7 +13,9 @@ Dataset collection
 3D dataset collection
 ^^^^^^^^^^^^^^^^^^^^^^
 
-We use a rotating table to collect point cloud data.
+Objects are placed on a rotating table such that it can capture the objects from 
+different angle. However, this can be done manually on a normal table and change 
+the object orientation manually.
 
 .. note::
 
@@ -21,9 +23,7 @@ We use a rotating table to collect point cloud data.
 
 Setup:
 
-  1. Using robot arm camera
-
-  2. Using camera
+  1. Using external camera
 
     * Launch the camera
 
@@ -37,7 +37,7 @@ Setup:
 
         Passthrough filter will not work if it's not parallel to the ground
 
-    * Then launch multimodal object recognition
+    * Launch multimodal object recognition
 
       .. code-block:: bash
 
@@ -46,13 +46,7 @@ Setup:
       .. note::
 
         To enable dataset collection, it requires to be in *debug_mode*. You can also
-        point to a specifi logdir to save the data e.g. logdir:=/home/robocup/cloud_dataset
-
-    * Trigger data collection mode
-
-      .. code-block:: bash
-
-        rostopic pub /mir_perception/multimodal_object_recognition/event_in std_msgs/String e_data_collection
+        point to a specifi logdir to save the data e.g. logdir:=/home/robocup/cloud_dataset.
 
     * Start collectiong dataset
 
@@ -60,35 +54,71 @@ Setup:
 
         rostopic pub /mir_perception/multimodal_object_recognition/event_in std_msgs/String e_start
 
-    * Stop data collection mode
 
-      .. code-block:: bash
+  2. Using robot arm camera
 
-        rostopic pub /mir_perception/multimodal_object_recognition/event_in std_msgs/String e_stop_data_collection
+    * Bringup the robot
+
+    * Start `multimodal_object_recognition` and continue with the next steps as described previously.
+    
+ .. note::
+
+    The segemented point clouds are saved in the `logdir`.
 
 .. _2d_dataset_collection:
 
 2D dataset collection
 ^^^^^^^^^^^^^^^^^^^^^^
 
-* Collect dataset using rotating table
-* Collect dataset using random surface
-* Collect dataset during competition
+Images can be collected using the robot camera or external camera.
+They can also be collected using `easy augment too <https://github.com/santoshreddy254/easy_augment>`_ 
+which use Intel Realsense D435 camera to capture the image and automatically 
+annotate them for 2D object detection.
+
 
 .. _dataset_preprocessing:
 
 Dataset preprocessing
 -----------------------
 
+Before training training the model, the data should be preprocessed, and this 
+includes but not limited to *removing bad data*, *normalization*, and converting 
+it to the required format such as *h5* for point clouds and *VOC* or *KITTI* for 
+images.
+
+.. _3d_dataset_preprocessing:
+
+3D dataset preprocessing
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+An example of the data directory structure:
+
+.. code-block:: bash
+
+  b-it-bots_atwork_dataset
+  ├── train
+  │   ├── AXIS
+  |       ├── axis_0001.pcd
+  |       ├── ...
+  │   ├── ...
+  ├── test
+  │   ├── AXIS
+  |       ├── axis_0001.pcd
+  |       ├── ...
+  │   ├── ...
+
+The dataset preprocessing can be found in `this notebook 
+<https://github.com/mhwasil/pointcloud_classification/blob/master/dataset/b-it-bots_dataset_preprocessing.ipynb>`_.
+
+It will generate `pgz` files containing a dictionary of objects consisting of `x y z r g b` and label.
+
+
 .. _2d_dataset_preprocessing:
 
 2D dataset preprocessing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Object detection
-
-  * Download labelme
-  * Label the data
-  * Augment data
-  * Convert to a particular format: VOC, KITTI etc
-
+* Create semantic labels using `labelme <https://github.com/wkentaro/labelme>`_.
+* Convert the semantic labels using `labelme2voc <https://github.com/mhwasil/labelme/blob/master/examples/bbox_detection/labelme2voc.py>`_.
+* If KITTI dataset is required, convert VOC dataset to KITTI using 
+  `vod-converter <https://github.com/umautobots/vod-converter>`_

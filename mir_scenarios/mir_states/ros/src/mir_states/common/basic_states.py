@@ -78,37 +78,6 @@ class set_vs_status(smach.State):
         return "success"
 
 
-class wait_for_open_door(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=["succeeded"])
-
-    def execute(self, userdata):
-
-        door_client = rospy.ServiceProxy(
-            "/raw_door_status/door_status", hbrs_srvs.srv.ReturnBool
-        )
-        rospy.wait_for_service(
-            "/raw_door_status/door_status", 20
-        )  # todo error handling
-
-        # wait for open door
-        door_open = False
-        while not door_open:
-            print "door open?:", door_open
-            try:
-                res = door_client()
-                door_open = res.value
-            except rospy.ServiceException, e:
-                print "Service call failed: %s" % e
-                door_open = False
-
-            rospy.sleep(0.3)
-
-        # sleep here to give the referees a chance to open the door completly
-        rospy.sleep(1)
-
-        return "succeeded"
-
 class wait_for(smach.State):
     def __init__(self, duration=1.0):
         smach.State.__init__(self, outcomes=["succeeded"])

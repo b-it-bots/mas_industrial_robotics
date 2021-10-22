@@ -46,7 +46,6 @@ How to use the RealSense2 camera
   .. code-block:: bash
 
     cd *catkin workspace*/src/mas_perception/mcr_scene_segmentation/ros/config
-    gedit scene_segmentation_constraints.yaml
 
 4. Setup Base Frame
 
@@ -67,7 +66,6 @@ How to use the RealSense2 camera
   .. code-block:: bash
 
     cd *catkin workspace*/src/mas_perception/mcr_scene_segmentation/ros/launch
-    gedit scene_segmentation.launch
 
   Change the value of "dataset_collection" from "false" to "true". Change value of "logdir" from "/temp/
   to the path in your computer where you want to save the files.
