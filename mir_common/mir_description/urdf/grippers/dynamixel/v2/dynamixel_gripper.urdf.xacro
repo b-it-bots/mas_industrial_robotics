@@ -12,6 +12,8 @@
   <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/festo_finger_mount.urdf.xacro" />
   <xacro:include filename="$(find mcr_description)/urdf/fingers/festo_finger_dhas-gf-shm.urdf.xacro" />
 
+  <xacro:arg name="grasp_link_offset" default="0.11"/>
+
   <xacro:macro name="dynamixel_gripper_v2" params="parent name *origin">
 
     <joint name="${name}_motor_mount_joint" type="fixed" >
@@ -19,6 +21,14 @@
       <parent link="${parent}" />
       <child link="${name}_motor_mount_link" />
     </joint>
+
+    <joint name="${name}_static_grasp_link_joint" type="fixed" >
+        <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>
+      <parent link="${parent}" />
+      <child link="${name}_static_grasp_link" />
+    </joint>
+    <link name="${name}_static_grasp_link">
+    </link>
 
     <!-- motor mount -->
     <link name="${name}_motor_mount_link">
