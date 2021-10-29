@@ -1,8 +1,9 @@
+from __future__ import print_function
 import tf
 import numpy as np
 import rospy
 
-from brics_actuator.msg import JointPositions
+from brics_actuator.msg import JointPositions, JointValue
 from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Quaternion
 from mcr_manipulation_measurers_ros.pose_transformer import PoseTransformer
 from mir_pregrasp_planning_ros.kinematics import Kinematics
@@ -71,6 +72,17 @@ class OrientationIndependentIK(object):
         return self._get_joint_msg_from_point_and_pitch_ranges(x, y, z, frame_id, pitch_ranges)
 
     def _get_joint_msg_from_point_and_pitch_ranges(self, x, y, z, frame_id, pitch_ranges):
+        """
+        Iteratively generate samples for each pitch_range and first the first
+        pose that has an ik solution
+
+        :x: float
+        :y: float
+        :z: float
+        :frame_id: str
+        :pitch_ranges: list[tuple(float, float)]
+        :returns: brics_actuator.JointPositions or None
+        """
         self._initialise_base_to_arm_offset()
         if self._base_link_to_arm_base_offset is None:
             rospy.logerr('Could not get translation from ' + str(self._base_link_frame) + ' to ' + str(self._arm_base_frame))
@@ -87,6 +99,7 @@ class OrientationIndependentIK(object):
                                                                              self._base_link_frame)
         if transformed_input_pose is None:
             rospy.logerr("Unable to transform pose to {0}".format(self._base_link_frame))
+            return None
 
         input_pose = transformed_input_pose
 
@@ -118,10 +131,18 @@ class OrientationIndependentIK(object):
                 rospy.logdebug('Yaw : ' + str(yaw))
                 if self.debug:
                     self._pose_out_pub.publish(reachable_pose)
-                return joint_angles
+                return OrientationIndependentIK.get_joint_pos_msg_from_joint_angles(joint_angles)
         return None
 
     def _get_reachable_pose_and_configuration(self, pose_samples):
+        """
+        Out of all the pose samples, return the first reachable pose and its ik
+        solution.
+
+        :pose_samples: geometry_msgs.msg.PoseArray
+        :returns: tuple(geometry_msgs.msg.PoseStamped, list(float))
+
+        """
         for pose in pose_samples.poses:
             # transform pose to arm base frame (since ik only works with that)
             pose_stamped = PoseStamped(pose=pose, header=pose_samples.header)
@@ -183,6 +204,7 @@ class OrientationIndependentIK(object):
     def _initialise_base_to_arm_offset(self):
         num_of_tries = 0
         while self._base_link_to_arm_base_offset is None and num_of_tries < 3:
+            num_of_tries += 1
             try:
                 trans, _ = self._tf_listener.lookupTransform(self._base_link_frame,
                                                              self._arm_base_frame,
@@ -190,3 +212,21 @@ class OrientationIndependentIK(object):
                 self._base_link_to_arm_base_offset = (trans[0], trans[1])
             except Exception as e:
                 rospy.sleep(1.0)
+
+    @staticmethod
+    def get_joint_pos_msg_from_joint_angles(joint_angles):
+        """
+        Converts a list of joint angles to a JointPositions message
+
+        :joint_angles: list(float)
+        :returns: brics_actuator.JointPositions
+
+        """
+        joint_position_msg = JointPositions()
+        for i, joint_angle in enumerate(joint_angles):
+            joint_value_msg = JointValue()
+            joint_value_msg.joint_uri = 'arm_joint_' + str(i+1)
+            joint_value_msg.unit = 'rad'
+            joint_value_msg.value = joint_angle
+            joint_position_msg.positions.append(joint_value_msg)
+        return joint_position_msg
