@@ -10,6 +10,7 @@
     <node pkg="mir_move_base" type="move_base_node" name="move_base_wrapper" output="screen">
         <param name="move_base_action_name" type="string" value="$(arg move_base_action_name)"/>
         <param name="loop_rate" type="double" value="10"/>
+        <remap from="~path_plan" to="/move_base/GlobalPlannerWithOrientations/plan" />
     </node>
 
 </launch>

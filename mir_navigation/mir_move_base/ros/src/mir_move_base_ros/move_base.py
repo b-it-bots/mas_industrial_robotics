@@ -23,6 +23,7 @@ import geometry_msgs.msg
 import move_base_msgs.msg
 import rospy
 import std_msgs.msg
+import numpy as np
 
 
 class MoveBase(object):
@@ -36,6 +37,7 @@ class MoveBase(object):
         self.event = None
         self.pose_in = None
         self.client_result = None
+        self.path_plan = None
 
         # Action name to move the robot's base
         self.move_base_action_name = rospy.get_param("~move_base_action_name", None)
@@ -50,13 +52,13 @@ class MoveBase(object):
         self.event_out = rospy.Publisher(
             "~event_out", std_msgs.msg.String, queue_size=1
         )
-        self.goal = rospy.Publisher(
-            "~pose_out", move_base_msgs.msg.MoveBaseGoal, queue_size=1
-        )
+        self.remaining_dist_pub = rospy.Publisher(
+            "~remaining_distance", std_msgs.msg.Float32, queue_size=1)
 
         # Subscribers
         rospy.Subscriber("~event_in", std_msgs.msg.String, self.event_in_cb)
         rospy.Subscriber("~pose_in", geometry_msgs.msg.PoseStamped, self.pose_in_cb)
+        rospy.Subscriber("~path_plan", geometry_msgs.msg.PoseArray, self.path_plan_cb)
 
         # Actions
         self.move_base_action = actionlib.SimpleActionClient(
@@ -86,6 +88,36 @@ class MoveBase(object):
 
         """
         self.client_result = state
+
+    def client_feedback_cb(self, feedback):
+        """
+        Obtains the feedback from move base and publishes
+        remaining distance in the path
+        """
+        if not self.path_plan:
+            return
+
+        def get_dist(p1, p2):
+            return np.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
+
+        path_poses = np.array([[p.position.x, p.position.y] for p in self.path_plan.poses])
+        base_pose = np.array([feedback.base_position.pose.position.x, feedback.base_position.pose.position.y])
+        dist = np.sum((path_poses - base_pose) ** 2, axis=1)
+        # find point in the path to which the base is closest
+        closest_pose_idx = np.argmin(dist)
+        # distance to closest point (this makes the distance estimation inaccurate because
+        # the base may have already crossed the point)
+        distance_remaining = dist[closest_pose_idx]
+        # distance of remaining points in the path
+        for idx in range(closest_pose_idx, len(self.path_plan.poses)-1):
+            distance_remaining += get_dist(self.path_plan.poses[idx].position, self.path_plan.poses[idx+1].position)
+        self.remaining_dist_pub.publish(distance_remaining)
+
+    def path_plan_cb(self, msg):
+        """
+        Receive global path plan from move base
+        """
+        self.path_plan = msg
 
     def start(self):
         """
@@ -150,7 +182,7 @@ class MoveBase(object):
         goal = move_base_msgs.msg.MoveBaseGoal()
         goal.target_pose = self.pose_in
 
-        self.move_base_action.send_goal(goal, done_cb=self.client_result_cb)
+        self.move_base_action.send_goal(goal, done_cb=self.client_result_cb, feedback_cb=self.client_feedback_cb)
 
         return "RUNNING"
 
@@ -190,6 +222,7 @@ class MoveBase(object):
         self.event = None
         self.pose_in = None
         self.client_result = None
+        self.path_plan = None
 
 
 def main():
