@@ -115,6 +115,22 @@ class PopulateResultWithCavities(smach.State):
 
 # ===============================================================================
 
+def transition_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
+
+def start_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
+# ===============================================================================
 
 def main():
     rospy.init_node("perceive_cavity_server")
@@ -220,6 +236,9 @@ def main():
             ),
             transitions={"success": "OVERALL_SUCCESS"},
         )
+
+    sm.register_transition_cb(transition_cb)
+    sm.register_start_cb(start_cb)
 
     # smach viewer
     if rospy.get_param("~viewer_enabled", False):
