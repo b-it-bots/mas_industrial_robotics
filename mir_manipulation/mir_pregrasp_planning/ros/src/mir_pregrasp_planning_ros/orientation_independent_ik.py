@@ -32,9 +32,6 @@ class OrientationIndependentIK(object):
         """
         Calculates the joint angles for the arm's end effector to reach a point.
         The orientation is sampled around the given point to find an IK solution.
-        The sampling is done in stages to reduce computational time. The stages are
-        based on existing knowledge about the placement of the arm on robot base
-        and where the arm can and cannot reach.
 
         :x: float
         :y: float
@@ -43,8 +40,27 @@ class OrientationIndependentIK(object):
         :returns: brics_actuator.JointPositions or None
 
         """
+        reachable_pose, joint_msg = self.get_reachable_pose_and_joint_msg_from_point(x, y, z, frame_id)
+        return joint_msg
+
+    def get_reachable_pose_and_joint_msg_from_point(self, x, y, z, frame_id):
+        """
+        Calculates the joint angles for the arm's end effector to reach a point.
+        The orientation is sampled around the given point to find an IK solution.
+        The sampling is done in stages to reduce computational time. The stages are
+        based on existing knowledge about the placement of the arm on robot base
+        and where the arm can and cannot reach.
+
+        :x: float
+        :y: float
+        :z: float
+        :frame_id: str
+        :returns: (geometry_msgs.msg.PoseStamped, brics_actuator.JointPositions) or None
+
+        """
         pitch_ranges = [(0.0, 0.0), (-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0), (0.0, 10.0)]
-        return self._get_joint_msg_from_point_and_pitch_ranges(x, y, z, frame_id, pitch_ranges)
+        return self._get_reachable_pose_and_joint_msg_from_point_and_pitch_ranges(
+                x, y, z, frame_id, pitch_ranges)
 
     def get_joint_msg_from_point_and_pitch(self, x, y, z, pitch, pitch_tolerance, frame_id):
         """
@@ -69,9 +85,12 @@ class OrientationIndependentIK(object):
         """
         tolerance = abs(pitch_tolerance)
         pitch_ranges = [(pitch, pitch), (pitch-tolerance, pitch), (pitch, pitch+tolerance)]
-        return self._get_joint_msg_from_point_and_pitch_ranges(x, y, z, frame_id, pitch_ranges)
+        reachable_pose, joint_msg = self._get_reachable_pose_and_joint_msg_from_point_and_pitch_ranges(
+                x, y, z, frame_id, pitch_ranges)
+        return joint_msg
 
-    def _get_joint_msg_from_point_and_pitch_ranges(self, x, y, z, frame_id, pitch_ranges):
+    def _get_reachable_pose_and_joint_msg_from_point_and_pitch_ranges(
+            self, x, y, z, frame_id, pitch_ranges):
         """
         Iteratively generate samples for each pitch_range and first the first
         pose that has an ik solution
@@ -131,7 +150,7 @@ class OrientationIndependentIK(object):
                 rospy.logdebug('Yaw : ' + str(yaw))
                 if self.debug:
                     self._pose_out_pub.publish(reachable_pose)
-                return OrientationIndependentIK.get_joint_pos_msg_from_joint_angles(joint_angles)
+                return (reachable_pose, OrientationIndependentIK.get_joint_pos_msg_from_joint_angles(joint_angles))
         return None
 
     def _get_reachable_pose_and_configuration(self, pose_samples):

@@ -54,6 +54,7 @@ import mcr_manipulation_pose_selector_ros.reachability_pose_selector
 import mcr_pose_generation_ros.pose_generator
 import mir_pregrasp_planning.cfg.PregraspPlannerParamsConfig as PregraspPlannerParamsConfig
 import mir_pregrasp_planning_ros.simple_pregrasp_planner_utils as pregrasp_planner_utils
+from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
 import rospy
 import std_msgs.msg
 from dynamic_reconfigure.server import Server
@@ -128,6 +129,8 @@ class PregraspPlannerPipeline(object):
         )
 
         self.pose_generator.set_gripper_config_matrix(self.gripper_config_matrix)
+
+        self.orientation_independent_ik = OrientationIndependentIK(debug=False)
 
         # subscribers
         rospy.Subscriber("~event_in", std_msgs.msg.String, self.event_in_cb)
@@ -308,36 +311,23 @@ class PregraspPlannerPipeline(object):
             input_pose = geometry_msgs.msg.PoseStamped()
             input_pose.header = transformed_pose.header
             input_pose.pose.position = transformed_pose.pose.position
-            zenith_ranges = [(-10.0, 10.0), (-30.0, -10.0), (-60.0, -30.0), (-90.0, -60.0)]
-            if input_pose.pose.position.y > 0.0:
-                roll_ranges = [(0.0, 30.0), (30.0, 60.0), (60.0, 90.0)]
-            else:
-                roll_ranges = [(-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0)]
-            found_solution = False
-            for zenith_range in zenith_ranges:
-                self.pose_generator.set_min_zenith(math.radians(zenith_range[0]))
-                self.pose_generator.set_max_zenith(math.radians(zenith_range[1]))
-                for roll_range in roll_ranges:
-                    self.pose_generator.set_min_roll(math.radians(roll_range[0]))
-                    self.pose_generator.set_max_roll(math.radians(roll_range[1]))
-                    pose_samples = self.pose_generator.calculate_poses_list(input_pose, number_of_fields=5)
-                    self.pose_samples_pub.publish(pose_samples)
-                    reachable_pose, joint_msg, _ = self.reachability_pose_selector.get_reachable_pose_and_configuration(pose_samples, None)
-                    if reachable_pose is not None:
-                        found_solution = True
-                        rospy.loginfo('Found solution')
-                        self.selected_pose.publish(reachable_pose)
-                        self.joint_configuration.publish(joint_msg)
-
-                        self.event_out.publish("e_success")
-                        self.reset_component_data()
-                        return 'INIT'
-            if not found_solution:
+            solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
+                    input_pose.pose.position.x, input_pose.pose.position.y,
+                    input_pose.pose.position.z, input_pose.header.frame_id)
+            if solution is None:
                 rospy.logerr("Could not find IK solution")
                 status = 'e_failure'
                 self.event_out.publish(status)
                 self.reset_component_data()
                 return 'INIT'
+            reachable_pose, joint_msg = solution
+            rospy.loginfo('Found solution')
+            self.selected_pose.publish(reachable_pose)
+            self.joint_configuration.publish(joint_msg)
+
+            self.event_out.publish("e_success")
+            self.reset_component_data()
+            return 'INIT'
 
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
             transformed_pose,
