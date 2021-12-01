@@ -7,12 +7,12 @@ import cv2 as cv
 import os
 
 TEMPLATE_IMAGE_NAME = 'not_grasped.jpg'
-# IMAGE_NAME = 'not_grasped.jpg'
+IMAGE_NAME = 'not_grasped.jpg'
 # IMAGE_NAME = 'grasped_f20b.jpg'
 # IMAGE_NAME = 'grasped_bearing.jpg'
 # IMAGE_NAME = 'grasped_axis.jpg'
 # IMAGE_NAME = 'grasped_axis_2.jpg'
-IMAGE_NAME = 'grasped_f20g.jpg'
+# IMAGE_NAME = 'grasped_f20g.jpg'
 
 CROP_X = 440
 CROP_Y = 100
@@ -27,6 +27,14 @@ BG_REMOVAL_POLYGON = np.array([
         [42, CROP_HEIGHT],
         [0, CROP_HEIGHT]
 ])
+HMIN = 0
+HMAX = 60
+SMIN = 50
+SMAX = 255
+VMIN = 30
+VMAX = 255
+
+use_hsv = True
 
 def get_image(image_name) :
     code_dir = os.path.abspath(os.path.dirname(__file__))
@@ -80,25 +88,94 @@ def process(raw_img, show_images=False):
     # cv.imshow('Canny Edge', edges)
     return blur_median_img
 
+
+def process_hsv(raw_img, show_images=False):
+    # cv.imshow('raw', raw_img)
+    hsv_raw_img = cv.cvtColor(raw_img, cv.COLOR_BGR2HSV)
+    # cv.imshow('hsv_raw_img', hsv_raw_img)
+    cropped_img = hsv_raw_img[CROP_Y:CROP_Y+CROP_HEIGHT, CROP_X:CROP_X+CROP_WIDTH]
+    if show_images:
+        cropped_rgb_img = cv.cvtColor(cropped_img, cv.COLOR_HSV2BGR)
+        cv.imshow('cropped', cropped_rgb_img)
+
+    lower = np.array([HMIN, SMIN, VMIN], np.uint8)
+    upper = np.array([HMAX, SMAX, VMAX], np.uint8)
+    masked_img = cv.inRange(cropped_img, lower, upper)
+    if show_images:
+        cv.imshow('masked', masked_img)
+
+    return masked_img
+
 def main():
     raw_test_img = get_image(IMAGE_NAME)
     cv.imshow('test_img', raw_test_img)
-    processed_test_img = process(raw_test_img, show_images=False)
+    # processed_test_img = process(raw_test_img, show_images=False)
+    processed_test_img = process_hsv(raw_test_img, show_images=True)
     cv.imshow('processed_test_img', processed_test_img)
 
+    bordersize = 20
+    processed_test_border_img = cv.copyMakeBorder(
+        processed_test_img, top=bordersize, bottom=bordersize, left=bordersize,
+        right=bordersize, borderType=cv.BORDER_CONSTANT, value=0)
+    cv.imshow('border', processed_test_border_img)
+
     raw_template_img = get_image(TEMPLATE_IMAGE_NAME)
-    processed_template_img = process(raw_template_img, show_images=False)
+    # processed_template_img = process(raw_template_img, show_images=True)
+    processed_template_img = process_hsv(raw_template_img, show_images=False)
     cv.imshow('processed_template_img', processed_template_img)
 
-    score_img = cv.matchTemplate(processed_test_img, processed_template_img, cv.TM_CCOEFF_NORMED)
+    score_img = cv.matchTemplate(processed_test_border_img, processed_template_img, cv.TM_CCOEFF_NORMED)
     _, max_value, _, _ = cv.minMaxLoc(score_img);
-    print("Matched:", round(max_value*100, 2), "%")
+    print("Max Matched:", round(max_value*100, 2), "%")
+    cv.imshow('score_img', score_img)
+    print(score_img.shape)
 
     print("Press 'q' to quit")
     while True:
-        key = cv.waitKey(10)
+        key = cv.waitKey(10) & 0xFFFF
         if key == ord("q"):
             break
 
+    cv.destroyAllWindows()
+
+def nothing(x): # for hsv_slider function
+    pass
+
+def hsv_slider():
+    raw_template_img = get_image(TEMPLATE_IMAGE_NAME)
+    hsv_img = cv.cvtColor(raw_template_img, cv.COLOR_BGR2HSV)
+
+    cv.namedWindow("image")
+    cv.createTrackbar("Hmin", "image", 0, 180, nothing)
+    cv.createTrackbar("Hmax", "image", 0, 180, nothing)
+    cv.createTrackbar("Smin", "image", 0, 255, nothing)
+    cv.createTrackbar("Smax", "image", 0, 255, nothing)
+    cv.createTrackbar("Vmin", "image", 0, 255, nothing)
+    cv.createTrackbar("Vmax", "image", 0, 255, nothing)
+
+    print("Press 'q' to quit")
+    while True:
+        key = cv.waitKey(10) & 0xFFFF
+        if key == ord("q"):
+            break
+
+        Hmin = cv.getTrackbarPos("Hmin", "image")
+        Hmax = cv.getTrackbarPos("Hmax", "image")
+        Smin = cv.getTrackbarPos("Smin", "image")
+        Smax = cv.getTrackbarPos("Smax", "image")
+        Vmin = cv.getTrackbarPos("Vmin", "image")
+        Vmax = cv.getTrackbarPos("Vmax", "image")
+
+        lower = np.array([Hmin, Smin, Vmin], np.uint8)
+        upper = np.array([Hmax, Smax, Vmax], np.uint8)
+        mask = cv.inRange(hsv_img, lower, upper)
+        masked_img = cv.bitwise_and(raw_template_img, raw_template_img, mask=mask)
+
+        cv.imshow("image", masked_img)
+
+    cv.destroyAllWindows()
+    pass
+
 if __name__ == "__main__":
     main()
+    # hsv_slider()
