@@ -8,11 +8,22 @@ import os
 
 TEMPLATE_IMAGE_NAME = 'not_grasped.jpg'
 # IMAGE_NAME = 'not_grasped.jpg'
-# IMAGE_NAME = 'grasped_f20b.jpg'
-IMAGE_NAME = 'grasped_bearing.jpg'
-# IMAGE_NAME = 'grasped_axis.jpg'
+IMAGE_NAME = 'grasped_axis.jpg'
 # IMAGE_NAME = 'grasped_axis_2.jpg'
+# IMAGE_NAME = 'grasped_bearing.jpg'
+# IMAGE_NAME = 'grasped_distance_tube_back_up.jpg'
+# IMAGE_NAME = 'grasped_distance_tube_stage.jpg'
+# IMAGE_NAME = 'grasped_distance_tube_stage_2.jpg'
+# IMAGE_NAME = 'grasped_f20b.jpg'
 # IMAGE_NAME = 'grasped_f20g.jpg'
+# IMAGE_NAME = 'grasped_f20g_back_up.jpg'
+# IMAGE_NAME = 'grasped_m20_light.jpg'
+# IMAGE_NAME = 'grasped_plate_stage.jpg'
+# TEMPLATE_IMAGE_NAME = 'not_grasped_back_up.jpg'
+# IMAGE_NAME = 'not_grasped_back_up.jpg'
+# TEMPLATE_IMAGE_NAME = 'not_grasped_light.jpg'
+# TEMPLATE_IMAGE_NAME = 'not_grasped_stage.jpg'
+# IMAGE_NAME = 'open_stage_blue.jpg'
 
 CROP_X = 440
 CROP_Y = 100
@@ -34,7 +45,7 @@ SMAX = 255
 VMIN = 30
 VMAX = 255
 
-use_hsv_process = False
+use_hsv_process = True
 
 def get_image(image_name) :
     code_dir = os.path.abspath(os.path.dirname(__file__))
@@ -51,10 +62,14 @@ def process(raw_img, show_images=False):
     if show_images:
         cv.imshow('cropped', cropped_img)
 
+    # eq_hist_img = cv.equalizeHist(cropped_img)
+    # if show_images:
+    #     cv.imshow('eq_hist', eq_hist_img)
     # thresholding
     # mean_thr_img = cv.adaptiveThreshold(cropped_img, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 15, 2)
     # cv.imshow('mean_threshold', mean_thr_img)
     adaptive_thr_img = cv.adaptiveThreshold(cropped_img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 17, 2)
+    # adaptive_thr_img = cv.adaptiveThreshold(eq_hist_img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 17, 5)
     if show_images:
         cv.imshow('adaptive_threshold', adaptive_thr_img)
 
@@ -78,37 +93,54 @@ def process(raw_img, show_images=False):
     # cv.imshow('opening', opening_img)
 
     # Sobel Edge Detection
-    # sobelxy = cv.Sobel(src=img_blur, ddepth=cv.CV_64F, dx=1, dy=1, ksize=7) # Combined X and Y Sobel Edge Detection
+    # sobelxy = cv.Sobel(src=adaptive_thr_img, ddepth=cv.CV_64F, dx=1, dy=1, ksize=7) # Combined X and Y Sobel Edge Detection
     # cv.imshow('Sobel X Y using Sobel() function', sobelxy)
      
     # Canny Edge Detection
-    # edges = cv.Canny(image=img_blur, threshold1=100, threshold2=200) # Canny Edge Detection
+    # edges = cv.Canny(image=adaptive_thr_img, threshold1=220, threshold2=660) # Canny Edge Detection
     # cv.imshow('Canny Edge', edges)
     return blur_median_img
 
 
 def process_hsv(raw_img, show_images=False):
     # cv.imshow('raw', raw_img)
-    hsv_raw_img = cv.cvtColor(raw_img, cv.COLOR_BGR2HSV)
     # cv.imshow('hsv_raw_img', hsv_raw_img)
-    cropped_img = hsv_raw_img[CROP_Y:CROP_Y+CROP_HEIGHT, CROP_X:CROP_X+CROP_WIDTH]
+    cropped_img = raw_img[CROP_Y:CROP_Y+CROP_HEIGHT, CROP_X:CROP_X+CROP_WIDTH]
     if show_images:
-        cropped_rgb_img = cv.cvtColor(cropped_img, cv.COLOR_HSV2BGR)
-        cv.imshow('cropped', cropped_rgb_img)
+        cv.imshow('cropped', cropped_img)
 
+    # convert RGB to YUV format
+    # img_yuv = cv.cvtColor(cropped_img, cv.COLOR_BGR2YUV)
+    img_yuv = cv.cvtColor(cropped_img, cv.COLOR_BGR2YCrCb)
+    # equalize the histogram of the Y channel
+    img_yuv[:,:,0] = cv.equalizeHist(img_yuv[:,:,0])
+    # convert the YUV image back to RGB format
+    # eq_hist_img = cv.cvtColor(img_yuv, cv.COLOR_YUV2BGR)
+    eq_hist_img = cv.cvtColor(img_yuv, cv.COLOR_YCrCb2BGR)
+
+    if show_images:
+        cv.imshow('eq_hist', eq_hist_img)
+
+    hsv_cropped_img = cv.cvtColor(eq_hist_img, cv.COLOR_BGR2HSV)
+    # hsv_cropped_img = cv.cvtColor(cropped_img, cv.COLOR_BGR2HSV)
     lower = np.array([HMIN, SMIN, VMIN], np.uint8)
     upper = np.array([HMAX, SMAX, VMAX], np.uint8)
-    masked_img = cv.inRange(cropped_img, lower, upper)
+    masked_img = cv.inRange(hsv_cropped_img, lower, upper)
 
-    return masked_img
+    if show_images:
+        cv.imshow('mask', masked_img)
+
+    blur_median_img = cv.medianBlur(masked_img, 5)
+
+    return blur_median_img
 
 def main():
     raw_test_img = get_image(IMAGE_NAME)
-    cv.imshow('test_img', raw_test_img)
+    # cv.imshow('test_img', raw_test_img)
     if use_hsv_process:
-        processed_test_img = process_hsv(raw_test_img, show_images=False)
+        processed_test_img = process_hsv(raw_test_img, show_images=True)
     else:
-        processed_test_img = process(raw_test_img, show_images=False)
+        processed_test_img = process(raw_test_img, show_images=True)
     cv.imshow('processed_test_img', processed_test_img)
 
     bordersize = 20
@@ -145,12 +177,12 @@ def hsv_slider():
     hsv_img = cv.cvtColor(raw_template_img, cv.COLOR_BGR2HSV)
 
     cv.namedWindow("image")
-    cv.createTrackbar("Hmin", "image", 0, 180, nothing)
-    cv.createTrackbar("Hmax", "image", 0, 180, nothing)
-    cv.createTrackbar("Smin", "image", 0, 255, nothing)
-    cv.createTrackbar("Smax", "image", 0, 255, nothing)
-    cv.createTrackbar("Vmin", "image", 0, 255, nothing)
-    cv.createTrackbar("Vmax", "image", 0, 255, nothing)
+    cv.createTrackbar("Hmin", "image", HMIN, 180, nothing)
+    cv.createTrackbar("Hmax", "image", HMAX, 180, nothing)
+    cv.createTrackbar("Smin", "image", SMIN, 255, nothing)
+    cv.createTrackbar("Smax", "image", SMAX, 255, nothing)
+    cv.createTrackbar("Vmin", "image", VMIN, 255, nothing)
+    cv.createTrackbar("Vmax", "image", VMAX, 255, nothing)
 
     print("Press 'q' to quit")
     while True:

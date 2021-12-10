@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import numpy as np
 import rospy
+import yaml
 import os
 
 from sensor_msgs.msg import Image
@@ -13,14 +14,38 @@ from cv_bridge import CvBridge, CvBridgeError
 
 class GraspVerifier(object):
     def __init__(self):
+        self._process_method_dict = {
+                "thr": self._process_img_thr,
+                "hsv": self._process_img_hsv
+                }
         # ros parameters
         self._debug = rospy.get_param("~debug", False)
         template_img_path = rospy.get_param("~template_img_path", None)
         self._process_method = rospy.get_param("~process_method", "thr") # can be "thr" or "hsv"
+        config_file_path = rospy.get_param("~config_file_path", None)
+        template_images_dir = rospy.get_param("~template_images_dir", None)
+
+        if template_images_dir is None:
+            rospy.logfatal("template_images_dir is empty")
+            rospy.signal_shutdown("template_images_dir is empty")
+            return
+        if not os.path.exists(template_images_dir):
+            rospy.logfatal("template_images_dir: " + template_images_dir + " does not exist")
+            rospy.signal_shutdown("template_images_dir: " + template_images_dir + " does not exist")
+            return
+
+        if config_file_path is None:
+            rospy.logfatal("config_file_path is empty")
+            rospy.signal_shutdown("config_file_path is empty")
+            return
+        if not os.path.exists(config_file_path):
+            rospy.logfatal("config_file_path: " + config_file_path + " does not exist")
+            rospy.signal_shutdown("config_file_path: " + config_file_path + " does not exist")
+            return
 
         # class variables
         self._bridge = CvBridge()
-        self._listening = True
+        self._listening = False
         self._crop_bbox = [440, 100, 170, 280] # x, y, width, height
         self._bg_polygon = np.array([ [0, 0], [40, 0], [5, 90], [10, 200],
                                       [42, self._crop_bbox[3]],
@@ -41,6 +66,13 @@ class GraspVerifier(object):
             self._process_img = self._process_img_thr
         elif self._process_method == "hsv":
             self._process_img = self._process_img_hsv
+
+        config_read_success = self._read_config_file(config_file_path, template_images_dir)
+        if not config_read_success:
+            rospy.logfatal("config_file_path: " + config_file_path + " not as expected.")
+            rospy.signal_shutdown("config_file_path: " + config_file_path + " not as expected")
+            return
+
 
         # load template image
         if template_img_path is None:
@@ -165,6 +197,51 @@ class GraspVerifier(object):
         upper = np.array([self._hmax, self._smax, self._vmax], np.uint8)
         masked_img = cv.inRange(cropped_img, lower, upper)
         return masked_img
+
+    def _read_config_file(self, config_file_path, template_images_dir):
+        with open(config_file_path, "r") as file_obj:
+            data = yaml.safe_load(file_obj)
+        if not isinstance(data, dict):
+            rospy.logerr("Expected dict object while reading config file")
+            return False
+        if "template_matching_params" not in data:
+            rospy.logerr("template_matching_params not found in config file")
+            return False
+        tm_params = data["template_matching_params"]
+        if not isinstance(tm_params, list):
+            rospy.logerr("Expected template_matching_params to be of list type")
+            return False
+        total_weight = 0.0
+        for i, tm_param in enumerate(tm_params):
+            if "img_name" not in tm_param\
+                    or "process_method" not in tm_param\
+                    or "weight" not in tm_param:
+                rospy.logerr("Expected img_name, process_method and weight"\
+                             + " for each template_matching_params item")
+                return False
+            template_img_path = os.path.join(template_images_dir, tm_param["img_name"])
+            if not os.path.exists(template_img_path):
+                rospy.logerr("template_img_path: " + template_img_path + " does not exist")
+                return False
+            template_img_raw = cv.imread(template_img_path)
+            process_method = tm_param["process_method"]
+            if process_method not in self._process_method_dict:
+                rospy.logerr("Unknown process_method " + process_method)
+                return False
+            template_img = self._process_method_dict[process_method](template_img_raw)
+            tm_param["template_img"] = template_img
+            weight = tm_param["weight"]
+            if not isinstance(weight, float):
+                rospy.logerr("Expected float value for weight, got " + str(type(weight)))
+                return False
+            total_weight += weight
+
+        if total_weight != 1.0:
+            rospy.logerr("Total weight for template images does not add up to 1")
+            return False
+
+        self._tm_params = tm_params
+        return True
 
 if __name__ == "__main__":
     rospy.init_node("grasp_verifier")
