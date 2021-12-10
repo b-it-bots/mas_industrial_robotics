@@ -77,17 +77,6 @@
    </joint>
    <!-- we create a fixed link from arm_cam3d_camera_link to
         arm_cam3d_camera_color_optical_frame. See issue -->
-   <link name="fixed_camera_link">
-       <visual>
-           <geometry>
-               <box size="0.0000001 0.000001 0.000001"/>
-           </geometry>
-       </visual>
-       <collision>
-           <geometry>
-               <box size="0.0000001 0.000001 0.000001"/>
-           </geometry>
-       </collision>
-   </link>
+   <link name="fixed_camera_link"/>
 
 </robot>
