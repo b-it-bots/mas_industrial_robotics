@@ -1,8 +1,15 @@
 <?xml version="1.0"?>
 <launch>
 
+  <arg name="use_arm_traj_ctrl" default="true"/>
+
   <!-- launch arm and gripper controller -->
-  <include file="$(find youbot_gazebo_control)/launch/arm_controller.launch" />
+  <group if="$(arg use_arm_traj_ctrl)">
+    <include file="$(find youbot_gazebo_control)/launch/arm_controller.launch" />
+  </group>
+  <group unless="$(arg use_arm_traj_ctrl)">
+    <include file="$(find youbot_gazebo_control)/launch/vel_arm_controller.launch" />
+  </group>
 
   <include file="$(find youbot_gazebo_control)/launch/gripper_controller.launch" />
   <!-- <include file="$(find mir_arm_cartesian_control)/ros/launch/arm_cartesian_control_youbot.launch" /> -->

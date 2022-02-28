@@ -50,7 +50,6 @@ class CheckIfBaseCentered(smach.State):
             robot_pose = self.get_robot_pose()
             xdiff = target_pose.pose.position.x - robot_pose[0]
             ydiff = target_pose.pose.position.y - robot_pose[1]
-            print('xydiff %.2f %.2f ' % (xdiff, ydiff))
             if (xdiff > self.distance_threshold or ydiff > self.distance_threshold):
                 return 'no'
             else:
@@ -202,6 +201,23 @@ class GetMotionType(smach.State):
 
 # ===============================================================================
 
+def transition_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
+
+def start_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
+# ===============================================================================
+
 
 def main():
     rospy.init_node("perceive_location_server")
@@ -233,19 +249,19 @@ def main():
     with sm:
         # approach to platform
         smach.StateMachine.add(
-            "SETUP", Setup(), transitions={"succeeded": "CHECK_IF_BASE_CENTERED"},
+            "SETUP", Setup(), transitions={"succeeded": "CHECK_IF_BASE_IS_AT_LOCATION"},
         )
 
         smach.StateMachine.add(
-            "CHECK_IF_BASE_CENTERED",
+            "CHECK_IF_BASE_IS_AT_LOCATION",
             CheckIfBaseCentered(),
             transitions={"yes": "PUBLISH_REFERENCE_FRAME",
                          "unavailable": "PUBLISH_REFERENCE_FRAME",
-                         "no" : "MOVE_BASE_TO_CENTER"},
+                         "no" : "MOVE_BASE_TO_LOCATION"},
         )
 
         smach.StateMachine.add(
-            "MOVE_BASE_TO_CENTER",
+            "MOVE_BASE_TO_LOCATION",
             gas.move_base(None),
             transitions={"success": "PUBLISH_REFERENCE_FRAME",
                          "failed" : "PUBLISH_REFERENCE_FRAME"},
@@ -255,12 +271,12 @@ def main():
         smach.StateMachine.add(
             "PUBLISH_REFERENCE_FRAME",
             gbs.send_event([("/static_transform_publisher_node/event_in", "e_start")]),
-            transitions={"success": "SET_DBC_PARAMS"},
+            transitions={"success": "SET_DIRECT_BASE_CONTROLLER_PARAMETERS"},
         )
 
         # publish a static frame which will be used as reference for perceived objs
         smach.StateMachine.add(
-            "SET_DBC_PARAMS",
+            "SET_DIRECT_BASE_CONTROLLER_PARAMETERS",
             gbs.set_named_config("dbc_pick_object"),
             transitions={
                 "success": "START_OBJECT_LIST_MERGER",
@@ -292,22 +308,22 @@ def main():
             "GET_MOTION_TYPE",
             GetMotionType(),
             transitions={
-                "base_motion": "SET_APPROPRIATE_BASE_POSE",
-                "arm_motion": "SET_APPROPRIATE_ARM_POSE",
+                "base_motion": "SET_NEXT_BASE_POSE",
+                "arm_motion": "SET_NEXT_ARM_POSE",
             },
         )
 
         smach.StateMachine.add(
-            "SET_APPROPRIATE_BASE_POSE",
+            "SET_NEXT_BASE_POSE",
             SetupMoveBaseWithDBC(),
             transitions={
-                "pose_set": "MOVE_BASE_WITH_DBC",
+                "pose_set": "MOVE_BASE_WITH_DIRECT_BASE_CONTROLLER",
                 "tried_all": "POPULATE_RESULT_WITH_OBJECTS",
             },
         )
 
         smach.StateMachine.add(
-            "MOVE_BASE_WITH_DBC",
+            "MOVE_BASE_WITH_DIRECT_BASE_CONTROLLER",
             gbs.send_and_wait_events_combined(
                 event_in_list=[
                     (
@@ -325,28 +341,28 @@ def main():
                 timeout_duration=10,
             ),
             transitions={
-                "success": "MOVE_ARM",
-                "timeout": "STOP_DBC",
-                "failure": "STOP_DBC",
+                "success": "MOVE_ARM_TO_PERCEIVE_POSE",
+                "timeout": "STOP_DIRECT_BASE_CONTROLLER",
+                "failure": "STOP_DIRECT_BASE_CONTROLLER",
             },
         )
 
         smach.StateMachine.add(
-            "SET_APPROPRIATE_ARM_POSE",
+            "SET_NEXT_ARM_POSE",
             SetupMoveArm(),
             transitions={
-                "pose_set": "MOVE_ARM",
+                "pose_set": "MOVE_ARM_TO_PERCEIVE_POSE",
                 "tried_all": "STOP_OBJECT_LIST_MERGER",
             },
         )
 
         # move arm to appropriate position
         smach.StateMachine.add(
-            "MOVE_ARM",
+            "MOVE_ARM_TO_PERCEIVE_POSE",
             gms.move_arm_and_gripper("open"),
             transitions={
                 "succeeded": "WAIT_FOR_ARM_TO_STABILIZE",
-                "failed": "MOVE_ARM",
+                "failed": "MOVE_ARM_TO_PERCEIVE_POSE",
             },
         )
 
@@ -479,7 +495,7 @@ def main():
         )
 
         smach.StateMachine.add(
-            "STOP_DBC",
+            "STOP_DIRECT_BASE_CONTROLLER",
             gbs.send_and_wait_events_combined(
                 event_in_list=[
                     (
@@ -502,6 +518,9 @@ def main():
                 "failure": "OVERALL_FAILED",
             },
         )
+
+    sm.register_transition_cb(transition_cb)
+    sm.register_start_cb(start_cb)
 
     # smach viewer
     if rospy.get_param("~viewer_enabled", False):

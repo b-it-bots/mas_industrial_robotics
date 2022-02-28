@@ -112,3 +112,8 @@
     local-name: atwork-commander
     uri: https://github.com/robocup-at-work/atwork-commander.git
     version: master
+
+- git:
+    local-name: mir_perception_models
+    uri: https://github.com/b-it-bots/mir_perception_models.git
+    version: main

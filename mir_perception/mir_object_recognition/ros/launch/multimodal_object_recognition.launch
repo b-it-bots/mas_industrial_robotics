@@ -4,6 +4,8 @@
   <arg name="input_pointcloud_topic" default="/arm_cam3d/depth_registered/points" />
   <arg name="input_image_topic" default="/arm_cam3d/rgb/image_raw" />
   <arg name="target_frame" default="base_link" />
+  <!-- for intel realsense d435, use fixed_camera_link as pointcloud_source_frame_id (bug from robocup 2021) -->
+  <arg name="pointcloud_source_frame_id" default="arm_cam3d_rgb_optical_frame" />
   <arg name="debug_mode" default="true" />
   <arg name="scene_segmentation_config_file" default="$(find mir_object_recognition)/ros/config/scene_segmentation_constraints.yaml" />
   <arg name="object_info" default="$(find mir_object_recognition)/ros/config/objects.xml" />
@@ -18,6 +20,7 @@
       <remap from="~input_image_topic" to="$(arg input_image_topic)" />
       <remap from="~output/object_list" to="/mcr_perception/object_detector/object_list"/>
       <param name="target_frame_id" value="$(arg target_frame)" type="str" />
+      <param name="pointcloud_source_frame_id" value="$(arg pointcloud_source_frame_id)" type="str" />
       <param name="debug_mode" value="$(arg debug_mode)" type="bool" />
       <param name="dataset_collection" value="true" />
       <param name="logdir" value="/tmp/" />

@@ -54,6 +54,7 @@ import mcr_manipulation_pose_selector_ros.reachability_pose_selector
 import mcr_pose_generation_ros.pose_generator
 import mir_pregrasp_planning.cfg.PregraspPlannerParamsConfig as PregraspPlannerParamsConfig
 import mir_pregrasp_planning_ros.simple_pregrasp_planner_utils as pregrasp_planner_utils
+from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
 import rospy
 import std_msgs.msg
 from dynamic_reconfigure.server import Server
@@ -129,6 +130,8 @@ class PregraspPlannerPipeline(object):
 
         self.pose_generator.set_gripper_config_matrix(self.gripper_config_matrix)
 
+        self.orientation_independent_ik = OrientationIndependentIK(debug=False)
+
         # subscribers
         rospy.Subscriber("~event_in", std_msgs.msg.String, self.event_in_cb)
         rospy.Subscriber("~pose_in", geometry_msgs.msg.PoseStamped, self.pose_cb)
@@ -193,6 +196,7 @@ class PregraspPlannerPipeline(object):
             config.linear_offset_z,
         ]
         self.generate_pregrasp_waypoint = config.generate_pregrasp_waypoint
+        self.ignore_orientation = config.ignore_orientation
         self.joint_offset = [
             config.joint_1_offset,
             config.joint_2_offset,
@@ -302,6 +306,28 @@ class PregraspPlannerPipeline(object):
             self.event_out.publish(status)
             self.reset_component_data()
             return "INIT"
+
+        if self.ignore_orientation:
+            input_pose = geometry_msgs.msg.PoseStamped()
+            input_pose.header = transformed_pose.header
+            input_pose.pose.position = transformed_pose.pose.position
+            solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
+                    input_pose.pose.position.x, input_pose.pose.position.y,
+                    input_pose.pose.position.z, input_pose.header.frame_id)
+            if solution is None:
+                rospy.logerr("Could not find IK solution")
+                status = 'e_failure'
+                self.event_out.publish(status)
+                self.reset_component_data()
+                return 'INIT'
+            reachable_pose, joint_msg = solution
+            rospy.loginfo('Found solution')
+            self.selected_pose.publish(reachable_pose)
+            self.joint_configuration.publish(joint_msg)
+
+            self.event_out.publish("e_success")
+            self.reset_component_data()
+            return 'INIT'
 
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
             transformed_pose,

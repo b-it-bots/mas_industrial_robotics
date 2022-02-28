@@ -20,6 +20,7 @@ linear_offset_x: 0.0
 linear_offset_y: 0.0
 linear_offset_z: 0.0
 generate_pregrasp_waypoint: True
+ignore_orientation: False
 joint_1_offset: 0.0
 joint_2_offset: -0.6
 joint_3_offset: 0.3
@@ -32,6 +33,7 @@ joint_4_offset_side_grasp: -0.367
 joint_5_offset_side_grasp: 0.0
 rotation_range_min: 270.0
 rotation_range_max: 90.0
+
 loop_rate: 10.0
 move_group: move_group
 arm: arm_1

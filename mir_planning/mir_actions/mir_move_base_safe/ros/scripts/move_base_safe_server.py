@@ -7,6 +7,7 @@ import smach
 import smach_ros
 from actionlib import SimpleActionClient
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import String
 from mir_actions.utils import Utils
 from mir_planning_msgs.msg import (
     GenericExecuteAction,
@@ -77,7 +78,7 @@ class CheckDontBeSafe(smach.State):
 # ===============================================================================
 
 
-class SetupMoveArmAfterMoveBase(smach.State):
+class PrepareArmForNextAction(smach.State):
     def __init__(self):
         smach.State.__init__(
             self,
@@ -159,7 +160,72 @@ class SetupMoveBase(smach.State):
         else:
             return "failed"
 
+# ===============================================================================
 
+class StartMoveBase(smach.State):
+    def __init__(self,
+            event_in_topic='/move_base_wrapper/event_in',
+            event_out_topic='/move_base_wrapper/event_out',
+            timeout_duration=50):
+        smach.State.__init__(
+            self,
+            outcomes=["success", "failure", "timeout", "stopped", "preempted"]
+        )
+        self.pub = rospy.Publisher(event_in_topic, String, queue_size=1)
+        self.sub = rospy.Subscriber(event_out_topic, String, self.event_cb)
+        self.event = None
+        self.timeout_duration = rospy.Duration.from_sec(timeout_duration)
+        rospy.sleep(0.1)
+
+    def execute(self, userdata):
+        if self.preempt_requested():
+            rospy.logwarn("preemption requested!!!")
+            self.recall_preempt()  # reset preemption flag for next request
+            return "preempted"
+        self.event = None
+        self.pub.publish('e_start')
+        start_time = rospy.Time.now()
+        while (rospy.Time.now() - start_time < self.timeout_duration):
+            if self.preempt_requested():
+                rospy.logwarn("preemption requested!!!")
+                self.recall_preempt()  # reset preemption flag for next request
+                self.pub.publish('e_stop')
+                return "preempted"
+            if self.event is not None:
+                if self.event == 'e_success':
+                    return 'success'
+                elif self.event == 'e_failure':
+                    return 'failure'
+                elif self.event == 'e_stopped':
+                    return 'stopped'
+            rospy.sleep(0.01)
+        return 'timeout'
+
+    def event_cb(self, msg):
+        self.event = msg.data
+
+
+# ===============================================================================
+
+def transition_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+    publisher = args[2]
+    publisher.publish(sm_state)
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
+
+def start_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+    publisher = args[2]
+    publisher.publish(sm_state)
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
 # ===============================================================================
 
 
@@ -173,7 +239,7 @@ def main():
     )
     with sm:
         smach.StateMachine.add(
-            "CHECK_DONT_BE_SAFE",
+            "CHECK_IF_BARRIER_TAPE_ENABLED",
             CheckDontBeSafe(),
             transitions={
                 "safe": "START_BARRIER_TAPE_DETECTION",
@@ -186,62 +252,57 @@ def main():
             gbs.send_event(
                 [("/mir_perception/barrier_tape_detection/event_in", "e_start",)]
             ),
-            transitions={"success": "MOVE_ARM"},
+            transitions={"success": "MOVE_ARM_TO_DETECT_BARRIER_TAPE"},
         )
 
         smach.StateMachine.add(
-            "MOVE_ARM",
+            "MOVE_ARM_TO_DETECT_BARRIER_TAPE",
             gms.move_arm("barrier_tape", blocking=False),
-            transitions={"succeeded": "SETUP_MOVE_BASE", "failed": "MOVE_ARM"},
+            transitions={"succeeded": "SETUP_MOVE_BASE", 
+                         "failed": "MOVE_ARM_TO_DETECT_BARRIER_TAPE"},
         )
         # get pose from action lib as string, convert to pose stamped and publish
         smach.StateMachine.add(
             "SETUP_MOVE_BASE",
             SetupMoveBase("/move_base_wrapper/pose_in"),
             transitions={
-                "succeeded": "SET_DBC_PARAMS",
+                "succeeded": "SET_DIRECT_BASE_CONTROLLER_PARAMETERS",
                 "failed": "STOP_BARRIER_TAPE_DETECTION_WITH_FAILURE",
                 "preempted": "OVERALL_PREEMPTED",
             },
         )
 
         smach.StateMachine.add(
-            "SET_DBC_PARAMS",
+            "SET_DIRECT_BASE_CONTROLLER_PARAMETERS",
             gbs.set_named_config("dbc_move_base"),
             transitions={
-                "success": "MOVE_BASE",
+                "success": "START_MOVE_BASE",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
         )
 
-        # send event_in to move base to a pose
-        # add events to mir_look at and mcr_converter
         smach.StateMachine.add(
-            "MOVE_BASE",
-            gbs.send_and_wait_events_combined(
-                event_in_list=[
-                    ("/move_base_wrapper/event_in", "e_start"),
-                    (
-                        "/mcr_common/twist_to_motion_direction_conversion/event_in",
-                        "e_start",
-                    ),
-                    ("/mir_manipulation/look_at_point/event_in", "e_start"),
-                ],
-                event_out_list=[("/move_base_wrapper/event_out", "e_success", True)],
+            "START_MOVE_BASE",
+            StartMoveBase(
+                event_in_topic="/move_base_wrapper/event_in",
+                event_out_topic="/move_base_wrapper/event_out",
                 timeout_duration=50,
             ),
             transitions={
-                "success": "SETUP_MOVE_ARM_AFTER_MOVE_BASE",
+                "success": "PREPARE_ARM_FOR_NEXT_ACTION",
                 "timeout": "RESET_BARRIER_TAPE",
                 "failure": "RESET_BARRIER_TAPE",
+                "stopped": "STOP_BARRIER_TAPE_DETECTION_WITH_FAILURE",
+                "preempted": "OVERALL_PREEMPTED",
             },
         )
 
         smach.StateMachine.add(
             "RESET_BARRIER_TAPE",
             gbs.send_event(
-                [("/mir_perception/barrier_tape_detection/event_in", "e_reset",)]
+                [("/mir_perception/barrier_tape_detection/event_in", "e_reset",),
+                ("/move_base_wrapper/event_in", "e_stop",)]
             ),
             transitions={"success": "SETUP_MOVE_BASE_AGAIN"},
         )
@@ -250,28 +311,22 @@ def main():
             "SETUP_MOVE_BASE_AGAIN",
             SetupMoveBase("/move_base_wrapper/pose_in"),
             transitions={
-                "succeeded": "MOVE_BASE_AGAIN",
+                "succeeded": "START_MOVE_BASE_AGAIN",
                 "failed": "STOP_BARRIER_TAPE_DETECTION_WITH_FAILURE",
                 "preempted": "OVERALL_PREEMPTED",
             },
         )
 
         smach.StateMachine.add(
-            "MOVE_BASE_AGAIN",
+            "START_MOVE_BASE_AGAIN",
             gbs.send_and_wait_events_combined(
                 event_in_list=[
-                    ("/move_base_wrapper/event_in", "e_start"),
-                    (
-                        "/mcr_common/twist_to_motion_direction_conversion/event_in",
-                        "e_start",
-                    ),
-                    ("/mir_manipulation/look_at_point/event_in", "e_start"),
-                ],
+                    ("/move_base_wrapper/event_in", "e_start")],
                 event_out_list=[("/move_base_wrapper/event_out", "e_success", True)],
                 timeout_duration=50,
             ),
             transitions={
-                "success": "SETUP_MOVE_ARM_AFTER_MOVE_BASE",
+                "success": "PREPARE_ARM_FOR_NEXT_ACTION",
                 "timeout": "STOP_BARRIER_TAPE_DETECTION_WITH_FAILURE",
                 "failure": "STOP_BARRIER_TAPE_DETECTION_WITH_FAILURE",
             },
@@ -279,32 +334,32 @@ def main():
 
         # send arm to a position depending on next action
         smach.StateMachine.add(
-            "SETUP_MOVE_ARM_AFTER_MOVE_BASE",
-            SetupMoveArmAfterMoveBase(),
+            "PREPARE_ARM_FOR_NEXT_ACTION",
+            PrepareArmForNextAction(),
             transitions={
-                "succeeded": "MOVE_ARM_AFTER_MOVE_BASE",
-                "skipped": "ADJUST_BASE",
-                "failed": "SETUP_MOVE_ARM_AFTER_MOVE_BASE",
+                "succeeded": "MOVE_ARM_FOR_NEXT_ACTION",
+                "skipped": "REACH_DESTINATION_PRECISELY",
+                "failed": "PREPARE_ARM_FOR_NEXT_ACTION",
             },
         )
 
         smach.StateMachine.add(
-            "MOVE_ARM_AFTER_MOVE_BASE",
+            "MOVE_ARM_FOR_NEXT_ACTION",
             gms.move_arm(blocking=False),
-            transitions={"succeeded": "ADJUST_BASE", "failed": "ADJUST_BASE"},
+            transitions={"succeeded": "REACH_DESTINATION_PRECISELY", 
+                         "failed": "REACH_DESTINATION_PRECISELY"},
         )
 
         # call direct base controller to fine adjust the base to the final desired pose
         # (navigation tolerance is set to a wide tolerance)
         smach.StateMachine.add(
-            "ADJUST_BASE",
+            "REACH_DESTINATION_PRECISELY",
             gbs.send_and_wait_events_combined(
                 event_in_list=[
                     (
                         "/mcr_navigation/direct_base_controller/coordinator/event_in",
                         "e_start",
                     ),
-                    ("/mir_manipulation/look_at_point/event_in", "e_stop"),
                 ],
                 event_out_list=[
                     (
@@ -377,7 +432,8 @@ def main():
         smach.StateMachine.add(
             "STOP_BARRIER_TAPE_DETECTION_WITH_FAILURE",
             gbs.send_event(
-                [("/mir_perception/barrier_tape_detection/event_in", "e_stop")]
+                [("/mir_perception/barrier_tape_detection/event_in", "e_stop"),
+                ("/move_base_wrapper/event_in", "e_stop",)]
             ),
             transitions={"success": "OVERALL_FAILED"},
         )
@@ -395,6 +451,10 @@ def main():
             AlignWithWorkspace(),
             transitions={"succeeded": "OVERALL_SUCCESS", "failed": "OVERALL_SUCCESS",},
         )
+
+    state_publisher = rospy.Publisher('~current_state', String, queue_size=1)
+    sm.register_transition_cb(transition_cb, [state_publisher])
+    sm.register_start_cb(start_cb, [state_publisher])
 
     # smach viewer
     if rospy.get_param("~viewer_enabled", False):

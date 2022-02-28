@@ -23,6 +23,8 @@
   <build_depend>roslint</build_depend>
   <build_depend>mir_object_segmentation</build_depend>
   <build_depend>mir_perception_utils</build_depend>
+  <build_depend>mir_rgb_object_recognition_models</build_depend>
+  <build_depend>mir_pointcloud_object_recognition_models</build_depend>
 
   <build_export_depend>cv_bridge</build_export_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
