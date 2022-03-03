@@ -132,6 +132,7 @@
     <!-- Multimodal object recognition-->
     <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch">
         <arg name="target_frame" value="base_link_static"/>
+        <arg name="pointcloud_source_frame_id" value="fixed_camera_link"/>
     </include>
     <!-- trims 3 last characters of objects in case they come with count information -->
     <!--include file="$(find mcr_poses_along_object)/ros/launch/poses_along_object.launch"/-->
