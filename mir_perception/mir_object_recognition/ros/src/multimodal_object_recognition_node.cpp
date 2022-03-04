@@ -148,14 +148,22 @@ void MultimodalObjectRecognitionROS::update()
     image_sub_->unsubscribe();
     cloud_sub_->unsubscribe();
 
-    ROS_WARN_STREAM("Starting multimodal object recognition");
+    ROS_INFO_STREAM("Starting multimodal object recognition");
+    std_msgs::String event_out;
     double start_time = ros::Time::now().toSec();
     // transform pointcloud to the given frame_id
-    preprocessPointCloud(pointcloud_msg_);
-    scene_segmentation_ros_->addCloudAccumulation(cloud_);  // Extend this to work with multiple viewpoints
-    recognizeCloudAndImage();
-    double end_time = ros::Time::now().toSec();
-    ROS_INFO_STREAM("Total processing time: "<< end_time - start_time);
+    if (preprocessPointCloud(pointcloud_msg_))
+    {
+      scene_segmentation_ros_->addCloudAccumulation(cloud_);  // Extend this to work with multiple viewpoints
+      recognizeCloudAndImage();
+      double end_time = ros::Time::now().toSec();
+      ROS_INFO_STREAM("Total processing time: "<< end_time - start_time);
+      event_out.data = "e_done";
+    }
+    else
+    {
+      event_out.data = "e_failed";
+    }
 
     // Reset received recognized cloud and image
     received_recognized_cloud_list_flag_ = false;
@@ -170,19 +178,22 @@ void MultimodalObjectRecognitionROS::update()
     recognized_cloud_list_.objects.clear();
 
     scene_segmentation_ros_->resetCloudAccumulation();
-    // pub e_done
-    std_msgs::String event_out;
-    event_out.data = "e_done";
     pub_event_out_.publish(event_out);
   }
 }
 
-void MultimodalObjectRecognitionROS::preprocessPointCloud(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
+bool MultimodalObjectRecognitionROS::preprocessPointCloud(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
 {
   sensor_msgs::PointCloud2 msg_transformed;
   msg_transformed.header.frame_id = target_frame_id_;
   if (!mpu::pointcloud::transformPointCloudMsg(tf_listener_, target_frame_id_, *cloud_msg, msg_transformed))
-    return;
+  {
+    ROS_ERROR("Unable to transform pointcloud. Are you sure target_frame_id_ and pointcloud_source_frame_id are set correctly?");
+    ROS_ERROR("pointcloud_source_frame_id: %s, target_frame_id: %s", pointcloud_source_frame_id_.c_str(), target_frame_id_.c_str());
+    ROS_ERROR("pointcloud_source_frame_id may need to be arm_cam3d_camera_color_frame or fixed_camera_link");
+    ROS_ERROR("target_frame_id may need to be base_link or base_link_static");
+    return false;
+  }
 
   pcl::PCLPointCloud2::Ptr pc2(new pcl::PCLPointCloud2);
   pcl_conversions::toPCL(msg_transformed, *pc2);
@@ -190,6 +201,7 @@ void MultimodalObjectRecognitionROS::preprocessPointCloud(const sensor_msgs::Poi
 
   cloud_ = PointCloud::Ptr(new PointCloud);
   pcl::fromPCLPointCloud2(*pc2, *cloud_);
+  return true;
 }
 
 void MultimodalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::ObjectList &object_list,

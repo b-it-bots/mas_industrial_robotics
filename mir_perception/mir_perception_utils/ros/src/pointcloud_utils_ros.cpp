@@ -23,7 +23,11 @@ bool pointcloud::transformPointCloudMsg(const boost::shared_ptr<tf::TransformLis
       cloud_in.header.stamp = common_time;
       tf_listener->waitForTransform(target_frame, cloud_in.header.frame_id, ros::Time::now(),
                                     ros::Duration(1.0));
-      pcl_ros::transformPointCloud(target_frame, cloud_in, cloud_out, *tf_listener);
+      bool result = pcl_ros::transformPointCloud(target_frame, cloud_in, cloud_out, *tf_listener);
+      if (!result)
+      {
+        return (false);
+      }
       cloud_out.header.frame_id = target_frame;
     } catch (tf::TransformException &ex) {
       ROS_ERROR("PCL transform error: %s", ex.what());

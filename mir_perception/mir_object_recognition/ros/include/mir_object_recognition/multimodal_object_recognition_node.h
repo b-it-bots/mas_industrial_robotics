@@ -203,8 +203,9 @@ class MultimodalObjectRecognitionROS
     
     /** \brief Transform pointcloud to the given frame id ("base_link" by default)
      * \param[in] PointCloud2 input
+     * \param[out] bool: false if unable to transform pointcloud
     */
-    void preprocessPointCloud(const sensor_msgs::PointCloud2ConstPtr &cloud_msg);
+    bool preprocessPointCloud(const sensor_msgs::PointCloud2ConstPtr &cloud_msg);
 
     /** \brief Add cloud accumulation, segment accumulated pointcloud, find the plane, 
      *     clusters table top objects, find object heights.

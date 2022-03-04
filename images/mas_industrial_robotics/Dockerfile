@@ -4,11 +4,8 @@ FROM osrf/ros:$ROS_DISTRO-desktop-full
 
 USER root
 
-#update ROS GPG key: https://discourse.ros.org/t/ros-gpg-key-expiration-incident/20669
-RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
-
 ENV IS_CI=1
-    
+
 USER root
 
 RUN apt-get update -y -qq \
@@ -27,7 +24,9 @@ RUN apt-get update -y -qq \
       unzip \
       gcc-multilib \
       g++-multilib \ 
-      python-pip 
+      python-pip \
+      vim \
+      openssh-server
 
 RUN pip install --upgrade pip==20.3
 
