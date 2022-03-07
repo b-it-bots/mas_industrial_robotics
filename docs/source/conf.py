@@ -26,7 +26,7 @@ def get_git_short_hash():
 
 # -- Project information -----------------------------------------------------
 project = "MAS Industrial Robotics"
-copyright = "2021, www.b-it-bots.de"
+copyright = "2022, www.b-it-bots.de"
 author = "www.b-it-bots.de"
 
 # The full version, including alpha/beta/rc tags
