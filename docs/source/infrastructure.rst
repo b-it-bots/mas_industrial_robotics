@@ -9,7 +9,7 @@ C025 Hub Server
 
 You can use our workstation in C025 lab if you need computing facilities such as 
 GPU, but the available resouces are limited with 24 cores of CPU, 32GB RAM, and 
-Nvidia 3090 with 24 GB GPU memory. So if you need more resouces, please request 
+Nvidia 3090 with 24 GB GPU memory. So if you need more resources, please request 
 access to `the university HPC cluster <https://wr0.wr.inf.h-brs.de/wr/index.html>`_.
 
 We also provide a JupyterHub server on the workstation so that you do not have to 
@@ -37,6 +37,12 @@ options as per request.
 
 Access
 ------
+
+In order to get access to the hub, we need to add your LDAP username. 
+
+.. hint::
+
+  Admins can add new users by going to admin page `https://10.20.118.78:32025/hub/admin <https://10.20.118.78:32025/hub/admin>`_.
 
 * Within the university network: 
 
