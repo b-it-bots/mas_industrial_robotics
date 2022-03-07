@@ -64,7 +64,7 @@ In order to get access to the hub, we need to add your LDAP username.
     .. code-block:: bash
       
       # replace account2s with your FBUID
-      ssh -L 32025:10.20.118.72:32025 account2s@home.inf.h-brs.de
+      ssh -L 32025:10.20.118.78:32025 account2s@home.inf.h-brs.de
 
     Then, open browser and go to `https://localhost:32025 <https://localhost:32025>`_.
 
