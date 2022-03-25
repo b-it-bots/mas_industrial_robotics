@@ -56,12 +56,12 @@
 - git:
     local-name: mas_perception
     uri: https://github.com/b-it-bots/mas_perception.git
-    version: melodic
+    version: noetic
 
 - git:
     local-name: mas_perception_msgs
     uri: https://github.com/b-it-bots/mas_perception_msgs.git
-    version: melodic
+    version: noetic
 
 - git:
     local-name: ROSPlan
@@ -76,17 +76,17 @@
 - git:
     local-name: lama_planner
     uri: https://github.com/b-it-bots/lama_planner.git
-    version: master
+    version: noetic
 
 - git:
     local-name: orocos_kinematics_dynamics
-    uri: https://github.com/b-it-bots/orocos_kinematics_dynamics.git
+    uri: https://github.com/orocos/orocos_kinematics_dynamics.git
     version: master
 
 - git:
     local-name: kdl_parser
     uri: https://github.com/ros/kdl_parser.git
-    version: melodic-devel
+    version: noetic-devel
 
 - git:
     local-name: dmp
@@ -106,12 +106,12 @@
 - git:
     local-name: explore_lite
     uri: https://github.com/hrnr/m-explore.git
-    version: melodic-devel
+    version: noetic-devel
 
 - git:
     local-name: atwork-commander
     uri: https://github.com/robocup-at-work/atwork-commander.git
-    version: master
+    version: noetic
 
 - git:
     local-name: mir_perception_models
