@@ -44,7 +44,7 @@ function install_ros_dependencies {
     sudo rm -rf /etc/ros/rosdep/sources.list.d/*
     sudo rosdep init -q
     rosdep update -q
-    sudo apt install -y -qq python3-rosinstall python3-rosinstall-generator python3-wstool build-essential python3-catkin-tools python3-pip
+    sudo apt install -y -qq python3-rosinstall python3-rosinstall-generator python3-wstool build-essential python3-catkin-tools python3-pip bison flex gawk g++-multilib pypy
     sudo pip3 install catkin_pkg empy
     #sudo rm -rf /var/lib/apt/lists/*
 }
