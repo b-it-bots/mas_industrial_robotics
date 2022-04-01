@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import mir_waypoint_trajectory_generation_ros.waypoint_trajectory_generation
+
+if __name__ == '__main__':
+    mir_waypoint_trajectory_generation_ros.waypoint_trajectory_generation.main()

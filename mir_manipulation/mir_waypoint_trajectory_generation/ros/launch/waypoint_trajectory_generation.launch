@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="mir_waypoint_trajectory_generation" type="waypoint_trajectory_generation_node"
+            name="waypoint_trajectory_generation"  output="screen" respawn="true">
+
+        <!-- the cycle rate of the node (in hz) -->
+        <param name="~loop_rate"  type="double" value="10.0"/>
+        <param name="~move_group"  type="string" value="/move_group"/>
+        <param name="~arm"  type="string" value="arm_1"/>
+        <remap from="waypoint_list" to="/pregrasp_planner_node/waypoint_list" />
+    </node>
+</launch>
+
+
