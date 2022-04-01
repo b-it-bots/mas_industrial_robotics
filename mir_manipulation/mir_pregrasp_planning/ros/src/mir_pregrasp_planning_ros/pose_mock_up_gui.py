@@ -7,7 +7,7 @@ This module contains a component that publishes an artificial object pose.
 
 import math
 import threading
-import Tkinter
+import tkinter as Tkinter
 
 import geometry_msgs.msg
 import rospy
@@ -249,7 +249,7 @@ def publish_pose():
 def main():
     rospy.init_node("target_pose_mock_up")
 
-    import thread
+    import _thread as thread
 
     try:
         thread.start_new_thread(create_window, tuple())
