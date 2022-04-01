@@ -164,3 +164,51 @@ On workstation or your PC
 .. code-block:: bash
 
     roslaunch mir_basic_navigation_test refbox_parser.py
+
+.. _Direct_robot_control:
+
+Aligning robot
+================
+
+* Bringup the robot
+
+.. code-block:: bash
+
+    <robot_name>
+
+* Export the youbot
+
+.. code-block:: bash
+
+    export ROS_MASTER_URI=http://192.168.1.114:11311
+
+* 
+Launch the pose_mock_up_gui file
+.. code-block:: bash
+
+    roslaunch mir_direct_base_controller pose_mock_up_gui.launch 
+
+A GUI pop up window will appear. 
+Change the offset accordingly in the window.
+
+* Run rviz
+
+  .. code-block:: bash
+
+    rviz
+
+  Set the 'Fixed Frame' to `odom`
+  Set the 'Topic' to '/mcr_navigation/direct_base_controller/input_pose'
+
+* 
+Launch the direct_base_controller file
+.. code-block:: bash
+
+    roslaunch mir_direct_base_controller direct_base_controller.launch 
+
+
+* 
+To publish the data to the Topic
+.. code-block:: bash
+
+    rostopic pub /mcr_navigation/direct_base_controller/coordinator/event_in std_msgs/String "data: 'e_start'" 
