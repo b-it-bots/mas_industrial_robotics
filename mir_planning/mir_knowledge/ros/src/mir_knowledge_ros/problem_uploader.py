@@ -88,7 +88,7 @@ class ProblemUploader(object):
 
         """
         ki_list = []
-        for instance_type, instance_names in instances.iteritems():
+        for instance_type, instance_names in instances.items():
             for instance_name in instance_names:
                 ki_list.append(
                     KnowledgeItem(
