@@ -167,48 +167,45 @@ On workstation or your PC
 
 .. _Direct_robot_control:
 
-Aligning robot
-================
+Direct base controller
+======================
+
+The direct base controller is used to perform relative motions of the robot with respect to a reference frame. It has an optional feature to stop the motions when obstacles are detected with the laser scanners.
 
 * Bringup the robot
 
 .. code-block:: bash
 
-    <robot_name>
+      roslaunch mir_bringup robot.launch
 
-* Export the youbot
+* Launch the direct base controller
 
 .. code-block:: bash
 
-    export ROS_MASTER_URI=http://192.168.1.114:11311
+    roslaunch mir_direct_base_controller direct_base_controller.launch
 
-* 
-Launch the pose_mock_up_gui file
+
+* Launch the pose mockup GUI on your PC:
 .. code-block:: bash
 
-    roslaunch mir_direct_base_controller pose_mock_up_gui.launch 
+    export ROS_MASTER_URI=http://<robot_ip_address>:11311
+    roslaunch mir_direct_base_controller pose_mock_up_gui.launch
 
-A GUI pop up window will appear. 
-Change the offset accordingly in the window.
+A GUI pop up window will appear.
+Set the relative pose accordingly in the window (e.g. 0.1 in X to move forward 10 cm).
 
-* Run rviz
+* Run rviz on your PC:
 
   .. code-block:: bash
 
+    export ROS_MASTER_URI=http://<robot_ip_address>:11311
     rviz
 
   Set the 'Fixed Frame' to `odom`
-  Set the 'Topic' to '/mcr_navigation/direct_base_controller/input_pose'
+  Add a 'Pose' display and set the topic to '/mcr_navigation/direct_base_controller/input_pose'
 
-* 
-Launch the direct_base_controller file
+
+* Publish an `e_start` event to the direct base controller node
 .. code-block:: bash
 
-    roslaunch mir_direct_base_controller direct_base_controller.launch 
-
-
-* 
-To publish the data to the Topic
-.. code-block:: bash
-
-    rostopic pub /mcr_navigation/direct_base_controller/coordinator/event_in std_msgs/String "data: 'e_start'" 
+    rostopic pub /mcr_navigation/direct_base_controller/coordinator/event_in std_msgs/String "data: 'e_start'"
