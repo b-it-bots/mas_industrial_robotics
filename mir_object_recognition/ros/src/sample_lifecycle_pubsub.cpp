@@ -20,6 +20,8 @@
 
 #include "std_msgs/msg/string.hpp"
 
+using std::placeholders::_1;
+
 using namespace std::chrono_literals;
 
 class LifecyclePubSub : public rclcpp_lifecycle::LifecycleNode
@@ -34,7 +36,8 @@ public:
   : rclcpp_lifecycle::LifecycleNode(node_name,
       rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
   {
-      
+      pcl_subs = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
+      "recognizer/pc/output/object_list", 10, std::bind(&LifecyclePubSub::pcl_callback, this, _1));
   }
 
   /// Callback for walltimer in order to publish the message.
@@ -51,7 +54,7 @@ public:
     mas_perception_msgs::msg::ObjectList sample_object_list;
 
     // Print the current state for demo purposes
-    if (!pub_->is_activated()) {
+    if (!obj_list_pub_->is_activated()) {
       RCLCPP_INFO(
         get_logger(), "Lifecycle publisher is currently inactive. Messages are not published.");
     } else {
@@ -63,7 +66,7 @@ public:
     // publisher.
     // Only if the publisher is in an active state, the message transfer is
     // enabled and the message actually published.
-    pub_->publish(std::move(sample_object_list));
+    obj_list_pub_->publish(std::move(sample_object_list));
   }
 
   /// Transition callback for state configuring
@@ -88,9 +91,7 @@ public:
     // can comply to the current state of the node.
     // As of the beta version, there is only a lifecycle publisher
     // available.
-    pub_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 10);
-    timer_ = this->create_wall_timer(
-      1s, std::bind(&LifecyclePubSub::publish, this));
+    obj_list_pub_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 10);
 
     RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
@@ -120,7 +121,7 @@ public:
     // We explicitly activate the lifecycle publisher.
     // Starting from this point, all messages are no longer
     // ignored but sent into the network.
-    pub_->on_activate();
+    obj_list_pub_->on_activate();
 
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 
@@ -155,7 +156,7 @@ public:
     // We explicitly deactivate the lifecycle publisher.
     // Starting from this point, all messages are no longer
     // sent into the network.
-    pub_->on_deactivate();
+    obj_list_pub_->on_deactivate();
 
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
 
@@ -185,8 +186,7 @@ public:
     // In our cleanup phase, we release the shared pointers to the
     // timer and publisher. These entities are no longer available
     // and our node is "clean".
-    timer_.reset();
-    pub_.reset();
+    obj_list_pub_.reset();
 
     RCUTILS_LOG_INFO_NAMED(get_name(), "on cleanup is called.");
 
@@ -216,8 +216,7 @@ public:
     // In our shutdown phase, we release the shared pointers to the
     // timer and publisher. These entities are no longer available
     // and our node is "clean".
-    timer_.reset();
-    pub_.reset();
+    obj_list_pub_.reset();
 
     RCUTILS_LOG_INFO_NAMED(
       get_name(),
@@ -239,14 +238,14 @@ private:
   // is in.
   // By default, a lifecycle publisher is inactive by creation and has to be
   // activated to publish messages into the ROS world.
-  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_;
+  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> obj_list_pub_;
 
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr pcl_subs;
-  // We hold an instance of a timer which periodically triggers the publish function.
-  // As for the beta version, this is a regular timer. In a future version, a
-  // lifecycle timer will be created which obeys the same lifecycle management as the
-  // lifecycle publisher.
-  std::shared_ptr<rclcpp::TimerBase> timer_;
+  rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>::SharedPtr pcl_subs;
+
+  void pcl_callback(const mas_perception_msgs::msg::ObjectList::SharedPtr msg) const
+  {
+      std::bind(&LifecyclePubSub::publish, this);
+  }
 };
 
 /**
