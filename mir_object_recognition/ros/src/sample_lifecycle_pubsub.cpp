@@ -49,10 +49,11 @@ public:
    * the communication is blocked so that no messages is actually transferred.
    */
   void
-  publish()
+  objlist_publish()
   {
     mas_perception_msgs::msg::ObjectList sample_object_list;
-
+    RCLCPP_INFO(
+        get_logger(), "inside publish fun.");
     // Print the current state for demo purposes
     if (!obj_list_pub_->is_activated()) {
       RCLCPP_INFO(
@@ -242,11 +243,11 @@ private:
 
   rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>::SharedPtr pcl_subs;
 
-  void pcl_callback(const mas_perception_msgs::msg::ObjectList::SharedPtr msg) const
+  void pcl_callback(const mas_perception_msgs::msg::ObjectList::SharedPtr msg)
   {
       RCLCPP_INFO(
-        get_logger(), "Lifecycle publisher is active. Publishing: [%s]", msg);
-      std::bind(&LifecyclePubSub::publish, this);
+        get_logger(), "pcl_callback: [%s]", msg);
+      this->objlist_publish();
   }
 };
 
@@ -267,7 +268,7 @@ int main(int argc, char * argv[])
   rclcpp::executors::SingleThreadedExecutor exe;
 
   std::shared_ptr<LifecyclePubSub> lc_node =
-    std::make_shared<LifecyclePubSub>("lc_pubsub");
+    std::make_shared<LifecyclePubSub>("lc_talker");
 
   exe.add_node(lc_node->get_node_base_interface());
 
