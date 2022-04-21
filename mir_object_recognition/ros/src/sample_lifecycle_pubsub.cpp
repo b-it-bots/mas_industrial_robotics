@@ -244,6 +244,8 @@ private:
 
   void pcl_callback(const mas_perception_msgs::msg::ObjectList::SharedPtr msg) const
   {
+      RCLCPP_INFO(
+        get_logger(), "Lifecycle publisher is active. Publishing: [%s]", msg);
       std::bind(&LifecyclePubSub::publish, this);
   }
 };

@@ -33,7 +33,8 @@ include_directories(
   ${rclcpp_INCLUDE_DIRS}
   ${mas_perception_msgs_INCLUDE_DIRS})
 
-#add_executable(lc_pubsub ros/src/sample_lifecycle_pubsub.cpp)
+add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
+ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
 add_executable(lc_client ros/src/sample_lifecycle_service_client.cpp)
 target_link_libraries(lc_client
@@ -42,6 +43,7 @@ target_link_libraries(lc_client
 )
 
 ament_target_dependencies(lc_client rclcpp std_msgs)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -57,6 +59,7 @@ endif()
 
 install(TARGETS
   lc_client
+  lc_talker
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
