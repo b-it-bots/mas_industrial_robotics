@@ -22,7 +22,6 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(std_srvs) 
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -37,7 +36,12 @@ include_directories(
 #add_executable(lc_pubsub ros/src/sample_lifecycle_pubsub.cpp)
 
 add_executable(lc_client ros/src/sample_lifecycle_service_client.cpp)
-ament_target_dependencies(lc_client rclcpp std_msgs std_srvs rosidl_default_runtime)
+target_link_libraries(lc_client
+  ${rclcpp_lifecycle_LIBRARIES}
+  ${std_msgs_LIBRARIES}
+)
+
+ament_target_dependencies(lc_client rclcpp std_msgs)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
