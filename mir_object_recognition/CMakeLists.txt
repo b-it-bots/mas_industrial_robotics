@@ -61,5 +61,10 @@ install(TARGETS
   lc_client
   lc_talker
   DESTINATION lib/${PROJECT_NAME})
+  
+install(DIRECTORY
+  ros/launch/
+  DESTINATION share/${PROJECT_NAME}/ros/launch
+)
 
 ament_package()
