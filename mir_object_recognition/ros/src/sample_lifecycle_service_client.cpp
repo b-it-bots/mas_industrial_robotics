@@ -29,17 +29,17 @@
 using namespace std::chrono_literals;
 
 // which node to handle
-static constexpr char const * lifecycle_node = "lc_talker";  //lc_talker 
+static constexpr char const * lifecycle_node = "lc_talker";  //lc_pubsub 
 
 // Every lifecycle node has various services
 // attached to it. By convention, we use the format of
 // <node name>/<service name>.
 // In this demo, we use get_state and change_state
 // and thus the two service topics are:
-// lc_talker/get_state
-// lc_talker/change_state 
-static constexpr char const * node_get_state_topic = "lc_talker/get_state"; //lc_talker 
-static constexpr char const * node_change_state_topic = "lc_talker/change_state";  //lc_talker 
+// lc_pubsub/get_state
+// lc_pubsub/change_state 
+static constexpr char const * node_get_state_topic = "lc_talker/get_state"; //lc_pubsub 
+static constexpr char const * node_change_state_topic = "lc_talker/change_state";  //lc_pubsub 
 
 template<typename FutureT, typename WaitTimeT>
 std::future_status
