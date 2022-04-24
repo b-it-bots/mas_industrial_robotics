@@ -267,7 +267,7 @@ int main(int argc, char * argv[])
   rclcpp::executors::SingleThreadedExecutor exe;
 
   std::shared_ptr<LifecyclePubSub> lc_node =
-    std::make_shared<LifecyclePubSub>("lc_pubsub");
+    std::make_shared<LifecyclePubSub>("lc_talker");
 
   exe.add_node(lc_node->get_node_base_interface());
 

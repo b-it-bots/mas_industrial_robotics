@@ -29,17 +29,17 @@
 using namespace std::chrono_literals;
 
 // which node to handle
-static constexpr char const * lifecycle_node = "lc_pubsub";  //lc_pubsub 
+static constexpr char const * lifecycle_node = "lc_talker";  //lc_talker 
 
 // Every lifecycle node has various services
 // attached to it. By convention, we use the format of
 // <node name>/<service name>.
 // In this demo, we use get_state and change_state
 // and thus the two service topics are:
-// lc_pubsub/get_state
-// lc_pubsub/change_state 
-static constexpr char const * node_get_state_topic = "lc_pubsub/get_state"; //lc_pubsub 
-static constexpr char const * node_change_state_topic = "lc_pubsub/change_state";  //lc_pubsub 
+// lc_talker/get_state
+// lc_talker/change_state 
+static constexpr char const * node_get_state_topic = "lc_talker/get_state"; //lc_talker 
+static constexpr char const * node_change_state_topic = "lc_talker/change_state";  //lc_talker 
 
 template<typename FutureT, typename WaitTimeT>
 std::future_status
@@ -83,7 +83,7 @@ public:
   /**
    * In this function, we send a service request
    * asking for the current state of the node
-   * lc_pubsub.
+   * lc_talker.
    * If it does return within the given time_out,
    * we return the current state of the node, if
    * not, we return an unknown state.
@@ -105,7 +105,7 @@ public:
     }
 
     // We send the service request for asking the current
-    // state of the lc_pubsub node.
+    // state of the lc_talker node.
     auto future_result = client_get_state_->async_send_request(request);
 
     // Let's wait until we have the answer from the node.
