@@ -22,16 +22,21 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(pcl_ros REQUIRED)
+find_package(PCL 1.7 REQUIRED)
+find_package(sensor_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 include_directories(
-  include
+  ros/include
+  common/include
   ${std_msgs_INCLUDE_DIRS}
   ${lifecycle_msgs_INCLUDE_DIRS}
   ${rclcpp_lifecycle_INCLUDE_DIRS}
   ${rclcpp_INCLUDE_DIRS}
-  ${mas_perception_msgs_INCLUDE_DIRS})
+  ${mas_perception_msgs_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS})
 
 add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
