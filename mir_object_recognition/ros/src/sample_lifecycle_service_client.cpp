@@ -230,8 +230,6 @@ int getch(void)
 }
 
 const char* msg = R"(
-
-  CONFIGURE ACTIVATE DEACTIVATE CLEANUP
 Reading from the keyboard and changing states!
 ########################################################################
 Key | Current State --> Via (Intermediate state) --> Destination State
@@ -246,9 +244,8 @@ X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
 
 ########################################################################
 
-CTRL-C to quit
-THIS IS A EXACT REPLICA OF https://github.com/ros-teleop/teleop_twist_keyboard 
-WITH SOME ADD-ONS BUT IMPLEMENTED WITH C++ and ROS2-foxy.
+Tip: Initial state is UNCONFIGURED state if the lifecycle node is ready. 
+Press "C" making the node state go from UNCONFIGURED --> INACTIVE
 )";
 
 
@@ -265,7 +262,7 @@ void
 callee_script(std::shared_ptr<LifecycleServiceClient> lc_client)
 {
 
-  
+  std::cout<<msg<<std::endl;
   while(rclcpp::ok()){
   key = getch();
 
@@ -319,6 +316,7 @@ callee_script(std::shared_ptr<LifecycleServiceClient> lc_client)
     std::cout<<"inactive shutdown"<<std::endl;  
     lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
     lc_client->get_state();
+    std::cout<<"Press T to terminate"<<std::endl;  
     }
 
   }
@@ -329,6 +327,8 @@ callee_script(std::shared_ptr<LifecycleServiceClient> lc_client)
     std::cout<<"active shutdown"<<std::endl;  
     lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
     lc_client->get_state();
+    std::cout<<"Press T to terminate"<<std::endl;  
+
     }
 
   }
@@ -343,6 +343,8 @@ callee_script(std::shared_ptr<LifecycleServiceClient> lc_client)
     std::cout<<"unconfig shutdown"<<std::endl;
     lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
     lc_client->get_state();
+    std::cout<<"Press T to terminate"<<std::endl;  
+
     }
   }
    
@@ -353,14 +355,9 @@ callee_script(std::shared_ptr<LifecycleServiceClient> lc_client)
 
   }
 
-
+std::cout<<"Press Cntr+C to exit"<<std::endl;
 
 }
-
-
-
-
-
 
 
 
@@ -388,7 +385,7 @@ int main(int argc, char ** argv)
 
   rclcpp::shutdown();
 
-  std::cout<<"Press Cntr+C to exit"<<std::endl;
+  
 
   return 0;
 }
