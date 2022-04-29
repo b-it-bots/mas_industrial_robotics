@@ -229,7 +229,27 @@ int getch(void)
   return ch;
 }
 
+const char* msg = R"(
 
+  CONFIGURE ACTIVATE DEACTIVATE CLEANUP
+Reading from the keyboard and changing states!
+########################################################################
+Key | Current State --> Via (Intermediate state) --> Destination State
+------------------------------------------------------------------------
+C:  | UNCONFIGURED -->  Configuring   --> INACTIVE
+S:  | UNCONFIGURED -->  ShuttingDown  --> FINALIZED
+A:  | INACTIVE     -->  Activating    --> ACTIVE
+R:  | INACTIVE     -->  CleaningUp    --> UNCONFIGURED
+W:  | INACTIVE     -->  ShuttingDown  --> FINALIZED
+D:  | ACTIVE       -->  Configuring   --> INACTIVE
+X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
+
+########################################################################
+
+CTRL-C to quit
+THIS IS A EXACT REPLICA OF https://github.com/ros-teleop/teleop_twist_keyboard 
+WITH SOME ADD-ONS BUT IMPLEMENTED WITH C++ and ROS2-foxy.
+)";
 
 
 
@@ -288,6 +308,26 @@ callee_script(std::shared_ptr<LifecycleServiceClient> lc_client)
     if (rclcpp::ok()) {
     std::cout<<"cleanup"<<std::endl;  
     lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+    lc_client->get_state();
+    }
+
+  }
+
+  if (key == 'W'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"inactive shutdown"<<std::endl;  
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
+    lc_client->get_state();
+    }
+
+  }
+
+  if (key == 'X'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"active shutdown"<<std::endl;  
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
     lc_client->get_state();
     }
 
