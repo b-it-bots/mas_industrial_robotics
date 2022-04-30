@@ -16,6 +16,9 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <iostream>
+#include <termios.h>
+#include <unistd.h>
 
 #include "lifecycle_msgs/msg/state.hpp"
 #include "lifecycle_msgs/msg/transition.hpp"
@@ -27,6 +30,8 @@
 #include "rcutils/logging_macros.h"
 
 using namespace std::chrono_literals;
+
+char key(' ');
 
 // which node to handle
 static constexpr char const * lifecycle_node = "lc_talker";  //lc_pubsub 
@@ -65,6 +70,7 @@ public:
   explicit LifecycleServiceClient(const std::string & node_name)
   : Node(node_name)
   {}
+  
 
   void
   init()
@@ -91,7 +97,7 @@ public:
    * how long we wait for a response before returning
    * unknown state
    */
-  unsigned int
+  void
   get_state(std::chrono::seconds time_out = 3s)
   {
     auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
@@ -101,7 +107,7 @@ public:
         get_logger(),
         "Service %s is not available.",
         client_get_state_->get_service_name());
-      return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+      //return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
     }
 
     // We send the service request for asking the current
@@ -115,7 +121,7 @@ public:
     if (future_status != std::future_status::ready) {
       RCLCPP_ERROR(
         get_logger(), "Server time out while getting current state for node %s", lifecycle_node);
-      return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+      //return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
     }
 
     // We have an succesful answer. So let's print the current state.
@@ -123,11 +129,11 @@ public:
       RCLCPP_INFO(
         get_logger(), "Node %s has current state %s.",
         lifecycle_node, future_result.get()->current_state.label.c_str());
-      return future_result.get()->current_state.id;
+      //return future_result.get()->current_state.id;
     } else {
       RCLCPP_ERROR(
         get_logger(), "Failed to get current state for node %s", lifecycle_node);
-      return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+      //return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
     }
   }
 
@@ -147,7 +153,7 @@ public:
    * how long we wait for a response before returning
    * unknown state
    */
-  bool
+  void
   change_state(std::uint8_t transition, std::chrono::seconds time_out = 3s)
   {
     auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
@@ -158,7 +164,7 @@ public:
         get_logger(),
         "Service %s is not available.",
         client_change_state_->get_service_name());
-      return false;
+      //return false;
     }
 
     // We send the request with the transition we want to invoke.
@@ -171,18 +177,18 @@ public:
     if (future_status != std::future_status::ready) {
       RCLCPP_ERROR(
         get_logger(), "Server time out while getting current state for node %s", lifecycle_node);
-      return false;
+      //return false;
     }
 
     // We have an answer, let's print our success.
     if (future_result.get()->success) {
       RCLCPP_INFO(
         get_logger(), "Transition %d successfully triggered.", static_cast<int>(transition));
-      return true;
+      //return true;
     } else {
       RCLCPP_WARN(
         get_logger(), "Failed to trigger transition %u", static_cast<unsigned int>(transition));
-      return false;
+      //return false;
     }
   }
 
@@ -190,6 +196,59 @@ private:
   std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::GetState>> client_get_state_;
   std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::ChangeState>> client_change_state_;
 };
+
+
+
+
+// For non-blocking keyboard inputs
+int getch(void)
+{
+  int ch;
+  struct termios oldt;
+  struct termios newt;
+
+  // Store old settings, and copy to new settings
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+
+  // Make required changes and apply the settings
+  newt.c_lflag &= ~(ICANON | ECHO);
+  newt.c_iflag |= IGNBRK;
+  newt.c_iflag &= ~(INLCR | ICRNL | IXON | IXOFF);
+  newt.c_lflag &= ~(ICANON | ECHO | ECHOK | ECHOE | ECHONL | ISIG | IEXTEN);
+  newt.c_cc[VMIN] = 1;
+  newt.c_cc[VTIME] = 0;
+  tcsetattr(fileno(stdin), TCSANOW, &newt);
+
+  // Get the current character
+  ch = getchar();
+
+  // Reapply old settings
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+
+  return ch;
+}
+
+const char* msg = R"(
+Reading from the keyboard and changing states!
+########################################################################
+Key | Current State --> Via (Intermediate state) --> Destination State
+------------------------------------------------------------------------
+C:  | UNCONFIGURED -->  Configuring   --> INACTIVE
+S:  | UNCONFIGURED -->  ShuttingDown  --> FINALIZED
+A:  | INACTIVE     -->  Activating    --> ACTIVE
+R:  | INACTIVE     -->  CleaningUp    --> UNCONFIGURED
+W:  | INACTIVE     -->  ShuttingDown  --> FINALIZED
+D:  | ACTIVE       -->  Configuring   --> INACTIVE
+X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
+
+########################################################################
+
+Tip: Initial state is UNCONFIGURED state if the lifecycle node is ready. 
+Press "C" making the node state go from UNCONFIGURED --> INACTIVE
+)";
+
+
 
 /**
  * This is a little independent
@@ -202,106 +261,106 @@ private:
 void
 callee_script(std::shared_ptr<LifecycleServiceClient> lc_client)
 {
-  rclcpp::WallRate time_between_state_changes(0.1);  // 10s
 
-  // configure
-  {
-    if (!lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE)) {
-      return;
-    }
-    if (!lc_client->get_state()) {
-      return;
-    }
+  std::cout<<msg<<std::endl;
+  while(rclcpp::ok()){
+  key = getch();
+
+
+  if (key == 'C'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"configure"<<std::endl;
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+    lc_client->get_state();
+    
   }
+  }
+
 
   // activate
-  {
-    time_between_state_changes.sleep();
-    if (!rclcpp::ok()) {
-      return;
-    }
-    if (!lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE)) {
-      return;
-    }
-    if (!lc_client->get_state()) {
-      return;
-    }
+  if (key == 'A'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"activate"<<std::endl;
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+    lc_client->get_state();
+    
   }
-
+  }
   // deactivate
-  {
-    time_between_state_changes.sleep();
-    if (!rclcpp::ok()) {
-      return;
+  if (key == 'D'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"deactivate"<<std::endl;
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+    lc_client->get_state();
     }
-    if (!lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE)) {
-      return;
-    }
-    if (!lc_client->get_state()) {
-      return;
-    }
-  }
-
-  // activate it again
-  {
-    time_between_state_changes.sleep();
-    if (!rclcpp::ok()) {
-      return;
-    }
-    if (!lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE)) {
-      return;
-    }
-    if (!lc_client->get_state()) {
-      return;
-    }
-  }
-
-  // and deactivate it again
-  {
-    time_between_state_changes.sleep();
-    if (!rclcpp::ok()) {
-      return;
-    }
-    if (!lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE)) {
-      return;
-    }
-    if (!lc_client->get_state()) {
-      return;
-    }
+    
   }
 
   // we cleanup
-  {
-    time_between_state_changes.sleep();
-    if (!rclcpp::ok()) {
-      return;
+  if (key == 'R'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"cleanup"<<std::endl;  
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+    lc_client->get_state();
     }
-    if (!lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP)) {
-      return;
+
+  }
+
+  if (key == 'W'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"inactive shutdown"<<std::endl;  
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
+    lc_client->get_state();
+    std::cout<<"Press T to terminate"<<std::endl;  
     }
-    if (!lc_client->get_state()) {
-      return;
+
+  }
+
+  if (key == 'X'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"active shutdown"<<std::endl;  
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
+    lc_client->get_state();
+    std::cout<<"Press T to terminate"<<std::endl;  
+
     }
+
   }
 
   // and finally shutdown
   // Note: We have to be precise here on which shutdown transition id to call
   // We are currently in the unconfigured state and thus have to call
   // TRANSITION_UNCONFIGURED_SHUTDOWN
-  {
-    time_between_state_changes.sleep();
-    if (!rclcpp::ok()) {
-      return;
-    }
-    if (!lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN))
-    {
-      return;
-    }
-    if (!lc_client->get_state()) {
-      return;
+  if (key == 'S'){
+    //time_between_state_changes.sleep();
+    if (rclcpp::ok()) {
+    std::cout<<"unconfig shutdown"<<std::endl;
+    lc_client->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+    lc_client->get_state();
+    std::cout<<"Press T to terminate"<<std::endl;  
+
     }
   }
+   
+
+  if (key == 'T'){
+        break;
+  }
+
+  }
+
+std::cout<<"Press Cntr+C to exit"<<std::endl;
+
 }
+
+
+
 
 int main(int argc, char ** argv)
 {
@@ -314,16 +373,19 @@ int main(int argc, char ** argv)
 
   auto lc_client = std::make_shared<LifecycleServiceClient>("lc_client");
   lc_client->init();
-
+  //rclcpp::WallRate time_between_state_changes(0.1);
   rclcpp::executors::SingleThreadedExecutor exe;
   exe.add_node(lc_client);
-
+  
+  
   std::shared_future<void> script = std::async(
     std::launch::async,
     std::bind(callee_script, lc_client));
   exe.spin_until_future_complete(script);
 
   rclcpp::shutdown();
+
+  
 
   return 0;
 }
