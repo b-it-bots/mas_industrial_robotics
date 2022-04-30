@@ -37,12 +37,7 @@ using namespace std::chrono_literals;
 class MultiModalObjectRecognitionROS2: public rclcpp_lifecycle::LifecycleNode
 {
     public:
-        explicit MultiModalObjectRecognitionROS2(const std::string & node_name, bool intra_process_comms = false)
-        : rclcpp_lifecycle::LifecycleNode(node_name,
-            rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
-        {};
-
-        void update();
+        explicit MultiModalObjectRecognitionROS2(const std::string & node_name, bool intra_process_comms);
 
         /// Transition callback for state configuring
         /**
@@ -116,9 +111,10 @@ class MultiModalObjectRecognitionROS2: public rclcpp_lifecycle::LifecycleNode
 
     private:
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> obj_list_pub_;
-
-        std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image>> image_sub_;
-        std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::PointCloud2>> cloud_sub_;
+        
+        std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image, rclcpp_lifecycle::LifecycleNode>> image_sub_;
+        
+        std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::PointCloud2, rclcpp_lifecycle::LifecycleNode>> cloud_sub_;
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image,
                 sensor_msgs::msg::PointCloud2> msgSyncPolicy;
         std::shared_ptr<message_filters::Synchronizer<msgSyncPolicy>> msg_sync_;

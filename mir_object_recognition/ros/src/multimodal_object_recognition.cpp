@@ -6,24 +6,18 @@
 MultiModalObjectRecognitionROS2::MultiModalObjectRecognitionROS2(const std::string & node_name, bool intra_process_comms):
     rclcpp_lifecycle::LifecycleNode(node_name,
         rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
-{
+{}
 
-};
-
-void MultiModalObjectRecognitionROS2::update()
-{
-}
-
-void MultiModalObjectRecognitionROS2::synchronizeCallback(const sensor_msgs::msg::Image image,
+/* void MultiModalObjectRecognitionROS2::synchronizeCallback(const sensor_msgs::msg::Image image,
                       const sensor_msgs::msg::PointCloud2 cloud)
 {
 
     RCLCPP_INFO(get_logger(), "synchro callback");
 
-}
+} */
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MultiModalObjectRecognitionROS2::on_configure(const rclcpp_lifecycle::State & state)
+MultiModalObjectRecognitionROS2::on_configure(const rclcpp_lifecycle::State &)
 {
     // This callback is supposed to be used for initialization and
     // configuring purposes.
@@ -36,15 +30,14 @@ MultiModalObjectRecognitionROS2::on_configure(const rclcpp_lifecycle::State & st
     
     RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
-
-    image_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Image>>(*this, "image", 10);
-    cloud_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::PointCloud2>>(*this, "cloud", 10);
-    msg_sync_ = std::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image,
-                sensor_msgs::msg::PointCloud2>>>(10);
+    image_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Image, rclcpp_lifecycle::LifecycleNode>>(this, "image");
     
-    msg_sync_ -> registerCallback(std::bind(&MultiModalObjectRecognitionROS2::synchronizeCallback, this, _1, _2));
-    
+    cloud_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::PointCloud2, rclcpp_lifecycle::LifecycleNode>>(this, "cloud");
 
+    // msg_sync_ = std::make_shared<message_filters::Synchronizer<msgSyncPolicy>>(msgSyncPolicy(10), image_sub_, cloud_sub_);
+    // msg_sync_ -> registerCallback(std::bind(&MultiModalObjectRecognitionROS2::synchronizeCallback, this, _1, _2));
+    
+    
     // We return a success and hence invoke the transition to the next
     // step: "inactive".
     // If we returned TRANSITION_CALLBACK_FAILURE instead, the state machine
@@ -55,7 +48,7 @@ MultiModalObjectRecognitionROS2::on_configure(const rclcpp_lifecycle::State & st
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MultiModalObjectRecognitionROS2::on_activate(const rclcpp_lifecycle::State & state)
+MultiModalObjectRecognitionROS2::on_activate(const rclcpp_lifecycle::State &)
 {
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 
@@ -74,7 +67,7 @@ MultiModalObjectRecognitionROS2::on_activate(const rclcpp_lifecycle::State & sta
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MultiModalObjectRecognitionROS2::on_deactivate(const rclcpp_lifecycle::State & state)
+MultiModalObjectRecognitionROS2::on_deactivate(const rclcpp_lifecycle::State &)
 {
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
 
@@ -88,7 +81,7 @@ MultiModalObjectRecognitionROS2::on_deactivate(const rclcpp_lifecycle::State & s
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-MultiModalObjectRecognitionROS2::on_cleanup(const rclcpp_lifecycle::State & state)
+MultiModalObjectRecognitionROS2::on_cleanup(const rclcpp_lifecycle::State &)
 {
     // In our cleanup phase, we release the shared pointers to the
     // timer and publisher. These entities are no longer available
@@ -146,7 +139,7 @@ int main(int argc, char * argv[])
   rclcpp::executors::SingleThreadedExecutor exe;
 
   std::shared_ptr<MultiModalObjectRecognitionROS2> mmor_lc_node =
-    std::make_shared<MultiModalObjectRecognitionROS2>("multimodal_object_recognition");
+    std::make_shared<MultiModalObjectRecognitionROS2>("multimodal_object_recognition", false);
 
   exe.add_node(mmor_lc_node->get_node_base_interface());
 

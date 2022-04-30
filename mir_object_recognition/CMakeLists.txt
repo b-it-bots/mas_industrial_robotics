@@ -22,8 +22,6 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(pcl_ros REQUIRED)
-find_package(PCL 1.7 REQUIRED)
 find_package(sensor_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -35,8 +33,7 @@ include_directories(
   ${lifecycle_msgs_INCLUDE_DIRS}
   ${rclcpp_lifecycle_INCLUDE_DIRS}
   ${rclcpp_INCLUDE_DIRS}
-  ${mas_perception_msgs_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS})
+  ${mas_perception_msgs_INCLUDE_DIRS})
 
 add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
@@ -46,8 +43,16 @@ target_link_libraries(lc_client
   ${rclcpp_lifecycle_LIBRARIES}
   ${std_msgs_LIBRARIES}
 )
-
 ament_target_dependencies(lc_client rclcpp std_msgs)
+
+add_executable(mmor ros/src/multimodal_object_recognition.cpp)
+target_link_libraries(mmor
+  ${rclcpp_lifecycle_LIBRARIES}
+  ${std_msgs_LIBRARIES}
+  ${sensor_msgs_LIBRARIES}
+  ${mas_perception_msgs_LIBRARIES}
+)
+ament_target_dependencies(mmor rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
 
 if(BUILD_TESTING)
