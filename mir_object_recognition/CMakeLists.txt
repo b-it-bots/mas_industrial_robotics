@@ -24,6 +24,8 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED) 
 find_package(message_filters REQUIRED)
+find_package(tf2_ros REQUIRED)
+# find_package(pcl_ros REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -60,6 +62,18 @@ target_link_libraries(mmor
 )
 ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs)
 
+add_executable(transformer ros/src/sample_tf2_transformer.cpp)
+target_link_libraries(transformer
+  ${std_msgs_INCLUDE_DIRS}
+  ${sensor_msgs_INCLUDE_DIRS}
+  ${lifecycle_msgs_INCLUDE_DIRS}
+  ${rclcpp_lifecycle_INCLUDE_DIRS}
+  ${rclcpp_INCLUDE_DIRS}
+  ${mas_perception_msgs_INCLUDE_DIRS}
+  ${message_filters_INCLUDE_DIRS}
+)
+ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -76,6 +90,8 @@ endif()
 install(TARGETS
   lc_client
   lc_talker
+  mmor
+  transformer
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY
