@@ -8,13 +8,13 @@ MultiModalObjectRecognitionROS2::MultiModalObjectRecognitionROS2(const std::stri
         rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
 {}
 
-/* void MultiModalObjectRecognitionROS2::synchronizeCallback(const sensor_msgs::msg::Image image,
+void MultiModalObjectRecognitionROS2::synchronizeCallback(const sensor_msgs::msg::Image image,
                       const sensor_msgs::msg::PointCloud2 cloud)
 {
 
     RCLCPP_INFO(get_logger(), "synchro callback");
 
-} */
+}
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MultiModalObjectRecognitionROS2::on_configure(const rclcpp_lifecycle::State &)
@@ -30,12 +30,13 @@ MultiModalObjectRecognitionROS2::on_configure(const rclcpp_lifecycle::State &)
     
     RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
-    image_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Image, rclcpp_lifecycle::LifecycleNode>>(this, "image");
+    image_sub_.subscribe(this, "image");
     
-    cloud_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::PointCloud2, rclcpp_lifecycle::LifecycleNode>>(this, "cloud");
+    cloud_sub_.subscribe(this, "cloud");
 
-    // msg_sync_ = std::make_shared<message_filters::Synchronizer<msgSyncPolicy>>(msgSyncPolicy(10), image_sub_, cloud_sub_);
-    // msg_sync_ -> registerCallback(std::bind(&MultiModalObjectRecognitionROS2::synchronizeCallback, this, _1, _2));
+    //msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
+    msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
+    msg_sync_ -> registerCallback(&MultiModalObjectRecognitionROS2::synchronizeCallback, this);
     
     
     // We return a success and hence invoke the transition to the next
