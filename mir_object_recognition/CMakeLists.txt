@@ -26,6 +26,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -40,6 +41,7 @@ include_directories(
   ${mas_perception_msgs_INCLUDE_DIRS}
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
+  ${geometry_msgs_INCLUDE_DIRS}
   )
 
 add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
@@ -74,8 +76,9 @@ target_link_libraries(transformer
   ${mas_perception_msgs_INCLUDE_DIRS}
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
+  ${geometry_msgs_INCLUDE_DIRS}
 )
-ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros)
+ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 
 
 if(BUILD_TESTING)
