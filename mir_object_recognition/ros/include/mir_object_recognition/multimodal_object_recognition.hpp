@@ -31,6 +31,7 @@
 
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
+#include "pcl_ros/transforms.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;

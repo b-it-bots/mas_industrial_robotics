@@ -17,11 +17,32 @@ public:
                              const sensor_msgs::msg::PointCloud2 cloud_in,
                              sensor_msgs::msg::PointCloud2 cloud_out)
     {
-        RCLCPP_INFO(this->get_logger(),"TF listener: ",tf_listener);
+        // RCLCPP_INFO(this->get_logger(),"TF listener: ",tf_listener);
         if(tf_listener)
         {
             RCLCPP_INFO(this->get_logger(),"Coming to the transform function");
         }
+        // if (tf_listener) 
+        // {
+        //     try {
+        //     ros::Time common_time;
+        //     tf_listener->getLatestCommonTime(target_frame, cloud_in.header.frame_id, common_time, NULL);
+        //     cloud_in.header.stamp = common_time;
+        //     tf_listener->waitForTransform(target_frame, cloud_in.header.frame_id, ros::Time::now(),
+        //                                     ros::Duration(1.0));
+        //     pcl_ros::transformPointCloud(target_frame, cloud_in, cloud_out, *tf_listener);
+        //     cloud_out.header.frame_id = target_frame;
+        //     } catch (tf::TransformException &ex) {
+        //     ROS_ERROR("PCL transform error: %s", ex.what());
+        //     return (false);
+        //     }
+        // }
+        // else 
+        // {
+        //     ROS_ERROR_THROTTLE(2.0, "TF listener not initialized.");
+        //     return (false);
+        // }
+        // return (true);
     }
 private:
     void callback_func(const sensor_msgs::msg::PointCloud2 cloud)
