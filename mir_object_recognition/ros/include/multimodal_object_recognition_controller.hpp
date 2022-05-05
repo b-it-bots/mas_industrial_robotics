@@ -19,9 +19,11 @@
 #include "rcutils/logging_macros.h"
 
 
-char key;
+extern char key;
+extern const char* msg;
+
 // which node to handle
-static constexpr char const * lifecycle_node;
+//static constexpr char const * lifecycle_node;
 
 // Every lifecycle node has various services
 // attached to it. By convention, we use the format of
@@ -30,8 +32,8 @@ static constexpr char const * lifecycle_node;
 // and thus the two service topics are:
 // lc_pubsub/get_state
 // lc_pubsub/change_state 
-static constexpr char const * node_get_state_topic; 
-static constexpr char const * node_change_state_topic;
+//static constexpr char const * node_get_state_topic; 
+//static constexpr char const * node_change_state_topic;
 
 template<typename FutureT, typename WaitTimeT>
 std::future_status 
@@ -94,8 +96,8 @@ int getch(void);
 
 
 
-void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> lc_client);
+void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_controller);
 
 
 
-#endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
+#endif  

@@ -26,17 +26,18 @@ find_package(std_msgs REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 include_directories(
-  include
+  ros/include
   ${std_msgs_INCLUDE_DIRS}
   ${lifecycle_msgs_INCLUDE_DIRS}
   ${rclcpp_lifecycle_INCLUDE_DIRS}
   ${rclcpp_INCLUDE_DIRS}
   ${mas_perception_msgs_INCLUDE_DIRS})
 
-add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
-ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
+#add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
+#ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
-add_executable(mmor_controller ros/src/sample_lifecycle_service_client.cpp)
+
+add_executable(mmor_controller ros/src/multimodal_object_recognition_controller.cpp)
 target_link_libraries(mmor_controller
   ${rclcpp_lifecycle_LIBRARIES}
   ${std_msgs_LIBRARIES}
@@ -59,7 +60,6 @@ endif()
 
 install(TARGETS
   mmor_controller
-  lc_talker
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY
