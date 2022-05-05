@@ -36,13 +36,13 @@ include_directories(
 add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
-add_executable(lc_client ros/src/sample_lifecycle_service_client.cpp)
-target_link_libraries(lc_client
+add_executable(mmor_controller ros/src/sample_lifecycle_service_client.cpp)
+target_link_libraries(mmor_controller
   ${rclcpp_lifecycle_LIBRARIES}
   ${std_msgs_LIBRARIES}
 )
 
-ament_target_dependencies(lc_client rclcpp std_msgs)
+ament_target_dependencies(mmor_controller rclcpp std_msgs)
 
 
 if(BUILD_TESTING)
@@ -58,7 +58,7 @@ endif()
 
 
 install(TARGETS
-  lc_client
+  mmor_controller
   lc_talker
   DESTINATION lib/${PROJECT_NAME})
   
