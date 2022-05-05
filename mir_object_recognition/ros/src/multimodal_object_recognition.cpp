@@ -13,6 +13,7 @@ void MultiModalObjectRecognitionROS2::synchronizeCallback(const sensor_msgs::msg
 {
 
     RCLCPP_INFO(get_logger(), "synchro callback");
+    RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image.header.stamp.sec, cloud.header.stamp.sec);
 
 }
 
@@ -30,9 +31,9 @@ MultiModalObjectRecognitionROS2::on_configure(const rclcpp_lifecycle::State &)
     
     RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
-    image_sub_.subscribe(this, "image");
+    image_sub_.subscribe(this, "/camera/color/image_raw");
     
-    cloud_sub_.subscribe(this, "cloud");
+    cloud_sub_.subscribe(this, "/camera/depth/color/points");
 
     //msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
     msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);

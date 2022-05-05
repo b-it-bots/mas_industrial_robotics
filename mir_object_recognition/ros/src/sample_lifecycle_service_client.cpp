@@ -34,7 +34,7 @@ using namespace std::chrono_literals;
 char key(' ');
 
 // which node to handle
-static constexpr char const * lifecycle_node = "lc_talker";  //lc_pubsub 
+static constexpr char const * lifecycle_node = "multimodal_object_recognition";  //lc_pubsub 
 
 // Every lifecycle node has various services
 // attached to it. By convention, we use the format of
@@ -43,8 +43,8 @@ static constexpr char const * lifecycle_node = "lc_talker";  //lc_pubsub
 // and thus the two service topics are:
 // lc_pubsub/get_state
 // lc_pubsub/change_state 
-static constexpr char const * node_get_state_topic = "lc_talker/get_state"; //lc_pubsub 
-static constexpr char const * node_change_state_topic = "lc_talker/change_state";  //lc_pubsub 
+static constexpr char const * node_get_state_topic = "multimodal_object_recognition/get_state"; //lc_pubsub 
+static constexpr char const * node_change_state_topic = "multimodal_object_recognition/change_state";  //lc_pubsub 
 
 template<typename FutureT, typename WaitTimeT>
 std::future_status
