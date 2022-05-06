@@ -60,7 +60,6 @@ ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs 
 add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

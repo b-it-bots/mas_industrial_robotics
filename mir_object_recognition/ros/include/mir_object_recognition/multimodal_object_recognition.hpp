@@ -39,10 +39,10 @@ using std::placeholders::_2;
 
 using namespace std::chrono_literals;
 
-class MultiModalObjectRecognitionROS2: public rclcpp_lifecycle::LifecycleNode
+class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
     public:
-        explicit MultiModalObjectRecognitionROS2(const std::string & node_name, bool intra_process_comms);
+        explicit MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms);
 
         /// Transition callback for state configuring
         /**
@@ -125,8 +125,10 @@ class MultiModalObjectRecognitionROS2: public rclcpp_lifecycle::LifecycleNode
         typedef message_filters::Synchronizer<msgSyncPolicy> Sync;
         std::shared_ptr<Sync> msg_sync_;
 
-        void synchronizeCallback(const sensor_msgs::msg::Image image, 
-                const sensor_msgs::msg::PointCloud2 cloud); 
+        void synchronizeCallback(const sensor_msgs::msg::Image &image, 
+                const sensor_msgs::msg::PointCloud2 &cloud);
+
+        void preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
