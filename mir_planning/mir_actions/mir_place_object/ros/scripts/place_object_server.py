@@ -13,7 +13,8 @@ from mir_planning_msgs.msg import (
 from smach_ros import ActionServerWrapper, IntrospectionServer
 from std_msgs.msg import String
 
-
+from geometry_msgs.msg import PoseArray
+from geometry_msgs.msg import PoseStamped
 # ===============================================================================
 class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
     def __init__(self, topic_name_pub, topic_name_sub, event_sub, timeout_duration):
@@ -27,11 +28,16 @@ class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
         self.timeout = rospy.Duration.from_sec(timeout_duration)
         # create publisher
         self.platform_name_pub = rospy.Publisher(topic_name_pub, String, queue_size=10)
+#        self.temp_empty_location_pub = rospy.Publisher(temp_location_pub, PoseArray, queue_size=10)
+
         rospy.Subscriber(topic_name_sub, String, self.pose_cb)
         rospy.Subscriber(event_sub, String, self.event_cb)
+
         rospy.sleep(0.1)  # time for publisher to register
+
         self.place_pose = None
         self.status = None
+	self.empty_location = None
 
     def pose_cb(self, msg):
         self.place_pose = msg.data
@@ -47,6 +53,7 @@ class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
         )
 
         location = Utils.get_value_of(userdata.goal.parameters, "location")
+
         if location is None:
             rospy.logwarn('"location" not provided. Using default.')
             return "failed"
@@ -97,7 +104,90 @@ class CheckIfLocationIsShelf(smach.State):
             return "not_shelf"
 
 
+
+# ==============================================================================
+
+# new class for empty space detection
+
+class GetEmptyPositionOnTable(smach.State):
+    def __init__(self,empty_spaces,topic_name_pub):
+	smach.State.__init__(
+		self,
+		outcomes=["success", "failure"],
+		input_keys=["empty_locations",], # change it later
+		output_keys=["feedback","result","empty_locations"])
+	self.empty_locations = None
+
+        self.timeout = rospy.Duration.from_sec(15.0)
+        # create publisher
+        #self.pose_array = rospy.Publisher(topic_name_pub, String, queue_size=10)
+        #self.pose_array = rospy.Publisher(topic_name_pub, PoseArray, queue_size=10)
+        rospy.Subscriber(empty_spaces, PoseArray, self.empty_space_cb)
+        rospy.sleep(0.1)
+
+    def empty_space_cb(self, msg): ############# callback for get empty_space_location from empty_sp$
+
+        self.empty_locations = msg
+
+    def execute(self, userdata): # getting data from empty space detector and giving all the poses it to next states 
+
+
+        userdata.result = GenericExecuteResult()
+        userdata.feedback = GenericExecuteFeedback(
+            current_state="POSE_RECEIVE", text="Receiving empty space location",)
+
+
+	# The empty locations have all three empty poses 
+	userdata.empty_locations = self.empty_locations
+
+#	single_array = PoseArray()
+#  	single_array.header.frame_id = self.empty_locations.header
+#	single_array.poses = self.empty_locations.poses[self.selection_index]
+
+
+        #self.pose_array.publish(single_array)
+	#rospy.loginfo("Below is the empty_location from userdata")
+	#rospy.loginfo(single_array)
+
+	return 'success'
+
 # ===============================================================================
+
+## ++++++++++++++ code from ekanshh ++++++++++++++ ##
+
+class PublishObjectPose(smach.State):
+    def __init__(self, empty_pose_index):
+        smach.State.__init__(self, outcomes=["success", "failed"],
+                                    input_keys=["empty_locations"])
+
+        self.empty_pose_pub = rospy.Publisher(
+            "/mcr_perception/object_selector/output/object_pose",
+            PoseStamped,
+            queue_size=10)
+	self.selection_index = empty_pose_index
+
+    def execute(self, userdata):
+
+	empty_locations = userdata.empty_locations
+
+        single_array = PoseStamped()
+        single_array.header = empty_locations.header
+        single_array.pose = empty_locations.poses[self.selection_index]
+
+        rospy.loginfo("Publishing single pose to pregrasp planner")
+
+        rospy.loginfo(type(single_array))
+        self.empty_pose_pub.publish(single_array)
+
+	rospy.sleep(0.3)
+	single_array = None
+        return "success"
+
+
+
+
+
+#=================================================================================
 def transition_cb(*args, **kwargs):
     userdata = args[0]
     sm_state = args[1][0]
@@ -113,7 +203,6 @@ def start_cb(*args, **kwargs):
     feedback = GenericExecuteFeedback()
     feedback.current_state = sm_state
     userdata.feedback = feedback
-# ===============================================================================
 
 
 def main():
@@ -122,8 +211,8 @@ def main():
     sm = smach.StateMachine(
         outcomes=["OVERALL_SUCCESS", "OVERALL_FAILED"],
         input_keys=["goal", "feedback", "result"],
-        output_keys=["feedback", "result"],
-    )
+        output_keys=["feedback", "result"],)
+    sm.userdata.empty_locations = None
     with sm:
         # add states to the container
         smach.StateMachine.add(
@@ -228,66 +317,182 @@ def main():
             gbs.send_event(
                 [("/mcr_perception/place_pose_selector/event_in", "e_start")]
             ),
-            transitions={"success": "GET_POSE_TO_PLACE_OBJECT"},
+            transitions={"success": "EMPTY_POSITION_SELECTION"},
+        )
+
+
+# new state machine for empty space detection
+# this below state will trigger the emptyspace node to publish the location of empty spaces
+
+# ===============================================================
+
+
+	smach.StateMachine.add("EMPTY_POSITION_SELECTION",
+
+		gbs.send_and_wait_events_combined(
+			event_in_list = [("/mir_perception/empty_space_detector/event_in","e_add_cloud")],
+			event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
+			timeout_duration=50,),
+	transitions={"success": "TRIGGER",
+		    "timeout": "EMPTY_POSITION_SELECTION",
+		    "failure": "EMPTY_POSITION_SELECTION",},
+	)
+
+
+        smach.StateMachine.add("TRIGGER",
+
+                gbs.send_and_wait_events_combined(
+                   event_in_list = [("/mir_perception/empty_space_detector/event_in","e_trigger")],
+		   event_out_list = [("/mir_perception/empty_space_detector/event_out","e_success",True)],
+		   timeout_duration = 50,),
+        transitions={"success": "POSE_RECEIVE",
+		     "timeout": "TRIGGER",
+		     "failure": "TRIGGER",},
+        )
+
+
+
+        smach.StateMachine.add(
+		"POSE_RECEIVE",
+                GetEmptyPositionOnTable(
+			"/mir_perception/empty_space_detector/empty_spaces",
+			"/mcr_perception/place_pose_selector/empty_space_pose_array"),
+
+        transitions={
+                "success": "PUBLISH_OBJECT_POSE_1",
+                "failure": "MOVE_ARM_TO_DEFAULT_PLACE",
+	   },
+	)
+
+
+
+## ++++++++++++++++++++++++++++++++++ code from Ekanshh ++++++++++++++++++++++#
+
+
+        smach.StateMachine.add(
+            "PUBLISH_OBJECT_POSE_1",
+            PublishObjectPose(0),
+            transitions={"success": "CHECK_PRE_GRASP_POSE", "failed": "PUBLISH_OBJECT_POSE_2"}
+
         )
 
         smach.StateMachine.add(
-            "GET_POSE_TO_PLACE_OBJECT",
-            GetPoseToPlaceOject(
-                "/mcr_perception/place_pose_selector/platform_name",
-                "/mcr_perception/place_pose_selector/place_pose",
-                "/mcr_perception/place_pose_selector/event_out",
-                15.0,
+            "PUBLISH_OBJECT_POSE_2",
+            PublishObjectPose(1),
+            transitions={"success": "CHECK_PRE_GRASP_POSE", "failed": "PUBLISH_OBJECT_POSE_3"}
+
+        )
+
+        smach.StateMachine.add(
+            "PUBLISH_OBJECT_POSE_3",
+            PublishObjectPose(2),
+            transitions={"success": "CHECK_PRE_GRASP_POSE", "failed": "OVERALL_FAILED"}
+
+        )
+        smach.StateMachine.add(
+            "CHECK_PRE_GRASP_POSE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    ("/pregrasp_planner_node/event_in", "e_start")
+                ],
+                event_out_list=[
+                    (
+                        "/pregrasp_planner_node/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=20,
             ),
             transitions={
-                "succeeded": "MOVE_ARM_TO_PLACE_OBJECT",
-                "failed": "MOVE_ARM_TO_DEFAULT_PLACE",
+                "success": "GO_TO_PRE_GRASP_POSE",
+                "timeout": "OVERALL_FAILED",
+                "failure": "EMPTY_POSITION_SELECTION",
             },
         )
-
         smach.StateMachine.add(
-            "MOVE_ARM_TO_DEFAULT_PLACE",
-            gms.move_arm("15cm/pose4"),
-            transitions={
-                "succeeded": "OPEN_GRIPPER",
-                "failed": "MOVE_ARM_TO_DEFAULT_PLACE",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_PLACE_OBJECT",
-            gms.move_arm(),
-            transitions={"succeeded": "OPEN_GRIPPER", "failed": "OPEN_GRIPPER",},
-        )
-
-        smach.StateMachine.add(
-            "OPEN_GRIPPER",
-            gms.control_gripper("open"),
-            transitions={"succeeded": "STOP_PLACE_POSE_SELECTOR"},
-        )
-
-        smach.StateMachine.add(
-            "STOP_PLACE_POSE_SELECTOR",
-            gbs.send_event(
-                [("/mcr_perception/place_pose_selector/event_in", "e_stop")]
+            "GO_TO_PRE_GRASP_POSE",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    ("/waypoint_trajectory_generation/event_in", "e_start")
+                ],
+                event_out_list=[
+                    (
+                        "/waypoint_trajectory_generation/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=20,
             ),
-            transitions={"success": "MOVE_ARM_TO_NEUTRAL"},
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_NEUTRAL",
-            gms.move_arm("barrier_tape"),
             transitions={
-                "succeeded": "OVERALL_SUCCESS",
-                "failed": "MOVE_ARM_TO_NEUTRAL",
+                "success": "OPEN_GRIPPER",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
             },
         )
 
+## ++++++++++++++++++++++++++++++++++
+
+# Not needed for now
+
+    #   smach.StateMachine.add(
+    #         "GET_POSE_TO_PLACE_OBJECT",
+    #         GetPoseToPlaceOject(
+    #             "/mcr_perception/place_pose_selector/platform_name",
+    #             "/mcr_perception/place_pose_selector/place_pose",
+    #             "/mcr_perception/place_pose_selector/event_out",
+    #             15.0,
+    #         ),
+    #         transitions={
+    #             "succeeded": "MOVE_ARM_TO_PLACE_OBJECT",
+    #             "failed": "MOVE_ARM_TO_DEFAULT_PLACE",
+    #         },
+    #     )
+
+        smach.StateMachine.add(
+             "MOVE_ARM_TO_DEFAULT_PLACE",
+             gms.move_arm("15cm/pose4"),
+             transitions={
+                 "succeeded": "EMPTY_POSITION_SELECTION",
+                "failed": "MOVE_ARM_TO_DEFAULT_PLACE",
+              },
+         )
+
+    #     smach.StateMachine.add(
+    #         "MOVE_ARM_TO_PLACE_OBJECT",
+    #         gms.move_arm("empty_location"), # new change (from _ to empty_location)
+    #         transitions={"succeeded": "OPEN_GRIPPER", "failed": "OPEN_GRIPPER",},
+    #     )
+
+# =======================================================================
+        smach.StateMachine.add(
+                    "OPEN_GRIPPER",
+                    gms.control_gripper("open"),
+                    transitions={"succeeded": "STOP_PLACE_POSE_SELECTOR"},
+                )
+
+        smach.StateMachine.add(
+                    "STOP_PLACE_POSE_SELECTOR",
+                    gbs.send_event(
+                        [("/mcr_perception/place_pose_selector/event_in", "e_stop")]
+                    ),
+                    transitions={"success": "MOVE_ARM_TO_NEUTRAL"},
+                )
+
+        smach.StateMachine.add(
+                    "MOVE_ARM_TO_NEUTRAL",
+                    gms.move_arm("barrier_tape"),
+                    transitions={
+                        "succeeded": "OVERALL_SUCCESS",
+                        "failed": "MOVE_ARM_TO_NEUTRAL",
+                    },
+                )
     sm.register_transition_cb(transition_cb)
     sm.register_start_cb(start_cb)
 
     # smach viewer
-    if rospy.get_param("~viewer_enabled", False):
+    if rospy.get_param("~viewer_enabled", True):
         sis = IntrospectionServer(
             "place_object_smach_viewer", sm, "/STAGE_OBJECT_SMACH_VIEWER"
         )
