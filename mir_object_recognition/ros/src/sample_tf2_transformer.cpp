@@ -11,6 +11,7 @@ public:
         tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
         tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
         pc_subscriber_ = this->create_subscription<sensor_msgs::msg::PointCloud2>("/camera/depth/color/points",10,std::bind(&Transformer::callback_func,this,_1));
+        publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",10);
     }
     bool transformpointcloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
                              const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
@@ -32,6 +33,7 @@ public:
                 // RCLCPP_INFO(this->get_logger(),"transformed stamped obtained");
                 pcl_ros::transformPointCloud(target_frame,cloud_in,cloud_out,*tf_buffer);
                 RCLCPP_INFO(this->get_logger(), "Transform throws no error");
+                publisher_->publish(cloud_out);
             } 
             catch (tf2::TransformException & ex) 
             {
@@ -58,6 +60,7 @@ private:
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_{nullptr};
     std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
     std::string target_frame_id_ = "base_link";
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
 };
 
 int main(int argc, char * argv[])
