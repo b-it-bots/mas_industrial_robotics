@@ -20,6 +20,10 @@
   <build_depend>pcl_ros</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>message_filters</build_depend>
+  <build_depend>tf_transformations</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+
   
   <exec_depend>mas_perception_msgs</exec_depend>  
   <exec_depend>rclcpp_lifecycle</exec_depend>
@@ -27,6 +31,11 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf_transformations</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
