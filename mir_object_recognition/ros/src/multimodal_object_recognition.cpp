@@ -14,12 +14,40 @@ void MultiModalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::msg:
 
     RCLCPP_INFO(get_logger(), "synchro callback");
     RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image.header.stamp.sec, cloud.header.stamp.sec);
-
+    sensor_msgs::msg::PointCloud2 transformed_msg;
+    this->preprocessPointCloud(tf_listener_, tf_buffer_, target_frame_id_, cloud, transformed_msg);
 }
 
-void MultiModalObjectRecognitionROS::preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg)
+bool MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
+                                                          const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+                                                          const std::string target_frame, 
+                                                          const sensor_msgs::msg::PointCloud2 cloud_in,
+                                                          sensor_msgs::msg::PointCloud2 cloud_out)
 {
     RCLCPP_INFO(get_logger(), "preprocess point cloud");
+    if (tf_listener) 
+        {
+            // geometry_msgs::msg::TransformStamped transformStamped;
+            try 
+            {
+                pcl_ros::transformPointCloud(target_frame,cloud_in,cloud_out,*tf_buffer);
+                RCLCPP_INFO(this->get_logger(), "Transform throws no error");
+                publisher_->publish(cloud_out);
+            } 
+            catch (tf2::TransformException & ex) 
+            {
+                RCLCPP_INFO(this->get_logger(), "Could not transform");
+                return (false);
+            }
+        }
+        else 
+        {
+            RCLCPP_INFO(this->get_logger(), "TF listener not initialized");
+            // RCLCPP_ERROR_THROTTLE(2.0, "TF listener not initialized.");
+            return (false);
+        }
+        return (true);
+
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -38,9 +66,13 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 
     image_sub_.subscribe(this, "input_image_topic");
     cloud_sub_.subscribe(this, "input_cloud_topic");
+    publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",10);
 
     //msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
     msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
+
+    tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     
     // We return a success and hence invoke the transition to the next
     // step: "inactive".

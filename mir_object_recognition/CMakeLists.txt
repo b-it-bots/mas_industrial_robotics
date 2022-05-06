@@ -55,7 +55,7 @@ target_link_libraries(lc_client
 ament_target_dependencies(lc_client rclcpp std_msgs)
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs)
+ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 
 add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
