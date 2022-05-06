@@ -67,8 +67,8 @@ void MultiModalObjectRecognitionController::get_state(std::chrono::seconds time_
 
 	// We send the service request for asking the current
 	// state of the lc_talker node.
-	auto future_result = client_get_state_->async_send_request(request);
-    std::cout<<""<<std::endl;
+	auto future_result = client_get_state_->async_send_request(request).future.share();
+    
 	// Let's wait until we have the answer from the node.
 	// If the request times out, we return an unknown state.
 	auto future_status = wait_for_result(future_result, time_out);
@@ -107,7 +107,7 @@ void MultiModalObjectRecognitionController::change_state(std::uint8_t transition
 	}
 
 	// We send the request with the transition we want to invoke.
-	auto future_result = client_change_state_->async_send_request(request);
+	auto future_result = client_change_state_->async_send_request(request).future.share();
 
 	// Let's wait until we have the answer from the node.
 	// If the request times out, we return an unknown state.
@@ -300,7 +300,7 @@ int main(int argc, char ** argv)
 
 	rclcpp::init(argc, argv);
 
-	auto mmor_controller = std::make_shared<MultiModalObjectRecognitionController>("lc_talker");
+	auto mmor_controller = std::make_shared<MultiModalObjectRecognitionController>("mmor_controller");
 	mmor_controller->init();
 	//rclcpp::WallRate time_between_state_changes(0.1);
 	rclcpp::executors::SingleThreadedExecutor exe;
