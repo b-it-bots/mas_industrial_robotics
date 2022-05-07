@@ -60,7 +60,7 @@ public:
         get_logger(), "Lifecycle publisher is currently inactive. Messages are not published.");
     } else {
       RCLCPP_INFO(
-        get_logger(), "Lifecycle publisher is active. Publishing: [%s]", sample_object_list);
+        get_logger(), "Lifecycle publisher is active. Publishing: [%s]", std::to_string(sample_object_list.objects.size()).c_str());
     }
 
     // We independently from the current state call publish on the lifecycle
@@ -246,7 +246,7 @@ private:
   void pcl_callback(const mas_perception_msgs::msg::ObjectList::SharedPtr msg)
   {
       RCLCPP_INFO(
-        get_logger(), "pcl_callback: [%s]", msg);
+        get_logger(), "pcl_callback: [%s]", std::to_string(msg->objects.size()).c_str());
       this->objlist_publish();
   }
 };
