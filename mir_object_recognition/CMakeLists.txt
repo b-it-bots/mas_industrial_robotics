@@ -74,7 +74,7 @@ endif()
 
 install(TARGETS
   lifecycle_controller
-  lc_talker
+  #lc_talker
   mmor
   transformer
   DESTINATION lib/${PROJECT_NAME})
