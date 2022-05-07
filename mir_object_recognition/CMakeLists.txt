@@ -44,15 +44,15 @@ include_directories(
   ${geometry_msgs_INCLUDE_DIRS}
   )
 
-add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
-ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
+#add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
+#ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
-add_executable(lc_client ros/src/sample_lifecycle_service_client.cpp)
-target_link_libraries(lc_client
+add_executable(lifecycle_controller ros/src/lifecycle_controller.cpp)
+target_link_libraries(lifecycle_controller
   ${rclcpp_lifecycle_LIBRARIES}
   ${std_msgs_LIBRARIES}
 )
-ament_target_dependencies(lc_client rclcpp std_msgs)
+ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
@@ -73,7 +73,7 @@ endif()
 
 
 install(TARGETS
-  lc_client
+  lifecycle_controller
   lc_talker
   mmor
   transformer
