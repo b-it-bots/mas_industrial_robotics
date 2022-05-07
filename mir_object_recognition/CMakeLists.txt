@@ -37,13 +37,13 @@ include_directories(
 #ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
 
-add_executable(mmor_controller ros/src/multimodal_object_recognition_controller.cpp)
-target_link_libraries(mmor_controller
+add_executable(lifecycle_controller ros/src/lifecycle_controller.cpp)
+target_link_libraries(lifecycle_controller
   ${rclcpp_lifecycle_LIBRARIES}
   ${std_msgs_LIBRARIES}
 )
 
-ament_target_dependencies(mmor_controller rclcpp std_msgs)
+ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 
 if(BUILD_TESTING)
@@ -59,7 +59,7 @@ endif()
 
 
 install(TARGETS
-  mmor_controller
+  lifecycle_controller
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY

@@ -1,5 +1,5 @@
-#ifndef MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_CONTROLLER_HPP
-#define MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_CONTROLLER_HPP
+#ifndef LIFECYCLE_CONTROLLER_HPP
+#define LIFECYCLE_CONTROLLER_HPP
 
 #include <chrono>
 #include <memory>
@@ -22,28 +22,24 @@
 extern char key;
 extern const char* msg;
 
-// which node to handle
-//static constexpr char const * lifecycle_node;
-
 // Every lifecycle node has various services
 // attached to it. By convention, we use the format of
 // <node name>/<service name>.
-// In this demo, we use get_state and change_state
+// In this file, we use get_state and change_state
 // and thus the two service topics are:
-// lc_pubsub/get_state
-// lc_pubsub/change_state 
-//static constexpr char const * node_get_state_topic; 
-//static constexpr char const * node_change_state_topic;
+// <node name>/get_state
+// <node name>/change_state 
+
 
 template<typename FutureT, typename WaitTimeT>
 std::future_status 
 wait_for_result( FutureT & future,  WaitTimeT time_to_wait);
 
 
-class MultiModalObjectRecognitionController : public rclcpp::Node
+class LifecycleController : public rclcpp::Node
 {
 public:
-  explicit MultiModalObjectRecognitionController(const std::string & node_name);
+  explicit LifecycleController(const std::string & node_name);
   
 
   void init();
@@ -85,6 +81,10 @@ public:
 private:
   std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::GetState>> client_get_state_;
   std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::ChangeState>> client_change_state_;
+  std::string lifecycle_node;
+  std::string node_get_state_topic;
+  std::string node_change_state_topic;
+ 
 
 };
 
@@ -96,7 +96,7 @@ int getch(void);
 
 
 
-void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_controller);
+void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller);
 
 
 

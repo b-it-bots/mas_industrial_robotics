@@ -1,15 +1,9 @@
-#include "multimodal_object_recognition_controller.hpp"
+#include "lifecycle_controller.hpp"
 
 
 using namespace std::chrono_literals;
 
 char key(' ');
-
-
-static constexpr char const * lifecycle_node = "lc_talker";
-static constexpr char const * node_get_state_topic = "lc_talker/get_state";
-static constexpr char const * node_change_state_topic = "lc_talker/change_state";
-
 
 template<typename FutureT, typename WaitTimeT>
 std::future_status wait_for_result( FutureT & future, WaitTimeT time_to_wait)
@@ -30,18 +24,19 @@ std::future_status wait_for_result( FutureT & future, WaitTimeT time_to_wait)
 
 
 
-MultiModalObjectRecognitionController::MultiModalObjectRecognitionController(const std::string & node_name)
+LifecycleController::LifecycleController(const std::string & node_name)
 : Node(node_name)
 {
-  //this->declare_parameter<std::string>("lifecycle_node_name", "lc_talker");
-  //this->get_parameter("lifecycle_node_name", lifecycle_node);
-  //node_get_state_topic = lifecycle_node + "/get_state"; 
-  //node_change_state_topic = lifecycle_node + "/change_state";  
+	// defualt lifecycle_node_name = lc_talker.
+	this->declare_parameter<std::string>("lifecycle_node_name", "lc_talker");
+	this->get_parameter("lifecycle_node_name", lifecycle_node);
+	node_get_state_topic = lifecycle_node + "/get_state"; 
+	node_change_state_topic = lifecycle_node + "/change_state";  
   
 }
   
 
-void MultiModalObjectRecognitionController::init()
+void LifecycleController::init()
 {
 
 	client_get_state_ = this->create_client<lifecycle_msgs::srv::GetState>(
@@ -52,12 +47,12 @@ void MultiModalObjectRecognitionController::init()
 
 
  
-void MultiModalObjectRecognitionController::get_state(std::chrono::seconds time_out = 3s)
+void LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 {
 	auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
     
 	if (!client_get_state_->wait_for_service(time_out)) {
-	RCLCPP_WARN(
+	RCLCPP_ERROR(
 	get_logger(),
 	"Service %s is not available.",
 	client_get_state_->get_service_name());
@@ -74,8 +69,8 @@ void MultiModalObjectRecognitionController::get_state(std::chrono::seconds time_
 	auto future_status = wait_for_result(future_result, time_out);
 
 	if (future_status != std::future_status::ready) {
-	RCLCPP_WARN(
-	get_logger(), "Server time out while getting current state for node %s", lifecycle_node);
+	RCLCPP_ERROR(
+	get_logger(), "Server time out while getting current state for node %s", lifecycle_node.c_str());
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
 	}
 
@@ -83,23 +78,23 @@ void MultiModalObjectRecognitionController::get_state(std::chrono::seconds time_
 	if (future_result.get()) {
 	RCLCPP_INFO(
 	get_logger(), "Node %s has current state %s.",
-	lifecycle_node, future_result.get()->current_state.label.c_str());
+	lifecycle_node.c_str(), future_result.get()->current_state.label.c_str());
 	//return future_result.get()->current_state.id;
 	} else {
-	RCLCPP_WARN(
-	get_logger(), "Failed to get current state for node %s", lifecycle_node);
+	RCLCPP_ERROR(
+	get_logger(), "Failed to get current state for node %s", lifecycle_node.c_str());
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
 	}
 }
 
 
-void MultiModalObjectRecognitionController::change_state(std::uint8_t transition, std::chrono::seconds time_out = 3s)
+void LifecycleController::change_state(std::uint8_t transition, std::chrono::seconds time_out = 3s)
 {
 	auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
 	request->transition.id = transition;
 
 	if (!client_change_state_->wait_for_service(time_out)) {
-	RCLCPP_WARN(
+	RCLCPP_ERROR(
 	get_logger(),
 	"Service %s is not available.",
 	client_change_state_->get_service_name());
@@ -114,8 +109,8 @@ void MultiModalObjectRecognitionController::change_state(std::uint8_t transition
 	auto future_status = wait_for_result(future_result, time_out);
 
 	if (future_status != std::future_status::ready) {
-	RCLCPP_WARN(
-	get_logger(), "Server time out while getting current state for node %s", lifecycle_node);
+	RCLCPP_ERROR(
+	get_logger(), "Server time out while getting current state for node %s", lifecycle_node.c_str());
 	//return false;
 	}
 
@@ -125,7 +120,7 @@ void MultiModalObjectRecognitionController::change_state(std::uint8_t transition
 	get_logger(), "Transition %d successfully triggered.", static_cast<int>(transition));
 	//return true;
 	} else {
-	RCLCPP_WARN(
+	RCLCPP_ERROR(
 	get_logger(), "Failed to trigger transition %u", static_cast<unsigned int>(transition));
 	//return false;
 	}
@@ -180,6 +175,8 @@ D:  | ACTIVE       -->  Configuring   --> INACTIVE
 X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
 
 ########################################################################
+
+Note: Press T to terminate and ctrl + c to exit.
 )";
 
 
@@ -187,15 +184,13 @@ X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
 /**
  * This is a little independent
  * script which triggers the
- * default lifecycle of a node.
- * It starts with configure, activate,
- * deactivate, activate, deactivate,
- * cleanup and finally shutdown
+ * default lifecycle of a node based on keyborad inputs.
  */
-void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_controller)
+void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 {
 
 	std::cout<<msg<<std::endl;
+	lifecycle_controller->get_state();
 	while(rclcpp::ok()){
 	key = getch();
 
@@ -204,8 +199,8 @@ void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_c
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"configure"<<std::endl;
-	mmor_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-	mmor_controller->get_state();
+	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+	lifecycle_controller->get_state();
 	}
 
 
@@ -214,16 +209,16 @@ void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_c
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"activate"<<std::endl;
-	mmor_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
-	mmor_controller->get_state();
+	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+	lifecycle_controller->get_state();
 	}
 	// deactivate
 	if (key == 'D'){
 	//time_between_state_changes.sleep();
 
 	std::cout<<"deactivate"<<std::endl;
-	mmor_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-	mmor_controller->get_state();
+	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+	lifecycle_controller->get_state();
 
 
 	}
@@ -233,8 +228,8 @@ void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_c
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"cleanup"<<std::endl;  
-	mmor_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
-	mmor_controller->get_state();
+	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+	lifecycle_controller->get_state();
 	
 
 	}
@@ -243,8 +238,8 @@ void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_c
 	//time_between_state_changes.sleep();
 
 	std::cout<<"inactive shutdown"<<std::endl;  
-	mmor_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
-	mmor_controller->get_state();
+	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
+	lifecycle_controller->get_state();
 	std::cout<<"Press T to terminate"<<std::endl;  
 	
 
@@ -254,8 +249,8 @@ void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_c
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"active shutdown"<<std::endl;  
-	mmor_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
-	mmor_controller->get_state();
+	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
+	lifecycle_controller->get_state();
 	std::cout<<"Press T to terminate"<<std::endl;  
 
 	
@@ -270,8 +265,8 @@ void callee_script(std::shared_ptr<MultiModalObjectRecognitionController> mmor_c
 	//time_between_state_changes.sleep();
 
 	std::cout<<"unconfig shutdown"<<std::endl;
-	mmor_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
-	mmor_controller->get_state();
+	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+	lifecycle_controller->get_state();
 	std::cout<<"Press T to terminate"<<std::endl;  
 
 	
@@ -300,16 +295,16 @@ int main(int argc, char ** argv)
 
 	rclcpp::init(argc, argv);
 
-	auto mmor_controller = std::make_shared<MultiModalObjectRecognitionController>("mmor_controller");
-	mmor_controller->init();
-	//rclcpp::WallRate time_between_state_changes(0.1);
+	auto lifecycle_controller = std::make_shared<LifecycleController>("lifecycle_controller");
+	lifecycle_controller->init();
+	
 	rclcpp::executors::SingleThreadedExecutor exe;
-	exe.add_node(mmor_controller);
+	exe.add_node(lifecycle_controller);
 
 
 	std::shared_future<void> script = std::async(
 	std::launch::async,
-	std::bind(callee_script, mmor_controller));
+	std::bind(callee_script, lifecycle_controller));
 	exe.spin_until_future_complete(script);
 
 	rclcpp::shutdown();
