@@ -6,7 +6,7 @@
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):
     rclcpp_lifecycle::LifecycleNode(node_name,
         rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
-{}
+{RCLCPP_INFO(get_logger(), "constructor called");}
 
 void MultiModalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::msg::Image &image,
                       const sensor_msgs::msg::PointCloud2 &cloud)

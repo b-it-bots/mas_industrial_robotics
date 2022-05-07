@@ -1,12 +1,13 @@
 from launch import LaunchDescription
-import launch_ros.actions
+from launch_ros.actions import LifecycleNode
 
 def generate_launch_description():
     return LaunchDescription([
-        launch_ros.actions.LifecycleNode(
+        LifecycleNode(
             package='mir_object_recognition',
-            node_executable='multimodal_object_recognition',
-            node_name='mmor',
+            executable='mmor',
+            name='mmor',
+            namespace='',
             output='screen',
             remappings=[
                 ('input_image_topic', '/camera/color/image_raw'),
