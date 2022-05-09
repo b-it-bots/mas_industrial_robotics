@@ -25,7 +25,8 @@ find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED) 
 find_package(message_filters REQUIRED)
 find_package(tf2_ros REQUIRED)
-# find_package(pcl_ros REQUIRED)
+find_package(pcl_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -38,42 +39,26 @@ include_directories(
   ${rclcpp_lifecycle_INCLUDE_DIRS}
   ${rclcpp_INCLUDE_DIRS}
   ${mas_perception_msgs_INCLUDE_DIRS}
-  ${message_filters_INCLUDE_DIRS})
+  ${message_filters_INCLUDE_DIRS}
+  ${pcl_ros_INCLUDE_DIRS}
+  ${geometry_msgs_INCLUDE_DIRS}
+  )
 
-add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
-ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
+#add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
+#ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
-add_executable(lc_client ros/src/sample_lifecycle_service_client.cpp)
-target_link_libraries(lc_client
+add_executable(lifecycle_controller ros/src/lifecycle_controller.cpp)
+target_link_libraries(lifecycle_controller
   ${rclcpp_lifecycle_LIBRARIES}
   ${std_msgs_LIBRARIES}
 )
-ament_target_dependencies(lc_client rclcpp std_msgs)
+ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-target_link_libraries(mmor
-  ${std_msgs_INCLUDE_DIRS}
-  ${sensor_msgs_INCLUDE_DIRS}
-  ${lifecycle_msgs_INCLUDE_DIRS}
-  ${rclcpp_lifecycle_INCLUDE_DIRS}
-  ${rclcpp_INCLUDE_DIRS}
-  ${mas_perception_msgs_INCLUDE_DIRS}
-  ${message_filters_INCLUDE_DIRS}
-)
-ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs)
+ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 
 add_executable(transformer ros/src/sample_tf2_transformer.cpp)
-target_link_libraries(transformer
-  ${std_msgs_INCLUDE_DIRS}
-  ${sensor_msgs_INCLUDE_DIRS}
-  ${lifecycle_msgs_INCLUDE_DIRS}
-  ${rclcpp_lifecycle_INCLUDE_DIRS}
-  ${rclcpp_INCLUDE_DIRS}
-  ${mas_perception_msgs_INCLUDE_DIRS}
-  ${message_filters_INCLUDE_DIRS}
-)
-ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros)
-
+ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -88,8 +73,8 @@ endif()
 
 
 install(TARGETS
-  lc_client
-  lc_talker
+  lifecycle_controller
+  #lc_talker
   mmor
   transformer
   DESTINATION lib/${PROJECT_NAME})

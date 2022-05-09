@@ -31,16 +31,18 @@
 
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <pcl_ros/transforms.hpp>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
 
 using namespace std::chrono_literals;
 
-class MultiModalObjectRecognitionROS2: public rclcpp_lifecycle::LifecycleNode
+class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
     public:
-        explicit MultiModalObjectRecognitionROS2(const std::string & node_name, bool intra_process_comms);
+        explicit MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms);
 
         /// Transition callback for state configuring
         /**
@@ -53,6 +55,7 @@ class MultiModalObjectRecognitionROS2: public rclcpp_lifecycle::LifecycleNode
          * TRANSITION_CALLBACK_FAILURE transitions to "unconfigured"
          * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
          */
+
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_configure(const rclcpp_lifecycle::State &);
 
@@ -123,8 +126,22 @@ class MultiModalObjectRecognitionROS2: public rclcpp_lifecycle::LifecycleNode
         typedef message_filters::Synchronizer<msgSyncPolicy> Sync;
         std::shared_ptr<Sync> msg_sync_;
 
-        void synchronizeCallback(const sensor_msgs::msg::Image image, 
-                const sensor_msgs::msg::PointCloud2 cloud); 
+        std::shared_ptr<tf2_ros::TransformListener> tf_listener_{nullptr};
+        std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+        std::string target_frame_id_ = "base_link";
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> publisher_;
+        // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
+        
+        void synchronizeCallback(const sensor_msgs::msg::Image &image, 
+                const sensor_msgs::msg::PointCloud2 &cloud);
+
+        // void preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
+
+        bool preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
+                                  const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+                                  const std::string target_frame, 
+                                  const sensor_msgs::msg::PointCloud2 cloud_in,
+                                  sensor_msgs::msg::PointCloud2 cloud_out);
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
