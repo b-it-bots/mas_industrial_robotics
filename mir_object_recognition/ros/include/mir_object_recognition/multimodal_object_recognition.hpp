@@ -34,6 +34,12 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <pcl_ros/transforms.hpp>
 
+#include <mir_perception_utils/object_utils_ros.h>
+#include <mir_perception_utils/pointcloud_utils_ros.h>
+#include <mir_object_segmentation/scene_segmentation_ros.h>
+#include <mir_object_recognition/SceneSegmentationConfig.h>
+
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 

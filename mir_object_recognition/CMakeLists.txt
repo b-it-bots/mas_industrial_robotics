@@ -27,6 +27,9 @@ find_package(message_filters REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(mir_object_segmentation REQUIRED)
+find_package(mir_perception_utils REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -42,6 +45,9 @@ include_directories(
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${cv_bridge_INCLUDE_DIRS}
+  ${mir_object_segmentation_INCLUDE_DIRS}
+  ${mir_perception_utils_INCLUDE_DIRS}
   )
 
 #add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
