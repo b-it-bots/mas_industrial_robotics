@@ -131,7 +131,7 @@ void object::transformPose(const boost::shared_ptr<tf::TransformListener> tf_lis
 {
   if (tf_listener) {
     try {
-      ros::Time common_time;
+      rclcpp::Time common_time;
       tf_listener->getLatestCommonTime(pose.header.frame_id, target_frame, common_time, NULL);
       pose.header.stamp = common_time;
       tf_listener->waitForTransform(target_frame, pose.header.frame_id, common_time,

@@ -34,11 +34,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <pcl_ros/transforms.hpp>
 
-#include <mir_perception_utils/object_utils_ros.h>
-#include <mir_perception_utils/pointcloud_utils_ros.h>
-#include <mir_object_segmentation/scene_segmentation_ros.h>
-#include <mir_object_recognition/SceneSegmentationConfig.h>
-
+#include "mir_object_segmentation/scene_segmentation_ros.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -148,6 +144,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                                   const std::string target_frame, 
                                   const sensor_msgs::msg::PointCloud2 cloud_in,
                                   sensor_msgs::msg::PointCloud2 cloud_out);
+
+        typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
+        SceneSegmentationROSSPtr scene_segmentation_ros_;
+        PointCloud::Ptr cloud_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H

@@ -1,8 +1,8 @@
 #ifndef HELPERS_HPP
 #define HELPERS_HPP
 
-#include <mas_perception_msgs/BoundingBox.h>
-#include <mas_perception_msgs/PlanarPolygon.h>
+#include <mas_perception_msgs/msg/bounding_box.hpp>
+#include <mas_perception_msgs/msg/planar_polygon.hpp>
 
 #include <mir_perception_utils/aliases.h>
 #include <mir_perception_utils/bounding_box.h>
@@ -11,7 +11,7 @@ using namespace mir_perception_utils::object;
 
 /** Convert from PCL PlanarPolygon to ROS message. */
 inline void convertPlanarPolygon(const PlanarPolygon &polygon,
-                                 mas_perception_msgs::PlanarPolygon &polygon_msg)
+                                 mas_perception_msgs::msg::PlanarPolygon &polygon_msg)
 {
   for (int i = 0; i < 4; ++i) {
     polygon_msg.coefficients[i] = polygon.getCoefficients()[i];
@@ -19,7 +19,7 @@ inline void convertPlanarPolygon(const PlanarPolygon &polygon,
 
   const PointCloud::VectorType &points = polygon.getContour();
   for (size_t i = 0; i < points.size(); i++) {
-    geometry_msgs::Point32 pt;
+    geometry_msgs::msg::Point32 pt;
     pt.x = points[i].x;
     pt.y = points[i].y;
     pt.z = points[i].z;
@@ -28,7 +28,7 @@ inline void convertPlanarPolygon(const PlanarPolygon &polygon,
 }
 
 /** Convert from ROS message to PCL PlanarPolygon. */
-inline void convertPlanarPolygon(const mas_perception_msgs::PlanarPolygon &polygon_msg,
+inline void convertPlanarPolygon(const mas_perception_msgs::msg::PlanarPolygon &polygon_msg,
                                  PlanarPolygon &polygon)
 {
   PointCloud::VectorType contour;
@@ -69,7 +69,7 @@ inline double computePlanarPolygonArea(const PlanarPolygon &polygon)
 
 /** Convert from BoundingBox object to ROS message. */
 inline void convertBoundingBox(const BoundingBox &bounding_box,
-                               mas_perception_msgs::BoundingBox &bounding_box_msg)
+                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg)
 {
   const BoundingBox::Point &center = bounding_box.getCenter();
   bounding_box_msg.center.x = center[0];
@@ -81,7 +81,7 @@ inline void convertBoundingBox(const BoundingBox &bounding_box,
 
   const BoundingBox::Points &vertices = bounding_box.getVertices();
   for (size_t i = 0; i < vertices.size(); i++) {
-    geometry_msgs::Point pt;
+    geometry_msgs::msg::Point pt;
     pt.x = vertices[i][0];
     pt.y = vertices[i][1];
     pt.z = vertices[i][2];

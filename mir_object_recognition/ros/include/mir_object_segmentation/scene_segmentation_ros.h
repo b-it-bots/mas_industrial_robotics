@@ -11,19 +11,19 @@
 #include <string>
 #include <vector>
 
-#include <geometry_msgs/PoseStamped.h>
-#include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <tf/transform_listener.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+// #include <ros/ros.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <tf2_ros/transform_listener.h>
 
-#include <mas_perception_msgs/BoundingBox.h>
-#include <mas_perception_msgs/ObjectList.h>
+#include <mas_perception_msgs/msg/bounding_box.hpp>
+#include <mas_perception_msgs/msg/object_list.hpp>
 
 #include <mir_object_segmentation/cloud_accumulation.h>
 #include <mir_object_segmentation/scene_segmentation.h>
 
-#include <mir_perception_utils/bounding_box.h>
-#include <mir_perception_utils/object_utils_ros.h>
+// #include <mir_perception_utils/bounding_box.h>
+// #include <mir_perception_utils/object_utils_ros.h>
 
 /** \brief This class is a wrapper for table top point cloud segmentation.
  *
@@ -43,8 +43,9 @@ class SceneSegmentationROS
   virtual ~SceneSegmentationROS();
 
  private:
-  ros::NodeHandle nh_;
-  ros::ServiceClient recognize_service;
+ // TODO: checkout where the following 2 lines are being used. 
+  // ros::NodeHandle nh_;
+  // ros::ServiceClient recognize_service;
 
   /** Create unique pointer object of cloud_accumulation */
   CloudAccumulation::UPtr cloud_accumulation_;
@@ -53,7 +54,7 @@ class SceneSegmentationROS
   SceneSegmentationUPtr scene_segmentation_;
 
   pcl::ModelCoefficients::Ptr model_coefficients_;
-  boost::shared_ptr<tf::TransformListener> tf_listener_;
+  boost::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   bool add_to_octree_;
   int pcl_object_id_;
@@ -73,7 +74,7 @@ class SceneSegmentationROS
    * size
    * \param[in] Number of padded points
    * */
-  void segmentCloud(const PointCloud::ConstPtr &cloud, mas_perception_msgs::ObjectList &obj_list,
+  void segmentCloud(const PointCloud::ConstPtr &cloud, mas_perception_msgs::msg::ObjectList &obj_list,
                     std::vector<PointCloud::Ptr> &clusters, std::vector<BoundingBox> &boxes,
                     bool center_cluster, bool pad_cluster, int num_points);
 
