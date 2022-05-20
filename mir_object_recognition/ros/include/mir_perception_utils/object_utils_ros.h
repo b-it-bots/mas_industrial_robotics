@@ -17,6 +17,7 @@
 #include <rclcpp/time.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <sensor_msgs/msg/image.hpp>
 
 #include <mas_perception_msgs/msg/bounding_box.hpp>
 #include <mas_perception_msgs/msg/object_list.hpp>
@@ -93,7 +94,7 @@ void saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir = "/
  * \param[in] Sensor_msg/Image
  * \param[out] cv image output
 */
-bool getCVImage(const sensor_msgs::msg::ImageConstPtr &image, cv_bridge::CvImagePtr &cv_image);
+bool getCVImage(std::shared_ptr< ::sensor_msgs::msg::Image const> &image, cv_bridge::CvImagePtr &cv_image);
 }
 }
 

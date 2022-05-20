@@ -29,6 +29,6 @@ unsigned int centerPointCloud(const PointCloud &cloud_in, PointCloud &centered_c
   */
 unsigned int padPointCloud(PointCloud::Ptr &cloud_in, int num_points);
 }
-};
+}
 
 #endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H

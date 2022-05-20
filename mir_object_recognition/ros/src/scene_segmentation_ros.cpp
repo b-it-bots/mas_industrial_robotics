@@ -161,8 +161,8 @@ void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluste
 
 PointCloud::Ptr SceneSegmentationROS::getCloudDebug()
 {
-  if (cloud_debug_->points.size() < 0)
-    ROS_WARN("Debug cloud is empty");
+  //if (cloud_debug_->points.size() < 0)
+    //ROS_WARN("Debug cloud is empty");
 
-  return(cloud_debug_);
+  //return(cloud_debug_);
 }

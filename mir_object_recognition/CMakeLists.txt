@@ -28,8 +28,8 @@ find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
-find_package(mir_object_segmentation REQUIRED)
-find_package(mir_perception_utils REQUIRED)
+#find_package(mir_object_segmentation REQUIRED)
+#find_package(mir_perception_utils REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)

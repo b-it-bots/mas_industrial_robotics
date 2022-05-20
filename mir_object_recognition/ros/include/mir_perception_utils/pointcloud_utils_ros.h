@@ -63,6 +63,6 @@ bool transformPointCloud2(const boost::shared_ptr<tf::TransformListener> &tf_lis
 bool getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, const PointCloud::Ptr &cloud_id,
                       PointCloud::Ptr &cloud_roi, float roi_size_adjustment, bool remove_outliers);
 }
-};
+}
 
 #endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_ROS_H

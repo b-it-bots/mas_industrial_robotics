@@ -32,7 +32,7 @@ inline void convertPlanarPolygon(const mas_perception_msgs::msg::PlanarPolygon &
                                  PlanarPolygon &polygon)
 {
   PointCloud::VectorType contour;
-  Eigen::Vector4f coefficients(polygon_msg.coefficients.elems);
+  Eigen::Vector4f coefficients(polygon_msg.coefficients._M_elems);
   for (size_t i = 0; i < polygon_msg.contour.size(); i++) {
     PointT pt;
     pt.x = polygon_msg.contour[i].x;

@@ -37,7 +37,7 @@ class SceneSegmentationROS
    * \param[in] NodeHandle in order for this to have access to parameters
    * for example octree_resolution.
    * */
-  explicit SceneSegmentationROS(double octree_resolution = 0.0025);
+  explicit SceneSegmentationROS(double octree_resolution_=0.0025);
 
   /** \brief Destructor */
   virtual ~SceneSegmentationROS();
