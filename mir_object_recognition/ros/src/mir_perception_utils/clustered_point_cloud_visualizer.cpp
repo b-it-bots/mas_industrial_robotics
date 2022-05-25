@@ -4,8 +4,8 @@
 #include "pcl/PCLPointCloud2.h"
 #include "pcl/conversions.h"
 
-#include "mir_object_recognition/aliases.hpp"
-#include "mir_object_recognition/color.hpp"
+#include "mir_perception_utils/aliases.hpp"
+#include "mir_perception_utils/color.hpp"
 
 using mir_perception_utils::visualization::Color;
 
@@ -64,7 +64,7 @@ namespace mir_perception_utils
                     pt.x = point.x;
                     pt.y = point.y;
                     pt.z = point.z;
-                    pt.rgb = float(Color(static_cast<Color::Name>(color)))
+                    pt.rgb = float(Color(static_cast<Color::Name>(color)));
                     composite.points.push_back(point);
                 }
                  color++;

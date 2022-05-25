@@ -10,7 +10,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
-#include "mir_object_recognition/color.hpp"
+#include "mir_perception_utils/color.hpp"
 
 namespace mir_perception_utils
 {
