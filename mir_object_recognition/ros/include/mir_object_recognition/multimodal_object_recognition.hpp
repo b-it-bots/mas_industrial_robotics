@@ -24,9 +24,7 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include "mas_perception_msgs/msg/object_list.hpp"
-
 #include "rcutils/logging_macros.h"
-
 #include "std_msgs/msg/string.hpp"
 
 #include <tf2_ros/transform_listener.h>

@@ -10,9 +10,9 @@
 #include <string>
 #include <vector>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
-#include <mas_perception_msgs/BoundingBox.h>
+#include <mas_perception_msgs/msg/bounding_box.hpp>
 #include <mir_perception_utils/color.h>
 
 using mir_perception_utils::visualization::Color;

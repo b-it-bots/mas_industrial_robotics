@@ -2,8 +2,8 @@
 #define BOUNDING_BOX_VISUALIZER_HPP
 
 #include <mir_perception_utils/color.h>
-#include <ros/node_handle.h>
-#include <visualization_msgs/Marker.h>
+// #include <ros/node_handle.h>
+#include <visualization_msgs/msg/marker.hpp>
 
 using mir_perception_utils::visualization::Color;
 

@@ -1,7 +1,7 @@
 #ifndef CLUSTERED_POINT_CLOUD_VISUALIZER_HPP
 #define CLUSTERED_POINT_CLOUD_VISUALIZER_HPP
 
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <pcl_conversions/pcl_conversions.h>
 

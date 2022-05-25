@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include "rclcpp/rclcpp.hpp"
 // #include <ros/ros.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/transform_listener.h>

@@ -1,6 +1,5 @@
 
 #include <std_msgs/msg/float64.hpp>
-
 #include <mir_object_recognition/multimodal_object_recognition.hpp>
 
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):

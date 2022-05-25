@@ -8,7 +8,7 @@
 #define MIR_PERCEPTION_UTILS_COLOR_H
 
 #include <pcl/point_types.h>
-#include <std_msgs/ColorRGBA.h>
+#include <std_msgs/msg/color_rgba.hpp>
 
 namespace mir_perception_utils
 {

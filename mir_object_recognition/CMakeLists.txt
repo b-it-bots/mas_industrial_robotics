@@ -28,6 +28,11 @@ find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(visualization_msgs REQUIRED)
+
+find_package(PCL 1.10 REQUIRED)
+find_package(VTK REQUIRED)
+find_package(OpenCV REQUIRED)
 #find_package(mir_object_segmentation REQUIRED)
 #find_package(mir_perception_utils REQUIRED)
 # uncomment the following section in order to fill in
@@ -61,10 +66,16 @@ target_link_libraries(lifecycle_controller
 ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
+ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
 
-add_executable(transformer ros/src/sample_tf2_transformer.cpp)
-ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
+add_executable(segmenter ros/src/scene_segmentation_node.cpp)
+ament_target_dependencies(segmenter rclcpp std_msgs sensor_msgs mas_perception_msgs tf2_ros pcl_ros cv_bridge visualization_msgs)
+target_link_libraries(segmenter
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+# add_executable(transformer ros/src/sample_tf2_transformer.cpp)
+# ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -82,7 +93,7 @@ install(TARGETS
   lifecycle_controller
   #lc_talker
   mmor
-  transformer
+  # transformer
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY

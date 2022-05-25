@@ -9,15 +9,15 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl_ros/transforms.h>
+// #include <pcl_ros/point_cloud.hpp>
+#include <pcl_ros/transforms.hpp>
 
-#include <std_msgs/Float64.h>
+#include <std_msgs/msg/float64.hpp>
 
-#include <mas_perception_msgs/BoundingBox.h>
-#include <mas_perception_msgs/BoundingBoxList.h>
-#include <mas_perception_msgs/ObjectList.h>
-#include <mas_perception_msgs/RecognizeObject.h>
+#include <mas_perception_msgs/msg/bounding_box.hpp>
+#include <mas_perception_msgs/msg/bounding_box_list.hpp>
+#include <mas_perception_msgs/msg/object_list.hpp>
+#include <mas_perception_msgs/srv/recognize_object.hpp>
 
 #include <mir_perception_utils/bounding_box.h>
 #include <mir_perception_utils/bounding_box_visualizer.h>
@@ -195,9 +195,9 @@ void SceneSegmentationNode::configCallback(mir_object_segmentation::SceneSegment
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "scene_segmentation_node");
+  rclcpp::init(argc, argv, "scene_segmentation_node");
   SceneSegmentationNode scene_seg;
   ROS_INFO_STREAM("\033[1;32m[scene_segmentation_node] node started \033[0m\n");
-  ros::spin();
+  rclcpp::spin();
   return 0;
 }
