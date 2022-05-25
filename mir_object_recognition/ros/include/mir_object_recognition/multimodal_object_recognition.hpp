@@ -35,7 +35,6 @@
 #include <pcl_ros/transforms.hpp>
 
 #include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
-#include "mir_object_recognition/color.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -153,7 +152,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     protected:
         // Visualization
         ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
