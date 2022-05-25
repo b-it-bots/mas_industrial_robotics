@@ -34,10 +34,17 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <pcl_ros/transforms.hpp>
 
+#include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
+#include "mir_object_recognition/mpu_color.hpp"
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
 using namespace std::chrono_literals;
+
+namespace mpu = mir_perception_utils;
+using mpu::visualization::ClusteredPointCloudVisualizer;
+using mpu::visualization::Color;
 
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
@@ -142,6 +149,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                                   const std::string target_frame, 
                                   const sensor_msgs::msg::PointCloud2 cloud_in,
                                   sensor_msgs::msg::PointCloud2 cloud_out);
+
+    protected:
+        // Visualization
+        ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H

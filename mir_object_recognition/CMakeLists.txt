@@ -44,6 +44,7 @@ include_directories(
   ${geometry_msgs_INCLUDE_DIRS}
   )
 
+
 #add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 #ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
 
@@ -56,6 +57,9 @@ ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
+target_include_directories(mmor PUBLIC
+  common/include
+)
 
 add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
@@ -78,6 +82,14 @@ install(TARGETS
   mmor
   transformer
   DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY ros/include/
+  DESTINATION ros/include/
+)
+
+install(DIRECTORY common/include/
+  DESTINATION common/include/
+)
   
 install(DIRECTORY
   ros/launch/

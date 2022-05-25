@@ -1,11 +1,14 @@
-
 #include <std_msgs/msg/float64.hpp>
 
-#include <mir_object_recognition/multimodal_object_recognition.hpp>
+#include "mir_object_recognition/multimodal_object_recognition.hpp"
+
+#include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
 
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):
     rclcpp_lifecycle::LifecycleNode(node_name,
-        rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
+        rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
+    cluster_visualizer_rgb_("output/tabletop_cluster_rgb"),
+    cluster_visualizer_pc_("output/tabletop_cluster_pc")
 {RCLCPP_INFO(get_logger(), "constructor called");}
 
 void MultiModalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::msg::Image &image,
