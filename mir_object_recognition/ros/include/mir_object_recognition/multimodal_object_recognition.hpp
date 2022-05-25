@@ -152,7 +152,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     protected:
         // Visualization
         ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H

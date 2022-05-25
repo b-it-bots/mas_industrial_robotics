@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-#include "pcl/point_cloud.h"
+#include <pcl/point_cloud.h>
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
@@ -14,32 +14,32 @@
 
 namespace mir_perception_utils
 {
-namespace visualization
-{
-class ClusteredPointCloudVisualizer
-{
- public:
-  ClusteredPointCloudVisualizer(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> &node,
-                                const std::string &topic_name, bool check_subscribers = true);
+  namespace visualization
+  {
+    class ClusteredPointCloudVisualizer
+    {
+    public:
+      ClusteredPointCloudVisualizer(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> &node,
+                                    const std::string &topic_name, bool check_subscribers = true);
 
-  ClusteredPointCloudVisualizer(const std::string &topic_name, bool check_subscribers = true);
+      ClusteredPointCloudVisualizer(const std::string &topic_name, bool check_subscribers = true);
 
-  template <typename PointT>
-  void publish(const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
-               const std::string &frame_id);
-  int getNumSubscribers();
+      template <typename PointT>
+      void publish(const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
+                   const std::string &frame_id);
+      int getNumSubscribers();
 
- private:
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_publisher_;
+    private:
+      rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_publisher_;
 
-  bool check_subscribers_;
+      bool check_subscribers_;
 
-  static const size_t COLORS_NUM = 32;
-  float COLORS[COLORS_NUM];
-};
+      static const size_t COLORS_NUM = 32;
+      float COLORS[COLORS_NUM];
+    };
 
-}  // namespace visualization
+  } // namespace visualization
 
-}  // namespace mir
+} // namespace mir
 
-#endif  // MIR_PERCEPTION_UTILS_CLUSTERED_POINT_CLOUD_VISUALIZER_H
+#endif // MIR_PERCEPTION_UTILS_CLUSTERED_POINT_CLOUD_VISUALIZER_H

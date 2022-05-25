@@ -6,9 +6,9 @@ if(NOT CMAKE_C_STANDARD)
   set(CMAKE_C_STANDARD 99)
 endif()
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -55,14 +55,14 @@ target_link_libraries(lifecycle_controller
 )
 ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
-add_library(${PROJECT_NAME}
+add_library( percption_visuliazation
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 target_link_libraries(mmor
-  ${mir_object_recognition_LIBRARIES}
+  percption_visuliazation
 )
 
 add_executable(transformer ros/src/sample_tf2_transformer.cpp)
