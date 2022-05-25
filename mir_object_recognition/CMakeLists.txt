@@ -60,6 +60,7 @@ ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 add_library( percption_visuliazation
   common/src/bounding_box.cpp
   common/src/pointcloud_utils.cpp
+  ros/src/mir_perception_utils/bounding_box_visualizer.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
 )
 
