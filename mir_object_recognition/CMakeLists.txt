@@ -27,6 +27,7 @@ find_package(message_filters REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -42,6 +43,7 @@ include_directories(
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   )
 
 
@@ -56,11 +58,13 @@ target_link_libraries(lifecycle_controller
 ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 add_library( percption_visuliazation
+  common/src/bounding_box.cpp
+  common/src/pointcloud_utils.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
+ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs OpenCV)
 target_link_libraries(mmor
   percption_visuliazation
 )
