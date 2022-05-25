@@ -35,7 +35,7 @@
 #include <pcl_ros/transforms.hpp>
 
 #include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
-#include "mir_object_recognition/mpu_color.hpp"
+#include "mir_object_recognition/color.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
