@@ -1,5 +1,5 @@
-#ifndef MIR_PERCEPTION_UTILS_COLOR_H
-#define MIR_PERCEPTION_UTILS_COLOR_H
+#ifndef MIR_PERCEPTION_UTILS_COLOR_HPP
+#define MIR_PERCEPTION_UTILS_COLOR_HPP
 
 #include <pcl/point_types.h>
 #include "std_msgs/msg/color_rgba.hpp"
@@ -93,4 +93,4 @@ struct Color {
 
 }  // namespace mir
 
-#endif  // MIR_PERCEPTION_UTILS_COLOR_H
+#endif  // MIR_PERCEPTION_UTILS_COLOR_HPP

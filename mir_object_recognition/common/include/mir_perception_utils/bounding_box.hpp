@@ -1,5 +1,5 @@
-#ifndef MIR_PERCEPTION_UTILS_BOUNDING_BOX_H
-#define MIR_PERCEPTION_UTILS_BOUNDING_BOX_H
+#ifndef MIR_PERCEPTION_UTILS_BOUNDING_BOX_HPP
+#define MIR_PERCEPTION_UTILS_BOUNDING_BOX_HPP
 
 #include "mir_perception_utils/aliases.hpp"
 #include <vector>
@@ -44,4 +44,4 @@ class BoundingBox
 }
 }
 
-#endif  // MIR_PERCEPTION_UTILS_BOUNDING_BOX_H
+#endif  // MIR_PERCEPTION_UTILS_BOUNDING_BOX_HPP

@@ -1,5 +1,5 @@
-#ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
-#define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
+#ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_HPP
+#define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_HPP
 
 #include "mir_perception_utils/aliases.hpp"
 
@@ -24,4 +24,4 @@ unsigned int padPointCloud(PointCloud::Ptr &cloud_in, int num_points);
 }
 }
 
-#endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_H
+#endif  // MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_HPP

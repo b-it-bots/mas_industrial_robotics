@@ -1,5 +1,5 @@
-#ifndef MIR_PERCEPTION_UTILS_ALIASES_H
-#define MIR_PERCEPTION_UTILS_ALIASES_H
+#ifndef MIR_PERCEPTION_UTILS_ALIASES_HPP
+#define MIR_PERCEPTION_UTILS_ALIASES_HPP
 
 #include <vector>
 
@@ -24,4 +24,4 @@ typedef boost::shared_ptr<const PlanarPolygon> PlanarPolygonConstPtr;
 typedef pcl::PlanarRegion<PointT> PlanarRegion;
 typedef std::vector<PlanarRegion, Eigen::aligned_allocator<PlanarRegion>> PlanarRegionVector;
 
-#endif  // MIR_PERCEPTION_UTILS_ALIASES_H
+#endif  // MIR_PERCEPTION_UTILS_ALIASES_HPP

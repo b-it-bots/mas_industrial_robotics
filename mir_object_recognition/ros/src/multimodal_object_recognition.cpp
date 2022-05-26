@@ -4,6 +4,7 @@
 
 #include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
 #include "mir_perception_utils/bounding_box_visualizer.hpp"
+#include "mir_perception_utils/label_visualizer.hpp"
 #include "mir_perception_utils/bounding_box.hpp"
 
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):
