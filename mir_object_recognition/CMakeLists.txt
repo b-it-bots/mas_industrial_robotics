@@ -63,6 +63,7 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/bounding_box_visualizer.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
   ros/src/mir_perception_utils/label_visualizer.cpp
+  ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)

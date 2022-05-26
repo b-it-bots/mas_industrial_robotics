@@ -7,6 +7,9 @@
 #include "mir_perception_utils/label_visualizer.hpp"
 #include "mir_perception_utils/bounding_box.hpp"
 
+// just for testing, remove later
+#include "mir_perception_utils/planar_polygon_visualizer.hpp"
+
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):
     rclcpp_lifecycle::LifecycleNode(node_name,
         rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
