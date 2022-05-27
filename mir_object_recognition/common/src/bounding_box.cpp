@@ -57,7 +57,7 @@ BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud, const Eigen::
 
     // ---------- change---------------
     // CvBox2D box2d = cvMinAreaRect2(points);
-    cv::RotatedRect box2d = cv::minAreaRect(cv::Mat(*points));
+    cv::RotatedRect box2d = cv::minAreaRect(*points);
     // cvReleaseMemStorage(&storage);
     box.dimensions_[0] = max_z - min_z;
     box.dimensions_[1] = std::max(box2d.size.width, box2d.size.height) / SCALE;

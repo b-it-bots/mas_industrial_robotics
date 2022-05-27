@@ -35,6 +35,7 @@
 #include <pcl_ros/transforms.hpp>
 
 #include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
+#include "mir_perception_utils/object_utils_ros.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;

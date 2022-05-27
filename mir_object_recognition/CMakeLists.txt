@@ -28,6 +28,7 @@ find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(cv_bridge REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -46,6 +47,7 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
   )
 
+  set(dependencies OpenCV cv_bridge)
 
 #add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 #ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
@@ -64,16 +66,30 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
   ros/src/mir_perception_utils/label_visualizer.cpp
   ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
+  ros/src/mir_perception_utils/object_utils_ros.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs OpenCV)
+ament_target_dependencies(mmor 
+  rclcpp
+  rclcpp_lifecycle 
+  message_filters 
+  std_msgs 
+  sensor_msgs 
+  lifecycle_msgs 
+  mas_perception_msgs 
+  tf2_ros 
+  pcl_ros 
+  geometry_msgs 
+  OpenCV
+  cv_bridge
+)
 target_link_libraries(mmor
   percption_visuliazation
 )
 
-add_executable(transformer ros/src/sample_tf2_transformer.cpp)
-ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
+# add_executable(transformer ros/src/sample_tf2_transformer.cpp)
+# ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
