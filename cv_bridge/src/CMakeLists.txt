@@ -23,7 +23,7 @@ install(TARGETS ${PROJECT_NAME} EXPORT export_${PROJECT_NAME}
 
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}_export.h
-  DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME})
+  DESTINATION include/${PROJECT_NAME}/)
 
 if(NOT ANDROID)
   Python3_add_library(${PROJECT_NAME}_boost MODULE module.cpp module_opencv3.cpp)
