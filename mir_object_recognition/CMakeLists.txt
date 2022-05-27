@@ -68,12 +68,12 @@ ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
 
-add_executable(segmenter ros/src/scene_segmentation_node.cpp)
-ament_target_dependencies(segmenter rclcpp std_msgs sensor_msgs mas_perception_msgs tf2_ros pcl_ros cv_bridge visualization_msgs)
-target_link_libraries(segmenter
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-)
+# add_executable(segmenter ros/src/scene_segmentation_node.cpp)
+# ament_target_dependencies(segmenter rclcpp std_msgs sensor_msgs mas_perception_msgs tf2_ros pcl_ros cv_bridge visualization_msgs)
+# target_link_libraries(segmenter
+#   ${catkin_LIBRARIES}
+#   ${OpenCV_LIBRARIES}
+# )
 # add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 # ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
 
@@ -94,6 +94,7 @@ install(TARGETS
   #lc_talker
   mmor
   # transformer
+  # segmenter
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY

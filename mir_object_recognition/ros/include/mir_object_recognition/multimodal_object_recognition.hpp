@@ -9,9 +9,13 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include <Eigen/Dense>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/publisher.hpp"
+#include "rcutils/logging_macros.h"
+#include "rclcpp/logger.hpp"
+#include "rclcpp/utilities.hpp"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -24,6 +28,7 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include "mas_perception_msgs/msg/object_list.hpp"
+#include "mas_perception_msgs/msg/bounding_box_list.hpp"
 #include "rcutils/logging_macros.h"
 #include "std_msgs/msg/string.hpp"
 
@@ -38,6 +43,13 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 using namespace std::chrono_literals;
+
+// TODO:
+// namespace mpu = mir_perception_utils;
+// using mpu::visualization::BoundingBoxVisualizer;
+// using mpu::visualization::ClusteredPointCloudVisualizer;
+// using mpu::visualization::LabelVisualizer;
+// using mpu::visualization::Color;
 
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
@@ -143,9 +155,22 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                                   const sensor_msgs::msg::PointCloud2 cloud_in,
                                   sensor_msgs::msg::PointCloud2 cloud_out);
 
+        void publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
+                                                std::vector<PointCloud::Ptr> &clusters_3d,
+                                                std::vector<PointCloud::Ptr> &clusters_2d);
+
         typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
         SceneSegmentationROSSPtr scene_segmentation_ros_;
         PointCloud::Ptr cloud_;
+        mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
+        mas_perception_msgs::msg::ObjectList recognized_image_list_;
+
+        // TODO:
+        // BoundingBoxVisualizer bounding_box_visualizer_pc_;
+        // ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+        // LabelVisualizer label_visualizer_rgb_;
+        // LabelVisualizer label_visualizer_pc_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
