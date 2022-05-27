@@ -145,23 +145,29 @@ void object::transformPose(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
                            const geometry_msgs::msg::PoseStamped &pose,
                            geometry_msgs::msg::PoseStamped &transformed_pose)
 {
-    bool canTransform = tf_buffer -> canTransform(target_frame, pose.header.frame_id, 
-                                        rclcpp::Clock().now(), rclcpp::Duration::from_seconds(0.1));
-    if (canTransform)
-    {
-        try{
-            tf_buffer -> transform(pose, transformed_pose, target_frame);
-        }
-        catch (tf2::TransformException &ex)
+    if (tf_buffer){
+        bool canTransform = tf_buffer -> canTransform(target_frame, pose.header.frame_id, 
+                                            rclcpp::Clock().now(), rclcpp::Duration::from_seconds(0.1));
+        if (canTransform)
         {
-            RCLCPP_ERROR(rclcpp::get_logger("mir_perception_utils_logger"), "Transform error: %s", ex.what());
+            try{
+                tf_buffer -> transform(pose, transformed_pose, target_frame);
+            }
+            catch (tf2::TransformException &ex)
+            {
+                RCLCPP_ERROR(rclcpp::get_logger("mir_perception_utils_logger"), "Transform error: %s", ex.what());
+                transformed_pose = pose;
+            }
+        }
+        else{
+            auto steady_clock = rclcpp::Clock();
+            RCLCPP_ERROR_THROTTLE(rclcpp::get_logger("mir_perception_utils_logger"), steady_clock,
+                                    2000, "[ObjectUtils]: Pose cannot be transformed.");
             transformed_pose = pose;
         }
     }
     else{
-        auto steady_clock = rclcpp::Clock();
-        RCLCPP_ERROR_THROTTLE(rclcpp::get_logger("mir_perception_utils_logger"), steady_clock,
-                                2000, "[ObjectUtils]: Pose cannot be transformed.");
+        RCLCPP_ERROR(rclcpp::get_logger("mir_perception_utils_logger"), "[ObjectUtils]: TF buffer is not initialized.");
         transformed_pose = pose;
     }
 }

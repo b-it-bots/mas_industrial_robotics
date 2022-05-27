@@ -44,13 +44,18 @@ include_directories(
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
+  # ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
   /home/vk/sdp_ws/install/cv_bridge/include
   )
+include_directories(SYSTEM
+  ${PCL_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+)
 # message(${cv_bridge_INCLUDE_DIRS})
 # message(${mas_perception_msgs_INCLUDE_DIRS})
-set(dependencies OpenCV cv_bridge)
+# set(dependencies OpenCV cv_bridge)
 
 #add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 #ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
@@ -71,6 +76,7 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/helpers.cpp
+  ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
