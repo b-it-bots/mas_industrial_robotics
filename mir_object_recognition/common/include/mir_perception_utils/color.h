@@ -83,9 +83,9 @@ struct Color {
     return point.rgb;
   }
 
-  operator std_msgs::ColorRGBA() const
+  operator std_msgs::msg::ColorRGBA() const
   {
-    std_msgs::ColorRGBA color;
+    std_msgs::msg::ColorRGBA color;
     color.r = r / 255.0;
     color.g = g / 255.0;
     color.b = b / 255.0;

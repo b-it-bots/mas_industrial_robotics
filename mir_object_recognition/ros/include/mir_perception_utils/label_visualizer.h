@@ -10,8 +10,8 @@
 #include <string>
 #include <vector>
 
-#include <geometry_msgs/PoseArray.h>
-#include <ros/ros.h>
+#include <geometry_msgs/msg/pose_array.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include <mir_perception_utils/color.h>
 

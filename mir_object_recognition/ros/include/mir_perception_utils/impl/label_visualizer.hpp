@@ -1,11 +1,11 @@
 #ifndef LABEL_VISUALIZER_HPP
 #define LABEL_VISUALIZER_HPP
 
-#include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/msg/pose_array.hpp>
 #include <mir_perception_utils/color.h>
-#include <ros/node_handle.h>
-#include <visualization_msgs/Marker.h>
-#include <visualization_msgs/MarkerArray.h>
+// #include <ros/node_handle.h>
+#include <visualization_msgs/msg/marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 using mir_perception_utils::visualization::Color;
 

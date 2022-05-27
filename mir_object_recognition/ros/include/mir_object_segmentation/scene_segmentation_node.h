@@ -9,15 +9,13 @@
 
 #include <string>
 
-#include <geometry_msgs/PoseStamped.h>
-#include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <std_msgs/String.h>
-#include <tf/transform_listener.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <tf2_ros/transform_listener.h>
 
-#include <dynamic_reconfigure/server.h>
-
-#include <mir_object_segmentation/SceneSegmentationConfig.h>
+// #include <mir_object_segmentation/SceneSegmentationConfig.h>
 #include <mir_object_segmentation/scene_segmentation_ros.h>
 
 /** \brief This node subscribes to pointcloud topic.

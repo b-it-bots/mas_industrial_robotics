@@ -14,6 +14,7 @@
 
 #include <mas_perception_msgs/msg/bounding_box.hpp>
 #include <mir_perception_utils/color.h>
+#include <visualization_msgs/msg/marker.hpp>
 
 using mir_perception_utils::visualization::Color;
 
@@ -24,20 +25,20 @@ namespace visualization
 class BoundingBoxVisualizer
 {
  public:
-  BoundingBoxVisualizer(ros::NodeHandle *nh, const std::string &topic_name, Color color,
-                        bool check_subscribers = true);
+  // BoundingBoxVisualizer(ros::NodeHandle *nh, const std::string &topic_name, Color color,
+  //                       bool check_subscribers = true);
 
   BoundingBoxVisualizer(const std::string &topic_name, Color color, bool check_subscribers = true);
 
-  void publish(const mas_perception_msgs::BoundingBox &box, const std::string &frame_id);
+  void publish(const mas_perception_msgs::msg::BoundingBox &box, const std::string &frame_id);
 
-  void publish(const std::vector<mas_perception_msgs::BoundingBox> &boxes,
+  void publish(const std::vector<mas_perception_msgs::msg::BoundingBox> &boxes,
                const std::string &frame_id);
 
   int getNumSubscribers();
 
  private:
-  ros::Publisher marker_publisher_;
+  // rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher_;
 
   const Color color_;
   bool check_subscribers_;
