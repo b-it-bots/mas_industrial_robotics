@@ -27,7 +27,7 @@ find_package(message_filters REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 find_package(cv_bridge REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -45,9 +45,12 @@ include_directories(
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  ${cv_bridge_INCLUDE_DIRS}
+  /home/vk/sdp_ws/install/cv_bridge/include
   )
-
-  set(dependencies OpenCV cv_bridge)
+# message(${cv_bridge_INCLUDE_DIRS})
+# message(${mas_perception_msgs_INCLUDE_DIRS})
+set(dependencies OpenCV cv_bridge)
 
 #add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 #ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
@@ -67,6 +70,7 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/label_visualizer.cpp
   ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
   ros/src/mir_perception_utils/object_utils_ros.cpp
+  ros/src/mir_perception_utils/helpers.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)

@@ -8,7 +8,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
-#include "cv_bridge/cv_bridge.h"
+#include "cv_bridge/cv_bridge/cv_bridge.h"
+
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/transform_listener.h>
@@ -50,12 +51,12 @@ namespace mir_perception_utils
          * objects
          * \param[in] Minimum value of the field z allowed
          * \param[in] Maximum value of the field z allowed
-        */
-       void estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
-                         geometry_msgs::msg::PoseStamped &pose,
-                         const std::string shape = "None",
-                         const float passthrough_lim_min = 0.0060,
-                         const float passthrough_lim_max = 0.0);
+         */
+        void estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
+                          geometry_msgs::msg::PoseStamped &pose,
+                          const std::string shape = "None",
+                          const float passthrough_lim_min = 0.0060,
+                          const float passthrough_lim_max = 0.0);
 
         /** \brief Transform pose
          * \param[in] Transform listener
@@ -63,8 +64,7 @@ namespace mir_perception_utils
          * \param[in] Source pose stamped
          * \param[out] Transformed pose stamped
          * */
-        void transformPose(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener,
-                           const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+        void transformPose(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
                            const std::string &target_frame,
                            const geometry_msgs::msg::PoseStamped &pose,
                            geometry_msgs::msg::PoseStamped &transformed_pose);
@@ -75,30 +75,9 @@ namespace mir_perception_utils
          * */
         void convertBboxToMsg(const BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
-        
-        /** \brief Save pointcloud
-         * \param[in] logdir (default="/tmp")
-         * \param[in] obj_name (default="unknown")
-         * */
-        /* void savePcd(const PointCloud::ConstPtr &pointcloud,
-                     const std::string logdir = "/tmp",
-                     const std::string obj_name = "unknown"); */
 
-        /** \brief Save debug image if debug_mode is enabled
-         * \param[in] image with boundix boxes of objects drawn
-         * \param[in] raw_image
-         * \param[in] logdir (default /tmp)
-        */
-        /* void saveCVImage(const cv_bridge::CvImagePtr &cv_image,
-                         const std::string logdir = "/tmp",
-                         const std::string obj_name = "unknown"); */
-
-        /** \brief Convert sensor_msgs/Image to cv_image
-         * \param[in] Sensor_msg/Image
-         * \param[out] cv image output
-        */
-       bool getCVImage(const sensor_msgs::msg::Image::ConstPtr &image,
-                       cv_bridge::CvImagePtr &cv_image);
+        bool getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
+                        cv_bridge::CvImagePtr &cv_image);
     }
 }
 

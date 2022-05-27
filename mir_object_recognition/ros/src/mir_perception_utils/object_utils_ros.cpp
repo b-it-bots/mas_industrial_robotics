@@ -9,7 +9,7 @@
 
 #include <opencv4/opencv2/highgui/highgui.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
 #include <pcl_ros/transforms.hpp>
@@ -140,17 +140,16 @@ void object::estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
     pose.pose.orientation = tf2::toMsg(q);
 }
 
-void object::transformPose(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener,
-                           const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+void object::transformPose(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
                            const std::string &target_frame,
                            const geometry_msgs::msg::PoseStamped &pose,
                            geometry_msgs::msg::PoseStamped &transformed_pose)
 {
-    if (tf_listener)
+    bool canTransform = tf_buffer -> canTransform(target_frame, pose.header.frame_id, 
+                                        rclcpp::Clock().now(), rclcpp::Duration::from_seconds(0.1));
+    if (canTransform)
     {
         try{
-            // lookup transform needs source frame, which is not available
-            
             tf_buffer -> transform(pose, transformed_pose, target_frame);
         }
         catch (tf2::TransformException &ex)
@@ -162,7 +161,7 @@ void object::transformPose(const std::shared_ptr<tf2_ros::TransformListener> &tf
     else{
         auto steady_clock = rclcpp::Clock();
         RCLCPP_ERROR_THROTTLE(rclcpp::get_logger("mir_perception_utils_logger"), steady_clock,
-                                2000, "[ObjectUtils]: TF listener is not initialized");
+                                2000, "[ObjectUtils]: Pose cannot be transformed.");
         transformed_pose = pose;
     }
 }
@@ -182,7 +181,7 @@ void convertBboxToMsg(const BoundingBox &bbox,
     convertBoundingBox(bbox, bounding_box_msg);
 }
 
-bool getCVImage(const sensor_msgs::msg::Image::ConstPtr &image,
+bool getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
                        cv_bridge::CvImagePtr &cv_image)
 {
     try{

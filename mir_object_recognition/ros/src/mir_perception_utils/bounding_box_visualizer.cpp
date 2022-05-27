@@ -47,7 +47,7 @@ namespace mir_perception_utils
             lines.header.frame_id = frame_id;
             // getting current time is not properly defined in ros2
             // the below line might not work
-            lines.header.stamp = rclcpp::Time(0);
+            lines.header.stamp = rclcpp::Clock().now();
             lines.type = visualization_msgs::msg::Marker::LINE_LIST;
             lines.action = visualization_msgs::msg::Marker::ADD;
             lines.scale.x = 0.01;
