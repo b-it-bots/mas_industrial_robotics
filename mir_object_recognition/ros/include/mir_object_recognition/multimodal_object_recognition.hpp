@@ -36,20 +36,27 @@
 #include <tf2_ros/buffer.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <pcl_ros/transforms.hpp>
-
+#include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
+#include "mir_perception_utils/object_utils_ros.hpp"
+#include "mir_perception_utils/pointcloud_utils_ros.hpp"
 #include "mir_object_segmentation/scene_segmentation_ros.h"
+
 
 using std::placeholders::_1;
 using std::placeholders::_2;
 
 using namespace std::chrono_literals;
 
+namespace mpu = mir_perception_utils;
+using mpu::visualization::ClusteredPointCloudVisualizer;
+using mpu::visualization::Color;
 // TODO:
 // namespace mpu = mir_perception_utils;
 // using mpu::visualization::BoundingBoxVisualizer;
 // using mpu::visualization::ClusteredPointCloudVisualizer;
 // using mpu::visualization::LabelVisualizer;
 // using mpu::visualization::Color;
+
 
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
