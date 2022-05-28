@@ -6,7 +6,7 @@ if(NOT CMAKE_C_STANDARD)
   set(CMAKE_C_STANDARD 99)
 endif()
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -27,17 +27,18 @@ find_package(message_filters REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(visualization_msgs REQUIRED)
 
 find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
-find_package(OpenCV REQUIRED)
-#find_package(mir_object_segmentation REQUIRED)
-#find_package(mir_perception_utils REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+# message(${CMAKE_INSTALL_PREFIX})
 include_directories(
   ros/include
   common/include
@@ -50,10 +51,20 @@ include_directories(
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
   ${mir_object_segmentation_INCLUDE_DIRS}
   ${mir_perception_utils_INCLUDE_DIRS}
+  ${CMAKE_INSTALL_PREFIX}/../cv_bridge/include
   )
+include_directories(SYSTEM
+  ${PCL_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+)
+# message(${cv_bridge_INCLUDE_DIRS})
+# message(${mas_perception_msgs_INCLUDE_DIRS})
+# set(dependencies OpenCV cv_bridge)
 
 #add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
 #ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
@@ -65,15 +76,46 @@ target_link_libraries(lifecycle_controller
 )
 ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
-add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-ament_target_dependencies(mmor rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
-
-add_executable(segmenter ros/src/scene_segmentation_node.cpp)
-ament_target_dependencies(segmenter rclcpp std_msgs sensor_msgs mas_perception_msgs tf2_ros pcl_ros cv_bridge visualization_msgs)
-target_link_libraries(segmenter
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
+add_library( percption_visuliazation
+  common/src/bounding_box.cpp
+  common/src/pointcloud_utils.cpp
+  ros/src/mir_perception_utils/bounding_box_visualizer.cpp
+  ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
+  ros/src/mir_perception_utils/label_visualizer.cpp
+  ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
+  ros/src/mir_perception_utils/object_utils_ros.cpp
+  ros/src/mir_perception_utils/helpers.cpp
+  ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
 )
+
+add_executable(mmor ros/src/multimodal_object_recognition.cpp)
+ament_target_dependencies(mmor 
+  rclcpp
+  rclcpp_lifecycle 
+  message_filters 
+  std_msgs 
+  sensor_msgs 
+  lifecycle_msgs 
+  mas_perception_msgs 
+  tf2_ros 
+  pcl_ros 
+  geometry_msgs 
+  OpenCV
+  cv_bridge
+)
+target_link_libraries(mmor
+  percption_visuliazation
+)
+
+# add_executable(transformer ros/src/sample_tf2_transformer.cpp)
+# ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
+
+# add_executable(segmenter ros/src/scene_segmentation_node.cpp)
+# ament_target_dependencies(segmenter rclcpp std_msgs sensor_msgs mas_perception_msgs tf2_ros pcl_ros cv_bridge visualization_msgs)
+# target_link_libraries(segmenter
+#   ${catkin_LIBRARIES}
+#   ${OpenCV_LIBRARIES}
+# )
 # add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 # ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
 
@@ -94,6 +136,7 @@ install(TARGETS
   #lc_talker
   mmor
   # transformer
+  # segmenter
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY

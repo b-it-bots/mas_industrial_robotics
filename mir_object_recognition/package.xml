@@ -12,7 +12,7 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
-  
+  <!-- <depend>cv_bridge</depend> -->
   
   <build_depend>lifecycle_msgs</build_depend>
   <build_depend>rclcpp_lifecycle</build_depend>
@@ -24,9 +24,6 @@
   <build_depend>tf2_ros</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
-  <build_depend>mir_object_segmentation</build_depend>
-  <build_depend>mir_perception_utils</build_depend>
-
   
   <exec_depend>mas_perception_msgs</exec_depend>  
   <exec_depend>rclcpp_lifecycle</exec_depend>
@@ -39,8 +36,7 @@
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>mir_object_segmentation</exec_depend>
-  <exec_depend>mir_perception_utils</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
