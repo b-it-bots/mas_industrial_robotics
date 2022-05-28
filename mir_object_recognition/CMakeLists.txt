@@ -32,6 +32,8 @@ find_package(cv_bridge REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+
+# message(${CMAKE_INSTALL_PREFIX})
 include_directories(
   ros/include
   common/include
@@ -44,9 +46,9 @@ include_directories(
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
-  # ${OpenCV_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
-  /home/vk/sdp_ws/install/cv_bridge/include
+  ${CMAKE_INSTALL_PREFIX}/../cv_bridge/include
   )
 include_directories(SYSTEM
   ${PCL_INCLUDE_DIRS}
