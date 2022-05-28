@@ -1,3 +1,4 @@
+
 #include <algorithm>
 #include <limits>
 #include <opencv4/opencv2/opencv.hpp>
@@ -5,6 +6,7 @@
 #include <pcl/common/transforms.h>
 
 #include "mir_perception_utils/bounding_box.hpp"
+
 
 using namespace mir_perception_utils::object;
 
@@ -84,6 +86,7 @@ BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud, const Eigen::
         box.vertices_.push_back(inverse_transform * p);
     }
     return box;
+
 }
 
 BoundingBox BoundingBox::create(const PointCloud::VectorType &points, const Eigen::Vector3f &normal)

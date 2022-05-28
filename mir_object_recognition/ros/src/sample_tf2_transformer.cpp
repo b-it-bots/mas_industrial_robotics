@@ -1,5 +1,7 @@
+
 #include <std_msgs/msg/float64.hpp>
 #include <mir_object_recognition/multimodal_object_recognition.hpp>
+#include "scene_segmentation_ros.cpp"
 
 using std::placeholders::_1;
 
@@ -8,6 +10,9 @@ class Transformer : public rclcpp::Node
 public:
     Transformer():Node("pointcloud_tranformer")
     {
+        cloud_ = PointCloud::Ptr(new PointCloud);
+        scene_segmentation_ros_ = std::shared_ptr<SceneSegmentationROS>(new SceneSegmentationROS());
+
         tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
         tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
         pc_subscriber_ = this->create_subscription<sensor_msgs::msg::PointCloud2>("/camera/depth/color/points",10,std::bind(&Transformer::callback_func,this,_1));
@@ -34,6 +39,7 @@ public:
                 pcl_ros::transformPointCloud(target_frame,cloud_in,cloud_out,*tf_buffer);
                 RCLCPP_INFO(this->get_logger(), "Transform throws no error");
                 publisher_->publish(cloud_out);
+                scene_segmentation_ros_->addCloudAccumulation(cloud_);
             } 
             catch (tf2::TransformException & ex) 
             {
@@ -61,6 +67,10 @@ private:
     std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
     std::string target_frame_id_ = "base_link";
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
+
+    typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
+    SceneSegmentationROSSPtr scene_segmentation_ros_;
+    PointCloud::Ptr cloud_;
 };
 
 int main(int argc, char * argv[])

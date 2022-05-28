@@ -29,6 +29,11 @@ find_package(pcl_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(OpenCV 4 REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(visualization_msgs REQUIRED)
+
+find_package(PCL 1.10 REQUIRED)
+find_package(VTK REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -48,6 +53,8 @@ include_directories(
   ${geometry_msgs_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
+  ${mir_object_segmentation_INCLUDE_DIRS}
+  ${mir_perception_utils_INCLUDE_DIRS}
   ${CMAKE_INSTALL_PREFIX}/../cv_bridge/include
   )
 include_directories(SYSTEM
@@ -103,6 +110,15 @@ target_link_libraries(mmor
 # add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 # ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
 
+# add_executable(segmenter ros/src/scene_segmentation_node.cpp)
+# ament_target_dependencies(segmenter rclcpp std_msgs sensor_msgs mas_perception_msgs tf2_ros pcl_ros cv_bridge visualization_msgs)
+# target_link_libraries(segmenter
+#   ${catkin_LIBRARIES}
+#   ${OpenCV_LIBRARIES}
+# )
+# add_executable(transformer ros/src/sample_tf2_transformer.cpp)
+# ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -120,6 +136,7 @@ install(TARGETS
   #lc_talker
   mmor
   # transformer
+  # segmenter
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY

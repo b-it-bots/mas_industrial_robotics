@@ -6,12 +6,14 @@
 
 #include "mir_perception_utils/pointcloud_utils.hpp"
 
+
 using namespace mir_perception_utils;
 
 unsigned int pointcloud::centerPointCloud(const PointCloud &cloud_in, PointCloud &centered_cloud)
 {
   if (cloud_in.empty())
     return (0);
+
 
   pcl::copyPointCloud(cloud_in, centered_cloud);
 
