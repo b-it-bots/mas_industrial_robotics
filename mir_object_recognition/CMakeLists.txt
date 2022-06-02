@@ -81,6 +81,10 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
 )
 
+add_executable(lc_talker ros/src/sample_lifecycle_pubsub.cpp)
+ament_target_dependencies(lc_talker rclcpp rclcpp_lifecycle std_msgs lifecycle_msgs mas_perception_msgs)
+
+
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor 
   rclcpp
@@ -117,7 +121,7 @@ endif()
 
 install(TARGETS
   lifecycle_controller
-  #lc_talker
+  lc_talker
   mmor
   # transformer
   DESTINATION lib/${PROJECT_NAME})
