@@ -1,7 +1,7 @@
 /*!
  * @copyright 2018 Bonn-Rhein-Sieg University
  */
-#include <mir_object_segmentation/laserscan_segmentation.h>
+#include <mir_object_segmentation/laserscan_segmentation.hpp>
 #include <vector>
 
 LaserScanSegmentation::LaserScanSegmentation(double dThresholdDistanceBetweenAdajecentPoints,

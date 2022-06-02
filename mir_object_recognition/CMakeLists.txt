@@ -76,9 +76,11 @@ target_link_libraries(lifecycle_controller
 )
 ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
-add_library( percption_visuliazation
+add_library(perception_visualization
   common/src/bounding_box.cpp
   common/src/pointcloud_utils.cpp
+  common/src/cloud_accumulation.cpp
+  common/src/scene_segmentation.cpp
   ros/src/mir_perception_utils/bounding_box_visualizer.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
   ros/src/mir_perception_utils/label_visualizer.cpp
@@ -86,6 +88,9 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/helpers.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
+  ros/src/mir_object_segmentation/laserscan_segmentation.cpp
+  ros/src/mir_object_segmentation/scene_segmentation_node.cpp
+  ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
@@ -104,7 +109,7 @@ ament_target_dependencies(mmor
   cv_bridge
 )
 target_link_libraries(mmor
-  percption_visuliazation
+  perception_visualization
 )
 
 # add_executable(transformer ros/src/sample_tf2_transformer.cpp)
@@ -116,8 +121,6 @@ target_link_libraries(mmor
 #   ${catkin_LIBRARIES}
 #   ${OpenCV_LIBRARIES}
 # )
-# add_executable(transformer ros/src/sample_tf2_transformer.cpp)
-# ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs cv_bridge)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -19,13 +19,13 @@
 #include <mas_perception_msgs/msg/object_list.hpp>
 #include <mas_perception_msgs/srv/recognize_object.hpp>
 
-#include <mir_perception_utils/bounding_box.h>
-#include <mir_perception_utils/bounding_box_visualizer.h>
-#include <mir_perception_utils/clustered_point_cloud_visualizer.h>
-#include <mir_perception_utils/label_visualizer.h>
-#include <mir_perception_utils/pointcloud_utils_ros.h>
+#include <mir_perception_utils/bounding_box.hpp>
+#include <mir_perception_utils/bounding_box_visualizer.hpp>
+#include <mir_perception_utils/clustered_point_cloud_visualizer.hpp>
+#include <mir_perception_utils/label_visualizer.hpp>
+#include <mir_perception_utils/pointcloud_utils_ros.hpp>
 
-#include <mir_object_segmentation/scene_segmentation_node.h>
+#include <mir_object_segmentation/scene_segmentation_node.hpp>
 
 SceneSegmentationNode::SceneSegmentationNode()
     : nh_("~"),

@@ -1,21 +1,17 @@
 #include <std_msgs/msg/float64.hpp>
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
-#include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
-#include "mir_perception_utils/bounding_box_visualizer.hpp"
-#include "mir_perception_utils/label_visualizer.hpp"
-#include "mir_perception_utils/bounding_box.hpp"
-
-// just for testing, remove later
-#include "mir_perception_utils/planar_polygon_visualizer.hpp"
 
 
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):
     rclcpp_lifecycle::LifecycleNode(node_name,
         rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
-        cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
-        cluster_visualizer_pc_("output/tabletop_cluster_pc")
-{RCLCPP_INFO(get_logger(), "constructor called");}
+        bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
+        cluster_visualizer_rgb_("output/tabletop_cluster_rgb"),
+        cluster_visualizer_pc_("output/tabletop_cluster_pc"),
+        label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
+        label_visualizer_pc_("output/pc_labels", Color(Color::IVORY))
+        {RCLCPP_INFO(get_logger(), "constructor called");}
 
 void MultiModalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::msg::Image &image,
                       const sensor_msgs::msg::PointCloud2 &cloud)
@@ -23,39 +19,60 @@ void MultiModalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::msg:
 
     RCLCPP_INFO(get_logger(), "synchro callback");
     RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image.header.stamp.sec, cloud.header.stamp.sec);
-    sensor_msgs::msg::PointCloud2 transformed_msg;
-    this->preprocessPointCloud(tf_listener_, tf_buffer_, target_frame_id_, cloud, transformed_msg);
+    // sensor_msgs::msg::PointCloud2 transformed_msg;
+    // this->preprocessPointCloud(tf_listener_, tf_buffer_, target_frame_id_, cloud, transformed_msg);
+    this->preprocessPointCloud(cloud);
 }
 
-bool MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
-                                                          const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
-                                                          const std::string target_frame, 
-                                                          const sensor_msgs::msg::PointCloud2 cloud_in,
-                                                          sensor_msgs::msg::PointCloud2 cloud_out)
+// bool MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
+//                                                           const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+//                                                           const std::string target_frame, 
+//                                                           const sensor_msgs::msg::PointCloud2 cloud_in,
+//                                                           sensor_msgs::msg::PointCloud2 cloud_out)
+bool MultiModalObjectRecognitionROS::preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg)
 {
     RCLCPP_INFO(get_logger(), "preprocess point cloud");
-    if (tf_listener) 
-        {
-            // geometry_msgs::msg::TransformStamped transformStamped;
-            try 
-            {
-                pcl_ros::transformPointCloud(target_frame,cloud_in,cloud_out,*tf_buffer);
-                RCLCPP_INFO(this->get_logger(), "Transform throws no error");
-                publisher_->publish(cloud_out);
-            } 
-            catch (tf2::TransformException & ex) 
-            {
-                RCLCPP_INFO(this->get_logger(), "Could not transform");
-                return (false);
-            }
-        }
-        else 
-        {
-            RCLCPP_INFO(this->get_logger(), "TF listener not initialized");
-            // RCLCPP_ERROR_THROTTLE(2.0, "TF listener not initialized.");
-            return (false);
-        }
-        return (true);
+    sensor_msgs::msg::PointCloud2 msg_transformed;
+    msg_transformed.header.frame_id = target_frame_id_;
+    if (!mpu::pointcloud::transformPointCloudMsg(tf_buffer_, target_frame_id_, cloud_msg, msg_transformed))
+    {
+        RCLCPP_ERROR(this->get_logger(),"Unable to transform pointcloud. Are you sure target_frame_id_ and pointcloud_source_frame_id are set correctly?");
+        RCLCPP_ERROR(this->get_logger(),"pointcloud_source_frame_id: %s, target_frame_id: %s", pointcloud_source_frame_id_.c_str(), target_frame_id_.c_str());
+        RCLCPP_ERROR(this->get_logger(),"pointcloud_source_frame_id may need to be arm_cam3d_camera_color_frame or fixed_camera_link");
+        RCLCPP_ERROR(this->get_logger(),"target_frame_id may need to be base_link or base_link_static");
+        return false;
+    }
+
+    pcl::PCLPointCloud2::Ptr pc2(new pcl::PCLPointCloud2);
+    pcl_conversions::toPCL(msg_transformed, *pc2);
+    pc2->header.frame_id = msg_transformed.header.frame_id;
+
+    cloud_ = PointCloud::Ptr(new PointCloud);
+    pcl::fromPCLPointCloud2(*pc2, *cloud_);
+    return true;
+
+    // if (tf_listener) 
+    //     {
+    //         // geometry_msgs::msg::TransformStamped transformStamped;
+    //         try 
+    //         {
+    //             pcl_ros::transformPointCloud(target_frame,cloud_in,cloud_out,*tf_buffer);
+    //             RCLCPP_INFO(this->get_logger(), "Transform throws no error");
+    //             publisher_->publish(cloud_out);
+    //         } 
+    //         catch (tf2::TransformException & ex) 
+    //         {
+    //             RCLCPP_INFO(this->get_logger(), "Could not transform");
+    //             return (false);
+    //         }
+    //     }
+    //     else 
+    //     {
+    //         RCLCPP_INFO(this->get_logger(), "TF listener not initialized");
+    //         // RCLCPP_ERROR_THROTTLE(2.0, "TF listener not initialized.");
+    //         return (false);
+    //     }
+    //     return (true);
 
 }
 
@@ -92,7 +109,7 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
         geometry_msgs::msg::PoseArray pcl_object_pose_array;
         pcl_object_pose_array.header.frame_id = target_frame_id_;
         // pcl_object_pose_array.header.stamp = rclcpp::Time::now();
-        pcl_object_pose_array.header.stamp = rclcpp::Clock()::now();
+        pcl_object_pose_array.header.stamp = rclcpp::Clock().now();
         pcl_object_pose_array.poses.resize(recognized_cloud_list_.objects.size());
         std::vector<std::string> pcl_labels;
         int pcl_count = 0;
@@ -106,11 +123,11 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
                 pcl_count++;
             }
         }
-        ROS_INFO_STREAM("[Cloud] Objects: " << names);
+        RCLCPP_INFO_STREAM(this->get_logger(),"[Cloud] Objects: " << names);
         // Publish pose array
         if (pcl_object_pose_array.poses.size() > 0)
         {
-            pub_pc_object_pose_array_.publish(pcl_object_pose_array);
+            pub_pc_object_pose_array_->publish(pcl_object_pose_array);
         }
         // Publish label visualizer
         if ((pcl_labels.size() == pcl_object_pose_array.poses.size()) &&
@@ -125,7 +142,7 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
         // RGB Pose array for debug mode only
         geometry_msgs::msg::PoseArray rgb_object_pose_array;
         rgb_object_pose_array.header.frame_id = target_frame_id_;
-        rgb_object_pose_array.header.stamp = ros::Time::now();
+        rgb_object_pose_array.header.stamp = rclcpp::Clock().now();
         rgb_object_pose_array.poses.resize(recognized_image_list_.objects.size());
         std::vector<std::string> rgb_labels;
         int rgb_count = 0;
@@ -140,11 +157,11 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
                 rgb_count++;
             }
         }
-        ROS_INFO_STREAM("[RGB] Objects: "<< names);
+        RCLCPP_INFO_STREAM(this->get_logger(),"[RGB] Objects: "<< names);
         // Publish pose array
         if (rgb_object_pose_array.poses.size() > 0)
         {
-        pub_rgb_object_pose_array_.publish(rgb_object_pose_array);
+        pub_rgb_object_pose_array_->publish(rgb_object_pose_array);
         }
         // Publish label visualizer
         if ((rgb_labels.size() == rgb_object_pose_array.poses.size()) &&
@@ -172,6 +189,8 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     image_sub_.subscribe(this, "input_image_topic");
     cloud_sub_.subscribe(this, "input_cloud_topic");
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",10);
+    pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/pc_object_pose_array", 10);
+    pub_rgb_object_pose_array_  = this->create_publisher<geometry_msgs::msg::PoseArray>("output/rgb_object_pose_array", 10);
 
     //msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
     msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);

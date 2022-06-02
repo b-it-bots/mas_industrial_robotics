@@ -1,4 +1,4 @@
-#include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
+#include "mir_perception_utils/clustered_point_cloud_visualizer.hpp"
 
 #include "pcl_conversions/pcl_conversions.h"
 #include "pcl/PCLPointCloud2.h"

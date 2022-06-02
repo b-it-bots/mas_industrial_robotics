@@ -8,8 +8,8 @@
 #ifndef MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
 #define MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
 
-#include <mir_perception_utils/aliases.h>
-#include <mir_perception_utils/octree_pointcloud_occupancy_colored.h>
+#include <mir_perception_utils/aliases.hpp>
+#include <mir_perception_utils/octree_pointcloud_occupancy_colored.hpp>
 #include <pcl/octree/octree_pointcloud_occupancy.h>
 #include <memory>
 

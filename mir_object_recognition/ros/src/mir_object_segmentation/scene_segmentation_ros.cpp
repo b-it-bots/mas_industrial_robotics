@@ -12,11 +12,11 @@
 #include <pcl_conversions/pcl_conversions.h>
 // #include <pcl_ros/point_cloud.hpp>
 
-#include <mir_object_segmentation/scene_segmentation_ros.h>
+#include <mir_object_segmentation/scene_segmentation_ros.hpp>
 #include <mir_perception_utils/impl/helpers.hpp>
 
-#include <mir_perception_utils/object_utils_ros.h>
-#include <mir_perception_utils/pointcloud_utils.h>
+#include <mir_perception_utils/object_utils_ros.hpp>
+#include <mir_perception_utils/pointcloud_utils.hpp>
 
 namespace mpu = mir_perception_utils;
 

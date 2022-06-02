@@ -4,10 +4,10 @@
 #ifndef MIR_OBJECT_SEGMENTATION_LASERSCAN_SEGMENTATION_H
 #define MIR_OBJECT_SEGMENTATION_LASERSCAN_SEGMENTATION_H
 
-#include <geometry_msgs/Pose.h>
-#include <mas_perception_msgs/LaserScanSegment.h>
-#include <mas_perception_msgs/LaserScanSegmentList.h>
-#include <sensor_msgs/LaserScan.h>
+#include <geometry_msgs/msg/pose.hpp>
+#include <mas_perception_msgs/msg/laser_scan_segment.h>
+#include <mas_perception_msgs/msg/laser_scan_segment_list.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
 
 class LaserScanSegmentation
 {

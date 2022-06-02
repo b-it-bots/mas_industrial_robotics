@@ -36,10 +36,19 @@
 #include <tf2_ros/buffer.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <pcl_ros/transforms.hpp>
+#include <pcl_conversions/pcl_conversions.h>
+
 #include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
+#include "mir_perception_utils/bounding_box_visualizer.hpp"
+#include "mir_perception_utils/label_visualizer.hpp"
 #include "mir_perception_utils/object_utils_ros.hpp"
 #include "mir_perception_utils/pointcloud_utils_ros.hpp"
-#include "mir_object_segmentation/scene_segmentation_ros.h"
+#include "mir_object_segmentation/scene_segmentation_ros.hpp"
+#include "mir_perception_utils/bounding_box.hpp"
+
+// just for testing, remove later
+#include "mir_perception_utils/planar_polygon_visualizer.hpp"
+
 
 
 using std::placeholders::_1;
@@ -48,14 +57,10 @@ using std::placeholders::_2;
 using namespace std::chrono_literals;
 
 namespace mpu = mir_perception_utils;
+using mpu::visualization::BoundingBoxVisualizer;
 using mpu::visualization::ClusteredPointCloudVisualizer;
+using mpu::visualization::LabelVisualizer;
 using mpu::visualization::Color;
-// TODO:
-// namespace mpu = mir_perception_utils;
-// using mpu::visualization::BoundingBoxVisualizer;
-// using mpu::visualization::ClusteredPointCloudVisualizer;
-// using mpu::visualization::LabelVisualizer;
-// using mpu::visualization::Color;
 
 
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
@@ -136,6 +141,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
     private:
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> obj_list_pub_;
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_pc_object_pose_array_;
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_rgb_object_pose_array_;
         
         message_filters::Subscriber<sensor_msgs::msg::Image, rclcpp_lifecycle::LifecycleNode> image_sub_;
         
@@ -148,6 +155,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_{nullptr};
         std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
         std::string target_frame_id_ = "base_link";
+
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> publisher_;
         // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
         
@@ -156,11 +164,12 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
         // void preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
 
-        bool preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
-                                  const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
-                                  const std::string target_frame, 
-                                  const sensor_msgs::msg::PointCloud2 cloud_in,
-                                  sensor_msgs::msg::PointCloud2 cloud_out);
+        // bool preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
+        //                           const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+        //                           const std::string target_frame, 
+        //                           const sensor_msgs::msg::PointCloud2 cloud_in,
+        //                           sensor_msgs::msg::PointCloud2 cloud_out);
+        bool preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
 
         void publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
                                                 std::vector<PointCloud::Ptr> &clusters_3d,
@@ -172,12 +181,21 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
         mas_perception_msgs::msg::ObjectList recognized_image_list_;
 
-        // TODO:
-        // BoundingBoxVisualizer bounding_box_visualizer_pc_;
-        // ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
-        // LabelVisualizer label_visualizer_rgb_;
-        // LabelVisualizer label_visualizer_pc_;
+    protected:
+        //visualization
+        BoundingBoxVisualizer bounding_box_visualizer_pc_;
+        ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+        LabelVisualizer label_visualizer_rgb_;
+        LabelVisualizer label_visualizer_pc_;
+
+        //parameters
+        bool debug_mode_;
+        std::string pointcloud_source_frame_id_;
+        // std::set<std::string> round_objects_;
+        // typedef std::vector<Object> ObjectInfo;
+        // ObjectInfo object_info_;
+        // std::string object_info_path_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H

@@ -20,8 +20,8 @@
 #include <mas_perception_msgs/msg/bounding_box.hpp>
 #include <mas_perception_msgs/msg/object_list.hpp>
 
-#include <mir_object_segmentation/cloud_accumulation.h>
-#include <mir_object_segmentation/scene_segmentation.h>
+#include <mir_object_segmentation/cloud_accumulation.hpp>
+#include <mir_object_segmentation/scene_segmentation.hpp>
 
 // #include <mir_perception_utils/bounding_box.h>
 // #include <mir_perception_utils/object_utils_ros.h>
