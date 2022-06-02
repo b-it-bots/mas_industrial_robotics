@@ -39,6 +39,8 @@
 #include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
 #include "mir_perception_utils/object_utils_ros.hpp"
 #include "mir_perception_utils/pointcloud_utils_ros.hpp"
+#include "mir_perception_utils/bounding_box_visualizer.hpp"
+#include "mir_perception_utils/label_visualizer.hpp"
 #include "mir_object_segmentation/scene_segmentation_ros.h"
 
 
@@ -51,11 +53,11 @@ namespace mpu = mir_perception_utils;
 using mpu::visualization::ClusteredPointCloudVisualizer;
 using mpu::visualization::Color;
 // TODO:
-// namespace mpu = mir_perception_utils;
-// using mpu::visualization::BoundingBoxVisualizer;
-// using mpu::visualization::ClusteredPointCloudVisualizer;
-// using mpu::visualization::LabelVisualizer;
-// using mpu::visualization::Color;
+ //namespace mpu = mir_perception_utils;
+ using mpu::visualization::BoundingBoxVisualizer;
+ using mpu::visualization::ClusteredPointCloudVisualizer;
+ using mpu::visualization::LabelVisualizer;
+ using mpu::visualization::Color;
 
 
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
@@ -173,11 +175,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         mas_perception_msgs::msg::ObjectList recognized_image_list_;
 
         // TODO:
-        // BoundingBoxVisualizer bounding_box_visualizer_pc_;
-        // ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
-        // LabelVisualizer label_visualizer_rgb_;
-        // LabelVisualizer label_visualizer_pc_;
+         BoundingBoxVisualizer bounding_box_visualizer_pc_;
+         ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+         ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+         LabelVisualizer label_visualizer_rgb_;
+         LabelVisualizer label_visualizer_pc_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H

@@ -23,8 +23,8 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/surface/convex_hull.h>
 
-#include <mir_perception_utils/aliases.h>
-#include <mir_perception_utils/bounding_box.h>
+#include <mir_perception_utils/aliases.hpp>
+#include <mir_perception_utils/bounding_box.hpp>
 
 using namespace mir_perception_utils::object;
 
