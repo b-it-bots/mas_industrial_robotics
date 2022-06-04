@@ -5,8 +5,8 @@
 
 #include <pcl_conversions/pcl_conversions.h>
 
-#include <mir_perception_utils/aliases.h>
-#include <mir_perception_utils/color.h>
+#include <mir_perception_utils/aliases.hpp>
+#include <mir_perception_utils/color.hpp>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
 

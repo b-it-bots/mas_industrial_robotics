@@ -40,4 +40,5 @@ class BoundingBoxVisualizer
 };
 }
 }
+//#include "mir_perception_utils/impl/bounding_box_visualizer.hpp"
 #endif /* BOUNDING_BOX_VISUALIZER_HPP */

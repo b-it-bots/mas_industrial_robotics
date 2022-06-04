@@ -41,5 +41,5 @@ namespace mir_perception_utils
   } // namespace visualization
 
 } // namespace mir
-
+//#include "mir_perception_utils/impl/clustered_point_cloud_visualizer.hpp"
 #endif // MIR_PERCEPTION_UTILS_CLUSTERED_POINT_CLOUD_VISUALIZER_H

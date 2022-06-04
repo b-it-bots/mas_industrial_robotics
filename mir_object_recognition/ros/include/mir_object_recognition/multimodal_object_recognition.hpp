@@ -175,11 +175,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         mas_perception_msgs::msg::ObjectList recognized_image_list_;
 
         // TODO:
-         BoundingBoxVisualizer bounding_box_visualizer_pc_;
-         ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-         ClusteredPointCloudVisualizer cluster_visualizer_pc_;
-         LabelVisualizer label_visualizer_rgb_;
-         LabelVisualizer label_visualizer_pc_;
+         //BoundingBoxVisualizer bounding_box_visualizer_pc_;
+         //ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+        // LabelVisualizer label_visualizer_rgb_;
+        // LabelVisualizer label_visualizer_pc_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
