@@ -36,7 +36,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
     rcl_interfaces::msg::FloatingPointRange range4;
     range4.set__from_value(-10.0).set__to_value(10.0);
     descriptor4.floating_point_range = {range4};
-    this->declare_parameter("voxel_filter_limit_max", 0.25, descriptor4);
+    this->declare_parameter("voxel_filter_limit_max", 0.3, descriptor4);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -80,7 +80,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
     rcl_interfaces::msg::IntegerRange range11;
     range11.set__from_value(1).set__to_value(16);
     descriptor11.integer_range = {range11};
-    this->declare_parameter("num_cores", 4, descriptor11);
+    this->declare_parameter("num_cores", 8, descriptor11);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor12;
     descriptor12.description = "The maximum number of iterations the algorithm will run for";
@@ -217,11 +217,11 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
 
     rcl_interfaces::msg::ParameterDescriptor descriptor31;
     descriptor31.description = "Center cluster";
-    this->declare_parameter("center_cluster", true, descriptor31);
+    this->declare_parameter("center_cluster", false, descriptor31);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor32;
     descriptor32.description = "Pad cluster so that it has the same size";
-    this->declare_parameter("pad_cluster", false, descriptor32);
+    this->declare_parameter("pad_cluster", true, descriptor32);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor33;
     descriptor33.description = "The size of the padded cluster";
@@ -237,14 +237,14 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
     rcl_interfaces::msg::FloatingPointRange range34;
     range34.set__from_value(0.0).set__to_value(2.0);
     descriptor34.floating_point_range = {range34};
-    this->declare_parameter("object_height_above_workspace", 0.052, descriptor34);
+    this->declare_parameter("object_height_above_workspace", 0.022, descriptor34);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor35;
     descriptor35.description = "The height of the container pose";
     rcl_interfaces::msg::FloatingPointRange range35;
     range35.set__from_value(0.0).set__to_value(2.0);
     descriptor35.floating_point_range = {range35};
-    this->declare_parameter("container_height", 0.0335, descriptor35);
+    this->declare_parameter("container_height", 0.07, descriptor35);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -267,14 +267,14 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
     rcl_interfaces::msg::FloatingPointRange range38;
     range38.set__from_value(0.0).set__to_value(500.0);
     descriptor38.floating_point_range = {range38};
-    this->declare_parameter("rgb_bbox_max_diag", 200.0, descriptor38);
+    this->declare_parameter("rgb_bbox_max_diag", 175.0, descriptor38);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor39;
     descriptor39.description = "Passthrough filter min for the generated pc from rgb proposal";
     rcl_interfaces::msg::FloatingPointRange range39;
     range39.set__from_value(-1.0).set__to_value(1.0);
     descriptor39.floating_point_range = {range39};
-    this->declare_parameter("rgb_cluster_filter_limit_min", 0.009, descriptor39);
+    this->declare_parameter("rgb_cluster_filter_limit_min", 0.0060, descriptor39);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor40;
     descriptor40.description = "Passthrough filter max for the generated pc from rgb proposal";
@@ -305,7 +305,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
     rcl_interfaces::msg::FloatingPointRange range44;
     range44.set__from_value(0.0).set__to_value(2.0);
     descriptor44.floating_point_range = {range44};
-    this->declare_parameter("roi_max_object_pose_x_to_base_link", 0.650, descriptor44);
+    this->declare_parameter("roi_max_object_pose_x_to_base_link", 0.700, descriptor44);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor45;
     descriptor45.description = "Min height of objects";
@@ -325,6 +325,11 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
     this->declare_parameter("enable_pc_recognizer", true, descriptor47);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////      
+    rcl_interfaces::msg::ParameterDescriptor descriptor48;
+    descriptor48.description = "Octree resolution";
+    rcl_interfaces::msg::FloatingPointRange range48;
+    range48.set__from_value(0.0).set__to_value(2.0);
+    descriptor48.floating_point_range = {range48};
     this->declare_parameter("octree_resolution", 0.0025);  
     
 }
