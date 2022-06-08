@@ -10,6 +10,7 @@
 #include <Eigen/Dense>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include "rclcpp/rclcpp.hpp"
@@ -55,7 +56,7 @@ class SceneSegmentationROS
   SceneSegmentationUPtr scene_segmentation_;
 
   pcl::ModelCoefficients::Ptr model_coefficients_;
-  boost::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   bool add_to_octree_;
   int pcl_object_id_;

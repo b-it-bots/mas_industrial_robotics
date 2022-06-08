@@ -8,6 +8,7 @@
 #define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_NODE_HPP
 
 #include <string>
+#include <memory>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -65,7 +66,7 @@ class SceneSegmentationNode
 
   dynamic_reconfigure::Server<mir_object_segmentation::SceneSegmentationConfig> server_;
 
-  boost::shared_ptr<tf::TransformListener> tf_listener_;
+  std::shared_ptr<tf::TransformListener> tf_listener_;
 
   SceneSegmentationROS scene_segmentation_ros_;
 

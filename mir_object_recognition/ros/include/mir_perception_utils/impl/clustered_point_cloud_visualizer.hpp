@@ -1,6 +1,8 @@
 #ifndef CLUSTERED_POINT_CLOUD_VISUALIZER_HPP
 #define CLUSTERED_POINT_CLOUD_VISUALIZER_HPP
 
+ #include <memory>
+ 
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <pcl_conversions/pcl_conversions.h>
@@ -17,7 +19,7 @@ namespace mir_perception_utils
 namespace visualization
 {
 ClusteredPointCloudVisualizer::ClusteredPointCloudVisualizer(
-    const boost::shared_ptr<ros::NodeHandle> &nh, const std::string &topic_name,
+    const std::shared_ptr<ros::NodeHandle> &nh, const std::string &topic_name,
     bool check_subscribers)
     : check_subscribers_(check_subscribers)
 {
