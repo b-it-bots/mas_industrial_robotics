@@ -13,7 +13,6 @@
 #include <pcl_ros/transforms.hpp>
 
 #include <std_msgs/msg/float64.hpp>
-#include <clock.hpp>
 
 #include <mas_perception_msgs/msg/bounding_box.hpp>
 #include <mas_perception_msgs/msg/bounding_box_list.hpp>

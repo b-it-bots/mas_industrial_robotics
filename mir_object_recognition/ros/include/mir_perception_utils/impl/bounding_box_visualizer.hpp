@@ -1,8 +1,6 @@
 #ifndef BOUNDING_BOX_VISUALIZER_HPP
 #define BOUNDING_BOX_VISUALIZER_HPP
 
-#include <clock.hpp>
-
 #include <mir_perception_utils/color.h>
 // #include <ros/node_handle.h>
 #include <visualization_msgs/msg/marker.hpp>

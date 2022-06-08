@@ -4,9 +4,13 @@
 #ifndef MIR_OBJECT_SEGMENTATION_LASERSCAN_SEGMENTATION_HPP
 #define MIR_OBJECT_SEGMENTATION_LASERSCAN_SEGMENTATION_HPP
 
+#include <cmath>
+#include <rclcpp/clock.hpp>
+
+
 #include <geometry_msgs/msg/pose.hpp>
-#include <mas_perception_msgs/msg/LaserScanSegment.hpp>
-#include <mas_perception_msgs/msg/LaserScanSegmentList.hpp>
+#include <mas_perception_msgs/msg/laser_scan_segment.hpp>
+#include <mas_perception_msgs/msg/laser_scan_segment_list.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 class LaserScanSegmentation

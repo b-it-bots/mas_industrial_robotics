@@ -2,7 +2,6 @@
  * @copyright 2018 Bonn-Rhein-Sieg University
  */
 
-#include <clock.hpp>
 #include <mir_object_segmentation/laserscan_segmentation.hpp>
 #include <vector>
 

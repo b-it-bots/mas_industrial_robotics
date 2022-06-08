@@ -24,8 +24,8 @@
 #include <mir_object_segmentation/cloud_accumulation.hpp>
 #include <mir_object_segmentation/scene_segmentation.hpp>
 
-// #include <mir_perception_utils/bounding_box.h>
-// #include <mir_perception_utils/object_utils_ros.h>
+#include <mir_perception_utils/bounding_box.hpp>
+#include <mir_perception_utils/object_utils_ros.hpp>
 
 /** \brief This class is a wrapper for table top point cloud segmentation.
  *
@@ -59,8 +59,9 @@ class SceneSegmentationROS
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   bool add_to_octree_;
-  int pcl_object_id_;
   double octree_resolution_;
+  int pcl_object_id_;
+ 
   double workspace_height_;
 
   PointCloud::Ptr cloud_debug_;
@@ -84,7 +85,7 @@ class SceneSegmentationROS
    * \param[in] Input point cloud
    * \param[out] Point cloud debug output
    * */
-  void c(const PointCloud::ConstPtr &cloud_in, PointCloud::Ptr &cloud_debug);
+  void findPlane(const PointCloud::ConstPtr &cloud_in, PointCloud::Ptr &cloud_debug);
 
   /** \brief Reset accumulated cloud */
   void resetCloudAccumulation();

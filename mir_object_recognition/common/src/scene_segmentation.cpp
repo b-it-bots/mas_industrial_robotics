@@ -12,13 +12,13 @@
 
 SceneSegmentation::SceneSegmentation() : use_omp_(false)
 {
-  cluster_extraction_.setSearchMethod(std::make_shared<pcl::search::KdTree<PointT>>());
-  normal_estimation_.setSearchMethod(std::make_shared<pcl::search::KdTree<PointT>>());
-  normal_estimation_omp_.setSearchMethod(std::make_shared<pcl::search::KdTree<PointT>>());
-};
+  cluster_extraction_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
+  normal_estimation_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
+  normal_estimation_omp_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
+}
 SceneSegmentation::~SceneSegmentation(){
 
-};
+}
 
 PointCloud::Ptr SceneSegmentation::segmentScene(const PointCloud::ConstPtr &cloud,
                                                 std::vector<PointCloud::Ptr> &clusters,
@@ -113,7 +113,7 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
 
   // determine workspace height based on the mean of z axis 
   double z = 0.0;
-  for (int i = 0; i < hull->points.size(); i++) {
+  for (size_t i = 0; i < hull->points.size(); i++) {
     z += hull->points[i].z;
   }
   if (hull->points.size() > 0) {
@@ -180,4 +180,10 @@ void SceneSegmentation::setClusterParams(double cluster_tolerance, int cluster_m
   cluster_extraction_.setClusterTolerance(cluster_tolerance);
   cluster_extraction_.setMinClusterSize(cluster_min_size);
   cluster_extraction_.setMaxClusterSize(cluster_max_size);
+
+  //unused parameters: To supress the warning 
+  (void)cluster_min_height;
+  (void)cluster_max_height;
+  (void)max_length;
+  (void)cluster_min_distance_to_polygon;
 }

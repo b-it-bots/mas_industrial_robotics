@@ -12,8 +12,6 @@
 #include <pcl_conversions/pcl_conversions.h>
 // #include <pcl_ros/point_cloud.hpp>
 
-#include <clock.hpp>
-
 #include <mir_object_segmentation/scene_segmentation_ros.hpp>
 #include <mir_perception_utils/impl/helpers.hpp>
 
@@ -45,8 +43,8 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
   cloud_debug_->header.frame_id = frame_id;
 
   object_list.objects.resize(boxes.size());
-  ros::Time now = rclcpp::Clock().now();
-  for (int i = 0; i < clusters.size(); i++) {
+  rclcpp::Time now = rclcpp::Clock().now();
+  for (size_t i = 0; i < clusters.size(); i++) {
     sensor_msgs::msg::PointCloud2 ros_cloud;
     ros_cloud.header.frame_id = frame_id;
     if (pad_cluster) {
@@ -163,8 +161,8 @@ void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluste
 
 PointCloud::Ptr SceneSegmentationROS::getCloudDebug()
 {
-  //if (cloud_debug_->points.size() < 0)
-    //ROS_WARN("Debug cloud is empty");
+  // if (cloud_debug_->points.size() < 0)
+  //   ROS_WARN("Debug cloud is empty");
 
-  //return(cloud_debug_);
+  return(cloud_debug_);
 }

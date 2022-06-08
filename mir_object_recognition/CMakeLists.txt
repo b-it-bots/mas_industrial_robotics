@@ -84,6 +84,8 @@ ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 add_library( percption_visuliazation
   common/src/bounding_box.cpp
   common/src/pointcloud_utils.cpp
+  common/src/cloud_accumulation.cpp
+  common/src/scene_segmentation.cpp
   ros/src/mir_perception_utils/bounding_box_visualizer.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
   ros/src/mir_perception_utils/label_visualizer.cpp
@@ -91,6 +93,9 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/helpers.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
+  ros/src/mir_object_segmentation/laserscan_segmentation.cpp
+  ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
+  #ros/src/mir_object_segmentation/scene_segmentation_node.cpp
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
