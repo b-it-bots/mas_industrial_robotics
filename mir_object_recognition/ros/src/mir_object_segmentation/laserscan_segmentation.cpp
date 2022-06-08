@@ -68,7 +68,7 @@ mas_perception_msgs::msg::LaserScanSegmentList LaserScanSegmentation::getSegment
           mas_perception_msgs::msg::LaserScanSegment seg;
 
           seg.header = inputScan->header;
-          seg.header.stamp = rclcpp::clock::now();
+          seg.header.stamp = rclcpp::Clock().now();
           seg.center.x = centerPoint.x;
           seg.center.y = centerPoint.y;
 
@@ -88,7 +88,7 @@ mas_perception_msgs::msg::LaserScanSegmentList LaserScanSegmentation::getSegment
   }
 
   segments.header = inputScan->header;
-  segments.header.stamp = rclcpp::clock::now();
+  segments.header.stamp = rclcpp::Clock().now();
   segments.num_segments = static_cast<unsigned int>(segments.segments.size());
 
   return segments;

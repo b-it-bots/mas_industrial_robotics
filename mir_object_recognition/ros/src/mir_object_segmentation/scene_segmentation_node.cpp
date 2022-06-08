@@ -92,7 +92,7 @@ void SceneSegmentationNode::segmentPointCloud()
   bounding_boxes.bounding_boxes.resize(clusters.size());
 
   geometry_msgs::msg::PoseArray poses;
-  poses.header.stamp = rclcpp::Clock::now();
+  poses.header.stamp = rclcpp::Clock().now();
   poses.header.frame_id = target_frame_id_;
   std::vector<std::string> labels;
 

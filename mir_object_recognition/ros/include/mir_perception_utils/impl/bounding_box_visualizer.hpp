@@ -44,7 +44,7 @@ void BoundingBoxVisualizer::publish(const std::vector<mas_perception_msgs::msg::
   if (check_subscribers_ && marker_publisher_.getNumSubscribers() == 0) return;
   visualization_msgs::msg::Marker lines;
   lines.header.frame_id = frame_id;
-  lines.header.stamp = rclcpp::clock::now();
+  lines.header.stamp = rclcpp::Clock().now();
   lines.type = visualization_msgs::Marker::LINE_LIST;
   lines.action = visualization_msgs::Marker::ADD;
   lines.scale.x = 0.001;
