@@ -140,6 +140,9 @@
 
     <include file="$(find mir_perceive_mock)/ros/launch/perceive_aruco_server.launch"/>
 
+    <!-- Empty space detector -->
+
+    <include file = "$(find mir_empty_space_detection)/ros/launch/empty_space_detector.launch"/>
 
     <!-- =================================================================== -->
 
