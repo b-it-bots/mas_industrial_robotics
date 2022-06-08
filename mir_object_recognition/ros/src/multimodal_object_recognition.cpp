@@ -330,7 +330,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters(){
     rcl_interfaces::msg::FloatingPointRange range48;
     range48.set__from_value(0.0).set__to_value(2.0);
     descriptor48.floating_point_range = {range48};
-    this->declare_parameter("octree_resolution", 0.0025);  
+    this->declare_parameter("octree_resolution", 0.0025, descriptor48);  
     
 }
 
