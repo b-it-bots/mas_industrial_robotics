@@ -5,8 +5,8 @@
  * Author: Sergey Alexandrov
  *
  */
-#ifndef MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
-#define MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
+#ifndef MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP
+#define MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP
 
 #include <mir_perception_utils/aliases.hpp>
 #include <mir_perception_utils/octree_pointcloud_occupancy_colored.hpp>
@@ -48,4 +48,4 @@ class CloudAccumulation
   double resolution_;
 };
 
-#endif  // MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
+#endif  // MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP

@@ -4,8 +4,8 @@
  * Author: Mohammad Wasil, Santosh Thoduka
  *
  */
-#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_H
-#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_H
+#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_HPP
+#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_HPP
 
 #include <Eigen/Dense>
 #include <string>
@@ -20,8 +20,8 @@
 #include <mas_perception_msgs/msg/bounding_box.hpp>
 #include <mas_perception_msgs/msg/object_list.hpp>
 
-#include <mir_object_segmentation/cloud_accumulation.h>
-#include <mir_object_segmentation/scene_segmentation.h>
+#include <mir_object_segmentation/cloud_accumulation.hpp>
+#include <mir_object_segmentation/scene_segmentation.hpp>
 
 // #include <mir_perception_utils/bounding_box.h>
 // #include <mir_perception_utils/object_utils_ros.h>
@@ -83,7 +83,7 @@ class SceneSegmentationROS
    * \param[in] Input point cloud
    * \param[out] Point cloud debug output
    * */
-  void findPlane(const PointCloud::ConstPtr &cloud_in, PointCloud::Ptr &cloud_debug);
+  void c(const PointCloud::ConstPtr &cloud_in, PointCloud::Ptr &cloud_debug);
 
   /** \brief Reset accumulated cloud */
   void resetCloudAccumulation();
@@ -185,4 +185,4 @@ class SceneSegmentationROS
 
 };
 
-#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_H
+#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_HPP

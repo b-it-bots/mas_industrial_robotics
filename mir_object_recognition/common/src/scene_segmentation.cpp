@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <mir_object_segmentation/scene_segmentation.h>
+#include <mir_object_segmentation/scene_segmentation.hpp>
 
 SceneSegmentation::SceneSegmentation() : use_omp_(false)
 {

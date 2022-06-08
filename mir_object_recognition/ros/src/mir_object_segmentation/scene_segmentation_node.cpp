@@ -13,19 +13,20 @@
 #include <pcl_ros/transforms.hpp>
 
 #include <std_msgs/msg/float64.hpp>
+#include <clock.hpp>
 
 #include <mas_perception_msgs/msg/bounding_box.hpp>
 #include <mas_perception_msgs/msg/bounding_box_list.hpp>
 #include <mas_perception_msgs/msg/object_list.hpp>
 #include <mas_perception_msgs/srv/recognize_object.hpp>
 
-#include <mir_perception_utils/bounding_box.h>
-#include <mir_perception_utils/bounding_box_visualizer.h>
-#include <mir_perception_utils/clustered_point_cloud_visualizer.h>
-#include <mir_perception_utils/label_visualizer.h>
-#include <mir_perception_utils/pointcloud_utils_ros.h>
+#include <mir_perception_utils/bounding_box.hpp>
+#include <mir_perception_utils/bounding_box_visualizer.hpp>
+#include <mir_perception_utils/clustered_point_cloud_visualizer.hpp>
+#include <mir_perception_utils/label_visualizer.hpp>
+#include <mir_perception_utils/pointcloud_utils_ros.hpp>
 
-#include <mir_object_segmentation/scene_segmentation_node.h>
+#include <mir_object_segmentation/scene_segmentation_node.hpp>
 
 SceneSegmentationNode::SceneSegmentationNode()
     : nh_("~"),
@@ -37,10 +38,10 @@ SceneSegmentationNode::SceneSegmentationNode()
       scene_segmentation_ros_(0.0025)
 {
   sub_event_in_ = nh_.subscribe("event_in", 1, &SceneSegmentationNode::eventCallback, this);
-  pub_event_out_ = nh_.advertise<std_msgs::String>("event_out", 1);
-  pub_object_list_ = nh_.advertise<mas_perception_msgs::ObjectList>("output/object_list", 1);
-  pub_workspace_height_ = nh_.advertise<std_msgs::Float64>("output/workspace_height", 1);
-  pub_debug_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud", 1);
+  pub_event_out_ = nh_.advertise<std_msgs::msg::String>("event_out", 1);
+  pub_object_list_ = nh_.advertise<mas_perception_msgs::msg::ObjectList>("output/object_list", 1);
+  pub_workspace_height_ = nh_.advertise<std_msgs::msg::Float64>("output/workspace_height", 1);
+  pub_debug_ = nh_.advertise<sensor_msgs::msg::PointCloud2>("output/debug_cloud", 1);
 
   dynamic_reconfigure::Server<mir_object_segmentation::SceneSegmentationConfig>::CallbackType f =
       boost::bind(&SceneSegmentationNode::configCallback, this, _1, _2);
@@ -53,10 +54,10 @@ SceneSegmentationNode::SceneSegmentationNode()
 }
 
 SceneSegmentationNode::~SceneSegmentationNode() {}
-void SceneSegmentationNode::pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg)
+void SceneSegmentationNode::pointcloudCallback(const sensor_msgs::msg::PointCloud2::Ptr &msg)
 {
   if (add_to_octree_) {
-    sensor_msgs::PointCloud2 msg_transformed;
+    sensor_msgs::msg::PointCloud2 msg_transformed;
     if (!mpu::pointcloud::transformPointCloudMsg(tf_listener_, target_frame_id_, *msg,
                                                  msg_transformed))
       return;
@@ -68,7 +69,7 @@ void SceneSegmentationNode::pointcloudCallback(const sensor_msgs::PointCloud2::P
 
     scene_segmentation_ros_.addCloudAccumulation(cloud);
 
-    std_msgs::String event_out;
+    std_msgs::msg::String event_out;
     add_to_octree_ = false;
     event_out.data = "e_add_cloud_stopped";
     pub_event_out_.publish(event_out);
@@ -82,16 +83,16 @@ void SceneSegmentationNode::segmentPointCloud()
   scene_segmentation_ros_.getCloudAccumulation(cloud);
 
   std::vector<PointCloud::Ptr> clusters;
-  mas_perception_msgs::ObjectList object_list;
+  mas_perception_msgs::msg::ObjectList object_list;
   std::vector<BoundingBox> boxes;
   scene_segmentation_ros_.segmentCloud(cloud, object_list, clusters, boxes, center_cluster_,
                                        pad_cluster_, padded_cluster_size_);
 
-  mas_perception_msgs::BoundingBoxList bounding_boxes;
+  mas_perception_msgs::msg::BoundingBoxList bounding_boxes;
   bounding_boxes.bounding_boxes.resize(clusters.size());
 
-  geometry_msgs::PoseArray poses;
-  poses.header.stamp = ros::Time::now();
+  geometry_msgs::msg::PoseArray poses;
+  poses.header.stamp = rclcpp::Clock::now();
   poses.header.frame_id = target_frame_id_;
   std::vector<std::string> labels;
 
@@ -108,7 +109,7 @@ void SceneSegmentationNode::segmentPointCloud()
   cluster_visualizer_.publish<PointT>(clusters, target_frame_id_);
   label_visualizer_.publish(labels, poses);
 
-  std_msgs::Float64 workspace_height_msg;
+  std_msgs::msg::Float64 workspace_height_msg;
   workspace_height_msg.data = scene_segmentation_ros_.getWorkspaceHeight();
   pub_workspace_height_.publish(workspace_height_msg);
 }
@@ -123,15 +124,15 @@ void SceneSegmentationNode::findPlane()
   scene_segmentation_ros_.findPlane(cloud, cloud_debug);
   cloud_debug->header.frame_id = cloud->header.frame_id;
   ROS_INFO_STREAM("Got plane and publishing workspace height");
-  std_msgs::Float64 workspace_height_msg;
+  std_msgs::msg::Float64 workspace_height_msg;
   workspace_height_msg.data = scene_segmentation_ros_.getWorkspaceHeight();
   pub_workspace_height_.publish(workspace_height_msg);
   pub_debug_.publish(*cloud_debug);
 }
 
-void SceneSegmentationNode::eventCallback(const std_msgs::String::ConstPtr &msg)
+void SceneSegmentationNode::eventCallback(const std_msgs::msg::String::ConstPtr &msg)
 {
-  std_msgs::String event_out;
+  std_msgs::msg::String event_out;
   if (msg->data == "e_start") {
     sub_cloud_ = nh_.subscribe("input", 1, &SceneSegmentationNode::pointcloudCallback, this);
     event_out.data = "e_started";

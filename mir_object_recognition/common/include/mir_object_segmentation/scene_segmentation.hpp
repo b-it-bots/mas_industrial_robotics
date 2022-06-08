@@ -4,8 +4,8 @@
  * Author: Mohammad Wasil, Santosh Thoduka
  *
  */
-#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_H
-#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_H
+#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP
+#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP
 
 #include <pcl/ModelCoefficients.h>
 #include <pcl/features/normal_3d.h>
@@ -140,4 +140,4 @@ class SceneSegmentation
   bool use_omp_;
 };
 
-#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_H
+#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP

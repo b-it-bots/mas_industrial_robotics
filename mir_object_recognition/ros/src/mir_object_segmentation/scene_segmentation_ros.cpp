@@ -12,11 +12,13 @@
 #include <pcl_conversions/pcl_conversions.h>
 // #include <pcl_ros/point_cloud.hpp>
 
-#include <mir_object_segmentation/scene_segmentation_ros.h>
+#include <clock.hpp>
+
+#include <mir_object_segmentation/scene_segmentation_ros.hpp>
 #include <mir_perception_utils/impl/helpers.hpp>
 
-#include <mir_perception_utils/object_utils_ros.h>
-#include <mir_perception_utils/pointcloud_utils.h>
+#include <mir_perception_utils/object_utils_ros.hpp>
+#include <mir_perception_utils/pointcloud_utils.hpp>
 
 namespace mpu = mir_perception_utils;
 
@@ -43,9 +45,9 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
   // cloud_debug_->header.frame_id = frame_id;
 
   // object_list.objects.resize(boxes.size());
-  // ros::Time now = ros::Time::now();
+  // ros::Time now = rclcpp::clock::now();
   // for (int i = 0; i < clusters.size(); i++) {
-  //   sensor_msgs::PointCloud2 ros_cloud;
+  //   sensor_msgs::msg::PointCloud2 ros_cloud;
   //   ros_cloud.header.frame_id = frame_id;
   //   if (pad_cluster) {
   //     mpu::pointcloud::padPointCloud(clusters[i], num_points);
@@ -64,7 +66,7 @@ void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
   //   object_list.objects[i].name = "unknown";
   //   object_list.objects[i].probability = 0.0;
 
-  //   geometry_msgs::PoseStamped pose;
+  //   geometry_msgs::msg::PoseStamped pose;
   //   mpu::object::estimatePose(boxes[i], pose);
   //   pose.header.stamp = now;
   //   pose.header.frame_id = frame_id;

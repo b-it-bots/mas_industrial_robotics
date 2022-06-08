@@ -1,6 +1,8 @@
 #ifndef BOUNDING_BOX_VISUALIZER_HPP
 #define BOUNDING_BOX_VISUALIZER_HPP
 
+#include <clock.hpp>
+
 #include <mir_perception_utils/color.h>
 // #include <ros/node_handle.h>
 #include <visualization_msgs/msg/marker.hpp>
@@ -42,17 +44,17 @@ void BoundingBoxVisualizer::publish(const std::vector<mas_perception_msgs::msg::
   if (check_subscribers_ && marker_publisher_.getNumSubscribers() == 0) return;
   visualization_msgs::msg::Marker lines;
   lines.header.frame_id = frame_id;
-  lines.header.stamp = ros::Time::now();
+  lines.header.stamp = rclcpp::clock::now();
   lines.type = visualization_msgs::Marker::LINE_LIST;
   lines.action = visualization_msgs::Marker::ADD;
   lines.scale.x = 0.001;
   lines.scale.y = 0.001;
-  lines.color = std_msgs::ColorRGBA(color_);
+  lines.color = std_msgs::msg::ColorRGBA(color_);
   lines.ns = "bounding_boxes";
   lines.id = 1;
 
   for (size_t i = 0; i < boxes.size(); i++) {
-    const std::vector<geometry_msgs::Point> &pt = boxes[i].vertices;
+    const std::vector<geometry_msgs::msg::Point> &pt = boxes[i].vertices;
     lines.points.push_back(pt[0]);
     lines.points.push_back(pt[1]);
     lines.points.push_back(pt[0]);

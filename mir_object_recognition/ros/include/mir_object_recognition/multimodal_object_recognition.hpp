@@ -41,7 +41,7 @@
 #include "mir_perception_utils/pointcloud_utils_ros.hpp"
 #include "mir_perception_utils/bounding_box_visualizer.hpp"
 #include "mir_perception_utils/label_visualizer.hpp"
-#include "mir_object_segmentation/scene_segmentation_ros.h"
+#include "mir_object_segmentation/scene_segmentation_ros.hpp"
 
 
 using std::placeholders::_1;

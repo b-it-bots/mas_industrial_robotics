@@ -40,14 +40,14 @@ void PlanarPolygonVisualizer::buildPolygonMarker(
   marker.id = id;
   marker.color = color_;
 
-  geometry_msgs::Point first_point;
+  geometry_msgs::msg::Point first_point;
   first_point.x = points[0].x;
   first_point.y = points[0].y;
   first_point.z = points[0].z;
   marker.points.push_back(first_point);
 
   for (size_t i = 1; i < points.size(); i++) {
-    geometry_msgs::Point pt;
+    geometry_msgs::msg::Point pt;
     pt.x = points[i].x;
     pt.y = points[i].y;
     pt.z = points[i].z;

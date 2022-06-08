@@ -30,7 +30,7 @@ LabelVisualizer::LabelVisualizer(const std::string &topic_name, Color color, boo
 
 int LabelVisualizer::getNumSubscribers() { return marker_publisher_.getNumSubscribers(); }
 void LabelVisualizer::publish(const std::vector<std::string> &labels,
-                              const geometry_msgs::PoseArray &poses)
+                              const geometry_msgs::msg:PoseArray &poses)
 {
   visualization_msgs::MarkerArray markers;
   for (int i = 0; i < labels.size(); i++) {
@@ -39,7 +39,7 @@ void LabelVisualizer::publish(const std::vector<std::string> &labels,
     m.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
     m.action = visualization_msgs::Marker::ADD;
     m.scale.z = 0.04;
-    m.color = std_msgs::ColorRGBA(color_);
+    m.color = std_msgs::msg::ColorRGBA(color_);
     m.ns = "labels";
     m.id = i;
     m.pose.position.x = poses.poses[i].position.x;
