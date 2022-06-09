@@ -1,14 +1,8 @@
 #include <std_msgs/msg/float64.hpp>
-
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
-#include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
-#include "mir_perception_utils/bounding_box_visualizer.hpp"
-#include "mir_perception_utils/label_visualizer.hpp"
-#include "mir_perception_utils/bounding_box.hpp"
+#include "mir_perception_utils/pointcloud_utils_ros.hpp"
 
-// just for testing, remove later
-#include "mir_perception_utils/planar_polygon_visualizer.hpp"
 
 
 void MultiModalObjectRecognitionROS::declare_all_parameters(){
@@ -350,55 +344,66 @@ MultiModalObjectRecognitionROS::parametersCallback(
   }
 
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):
-    rclcpp_lifecycle::LifecycleNode(node_name, 
-        rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
-        // cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
-        // cluster_visualizer_pc_("output/tabletop_cluster_pc")
+    rclcpp_lifecycle::LifecycleNode(node_name,
+        rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
+        cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
+        cluster_visualizer_pc_("output/tabletop_cluster_pc")
 {
     RCLCPP_INFO(get_logger(), "constructor called");
+    this -> declare_parameter<std::string>("target_frame_id", "base_link");
+    this -> get_parameter("target_frame_id", target_frame_id_);
     MultiModalObjectRecognitionROS::declare_all_parameters();
-    
 }
 
-void MultiModalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::msg::Image &image,
-                      const sensor_msgs::msg::PointCloud2 &cloud)
+void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image,
+                      const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud)
 {
 
     RCLCPP_INFO(get_logger(), "synchro callback");
-    RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image.header.stamp.sec, cloud.header.stamp.sec);
-    sensor_msgs::msg::PointCloud2 transformed_msg;
-    this->preprocessPointCloud(tf_listener_, tf_buffer_, target_frame_id_, cloud, transformed_msg);
+    RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image -> header.stamp.sec, cloud -> header.stamp.sec);
+    
+    pointcloud_msg_ = cloud;
+    image_msg_ = image;
+
+    // pre-process the pointcloud
+    this -> preprocessPointCloud(pointcloud_msg_);
 }
 
-bool MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
-                                                          const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
-                                                          const std::string target_frame, 
-                                                          const sensor_msgs::msg::PointCloud2 cloud_in,
-                                                          sensor_msgs::msg::PointCloud2 cloud_out)
+void MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud_msg)
 {
-    RCLCPP_INFO(get_logger(), "preprocess point cloud");
-    if (tf_listener) 
-        {
-            // geometry_msgs::msg::TransformStamped transformStamped;
-            try 
-            {
-                pcl_ros::transformPointCloud(target_frame,cloud_in,cloud_out,*tf_buffer);
-                RCLCPP_INFO(this->get_logger(), "Transform throws no error");
-                publisher_->publish(cloud_out);
-            } 
-            catch (tf2::TransformException & ex) 
-            {
-                RCLCPP_INFO(this->get_logger(), "Could not transform");
-                return (false);
-            }
-        }
-        else 
-        {
-            RCLCPP_INFO(this->get_logger(), "TF listener not initialized");
-            // RCLCPP_ERROR_THROTTLE(2.0, "TF listener not initialized.");
-            return (false);
-        }
-        return (true);
+    sensor_msgs::msg::PointCloud2 msg_transformed;
+    msg_transformed.header.frame_id = target_frame_id_;
+    if (!mpu::pointcloud::transformPointCloudMsg(tf_buffer_, target_frame_id_, *cloud_msg, msg_transformed))
+    {
+        RCLCPP_ERROR(get_logger(), "Failed to transform point cloud");
+        return;
+    }
+    
+    std::shared_ptr<pcl::PCLPointCloud2> pc2 = std::make_shared<pcl::PCLPointCloud2>();
+    pcl_conversions::toPCL(msg_transformed, *pc2);
+    pc2 -> header.frame_id = msg_transformed.header.frame_id;
+    
+    cloud_ = PointCloudBSPtr(new PointCloud);
+    pcl::fromPCLPointCloud2(*pc2, *cloud_);
+
+    RCLCPP_INFO(get_logger(), "Transformed point cloud");
+}
+
+void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg::ObjectList &obj_list,
+                        std::vector<PointCloudBSPtr> &clusters,
+                        std::vector<mpu::object::BoundingBox> boxes)
+{
+    PointCloudBSPtr cloud = PointCloudBSPtr(new PointCloud);
+    cloud -> header.frame_id = target_frame_id_;
+
+}
+
+void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
+{
+    mas_perception_msgs::msg::ObjectList cloud_object_list;
+    std::vector<std::shared_ptr<PointCloud>> clusters_3d;
+    std::vector<mpu::object::BoundingBox> boxes;
+
 
 }
 
@@ -416,12 +421,12 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     
     RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
-    image_sub_.subscribe(this, "input_image_topic");
-    cloud_sub_.subscribe(this, "input_cloud_topic");
+    image_sub_ -> subscribe(this, "input_image_topic");
+    cloud_sub_ -> subscribe(this, "input_cloud_topic");
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",10);
 
     //msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
-    msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
+    msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), *image_sub_, *cloud_sub_);
 
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -464,8 +469,8 @@ MultiModalObjectRecognitionROS::on_deactivate(const rclcpp_lifecycle::State &)
 {
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
 
-    image_sub_.unsubscribe();
-    cloud_sub_.unsubscribe();
+    image_sub_ -> unsubscribe();
+    cloud_sub_ -> unsubscribe();
 
     // We return a success and hence invoke the transition to the next
     // step: "inactive".

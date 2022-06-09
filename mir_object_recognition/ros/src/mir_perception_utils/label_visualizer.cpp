@@ -21,7 +21,7 @@ namespace mir_perception_utils
                                          bool check_subscribers)
             : color_(color), check_subscribers_(check_subscribers)
         {
-            auto node = rclcpp::Node::make_shared("~");
+            auto node = rclcpp::Node::make_shared("_");
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::MarkerArray>(
                 topic_name, 10);
         }

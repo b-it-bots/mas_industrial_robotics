@@ -16,12 +16,12 @@ namespace mir_perception_utils
                                                          bool check_subscribers, double thickness)
             : color_(color), check_subscribers_(check_subscribers), thickness_(thickness)
         {
-            auto node = rclcpp::Node::make_shared("~");
+            auto node = rclcpp::Node::make_shared("_");
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(topic_name, 1);
         }
 
-        template <typename PointT>
-        void PlanarPolygonVisualizer::publish(const pcl::PlanarPolygon<PointT> &polygon,
+        
+        void PlanarPolygonVisualizer::publish(const PlanarPolygon &polygon,
                                               const std::string &frame_id)
         {
             if (check_subscribers_ && !marker_publisher_->get_subscription_count())
@@ -35,11 +35,12 @@ namespace mir_perception_utils
         }
 
         template <typename PointT>
-        void PlanarPolygonVisualizer::buildPolygonMarker(const typename pcl::PointCloud<PointT>::VectorType &points,
+        void PlanarPolygonVisualizer::buildPolygonMarker(const typename PointCloud::VectorType &points,
                                                          visualization_msgs::msg::Marker &marker,
                                                          const std::string &frame_id, int id)
         {
-            if (!points.size()) return;
+            if (!points.size())
+                return;
 
             marker.header.frame_id = frame_id;
             marker.ns = "polygon";
