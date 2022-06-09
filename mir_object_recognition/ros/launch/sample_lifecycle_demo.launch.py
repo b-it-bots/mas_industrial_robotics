@@ -18,8 +18,16 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    return LaunchDescription([
-        LifecycleNode(package='mir_object_recognition', executable='lc_talker',
-                      name='lc_talker', output='screen'),
-        Node(package='mir_object_recognition', executable='lc_client', output='screen')
-    ])
+    ld = LaunchDescription()
+    node = LifecycleNode(
+            package='mir_object_recognition', 
+            # executable='dynamic_reconfigure',
+            executable='lc_talker',
+            namespace='',
+            # name='dynamic_reconfigure_rclcpp', 
+            name='lc_talker',
+            # parameters = [config],
+            output='screen')
+    
+    ld.add_action(node)
+    return ld

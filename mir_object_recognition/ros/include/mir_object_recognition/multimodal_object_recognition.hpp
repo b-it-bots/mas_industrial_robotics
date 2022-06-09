@@ -91,6 +91,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
          * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
          */
 
+        rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters);
+
+        void declare_all_parameters();
+
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_configure(const rclcpp_lifecycle::State &);
 
@@ -169,6 +173,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         void synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image, 
                 const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud);
 
+        OnSetParametersCallbackHandle::SharedPtr callback_handle_;
+        
         // void preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
 
         /** \brief Transform pointcloud to the given frame id ("base_link" by default)

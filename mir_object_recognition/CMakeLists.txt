@@ -93,7 +93,6 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
 )
 
-
 ament_target_dependencies( percption_visuliazation
  tf2_ros
  pcl_ros
@@ -159,7 +158,7 @@ endif()
 
 install(TARGETS
   lifecycle_controller
-  #lc_talker
+  lc_talker
   mmor
   # transformer
   # segmenter
