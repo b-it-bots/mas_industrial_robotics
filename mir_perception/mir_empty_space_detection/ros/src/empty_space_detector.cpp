@@ -128,6 +128,7 @@ bool EmptySpaceDetector::findEmptySpaces()
   PointCloud::Ptr plane(new PointCloud);
   bool plane_found = this->findPlane(plane);
   if (!plane_found) {
+
     return false;
   }
 
