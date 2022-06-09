@@ -81,7 +81,7 @@ ament_export_dependencies(
 ament_export_targets(export_${PROJECT_NAME})
 
 # install the include folder
-install(DIRECTORY include/${PROJECT_NAME} DESTINATION include/)
+install(DIRECTORY include/ DESTINATION include/)
 
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin

@@ -70,7 +70,7 @@ unsigned int pointcloud::padPointCloud(PointCloudBSPtr &cloud_in, int num_points
     // unused variable
     // unsigned int point_diff = point_count - num_points;
 
-    pcl::PointIndices::Ptr random_indices(new pcl::PointIndices());
+    pcl::PointIndices::Ptr random_indices(new pcl::PointIndices);
 
     for (int n = 0; n < num_points; ++n)
       random_indices->indices.push_back(distr(eng));

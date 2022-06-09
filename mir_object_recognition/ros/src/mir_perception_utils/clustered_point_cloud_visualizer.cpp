@@ -30,7 +30,7 @@ namespace mir_perception_utils
             const std::string &topic_name, bool check_subscribers)
             : check_subscribers_(check_subscribers)
         {
-            auto node = rclcpp::Node::make_shared("~");
+            auto node = rclcpp::Node::make_shared("_");
             cloud_publisher_ = node->create_publisher<sensor_msgs::msg::PointCloud2>(
                 topic_name, 1);
             for (size_t i = 0; i < COLORS_NUM; i++)
@@ -44,13 +44,14 @@ namespace mir_perception_utils
             return cloud_publisher_->get_subscription_count();
         }
 
-        template <typename PointT>
+        
         void ClusteredPointCloudVisualizer::publish(
-            const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
+            const std::vector<PointCloudBSPtr> &clusters,
             const std::string &frame_id)
         {
-            if (getNumSubscribers() == 0) return;
-            
+            if (getNumSubscribers() == 0)
+                return;
+
             pcl::PointCloud<pcl::PointXYZRGB> composite;
             size_t color = 0;
 
@@ -67,7 +68,7 @@ namespace mir_perception_utils
                     pt.rgb = float(Color(static_cast<Color::Name>(color)));
                     composite.points.push_back(point);
                 }
-                 color++;
+                color++;
             }
             composite.header.frame_id = frame_id;
             composite.width = static_cast<uint32_t>(composite.points.size());

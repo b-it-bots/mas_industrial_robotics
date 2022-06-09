@@ -10,7 +10,7 @@
 
 using namespace mir_perception_utils::object;
 
-BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud, const Eigen::Vector3f &normal)
+BoundingBox BoundingBox::create(const PointCloudConstBSPtr &cloud, const Eigen::Vector3f &normal)
 {
     BoundingBox box;
 
@@ -91,7 +91,7 @@ BoundingBox BoundingBox::create(const PointCloud::ConstPtr &cloud, const Eigen::
 
 BoundingBox BoundingBox::create(const PointCloud::VectorType &points, const Eigen::Vector3f &normal)
 {
-    PointCloud::Ptr cloud(new PointCloud);
+    PointCloudBSPtr cloud(new PointCloud);
     cloud->points = points;
     cloud->width = points.size();
     cloud->height = 1;

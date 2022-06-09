@@ -106,7 +106,7 @@ void object::estimatePose(const PointCloudConstBSPtr &xyz_input_cloud,
     eigen_vector_transform.block<3, 1>(0, 3) = -(eigen_vector_transform.block<3, 3>(0, 0) * centroid.head<3>());
 
     // transform cloud to eigenvector space
-    pcl::PointCloud<pcl::PointXYZRGB> transform_cloud;
+    PointCloud transform_cloud;
     pcl::transformPointCloud(filtered_cloud, transform_cloud, eigen_vector_transform);
 
     // find mean diagonal
@@ -187,7 +187,25 @@ void convertBboxToMsg(const BoundingBox &bbox,
     convertBoundingBox(bbox, bounding_box_msg);
 }
 
-bool getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
+void object::savePcd(const PointCloudConstSPtr &pointcloud, std::string log_dir,
+                     std::string obj_name)
+{
+  std::stringstream filename;
+  filename.str("");
+  filename << log_dir << obj_name << ".pcd";
+  pcl::io::savePCDFileASCII(filename.str(), *pointcloud);
+}
+
+void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir,
+                         std::string obj_name)
+{
+  std::stringstream filename;
+  filename.str("");
+  filename << log_dir << obj_name << ".jpg";
+  cv::imwrite(filename.str(), cv_image->image);
+}
+
+bool getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
                        cv_bridge::CvImagePtr &cv_image)
 {
     try{
