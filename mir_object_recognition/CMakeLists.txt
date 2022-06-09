@@ -169,4 +169,9 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/ros/launch
 )
 
+install(DIRECTORY
+  ros/config/
+  DESTINATION share/${PROJECT_NAME}/ros/config
+)
+
 ament_package()

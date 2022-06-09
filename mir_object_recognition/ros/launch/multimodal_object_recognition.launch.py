@@ -8,6 +8,7 @@ def generate_launch_description():
     ld = LaunchDescription()
     config = os.path.join(
         get_package_share_directory('mir_object_recognition'),
+        'ros',
         'config',
         'scene_segmentation_constraints.yaml'
         )
