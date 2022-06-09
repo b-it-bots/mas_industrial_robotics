@@ -56,7 +56,7 @@ namespace mir_perception_utils
 
             for (size_t i = 0; i < clusters.size(); i++)
             {
-                const PointCloud::Ptr &cloud = clusters[i];
+                const PointCloudBSPtr &cloud = clusters[i];
                 for (size_t j = 0; j < cloud->points.size(); j++)
                 {
                     const PointT &point = cloud->points[j];

@@ -95,8 +95,8 @@ bool transformPointCloud2(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
 }
 
  bool getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
-                             const PointCloud::Ptr &cloud_in,
-                             PointCloud::Ptr &cloud_roi,
+                             const PointCloudBSPtr &cloud_in,
+                             PointCloudBSPtr &cloud_roi,
                              float roi_size_adjustment, bool remove_outliers)
 {
     if (cloud_in -> height <= 1 || cloud_in -> width <= 1){

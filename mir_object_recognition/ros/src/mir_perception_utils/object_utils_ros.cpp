@@ -62,7 +62,7 @@ void object::estimatePose(const BoundingBox &box, geometry_msgs::msg::PoseStampe
     pose.pose.orientation.w = q.w();
 }
 
-void object::estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
+void object::estimatePose(const PointCloudConstBSPtr &xyz_input_cloud,
                          geometry_msgs::msg::PoseStamped &pose,
                          const std::string shape,
                          float passthrouigh_lim_min_offset,
@@ -172,7 +172,7 @@ void object::transformPose(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
     }
 }
 
-void object::get3DBoundingBox(const PointCloud::ConstPtr &cloud,
+void object::get3DBoundingBox(const PointCloudConstBSPtr &cloud,
                               const Eigen::Vector3f &normal,
                               BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg)

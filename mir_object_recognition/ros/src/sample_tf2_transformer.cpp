@@ -10,7 +10,7 @@ class Transformer : public rclcpp::Node
 public:
     Transformer():Node("pointcloud_tranformer")
     {
-        cloud_ = PointCloud::Ptr(new PointCloud);
+        cloud_ = PointCloudBSPtr(new PointCloud);
         scene_segmentation_ros_ = std::shared_ptr<SceneSegmentationROS>(new SceneSegmentationROS());
 
         tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
@@ -70,7 +70,7 @@ private:
 
     typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
     SceneSegmentationROSSPtr scene_segmentation_ros_;
-    PointCloud::Ptr cloud_;
+    PointCloudBSPtr cloud_;
 };
 
 int main(int argc, char * argv[])

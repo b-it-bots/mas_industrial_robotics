@@ -52,7 +52,7 @@ unsigned int pointcloud::centerPointCloud(const PointCloud &cloud_in, PointCloud
   return (point_count);
 }
 
-unsigned int pointcloud::padPointCloud(PointCloud::Ptr &cloud_in, int num_points)
+unsigned int pointcloud::padPointCloud(PointCloudBSPtr &cloud_in, int num_points)
 {
   if (cloud_in->empty())
     return (0);

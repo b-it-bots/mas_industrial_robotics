@@ -93,6 +93,12 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
 )
 
+ament_target_dependencies( percption_visuliazation
+ tf2_ros
+ pcl_ros
+ )
+
+
 
 add_library( scene_segmentation
   common/src/cloud_accumulation.cpp
@@ -100,6 +106,11 @@ add_library( scene_segmentation
   ros/src/mir_object_segmentation/laserscan_segmentation.cpp
   ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
   #ros/src/mir_object_segmentation/scene_segmentation_node.cpp
+)
+
+ament_target_dependencies(scene_segmentation 
+tf2_ros 
+pcl_ros
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
@@ -121,6 +132,10 @@ target_link_libraries(mmor
   percption_visuliazation
   scene_segmentation
 )
+
+
+
+
 
 # add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 # ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)

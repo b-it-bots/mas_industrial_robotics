@@ -28,7 +28,7 @@ class CloudAccumulation
   /** \brief Add point cloud to octree
    * \param[in] Point cloud
    * */
-  void addCloud(const PointCloud::ConstPtr &cloud);
+  void addCloud(const PointCloudConstBSPtr &cloud);
   /** \brief Get accumulated cloud
    * \param[out] Accumulated point cloud
    * */

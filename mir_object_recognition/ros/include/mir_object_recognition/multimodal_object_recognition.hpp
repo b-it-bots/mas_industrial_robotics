@@ -165,12 +165,12 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                                   sensor_msgs::msg::PointCloud2 cloud_out);
 
         void publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
-                                                std::vector<PointCloud::Ptr> &clusters_3d,
-                                                std::vector<PointCloud::Ptr> &clusters_2d);
+                                                std::vector<PointCloudBSPtr> &clusters_3d,
+                                                std::vector<PointCloudBSPtr> &clusters_2d);
 
         typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
         SceneSegmentationROSSPtr scene_segmentation_ros_;
-        PointCloud::Ptr cloud_;
+        PointCloudBSPtr cloud_;
         mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
         mas_perception_msgs::msg::ObjectList recognized_image_list_;
 

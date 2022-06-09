@@ -64,7 +64,7 @@ class SceneSegmentationROS
  
   double workspace_height_;
 
-  PointCloud::Ptr cloud_debug_;
+  PointCloudBSPtr cloud_debug_;
 
  public:
   /** \brief Find plane, segment table top point cloud and cluster them
@@ -77,15 +77,15 @@ class SceneSegmentationROS
    * size
    * \param[in] Number of padded points
    * */
-  void segmentCloud(const PointCloud::ConstPtr &cloud, mas_perception_msgs::msg::ObjectList &obj_list,
-                    std::vector<PointCloud::Ptr> &clusters, std::vector<BoundingBox> &boxes,
+  void segmentCloud(const PointCloudConstBSPtr &cloud, mas_perception_msgs::msg::ObjectList &obj_list,
+                    std::vector<PointCloudBSPtr> &clusters, std::vector<BoundingBox> &boxes,
                     bool center_cluster, bool pad_cluster, int num_points);
 
   /** \brief Find plane
    * \param[in] Input point cloud
    * \param[out] Point cloud debug output
    * */
-  void findPlane(const PointCloud::ConstPtr &cloud_in, PointCloud::Ptr &cloud_debug);
+  void findPlane(const PointCloudConstBSPtr &cloud_in, PointCloudBSPtr &cloud_debug);
 
   /** \brief Reset accumulated cloud */
   void resetCloudAccumulation();
@@ -93,12 +93,12 @@ class SceneSegmentationROS
   /** \brief Accumulate pointcloud
    * \param[in] Pointcloud to accumulate
    * */
-  void addCloudAccumulation(const PointCloud::Ptr &cloud);
+  void addCloudAccumulation(const PointCloudBSPtr &cloud);
 
   /** \brief Get accumulated pointcloud
    * \param[out] Accumulated pointcloud
    * */
-  void getCloudAccumulation(PointCloud::Ptr &cloud);
+  void getCloudAccumulation(PointCloudBSPtr &cloud);
 
   /** Returns plane normal */
   Eigen::Vector3f getPlaneNormal();
@@ -183,7 +183,7 @@ class SceneSegmentationROS
                         double cluster_max_length, double cluster_min_distance_to_polygon);
   
   /** \brief Get debug cloud**/
-  PointCloud::Ptr getCloudDebug();
+  PointCloudBSPtr getCloudDebug();
 
 };
 

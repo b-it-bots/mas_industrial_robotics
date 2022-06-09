@@ -61,7 +61,7 @@ void SceneSegmentationNode::pointcloudCallback(const sensor_msgs::msg::PointClou
                                                  msg_transformed))
       return;
 
-    PointCloud::Ptr cloud = boost::make_shared<PointCloud>();
+    PointCloudBSPtr cloud = boost::make_shared<PointCloud>();
     pcl::PCLPointCloud2 pc2;
     pcl_conversions::toPCL(msg_transformed, pc2);
     pcl::fromPCLPointCloud2(pc2, *cloud);
@@ -77,11 +77,11 @@ void SceneSegmentationNode::pointcloudCallback(const sensor_msgs::msg::PointClou
 
 void SceneSegmentationNode::segmentPointCloud()
 {
-  PointCloud::Ptr cloud(new PointCloud);
+  PointCloudBSPtr cloud(new PointCloud);
   cloud->header.frame_id = target_frame_id_;
   scene_segmentation_ros_.getCloudAccumulation(cloud);
 
-  std::vector<PointCloud::Ptr> clusters;
+  std::vector<PointCloudBSPtr> clusters;
   mas_perception_msgs::msg::ObjectList object_list;
   std::vector<BoundingBox> boxes;
   scene_segmentation_ros_.segmentCloud(cloud, object_list, clusters, boxes, center_cluster_,
@@ -115,11 +115,11 @@ void SceneSegmentationNode::segmentPointCloud()
 
 void SceneSegmentationNode::findPlane()
 {
-  PointCloud::Ptr cloud(new PointCloud);
+  PointCloudBSPtr cloud(new PointCloud);
   cloud->header.frame_id = target_frame_id_;
   scene_segmentation_ros_.getCloudAccumulation(cloud);
 
-  PointCloud::Ptr cloud_debug(new PointCloud);
+  PointCloudBSPtr cloud_debug(new PointCloud);
   scene_segmentation_ros_.findPlane(cloud, cloud_debug);
   cloud_debug->header.frame_id = cloud->header.frame_id;
   ROS_INFO_STREAM("Got plane and publishing workspace height");

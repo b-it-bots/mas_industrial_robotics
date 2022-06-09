@@ -30,7 +30,7 @@ namespace mir_perception_utils
          * \param[Out] Generated bounding box
          * \param[out] Bounding box message
          * */
-        void get3DBoundingBox(const PointCloud::ConstPtr &cloud,
+        void get3DBoundingBox(const PointCloudConstBSPtr &cloud,
                               const Eigen::Vector3f &normal,
                               BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
@@ -54,7 +54,7 @@ namespace mir_perception_utils
          * \param[in] Minimum value of the field z allowed
          * \param[in] Maximum value of the field z allowed
          */
-        void estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
+        void estimatePose(const PointCloudConstBSPtr &xyz_input_cloud,
                           geometry_msgs::msg::PoseStamped &pose,
                           const std::string shape = "None",
                           const float passthrough_lim_min = 0.0060,
