@@ -1,7 +1,9 @@
 #ifndef MIR_PERCEPTION_UTILS_ALIASES_HPP
 #define MIR_PERCEPTION_UTILS_ALIASES_HPP
 
+#include <chrono>
 #include <vector>
+#include <memory>
 
 #include "pcl/geometry/planar_polygon.h"
 #include "pcl/point_cloud.h"
@@ -13,13 +15,17 @@ typedef pcl::Normal PointNT;
 typedef pcl::Label PointLT;
 
 typedef pcl::PointCloud<PointT> PointCloud;
+typedef std::shared_ptr<PointCloud> PointCloudSPtr;
+typedef std::shared_ptr<const PointCloud> PointCloudConstSPtr;
+typedef PointCloud::Ptr PointCloudBSPtr;
+typedef PointCloud::ConstPtr PointCloudConstBSPtr;
 typedef pcl::PointCloud<PointNT> PointCloudN;
 typedef pcl::PointCloud<PointLT> PointCloudL;
 
 typedef pcl::PlanarPolygon<PointT> PlanarPolygon;
 typedef std::vector<PlanarPolygon, Eigen::aligned_allocator<PlanarPolygon>> PlanarPolygonVector;
-typedef boost::shared_ptr<PlanarPolygon> PlanarPolygonPtr;
-typedef boost::shared_ptr<const PlanarPolygon> PlanarPolygonConstPtr;
+typedef std::shared_ptr<PlanarPolygon> PlanarPolygonPtr;
+typedef std::shared_ptr<const PlanarPolygon> PlanarPolygonConstPtr;
 
 typedef pcl::PlanarRegion<PointT> PlanarRegion;
 typedef std::vector<PlanarRegion, Eigen::aligned_allocator<PlanarRegion>> PlanarRegionVector;

@@ -6,7 +6,7 @@
 
 using namespace mir_perception_utils;
 
-bool transformPointCloudMsg(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+bool pointcloud::transformPointCloudMsg(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
                             const std::string &target_frame,
                             const sensor_msgs::msg::PointCloud2 &cloud_in,
                             sensor_msgs::msg::PointCloud2 &cloud_out)
@@ -34,7 +34,7 @@ bool transformPointCloudMsg(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
     return (true);
 }
 
-bool transformPointCloud(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+bool pointcloud::transformPointCloud(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
                         const std::string &target_frame,
                         const PointCloud &cloud_in,
                         PointCloud &cloud_out)
@@ -62,7 +62,7 @@ bool transformPointCloud(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
     return (true);
 }
 
-bool transformPointCloud2(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
+bool pointcloud::transformPointCloud2(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
                                  const std::string &target_frame,
                                  const pcl::PCLPointCloud2 &cloud_in_pc2,
                                  pcl::PCLPointCloud2 &cloud_out_pc2)
@@ -94,9 +94,9 @@ bool transformPointCloud2(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
     return (true);
 }
 
- bool getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
-                             const PointCloud::Ptr &cloud_in,
-                             PointCloud::Ptr &cloud_roi,
+bool pointcloud::getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
+                             const PointCloudBSPtr &cloud_in,
+                             PointCloudBSPtr &cloud_roi,
                              float roi_size_adjustment, bool remove_outliers)
 {
     if (cloud_in -> height <= 1 || cloud_in -> width <= 1){

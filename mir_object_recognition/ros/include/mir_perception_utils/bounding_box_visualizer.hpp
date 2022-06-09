@@ -15,29 +15,29 @@ using mir_perception_utils::visualization::Color;
 
 namespace mir_perception_utils
 {
-namespace visualization
-{
-class BoundingBoxVisualizer
-{
-    public:
-        BoundingBoxVisualizer(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> &node,
-                              const std::string& topic_name, Color color,
-                              bool check_subscribers = true);
+    namespace visualization
+    {
+        class BoundingBoxVisualizer
+        {
+        public:
+            BoundingBoxVisualizer(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> &node,
+                                  const std::string &topic_name, Color color,
+                                  bool check_subscribers = true);
 
-        BoundingBoxVisualizer(const std::string& topic_name, Color color,
-                              bool check_subscribers = true);
+            BoundingBoxVisualizer(const std::string &topic_name, Color color,
+                                  bool check_subscribers = true);
 
-        void publish(const mas_perception_msgs::msg::BoundingBox &box, const std::string &frame_id);
+            void publish(const mas_perception_msgs::msg::BoundingBox &box, const std::string &frame_id);
 
-        void publish(const std::vector<mas_perception_msgs::msg::BoundingBox> &boxes, const std::string &frame_id);
+            void publish(const std::vector<mas_perception_msgs::msg::BoundingBox> &boxes, const std::string &frame_id);
 
-        int getNumSubscribers();
+            int getNumSubscribers();
 
-    private:
-        rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher_;
-        const Color color_;
-        bool check_subscribers_;
-};
-}
+        private:
+            rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher_;
+            const Color color_;
+            bool check_subscribers_;
+        };
+    }
 }
 #endif /* BOUNDING_BOX_VISUALIZER_HPP */

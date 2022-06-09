@@ -81,6 +81,11 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
 )
 
+ament_target_dependencies(percption_visuliazation
+  tf2_ros
+  pcl_ros
+)
+
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor 
   rclcpp

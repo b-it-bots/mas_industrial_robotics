@@ -59,8 +59,8 @@ namespace mir_perception_utils
          * \param[in] Remove 3D ROI outliers
         */
        bool getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
-                             const PointCloud::Ptr &cloud_in,
-                             PointCloud::Ptr &cloud_roi,
+                             const PointCloudBSPtr &cloud_in,
+                             PointCloudBSPtr &cloud_roi,
                              float roi_size_adjustment, bool remove_outliers);
 
     }

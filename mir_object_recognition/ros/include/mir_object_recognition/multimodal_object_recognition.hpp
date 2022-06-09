@@ -172,7 +172,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
          * \param[out] Table top pointcloud clusters
          **/
         void segmentPointCloud(mas_perception_msgs::msg::ObjectList &obj_list,
-                        std::vector<std::shared_ptr<PointCloud>> &clusters,
+                        std::vector<PointCloudSPtr> &clusters,
                         std::vector<mpu::object::BoundingBox> boxes);
         
         /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
@@ -186,7 +186,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // Used to store pointcloud and image received from callback
         std::shared_ptr<sensor_msgs::msg::PointCloud2> pointcloud_msg_;
         std::shared_ptr<sensor_msgs::msg::Image> image_msg_;
-        std::shared_ptr<PointCloud> cloud_;
+        PointCloudSPtr cloud_;
 
         // Parameters
         std::string target_frame_id_;

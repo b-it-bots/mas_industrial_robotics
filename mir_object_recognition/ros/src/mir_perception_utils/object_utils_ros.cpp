@@ -62,7 +62,7 @@ void object::estimatePose(const BoundingBox &box, geometry_msgs::msg::PoseStampe
     pose.pose.orientation.w = q.w();
 }
 
-void object::estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
+void object::estimatePose(const PointCloudConstBSPtr &xyz_input_cloud,
                          geometry_msgs::msg::PoseStamped &pose,
                          const std::string shape,
                          float passthrouigh_lim_min_offset,
@@ -106,7 +106,7 @@ void object::estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
     eigen_vector_transform.block<3, 1>(0, 3) = -(eigen_vector_transform.block<3, 3>(0, 0) * centroid.head<3>());
 
     // transform cloud to eigenvector space
-    pcl::PointCloud<pcl::PointXYZRGB> transform_cloud;
+    PointCloud transform_cloud;
     pcl::transformPointCloud(filtered_cloud, transform_cloud, eigen_vector_transform);
 
     // find mean diagonal
@@ -172,7 +172,7 @@ void object::transformPose(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
     }
 }
 
-void object::get3DBoundingBox(const PointCloud::ConstPtr &cloud,
+void object::get3DBoundingBox(const PointCloudConstBSPtr &cloud,
                               const Eigen::Vector3f &normal,
                               BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg)
@@ -187,7 +187,25 @@ void convertBboxToMsg(const BoundingBox &bbox,
     convertBoundingBox(bbox, bounding_box_msg);
 }
 
-bool getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
+void object::savePcd(const PointCloudConstSPtr &pointcloud, std::string log_dir,
+                     std::string obj_name)
+{
+  std::stringstream filename;
+  filename.str("");
+  filename << log_dir << obj_name << ".pcd";
+  pcl::io::savePCDFileASCII(filename.str(), *pointcloud);
+}
+
+void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir,
+                         std::string obj_name)
+{
+  std::stringstream filename;
+  filename.str("");
+  filename << log_dir << obj_name << ".jpg";
+  cv::imwrite(filename.str(), cv_image->image);
+}
+
+bool getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
                        cv_bridge::CvImagePtr &cv_image)
 {
     try{

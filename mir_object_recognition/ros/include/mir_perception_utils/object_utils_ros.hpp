@@ -16,6 +16,7 @@
 #include <tf2_ros/buffer.h>
 #include "mas_perception_msgs/msg/bounding_box.hpp"
 #include "mas_perception_msgs/msg/object_list.hpp"
+#include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/bounding_box.hpp"
 
 namespace mir_perception_utils
@@ -28,7 +29,7 @@ namespace mir_perception_utils
          * \param[Out] Generated bounding box
          * \param[out] Bounding box message
          * */
-        void get3DBoundingBox(const PointCloud::ConstPtr &cloud,
+        void get3DBoundingBox(const PointCloudConstBSPtr &cloud,
                               const Eigen::Vector3f &normal,
                               BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
@@ -52,7 +53,7 @@ namespace mir_perception_utils
          * \param[in] Minimum value of the field z allowed
          * \param[in] Maximum value of the field z allowed
          */
-        void estimatePose(const PointCloud::ConstPtr &xyz_input_cloud,
+        void estimatePose(const PointCloudConstBSPtr &xyz_input_cloud,
                           geometry_msgs::msg::PoseStamped &pose,
                           const std::string shape = "None",
                           const float passthrough_lim_min = 0.0060,
@@ -76,7 +77,22 @@ namespace mir_perception_utils
         void convertBboxToMsg(const BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
 
-        bool getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
+        /** \brief Save pointcloud
+         * \param[in] logdir (default="/tmp")
+         * \param[in] obj_name (default="unknown")
+         * */
+        void savePcd(const PointCloudConstSPtr &pointcloud, std::string log_dir = "/tmp/",
+                    std::string obj_name = "unknown");
+
+        /** \brief Save debug image if debug_mode is enabled
+         * \param[in] image with boundix boxes of objects drawn
+         * \param[in] raw_image
+         * \param[in] logdir (default /tmp)
+        */
+        void saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir = "/tmp/",
+                        std::string obj_name = "unknown");
+
+        bool getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
                         cv_bridge::CvImagePtr &cv_image);
     }
 }
