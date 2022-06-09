@@ -241,11 +241,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // Dynamic parameter
         double object_height_above_workspace_;
         double container_height_;
-        int rgb_roi_adjustment_;
-        int rgb_bbox_min_diag_;
-        int rgb_bbox_max_diag_;
-        int rgb_cluster_filter_limit_min_;
-        int rgb_cluster_filter_limit_max_;
+        double rgb_roi_adjustment_;
+        double rgb_bbox_min_diag_;
+        double rgb_bbox_max_diag_;
+        double rgb_cluster_filter_limit_min_;
+        double rgb_cluster_filter_limit_max_;
         bool enable_roi_;
         double roi_base_link_to_laser_distance_;
         double roi_max_object_pose_x_to_base_link_;

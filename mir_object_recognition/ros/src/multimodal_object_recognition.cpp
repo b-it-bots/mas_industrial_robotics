@@ -338,19 +338,22 @@ MultiModalObjectRecognitionROS::parametersCallback(
           RCLCPP_INFO(this->get_logger(), "%s", param.get_name().c_str());
           RCLCPP_INFO(this->get_logger(), "%s", param.value_to_string().c_str());
       }
-      rclcpp::Parameter object_height_above_workspace_ = this->get_parameter("object_height_above_workspace_");
-      rclcpp::Parameter container_height_ = this->get_parameter("container_height_");
-      rclcpp::Parameter rgb_roi_adjustment_ = this->get_parameter("rgb_roi_adjustment_");
-      rclcpp::Parameter rgb_bbox_min_diag_ = this->get_parameter("rgb_bbox_min_diag_");
-      rclcpp::Parameter rgb_bbox_max_diag_ = this->get_parameter("rgb_bbox_max_diag_");
-      rclcpp::Parameter rgb_cluster_filter_limit_min_ = this->get_parameter("rgb_cluster_filter_limit_min_");
-      rclcpp::Parameter rgb_cluster_filter_limit_max_ = this->get_parameter("rgb_cluster_filter_limit_max_");
-      rclcpp::Parameter enable_roi_ = this->get_parameter("enable_roi_");
-      rclcpp::Parameter roi_base_link_to_laser_distance_ = this->get_parameter("roi_base_link_to_laser_distance_");
-      rclcpp::Parameter roi_max_object_pose_x_to_base_link_ = this->get_parameter("roi_max_object_pose_x_to_base_link_");
-      rclcpp::Parameter roi_min_bbox_z_ = this->get_parameter("roi_min_bbox_z_");
-      rclcpp::Parameter rgb_cluster_remove_outliers_ = this->get_parameter("rgb_cluster_remove_outliers_");
-      
+      rclcpp::Parameter object_height_above_workspace_ = this->get_parameter("object_height_above_workspace");
+      rclcpp::Parameter container_height_ = this->get_parameter("container_height");
+      rclcpp::Parameter rgb_roi_adjustment_ = this->get_parameter("rgb_roi_adjustment");
+      rclcpp::Parameter rgb_bbox_min_diag_ = this->get_parameter("rgb_bbox_min_diag");
+      rclcpp::Parameter rgb_bbox_max_diag_ = this->get_parameter("rgb_bbox_max_diag");
+      rclcpp::Parameter rgb_cluster_filter_limit_min_ = this->get_parameter("rgb_cluster_filter_limit_min");
+      rclcpp::Parameter rgb_cluster_filter_limit_max_ = this->get_parameter("rgb_cluster_filter_limit_max");
+      rclcpp::Parameter enable_roi_ = this->get_parameter("enable_roi");
+      rclcpp::Parameter roi_base_link_to_laser_distance_ = this->get_parameter("roi_base_link_to_laser_distance");
+      rclcpp::Parameter roi_max_object_pose_x_to_base_link_ = this->get_parameter("roi_max_object_pose_x_to_base_link");
+      rclcpp::Parameter roi_min_bbox_z_ = this->get_parameter("roi_min_bbox_z");
+      rclcpp::Parameter rgb_cluster_remove_outliers_ = this->get_parameter("rgb_cluster_remove_outliers");
+      RCLCPP_INFO(this->get_logger(), "rgb_cluster_filter_limit_min_: %s, rgb_cluster_filter_limit_max_: %s, enable_roi_: %s",
+              rgb_cluster_filter_limit_min_.value_to_string().c_str(),
+              rgb_cluster_filter_limit_max_.value_to_string().c_str(),
+              enable_roi_.value_to_string().c_str());
       return result;
   }
 
