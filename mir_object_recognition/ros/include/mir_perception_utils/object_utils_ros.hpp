@@ -76,6 +76,22 @@ namespace mir_perception_utils
         void convertBboxToMsg(const BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
 
+        void savePcd(const PointCloud::ConstPtr &pointcloud, std::string log_dir = "/tmp/",
+             std::string obj_name = "unknown");
+
+        /** \brief Save debug image if debug_mode is enabled
+         * \param[in] image with boundix boxes of objects drawn
+         * \param[in] raw_image
+         * \param[in] logdir (default /tmp)
+        */
+        void saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir = "/tmp/",
+                        std::string obj_name = "unknown");
+
+        /** \brief Convert sensor_msgs/Image to cv_image
+         * \param[in] Sensor_msg/Image
+         * \param[out] cv image output
+        */
+
         bool getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
                         cv_bridge::CvImagePtr &cv_image);
     }

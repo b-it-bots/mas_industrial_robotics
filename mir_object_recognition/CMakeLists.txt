@@ -88,16 +88,34 @@ add_library(perception_visualization
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/helpers.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
-  ros/src/mir_object_segmentation/laserscan_segmentation.cpp
-  ros/src/mir_object_segmentation/scene_segmentation_node.cpp
-  ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
+  # ros/src/mir_object_segmentation/laserscan_segmentation.cpp
+  # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
+  # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
 
-add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-ament_target_dependencies(mmor 
+# add_executable(mmor ros/src/multimodal_object_recognition.cpp)
+# ament_target_dependencies(mmor 
+#   rclcpp
+#   rclcpp_lifecycle 
+#   message_filters 
+#   std_msgs 
+#   sensor_msgs 
+#   lifecycle_msgs 
+#   mas_perception_msgs 
+#   tf2_ros 
+#   pcl_ros 
+#   geometry_msgs 
+#   OpenCV
+#   cv_bridge
+# )
+# target_link_libraries(mmor
+#   perception_visualization
+# )
+
+add_executable(data_logger ros/src/mmor_data_logger.cpp)
+ament_target_dependencies(data_logger 
   rclcpp
   rclcpp_lifecycle 
-  message_filters 
   std_msgs 
   sensor_msgs 
   lifecycle_msgs 
@@ -108,7 +126,7 @@ ament_target_dependencies(mmor
   OpenCV
   cv_bridge
 )
-target_link_libraries(mmor
+target_link_libraries(data_logger
   perception_visualization
 )
 
@@ -137,9 +155,10 @@ endif()
 install(TARGETS
   lifecycle_controller
   #lc_talker
-  mmor
+  # mmor
   # transformer
   # segmenter
+  data_logger
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY

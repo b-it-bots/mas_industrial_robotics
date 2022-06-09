@@ -76,101 +76,101 @@ bool MultiModalObjectRecognitionROS::preprocessPointCloud(const sensor_msgs::msg
 
 }
 
-void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
-                                                std::vector<PointCloud::Ptr> &clusters_3d,
-                                                std::vector<PointCloud::Ptr> &clusters_2d)
-{
-    RCLCPP_INFO(this->get_logger(), "Inside the publish debug function");
-    RCLCPP_INFO_STREAM(this->get_logger(), "Cloud list: " << recognized_cloud_list_.objects.size());
-    RCLCPP_INFO_STREAM(this->get_logger(), "RGB list: " << recognized_image_list_.objects.size());
-    RCLCPP_INFO_STREAM(this->get_logger(), "Combined object list: "<< combined_object_list.objects.size());
-    const Eigen::Vector3f normal = scene_segmentation_ros_->getPlaneNormal();
+// void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
+//                                                 std::vector<PointCloud::Ptr> &clusters_3d,
+//                                                 std::vector<PointCloud::Ptr> &clusters_2d)
+// {
+//     RCLCPP_INFO(this->get_logger(), "Inside the publish debug function");
+//     RCLCPP_INFO_STREAM(this->get_logger(), "Cloud list: " << recognized_cloud_list_.objects.size());
+//     RCLCPP_INFO_STREAM(this->get_logger(), "RGB list: " << recognized_image_list_.objects.size());
+//     RCLCPP_INFO_STREAM(this->get_logger(), "Combined object list: "<< combined_object_list.objects.size());
+//     const Eigen::Vector3f normal = scene_segmentation_ros_->getPlaneNormal();
 
-    std::string names = "";
-    if (recognized_cloud_list_.objects.size() > 0)
-    {
-        // Bounding boxes
-        if (clusters_3d.size() > 0)
-        {
-            mas_perception_msgs::msg::BoundingBoxList bounding_boxes;
-            cluster_visualizer_pc_.publish<PointT>(clusters_3d, target_frame_id_);
-            bounding_boxes.bounding_boxes.resize(clusters_3d.size());
-            for (int i=0; i < clusters_3d.size(); i++)
-            {
-                mpu::object::BoundingBox bbox;
-                mpu::object::get3DBoundingBox(clusters_3d[i], normal, bbox, bounding_boxes.bounding_boxes[i]);
-            }
-            if (bounding_boxes.bounding_boxes.size() > 0)
-            {
-                bounding_box_visualizer_pc_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
-            }
-        }
-        // PCL Pose array for debug mode only
-        geometry_msgs::msg::PoseArray pcl_object_pose_array;
-        pcl_object_pose_array.header.frame_id = target_frame_id_;
-        // pcl_object_pose_array.header.stamp = rclcpp::Time::now();
-        pcl_object_pose_array.header.stamp = rclcpp::Clock().now();
-        pcl_object_pose_array.poses.resize(recognized_cloud_list_.objects.size());
-        std::vector<std::string> pcl_labels;
-        int pcl_count = 0;
-        for (int i=0; i < combined_object_list.objects.size(); i++)
-        {
-            if (combined_object_list.objects[i].database_id < 99)
-            {
-                names += combined_object_list.objects[i].name + ", ";
-                pcl_object_pose_array.poses[pcl_count] = combined_object_list.objects[i].pose.pose;
-                pcl_labels.push_back(combined_object_list.objects[i].name);
-                pcl_count++;
-            }
-        }
-        RCLCPP_INFO_STREAM(this->get_logger(),"[Cloud] Objects: " << names);
-        // Publish pose array
-        if (pcl_object_pose_array.poses.size() > 0)
-        {
-            pub_pc_object_pose_array_->publish(pcl_object_pose_array);
-        }
-        // Publish label visualizer
-        if ((pcl_labels.size() == pcl_object_pose_array.poses.size()) &&
-            (pcl_labels.size() > 0) && (pcl_object_pose_array.poses.size() > 0))
-        {
-            label_visualizer_pc_.publish(pcl_labels, pcl_object_pose_array);
-        }
-    }
-    if (clusters_2d.size() > 0)
-    {
-        cluster_visualizer_rgb_.publish<PointT>(clusters_2d, target_frame_id_);
-        // RGB Pose array for debug mode only
-        geometry_msgs::msg::PoseArray rgb_object_pose_array;
-        rgb_object_pose_array.header.frame_id = target_frame_id_;
-        rgb_object_pose_array.header.stamp = rclcpp::Clock().now();
-        rgb_object_pose_array.poses.resize(recognized_image_list_.objects.size());
-        std::vector<std::string> rgb_labels;
-        int rgb_count = 0;
-        names = "";
-        for (int i = 0; i < combined_object_list.objects.size(); i++)
-        {
-            if (combined_object_list.objects[i].database_id > 99)
-            {
-                names += combined_object_list.objects[i].name + ", ";
-                rgb_object_pose_array.poses[rgb_count] = combined_object_list.objects[i].pose.pose;
-                rgb_labels.push_back(combined_object_list.objects[i].name);
-                rgb_count++;
-            }
-        }
-        RCLCPP_INFO_STREAM(this->get_logger(),"[RGB] Objects: "<< names);
-        // Publish pose array
-        if (rgb_object_pose_array.poses.size() > 0)
-        {
-        pub_rgb_object_pose_array_->publish(rgb_object_pose_array);
-        }
-        // Publish label visualizer
-        if ((rgb_labels.size() == rgb_object_pose_array.poses.size()) &&
-            (rgb_labels.size() > 0) && (rgb_object_pose_array.poses.size() > 0))
-        {
-        label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
-        }
-    }
-}
+//     std::string names = "";
+//     if (recognized_cloud_list_.objects.size() > 0)
+//     {
+//         // Bounding boxes
+//         if (clusters_3d.size() > 0)
+//         {
+//             mas_perception_msgs::msg::BoundingBoxList bounding_boxes;
+//             cluster_visualizer_pc_.publish<PointT>(clusters_3d, target_frame_id_);
+//             bounding_boxes.bounding_boxes.resize(clusters_3d.size());
+//             for (int i=0; i < clusters_3d.size(); i++)
+//             {
+//                 mpu::object::BoundingBox bbox;
+//                 mpu::object::get3DBoundingBox(clusters_3d[i], normal, bbox, bounding_boxes.bounding_boxes[i]);
+//             }
+//             if (bounding_boxes.bounding_boxes.size() > 0)
+//             {
+//                 bounding_box_visualizer_pc_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
+//             }
+//         }
+//         // PCL Pose array for debug mode only
+//         geometry_msgs::msg::PoseArray pcl_object_pose_array;
+//         pcl_object_pose_array.header.frame_id = target_frame_id_;
+//         // pcl_object_pose_array.header.stamp = rclcpp::Time::now();
+//         pcl_object_pose_array.header.stamp = rclcpp::Clock().now();
+//         pcl_object_pose_array.poses.resize(recognized_cloud_list_.objects.size());
+//         std::vector<std::string> pcl_labels;
+//         int pcl_count = 0;
+//         for (int i=0; i < combined_object_list.objects.size(); i++)
+//         {
+//             if (combined_object_list.objects[i].database_id < 99)
+//             {
+//                 names += combined_object_list.objects[i].name + ", ";
+//                 pcl_object_pose_array.poses[pcl_count] = combined_object_list.objects[i].pose.pose;
+//                 pcl_labels.push_back(combined_object_list.objects[i].name);
+//                 pcl_count++;
+//             }
+//         }
+//         RCLCPP_INFO_STREAM(this->get_logger(),"[Cloud] Objects: " << names);
+//         // Publish pose array
+//         if (pcl_object_pose_array.poses.size() > 0)
+//         {
+//             pub_pc_object_pose_array_->publish(pcl_object_pose_array);
+//         }
+//         // Publish label visualizer
+//         if ((pcl_labels.size() == pcl_object_pose_array.poses.size()) &&
+//             (pcl_labels.size() > 0) && (pcl_object_pose_array.poses.size() > 0))
+//         {
+//             label_visualizer_pc_.publish(pcl_labels, pcl_object_pose_array);
+//         }
+//     }
+//     if (clusters_2d.size() > 0)
+//     {
+//         cluster_visualizer_rgb_.publish<PointT>(clusters_2d, target_frame_id_);
+//         // RGB Pose array for debug mode only
+//         geometry_msgs::msg::PoseArray rgb_object_pose_array;
+//         rgb_object_pose_array.header.frame_id = target_frame_id_;
+//         rgb_object_pose_array.header.stamp = rclcpp::Clock().now();
+//         rgb_object_pose_array.poses.resize(recognized_image_list_.objects.size());
+//         std::vector<std::string> rgb_labels;
+//         int rgb_count = 0;
+//         names = "";
+//         for (int i = 0; i < combined_object_list.objects.size(); i++)
+//         {
+//             if (combined_object_list.objects[i].database_id > 99)
+//             {
+//                 names += combined_object_list.objects[i].name + ", ";
+//                 rgb_object_pose_array.poses[rgb_count] = combined_object_list.objects[i].pose.pose;
+//                 rgb_labels.push_back(combined_object_list.objects[i].name);
+//                 rgb_count++;
+//             }
+//         }
+//         RCLCPP_INFO_STREAM(this->get_logger(),"[RGB] Objects: "<< names);
+//         // Publish pose array
+//         if (rgb_object_pose_array.poses.size() > 0)
+//         {
+//         pub_rgb_object_pose_array_->publish(rgb_object_pose_array);
+//         }
+//         // Publish label visualizer
+//         if ((rgb_labels.size() == rgb_object_pose_array.poses.size()) &&
+//             (rgb_labels.size() > 0) && (rgb_object_pose_array.poses.size() > 0))
+//         {
+//         label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
+//         }
+//     }
+// }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)

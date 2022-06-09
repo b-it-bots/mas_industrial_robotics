@@ -25,11 +25,13 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+
+#include <cv_bridge/cv_bridge.h>
 // pcl_ros is not converted to ros2 yet, hence commented out
 // #include <pcl_ros/point_cloud.hpp>
 
 #include "mir_perception_utils/object_utils_ros.hpp"
-#include "mir_perception_utils/helpers.hpp"
+#include "helpers.cpp"
 
 using namespace std::chrono_literals;
 using namespace mir_perception_utils;
@@ -187,7 +189,24 @@ void convertBboxToMsg(const BoundingBox &bbox,
     convertBoundingBox(bbox, bounding_box_msg);
 }
 
-bool getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
+void object::savePcd(const PointCloud::ConstPtr &pointcloud, std::string log_dir,
+                     std::string obj_name)
+{
+  std::stringstream filename;
+  filename.str("");
+  filename << log_dir << obj_name << ".pcd";
+  pcl::io::savePCDFileASCII(filename.str(), *pointcloud);
+}
+
+void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir,
+                         std::string obj_name)
+{
+  std::stringstream filename;
+  filename.str("");
+  filename << log_dir << obj_name << ".jpg";
+  cv::imwrite(filename.str(), cv_image->image);
+}
+bool object::getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
                        cv_bridge::CvImagePtr &cv_image)
 {
     try{

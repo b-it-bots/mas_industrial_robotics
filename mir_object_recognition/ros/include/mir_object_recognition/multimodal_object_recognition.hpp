@@ -38,7 +38,7 @@
 #include <pcl_ros/transforms.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include "mir_perception_utils/clustered_point_clouid_visualizer.hpp"
+#include "mir_perception_utils/clustered_point_cloud_visualizer.hpp"
 #include "mir_perception_utils/bounding_box_visualizer.hpp"
 #include "mir_perception_utils/label_visualizer.hpp"
 #include "mir_perception_utils/object_utils_ros.hpp"
@@ -171,9 +171,9 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         //                           sensor_msgs::msg::PointCloud2 cloud_out);
         bool preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
 
-        void publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
-                                                std::vector<PointCloud::Ptr> &clusters_3d,
-                                                std::vector<PointCloud::Ptr> &clusters_2d);
+        // void publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
+        //                                         std::vector<PointCloud::Ptr> &clusters_3d,
+        //                                         std::vector<PointCloud::Ptr> &clusters_2d);
 
         typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
         SceneSegmentationROSSPtr scene_segmentation_ros_;
