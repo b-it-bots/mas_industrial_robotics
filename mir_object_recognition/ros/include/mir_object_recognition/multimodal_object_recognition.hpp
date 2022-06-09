@@ -238,6 +238,20 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool pad_cluster_;
         unsigned int padded_cluster_size_;
 
+        // Dynamic parameter
+        double object_height_above_workspace_;
+        double container_height_;
+        int rgb_roi_adjustment_;
+        int rgb_bbox_min_diag_;
+        int rgb_bbox_max_diag_;
+        int rgb_cluster_filter_limit_min_;
+        int rgb_cluster_filter_limit_max_;
+        bool enable_roi_;
+        double roi_base_link_to_laser_distance_;
+        double roi_max_object_pose_x_to_base_link_;
+        double roi_min_bbox_z_;
+        bool rgb_cluster_remove_outliers_;
+
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
