@@ -169,6 +169,15 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> publisher_;
         // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
+
+        // publisher object list
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>> pub_workspace_height_;
+
+        // publisher debug
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> pub_debug_cloud_plane_;
+
+
+        // --------------------------- function declarations -----------------------------------
         
         void synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image, 
                 const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud);
@@ -187,7 +196,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
          * \param[out] 3D object list with unknown label
          * \param[out] Table top pointcloud clusters
          **/
-        void segmentPointCloud(mas_perception_msgs::msg::ObjectList &obj_list,
+        void segmentPointCloud(mas_perception_msgs::msg::ObjectList &object_list,
                         std::vector<PointCloudBSPtr> &clusters,
                         std::vector<mpu::object::BoundingBox> boxes);
         
@@ -221,7 +230,13 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         PointCloudBSPtr cloud_;
 
         // Parameters
+        bool debug_mode_;
         std::string target_frame_id_;
+
+        //cluster
+        bool center_cluster_;
+        bool pad_cluster_;
+        unsigned int padded_cluster_size_;
 
 };
 

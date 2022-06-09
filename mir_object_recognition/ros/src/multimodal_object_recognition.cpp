@@ -350,6 +350,8 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string
     RCLCPP_INFO(get_logger(), "constructor called");
     this -> declare_parameter<std::string>("target_frame_id", "base_link");
     this -> get_parameter("target_frame_id", target_frame_id_);
+    this -> declare_parameter<bool>("debug_mode_", false);
+    this -> get_parameter("debug_mode_", debug_mode_);
     MultiModalObjectRecognitionROS::declare_all_parameters();
 }
 
@@ -384,25 +386,45 @@ void MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<
     cloud_ = PointCloudBSPtr(new PointCloud);
     pcl::fromPCLPointCloud2(*pc2, *cloud_);
 
-    RCLCPP_INFO(get_logger(), "Transformed point cloud");
+    RCLCPP_INFO(get_logger(), "Point cloud transformed.");
 }
 
-void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg::ObjectList &obj_list,
+void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg::ObjectList &object_list,
                         std::vector<PointCloudBSPtr> &clusters,
                         std::vector<mpu::object::BoundingBox> boxes)
 {
     PointCloudBSPtr cloud = PointCloudBSPtr(new PointCloud);
     cloud -> header.frame_id = target_frame_id_;
 
+    scene_segmentation_ros_ -> getCloudAccumulation(cloud);
+
+    // if the cluster is centered,it looses the correct location of the object
+    scene_segmentation_ros_ -> segmentCloud(cloud, object_list, clusters, boxes,
+                                            center_cluster_ = false, pad_cluster_, padded_cluster_size_);
+
+    // get workspace height
+    std_msgs::msg::Float64 workspace_height_msg;
+    workspace_height_msg.data = scene_segmentation_ros_ -> getWorkspaceHeight();
+    pub_workspace_height_ -> publish(workspace_height_msg);
+
+    if (debug_mode_)
+    {
+        PointCloudBSPtr cloud_debug(new PointCloud);
+        cloud_debug = scene_segmentation_ros_ -> getCloudDebug();
+        sensor_msgs::msg::PointCloud2 ros_pc2;
+        pcl::toROSMsg(*cloud_debug, ros_pc2);
+        ros_pc2.header.frame_id = target_frame_id_;
+        pub_debug_cloud_plane_ -> publish(ros_pc2);
+    }
 }
 
 void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 {
     mas_perception_msgs::msg::ObjectList cloud_object_list;
-    std::vector<std::shared_ptr<PointCloud>> clusters_3d;
+    std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
 
-
+    this -> segmentPointCloud(cloud_object_list, clusters_3d, boxes);
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -431,6 +453,12 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     
     callback_handle_ = this->add_on_set_parameters_callback(
         std::bind(&MultiModalObjectRecognitionROS::parametersCallback, this, std::placeholders::_1));
+
+    // publish workspace height
+    pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", 1);
+
+    // publish debug
+    pub_debug_cloud_plane_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("output/debug_cloud_plane", 1);
 
     // We return a success and hence invoke the transition to the next
     // step: "inactive".
