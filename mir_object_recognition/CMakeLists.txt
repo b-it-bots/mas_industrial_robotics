@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(mir_object_recognition)
 
 # Default to C99
@@ -158,7 +158,7 @@ endif()
 
 install(TARGETS
   lifecycle_controller
-  lc_talker
+  # lc_talker
   mmor
   # transformer
   # segmenter

@@ -3,8 +3,6 @@
 
 #include "mir_perception_utils/pointcloud_utils_ros.hpp"
 
-
-
 void MultiModalObjectRecognitionROS::declare_all_parameters(){
     
     rcl_interfaces::msg::ParameterDescriptor descriptor1;
@@ -421,12 +419,12 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     
     RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
-    image_sub_ -> subscribe(this, "input_image_topic");
-    cloud_sub_ -> subscribe(this, "input_cloud_topic");
+    image_sub_.subscribe(this, "input_image_topic");
+    cloud_sub_.subscribe(this, "input_cloud_topic");
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",10);
 
     //msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
-    msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), *image_sub_, *cloud_sub_);
+    msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
 
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -469,8 +467,8 @@ MultiModalObjectRecognitionROS::on_deactivate(const rclcpp_lifecycle::State &)
 {
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
 
-    image_sub_ -> unsubscribe();
-    cloud_sub_ -> unsubscribe();
+    image_sub_.unsubscribe();
+    cloud_sub_.unsubscribe();
 
     // We return a success and hence invoke the transition to the next
     // step: "inactive".
