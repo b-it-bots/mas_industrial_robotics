@@ -64,6 +64,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
          * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
          */
 
+        rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters);
+
+        void declare_all_parameters();
+
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_configure(const rclcpp_lifecycle::State &);
 
@@ -143,8 +147,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         void synchronizeCallback(const sensor_msgs::msg::Image &image, 
                 const sensor_msgs::msg::PointCloud2 &cloud);
 
+        OnSetParametersCallbackHandle::SharedPtr callback_handle_;
+        
         // void preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
-
+        
         bool preprocessPointCloud(const std::shared_ptr<tf2_ros::TransformListener> &tf_listener, 
                                   const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
                                   const std::string target_frame, 
@@ -153,8 +159,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
     protected:
         // Visualization
-        ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+        // ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
+        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
 };
 
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
