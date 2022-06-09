@@ -36,7 +36,7 @@ public:
     leaf->addPointIndex(point.rgba);
   }
 
-  void setOccupiedVoxelsAtPointsFromCloud(const typename PointCloudConstSPtr &cloud)
+  void setOccupiedVoxelsAtPointsFromCloud(const PointCloudConstBSPtr &cloud)
   {
     for (size_t i = 0; i < cloud->points.size(); i++)
       if (isFinite(cloud->points[i]))

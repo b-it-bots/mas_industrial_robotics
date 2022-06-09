@@ -43,17 +43,17 @@ void MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<
     pcl_conversions::toPCL(msg_transformed, *pc2);
     pc2 -> header.frame_id = msg_transformed.header.frame_id;
     
-    cloud_ = std::make_shared<PointCloud>();
+    cloud_ = PointCloudBSPtr(new PointCloud);
     pcl::fromPCLPointCloud2(*pc2, *cloud_);
 
     RCLCPP_INFO(get_logger(), "Transformed point cloud");
 }
 
 void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg::ObjectList &obj_list,
-                        std::vector<PointCloudSPtr> &clusters,
+                        std::vector<PointCloudBSPtr> &clusters,
                         std::vector<mpu::object::BoundingBox> boxes)
 {
-    PointCloudSPtr cloud = std::make_shared<PointCloud>();
+    PointCloudBSPtr cloud = PointCloudBSPtr(new PointCloud);
     cloud -> header.frame_id = target_frame_id_;
 
 }

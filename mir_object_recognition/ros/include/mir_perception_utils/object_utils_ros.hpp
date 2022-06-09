@@ -82,7 +82,7 @@ namespace mir_perception_utils
          * \param[in] logdir (default="/tmp")
          * \param[in] obj_name (default="unknown")
          * */
-        void savePcd(const PointCloudConstSPtr &pointcloud, std::string log_dir = "/tmp/",
+        void savePcd(const PointCloudConstBSPtr &pointcloud, std::string log_dir = "/tmp/",
                     std::string obj_name = "unknown");
 
         /** \brief Save debug image if debug_mode is enabled
