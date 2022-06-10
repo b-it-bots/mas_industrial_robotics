@@ -91,7 +91,7 @@ class SceneSegmentationNode
 
  private:
   void pointcloudCallback(const sensor_msgs::msg::PointCloud2::Ptr &msg);
-  void eventCallback(const std_msgs::msg::String::ConstPtr &msg);
+  void eventCallback(const std::shared_ptr<const std_msgs::msg::String> &msg);
   void configCallback(mir_object_segmentation::SceneSegmentationConfig &config, uint32_t level);
 
   /** \brief Segment accumulated pointcloud, find the plane,

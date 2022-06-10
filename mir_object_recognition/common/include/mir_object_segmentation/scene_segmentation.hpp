@@ -85,8 +85,13 @@ class SceneSegmentation
    * \param[in] The minimum allowed the field value
    * \param[in] The maximum allowed the field value
    * */
-  void setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name,
-                            double limit_min, double limit_max);
+  void setPassthroughParams(bool enable_passthrough_filter, 
+                            const std::string &field_name,
+                            double limit_min, 
+                            double limit_max,
+                            const std::string &field_y, 
+                            double limit_y_min,
+                            double limit_y_max);
   /** \brief Set Normal param using radius
    * \param[in] Radius search
    * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu

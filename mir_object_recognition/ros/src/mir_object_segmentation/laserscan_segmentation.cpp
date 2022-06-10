@@ -15,7 +15,7 @@ LaserScanSegmentation::LaserScanSegmentation(double dThresholdDistanceBetweenAda
 LaserScanSegmentation::~LaserScanSegmentation() = default;
 
 mas_perception_msgs::msg::LaserScanSegmentList LaserScanSegmentation::getSegments(
-    const sensor_msgs::msg::LaserScan::ConstPtr &inputScan, bool store_data_points)
+    const std::shared_ptr<const sensor_msgs::msg::LaserScan> &inputScan, bool store_data_points)
 {
   mas_perception_msgs::msg::LaserScanSegmentList segments;
   std::vector<geometry_msgs::msg::Point> data_points;
@@ -102,7 +102,7 @@ double LaserScanSegmentation::getEuclideanDistance(double dDistanceA, double dAn
 
 geometry_msgs::msg::Point LaserScanSegmentation::getCenterOfGravity(
     unsigned int indexStart, unsigned int indexEnd,
-    const sensor_msgs::msg::LaserScan::ConstPtr &inputScan)
+    const std::shared_ptr<const sensor_msgs::msg::LaserScan> &inputScan)
 {
   geometry_msgs::msg::Point centerPoint;
 

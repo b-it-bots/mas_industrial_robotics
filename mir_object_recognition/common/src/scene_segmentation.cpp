@@ -121,6 +121,8 @@ PointCloudBSPtr SceneSegmentation::findPlane(const PointCloudConstBSPtr &cloud,
   }
   workspace_height = z;
 
+  // commented this for now to test plane detection
+  // return filtered;
   return plane;
 }
 
@@ -133,12 +135,18 @@ void SceneSegmentation::setVoxelGridParams(double leaf_size, const std::string &
 }
 
 void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter,
-                                             const std::string &field_name, double limit_min,
-                                             double limit_max)
+                                             const std::string &field_name, 
+                                             double limit_min,
+                                             double limit_max,
+                                             const std::string &field_y, 
+                                             double limit_y_min,
+                                             double limit_y_max)
 {
   enable_passthrough_filter_ = enable_passthrough_filter;
   pass_through_.setFilterFieldName(field_name);
   pass_through_.setFilterLimits(limit_min, limit_max);
+  pass_through_.setFilterFieldName(field_y);
+  pass_through_.setFilterLimits(limit_y_min, limit_y_max);
 }
 
 void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int num_cores)
