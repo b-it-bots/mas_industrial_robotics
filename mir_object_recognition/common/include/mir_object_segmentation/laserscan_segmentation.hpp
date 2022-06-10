@@ -22,7 +22,7 @@ class LaserScanSegmentation
   ~LaserScanSegmentation();
 
   mas_perception_msgs::msg::LaserScanSegmentList getSegments(
-      const sensor_msgs::msg::LaserScan::ConstPtr &inputScan, bool store_data_points = false);
+      const std::shared_ptr<const sensor_msgs::msg::LaserScan> &inputScan, bool store_data_points = false);
 
  private:
   /* distance threshold between two adjacent laser scan points to determine
@@ -33,7 +33,7 @@ class LaserScanSegmentation
   double getEuclideanDistance(double dDistanceA, double dAngleA, double dDistanceB, double dAngleB);
 
   geometry_msgs::msg::Point getCenterOfGravity(unsigned int indexStart, unsigned int indexEnd,
-                                          const sensor_msgs::msg::LaserScan::ConstPtr &inputScan);
+                                          const std::shared_ptr<const sensor_msgs::msg::LaserScan> &inputScan);
 };
 
 #endif  // MIR_OBJECT_SEGMENTATION_LASERSCAN_SEGMENTATION_HPP

@@ -2,13 +2,16 @@
 /mmor:
   ros__parameters:
     voxel_leaf_size: 0.009
-    voxel_filter_field_name: z
+    voxel_filter_field_name: 'z'
     voxel_filter_limit_min: -0.15
     voxel_filter_limit_max: 0.3
     enable_passthrough_filter: false
-    passthrough_filter_field_name: x
+    passthrough_filter_field_name: 'x'
     passthrough_filter_limit_min: 0.0
     passthrough_filter_limit_max: 0.8
+    passthrough_filter_field_y: 'y'
+    passthrough_filter_y_limit_min: -0.5
+    passthrough_filter_y_limit_max: 0.8
     normal_radius_search: 0.03
     use_omp: false
     num_cores: 8

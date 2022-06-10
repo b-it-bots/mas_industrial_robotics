@@ -129,7 +129,7 @@ void SceneSegmentationNode::findPlane()
   pub_debug_.publish(*cloud_debug);
 }
 
-void SceneSegmentationNode::eventCallback(const std_msgs::msg::String::ConstPtr &msg)
+void SceneSegmentationNode::eventCallback(const std::shared_ptr<const std_msgs::msg::String> &msg)
 {
   std_msgs::msg::String event_out;
   if (msg->data == "e_start") {

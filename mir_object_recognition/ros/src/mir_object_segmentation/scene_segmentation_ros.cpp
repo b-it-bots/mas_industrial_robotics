@@ -44,17 +44,22 @@ void SceneSegmentationROS::segmentCloud(const PointCloudConstBSPtr &cloud,
 
   object_list.objects.resize(boxes.size());
   rclcpp::Time now = rclcpp::Clock().now();
-  for (size_t i = 0; i < clusters.size(); i++) {
+  for (size_t i = 0; i < clusters.size(); i++)
+  {
     sensor_msgs::msg::PointCloud2 ros_cloud;
     ros_cloud.header.frame_id = frame_id;
-    if (pad_cluster) {
+    if (pad_cluster)
+    {
       mpu::pointcloud::padPointCloud(clusters[i], num_points);
     }
-    if (center_cluster) {
+    if (center_cluster)
+    {
       PointCloudBSPtr centered_cluster(new PointCloud);
       mpu::pointcloud::centerPointCloud(*clusters[i], *centered_cluster);
       pcl::toROSMsg(*centered_cluster, ros_cloud);
-    } else {
+    }
+    else
+    {
       pcl::toROSMsg(*clusters[i], ros_cloud);
     }
 
@@ -117,11 +122,19 @@ void SceneSegmentationROS::setVoxelGridParams(double voxel_leaf_size,
 void SceneSegmentationROS::setPassthroughParams(bool enable_passthrough_filter,
                                                 std::string passthrough_filter_field_name,
                                                 double passthrough_filter_limit_min,
-                                                double passthrough_filter_limit_max)
+                                                double passthrough_filter_limit_max,
+                                                std::string passthrough_filter_field_y,
+                                                double passthrough_filter_limit_y_min,
+                                                double passthrough_filter_limit_y_max)
 {
   scene_segmentation_->setPassthroughParams(
-      enable_passthrough_filter, passthrough_filter_field_name, passthrough_filter_limit_min,
-      passthrough_filter_limit_max);
+      enable_passthrough_filter, 
+      passthrough_filter_field_name, 
+      passthrough_filter_limit_min,
+      passthrough_filter_limit_max,
+      passthrough_filter_field_y,
+      passthrough_filter_limit_y_min,
+      passthrough_filter_limit_y_max);
 }
 
 void SceneSegmentationROS::setNormalParams(double normal_radius_search, bool use_omp, int num_cores)
@@ -161,8 +174,8 @@ void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluste
 
 PointCloudBSPtr SceneSegmentationROS::getCloudDebug()
 {
-  // if (cloud_debug_->points.size() < 0)
-  //   ROS_WARN("Debug cloud is empty");
+  if (cloud_debug_->points.size() == 0)
+    RCLCPP_WARN(rclcpp::get_logger("mir_object_segmentation"), "Debug cloud is empty");
 
-  return(cloud_debug_);
+  return (cloud_debug_);
 }

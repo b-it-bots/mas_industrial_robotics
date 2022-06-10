@@ -246,6 +246,9 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::string passthrough_filter_field_name_;
         double passthrough_filter_limit_min_;
         double passthrough_filter_limit_max_;
+        std::string passthrough_filter_field_y_;
+        double passthrough_filter_y_limit_min_;
+        double passthrough_filter_y_limit_max_;
         double normal_radius_search_;
         bool use_omp_;
         int num_cores_;

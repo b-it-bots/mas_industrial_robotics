@@ -845,8 +845,8 @@ void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg:
 
     PointCloudBSPtr cloud_debug(new PointCloud);
 
+    // for testing plane detection, findPlane is directly called here.
     scene_segmentation_ros_->findPlane(cloud, cloud_debug);
-    // cloud_debug = scene_segmentation_ros_->getCloudDebug();
 
     sensor_msgs::msg::PointCloud2 ros_pc2;
     pcl::toROSMsg(*cloud_debug, ros_pc2);

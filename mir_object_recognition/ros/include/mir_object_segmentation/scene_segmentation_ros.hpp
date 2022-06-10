@@ -34,18 +34,18 @@
 
 class SceneSegmentationROS
 {
- public:
+public:
   /** \brief Constructor
    * \param[in] NodeHandle in order for this to have access to parameters
    * for example octree_resolution.
    * */
-  explicit SceneSegmentationROS(double octree_resolution_=0.0025);
+  explicit SceneSegmentationROS(double octree_resolution_ = 0.0025);
 
   /** \brief Destructor */
   virtual ~SceneSegmentationROS();
 
- private:
- // TODO: checkout where the following 2 lines are being used. 
+private:
+  // TODO: checkout where the following 2 lines are being used.
   // ros::NodeHandle nh_;
   // ros::ServiceClient recognize_service;
 
@@ -61,12 +61,12 @@ class SceneSegmentationROS
   bool add_to_octree_;
   double octree_resolution_;
   int pcl_object_id_;
- 
+
   double workspace_height_;
 
   PointCloudBSPtr cloud_debug_;
 
- public:
+public:
   /** \brief Find plane, segment table top point cloud and cluster them
    * \param[in] Input point cloud
    * \param[out] Object list with unknown labels
@@ -127,7 +127,10 @@ class SceneSegmentationROS
   void setPassthroughParams(bool enable_passthrough_filter,
                             std::string passthrough_filter_field_name,
                             double passthrough_filter_limit_min,
-                            double passthrough_filter_limit_max);
+                            double passthrough_filter_limit_max,
+                            std::string passthrough_filter_field_y,
+                            double passthrough_filter_limit_y_min,
+                            double passthrough_filter_limit_y_max);
 
   /** \brief Set Normal param using radius
    * \param[in] Radius search
@@ -181,10 +184,9 @@ class SceneSegmentationROS
   void setClusterParams(double cluster_tolerance, int cluster_min_size, int cluster_max_size,
                         double cluster_min_height, double cluster_max_height,
                         double cluster_max_length, double cluster_min_distance_to_polygon);
-  
+
   /** \brief Get debug cloud**/
   PointCloudBSPtr getCloudDebug();
-
 };
 
-#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_HPP
+#endif // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_HPP
