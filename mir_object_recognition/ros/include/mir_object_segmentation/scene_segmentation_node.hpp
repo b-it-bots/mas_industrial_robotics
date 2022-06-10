@@ -4,10 +4,11 @@
  * Author: Mohammad Wasil, Santosh Thoduka
  *
  */
-#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_NODE_H
-#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_NODE_H
+#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_NODE_HPP
+#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_NODE_HPP
 
 #include <string>
+#include <memory>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -16,7 +17,7 @@
 #include <tf2_ros/transform_listener.h>
 
 // #include <mir_object_segmentation/SceneSegmentationConfig.h>
-#include <mir_object_segmentation/scene_segmentation_ros.h>
+#include <mir_object_segmentation/scene_segmentation_ros.hpp>
 
 /** \brief This node subscribes to pointcloud topic.
  * Inputs:
@@ -65,7 +66,7 @@ class SceneSegmentationNode
 
   dynamic_reconfigure::Server<mir_object_segmentation::SceneSegmentationConfig> server_;
 
-  boost::shared_ptr<tf::TransformListener> tf_listener_;
+  std::shared_ptr<tf::TransformListener> tf_listener_;
 
   SceneSegmentationROS scene_segmentation_ros_;
 
@@ -89,8 +90,8 @@ class SceneSegmentationNode
   unsigned int padded_cluster_size_;
 
  private:
-  void pointcloudCallback(const sensor_msgs::PointCloud2::Ptr &msg);
-  void eventCallback(const std_msgs::String::ConstPtr &msg);
+  void pointcloudCallback(const sensor_msgs::msg::PointCloud2::Ptr &msg);
+  void eventCallback(const std_msgs::msg::String::ConstPtr &msg);
   void configCallback(mir_object_segmentation::SceneSegmentationConfig &config, uint32_t level);
 
   /** \brief Segment accumulated pointcloud, find the plane,
@@ -104,4 +105,4 @@ class SceneSegmentationNode
   void findPlane();
 };
 
-#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_NODE_H
+#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_NODE_HPP

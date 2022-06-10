@@ -15,20 +15,20 @@ SceneSegmentation::SceneSegmentation() : use_omp_(false)
   cluster_extraction_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
   normal_estimation_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
   normal_estimation_omp_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
-};
+}
 SceneSegmentation::~SceneSegmentation(){
 
-};
+}
 
-PointCloud::Ptr SceneSegmentation::segmentScene(const PointCloud::ConstPtr &cloud,
-                                                std::vector<PointCloud::Ptr> &clusters,
+PointCloudBSPtr SceneSegmentation::segmentScene(const PointCloudConstBSPtr &cloud,
+                                                std::vector<PointCloudBSPtr> &clusters,
                                                 std::vector<BoundingBox> &boxes,
                                                 pcl::ModelCoefficients::Ptr &coefficients,
                                                 double &workspace_height)
 {
-  PointCloud::Ptr filtered(new PointCloud);
-  PointCloud::Ptr plane(new PointCloud);
-  PointCloud::Ptr hull(new PointCloud);
+  PointCloudBSPtr filtered(new PointCloud);
+  PointCloudBSPtr plane(new PointCloud);
+  PointCloudBSPtr hull(new PointCloud);
   pcl::PointIndices::Ptr segmented_cloud_inliers(new pcl::PointIndices);
   std::vector<pcl::PointIndices> clusters_indices;
 
@@ -52,7 +52,7 @@ PointCloud::Ptr SceneSegmentation::segmentScene(const PointCloud::ConstPtr &clou
 
   for (size_t i = 0; i < clusters_indices.size(); i++) {
     const pcl::PointIndices &cluster_indices = clusters_indices[i];
-    PointCloud::Ptr cluster(new PointCloud);
+    PointCloudBSPtr cluster(new PointCloud);
     pcl::copyPointCloud(*cloud, cluster_indices, *cluster);
     clusters.push_back(cluster);
     BoundingBox box = BoundingBox::create(cluster->points, normal);
@@ -61,12 +61,12 @@ PointCloud::Ptr SceneSegmentation::segmentScene(const PointCloud::ConstPtr &clou
   return filtered;
 }
 
-PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
-                                             PointCloud::Ptr &hull, PointCloud::Ptr &plane,
+PointCloudBSPtr SceneSegmentation::findPlane(const PointCloudConstBSPtr &cloud,
+                                             PointCloudBSPtr &hull, PointCloudBSPtr &plane,
                                              pcl::ModelCoefficients::Ptr &coefficients,
                                              double &workspace_height)
 {
-  PointCloud::Ptr filtered(new PointCloud);
+  PointCloudBSPtr filtered(new PointCloud);
   pcl::PointIndices::Ptr segmented_cloud_inliers(new pcl::PointIndices);
 
   PointCloudN::Ptr normals(new PointCloudN);
@@ -113,7 +113,7 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
 
   // determine workspace height based on the mean of z axis 
   double z = 0.0;
-  for (int i = 0; i < hull->points.size(); i++) {
+  for (size_t i = 0; i < hull->points.size(); i++) {
     z += hull->points[i].z;
   }
   if (hull->points.size() > 0) {
@@ -121,7 +121,7 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
   }
   workspace_height = z;
 
-  return filtered;
+  return plane;
 }
 
 void SceneSegmentation::setVoxelGridParams(double leaf_size, const std::string &filter_field,
@@ -180,4 +180,10 @@ void SceneSegmentation::setClusterParams(double cluster_tolerance, int cluster_m
   cluster_extraction_.setClusterTolerance(cluster_tolerance);
   cluster_extraction_.setMinClusterSize(cluster_min_size);
   cluster_extraction_.setMaxClusterSize(cluster_max_size);
+
+  //unused parameters: To supress the warning 
+  (void)cluster_min_height;
+  (void)cluster_max_height;
+  (void)max_length;
+  (void)cluster_min_distance_to_polygon;
 }

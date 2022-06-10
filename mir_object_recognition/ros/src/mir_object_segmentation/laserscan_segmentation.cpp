@@ -13,11 +13,11 @@ LaserScanSegmentation::LaserScanSegmentation(double dThresholdDistanceBetweenAda
 
 LaserScanSegmentation::~LaserScanSegmentation() = default;
 
-mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
-    const sensor_msgs::LaserScan::ConstPtr &inputScan, bool store_data_points)
+mas_perception_msgs::msg::LaserScanSegmentList LaserScanSegmentation::getSegments(
+    const sensor_msgs::msg::LaserScan::ConstPtr &inputScan, bool store_data_points)
 {
-  mas_perception_msgs::LaserScanSegmentList segments;
-  std::vector<geometry_msgs::Point> data_points;
+  mas_perception_msgs::msg::LaserScanSegmentList segments;
+  std::vector<geometry_msgs::msg::Point> data_points;
 
   double dNumberofPointsBetweenStartAndEnd = 0;
   unsigned int unSegmentStartPoint = 0;
@@ -41,7 +41,7 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
     double dDistanceNext = inputScan->ranges[i + 1];
 
     if (store_data_points) {
-      geometry_msgs::Point cur_point;
+      geometry_msgs::msg::Point cur_point;
       cur_point.x = dDistanceCur * cos(dAngleCur);
       cur_point.y = dDistanceCur * sin(dAngleCur);
       data_points.push_back(cur_point);
@@ -58,15 +58,15 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
       // if number of points between start and end point is lesser then 3 , it
       // is not a segment
       if (dNumberofPointsBetweenStartAndEnd >= this->_unMinimumPointsPerSegment) {
-        geometry_msgs::Point centerPoint;
+        geometry_msgs::msg::Point centerPoint;
         centerPoint = getCenterOfGravity(unSegmentStartPoint, unSegmentEndPoint, inputScan);
         double dDistanceToSegment = sqrt(pow(centerPoint.x, 2.0) + pow(centerPoint.y, 2.0));
 
         if (dDistanceToSegment < 5.0) {
-          mas_perception_msgs::LaserScanSegment seg;
+          mas_perception_msgs::msg::LaserScanSegment seg;
 
           seg.header = inputScan->header;
-          seg.header.stamp = ros::Time::now();
+          seg.header.stamp = rclcpp::Clock().now();
           seg.center.x = centerPoint.x;
           seg.center.y = centerPoint.y;
 
@@ -86,7 +86,7 @@ mas_perception_msgs::LaserScanSegmentList LaserScanSegmentation::getSegments(
   }
 
   segments.header = inputScan->header;
-  segments.header.stamp = ros::Time::now();
+  segments.header.stamp = rclcpp::Clock().now();
   segments.num_segments = static_cast<unsigned int>(segments.segments.size());
 
   return segments;
@@ -99,11 +99,11 @@ double LaserScanSegmentation::getEuclideanDistance(double dDistanceA, double dAn
               (2 * dDistanceA * dDistanceB) * cos(fabs(dAngleA - dAngleB)));
 }
 
-geometry_msgs::Point LaserScanSegmentation::getCenterOfGravity(
+geometry_msgs::msg::Point LaserScanSegmentation::getCenterOfGravity(
     unsigned int indexStart, unsigned int indexEnd,
-    const sensor_msgs::LaserScan::ConstPtr &inputScan)
+    const sensor_msgs::msg::LaserScan::ConstPtr &inputScan)
 {
-  geometry_msgs::Point centerPoint;
+  geometry_msgs::msg::Point centerPoint;
 
   centerPoint.x = 0;
   centerPoint.y = 0;

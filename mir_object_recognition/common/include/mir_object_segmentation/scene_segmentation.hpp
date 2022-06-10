@@ -4,8 +4,8 @@
  * Author: Mohammad Wasil, Santosh Thoduka
  *
  */
-#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_H
-#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_H
+#ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP
+#define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP
 
 #include <pcl/ModelCoefficients.h>
 #include <pcl/features/normal_3d.h>
@@ -57,8 +57,8 @@ class SceneSegmentation
    * \param[out] Model coefficients
    * \param[out] Workspace height
    * */
-  PointCloud::Ptr segmentScene(const PointCloud::ConstPtr &cloud,
-                               std::vector<PointCloud::Ptr> &clusters,
+  PointCloudBSPtr segmentScene(const PointCloudConstBSPtr &cloud,
+                               std::vector<PointCloudBSPtr> &clusters,
                                std::vector<BoundingBox> &boxes,
                                pcl::ModelCoefficients::Ptr &coefficients, double &workspace_height);
   /** \brief Find plane
@@ -67,8 +67,8 @@ class SceneSegmentation
    * \param[out] Model coefficients
    * \param[out] Workspace height
    * */
-  PointCloud::Ptr findPlane(const PointCloud::ConstPtr &cloud, PointCloud::Ptr &hull,
-                            PointCloud::Ptr &plane, pcl::ModelCoefficients::Ptr &coefficients,
+  PointCloudBSPtr findPlane(const PointCloudConstBSPtr &cloud, PointCloudBSPtr &hull,
+                            PointCloudBSPtr &plane, pcl::ModelCoefficients::Ptr &coefficients,
                             double &workspace_height);
 
   /** \brief Set voxel grid parameters
@@ -140,4 +140,4 @@ class SceneSegmentation
   bool use_omp_;
 };
 
-#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_H
+#endif  // MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP

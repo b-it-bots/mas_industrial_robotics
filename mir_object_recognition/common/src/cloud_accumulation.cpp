@@ -10,7 +10,7 @@
 #include <mir_object_segmentation/cloud_accumulation.hpp>
 
 CloudAccumulation::CloudAccumulation(double resolution) : resolution_(resolution) { reset(); }
-void CloudAccumulation::addCloud(const PointCloud::ConstPtr &cloud)
+void CloudAccumulation::addCloud(const PointCloudConstBSPtr &cloud)
 {
   octree_->setOccupiedVoxelsAtPointsFromCloud(cloud);
   cloud_count_++;

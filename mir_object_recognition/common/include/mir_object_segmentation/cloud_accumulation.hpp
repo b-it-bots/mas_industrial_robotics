@@ -5,12 +5,12 @@
  * Author: Sergey Alexandrov
  *
  */
-#ifndef MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
-#define MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
+#ifndef MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP
+#define MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP
 
 #include <mir_perception_utils/aliases.hpp>
 #include <mir_perception_utils/octree_pointcloud_occupancy_colored.hpp>
-#include <pcl/octree/octree_pointcloud_occupancy.h>
+//#include <pcl/octree/octree_pointcloud_occupancy.hpp>
 #include <memory>
 
 /** This class accumulates input point clouds in the occupancy octree with a
@@ -28,7 +28,7 @@ class CloudAccumulation
   /** \brief Add point cloud to octree
    * \param[in] Point cloud
    * */
-  void addCloud(const PointCloud::ConstPtr &cloud);
+  void addCloud(const PointCloudConstBSPtr &cloud);
   /** \brief Get accumulated cloud
    * \param[out] Accumulated point cloud
    * */
@@ -48,4 +48,4 @@ class CloudAccumulation
   double resolution_;
 };
 
-#endif  // MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_H
+#endif  // MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP

@@ -28,7 +28,7 @@ LifecycleController::LifecycleController(const std::string & node_name)
 : Node(node_name)
 {
 	// defualt lifecycle_node_name = lc_talker.
-	this->declare_parameter<std::string>("lifecycle_node_name", "lc_talker");
+	this->declare_parameter<std::string>("lifecycle_node_name", "mmor");
 	this->get_parameter("lifecycle_node_name", lifecycle_node);
 	node_get_state_topic = lifecycle_node + "/get_state"; 
 	node_change_state_topic = lifecycle_node + "/change_state";  

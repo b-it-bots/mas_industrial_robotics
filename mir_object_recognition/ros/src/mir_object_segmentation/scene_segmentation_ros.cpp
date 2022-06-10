@@ -13,7 +13,7 @@
 // #include <pcl_ros/point_cloud.hpp>
 
 #include <mir_object_segmentation/scene_segmentation_ros.hpp>
-#include <mir_perception_utils/impl/helpers.hpp>
+//#include <mir_perception_utils/impl/helpers.hpp>
 
 #include <mir_perception_utils/object_utils_ros.hpp>
 #include <mir_perception_utils/pointcloud_utils.hpp>
@@ -26,72 +26,72 @@ SceneSegmentationROS::SceneSegmentationROS(double octree_resolution)
   cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution_));
   scene_segmentation_ = SceneSegmentationUPtr(new SceneSegmentation());
   model_coefficients_ = pcl::ModelCoefficients::Ptr(new pcl::ModelCoefficients);
-  cloud_debug_ = PointCloud::Ptr(new PointCloud);
+  cloud_debug_ = PointCloudBSPtr(new PointCloud);
 }
 
 // TODO : uncomment segmentCloud function in scene_segmentation_ros.cpp
 SceneSegmentationROS::~SceneSegmentationROS() {}
-void SceneSegmentationROS::segmentCloud(const PointCloud::ConstPtr &cloud,
+void SceneSegmentationROS::segmentCloud(const PointCloudConstBSPtr &cloud,
                                         mas_perception_msgs::msg::ObjectList &object_list,
-                                        std::vector<PointCloud::Ptr> &clusters,
+                                        std::vector<PointCloudBSPtr> &clusters,
                                         std::vector<BoundingBox> &boxes, bool center_cluster,
                                         bool pad_cluster, int num_points)
 {
-  // std::string frame_id = cloud->header.frame_id;
-  // cloud_debug_ = scene_segmentation_->segmentScene(cloud, clusters, boxes,
-  //                                                  model_coefficients_, workspace_height_);
-  // cloud_debug_->header.frame_id = frame_id;
+  std::string frame_id = cloud->header.frame_id;
+  cloud_debug_ = scene_segmentation_->segmentScene(cloud, clusters, boxes,
+                                                   model_coefficients_, workspace_height_);
+  cloud_debug_->header.frame_id = frame_id;
 
-  // object_list.objects.resize(boxes.size());
-  // ros::Time now = ros::Time::now();
-  // for (int i = 0; i < clusters.size(); i++) {
-  //   sensor_msgs::PointCloud2 ros_cloud;
-  //   ros_cloud.header.frame_id = frame_id;
-  //   if (pad_cluster) {
-  //     mpu::pointcloud::padPointCloud(clusters[i], num_points);
-  //   }
-  //   if (center_cluster) {
-  //     PointCloud::Ptr centered_cluster(new PointCloud);
-  //     mpu::pointcloud::centerPointCloud(*clusters[i], *centered_cluster);
-  //     pcl::toROSMsg(*centered_cluster, ros_cloud);
-  //   } else {
-  //     pcl::toROSMsg(*clusters[i], ros_cloud);
-  //   }
+  object_list.objects.resize(boxes.size());
+  rclcpp::Time now = rclcpp::Clock().now();
+  for (size_t i = 0; i < clusters.size(); i++) {
+    sensor_msgs::msg::PointCloud2 ros_cloud;
+    ros_cloud.header.frame_id = frame_id;
+    if (pad_cluster) {
+      mpu::pointcloud::padPointCloud(clusters[i], num_points);
+    }
+    if (center_cluster) {
+      PointCloudBSPtr centered_cluster(new PointCloud);
+      mpu::pointcloud::centerPointCloud(*clusters[i], *centered_cluster);
+      pcl::toROSMsg(*centered_cluster, ros_cloud);
+    } else {
+      pcl::toROSMsg(*clusters[i], ros_cloud);
+    }
 
-  //   // Assign unknown name for every object by default then recognize it later
-  //   object_list.objects[i].views.resize(1);
-  //   object_list.objects[i].views[0].point_cloud = ros_cloud;
-  //   object_list.objects[i].name = "unknown";
-  //   object_list.objects[i].probability = 0.0;
+    // Assign unknown name for every object by default then recognize it later
+    object_list.objects[i].views.resize(1);
+    object_list.objects[i].views[0].point_cloud = ros_cloud;
+    object_list.objects[i].name = "unknown";
+    object_list.objects[i].probability = 0.0;
 
-  //   geometry_msgs::PoseStamped pose;
-  //   mpu::object::estimatePose(boxes[i], pose);
-  //   pose.header.stamp = now;
-  //   pose.header.frame_id = frame_id;
+    geometry_msgs::msg::PoseStamped pose;
+    mpu::object::estimatePose(boxes[i], pose);
+    pose.header.stamp = now;
+    pose.header.frame_id = frame_id;
 
-  //   object_list.objects[i].pose = pose;
-  //   object_list.objects[i].database_id = pcl_object_id_;
-  //   pcl_object_id_++;
-  // }
+    object_list.objects[i].pose = pose;
+    object_list.objects[i].database_id = pcl_object_id_;
+    pcl_object_id_++;
+  }
 }
 
-void SceneSegmentationROS::findPlane(const PointCloud::ConstPtr &cloud_in,
-                                     PointCloud::Ptr &cloud_debug)
+void SceneSegmentationROS::findPlane(const PointCloudConstBSPtr &cloud_in,
+                                     PointCloudBSPtr &cloud_debug)
 {
-  PointCloud::Ptr hull(new PointCloud);
-  PointCloud::Ptr plane(new PointCloud);
+  PointCloudBSPtr hull(new PointCloud);
+  PointCloudBSPtr plane(new PointCloud);
   cloud_debug =
       scene_segmentation_->findPlane(cloud_in, hull, plane, model_coefficients_, workspace_height_);
   cloud_debug->header.frame_id = cloud_in->header.frame_id;
 }
 
 void SceneSegmentationROS::resetCloudAccumulation() { cloud_accumulation_->reset(); }
-void SceneSegmentationROS::addCloudAccumulation(const PointCloud::Ptr &cloud)
+void SceneSegmentationROS::addCloudAccumulation(const PointCloudBSPtr &cloud)
 {
   cloud_accumulation_->addCloud(cloud);
 }
 
-void SceneSegmentationROS::getCloudAccumulation(PointCloud::Ptr &cloud)
+void SceneSegmentationROS::getCloudAccumulation(PointCloudBSPtr &cloud)
 {
   cloud_accumulation_->getAccumulatedCloud(*cloud);
 }
@@ -159,10 +159,10 @@ void SceneSegmentationROS::setClusterParams(double cluster_tolerance, int cluste
                                         cluster_min_distance_to_polygon);
 }
 
-PointCloud::Ptr SceneSegmentationROS::getCloudDebug()
+PointCloudBSPtr SceneSegmentationROS::getCloudDebug()
 {
-  //if (cloud_debug_->points.size() < 0)
-    //ROS_WARN("Debug cloud is empty");
+  // if (cloud_debug_->points.size() < 0)
+  //   ROS_WARN("Debug cloud is empty");
 
-  //return(cloud_debug_);
+  return(cloud_debug_);
 }

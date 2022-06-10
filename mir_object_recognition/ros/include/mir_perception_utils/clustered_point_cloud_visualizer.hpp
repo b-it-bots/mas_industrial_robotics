@@ -10,6 +10,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
+#include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/color.hpp"
 
 namespace mir_perception_utils
@@ -24,8 +25,8 @@ namespace mir_perception_utils
 
       ClusteredPointCloudVisualizer(const std::string &topic_name, bool check_subscribers = true);
 
-      template <typename PointT>
-      void publish(const std::vector<typename pcl::PointCloud<PointT>::Ptr> &clusters,
+      
+      void publish(const std::vector<PointCloudBSPtr> &clusters,
                    const std::string &frame_id);
       int getNumSubscribers();
 
@@ -41,5 +42,5 @@ namespace mir_perception_utils
   } // namespace visualization
 
 } // namespace mir
-
+//#include "mir_perception_utils/impl/clustered_point_cloud_visualizer.hpp"
 #endif // MIR_PERCEPTION_UTILS_CLUSTERED_POINT_CLOUD_VISUALIZER_H

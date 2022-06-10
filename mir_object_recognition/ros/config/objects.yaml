@@ -1,0 +1,53 @@
+object_info:
+  object:
+    - name: S40_40_G
+      shape: box
+      color: gray
+    - name: S40_40_B
+      shape: box
+      color: black
+    - name: R20
+      shape: cylinder
+      color: black
+    - name: MOTOR
+      shape: cylinder
+      color: black
+    - name: M30
+      shape: sphere
+      color: black
+    - name: M20_100
+      shape: cylinder
+      color: black
+    - name: M20
+      shape: sphere
+      color: black
+    - name: F20_20_G
+      shape: box
+      color: gray
+    - name: F20_20_B
+      shape: box
+      color: black
+    - name: EM-02
+      shape: box
+      color: black
+    - name: EM-01
+      shape: box
+      color: orange
+    - name: DISTANCE_TUBE
+      shape: sphere
+      color: gray
+    - name: CONTAINER_BOX_BLUE
+      shape: box
+      color: blue
+    - name: CONTAINER_BOX_RED
+      shape: box
+      color: red
+    - name: BEARING_BOX
+      shape: box
+      color: gray
+    - name: BEARING
+      shape: sphere
+      color: gray
+    - name: AXIS
+      shape: cylinder
+      color: gray

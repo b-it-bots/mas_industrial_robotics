@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(mir_object_recognition)
 
 # Default to C99
@@ -10,6 +10,11 @@ endif()
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
+
+# temporary linker flags for build, remove or comment accordingly 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
+
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -86,7 +91,6 @@ add_library(perception_visualization
   ros/src/mir_perception_utils/label_visualizer.cpp
   ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
   ros/src/mir_perception_utils/object_utils_ros.cpp
-  ros/src/mir_perception_utils/helpers.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
   # ros/src/mir_object_segmentation/laserscan_segmentation.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
@@ -97,6 +101,28 @@ ament_target_dependencies(perception_visualization
   pcl_ros
   cv_bridge
   visualization_msgs)
+
+ament_target_dependencies( percption_visuliazation
+ tf2_ros
+ pcl_ros
+)
+
+add_library( scene_segmentation
+  common/src/cloud_accumulation.cpp
+  common/src/scene_segmentation.cpp
+  ros/src/mir_object_segmentation/laserscan_segmentation.cpp
+  ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
+  #ros/src/mir_object_segmentation/scene_segmentation_node.cpp
+)
+
+target_link_libraries(scene_segmentation
+  percption_visuliazation
+)
+
+ament_target_dependencies(scene_segmentation 
+  tf2_ros 
+  pcl_ros
+)
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor 
@@ -115,6 +141,7 @@ ament_target_dependencies(mmor
 )
 target_link_libraries(mmor
   perception_visualization
+  scene_segmentation
 )
 
 add_executable(data_logger ros/src/mmor_data_logger.cpp)
@@ -133,7 +160,9 @@ ament_target_dependencies(data_logger
 )
 target_link_libraries(data_logger
   perception_visualization
+  scene_segmentation
 )
+
 
 # add_executable(transformer ros/src/sample_tf2_transformer.cpp)
 # ament_target_dependencies(transformer rclcpp rclcpp_lifecycle message_filters std_msgs sensor_msgs lifecycle_msgs mas_perception_msgs tf2_ros pcl_ros geometry_msgs)
@@ -159,7 +188,7 @@ endif()
 
 install(TARGETS
   lifecycle_controller
-  #lc_talker
+  # lc_talker
   mmor
   # transformer
   # segmenter
@@ -169,6 +198,11 @@ install(TARGETS
 install(DIRECTORY
   ros/launch/
   DESTINATION share/${PROJECT_NAME}/ros/launch
+)
+
+install(DIRECTORY
+  ros/config/
+  DESTINATION share/${PROJECT_NAME}/ros/config
 )
 
 ament_package()

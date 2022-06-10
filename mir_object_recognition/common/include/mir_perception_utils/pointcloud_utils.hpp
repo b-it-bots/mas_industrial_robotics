@@ -20,7 +20,7 @@ unsigned int centerPointCloud(const PointCloud &cloud_in, PointCloud &centered_c
   * \param[in] Number of points
   * \return The number of padded points
   */
-unsigned int padPointCloud(PointCloud::Ptr &cloud_in, int num_points);
+unsigned int padPointCloud(PointCloudBSPtr &cloud_in, int num_points);
 }
 }
 
