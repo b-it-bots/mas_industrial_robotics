@@ -31,7 +31,6 @@
 // #include <pcl_ros/point_cloud.hpp>
 
 #include "mir_perception_utils/object_utils_ros.hpp"
-#include "helpers.cpp"
 
 using namespace std::chrono_literals;
 using namespace mir_perception_utils;
@@ -189,8 +188,7 @@ void convertBboxToMsg(const BoundingBox &bbox,
     convertBoundingBox(bbox, bounding_box_msg);
 }
 
-void object::savePcd(const PointCloudConstBSPtr &pointcloud, std::string log_dir, 
-                     std::string obj_name)
+void object::savePcd(const PointCloudConstBSPtr &pointcloud, std::string log_dir, std::string obj_name)
 {
   std::stringstream filename;
   filename.str("");
@@ -206,8 +204,10 @@ void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_
   filename << log_dir << obj_name << ".jpg";
   cv::imwrite(filename.str(), cv_image->image);
 }
-bool object::getCVImage(const std::shared_ptr<sensor_msgs::msg::Image> &image,
-                       cv_bridge::CvImagePtr &cv_image)
+
+bool object::getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
+                        cv_bridge::CvImagePtr &cv_image)
+                        
 {
     try{
         cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);

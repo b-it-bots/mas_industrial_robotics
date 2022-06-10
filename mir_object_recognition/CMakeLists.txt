@@ -102,11 +102,6 @@ ament_target_dependencies(perception_visualization
   cv_bridge
   visualization_msgs)
 
-ament_target_dependencies( percption_visuliazation
- tf2_ros
- pcl_ros
-)
-
 add_library( scene_segmentation
   common/src/cloud_accumulation.cpp
   common/src/scene_segmentation.cpp
@@ -116,12 +111,14 @@ add_library( scene_segmentation
 )
 
 target_link_libraries(scene_segmentation
-  percption_visuliazation
+  perception_visualization
 )
 
 ament_target_dependencies(scene_segmentation 
   tf2_ros 
   pcl_ros
+  cv_bridge
+  visualization_msgs
 )
 
 add_executable(mmor ros/src/multimodal_object_recognition.cpp)
@@ -144,24 +141,24 @@ target_link_libraries(mmor
   scene_segmentation
 )
 
-add_executable(data_logger ros/src/mmor_data_logger.cpp)
-ament_target_dependencies(data_logger 
-  rclcpp
-  rclcpp_lifecycle 
-  std_msgs 
-  sensor_msgs 
-  lifecycle_msgs 
-  mas_perception_msgs 
-  tf2_ros 
-  pcl_ros 
-  geometry_msgs 
-  OpenCV
-  cv_bridge
-)
-target_link_libraries(data_logger
-  perception_visualization
-  scene_segmentation
-)
+# add_executable(data_logger ros/src/mmor_data_logger.cpp)
+# ament_target_dependencies(data_logger 
+#   rclcpp
+#   rclcpp_lifecycle 
+#   std_msgs 
+#   sensor_msgs 
+#   lifecycle_msgs 
+#   mas_perception_msgs 
+#   tf2_ros 
+#   pcl_ros 
+#   geometry_msgs 
+#   OpenCV
+#   cv_bridge
+# )
+# target_link_libraries(data_logger
+#   perception_visualization
+#   scene_segmentation
+# )
 
 
 # add_executable(transformer ros/src/sample_tf2_transformer.cpp)
@@ -192,7 +189,7 @@ install(TARGETS
   mmor
   # transformer
   # segmenter
-  data_logger
+  # data_logger
   DESTINATION lib/${PROJECT_NAME})
   
 install(DIRECTORY

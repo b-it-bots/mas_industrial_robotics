@@ -214,7 +214,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
         mas_perception_msgs::msg::ObjectList recognized_image_list_;
 
-    protected:
+    // protected:
         //visualization
         BoundingBoxVisualizer bounding_box_visualizer_pc_;
         ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
@@ -225,6 +225,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         //parameters
         bool debug_mode_;
         std::string pointcloud_source_frame_id_;
+        std::string target_frame_id_;
         // std::set<std::string> round_objects_;
         // typedef std::vector<Object> ObjectInfo;
         // ObjectInfo object_info_;
@@ -234,10 +235,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::shared_ptr<sensor_msgs::msg::PointCloud2> pointcloud_msg_;
         std::shared_ptr<sensor_msgs::msg::Image> image_msg_;
         PointCloudBSPtr cloud_;
-
-        // Parameters
-        bool debug_mode_;
-        std::string target_frame_id_;
+        
 
         // Dynamic parameter
         double voxel_leaf_size_;
