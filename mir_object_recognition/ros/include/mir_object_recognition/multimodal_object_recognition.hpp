@@ -236,7 +236,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         //cluster
         bool center_cluster_;
         bool pad_cluster_;
-        unsigned int padded_cluster_size_;
+        int padded_cluster_size_;
 
         // Dynamic parameter
         double object_height_above_workspace_;
