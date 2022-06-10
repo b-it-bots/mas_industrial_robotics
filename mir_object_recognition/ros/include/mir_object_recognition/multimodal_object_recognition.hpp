@@ -191,7 +191,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         /** \brief Transform pointcloud to the given frame id ("base_link" by default)
          * \param[in] PointCloud2 input
         */
-        void preprocessPointCloud(const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud_msg);
+        bool preprocessPointCloud(const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud_msg);
 
         /** \brief Add cloud accumulation, segment accumulated pointcloud, find the plane, 
          *     clusters table top objects, find object heights.
