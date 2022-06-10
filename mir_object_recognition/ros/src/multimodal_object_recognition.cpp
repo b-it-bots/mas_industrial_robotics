@@ -1,6 +1,5 @@
 #include <std_msgs/msg/float64.hpp>
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
-
 #include "mir_perception_utils/pointcloud_utils_ros.hpp"
 
 void MultiModalObjectRecognitionROS::declare_all_parameters()
@@ -531,6 +530,23 @@ MultiModalObjectRecognitionROS::parametersCallback(
             this->roi_min_bbox_z_ = param.get_value<double>();
         }
     }
+    
+    scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
+        voxel_filter_limit_min_, voxel_filter_limit_max_);
+    scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
+        passthrough_filter_field_name_, passthrough_filter_limit_min_,
+        passthrough_filter_limit_max_);
+    scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
+    Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
+    scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
+        sac_optimize_coefficients_, axis, sac_eps_angle_,
+        sac_normal_distance_weight_);
+    scene_segmentation_ros_->setPrismParams(prism_min_height_, prism_max_height_);
+    scene_segmentation_ros_->setOutlierParams(outlier_radius_search_, outlier_min_neighbors_);
+    scene_segmentation_ros_->setClusterParams(cluster_tolerance_, cluster_min_size_, cluster_max_size_,
+        cluster_min_height_, cluster_max_height_, cluster_max_length_,
+        cluster_min_distance_to_polygon_);
+
     return result;
 }
 
@@ -545,6 +561,8 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string
     this->get_parameter("target_frame_id", target_frame_id_);
     this->declare_parameter<bool>("debug_mode_", false);
     this->get_parameter("debug_mode_", debug_mode_);
+    scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
+  
     MultiModalObjectRecognitionROS::declare_all_parameters();
 }
 
@@ -697,6 +715,23 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     this->get_parameter("roi_base_link_to_laser_distance", roi_base_link_to_laser_distance_);
     this->get_parameter("roi_max_object_pose_x_to_base_link", roi_max_object_pose_x_to_base_link_);
     this->get_parameter("roi_min_bbox_z", roi_min_bbox_z_);
+
+    scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
+        voxel_filter_limit_min_, voxel_filter_limit_max_);
+    scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
+        passthrough_filter_field_name_, passthrough_filter_limit_min_,
+        passthrough_filter_limit_max_);
+    scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
+    Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
+    scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
+        sac_optimize_coefficients_, axis, sac_eps_angle_,
+        sac_normal_distance_weight_);
+    scene_segmentation_ros_->setPrismParams(prism_min_height_, prism_max_height_);
+    scene_segmentation_ros_->setOutlierParams(outlier_radius_search_, outlier_min_neighbors_);
+    scene_segmentation_ros_->setClusterParams(cluster_tolerance_, cluster_min_size_, cluster_max_size_,
+        cluster_min_height_, cluster_max_height_, cluster_max_length_,
+        cluster_min_distance_to_polygon_);
+
 
     // publish workspace height
     pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", 1);
