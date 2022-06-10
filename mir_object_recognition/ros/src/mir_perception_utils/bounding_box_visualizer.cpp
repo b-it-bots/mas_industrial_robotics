@@ -17,7 +17,7 @@ namespace mir_perception_utils
         BoundingBoxVisualizer::BoundingBoxVisualizer(const std::string &topic_name, Color color,
                                                      bool check_subscribers) : color_(color), check_subscribers_(check_subscribers)
         {
-            auto node = rclcpp::Node::make_shared("~");
+            auto node = rclcpp::Node::make_shared("_");
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(
                 topic_name, 1);
         }

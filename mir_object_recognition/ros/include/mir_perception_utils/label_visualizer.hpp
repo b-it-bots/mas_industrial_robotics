@@ -9,7 +9,7 @@
 
 #include "geometry_msgs/msg/pose_array.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
-
+#include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/color.hpp"
 
 using mir_perception_utils::visualization::Color;

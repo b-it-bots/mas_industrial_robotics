@@ -8,7 +8,7 @@
 #include "pcl/geometry/planar_polygon.h"
 #include "pcl/point_cloud.h"
 #include "visualization_msgs/msg/marker.hpp"
-
+#include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/color.hpp"
 
 namespace mir_perception_utils
@@ -25,14 +25,14 @@ namespace mir_perception_utils
             PlanarPolygonVisualizer(const std::string &topic_name, Color color,
                                     bool check_subscribers = true, double thickness = 0.005);
 
-            template <typename PointT>
-            void publish(const pcl::PlanarPolygon<PointT> &polygon,
+            
+            void publish(const PlanarPolygon &polygon,
                          const std::string &frame_id);
 
             /** Fill the fields of the marker object so that it visualizes the provided
                 * vector of points by drawing a polyline through them. */
             template <typename PointT>
-            void buildPolygonMarker(const typename pcl::PointCloud<PointT>::VectorType &points,
+            void buildPolygonMarker(const typename PointCloud::VectorType &points,
                                     visualization_msgs::msg::Marker &marker,
                                     const std::string &frame_id, int id = 1);
 
