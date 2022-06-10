@@ -76,7 +76,7 @@ namespace mir_perception_utils
         void convertBboxToMsg(const BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
 
-        void savePcd(const PointCloud::ConstPtr &pointcloud, std::string log_dir = "/tmp/",
+        void savePcd(std::shared_ptr<PointCloud> &pointcloud, std::string log_dir = "/tmp/",
              std::string obj_name = "unknown");
 
         /** \brief Save debug image if debug_mode is enabled

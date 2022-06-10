@@ -80,7 +80,7 @@ add_library(perception_visualization
   common/src/bounding_box.cpp
   common/src/pointcloud_utils.cpp
   common/src/cloud_accumulation.cpp
-  common/src/scene_segmentation.cpp
+  # common/src/scene_segmentation.cpp
   ros/src/mir_perception_utils/bounding_box_visualizer.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
   ros/src/mir_perception_utils/label_visualizer.cpp
@@ -92,25 +92,30 @@ add_library(perception_visualization
   # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
+ament_target_dependencies(perception_visualization 
+  tf2_ros
+  pcl_ros
+  cv_bridge
+  visualization_msgs)
 
-# add_executable(mmor ros/src/multimodal_object_recognition.cpp)
-# ament_target_dependencies(mmor 
-#   rclcpp
-#   rclcpp_lifecycle 
-#   message_filters 
-#   std_msgs 
-#   sensor_msgs 
-#   lifecycle_msgs 
-#   mas_perception_msgs 
-#   tf2_ros 
-#   pcl_ros 
-#   geometry_msgs 
-#   OpenCV
-#   cv_bridge
-# )
-# target_link_libraries(mmor
-#   perception_visualization
-# )
+add_executable(mmor ros/src/multimodal_object_recognition.cpp)
+ament_target_dependencies(mmor 
+  rclcpp
+  rclcpp_lifecycle 
+  message_filters 
+  std_msgs 
+  sensor_msgs 
+  lifecycle_msgs 
+  mas_perception_msgs 
+  tf2_ros 
+  pcl_ros 
+  geometry_msgs 
+  OpenCV
+  cv_bridge
+)
+target_link_libraries(mmor
+  perception_visualization
+)
 
 add_executable(data_logger ros/src/mmor_data_logger.cpp)
 ament_target_dependencies(data_logger 
@@ -155,7 +160,7 @@ endif()
 install(TARGETS
   lifecycle_controller
   #lc_talker
-  # mmor
+  mmor
   # transformer
   # segmenter
   data_logger

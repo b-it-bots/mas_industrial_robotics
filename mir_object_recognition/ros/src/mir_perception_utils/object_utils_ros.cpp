@@ -189,8 +189,7 @@ void convertBboxToMsg(const BoundingBox &bbox,
     convertBoundingBox(bbox, bounding_box_msg);
 }
 
-void object::savePcd(const PointCloud::ConstPtr &pointcloud, std::string log_dir,
-                     std::string obj_name)
+void object::savePcd(std::shared_ptr<PointCloud> &pointcloud, std::string log_dir, std::string obj_name)
 {
   std::stringstream filename;
   filename.str("");
