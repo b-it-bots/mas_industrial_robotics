@@ -233,24 +233,58 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool debug_mode_;
         std::string target_frame_id_;
 
+        // Dynamic parameter
+        double voxel_leaf_size_;
+        std::string voxel_filter_field_name_;
+        double voxel_filter_limit_min_;
+        double voxel_filter_limit_max_;
+        bool enable_passthrough_filter_;
+        std::string passthrough_filter_field_name_;
+        double passthrough_filter_limit_min_;
+        double passthrough_filter_limit_max_;
+        double normal_radius_search_;
+        bool use_omp_;
+        int num_cores_;
+        int sac_max_iterations_;
+        double sac_distance_threshold_;
+        bool sac_optimize_coefficients_;
+        double sac_x_axis_;
+        double sac_y_axis_;
+        double sac_z_axis_;
+        double sac_eps_angle_;
+        double sac_normal_distance_weight_;
+        double prism_min_height_;
+        double prism_max_height_;
+        double outlier_radius_search_;
+        int outlier_min_neighbors_;
+        double cluster_tolerance_;
+        int cluster_min_size_;
+        int cluster_max_size_;
+        double cluster_min_height_;
+        double cluster_max_height_;
+        double cluster_max_length_;
+        double cluster_min_distance_to_polygon_;
+
         //cluster
         bool center_cluster_;
         bool pad_cluster_;
         int padded_cluster_size_;
 
-        // Dynamic parameter
+        double octree_resolution_;
         double object_height_above_workspace_;
         double container_height_;
-        double rgb_roi_adjustment_;
-        double rgb_bbox_min_diag_;
-        double rgb_bbox_max_diag_;
+        bool enable_rgb_recognizer_;
+        bool enable_pc_recognizer_;
+        int rgb_roi_adjustment_;
+        int rgb_bbox_min_diag_;
+        int rgb_bbox_max_diag_;
         double rgb_cluster_filter_limit_min_;
         double rgb_cluster_filter_limit_max_;
+        bool rgb_cluster_remove_outliers_;
         bool enable_roi_;
         double roi_base_link_to_laser_distance_;
         double roi_max_object_pose_x_to_base_link_;
         double roi_min_bbox_z_;
-        bool rgb_cluster_remove_outliers_;
 
 };
 
