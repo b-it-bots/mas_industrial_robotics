@@ -356,7 +356,7 @@ MultiModalObjectRecognitionROS::parametersCallback(
               enable_roi_.value_to_string().c_str());
       return result;
   }
-
+    
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms):
     rclcpp_lifecycle::LifecycleNode(node_name,
         rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),

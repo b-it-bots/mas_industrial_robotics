@@ -89,7 +89,6 @@ add_library( percption_visuliazation
   ros/src/mir_perception_utils/label_visualizer.cpp
   ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
   ros/src/mir_perception_utils/object_utils_ros.cpp
-  ros/src/mir_perception_utils/helpers.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
 )
 
@@ -104,6 +103,10 @@ add_library( scene_segmentation
   ros/src/mir_object_segmentation/laserscan_segmentation.cpp
   ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
   #ros/src/mir_object_segmentation/scene_segmentation_node.cpp
+)
+
+target_link_libraries(scene_segmentation
+  percption_visuliazation
 )
 
 ament_target_dependencies(scene_segmentation 
