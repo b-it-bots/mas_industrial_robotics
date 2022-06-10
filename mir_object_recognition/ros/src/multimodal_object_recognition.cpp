@@ -1,6 +1,5 @@
 #include <std_msgs/msg/float64.hpp>
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
-
 #include "mir_perception_utils/pointcloud_utils_ros.hpp"
 
 void MultiModalObjectRecognitionROS::declare_all_parameters()
@@ -242,24 +241,24 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
 
     rcl_interfaces::msg::ParameterDescriptor descriptor36;
     descriptor36.description = "RGB bounding box/ROI adjustment in pixel";
-    rcl_interfaces::msg::FloatingPointRange range36;
-    range36.set__from_value(0.0).set__to_value(50.0);
-    descriptor36.floating_point_range = {range36};
-    this->declare_parameter("rgb_roi_adjustment", 2.0, descriptor36);
+    rcl_interfaces::msg::IntegerRange range36;
+    range36.set__from_value(0).set__to_value(50);
+    descriptor36.integer_range = {range36};
+    this->declare_parameter("rgb_roi_adjustment", 2, descriptor36);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor37;
     descriptor37.description = "Allowed RGB bounding box min diagonal";
-    rcl_interfaces::msg::FloatingPointRange range37;
-    range37.set__from_value(0.0).set__to_value(500.0);
-    descriptor37.floating_point_range = {range37};
-    this->declare_parameter("rgb_bbox_min_diag", 21.0, descriptor37);
+    rcl_interfaces::msg::IntegerRange range37;
+    range37.set__from_value(0).set__to_value(500);
+    descriptor37.integer_range = {range37};
+    this->declare_parameter("rgb_bbox_min_diag", 21, descriptor37);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor38;
     descriptor38.description = "Allowed RGB bounding box max diagonal";
-    rcl_interfaces::msg::FloatingPointRange range38;
-    range38.set__from_value(0.0).set__to_value(500.0);
-    descriptor38.floating_point_range = {range38};
-    this->declare_parameter("rgb_bbox_max_diag", 175.0, descriptor38);
+    rcl_interfaces::msg::IntegerRange range38;
+    range38.set__from_value(0).set__to_value(500);
+    descriptor38.integer_range = {range38};
+    this->declare_parameter("rgb_bbox_max_diag", 175, descriptor38);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor39;
     descriptor39.description = "Passthrough filter min for the generated pc from rgb proposal";
@@ -325,6 +324,75 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     this->declare_parameter("octree_resolution", 0.0025, descriptor48);
 }
 
+void MultiModalObjectRecognitionROS::get_all_parameters()
+{
+    this->get_parameter("voxel_leaf_size", voxel_leaf_size_);
+    this->get_parameter("voxel_filter_field_name", voxel_filter_field_name_);
+    this->get_parameter("voxel_filter_limit_min", voxel_filter_limit_min_);
+    this->get_parameter("voxel_filter_limit_max", voxel_filter_limit_max_);
+    this->get_parameter("enable_passthrough_filter", enable_passthrough_filter_);
+    this->get_parameter("passthrough_filter_field_name", passthrough_filter_field_name_);
+    this->get_parameter("passthrough_filter_limit_min", passthrough_filter_limit_min_);
+    this->get_parameter("passthrough_filter_limit_max", passthrough_filter_limit_max_);
+    this->get_parameter("normal_radius_search", normal_radius_search_);
+    this->get_parameter("use_omp", use_omp_);
+    this->get_parameter("num_cores", num_cores_);
+    this->get_parameter("sac_max_iterations", sac_max_iterations_);
+    this->get_parameter("sac_distance_threshold", sac_distance_threshold_);
+    this->get_parameter("sac_optimize_coefficients", sac_optimize_coefficients_);
+    this->get_parameter("sac_x_axis", sac_x_axis_);
+    this->get_parameter("sac_y_axis", sac_y_axis_);
+    this->get_parameter("sac_z_axis", sac_z_axis_);
+    this->get_parameter("sac_eps_angle", sac_eps_angle_);
+    this->get_parameter("sac_normal_distance_weight", sac_normal_distance_weight_);
+    this->get_parameter("prism_min_height", prism_min_height_);
+    this->get_parameter("prism_max_height", prism_max_height_);
+    this->get_parameter("outlier_radius_search", outlier_radius_search_);
+    this->get_parameter("outlier_min_neighbors", outlier_min_neighbors_);
+    this->get_parameter("cluster_tolerance", cluster_tolerance_);
+    this->get_parameter("cluster_min_size", cluster_min_size_);
+    this->get_parameter("cluster_max_size", cluster_max_size_);
+    this->get_parameter("cluster_min_height", cluster_min_height_);
+    this->get_parameter("cluster_max_height", cluster_max_height_);
+    this->get_parameter("cluster_max_length", cluster_max_length_);
+    this->get_parameter("cluster_min_distance_to_polygon", cluster_min_distance_to_polygon_);
+    this->get_parameter("center_cluster", center_cluster_);
+    this->get_parameter("pad_cluster", pad_cluster_);
+    this->get_parameter("padded_cluster_size", padded_cluster_size_);
+    this->get_parameter("octree_resolution", octree_resolution_);
+    this->get_parameter("object_height_above_workspace", object_height_above_workspace_);
+    this->get_parameter("container_height", container_height_);
+    this->get_parameter("enable_rgb_recognizer", enable_rgb_recognizer_);
+    this->get_parameter("enable_pc_recognizer", enable_pc_recognizer_);
+    this->get_parameter("rgb_roi_adjustment", rgb_roi_adjustment_);
+    this->get_parameter("rgb_bbox_min_diag", rgb_bbox_min_diag_);
+    this->get_parameter("rgb_bbox_max_diag", rgb_bbox_max_diag_);
+    this->get_parameter("rgb_cluster_filter_limit_min", rgb_cluster_filter_limit_min_);
+    this->get_parameter("rgb_cluster_filter_limit_max", rgb_cluster_filter_limit_max_);
+    this->get_parameter("rgb_cluster_remove_outliers", rgb_cluster_remove_outliers_);
+    this->get_parameter("enable_roi", enable_roi_);
+    this->get_parameter("roi_base_link_to_laser_distance", roi_base_link_to_laser_distance_);
+    this->get_parameter("roi_max_object_pose_x_to_base_link", roi_max_object_pose_x_to_base_link_);
+    this->get_parameter("roi_min_bbox_z", roi_min_bbox_z_);
+
+    scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
+        voxel_filter_limit_min_, voxel_filter_limit_max_);
+    scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
+        passthrough_filter_field_name_, passthrough_filter_limit_min_,
+        passthrough_filter_limit_max_);
+    scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
+    Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
+    scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
+        sac_optimize_coefficients_, axis, sac_eps_angle_,
+        sac_normal_distance_weight_);
+    scene_segmentation_ros_->setPrismParams(prism_min_height_, prism_max_height_);
+    scene_segmentation_ros_->setOutlierParams(outlier_radius_search_, outlier_min_neighbors_);
+    scene_segmentation_ros_->setClusterParams(cluster_tolerance_, cluster_min_size_, cluster_max_size_,
+        cluster_min_height_, cluster_max_height_, cluster_max_length_,
+        cluster_min_distance_to_polygon_);
+
+}
+
 rcl_interfaces::msg::SetParametersResult
 MultiModalObjectRecognitionROS::parametersCallback(
     const std::vector<rclcpp::Parameter> &parameters)
@@ -332,45 +400,238 @@ MultiModalObjectRecognitionROS::parametersCallback(
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
     result.reason = "success";
+    RCLCPP_INFO(this->get_logger(), "Hello from callabck");
+        
     for (const auto &param : parameters)
     {
         RCLCPP_INFO(this->get_logger(), "%s", param.get_name().c_str());
         RCLCPP_INFO(this->get_logger(), "%s", param.value_to_string().c_str());
+        if (param.get_name() == "voxel_leaf_size")
+        {
+            this->voxel_leaf_size_ = param.get_value<double>();
+        }
+        if (param.get_name() == "voxel_filter_field_name")
+        {
+            this->voxel_filter_field_name_ = param.get_value<std::string>();
+        }
+        if (param.get_name() == "voxel_filter_limit_min")
+        {
+            this->voxel_filter_limit_min_ = param.get_value<double>();
+        }
+        if (param.get_name() == "voxel_filter_limit_max")
+        {
+            this->voxel_filter_limit_max_ = param.get_value<double>();
+        }
+        if (param.get_name() == "enable_passthrough_filter")
+        {
+            this->enable_passthrough_filter_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "passthrough_filter_field_name")
+        {
+            this->passthrough_filter_field_name_ = param.get_value<std::string>();
+        }
+        if (param.get_name() == "passthrough_filter_limit_min")
+        {
+            this->passthrough_filter_limit_min_ = param.get_value<double>();
+        }
+        if (param.get_name() == "passthrough_filter_limit_max")
+        {
+            this->passthrough_filter_limit_max_ = param.get_value<double>();
+        }
+        if (param.get_name() == "normal_radius_search")
+        {
+            this->normal_radius_search_ = param.get_value<double>();
+        }
+        if (param.get_name() == "use_omp")
+        {
+            this->use_omp_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "num_cores")
+        {
+            this->num_cores_ = param.get_value<int>();
+        }
+        if (param.get_name() == "sac_max_iterations")
+        {
+            this->sac_max_iterations_ = param.get_value<int>();
+        }
+        if (param.get_name() == "sac_distance_threshold")
+        {
+            this->sac_distance_threshold_ = param.get_value<double>();
+        }
+        if (param.get_name() == "sac_optimize_coefficients")
+        {
+            this->sac_optimize_coefficients_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "sac_x_axis")
+        {
+            this->sac_x_axis_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "sac_y_axis")
+        {
+            this->sac_y_axis_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "sac_z_axis")
+        {
+            this->sac_z_axis_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "sac_eps_angle")
+        {
+            this->sac_eps_angle_ = param.get_value<double>();
+        }
+        if (param.get_name() == "sac_normal_distance_weight")
+        {
+            this->sac_normal_distance_weight_ = param.get_value<double>();
+        }
+        if (param.get_name() == "prism_min_height")
+        {
+            this->prism_min_height_ = param.get_value<double>();
+        }
+        if (param.get_name() == "prism_max_height")
+        {
+            this->prism_max_height_ = param.get_value<double>();
+        }
+        if (param.get_name() == "outlier_radius_search")
+        {
+            this->outlier_radius_search_ = param.get_value<double>();
+        }
+        if (param.get_name() == "outlier_min_neighbors")
+        {
+            this->outlier_min_neighbors_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cluster_tolerance")
+        {
+            this->cluster_tolerance_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cluster_min_size")
+        {
+            this->cluster_min_size_ = param.get_value<int>();
+        }
+        if (param.get_name() == "cluster_max_size")
+        {
+            this->cluster_max_size_ = param.get_value<int>();
+        }
+        if (param.get_name() == "cluster_min_height")
+        {
+            this->cluster_min_height_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cluster_max_height")
+        {
+            this->cluster_max_height_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cluster_max_length")
+        {
+            this->cluster_max_length_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cluster_min_distance_to_polygon")
+        {
+            this->cluster_min_distance_to_polygon_ = param.get_value<double>();
+        }
+        if (param.get_name() == "center_cluster")
+        {
+            this->center_cluster_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "pad_cluster")
+        {
+            this->pad_cluster_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "padded_cluster_size")
+        {
+            this->padded_cluster_size_ = param.get_value<int>();
+        }
+        if (param.get_name() == "octree_resolution")
+        {
+            this->octree_resolution_ = param.get_value<double>();
+        }
+        if (param.get_name() == "object_height_above_workspace")
+        {
+            this->object_height_above_workspace_ = param.get_value<double>();
+        }
+        if (param.get_name() == "container_height")
+        {
+            this->container_height_ = param.get_value<double>();
+        }
+        if (param.get_name() == "enable_rgb_recognizer")
+        {
+            this->enable_rgb_recognizer_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "enable_pc_recognizer")
+        {
+            this->enable_pc_recognizer_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "rgb_roi_adjustment")
+        {
+            this->rgb_roi_adjustment_ = param.get_value<int>();
+        }
+        if (param.get_name() == "rgb_bbox_min_diag")
+        {
+            this->rgb_bbox_min_diag_ = param.get_value<int>();
+        }
+        if (param.get_name() == "rgb_bbox_max_diag")
+        {
+            this->rgb_bbox_max_diag_ = param.get_value<int>();
+        }
+        if (param.get_name() == "rgb_cluster_filter_limit_min")
+        {
+            this->rgb_cluster_filter_limit_min_ = param.get_value<double>();
+        }
+        if (param.get_name() == "rgb_cluster_filter_limit_max")
+        {
+            this->rgb_cluster_filter_limit_max_ = param.get_value<double>();
+        }
+        if (param.get_name() == "rgb_cluster_remove_outliers")
+        {
+            this->rgb_cluster_remove_outliers_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "enable_roi")
+        {
+            this->enable_roi_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "roi_base_link_to_laser_distance")
+        {
+            this->roi_base_link_to_laser_distance_ = param.get_value<double>();
+        }
+        if (param.get_name() == "roi_max_object_pose_x_to_base_link")
+        {
+            this->roi_max_object_pose_x_to_base_link_ = param.get_value<double>();
+        }
+        if (param.get_name() == "roi_min_bbox_z")
+        {
+            this->roi_min_bbox_z_ = param.get_value<double>();
+        }
     }
-    rclcpp::Parameter object_height_above_workspace_ = this->get_parameter("object_height_above_workspace");
-    rclcpp::Parameter container_height_ = this->get_parameter("container_height");
-    rclcpp::Parameter rgb_roi_adjustment_ = this->get_parameter("rgb_roi_adjustment");
-    rclcpp::Parameter rgb_bbox_min_diag_ = this->get_parameter("rgb_bbox_min_diag");
-    rclcpp::Parameter rgb_bbox_max_diag_ = this->get_parameter("rgb_bbox_max_diag");
-    rclcpp::Parameter rgb_cluster_filter_limit_min_ = this->get_parameter("rgb_cluster_filter_limit_min");
-    rclcpp::Parameter rgb_cluster_filter_limit_max_ = this->get_parameter("rgb_cluster_filter_limit_max");
-    rclcpp::Parameter enable_roi_ = this->get_parameter("enable_roi");
-    rclcpp::Parameter roi_base_link_to_laser_distance_ = this->get_parameter("roi_base_link_to_laser_distance");
-    rclcpp::Parameter roi_max_object_pose_x_to_base_link_ = this->get_parameter("roi_max_object_pose_x_to_base_link");
-    rclcpp::Parameter roi_min_bbox_z_ = this->get_parameter("roi_min_bbox_z");
-    rclcpp::Parameter rgb_cluster_remove_outliers_ = this->get_parameter("rgb_cluster_remove_outliers");
-    RCLCPP_INFO(this->get_logger(), "rgb_cluster_filter_limit_min_: %s, rgb_cluster_filter_limit_max_: %s, enable_roi_: %s",
-                rgb_cluster_filter_limit_min_.value_to_string().c_str(),
-                rgb_cluster_filter_limit_max_.value_to_string().c_str(),
-                enable_roi_.value_to_string().c_str());
-
-    this -> get_parameter("center_cluster", center_cluster_);
-    this -> get_parameter("pad_cluster", pad_cluster_);
-    this -> get_parameter("padded_cluster_size", padded_cluster_size_);
+    
+    scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
+        voxel_filter_limit_min_, voxel_filter_limit_max_);
+    scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
+        passthrough_filter_field_name_, passthrough_filter_limit_min_,
+        passthrough_filter_limit_max_);
+    scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
+    Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
+    scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
+        sac_optimize_coefficients_, axis, sac_eps_angle_,
+        sac_normal_distance_weight_);
+    scene_segmentation_ros_->setPrismParams(prism_min_height_, prism_max_height_);
+    scene_segmentation_ros_->setOutlierParams(outlier_radius_search_, outlier_min_neighbors_);
+    scene_segmentation_ros_->setClusterParams(cluster_tolerance_, cluster_min_size_, cluster_max_size_,
+        cluster_min_height_, cluster_max_height_, cluster_max_length_,
+        cluster_min_distance_to_polygon_);
 
     return result;
 }
 
-MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string &node_name, bool intra_process_comms) : rclcpp_lifecycle::LifecycleNode(node_name,
-                                                                                                                                                         rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
-                                                                                                                         cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
-                                                                                                                         cluster_visualizer_pc_("output/tabletop_cluster_pc")
+MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string &node_name, bool intra_process_comms) : 
+                    rclcpp_lifecycle::LifecycleNode(node_name,
+                    rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
+                    cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
+                    cluster_visualizer_pc_("output/tabletop_cluster_pc")
 {
     RCLCPP_INFO(get_logger(), "constructor called");
     this->declare_parameter<std::string>("target_frame_id", "base_link");
     this->get_parameter("target_frame_id", target_frame_id_);
     this->declare_parameter<bool>("debug_mode_", false);
     this->get_parameter("debug_mode_", debug_mode_);
+    scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
+  
     MultiModalObjectRecognitionROS::declare_all_parameters();
 }
 
@@ -420,23 +681,24 @@ void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg:
     scene_segmentation_ros_->getCloudAccumulation(cloud);
 
     // if the cluster is centered,it looses the correct location of the object
-    scene_segmentation_ros_->segmentCloud(cloud, object_list, clusters, boxes,
-                                          center_cluster_ = false, pad_cluster_, padded_cluster_size_);
+    // scene_segmentation_ros_->segmentCloud(cloud, object_list, clusters, boxes,
+    //                                       center_cluster_ = false, pad_cluster_, padded_cluster_size_);
 
+    
     // get workspace height
     std_msgs::msg::Float64 workspace_height_msg;
     workspace_height_msg.data = scene_segmentation_ros_->getWorkspaceHeight();
     pub_workspace_height_->publish(workspace_height_msg);
 
-    if (debug_mode_)
-    {
-        PointCloudBSPtr cloud_debug(new PointCloud);
-        cloud_debug = scene_segmentation_ros_->getCloudDebug();
-        sensor_msgs::msg::PointCloud2 ros_pc2;
-        pcl::toROSMsg(*cloud_debug, ros_pc2);
-        ros_pc2.header.frame_id = target_frame_id_;
-        pub_debug_cloud_plane_->publish(ros_pc2);
-    }
+    PointCloudBSPtr cloud_debug(new PointCloud);
+
+    scene_segmentation_ros_->findPlane(cloud, cloud_debug);
+    // cloud_debug = scene_segmentation_ros_->getCloudDebug();
+
+    sensor_msgs::msg::PointCloud2 ros_pc2;
+    pcl::toROSMsg(*cloud_debug, ros_pc2);
+    ros_pc2.header.frame_id = target_frame_id_;
+    pub_debug_cloud_plane_->publish(ros_pc2);
 }
 
 void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
@@ -475,6 +737,8 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     callback_handle_ = this->add_on_set_parameters_callback(
         std::bind(&MultiModalObjectRecognitionROS::parametersCallback, this, std::placeholders::_1));
 
+    MultiModalObjectRecognitionROS::get_all_parameters();
+
     // publish workspace height
     pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", 1);
 
@@ -498,6 +762,8 @@ MultiModalObjectRecognitionROS::on_activate(const rclcpp_lifecycle::State &)
     // Let's sleep for 2 seconds.
     // We emulate we are doing important
     // work in the activating phase.
+    pub_workspace_height_ -> on_activate(); 
+    pub_debug_cloud_plane_ -> on_activate();
     std::this_thread::sleep_for(2s);
 
     msg_sync_->registerCallback(&MultiModalObjectRecognitionROS::synchronizeCallback, this);

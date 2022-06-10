@@ -121,7 +121,7 @@ PointCloudBSPtr SceneSegmentation::findPlane(const PointCloudConstBSPtr &cloud,
   }
   workspace_height = z;
 
-  return filtered;
+  return plane;
 }
 
 void SceneSegmentation::setVoxelGridParams(double leaf_size, const std::string &filter_field,
