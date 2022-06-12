@@ -8,6 +8,43 @@
 * Plane detection
 * Visualization of plane detection in rviz2
 
+## Environmental setup
+
+> Note: Ubuntu 20.04 LTS(Focal Fossa) is recommended for this codebase to work.
+
+### Install ROS2 Rolling
+```
+sudo apt install ros-rolling-desktop
+```
+
+### Source the setup script
+```
+source /opt/ros/rolling/setup.bash
+```
+### Build 'mas_perception_messages' package
+```
+mkdir ~/sdp_ws/src
+cd ~/sdp_ws/src
+git clone --branch foxy-devel https://github.com/HBRS-SDP/mas_perception_msgs.git
+cd ~/sdp_ws
+colcon build --packages-select mas_perception_msgs
+```
+
+### Build 'mir_object_recognition' package
+
+```
+cd ~/sdp_ws/src
+git clone --branch rolling-devel https://github.com/HBRS-SDP/ss22-ros2-perception.git .
+cd ~/sdp_ws
+colcon build 
+source install/local_setup.bash
+```
+
+### Install rqt-reconfigure for dynamic parameter reconfiguration
+```
+sudo apt install ros-rolling-rqt-reconfigure
+```
+
 ## Steps to run
 
 > Note: Make sure to source the ROS rolling and devel in all the terminals
