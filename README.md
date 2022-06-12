@@ -56,12 +56,12 @@ ros2 run mir_object_recognition lifecycle_controller --ros-args -p lifecycle_nod
 <img src="https://github.com/HBRS-SDP/ss22-ros2-perception/blob/rolling-devel/images/lc_cntrl_state_chng.png" >
 
 * Follow the below steps to perform plane detection:    
-    * The mmmor node will be in unconfigured state by default.
+    * The mmor node will be in unconfigured state by default.
     * Change the state to Inactive by entering `C`, during which all the parameters, publishers, subscribers and other configurations take place.
     * To process the data, change the state to Active by entering `A`.
     * The node then process the point cloud data and perform plane detection.
     * The detected plane is published to the topic `output/debug_cloud_plane`.
-
+    * To terminate the mmor ndoe, enter `X` which will shut down the node.
 
 * If a lifecycle node is not available the following error is displayed. Kill the node and re-run once the lifecycle node is available.
 
@@ -84,3 +84,6 @@ Step 6:
 rviz2
 ```
 * Once the rviz is open, load the `plane_det.rviz` to view the input pointcloud and the detected plane (in red color).
+
+
+> More details about the concepts, issues and resources can be found on the wiki page.
