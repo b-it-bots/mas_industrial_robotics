@@ -16,11 +16,18 @@
 ```
 sudo apt install ros-rolling-desktop
 ```
+For more details, see [ROS2 Rolling Installation](https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Development-Setup.html).
 
 ### Source the setup script
 ```
 source /opt/ros/rolling/setup.bash
 ```
+
+### Remove cv-bridge package (to avoid conficts while building packages)
+```
+sudo apt-get remove ros-rolling-cv-bridge
+```
+
 ### Build 'mas_perception_messages' package
 ```
 mkdir ~/sdp_ws/src
