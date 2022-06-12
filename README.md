@@ -30,7 +30,7 @@ sudo apt-get remove ros-rolling-cv-bridge
 
 > Note: cv-bridge is compiled locally to resolve the bug.
 
-### Build 'mas_perception_messages' package
+### Build 'mas_perception_messages' package (a dependency)
 ```
 mkdir ~/sdp_ws/src
 cd ~/sdp_ws/src
@@ -39,7 +39,7 @@ cd ~/sdp_ws
 colcon build --packages-select mas_perception_msgs
 ```
 
-### Build 'mir_object_recognition' package
+### Build the workspace, which includes 'cv_brdige' and 'mir_object_recognition' packages
 
 ```
 cd ~/sdp_ws/src
