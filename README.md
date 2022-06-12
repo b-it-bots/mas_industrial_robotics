@@ -23,10 +23,12 @@ For more details, see [ROS2 Rolling Installation](https://docs.ros.org/en/rollin
 source /opt/ros/rolling/setup.bash
 ```
 
-### Remove cv-bridge package (to avoid conficts while building packages)
+### Remove cv-bridge package installed with ROS (it has a [bug](https://github.com/HBRS-SDP/ss22-ros2-perception/issues/13) that doesn't allow building our package)
 ```
 sudo apt-get remove ros-rolling-cv-bridge
 ```
+
+> Note: cv-bridge is compiled locally to resolve the bug.
 
 ### Build 'mas_perception_messages' package
 ```
@@ -55,8 +57,6 @@ sudo apt install ros-rolling-rqt-reconfigure
 ## Steps to run
 
 > Note: Make sure to source the ROS rolling and devel in all the terminals
-
-### **Camera feed**
 
 **Step 1:**
 
