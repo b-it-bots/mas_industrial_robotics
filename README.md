@@ -49,6 +49,8 @@ colcon build
 source install/local_setup.bash
 ```
 
+* If the `mir_object_recognition` throws an error related to cv_bridge import, just re-run the `colcon-build`.
+
 ### Install rqt-reconfigure for dynamic parameter reconfiguration
 ```
 sudo apt install ros-rolling-rqt-reconfigure
