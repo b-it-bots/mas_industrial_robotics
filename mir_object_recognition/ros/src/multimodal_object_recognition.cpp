@@ -1,6 +1,6 @@
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
-namespace data_collection
+namespace perception_namespace
 {
 void MultiModalObjectRecognitionROS::declare_all_parameters()
 {
@@ -1047,4 +1047,4 @@ MultiModalObjectRecognitionROS::on_shutdown(const rclcpp_lifecycle::State &state
 // }
 
 
-RCLCPP_COMPONENTS_REGISTER_NODE(data_collection::MultiModalObjectRecognitionROS)
+RCLCPP_COMPONENTS_REGISTER_NODE(perception_namespace::MultiModalObjectRecognitionROS)

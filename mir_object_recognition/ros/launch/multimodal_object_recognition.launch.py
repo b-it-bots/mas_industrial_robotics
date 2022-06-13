@@ -22,13 +22,12 @@ def generate_launch_description():
         composable_node_descriptions=[
             ComposableNode(
                     package="mir_object_recognition",
-                    plugin="data_collection::MultiModalObjectRecognitionROS",
+                    plugin="perception_namespace::MultiModalObjectRecognitionROS",
                     name="mmor",
-                    # namespace="/data_collection"
                 ),
             ComposableNode(
                     package="mir_object_recognition",
-                    plugin="data_collection::DataCollector",
+                    plugin="perception_namespace::DataCollector",
                     name="data_collector",
                 )
                 ],

@@ -70,9 +70,6 @@ include_directories(SYSTEM
   ${OpenCV_INCLUDE_DIRS}
 )
 
-# create ament index resource which references the libraries in the binary dir
-# set(node_plugins "")
-
 
 add_executable(lifecycle_controller ros/src/lifecycle_controller.cpp)
 target_link_libraries(lifecycle_controller
@@ -146,8 +143,7 @@ target_link_libraries(mmor
   perception_visualization
   scene_segmentation
 )
-rclcpp_components_register_nodes(mmor "data_collection::MultiModalObjectRecognitionROS")
-# set(node_plugins "${node_plugins}data_collection::MultiModalObjectRecognitionROS;$<TARGET_FILE:mmor>\n")
+rclcpp_components_register_nodes(mmor "perception_namespace::MultiModalObjectRecognitionROS")
 
 add_library(data_collector SHARED
             ros/src/mmor_data_collector.cpp
@@ -175,7 +171,7 @@ target_link_libraries(data_collector
   perception_visualization
   scene_segmentation
 )
-rclcpp_components_register_nodes(data_collector "data_collection::DataCollector")
+rclcpp_components_register_nodes(data_collector "perception_namespace::DataCollector")
 
 ament_export_include_directories(include)
 # ament_export_interfaces(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)

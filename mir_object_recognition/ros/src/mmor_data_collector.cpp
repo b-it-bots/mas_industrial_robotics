@@ -1,6 +1,6 @@
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
-namespace data_collection
+namespace perception_namespace
 {
 class DataCollector : public MultiModalObjectRecognitionROS
 {
@@ -13,6 +13,6 @@ public:
 private:
     std::string logdir_;
 };
-} // namespace data_collection
+} // namespace perception_namespace
 
-RCLCPP_COMPONENTS_REGISTER_NODE(data_collection::DataCollector)
+RCLCPP_COMPONENTS_REGISTER_NODE(perception_namespace::DataCollector)
