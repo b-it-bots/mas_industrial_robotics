@@ -1,8 +1,8 @@
-#include <std_msgs/msg/float64.hpp>
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
-#include "mir_perception_utils/pointcloud_utils_ros.hpp"
 
-    void MultiModalObjectRecognitionROS::declare_all_parameters()
+namespace vivek
+{
+void MultiModalObjectRecognitionROS::declare_all_parameters()
 {
 
     rcl_interfaces::msg::ParameterDescriptor descriptor1;
@@ -425,7 +425,7 @@ MultiModalObjectRecognitionROS::parametersCallback(
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
     result.reason = "success";
-    RCLCPP_INFO(this->get_logger(), "Hello from callabck");
+    RCLCPP_INFO(this->get_logger(), "Hello from callback");
         
     for (const auto &param : parameters)
     {
@@ -661,9 +661,11 @@ MultiModalObjectRecognitionROS::parametersCallback(
 }
 
 
-MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string &node_name, bool intra_process_comms) : 
-                    rclcpp_lifecycle::LifecycleNode(node_name,
-                    rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
+MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options) : 
+                    rclcpp_lifecycle::LifecycleNode("mmor_node",options),
+// MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string &node_name, bool intra_process_comms) : 
+//                     rclcpp_lifecycle::LifecycleNode(node_name,
+//                     rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
                     bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
                     cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
                     cluster_visualizer_pc_("output/tabletop_cluster_pc"),
@@ -676,6 +678,8 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string
     this->get_parameter("target_frame_id", target_frame_id_);
     this->declare_parameter<bool>("debug_mode_", false);
     this->get_parameter("debug_mode_", debug_mode_);
+    this->declare_parameter<std::string>("logdir", "/tmp/");
+    this->get_parameter("logdir", logdir_);
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
   
     MultiModalObjectRecognitionROS::declare_all_parameters();
@@ -850,6 +854,35 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
     std::vector<mpu::object::BoundingBox> boxes;
 
     this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);
+
+    if (data_collection_)
+    {
+        std::string filename;
+        for (auto& cluster : clusters_3d)
+        {
+            filename = "";
+            filename.append("pcd_cluster_");
+            // filename.append(std::to_string(cluster -> header.timestamp)); // get the proper format for the timestamp
+            mpu::object::savePcd(cluster, logdir_, filename);
+            // ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m" << logdir_);
+        }
+            // Save raw image
+        cv_bridge::CvImagePtr raw_cv_image;
+        if (mpu::object::getCVImage(image_msg_, raw_cv_image))
+        {
+            std::string filename = "";
+            filename.append("rgb_raw_");
+            // filename.append(std::to_string(raw_cv_image->header.timestamp)); // get the proper format for the timestamp
+            mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
+            // ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
+        }
+        else
+        {
+            RCLCPP_ERROR(get_logger(),"Cannot generate cv image...");
+        }
+
+        return;
+    }
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -982,30 +1015,36 @@ MultiModalObjectRecognitionROS::on_shutdown(const rclcpp_lifecycle::State &state
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
+} //end of namespace
+
+
 /**
  * A lifecycle node has the same node API
  * as a regular node. This means we can spawn a
  * node, give it a name and add it to the executor.
  */
-int main(int argc, char *argv[])
-{
-    // force flush of the stdout buffer.
-    // this ensures a correct sync of all prints
-    // even when executed simultaneously within the launch file.
-    setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+// int main(int argc, char *argv[])
+// {
+//     // force flush of the stdout buffer.
+//     // this ensures a correct sync of all prints
+//     // even when executed simultaneously within the launch file.
+//     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
-    rclcpp::init(argc, argv);
+//     rclcpp::init(argc, argv);
 
-    rclcpp::executors::SingleThreadedExecutor exe;
+//     rclcpp::executors::SingleThreadedExecutor exe;
 
-    std::shared_ptr<MultiModalObjectRecognitionROS> mmor_lc_node =
-        std::make_shared<MultiModalObjectRecognitionROS>("multimodal_object_recognition", false);
+//     std::shared_ptr<MultiModalObjectRecognitionROS> mmor_lc_node =
+//         std::make_shared<MultiModalObjectRecognitionROS>("multimodal_object_recognition", false);
 
-    exe.add_node(mmor_lc_node->get_node_base_interface());
+//     exe.add_node(mmor_lc_node->get_node_base_interface());
 
-    exe.spin();
+//     exe.spin();
 
-    rclcpp::shutdown();
+//     rclcpp::shutdown();
 
-    return 0;
-}
+//     return 0;
+// }
+
+
+RCLCPP_COMPONENTS_REGISTER_NODE(vivek::MultiModalObjectRecognitionROS)

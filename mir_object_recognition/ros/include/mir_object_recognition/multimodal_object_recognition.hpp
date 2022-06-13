@@ -2,6 +2,9 @@
 #ifndef MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 #define MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 
+// #ifndef COMPOSITION__SERVER_COMPONENT_HPP_
+// #define COMPOSITION__SERVER_COMPONENT_HPP_
+
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -15,7 +18,9 @@
 #include "rclcpp/publisher.hpp"
 #include "rcutils/logging_macros.h"
 #include "rclcpp/logger.hpp"
+#include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
+#include <std_msgs/msg/float64.hpp>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -23,6 +28,8 @@
 
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+// #include "composition/visibility_control.h"
 
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -73,10 +80,15 @@ struct Object
 };
 typedef std::vector<Object> ObjectInfo;
 
+namespace vivek
+{
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
     public:
-        explicit MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms);
+        // COMPOSITION_PUBLIC
+        // explicit MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms);
+        explicit MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options);
+
 
         /// Transition callback for state configuring
         /**
@@ -226,6 +238,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool debug_mode_;
         std::string pointcloud_source_frame_id_;
         std::string target_frame_id_;
+        std::string logdir_;
+        bool data_collection_ = false;
         // std::set<std::string> round_objects_;
         // typedef std::vector<Object> ObjectInfo;
         // ObjectInfo object_info_;
@@ -295,4 +309,5 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
 };
 
+} // namespace vivek ends
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
