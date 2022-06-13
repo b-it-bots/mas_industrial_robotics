@@ -150,7 +150,7 @@ rclcpp_components_register_nodes(mmor "vivek::MultiModalObjectRecognitionROS")
 # set(node_plugins "${node_plugins}vivek::MultiModalObjectRecognitionROS;$<TARGET_FILE:mmor>\n")
 
 add_library(data_collector SHARED
-            ros/src/mmor_data_logger.cpp
+            ros/src/mmor_data_collector.cpp
             ros/src/multimodal_object_recognition.cpp)
 
 target_compile_definitions(data_collector
