@@ -29,6 +29,8 @@
 
 #include "mas_perception_msgs/msg/object_list.hpp"
 #include "mas_perception_msgs/msg/bounding_box_list.hpp"
+#include "mas_perception_msgs/msg/image_list.hpp"
+
 #include "rcutils/logging_macros.h"
 #include "std_msgs/msg/string.hpp"
 
@@ -177,6 +179,17 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // publisher debug
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> pub_debug_cloud_plane_;
 
+        typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
+        SceneSegmentationROSSPtr scene_segmentation_ros_;
+
+        // Publisher for clouds and images recognizer
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_cloud_to_recognizer_;
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ImageList>> pub_image_to_recognizer_;
+
+        // Subscriber for clouds and images recognizer
+        std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_image_list_;
+        std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_cloud_list_;
+
 
         // --------------------------- function declarations -----------------------------------
         
@@ -185,7 +198,9 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
         OnSetParametersCallbackHandle::SharedPtr callback_handle_;
         
-        // void preprocessPointCloud(const sensor_msgs::msg::PointCloud2 &cloud_msg);
+        // Recognize Clouds and Image callback
+        void recognizedImageCallback(const mas_perception_msgs::msg::ObjectList &msg);
+        void recognizedCloudCallback(const mas_perception_msgs::msg::ObjectList &msg);
 
         /** \brief Transform pointcloud to the given frame id ("base_link" by default)
          * \param[in] PointCloud2 input
@@ -208,17 +223,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                                                 std::vector<PointCloudBSPtr> &clusters_3d,
                                                 std::vector<PointCloudBSPtr> &clusters_2d);
 
-        typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
-        SceneSegmentationROSSPtr scene_segmentation_ros_;
-        mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
-        mas_perception_msgs::msg::ObjectList recognized_image_list_;
-
-        // TODO:
-         //BoundingBoxVisualizer bounding_box_visualizer_pc_;
-         //ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        // ClusteredPointCloudVisualizer cluster_visualizer_pc_;
-        // LabelVisualizer label_visualizer_rgb_;
-        // LabelVisualizer label_visualizer_pc_;
 
     protected:
         // Visualization
@@ -277,8 +281,19 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double octree_resolution_;
         double object_height_above_workspace_;
         double container_height_;
+
+        // Flags for object recognition
+        bool received_recognized_image_list_flag_;
+        bool received_recognized_cloud_list_flag_;
+
+        //Recognized image list
+        mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
+        mas_perception_msgs::msg::ObjectList recognized_image_list_;
+
+        // Enable recognizer
         bool enable_rgb_recognizer_;
         bool enable_pc_recognizer_;
+
         int rgb_roi_adjustment_;
         int rgb_bbox_min_diag_;
         int rgb_bbox_max_diag_;

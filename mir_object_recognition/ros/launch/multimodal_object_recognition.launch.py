@@ -5,7 +5,6 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    ld = LaunchDescription()
     config = os.path.join(
         get_package_share_directory('mir_object_recognition'),
         'ros',
@@ -13,7 +12,8 @@ def generate_launch_description():
         'scene_segmentation_constraints.yaml'
         )
         
-    node = LifecycleNode(
+    return LaunchDescription([
+        LifecycleNode(
             package='mir_object_recognition', 
             executable='mmor',
             namespace='',
@@ -25,5 +25,4 @@ def generate_launch_description():
                 ('input_cloud_topic', '/camera/depth/color/points'),
             ])
     
-    ld.add_action(node)
-    return ld
+    ])
