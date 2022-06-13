@@ -1,6 +1,6 @@
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
-namespace vivek
+namespace data_collection
 {
 class DataCollector : public MultiModalObjectRecognitionROS
 {
@@ -13,6 +13,6 @@ public:
 private:
     std::string logdir_;
 };
-} // namespace vivek
+} // namespace data_collection
 
-RCLCPP_COMPONENTS_REGISTER_NODE(vivek::DataCollector)
+RCLCPP_COMPONENTS_REGISTER_NODE(data_collection::DataCollector)

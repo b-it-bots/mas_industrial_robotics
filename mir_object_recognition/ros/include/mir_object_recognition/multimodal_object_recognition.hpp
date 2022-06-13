@@ -80,7 +80,7 @@ struct Object
 };
 typedef std::vector<Object> ObjectInfo;
 
-namespace vivek
+namespace data_collection
 {
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
@@ -309,5 +309,5 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
 };
 
-} // namespace vivek ends
+} // namespace data_collection ends
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H

@@ -146,8 +146,8 @@ target_link_libraries(mmor
   perception_visualization
   scene_segmentation
 )
-rclcpp_components_register_nodes(mmor "vivek::MultiModalObjectRecognitionROS")
-# set(node_plugins "${node_plugins}vivek::MultiModalObjectRecognitionROS;$<TARGET_FILE:mmor>\n")
+rclcpp_components_register_nodes(mmor "data_collection::MultiModalObjectRecognitionROS")
+# set(node_plugins "${node_plugins}data_collection::MultiModalObjectRecognitionROS;$<TARGET_FILE:mmor>\n")
 
 add_library(data_collector SHARED
             ros/src/mmor_data_collector.cpp
@@ -175,7 +175,7 @@ target_link_libraries(data_collector
   perception_visualization
   scene_segmentation
 )
-rclcpp_components_register_nodes(data_collector "vivek::DataCollector")
+rclcpp_components_register_nodes(data_collector "data_collection::DataCollector")
 
 ament_export_include_directories(include)
 # ament_export_interfaces(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)

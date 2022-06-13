@@ -22,13 +22,13 @@ def generate_launch_description():
         composable_node_descriptions=[
             ComposableNode(
                     package="mir_object_recognition",
-                    plugin="vivek::MultiModalObjectRecognitionROS",
+                    plugin="data_collection::MultiModalObjectRecognitionROS",
                     name="mmor",
-                    # namespace="/vivek"
+                    # namespace="/data_collection"
                 ),
             ComposableNode(
                     package="mir_object_recognition",
-                    plugin="vivek::DataCollector",
+                    plugin="data_collection::DataCollector",
                     name="data_collector",
                 )
                 ],
