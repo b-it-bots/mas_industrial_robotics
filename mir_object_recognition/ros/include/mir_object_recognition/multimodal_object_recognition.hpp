@@ -60,13 +60,6 @@ using mpu::visualization::BoundingBoxVisualizer;
 using mpu::visualization::ClusteredPointCloudVisualizer;
 using mpu::visualization::LabelVisualizer;
 using mpu::visualization::Color;
-// TODO:
- //namespace mpu = mir_perception_utils;
- using mpu::visualization::BoundingBoxVisualizer;
- using mpu::visualization::ClusteredPointCloudVisualizer;
- using mpu::visualization::LabelVisualizer;
- using mpu::visualization::Color;
-
 
 struct Object
 {
@@ -218,11 +211,31 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         
         /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
         void recognizeCloudAndImage();
+
+        /** \brief Adjust object pose, make it flat, adjust container, axis and bolt poses.
+         * \param[in] Object_list.pose, .name,
+         * 
+         **/
+        void adjustObjectPose(mas_perception_msgs::msg::ObjectList &object_list);
+
+        /** \brief Publish object_list to object_list merger 
+         * \param[in] Object list to publish
+         **/
+        void publishObjectList(mas_perception_msgs::msg::ObjectList &object_list);
         
+        /** \brief Publish debug info such as bbox, poses, labels for both 2D and 3D objects.
+         * \param[in] combined object list
+         * \param[in] 3D pointcloud cluster from 3D object segmentation
+         * \param[in] 3D pointcloud cluster from 2D bounding box proposal
+         **/
         void publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
                                                 std::vector<PointCloudBSPtr> &clusters_3d,
                                                 std::vector<PointCloudBSPtr> &clusters_2d);
 
+        /** \brief Load qualitative object info
+         * \param[in] Path to the xml object file
+         * */ 
+        void loadObjectInfo(const std::string &filename);
 
     protected:
         // Visualization
@@ -237,6 +250,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // Parameters
         bool debug_mode_;
         std::string target_frame_id_;
+        std::set<std::string> round_objects_;
 
         // Dynamic parameter
         double voxel_leaf_size_;
@@ -278,6 +292,9 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool pad_cluster_;
         int padded_cluster_size_;
 
+        // logdir for saving debug image
+        std::string logdir_;
+
         double octree_resolution_;
         double object_height_above_workspace_;
         double container_height_;
@@ -285,6 +302,9 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // Flags for object recognition
         bool received_recognized_image_list_flag_;
         bool received_recognized_cloud_list_flag_;
+
+        // rgb_object_id used to differentiate 2D and 3D objects
+        int rgb_object_id_;
 
         //Recognized image list
         mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 

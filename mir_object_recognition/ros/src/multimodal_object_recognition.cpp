@@ -666,14 +666,19 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string
     cluster_visualizer_pc_("output/tabletop_cluster_pc"),
     received_recognized_image_list_flag_(false),
     received_recognized_cloud_list_flag_(false),
+    rgb_object_id_(100),
     enable_rgb_recognizer_(true),
-    enable_pc_recognizer_(true)
+    enable_pc_recognizer_(true),
+    rgb_roi_adjustment_(2),
+    rgb_cluster_remove_outliers_(true)
 {
     RCLCPP_INFO(get_logger(), "constructor called");
     this->declare_parameter<std::string>("target_frame_id", "base_link");
     this->get_parameter("target_frame_id", target_frame_id_);
     this->declare_parameter<bool>("debug_mode_", false);
     this->get_parameter("debug_mode_", debug_mode_);
+    this->declare_parameter<std::string>("logdir", "/tmp/");
+    this->get_parameter("logdir", logdir_);
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
 
     MultiModalObjectRecognitionROS::declare_all_parameters();
@@ -872,7 +877,206 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 
         bounding_boxes.bounding_boxes.resize(recognized_image_list_.objects.size());
         rgb_object_list.objects.resize(recognized_image_list_.objects.size());
+
+        for (size_t i = 0; i < recognized_image_list_.objects.size(); i++)
+        {
+            mas_perception_msgs::msg::Object object = recognized_image_list_.objects[i];
+            // Check qualitative info of the object
+            if (round_objects_.count(recognized_image_list_.objects[i].name))
+            {
+                object.shape.shape = object.shape.SPHERE;
+            }
+            else
+            {
+                object.shape.shape = object.shape.OTHER;
+            }
+            // Get ROI
+            sensor_msgs::msg::RegionOfInterest roi_2d = object.roi;
+            const cv::Rect2d rect2d(roi_2d.x_offset, roi_2d.y_offset, roi_2d.width, roi_2d.height);
+
+            if (debug_mode_)
+            {
+                cv::Point pt1;
+                cv::Point pt2;
+
+                pt1.x = roi_2d.x_offset;
+                pt1.y = roi_2d.y_offset;
+                pt2.x = roi_2d.x_offset + roi_2d.width;
+                pt2.y = roi_2d.y_offset + roi_2d.height;
+
+                // draw bbox
+                cv::rectangle(cv_image->image, pt1, pt2, cv::Scalar(0, 255, 0), 1, 8, 0);
+
+                // add label
+                cv::putText(cv_image->image, object.name, cv::Point(pt1.x, pt2.y),
+                            cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(0, 255, 0), 1);
+            }
+
+            // Remove large 2d misdetected bbox (misdetection)
+            double len_diag = sqrt(powf(((roi_2d.width + roi_2d.width) >> 1), 2));
+            if (len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_)
+            {
+                PointCloudBSPtr cloud_roi(new PointCloud);
+                bool getROISuccess = mpu::pointcloud::getPointCloudROI(roi_2d, cloud_, 
+                                                                        cloud_roi,
+                                                                        rgb_roi_adjustment_,
+                                                                        rgb_cluster_remove_outliers_);
+                
+                // ToDo: Filter big objects from 2d proposal, if the height is less than 3 mm
+                // pcl::PointXYZRGB min_pt;
+                // pcl::PointXYZRGB max_pt;
+                // pcl::getMinMax3D(*cloud_roi, min_pt, max_pt);
+                // float obj_height = max_pt.z - scene_segmentation_ros_->getWorkspaceHeight();
+
+                if (getROISuccess)
+                {
+                    sensor_msgs::msg::PointCloud2 ros_pc2;
+                    PCLPointCloud2BSPtr pc2(new pcl::PCLPointCloud2);
+                    pcl::toPCLPointCloud2(*cloud_roi, *pc2);
+                    pcl_conversions::fromPCL(*pc2, ros_pc2);
+                    ros_pc2.header.frame_id = target_frame_id_;
+                    ros_pc2.header.stamp = this->get_clock()->now();
+
+                    clusters_2d.push_back(cloud_roi);
+                    
+                    // Get pose
+                    geometry_msgs::msg::PoseStamped pose;
+                    mpu::object::estimatePose(cloud_roi, pose, object.shape.shape, 
+                                                rgb_cluster_filter_limit_min_, 
+                                                rgb_cluster_filter_limit_max_);
+
+                    // Transform pose
+                    std::string frame_id = cloud_ -> header.frame_id;
+                    pose.header.stamp = this->get_clock()->now();
+                    pose.header.frame_id = frame_id;
+                    if (frame_id != target_frame_id_)
+                    {
+                        mpu::object::transformPose(tf_buffer_, target_frame_id_,
+                                                    pose, rgb_object_list.objects[i].pose);
+                    }
+                    else
+                    {
+                        rgb_object_list.objects[i].pose = pose;
+                    }
+                    rgb_object_list.objects[i].probability = recognized_image_list_.objects[i].probability;
+                    rgb_object_list.objects[i].database_id = rgb_object_id_;
+                    rgb_object_list.objects[i].name = recognized_image_list_.objects[i].name;
+                }
+                else
+                {
+                    RCLCPP_DEBUG(get_logger(), "[RGB] DECOY");
+                    rgb_object_list.objects[i].name = "DECOY";
+                    rgb_object_list.objects[i].database_id = rgb_object_id_;
+                }
+            }
+            else
+            {
+                RCLCPP_DEBUG(get_logger(), "[RGB] DECOY");
+                rgb_object_list.objects[i].name = "DECOY";
+                rgb_object_list.objects[i].database_id = rgb_object_id_;
+            }
+            rgb_object_id_++;
+        }
+        combined_object_list.objects.insert(combined_object_list.objects.end(),
+                    rgb_object_list.objects.begin(),
+                    rgb_object_list.objects.end());
     }
+
+    if (!combined_object_list.objects.empty())
+    {
+        if (enable_roi_)
+        {
+            for (size_t i = 0; i < combined_object_list.objects.size(); i++)
+            {
+                double current_object_pose_x = combined_object_list.objects[i].pose.pose.position.x;
+                if (current_object_pose_x < roi_base_link_to_laser_distance_ ||
+                    current_object_pose_x > roi_max_object_pose_x_to_base_link_)
+                    /* combined_object_list.objects[i].pose.pose.position.z < scene_segmentation_ros_ */
+                    /* ->object_height_above_workspace_ - 0.05) */
+                {
+                    RCLCPP_WARN_STREAM(get_logger(), "This object " << combined_object_list.objects[i].name << " out of RoI");
+                    combined_object_list.objects[i].name = "DECOY";
+                }
+            }
+        }
+        // Adjust RPY to make pose flat, adjust container pose
+        // Adjust Axis and Bolt pose
+        adjustObjectPose(combined_object_list);
+        // Publish object to object list merger
+        publishObjectList(combined_object_list);
+    }
+    else
+    {
+        RCLCPP_WARN(get_logger(), "No object detected to publish");
+        return;
+    }
+
+    if (debug_mode_)
+    {
+        RCLCPP_WARN_STREAM(get_logger(), "Debug mode: publishing object information");
+        publishDebug(combined_object_list, clusters_3d, clusters_2d);
+
+        rclcpp::Time time_now = this->get_clock()->now();
+
+        // save debug image
+        if(recognized_image_list_.objects.size() > 0)
+        {
+            std::string filename = "";
+            filename.append("rgb_debug_");
+            filename.append(std::to_string(time_now.seconds()));
+            mpu::object::saveCVImage(cv_image, logdir_, filename);
+            RCLCPP_INFO_STREAM(get_logger(), "Image:" << filename << " saved to " << logdir_);
+        }
+        else
+        {
+            RCLCPP_WARN_STREAM(get_logger(), "No Objects found. Cannot save debug image...");
+        }
+
+        // Save raw image
+        cv_bridge::CvImagePtr raw_cv_image;
+        if (mpu::object::getCVImage(image_msg_, raw_cv_image))
+        {
+            std::string filename = "";
+            filename = "";
+            filename.append("rgb_raw_");
+            filename.append(std::to_string(time_now.seconds()));
+            mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
+            RCLCPP_INFO_STREAM(get_logger(), "Image:" << filename << " saved to " << logdir_);
+        }
+        else
+        {
+            RCLCPP_ERROR(get_logger(), "Cannot generate cv image...");
+        }
+
+        // Save pointcloud debug
+        for (auto& cluster : clusters_3d)
+        {
+            std::string filename = "";
+            filename = "";
+            filename.append("pcd_cluster_");
+            filename.append(std::to_string(time_now.seconds()));
+            mpu::object::savePcd(cluster, logdir_, filename);
+            RCLCPP_INFO_STREAM(get_logger(), "Point cloud:" << filename << " saved to " << logdir_);
+        }
+    }
+
+}
+
+void MultiModalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::msg::ObjectList &object_list)
+{
+
+}
+
+void MultiModalObjectRecognitionROS::publishObjectList(mas_perception_msgs::msg::ObjectList &object_list)
+{
+
+}
+
+void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
+                                                std::vector<PointCloudBSPtr> &clusters_3d,
+                                                std::vector<PointCloudBSPtr> &clusters_2d)
+{
+
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn

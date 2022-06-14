@@ -205,7 +205,7 @@ void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_
   cv::imwrite(filename.str(), cv_image->image);
 }
 
-bool getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
+bool object::getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
                        cv_bridge::CvImagePtr &cv_image)
 {
     try{

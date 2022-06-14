@@ -93,6 +93,10 @@ namespace mir_perception_utils
         void saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_dir = "/tmp/",
                         std::string obj_name = "unknown");
 
+        /** \brief Convert sensor_msgs/Image to cv_image
+         * \param[in] Sensor_msg/Image
+         * \param[out] cv image output
+        */
         bool getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
                         cv_bridge::CvImagePtr &cv_image);
     }
