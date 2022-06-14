@@ -1069,7 +1069,24 @@ void MultiModalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::msg::
 
 void MultiModalObjectRecognitionROS::publishObjectList(mas_perception_msgs::msg::ObjectList &object_list)
 {
-
+    for (int i = 0; i < object_list.objects.size(); i++)
+    {
+        // Empty cloud
+        sensor_msgs::msg::PointCloud2 empty_ros_cloud;
+        object_list.objects[i].views.resize(1);
+        object_list.objects[i].views[0].point_cloud = empty_ros_cloud;
+        // Rename container to match refbox naming
+        if (object_list.objects[i].name == "BLUE_CONTAINER")
+        {
+            object_list.objects[i].name = "CONTAINER_BOX_BLUE";
+        }
+        else if (object_list.objects[i].name == "RED_CONTAINER")
+        {
+            object_list.objects[i].name = "CONTAINER_BOX_RED";
+        }
+    }
+    // Publish object list to object list merger
+    pub_object_list_ -> publish(object_list);
 }
 
 void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
@@ -1077,6 +1094,14 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
                                                 std::vector<PointCloudBSPtr> &clusters_2d)
 {
 
+}
+
+void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
+{
+    if (std::filesystem::is_regular_file(filename))
+    {
+
+    }
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -1124,6 +1149,9 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 
     sub_recognized_cloud_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
         "recognizer/pc/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1));
+
+    // Pub combined object_list to object_list merger
+    pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 1);
 
     // We return a success and hence invoke the transition to the next
     // step: "inactive".

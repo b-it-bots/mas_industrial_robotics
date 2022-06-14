@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <filesystem>
 #include <memory>
 #include <vector>
 #include <string>
@@ -183,6 +184,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_image_list_;
         std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_cloud_list_;
 
+        // Publisher object lsit
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_object_list_;
 
         // --------------------------- function declarations -----------------------------------
         
