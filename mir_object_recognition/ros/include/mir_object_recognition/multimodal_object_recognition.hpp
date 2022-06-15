@@ -187,6 +187,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // Publisher object lsit
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_object_list_;
 
+        // Publisher pose array (debug_mode only)
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_pc_object_pose_array_;
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_rgb_object_pose_array_;
+
         // --------------------------- function declarations -----------------------------------
         
         void synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image, 
@@ -242,8 +246,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
     protected:
         // Visualization
+        BoundingBoxVisualizer bounding_box_visualizer_pc_;
         ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
         ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+        LabelVisualizer label_visualizer_rgb_;
+        LabelVisualizer label_visualizer_pc_;
 
         // Used to store pointcloud and image received from callback
         std::shared_ptr<sensor_msgs::msg::PointCloud2> pointcloud_msg_;
@@ -298,6 +305,9 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // logdir for saving debug image
         std::string logdir_;
 
+        // rgb_object_id used to differentiate 2D and 3D objects
+        int rgb_object_id_;
+
         double octree_resolution_;
         double object_height_above_workspace_;
         double container_height_;
@@ -305,9 +315,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         // Flags for object recognition
         bool received_recognized_image_list_flag_;
         bool received_recognized_cloud_list_flag_;
-
-        // rgb_object_id used to differentiate 2D and 3D objects
-        int rgb_object_id_;
 
         //Recognized image list
         mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 

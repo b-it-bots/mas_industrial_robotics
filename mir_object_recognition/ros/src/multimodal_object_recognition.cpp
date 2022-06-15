@@ -662,11 +662,15 @@ MultiModalObjectRecognitionROS::parametersCallback(
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string &node_name, bool intra_process_comms) : 
     rclcpp_lifecycle::LifecycleNode(node_name,
                                     rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
+    bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
     cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
     cluster_visualizer_pc_("output/tabletop_cluster_pc"),
+    label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
+    label_visualizer_pc_("output/pc_labels", Color(Color::IVORY)),
+    rgb_object_id_(100),
+    container_height_(0.05),
     received_recognized_image_list_flag_(false),
     received_recognized_cloud_list_flag_(false),
-    rgb_object_id_(100),
     enable_rgb_recognizer_(true),
     enable_pc_recognizer_(true),
     rgb_roi_adjustment_(2),
@@ -1064,12 +1068,65 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 
 void MultiModalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::msg::ObjectList &object_list)
 {
+    for (size_t i = 0; i < object_list.objects.size(); i++)
+    {
+        tf2::Quaternion q(
+            object_list.objects[i].pose.pose.orientation.x,
+            object_list.objects[i].pose.pose.orientation.y,
+            object_list.objects[i].pose.pose.orientation.z,
+            object_list.objects[i].pose.pose.orientation.w);
+        tf2::Matrix3x3 m(q);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+        double change_in_pitch = 0.0;
+        if (round_objects_.count(object_list.objects[i].name))
+        {
+            yaw = 0.0;
+        }
+        // Update container pose
+        if (object_list.objects[i].name == "CONTAINER_BOX_RED" || 
+            object_list.objects[i].name == "CONTAINER_BOX_BLUE")
+        {
+            if (object_list.objects[i].database_id > 100)
+            {
+                RCLCPP_DEBUG_STREAM(get_logger(), "Updating RGB container pose");
+                // mm_object_recognition_utils_->adjustContainerPose(object_list.objects[i], container_height_);
+            }
+        }
+        // Make pose flat
+        tf2::Quaternion q2;
+        q2.setRPY(0.0, change_in_pitch, yaw);
 
+        object_list.objects[i].pose.pose.orientation.x = q2.x();
+        object_list.objects[i].pose.pose.orientation.y = q2.y();
+        object_list.objects[i].pose.pose.orientation.z = q2.z();
+        object_list.objects[i].pose.pose.orientation.w = q2.w();
+
+        // Update workspace height
+        if (scene_segmentation_ros_ -> getWorkspaceHeight() != -1000.0)
+        {
+            object_list.objects[i].pose.pose.position.z = 
+                scene_segmentation_ros_ -> getWorkspaceHeight() + object_height_above_workspace_;
+
+            if (object_list.objects[i].name == "CONTAINER_BOX_RED" || 
+                object_list.objects[i].name == "CONTAINER_BOX_BLUE")
+            {
+                object_list.objects[i].pose.pose.position.z = 
+                    scene_segmentation_ros_ -> getWorkspaceHeight() + container_height_;
+                RCLCPP_WARN_STREAM(get_logger(), "Updated container height: " << object_list.objects[i].pose.pose.position.z);
+            }
+        }
+        // Update axis or bolt pose
+        if (object_list.objects[i].name == "M20_100" || object_list.objects[i].name == "AXIS")
+        {
+            // mm_object_recognition_utils_->adjustAxisBoltPose(object_list.objects[i]);
+        }
+    }
 }
 
 void MultiModalObjectRecognitionROS::publishObjectList(mas_perception_msgs::msg::ObjectList &object_list)
 {
-    for (int i = 0; i < object_list.objects.size(); i++)
+    for (size_t i = 0; i < object_list.objects.size(); i++)
     {
         // Empty cloud
         sensor_msgs::msg::PointCloud2 empty_ros_cloud;
@@ -1093,7 +1150,96 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
                                                 std::vector<PointCloudBSPtr> &clusters_3d,
                                                 std::vector<PointCloudBSPtr> &clusters_2d)
 {
+    RCLCPP_INFO_STREAM(get_logger(), "Cloud list: " << recognized_cloud_list_.objects.size());
+    RCLCPP_INFO_STREAM(get_logger(), "RGB list: " << recognized_image_list_.objects.size());
+    RCLCPP_INFO_STREAM(get_logger(), "Combined object list: "<< combined_object_list.objects.size());
 
+    // Compute normal to generate parallel BBOX to the plane
+    const Eigen::Vector3f normal = scene_segmentation_ros_ -> getPlaneNormal();
+
+    std::string names = "";
+    if (recognized_cloud_list_.objects.size() > 0)
+    {
+        // Bounding boxes
+        if (clusters_3d.size() > 0)
+        {
+            mas_perception_msgs::msg::BoundingBoxList bounding_boxes;
+            cluster_visualizer_pc_.publish(clusters_3d, target_frame_id_);
+            bounding_boxes.bounding_boxes.resize(clusters_3d.size());
+            for (size_t i=0; i < clusters_3d.size(); i++)
+            {
+                mpu::object::BoundingBox bbox;
+                mpu::object::get3DBoundingBox(clusters_3d[i], normal, bbox, bounding_boxes.bounding_boxes[i]);
+            }
+            if (bounding_boxes.bounding_boxes.size() > 0)
+            {
+                bounding_box_visualizer_pc_.publish(bounding_boxes.bounding_boxes, target_frame_id_);
+            }
+        }
+        // PCL Pose array for debug mode only
+        geometry_msgs::msg::PoseArray pcl_object_pose_array;
+        pcl_object_pose_array.header.frame_id = target_frame_id_;
+        pcl_object_pose_array.header.stamp = this->get_clock()->now();
+        pcl_object_pose_array.poses.resize(recognized_cloud_list_.objects.size());
+        std::vector<std::string> pcl_labels;
+        int pcl_count = 0;
+        for (size_t i=0; i < combined_object_list.objects.size(); i++)
+        {
+            if (combined_object_list.objects[i].database_id < 99)
+            {
+                names += combined_object_list.objects[i].name + ", ";
+                pcl_object_pose_array.poses[pcl_count] = combined_object_list.objects[i].pose.pose;
+                pcl_labels.push_back(combined_object_list.objects[i].name);
+                pcl_count++;
+            }
+        }
+        RCLCPP_INFO_STREAM(get_logger(), "[Cloud] Objects: " << names);
+        // Publish pose array
+        if (pcl_object_pose_array.poses.size() > 0)
+        {
+            pub_pc_object_pose_array_ -> publish(pcl_object_pose_array);
+        }
+        // Publish label visualizer
+        if ((pcl_labels.size() == pcl_object_pose_array.poses.size()) &&
+            (pcl_labels.size() > 0) && (pcl_object_pose_array.poses.size() > 0))
+        {
+            label_visualizer_pc_.publish(pcl_labels, pcl_object_pose_array);
+        }
+    }
+    if (clusters_2d.size() > 0)
+    {
+        cluster_visualizer_rgb_.publish(clusters_2d, target_frame_id_);
+        // RGB Pose array for debug mode only
+        geometry_msgs::msg::PoseArray rgb_object_pose_array;
+        rgb_object_pose_array.header.frame_id = target_frame_id_;
+        rgb_object_pose_array.header.stamp = this->get_clock()->now();
+        rgb_object_pose_array.poses.resize(recognized_image_list_.objects.size());
+        std::vector<std::string> rgb_labels;
+        int rgb_count = 0;
+        names = "";
+        for (size_t i = 0; i < combined_object_list.objects.size(); i++)
+        {
+            if (combined_object_list.objects[i].database_id > 99)
+            {
+                names += combined_object_list.objects[i].name + ", ";
+                rgb_object_pose_array.poses[rgb_count] = combined_object_list.objects[i].pose.pose;
+                rgb_labels.push_back(combined_object_list.objects[i].name);
+                rgb_count++;
+            }
+        }
+        RCLCPP_INFO_STREAM(get_logger(), "[RGB] Objects: " << names);
+        // Publish pose array
+        if (rgb_object_pose_array.poses.size() > 0)
+        {
+            pub_rgb_object_pose_array_->publish(rgb_object_pose_array);
+        }
+        // Publish label visualizer
+        if ((rgb_labels.size() == rgb_object_pose_array.poses.size()) &&
+            (rgb_labels.size() > 0) && (rgb_object_pose_array.poses.size() > 0))
+        {
+            label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
+        }
+    }
 }
 
 void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
@@ -1152,6 +1298,10 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 
     // Pub combined object_list to object_list merger
     pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 1);
+
+    // Pub pose array
+    pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/pc_object_pose_array", 10);
+    pub_rgb_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/rgb_object_pose_array", 10);
 
     // We return a success and hence invoke the transition to the next
     // step: "inactive".
