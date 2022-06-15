@@ -702,6 +702,22 @@ void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<s
     this->preprocessPointCloud(pointcloud_msg_);
     scene_segmentation_ros_->addCloudAccumulation(cloud_);
     this->recognizeCloudAndImage();
+
+    // Reset received recognized cloud and image
+    received_recognized_cloud_list_flag_ = false;
+    received_recognized_image_list_flag_ = false;
+
+    // reset object id
+    rgb_object_id_ = 100;
+    scene_segmentation_ros_->resetPclObjectId();
+
+    // clear recognized image and cloud list
+    recognized_image_list_.objects.clear();
+    recognized_cloud_list_.objects.clear();
+
+    scene_segmentation_ros_->resetCloudAccumulation();
+
+    RCLCPP_INFO(get_logger(), "synchro callback complete");
 }
 
 void MultiModalObjectRecognitionROS::recognizedImageCallback(const mas_perception_msgs::msg::ObjectList &msg)
