@@ -7,6 +7,7 @@
 
 #include "pcl/geometry/planar_polygon.h"
 #include "pcl/point_cloud.h"
+#include <pcl/PCLPointCloud2.h>
 #include "pcl/point_types.h"
 #include "pcl/segmentation/planar_region.h"
 
@@ -21,6 +22,7 @@ typedef PointCloud::Ptr PointCloudBSPtr;
 typedef PointCloud::ConstPtr PointCloudConstBSPtr;
 typedef pcl::PointCloud<PointNT> PointCloudN;
 typedef pcl::PointCloud<PointLT> PointCloudL;
+typedef pcl::PCLPointCloud2::Ptr PCLPointCloud2BSPtr;
 
 typedef pcl::PlanarPolygon<PointT> PlanarPolygon;
 typedef std::vector<PlanarPolygon, Eigen::aligned_allocator<PlanarPolygon>> PlanarPolygonVector;
