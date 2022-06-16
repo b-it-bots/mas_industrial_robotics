@@ -119,7 +119,8 @@ ament_target_dependencies(scene_segmentation
 )
 
 add_library(mmor SHARED
-            ros/src/multimodal_object_recognition.cpp)
+            ros/src/multimodal_object_recognition.cpp
+            ros/src/multimodal_object_recognition_utils.cpp)
 
 target_compile_definitions(mmor
             PRIVATE "COMPOSITION_BUILDING_DLL")          
@@ -147,7 +148,8 @@ rclcpp_components_register_nodes(mmor "perception_namespace::MultiModalObjectRec
 
 add_library(data_collector SHARED
             ros/src/mmor_data_collector.cpp
-            ros/src/multimodal_object_recognition.cpp)
+            ros/src/multimodal_object_recognition.cpp
+            ros/src/multimodal_object_recognition_utils.cpp)
 
 target_compile_definitions(data_collector
             PRIVATE "COMPOSITION_BUILDING_DLL")          
