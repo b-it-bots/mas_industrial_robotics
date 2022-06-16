@@ -58,6 +58,7 @@ include_directories(
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${visualization_msgs_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
   ${mir_object_segmentation_INCLUDE_DIRS}
@@ -93,6 +94,7 @@ add_library(perception_visualization
   # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
+
 ament_target_dependencies(perception_visualization 
   tf2_ros
   pcl_ros
@@ -134,7 +136,8 @@ ament_target_dependencies(mmor
   mas_perception_msgs 
   tf2_ros 
   pcl_ros 
-  geometry_msgs 
+  geometry_msgs
+  visualization_msgs
   OpenCV
   cv_bridge
   rclcpp_components
