@@ -170,12 +170,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
     // private:
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> obj_list_pub_;
-        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_pc_object_pose_array_;
-        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_rgb_object_pose_array_;
         
         message_filters::Subscriber<sensor_msgs::msg::Image, rclcpp_lifecycle::LifecycleNode> image_sub_;
         
         message_filters::Subscriber<sensor_msgs::msg::PointCloud2, rclcpp_lifecycle::LifecycleNode> cloud_sub_;
+        
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image,
                 sensor_msgs::msg::PointCloud2> msgSyncPolicy;
         typedef message_filters::Synchronizer<msgSyncPolicy> Sync;
@@ -263,10 +262,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
          * */ 
         void loadObjectInfo(const std::string &filename);
 
-        typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
-        SceneSegmentationROSSPtr scene_segmentation_ros_;
-        mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
-        mas_perception_msgs::msg::ObjectList recognized_image_list_;
+
 
     // protected:
         //visualization
@@ -280,7 +276,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool debug_mode_;
         std::string pointcloud_source_frame_id_;
         std::string target_frame_id_;
-        std::string logdir_;
         std::set<std::string> round_objects_;
         bool data_collection_ = false;
         // std::set<std::string> round_objects_;
