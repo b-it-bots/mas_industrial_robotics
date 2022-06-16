@@ -22,6 +22,8 @@
 extern char key;
 extern const char* msg;
 
+// Adapted from  ROS2 lifecycle demos
+// 
 // Every lifecycle node has various services
 // attached to it. By convention, we use the format of
 // <node name>/<service name>.
@@ -49,7 +51,7 @@ public:
   /**
    * In this function, we send a service request
    * asking for the current state of the node
-   * lc_talker.
+   * lc_talker(default).
    * If it does return within the given time_out,
    * we return the current state of the node, if
    * not, we return an unknown state.
@@ -57,7 +59,8 @@ public:
    * how long we wait for a response before returning
    * unknown state
    */
-  void get_state(std::chrono::seconds time_out);
+
+  bool get_state(std::chrono::seconds time_out);
 
 
   /// Invokes a transition
@@ -76,7 +79,7 @@ public:
    * how long we wait for a response before returning
    * unknown state
    */
-  void change_state(std::uint8_t transition, std::chrono::seconds time_out);
+  bool change_state(std::uint8_t transition, std::chrono::seconds time_out);
  
 private:
   std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::GetState>> client_get_state_;
