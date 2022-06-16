@@ -852,7 +852,7 @@ void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg:
 
 void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 {
-    RCLCPP_INFO(get_logger(),"Khelo Dimaag se");
+    RCLCPP_INFO(get_logger(),"Inside MMOR recognize Cloud And Image function");
     mas_perception_msgs::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
