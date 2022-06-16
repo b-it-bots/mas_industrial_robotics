@@ -97,13 +97,13 @@ ros2 run lifecycle_controller lifecycle_controller --ros-args -p lc_name:=lc_tal
 ```
 * After running the lifecycle_controller we can see the following output as shown below.
 
-<img src="https://github.com/HBRS-SDP/ss22-ros2-perception/blob/rolling-devel/images/lc_cntrl_out.png" >
+<img src="images/lc_cntrl_out.png" >
 
 **Step 4:**
 
 * Using the keyboard inputs, we can control the lifecycle_controller by changing states. The current state is also displayed.
 
-<img src="https://github.com/HBRS-SDP/ss22-ros2-perception/blob/rolling-devel/images/lc_cntrl_state_chng.png" >
+<img src="images/lc_cntrl_state_chng.png" >
 
 * Follow the below steps to perform plane detection:    
     * The mmor node will be in unconfigured state by default.
@@ -115,7 +115,7 @@ ros2 run lifecycle_controller lifecycle_controller --ros-args -p lc_name:=lc_tal
 
 * If a lifecycle node is not available the following error is displayed and node is terminated. Re-run once the lifecycle node is available.
 
-<img src="https://github.com/HBRS-SDP/ss22-ros2-perception/blob/rolling-devel/images/lc_cntrl_out_error.png" >
+<img src="images/lc_cntrl_out_error.png" >
 
 
 **Step 5:**
