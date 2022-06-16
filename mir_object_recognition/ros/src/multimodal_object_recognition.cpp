@@ -678,7 +678,7 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::Nod
     this->get_parameter("target_frame_id", target_frame_id_);
     this->declare_parameter<bool>("debug_mode_", false);
     this->get_parameter("debug_mode_", debug_mode_);
-    this->declare_parameter<std::string>("logdir", "/tmp/");
+    this->declare_parameter<std::string>("logdir", "~/Downloads/");
     this->get_parameter("logdir", logdir_);
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
   
@@ -691,14 +691,18 @@ void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<s
 
     RCLCPP_INFO(get_logger(), "synchro callback");
     RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image->header.stamp.sec, cloud->header.stamp.sec);
-    // sensor_msgs::msg::PointCloud2 transformed_msg;
-    // this->preprocessPointCloud(tf_listener_, tf_buffer_, target_frame_id_, cloud, transformed_msg);
-    this->preprocessPointCloud(cloud);
+    
+    pointcloud_msg_ = cloud;
+    image_msg_ = image;
+
+    // pre-process the pointcloud
+    this->preprocessPointCloud(pointcloud_msg_);
+    scene_segmentation_ros_->addCloudAccumulation(cloud_);
+    this->recognizeCloudAndImage();
 }
 
-bool MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud_msg)
+void MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud_msg)
 {
-    RCLCPP_INFO(get_logger(), "preprocess point cloud");
     sensor_msgs::msg::PointCloud2 msg_transformed;
     msg_transformed.header.frame_id = target_frame_id_;
     if (!mpu::pointcloud::transformPointCloudMsg(tf_buffer_, target_frame_id_, *cloud_msg, msg_transformed))
@@ -707,7 +711,7 @@ bool MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<
         RCLCPP_ERROR(this->get_logger(),"pointcloud_source_frame_id: %s, target_frame_id: %s", pointcloud_source_frame_id_.c_str(), target_frame_id_.c_str());
         RCLCPP_ERROR(this->get_logger(),"pointcloud_source_frame_id may need to be arm_cam3d_camera_color_frame or fixed_camera_link");
         RCLCPP_ERROR(this->get_logger(),"target_frame_id may need to be base_link or base_link_static");
-        return false;
+        return;
     }
     std::shared_ptr<pcl::PCLPointCloud2> pc2 = std::make_shared<pcl::PCLPointCloud2>();
     pcl_conversions::toPCL(msg_transformed, *pc2);
@@ -717,7 +721,6 @@ bool MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<
     pcl::fromPCLPointCloud2(*pc2, *cloud_);
 
     RCLCPP_INFO(get_logger(), "Point cloud transformed.");
-    return true;
 }
 
 void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
@@ -849,11 +852,12 @@ void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg:
 
 void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 {
+    RCLCPP_INFO(get_logger(),"Khelo Dimaag se");
     mas_perception_msgs::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
-
     this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);
+    
 
     if (data_collection_)
     {
