@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>lifecycle_controller</name>
+  <version>0.20.2</version>
+  <description>Package for lifecycle_controller implementation</description>
+
+  <maintainer email="sdp_ss22@hbrs.de">sdp_ss22</maintainer>
+
+
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>lifecycle_msgs</build_depend>
+  <build_depend>rclcpp_lifecycle</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <exec_depend>rclcpp_lifecycle</exec_depend>
+  <exec_depend>lifecycle_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

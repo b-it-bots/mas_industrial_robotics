@@ -28,8 +28,8 @@ LifecycleController::LifecycleController(const std::string & node_name)
 : Node(node_name)
 {
 	// defualt lifecycle_node_name = lc_talker.
-	this->declare_parameter<std::string>("lifecycle_node_name", "mmor");
-	this->get_parameter("lifecycle_node_name", lifecycle_node);
+	this->declare_parameter<std::string>("lc_name", "mmor");
+	this->get_parameter("lc_name", lifecycle_node);
 	node_get_state_topic = lifecycle_node + "/get_state"; 
 	node_change_state_topic = lifecycle_node + "/change_state";  
   
@@ -47,7 +47,7 @@ void LifecycleController::init()
 
 
  
-void LifecycleController::get_state(std::chrono::seconds time_out = 3s)
+bool LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 {
 	auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
     
@@ -56,7 +56,12 @@ void LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 	get_logger(),
 	"Service %s is not available.",
 	client_get_state_->get_service_name());
+		
+	RCLCPP_ERROR(
+	get_logger(), "Waited for 3 sec,  failed to get current state for node %s", lifecycle_node.c_str());
+
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+	return false;
 	
 	}
 
@@ -71,7 +76,11 @@ void LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 	if (future_status != std::future_status::ready) {
 	RCLCPP_ERROR(
 	get_logger(), "Server time out while getting current state for node %s", lifecycle_node.c_str());
+	RCLCPP_ERROR(
+	get_logger(), "Waited for 3 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+	return false;
+	
 	}
 
 	// We have an succesful answer. So let's print the current state.
@@ -80,25 +89,23 @@ void LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 	get_logger(), "Node %s has current state %s.",
 	lifecycle_node.c_str(), future_result.get()->current_state.label.c_str());
 	//return future_result.get()->current_state.id;
+	return true;
 	} else {
 	RCLCPP_ERROR(
-	get_logger(), "Failed to get current state for node %s", lifecycle_node.c_str());
+	get_logger(), "Waited for 3 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
+	return false;
 	}
 }
 
 
-void LifecycleController::change_state(std::uint8_t transition, std::chrono::seconds time_out = 3s)
+bool LifecycleController::change_state(std::uint8_t transition, std::chrono::seconds time_out = 3s)
 {
 	auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
 	request->transition.id = transition;
 
 	if (!client_change_state_->wait_for_service(time_out)) {
-	RCLCPP_ERROR(
-	get_logger(),
-	"Service %s is not available.",
-	client_change_state_->get_service_name());
-	//return false;
+		return false;
 	}
 
 	// We send the request with the transition we want to invoke.
@@ -109,20 +116,19 @@ void LifecycleController::change_state(std::uint8_t transition, std::chrono::sec
 	auto future_status = wait_for_result(future_result, time_out);
 
 	if (future_status != std::future_status::ready) {
-	RCLCPP_ERROR(
-	get_logger(), "Server time out while getting current state for node %s", lifecycle_node.c_str());
-	//return false;
+	
+		return false;
 	}
 
 	// We have an answer, let's print our success.
 	if (future_result.get()->success) {
 	RCLCPP_INFO(
 	get_logger(), "Transition %d successfully triggered.", static_cast<int>(transition));
-	//return true;
+	return true;
 	} else {
 	RCLCPP_ERROR(
 	get_logger(), "Failed to trigger transition %u", static_cast<unsigned int>(transition));
-	//return false;
+	return false;
 	}
 }
 
@@ -161,7 +167,7 @@ int getch(void)
 }
 
 
-const char* msg = R"(
+const char* display = R"(
 Reading from the keyboard and changing states!
 ########################################################################
 Key | Current State --> Via (Intermediate state) --> Destination State
@@ -175,8 +181,6 @@ D:  | ACTIVE       -->  Configuring   --> INACTIVE
 X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
 
 ########################################################################
-
-Note: Press T to terminate and ctrl + c to exit.
 )";
 
 
@@ -189,18 +193,20 @@ Note: Press T to terminate and ctrl + c to exit.
 void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 {
 
-	std::cout<<msg<<std::endl;
-	lifecycle_controller->get_state();
-	while(rclcpp::ok()){
+	std::cout<<display<<std::endl;
+	int lc_state = lifecycle_controller->get_state();
+	
+	while(lc_state){
+    std::cout<<"Enter the key or press T to terminate and exit :"<<std::endl;
 	key = getch();
 
-
+    
 	if (key == 'C'){
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"configure"<<std::endl;
-	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-	lifecycle_controller->get_state();
+	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+	lc_state=lifecycle_controller->get_state();
 	}
 
 
@@ -209,16 +215,16 @@ void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"activate"<<std::endl;
-	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
-	lifecycle_controller->get_state();
+	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+	lc_state=lifecycle_controller->get_state();
 	}
 	// deactivate
 	if (key == 'D'){
 	//time_between_state_changes.sleep();
 
 	std::cout<<"deactivate"<<std::endl;
-	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-	lifecycle_controller->get_state();
+	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+	lc_state=lifecycle_controller->get_state();
 
 
 	}
@@ -228,8 +234,8 @@ void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"cleanup"<<std::endl;  
-	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
-	lifecycle_controller->get_state();
+	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+	lc_state=lifecycle_controller->get_state();
 	
 
 	}
@@ -238,9 +244,9 @@ void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 	//time_between_state_changes.sleep();
 
 	std::cout<<"inactive shutdown"<<std::endl;  
-	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
-	lifecycle_controller->get_state();
-	std::cout<<"Press T to terminate"<<std::endl;  
+	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
+	lc_state=lifecycle_controller->get_state();
+	
 	
 
 	}
@@ -249,10 +255,9 @@ void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 	//time_between_state_changes.sleep();
 	
 	std::cout<<"active shutdown"<<std::endl;  
-	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
-	lifecycle_controller->get_state();
-	std::cout<<"Press T to terminate"<<std::endl;  
-
+	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
+	lc_state=lifecycle_controller->get_state();
+	
 	
 
 	}
@@ -265,9 +270,9 @@ void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 	//time_between_state_changes.sleep();
 
 	std::cout<<"unconfig shutdown"<<std::endl;
-	lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
-	lifecycle_controller->get_state();
-	std::cout<<"Press T to terminate"<<std::endl;  
+	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+	lc_state=lifecycle_controller->get_state();
+	 
 
 	
 	}
@@ -279,7 +284,8 @@ void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 
 	}
 
-	std::cout<<"Press Cntr+C to exit"<<std::endl;
+	std::cout<<"Exiting the node"<<std::endl;
+	rclcpp::shutdown();
 
 }
 
