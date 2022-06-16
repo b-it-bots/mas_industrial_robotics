@@ -88,12 +88,12 @@ ros2 launch mir_object_recognition multimodal_object_recognition.launch.py
 * Run the lifecycle_controller in terminal 3 using the command below.
 
 ```
-ros2 run mir_object_recognition lifecycle_controller 
+ros2 run lifecycle_controller lifecycle_controller 
 ```
 * lifecycle_controller is by default set to work with multimodal_object_recognition (mmor) node.
 * If you want to configure it for a different node:
 ```
-ros2 run mir_object_recognition lifecycle_controller --ros-args -p lifecycle_node_name:=node_name
+ros2 run lifecycle_controller lifecycle_controller --ros-args -p lc_name:=lc_talker
 ```
 * After running the lifecycle_controller we can see the following output as shown below.
 
@@ -113,7 +113,7 @@ ros2 run mir_object_recognition lifecycle_controller --ros-args -p lifecycle_nod
     * The detected plane is published to the topic `output/debug_cloud_plane`.
     * To terminate the mmor ndoe, enter `X` which will shut down the node.
 
-* If a lifecycle node is not available the following error is displayed. Kill the node and re-run once the lifecycle node is available.
+* If a lifecycle node is not available the following error is displayed and node is terminated. Re-run once the lifecycle node is available.
 
 <img src="https://github.com/HBRS-SDP/ss22-ros2-perception/blob/rolling-devel/images/lc_cntrl_out_error.png" >
 
