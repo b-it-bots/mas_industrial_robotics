@@ -167,7 +167,7 @@ int getch(void)
 }
 
 
-const char* msg = R"(
+const char* display = R"(
 Reading from the keyboard and changing states!
 ########################################################################
 Key | Current State --> Via (Intermediate state) --> Destination State
@@ -181,8 +181,6 @@ D:  | ACTIVE       -->  Configuring   --> INACTIVE
 X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
 
 ########################################################################
-
-Note: Press T to terminate and exit.
 )";
 
 
@@ -195,7 +193,7 @@ Note: Press T to terminate and exit.
 void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 {
 
-	std::cout<<msg<<std::endl;
+	std::cout<<display<<std::endl;
 	int lc_state = lifecycle_controller->get_state();
 	
 	while(lc_state){

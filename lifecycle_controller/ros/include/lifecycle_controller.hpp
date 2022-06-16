@@ -20,7 +20,7 @@
 
 
 extern char key;
-extern const char* msg;
+extern const char* display;
 
 // Adapted from  ROS2 lifecycle demos
 // 
