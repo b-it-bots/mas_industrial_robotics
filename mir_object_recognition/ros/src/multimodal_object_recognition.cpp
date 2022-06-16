@@ -1,7 +1,7 @@
-#include <std_msgs/msg/float64.hpp>
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
-#include "mir_perception_utils/pointcloud_utils_ros.hpp"
 
+namespace perception_namespace
+{
 void MultiModalObjectRecognitionROS::declare_all_parameters()
 {
 
@@ -424,7 +424,8 @@ MultiModalObjectRecognitionROS::parametersCallback(
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
     result.reason = "success";
-    RCLCPP_INFO(this->get_logger(), "Hello from callabck");
+
+    RCLCPP_INFO(this->get_logger(), "Hello from callback");
 
     for (const auto &param : parameters)
     {
@@ -659,29 +660,31 @@ MultiModalObjectRecognitionROS::parametersCallback(
     return result;
 }
 
-MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string &node_name, bool intra_process_comms) : 
-    rclcpp_lifecycle::LifecycleNode(node_name,
-                                    rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
-    bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
-    cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
-    cluster_visualizer_pc_("output/tabletop_cluster_pc"),
-    label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
-    label_visualizer_pc_("output/pc_labels", Color(Color::IVORY)),
-    rgb_object_id_(100),
-    container_height_(0.05),
-    received_recognized_image_list_flag_(false),
-    received_recognized_cloud_list_flag_(false),
-    enable_rgb_recognizer_(true),
-    enable_pc_recognizer_(true),
-    rgb_roi_adjustment_(2),
-    rgb_cluster_remove_outliers_(true)
+MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options) : 
+                    rclcpp_lifecycle::LifecycleNode("mmor_node",options),
+// MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const std::string &node_name, bool intra_process_comms) : 
+//                     rclcpp_lifecycle::LifecycleNode(node_name,
+//                     rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms)),
+                    bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
+                    cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
+                    cluster_visualizer_pc_("output/tabletop_cluster_pc"),
+                    label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
+                    label_visualizer_pc_("output/pc_labels", Color(Color::IVORY)),
+                    rgb_object_id_(100),
+                    container_height_(0.05),
+                    received_recognized_image_list_flag_(false),
+                    received_recognized_cloud_list_flag_(false),
+                    enable_rgb_recognizer_(true),
+                    enable_pc_recognizer_(true),
+                    rgb_roi_adjustment_(2),
+                    rgb_cluster_remove_outliers_(true)
 {
     RCLCPP_INFO(get_logger(), "constructor called");
     this->declare_parameter<std::string>("target_frame_id", "base_link");
     this->get_parameter("target_frame_id", target_frame_id_);
     this->declare_parameter<bool>("debug_mode_", false);
     this->get_parameter("debug_mode_", debug_mode_);
-    this->declare_parameter<std::string>("logdir", "/tmp/");
+    this->declare_parameter<std::string>("logdir", "~/Downloads/");
     this->get_parameter("logdir", logdir_);
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
 
@@ -694,7 +697,7 @@ void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<s
 
     RCLCPP_INFO(get_logger(), "synchro callback");
     RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image->header.stamp.sec, cloud->header.stamp.sec);
-
+    
     pointcloud_msg_ = cloud;
     image_msg_ = image;
 
@@ -746,10 +749,12 @@ void MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<
     msg_transformed.header.frame_id = target_frame_id_;
     if (!mpu::pointcloud::transformPointCloudMsg(tf_buffer_, target_frame_id_, *cloud_msg, msg_transformed))
     {
-        RCLCPP_ERROR(get_logger(), "Failed to transform point cloud");
+        RCLCPP_ERROR(this->get_logger(),"Unable to transform pointcloud. Are you sure target_frame_id_ and pointcloud_source_frame_id are set correctly?");
+        RCLCPP_ERROR(this->get_logger(),"pointcloud_source_frame_id: %s, target_frame_id: %s", pointcloud_source_frame_id_.c_str(), target_frame_id_.c_str());
+        RCLCPP_ERROR(this->get_logger(),"pointcloud_source_frame_id may need to be arm_cam3d_camera_color_frame or fixed_camera_link");
+        RCLCPP_ERROR(this->get_logger(),"target_frame_id may need to be base_link or base_link_static");
         return;
     }
-
     std::shared_ptr<pcl::PCLPointCloud2> pc2 = std::make_shared<pcl::PCLPointCloud2>();
     pcl_conversions::toPCL(msg_transformed, *pc2);
     pc2->header.frame_id = msg_transformed.header.frame_id;
@@ -759,7 +764,7 @@ void MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<
 
     RCLCPP_INFO(get_logger(), "Point cloud transformed.");
 }
-
+  
 void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg::ObjectList &object_list,
                                                        std::vector<PointCloudBSPtr> &clusters,
                                                        std::vector<mpu::object::BoundingBox> boxes)
@@ -1162,6 +1167,7 @@ void MultiModalObjectRecognitionROS::publishObjectList(mas_perception_msgs::msg:
     pub_object_list_ -> publish(object_list);
 }
 
+
 void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
                                                 std::vector<PointCloudBSPtr> &clusters_3d,
                                                 std::vector<PointCloudBSPtr> &clusters_2d)
@@ -1282,7 +1288,9 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 
     image_sub_.subscribe(this, "input_image_topic");
     cloud_sub_.subscribe(this, "input_cloud_topic");
-    publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud", 10);
+    publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",10);
+    pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/pc_object_pose_array", 10);
+    pub_rgb_object_pose_array_  = this->create_publisher<geometry_msgs::msg::PoseArray>("output/rgb_object_pose_array", 10);
 
     // msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
     msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
@@ -1421,30 +1429,36 @@ MultiModalObjectRecognitionROS::on_shutdown(const rclcpp_lifecycle::State &state
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
 
+} //end of namespace
+
+
 /**
  * A lifecycle node has the same node API
  * as a regular node. This means we can spawn a
  * node, give it a name and add it to the executor.
  */
-int main(int argc, char *argv[])
-{
-    // force flush of the stdout buffer.
-    // this ensures a correct sync of all prints
-    // even when executed simultaneously within the launch file.
-    setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+// int main(int argc, char *argv[])
+// {
+//     // force flush of the stdout buffer.
+//     // this ensures a correct sync of all prints
+//     // even when executed simultaneously within the launch file.
+//     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
-    rclcpp::init(argc, argv);
+//     rclcpp::init(argc, argv);
 
-    rclcpp::executors::SingleThreadedExecutor exe;
+//     rclcpp::executors::SingleThreadedExecutor exe;
 
-    std::shared_ptr<MultiModalObjectRecognitionROS> mmor_lc_node =
-        std::make_shared<MultiModalObjectRecognitionROS>("multimodal_object_recognition", false);
+//     std::shared_ptr<MultiModalObjectRecognitionROS> mmor_lc_node =
+//         std::make_shared<MultiModalObjectRecognitionROS>("multimodal_object_recognition", false);
 
-    exe.add_node(mmor_lc_node->get_node_base_interface());
+//     exe.add_node(mmor_lc_node->get_node_base_interface());
 
-    exe.spin();
+//     exe.spin();
 
-    rclcpp::shutdown();
+//     rclcpp::shutdown();
 
-    return 0;
-}
+//     return 0;
+// }
+
+
+RCLCPP_COMPONENTS_REGISTER_NODE(perception_namespace::MultiModalObjectRecognitionROS)

@@ -19,6 +19,7 @@
 #include "mas_perception_msgs/msg/object_list.hpp"
 #include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/bounding_box.hpp"
+#include "helpers.hpp"
 
 namespace mir_perception_utils
 {
@@ -78,12 +79,8 @@ namespace mir_perception_utils
         void convertBboxToMsg(const BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
 
-        /** \brief Save pointcloud
-         * \param[in] logdir (default="/tmp")
-         * \param[in] obj_name (default="unknown")
-         * */
-        void savePcd(const PointCloudConstBSPtr &pointcloud, std::string log_dir = "/tmp/",
-                    std::string obj_name = "unknown");
+        void savePcd(const PointCloudConstBSPtr &pointcloud,
+            std::string log_dir, std::string obj_name = "unknown");
 
         /** \brief Save debug image if debug_mode is enabled
          * \param[in] image with boundix boxes of objects drawn
@@ -99,6 +96,7 @@ namespace mir_perception_utils
         */
         bool getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
                         cv_bridge::CvImagePtr &cv_image);
+        
     }
 }
 

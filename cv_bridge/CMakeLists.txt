@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+	cmake_minimum_required(VERSION 3.14)
 project(cv_bridge)
 
 find_package(ament_cmake_ros REQUIRED)
