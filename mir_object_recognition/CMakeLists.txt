@@ -71,12 +71,6 @@ include_directories(SYSTEM
 )
 
 
-add_executable(lifecycle_controller ros/src/lifecycle_controller.cpp)
-target_link_libraries(lifecycle_controller
-  ${rclcpp_lifecycle_LIBRARIES}
-  ${std_msgs_LIBRARIES}
-)
-ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 add_library(perception_visualization
   common/src/bounding_box.cpp
@@ -189,12 +183,10 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS
-  lifecycle_controller
   mmor
   data_collector
 
   EXPORT export_mmor
-  EXPORT export_lifecycle_controller
   EXPORT export_data_collector
 
   ARCHIVE DESTINATION lib
@@ -202,7 +194,6 @@ install(TARGETS
   RUNTIME DESTINATION bin)
 
 install(TARGETS
-  lifecycle_controller
   mmor
   data_collector
 
