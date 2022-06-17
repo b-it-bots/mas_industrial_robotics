@@ -19,7 +19,7 @@ public:
         std::vector<PointCloudBSPtr> clusters_3d;
         std::vector<mpu::object::BoundingBox> boxes;
 
-        this->MultiModalObjectRecognitionROS::segmentPointCloud(cloud_object_list, clusters_3d, boxes);
+        this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);
 
             std::string filename;
             for (auto& cluster : clusters_3d)

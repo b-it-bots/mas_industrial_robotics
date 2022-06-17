@@ -796,6 +796,7 @@ void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg:
 
 void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 {
+    RCLCPP_INFO(get_logger(),"Inside mmor node recognize cloud image function");
     mas_perception_msgs::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
