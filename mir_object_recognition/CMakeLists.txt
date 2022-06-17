@@ -91,6 +91,7 @@ add_library(perception_visualization
   ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
+  ros/src/multimodal_object_recognition_utils.cpp
   # ros/src/mir_object_segmentation/laserscan_segmentation.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
@@ -122,7 +123,8 @@ ament_target_dependencies(scene_segmentation
 
 add_library(mmor SHARED
             ros/src/multimodal_object_recognition.cpp
-            ros/src/multimodal_object_recognition_utils.cpp)
+            ros/src/multimodal_object_recognition_parameters.cpp
+            )
 
 target_compile_definitions(mmor
             PRIVATE "COMPOSITION_BUILDING_DLL")          
@@ -151,7 +153,8 @@ rclcpp_components_register_nodes(mmor "perception_namespace::MultiModalObjectRec
 add_library(data_collector SHARED
             ros/src/mmor_data_collector.cpp
             ros/src/multimodal_object_recognition.cpp
-            ros/src/multimodal_object_recognition_utils.cpp)
+            ros/src/multimodal_object_recognition_parameters.cpp
+            )
 
 target_compile_definitions(data_collector
             PRIVATE "COMPOSITION_BUILDING_DLL")          
