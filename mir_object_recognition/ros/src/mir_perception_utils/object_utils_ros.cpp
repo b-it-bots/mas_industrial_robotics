@@ -206,8 +206,8 @@ void object::saveCVImage(const cv_bridge::CvImagePtr &cv_image, std::string log_
 }
 
 bool object::getCVImage(const std::shared_ptr<const sensor_msgs::msg::Image> &image,
-                        cv_bridge::CvImagePtr &cv_image)
-                        
+                       cv_bridge::CvImagePtr &cv_image)
+
 {
     try{
         cv_image = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);

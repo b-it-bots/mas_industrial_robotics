@@ -59,6 +59,7 @@ include_directories(
   ${message_filters_INCLUDE_DIRS}
   ${pcl_ros_INCLUDE_DIRS}
   ${geometry_msgs_INCLUDE_DIRS}
+  ${visualization_msgs_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
   ${YAML_INCLUDE_DIRS}
@@ -73,12 +74,6 @@ include_directories(SYSTEM
 )
 
 
-add_executable(lifecycle_controller ros/src/lifecycle_controller.cpp)
-target_link_libraries(lifecycle_controller
-  ${rclcpp_lifecycle_LIBRARIES}
-  ${std_msgs_LIBRARIES}
-)
-ament_target_dependencies(lifecycle_controller rclcpp std_msgs)
 
 add_library(perception_visualization
   common/src/bounding_box.cpp
@@ -96,6 +91,7 @@ add_library(perception_visualization
   # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
+
 ament_target_dependencies(perception_visualization 
   tf2_ros
   pcl_ros
@@ -139,7 +135,8 @@ ament_target_dependencies(mmor
   mas_perception_msgs 
   tf2_ros 
   pcl_ros 
-  geometry_msgs 
+  geometry_msgs
+  visualization_msgs
   OpenCV
   cv_bridge
   rclcpp_components
@@ -196,12 +193,10 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS
-  lifecycle_controller
   mmor
   data_collector
 
   EXPORT export_mmor
-  EXPORT export_lifecycle_controller
   EXPORT export_data_collector
 
   ARCHIVE DESTINATION lib
@@ -209,7 +204,6 @@ install(TARGETS
   RUNTIME DESTINATION bin)
 
 install(TARGETS
-  lifecycle_controller
   mmor
   data_collector
 
