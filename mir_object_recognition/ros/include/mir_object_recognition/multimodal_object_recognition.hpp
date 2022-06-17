@@ -13,6 +13,7 @@
 #include <thread>
 #include <utility>
 #include <Eigen/Dense>
+#include <yaml-cpp/yaml.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/publisher.hpp"
@@ -221,6 +222,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                                                 std::vector<PointCloudBSPtr> &clusters_3d,
                                                 std::vector<PointCloudBSPtr> &clusters_2d);
 
+        void loadObjectInfo(const std::string &filename);
+        
         typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
         SceneSegmentationROSSPtr scene_segmentation_ros_;
         mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
@@ -240,10 +243,17 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::string target_frame_id_;
         std::string logdir_;
         bool data_collection_ = false;
-        // std::set<std::string> round_objects_;
-        // typedef std::vector<Object> ObjectInfo;
-        // ObjectInfo object_info_;
-        // std::string object_info_path_;
+        std::set<std::string> round_objects_;
+        
+        struct Object
+        {
+            std::string name;
+            std::string shape;
+            std::string color;
+        };
+        typedef std::vector<Object> ObjectInfo;
+        ObjectInfo object_info_;
+        std::string object_info_path_;
 
         // Used to store pointcloud and image received from callback
         std::shared_ptr<sensor_msgs::msg::PointCloud2> pointcloud_msg_;

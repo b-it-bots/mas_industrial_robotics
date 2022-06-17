@@ -426,7 +426,7 @@ MultiModalObjectRecognitionROS::parametersCallback(
     result.successful = true;
     result.reason = "success";
     RCLCPP_INFO(this->get_logger(), "Hello from callback");
-        
+    
     for (const auto &param : parameters)
     {
         RCLCPP_INFO(this->get_logger(), "%s", param.get_name().c_str());
@@ -683,6 +683,7 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::Nod
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
   
     MultiModalObjectRecognitionROS::declare_all_parameters();
+    object_info_path_ = "mir_object_recognition/ros/config/objects.yaml";
 }
 
 void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image,
@@ -885,6 +886,36 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
     }
 }
 
+void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
+{
+    RCLCPP_INFO(get_logger(), "Into my function!");
+    YAML::Node config = YAML::LoadFile(filename);
+    mas_perception_msgs::msg::Object object1;
+    if (config["object_info"])
+    {
+        for (unsigned j = 0; j < config[0]["object"].size(); ++j)
+        {
+            Object f;
+            f.name = config[0]["object"][j]["name"].as<std::string>();
+            f.shape = config[0]["object"][j]["shape"].as<std::string>();
+            f.color = config[0]["object"][j]["color"].as<std::string>();
+            RCLCPP_INFO(get_logger(), "%s %s %s", f.name.c_str(), f.shape.c_str(), f.color.c_str());
+            if (f.shape == object1.shape.SPHERE)
+            {
+                round_objects_.insert(f.name);
+            }
+            object_info_.push_back(f);
+        }
+        
+        RCLCPP_INFO(get_logger(), "Object info is loaded!");
+    }
+    else
+    {
+        RCLCPP_WARN(get_logger(), "No object info is provided!");
+        return;
+    }    
+}
+
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 {
@@ -915,6 +946,7 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
         std::bind(&MultiModalObjectRecognitionROS::parametersCallback, this, std::placeholders::_1));
 
     MultiModalObjectRecognitionROS::get_all_parameters();
+    MultiModalObjectRecognitionROS::loadObjectInfo(object_info_path_);
 
     // publish workspace height
     pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", 1);

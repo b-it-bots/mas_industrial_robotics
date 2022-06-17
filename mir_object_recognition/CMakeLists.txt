@@ -36,6 +36,7 @@ find_package(OpenCV 4 REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 
 find_package(PCL 1.10 REQUIRED)
@@ -60,6 +61,7 @@ include_directories(
   ${geometry_msgs_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
+  ${YAML_INCLUDE_DIRS}
   ${mir_object_segmentation_INCLUDE_DIRS}
   ${mir_perception_utils_INCLUDE_DIRS}
   ${CMAKE_INSTALL_PREFIX}/../cv_bridge/include
