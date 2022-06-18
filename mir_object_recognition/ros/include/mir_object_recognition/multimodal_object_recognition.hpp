@@ -199,9 +199,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ImageList>> pub_image_to_recognizer_;
 
         // Subscriber for clouds and images recognizer
-        // rclcpp::CallbackGroup::SharedPtr recognized_callback_group_;
-        // rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>::SharedPtr sub_recognized_image_list_;
-        // rclcpp::Subscription<mas_perception_msgs::msg::ImageList>::SharedPtr sub_recognized_cloud_list_;
         std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_image_list_;
         std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_cloud_list_;
 
@@ -238,7 +235,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                         std::vector<mpu::object::BoundingBox> boxes);
         
         /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
-        void recognizeCloudAndImage();
+        virtual void recognizeCloudAndImage();
 
         /** \brief Adjust object pose, make it flat, adjust container, axis and bolt poses.
          * \param[in] Object_list.pose, .name,

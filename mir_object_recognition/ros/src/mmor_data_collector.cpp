@@ -26,7 +26,7 @@ public:
             {
                 RCLCPP_INFO(get_logger(),"Should be saving pointcloud");
                 filename = "";
-                filename.append("pcd_cluster_.png");
+                filename.append("pcd_cluster_");
                 // filename.append(std::to_string(cluster -> header.timestamp)); // get the proper format for the timestamp
                 mpu::object::savePcd(cluster, logdir_, filename);
                 // ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m" << logdir_);
@@ -37,7 +37,7 @@ public:
             {
                 RCLCPP_INFO(get_logger(),"Should be saving RGB Image");
                 std::string filename = "";
-                filename.append("rgb_raw_.png");
+                filename.append("rgb_raw_");
                 // filename.append(std::to_string(raw_cv_image->header.timestamp)); // get the proper format for the timestamp
                 mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
                 // ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);

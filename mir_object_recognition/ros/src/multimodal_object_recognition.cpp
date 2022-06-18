@@ -684,7 +684,7 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::Nod
     this->get_parameter("target_frame_id", target_frame_id_);
     this->declare_parameter<bool>("debug_mode_", false);
     this->get_parameter("debug_mode_", debug_mode_);
-    this->declare_parameter<std::string>("logdir", "~/Downloads/");
+    this->declare_parameter<std::string>("logdir", "/tmp/");
     this->get_parameter("logdir", logdir_);
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
 
