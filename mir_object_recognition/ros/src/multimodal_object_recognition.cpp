@@ -865,7 +865,7 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
         {
             loop_rate_count += 1;
             // not sure this will give same result as intended
-            rclcpp::spin_some(this->get_node_base_interface());
+            // rclcpp::spin_some(this->get_node_base_interface());
             loop_rate.sleep();
             if (received_recognized_image_list_flag_ == true)
             {
@@ -1315,12 +1315,14 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     pub_image_to_recognizer_ = this->create_publisher<mas_perception_msgs::msg::ImageList>("recognizer/rgb/input/images", 1);
 
     // Subscribe to cloud and rgb recognition topics
-    recognized_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+    auto recognized_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+    auto recognized_sub_options = rclcpp::SubscriptionOptions();
+    recognized_sub_options.callback_group = recognized_callback_group_;
     sub_recognized_image_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
-        "recognizer/rgb/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1),recognized_callback_group_);
+        "recognizer/rgb/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1),recognized_sub_options);
 
     sub_recognized_cloud_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
-        "recognizer/pc/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1),recognized_callback_group_);
+        "recognizer/pc/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1),recognized_sub_options);
 
     // Pub combined object_list to object_list merger
     pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 1);

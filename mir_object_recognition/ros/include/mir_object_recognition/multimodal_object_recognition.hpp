@@ -199,11 +199,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ImageList>> pub_image_to_recognizer_;
 
         // Subscriber for clouds and images recognizer
-        rclcpp::CallbackGroup::SharedPtr recognized_callback_group_;
-        rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>::SharedPtr sub_recognized_image_list_;
-        rclcpp::Subscription<mas_perception_msgs::msg::ImageList>::SharedPtr sub_recognized_cloud_list_;
-        // std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_image_list_;
-        // std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_cloud_list_;
+        // rclcpp::CallbackGroup::SharedPtr recognized_callback_group_;
+        // rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>::SharedPtr sub_recognized_image_list_;
+        // rclcpp::Subscription<mas_perception_msgs::msg::ImageList>::SharedPtr sub_recognized_cloud_list_;
+        std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_image_list_;
+        std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_cloud_list_;
 
         // Publisher object lsit
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_object_list_;
