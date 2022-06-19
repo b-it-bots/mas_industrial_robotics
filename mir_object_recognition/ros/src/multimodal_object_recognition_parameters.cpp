@@ -425,12 +425,10 @@ MultiModalObjectRecognitionROS::parametersCallback(
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
     result.reason = "success";
-    RCLCPP_INFO(this->get_logger(), "Hello from callback");
     
     for (const auto &param : parameters)
     {
-        RCLCPP_INFO(this->get_logger(), "%s", param.get_name().c_str());
-        RCLCPP_INFO(this->get_logger(), "%s", param.value_to_string().c_str());
+        RCLCPP_INFO(this->get_logger(), "Value of param %s changed to %s", param.get_name().c_str(), param.value_to_string().c_str());
         if (param.get_name() == "voxel_leaf_size")
         {
             this->voxel_leaf_size_ = param.get_value<double>();
