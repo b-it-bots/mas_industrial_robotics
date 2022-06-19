@@ -607,13 +607,13 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
     }
 }
 
-void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
-{
-    if (std::filesystem::is_regular_file(filename))
-    {
+// void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
+// {
+//     if (std::filesystem::is_regular_file(filename))
+//     {
 
-    }
-}
+//     }
+// }
 
 void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
 {

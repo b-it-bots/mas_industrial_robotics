@@ -275,7 +275,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool debug_mode_;
         std::string pointcloud_source_frame_id_;
         std::string target_frame_id_;
-        std::set<std::string> round_objects_;
+        // std::set<std::string> round_objects_;
         bool data_collection_ = false;
         std::set<std::string> round_objects_;
         

@@ -666,4 +666,4 @@ MultiModalObjectRecognitionROS::parametersCallback(
 
 
 
-RCLCPP_COMPONENTS_REGISTER_NODE(perception_namespace::MultiModalObjectRecognitionROS)
+// RCLCPP_COMPONENTS_REGISTER_NODE(perception_namespace::MultiModalObjectRecognitionROS)
