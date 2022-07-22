@@ -124,7 +124,7 @@ On workstation or your PC
 
   .. code-block:: bash
 
-      roslaunch mir_2dnav 2Dnav.launch
+      roslaunch mir_2dnav 2dnav.launch
 
 * Create navigation goals and orientations
 
@@ -150,7 +150,7 @@ On workstation or your PC
 
       roscd mcr_default_env_config
       cd brsu-C025
-      rosrun mcr_navigation_tools save_map_poses_to_file
+      rosrun mcr_navigation_tools save_base_map_poses_to_file
 
 * Test navigation goal using move_base
 
