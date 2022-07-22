@@ -104,11 +104,15 @@ First of all you have to clone the repository.
 
     mkdir ~/temp
     cd ~/temp
-    git clone git@github.com:b-it-bots/mas_industrial_robotics.git
+    git clone --branch noetic git@github.com:b-it-bots/mas_industrial_robotics.git
 
 Navigate into the cloned repository and run setup.sh file.
 
      ./setup.sh --ros_install <full|base> --ros_distro <melodic|kinetic|noetic> --ws_dir <$HOME/catkin_ws> --docker 0
+
+Example:
+
+     ./setup.sh --ros_install full --ros_distro noetic --ws_dir $HOME/catkin_ws --docker 0
 
 **Note:** In case you are using the docker images, please pay attention to the mounted directory path in the container. All the above paths should be relative to your mounted folder inside the docker container and not your local file system.
 
