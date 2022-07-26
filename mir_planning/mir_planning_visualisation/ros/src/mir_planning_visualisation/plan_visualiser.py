@@ -4,7 +4,7 @@ import rospy
 import yaml
 from mir_planning_msgs.msg import PlanActionResult
 from mir_planning_visualisation.utils import Utils
-
+import itertools
 
 class PlanVisualiser(object):
     """
@@ -98,4 +98,6 @@ class PlanVisualiser(object):
             self._set_markers_for_complete_plan(kb_markers, kb_data)
 
         # flatten the list of markers
-        return sum(kb_markers, [])
+        flattened_kb_markers = list(itertools.chain.from_iterable(kb_markers))
+        return(flattened_kb_markers)
+        # return sum(kb_markers, [])

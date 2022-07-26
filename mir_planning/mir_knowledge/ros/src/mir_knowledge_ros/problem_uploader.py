@@ -32,6 +32,8 @@ KnowledgeUpdateServiceArray.
 """
 
 from __future__ import print_function
+from os import curdir
+import string
 
 import mercury_planner.pddl as pddl  # for parsing pddl file
 import rospy
@@ -68,6 +70,7 @@ class ProblemUploader(object):
             self._instances
         )
         success_1 = ProblemUploader.update_kb_array(instance_ki_list, Req.ADD_KNOWLEDGE)
+        
 
         fact_ki_list = ProblemUploader.get_fact_knowledge_item_list(self._facts)
         success_2 = ProblemUploader.update_kb_array(fact_ki_list, Req.ADD_KNOWLEDGE)
@@ -174,9 +177,11 @@ class ProblemUploader(object):
         curr_list = []
         obj_dict = {}
         while len(objects) > 0:
-            string = objects.pop(0).encode("utf-8")
+            # string = objects.pop(0).encode("utf-8")
+            string = objects.pop(0)
             if string == "-":
-                type_name = objects.pop(0).encode("utf-8")
+                # type_name = objects.pop(0).encode("utf-8")
+                type_name = objects.pop(0)
                 obj_dict[type_name] = curr_list
                 curr_list = list()
             else:
@@ -203,13 +208,16 @@ class ProblemUploader(object):
         """
         facts = []
         for fact in pddl_facts[1:]:
-            attr_name = fact[0].encode("utf-8")
+            # attr_name = fact[0].encode("utf-8")
+            attr_name = fact[0]
             if attr_name not in self._attr_to_obj_type or len(fact) - 1 != len(
                 self._attr_to_obj_type[attr_name]
             ):
                 continue
             kv_list = [
-                (key, value.encode("utf-8"))
+                (key, value)
+                # (key, value.encode("utf-8"))
+
                 for key, value in zip(self._attr_to_obj_type[attr_name], fact[1:])
             ]
             facts.append((attr_name, kv_list))
