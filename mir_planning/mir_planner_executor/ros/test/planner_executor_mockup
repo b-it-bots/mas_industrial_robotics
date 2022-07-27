@@ -84,7 +84,7 @@ class PlannerExecutorMockup(object):
             if param.key != "next_action":
                 print(param.key, ":", param.value)
         plan_result = GenericExecuteResult()
-        success = raw_input("Succeed? (y|n)[y]? ")
+        success = input("Succeed? (y|n)[y]? ")
         if success in ["", "y", "Y"]:
             self._action_servers[action_server_index].set_succeeded(plan_result)
         else:
