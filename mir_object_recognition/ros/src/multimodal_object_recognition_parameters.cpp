@@ -499,15 +499,15 @@ MultiModalObjectRecognitionROS::parametersCallback(
         }
         if (param.get_name() == "sac_x_axis")
         {
-            this->sac_x_axis_ = param.get_value<bool>();
+            this->sac_x_axis_ = param.get_value<double>();
         }
         if (param.get_name() == "sac_y_axis")
         {
-            this->sac_y_axis_ = param.get_value<bool>();
+            this->sac_y_axis_ = param.get_value<double>();
         }
         if (param.get_name() == "sac_z_axis")
         {
-            this->sac_z_axis_ = param.get_value<bool>();
+            this->sac_z_axis_ = param.get_value<double>();
         }
         if (param.get_name() == "sac_eps_angle")
         {
@@ -531,7 +531,7 @@ MultiModalObjectRecognitionROS::parametersCallback(
         }
         if (param.get_name() == "outlier_min_neighbors")
         {
-            this->outlier_min_neighbors_ = param.get_value<double>();
+            this->outlier_min_neighbors_ = param.get_value<int>();
         }
         if (param.get_name() == "cluster_tolerance")
         {

@@ -31,7 +31,7 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::Nod
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
 
     MultiModalObjectRecognitionROS::declare_all_parameters();
-    object_info_path_ = "mir_object_recognition/ros/config/objects.yaml";
+    object_info_path_ = "src/mir_object_recognition/ros/config/objects.yaml";
 }
 
 void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image,
@@ -607,43 +607,35 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
     }
 }
 
-// void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
-// {
-//     if (std::filesystem::is_regular_file(filename))
-//     {
-
-//     }
-// }
-
 void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
 {
     RCLCPP_INFO(get_logger(), "Into my function!");
-    YAML::Node config;
-    // config = YAML::LoadFile(filename);
-    // mas_perception_msgs::msg::Object object1;
-    // if (config["object_info"])
-    // {
-    //     for (unsigned j = 0; j < config[0]["object"].size(); ++j)
-    //     {
-    //         Object f;
-    //         f.name = config[0]["object"][j]["name"].as<std::string>();
-    //         f.shape = config[0]["object"][j]["shape"].as<std::string>();
-    //         f.color = config[0]["object"][j]["color"].as<std::string>();
-    //         RCLCPP_INFO(get_logger(), "%s %s %s", f.name.c_str(), f.shape.c_str(), f.color.c_str());
-    //         if (f.shape == object1.shape.SPHERE)
-    //         {
-    //             round_objects_.insert(f.name);
-    //         }
-    //         object_info_.push_back(f);
-    //     }
+    YAML::Node config = YAML::LoadFile(filename);
+    RCLCPP_INFO(get_logger(), "File loaded !");
+    mas_perception_msgs::msg::Object object1;
+    if (config["object_info"])
+    {
+        for (unsigned j = 0; j < config["object_info"]["object"].size(); ++j)
+        {
+            Object f;
+            f.name = config["object_info"]["object"][j]["name"].as<std::string>();
+            f.shape = config["object_info"]["object"][j]["shape"].as<std::string>();
+            f.color = config["object_info"]["object"][j]["color"].as<std::string>();
+            RCLCPP_INFO(get_logger(), "%s || %s || %s", f.name.c_str(), f.shape.c_str(), f.color.c_str());
+            if (f.shape == object1.shape.SPHERE)
+            {
+                round_objects_.insert(f.name);
+                RCLCPP_INFO(get_logger(), "Round object detected !");
+            }
+            object_info_.push_back(f);
+        }
         
-    //     RCLCPP_INFO(get_logger(), "Object info is loaded!");
-    // }
-    // else
-    // {
-    //     RCLCPP_WARN(get_logger(), "No object info is provided!");
-    //     return;
-    // }    
+        RCLCPP_INFO(get_logger(), "Object info is loaded!");
+    }
+    else
+    {
+        RCLCPP_WARN(get_logger(), "No object info is provided!");
+    }    
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
