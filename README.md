@@ -59,6 +59,10 @@ source install/local_setup.bash
 ```
 sudo apt install ros-rolling-rqt-reconfigure
 ```
+### Install yaml-cpp-vendor for reading yaml files
+```
+sudo apt install ros-rolling-yaml-cpp-vendor*
+```
 
 ## Steps to run
 
