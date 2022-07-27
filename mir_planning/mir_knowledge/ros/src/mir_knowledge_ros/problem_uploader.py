@@ -177,10 +177,8 @@ class ProblemUploader(object):
         curr_list = []
         obj_dict = {}
         while len(objects) > 0:
-            # string = objects.pop(0).encode("utf-8")
             string = objects.pop(0)
             if string == "-":
-                # type_name = objects.pop(0).encode("utf-8")
                 type_name = objects.pop(0)
                 obj_dict[type_name] = curr_list
                 curr_list = list()
@@ -208,7 +206,6 @@ class ProblemUploader(object):
         """
         facts = []
         for fact in pddl_facts[1:]:
-            # attr_name = fact[0].encode("utf-8")
             attr_name = fact[0]
             if attr_name not in self._attr_to_obj_type or len(fact) - 1 != len(
                 self._attr_to_obj_type[attr_name]
@@ -216,7 +213,6 @@ class ProblemUploader(object):
                 continue
             kv_list = [
                 (key, value)
-                # (key, value.encode("utf-8"))
 
                 for key, value in zip(self._attr_to_obj_type[attr_name], fact[1:])
             ]
