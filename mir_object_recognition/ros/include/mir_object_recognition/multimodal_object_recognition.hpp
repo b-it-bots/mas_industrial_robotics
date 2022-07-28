@@ -14,6 +14,7 @@
 #include <thread>
 #include <utility>
 #include <Eigen/Dense>
+#include <yaml-cpp/yaml.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/publisher.hpp"
@@ -262,8 +263,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
          * */ 
         void loadObjectInfo(const std::string &filename);
 
-
-
     // protected:
         //visualization
         BoundingBoxVisualizer bounding_box_visualizer_pc_;
@@ -276,12 +275,19 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool debug_mode_;
         std::string pointcloud_source_frame_id_;
         std::string target_frame_id_;
-        std::set<std::string> round_objects_;
-        bool data_collection_ = false;
         // std::set<std::string> round_objects_;
-        // typedef std::vector<Object> ObjectInfo;
-        // ObjectInfo object_info_;
-        // std::string object_info_path_;
+        bool data_collection_ = false;
+        std::set<std::string> round_objects_;
+        
+        struct Object
+        {
+            std::string name;
+            std::string shape;
+            std::string color;
+        };
+        typedef std::vector<Object> ObjectInfo;
+        ObjectInfo object_info_;
+        std::string object_info_path_;
 
 
         // Used to store pointcloud and image received from callback
