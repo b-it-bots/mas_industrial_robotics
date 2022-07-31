@@ -47,7 +47,7 @@ void object::estimatePose(const BoundingBox &box, geometry_msgs::msg::PoseStampe
         n1 = (vertices[3] - vertices[0]) / (vertices[3] - vertices[0]).norm();
     }
     n2 = n3.cross(n1);
-    RCLCPP_INFO(rclcpp::get_logger("mir_perception_utils_logger"), "got norms");
+    // RCLCPP_INFO(rclcpp::get_logger("mir_perception_utils_logger"), "got norms");
     Eigen::Matrix3f m;
     m << n1, n2, n3;
     Eigen::Quaternion<float> q(m);

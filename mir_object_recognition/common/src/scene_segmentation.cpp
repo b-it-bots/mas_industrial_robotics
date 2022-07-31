@@ -16,8 +16,8 @@ SceneSegmentation::SceneSegmentation() : use_omp_(false)
   normal_estimation_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
   normal_estimation_omp_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
 }
-SceneSegmentation::~SceneSegmentation(){
-
+SceneSegmentation::~SceneSegmentation()
+{
 }
 
 PointCloudBSPtr SceneSegmentation::segmentScene(const PointCloudConstBSPtr &cloud,
@@ -34,7 +34,8 @@ PointCloudBSPtr SceneSegmentation::segmentScene(const PointCloudConstBSPtr &clou
 
   filtered = findPlane(cloud, hull, plane, coefficients, workspace_height);
 
-  if (coefficients->values.size() == 0) {
+  if (coefficients->values.size() == 0)
+  {
     return filtered;
   }
 
@@ -50,7 +51,8 @@ PointCloudBSPtr SceneSegmentation::segmentScene(const PointCloudConstBSPtr &clou
   const Eigen::Vector3f normal(coefficients->values[0], coefficients->values[1],
                                coefficients->values[2]);
 
-  for (size_t i = 0; i < clusters_indices.size(); i++) {
+  for (size_t i = 0; i < clusters_indices.size(); i++)
+  {
     const pcl::PointIndices &cluster_indices = clusters_indices[i];
     PointCloudBSPtr cluster(new PointCloud);
     pcl::copyPointCloud(*cloud, cluster_indices, *cluster);
@@ -74,15 +76,24 @@ PointCloudBSPtr SceneSegmentation::findPlane(const PointCloudConstBSPtr &cloud,
   voxel_grid_.setInputCloud(cloud);
   voxel_grid_.filter(*filtered);
 
-  if (enable_passthrough_filter_) {
-    pass_through_.setInputCloud(filtered);
-    pass_through_.filter(*filtered);
+  if (enable_passthrough_filter_)
+  {
+    // pass_through_.setInputCloud(filtered);
+    // pass_through_.filter(*filtered);
+
+    // using cropbox filter to include filters in XYZ
+
+    crop_box_.setInputCloud(filtered);
+    crop_box_.filter(*filtered);
   }
 
-  if (use_omp_) {
+  if (use_omp_)
+  {
     normal_estimation_omp_.setInputCloud(filtered);
     normal_estimation_omp_.compute(*normals);
-  } else {
+  }
+  else
+  {
     normal_estimation_.setInputCloud(filtered);
     normal_estimation_.compute(*normals);
   }
@@ -96,7 +107,8 @@ PointCloudBSPtr SceneSegmentation::findPlane(const PointCloudConstBSPtr &cloud,
   sac_.setInputNormals(normals);
   sac_.segment(*inliers, *coefficients);
 
-  if (inliers->indices.size() == 0) {
+  if (inliers->indices.size() == 0)
+  {
     std::cout << "No plane inliers found " << std::endl;
     return filtered;
   }
@@ -111,12 +123,14 @@ PointCloudBSPtr SceneSegmentation::findPlane(const PointCloudConstBSPtr &cloud,
   convex_hull_.setInputCloud(plane);
   convex_hull_.reconstruct(*hull);
 
-  // determine workspace height based on the mean of z axis 
+  // determine workspace height based on the mean of z axis
   double z = 0.0;
-  for (size_t i = 0; i < hull->points.size(); i++) {
+  for (size_t i = 0; i < hull->points.size(); i++)
+  {
     z += hull->points[i].z;
   }
-  if (hull->points.size() > 0) {
+  if (hull->points.size() > 0)
+  {
     z /= hull->points.size();
   }
   workspace_height = z;
@@ -135,27 +149,40 @@ void SceneSegmentation::setVoxelGridParams(double leaf_size, const std::string &
 }
 
 void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter,
-                                             const std::string &field_name, 
+                                             const std::string &field_name,
                                              double limit_min,
                                              double limit_max,
-                                             const std::string &field_y, 
+                                             const std::string &field_y,
                                              double limit_y_min,
-                                             double limit_y_max)
+                                             double limit_y_max,
+                                             const std::string &field_z,
+                                             double limit_z_min,
+                                             double limit_z_max)
 {
   enable_passthrough_filter_ = enable_passthrough_filter;
-  pass_through_.setFilterFieldName(field_name);
-  pass_through_.setFilterLimits(limit_min, limit_max);
-  pass_through_.setFilterFieldName(field_y);
-  pass_through_.setFilterLimits(limit_y_min, limit_y_max);
+  // pass_through_.setFilterFieldName(field_name);
+  // pass_through_.setFilterLimits(limit_min, limit_max);
+  // pass_through_.setFilterFieldName(field_y);
+  // pass_through_.setFilterLimits(limit_y_min, limit_y_max);
+  // pass_through_.setFilterFieldName(field_z);
+  // pass_through_.setFilterLimits(limit_z_min, limit_z_max);
+
+  // using cropbox filter to include filters in XYZ
+  
+  crop_box_.setMin(Eigen::Vector4f(limit_min, limit_y_min, limit_z_min, 1.0));
+  crop_box_.setMax(Eigen::Vector4f(limit_max, limit_y_max, limit_z_max, 1.0));
 }
 
 void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int num_cores)
 {
   use_omp_ = use_omp;
-  if (use_omp_) {
+  if (use_omp_)
+  {
     normal_estimation_omp_.setRadiusSearch(radius_search);
     normal_estimation_omp_.setNumberOfThreads(num_cores);
-  } else {
+  }
+  else
+  {
     normal_estimation_.setRadiusSearch(radius_search);
   }
 }
@@ -189,7 +216,7 @@ void SceneSegmentation::setClusterParams(double cluster_tolerance, int cluster_m
   cluster_extraction_.setMinClusterSize(cluster_min_size);
   cluster_extraction_.setMaxClusterSize(cluster_max_size);
 
-  //unused parameters: To supress the warning 
+  // unused parameters: To supress the warning
   (void)cluster_min_height;
   (void)cluster_max_height;
   (void)max_length;

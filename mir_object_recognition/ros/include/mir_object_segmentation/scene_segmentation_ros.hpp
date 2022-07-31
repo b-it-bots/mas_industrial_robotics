@@ -130,7 +130,10 @@ public:
                             double passthrough_filter_limit_max,
                             std::string passthrough_filter_field_y,
                             double passthrough_filter_limit_y_min,
-                            double passthrough_filter_limit_y_max);
+                            double passthrough_filter_limit_y_max,
+                            std::string passthrough_filter_field_z,
+                            double passthrough_filter_limit_z_min,
+                            double passthrough_filter_limit_z_max);
 
   /** \brief Set Normal param using radius
    * \param[in] Radius search

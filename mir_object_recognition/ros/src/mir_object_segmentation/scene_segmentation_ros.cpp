@@ -125,7 +125,10 @@ void SceneSegmentationROS::setPassthroughParams(bool enable_passthrough_filter,
                                                 double passthrough_filter_limit_max,
                                                 std::string passthrough_filter_field_y,
                                                 double passthrough_filter_limit_y_min,
-                                                double passthrough_filter_limit_y_max)
+                                                double passthrough_filter_limit_y_max,
+                                                std::string passthrough_filter_field_z,
+                                                double passthrough_filter_limit_z_min,
+                                                double passthrough_filter_limit_z_max)
 {
   scene_segmentation_->setPassthroughParams(
       enable_passthrough_filter, 
@@ -134,7 +137,10 @@ void SceneSegmentationROS::setPassthroughParams(bool enable_passthrough_filter,
       passthrough_filter_limit_max,
       passthrough_filter_field_y,
       passthrough_filter_limit_y_min,
-      passthrough_filter_limit_y_max);
+      passthrough_filter_limit_y_max,
+      passthrough_filter_field_z,
+      passthrough_filter_limit_z_min,
+      passthrough_filter_limit_z_max);
 }
 
 void SceneSegmentationROS::setNormalParams(double normal_radius_search, bool use_omp, int num_cores)
