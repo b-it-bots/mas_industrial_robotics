@@ -36,27 +36,19 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     descriptor5.description = "Enable passthrough filter";
     this->declare_parameter("enable_passthrough_filter", false, descriptor5);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor6;
-    descriptor6.description = "The field name used for filtering";
-    this->declare_parameter("passthrough_filter_field_name", "x", descriptor6);
-
     rcl_interfaces::msg::ParameterDescriptor descriptor7;
     descriptor7.description = "The minimum allowed field value a point will be considered from";
     rcl_interfaces::msg::FloatingPointRange range7;
     range7.set__from_value(-10.0).set__to_value(10.0);
     descriptor7.floating_point_range = {range7};
-    this->declare_parameter("passthrough_filter_limit_min", 0.0, descriptor7);
+    this->declare_parameter("passthrough_filter_x_limit_min", 0.0, descriptor7);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor8;
     descriptor8.description = "The maximum allowed field value a point will be considered from";
     rcl_interfaces::msg::FloatingPointRange range8;
     range8.set__from_value(-10.0).set__to_value(10.0);
     descriptor8.floating_point_range = {range8};
-    this->declare_parameter("passthrough_filter_limit_max", 0.8, descriptor8);
-
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_field_y;
-    descr_passthrough_filter_field_y.description = "The field name used for filtering";
-    this->declare_parameter("passthrough_filter_field_y", "y", descr_passthrough_filter_field_y);
+    this->declare_parameter("passthrough_filter_x_limit_max", 0.8, descriptor8);
 
     rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_y_lim_min;
     descr_passthrough_filter_y_lim_min.description = "The minimum allowed field value a point will be considered from";
@@ -72,10 +64,6 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     descr_passthrough_filter_y_lim_max.floating_point_range = {range_passthrough_filter_y_lim_max};
     this->declare_parameter("passthrough_filter_y_limit_max", 0.8, descr_passthrough_filter_y_lim_max);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_field_z;
-    descr_passthrough_filter_field_y.description = "The field name used for filtering";
-    this->declare_parameter("passthrough_filter_field_z", "z", descr_passthrough_filter_field_z);
-
     rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_z_lim_min;
     descr_passthrough_filter_z_lim_min.description = "The minimum allowed field value a point will be considered from";
     rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_z_lim_min;
@@ -88,7 +76,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_z_lim_max;
     range_passthrough_filter_z_lim_max.set__from_value(-10.0).set__to_value(10.0);
     descr_passthrough_filter_z_lim_max.floating_point_range = {range_passthrough_filter_z_lim_max};
-    this->declare_parameter("passthrough_filter_z_limit_max", 0.2, descr_passthrough_filter_z_lim_max);
+    this->declare_parameter("passthrough_filter_z_limit_max", 0.6, descr_passthrough_filter_z_lim_max);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -367,13 +355,10 @@ void MultiModalObjectRecognitionROS::get_all_parameters()
     this->get_parameter("voxel_filter_limit_min", voxel_filter_limit_min_);
     this->get_parameter("voxel_filter_limit_max", voxel_filter_limit_max_);
     this->get_parameter("enable_passthrough_filter", enable_passthrough_filter_);
-    this->get_parameter("passthrough_filter_field_name", passthrough_filter_field_name_);
-    this->get_parameter("passthrough_filter_limit_min", passthrough_filter_limit_min_);
-    this->get_parameter("passthrough_filter_limit_max", passthrough_filter_limit_max_);
-    this->get_parameter("passthrough_filter_field_y", passthrough_filter_field_y_);
+    this->get_parameter("passthrough_filter_x_limit_min", passthrough_filter_x_limit_min_);
+    this->get_parameter("passthrough_filter_x_limit_max", passthrough_filter_x_limit_max_);
     this->get_parameter("passthrough_filter_y_limit_min", passthrough_filter_y_limit_min_);
     this->get_parameter("passthrough_filter_y_limit_max", passthrough_filter_y_limit_max_);
-    this->get_parameter("passthrough_filter_field_z", passthrough_filter_field_z_);
     this->get_parameter("passthrough_filter_z_limit_min", passthrough_filter_z_limit_min_);
     this->get_parameter("passthrough_filter_z_limit_max", passthrough_filter_z_limit_max_);
     this->get_parameter("normal_radius_search", normal_radius_search_);
@@ -420,13 +405,10 @@ void MultiModalObjectRecognitionROS::get_all_parameters()
     scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
         voxel_filter_limit_min_, voxel_filter_limit_max_);
     scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
-        passthrough_filter_field_name_, 
-        passthrough_filter_limit_min_,
-        passthrough_filter_limit_max_,
-        passthrough_filter_field_y_,
+        passthrough_filter_x_limit_min_,
+        passthrough_filter_x_limit_max_,
         passthrough_filter_y_limit_min_,
         passthrough_filter_y_limit_max_,
-        passthrough_filter_field_z_,
         passthrough_filter_z_limit_min_,
         passthrough_filter_z_limit_max_);
     scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
@@ -473,21 +455,13 @@ MultiModalObjectRecognitionROS::parametersCallback(
         {
             this->enable_passthrough_filter_ = param.get_value<bool>();
         }
-        if (param.get_name() == "passthrough_filter_field_name")
+        if (param.get_name() == "passthrough_filter_x_limit_min")
         {
-            this->passthrough_filter_field_name_ = param.get_value<std::string>();
+            this->passthrough_filter_x_limit_min_ = param.get_value<double>();
         }
-        if (param.get_name() == "passthrough_filter_limit_min")
+        if (param.get_name() == "passthrough_filter_x_limit_max")
         {
-            this->passthrough_filter_limit_min_ = param.get_value<double>();
-        }
-        if (param.get_name() == "passthrough_filter_limit_max")
-        {
-            this->passthrough_filter_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "passthrough_filter_field_y")
-        {
-            this->passthrough_filter_field_y_ = param.get_value<std::string>();
+            this->passthrough_filter_x_limit_max_ = param.get_value<double>();
         }
         if (param.get_name() == "passthrough_filter_y_limit_min")
         {
@@ -496,10 +470,6 @@ MultiModalObjectRecognitionROS::parametersCallback(
         if (param.get_name() == "passthrough_filter_y_limit_max")
         {
             this->passthrough_filter_y_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "passthrough_filter_field_z")
-        {
-            this->passthrough_filter_field_z_ = param.get_value<std::string>();
         }
         if (param.get_name() == "passthrough_filter_z_limit_min")
         {
@@ -674,13 +644,10 @@ MultiModalObjectRecognitionROS::parametersCallback(
     scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
         voxel_filter_limit_min_, voxel_filter_limit_max_);
     scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
-        passthrough_filter_field_name_, 
-        passthrough_filter_limit_min_,
-        passthrough_filter_limit_max_,
-        passthrough_filter_field_y_,
+        passthrough_filter_x_limit_min_,
+        passthrough_filter_x_limit_max_,
         passthrough_filter_y_limit_min_,
         passthrough_filter_y_limit_max_,
-        passthrough_filter_field_z_,
         passthrough_filter_z_limit_min_,
         passthrough_filter_z_limit_max_);
     scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);

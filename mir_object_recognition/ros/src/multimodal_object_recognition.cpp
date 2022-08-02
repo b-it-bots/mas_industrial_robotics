@@ -147,16 +147,32 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
     mas_perception_msgs::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
+    
+    // Object detection and bounding box generation
 
     this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);
-
 
     if (!cloud_object_list.objects.empty() && enable_rgb_recognizer_)
     {
         // publish the recognized objects
         RCLCPP_INFO_STREAM(get_logger(), "Publishing clouds for recognition");
         pub_cloud_to_recognizer_->publish(cloud_object_list);
-        test_pub_pose_->publish(cloud_object_list.objects[0].pose);
+
+        if (debug_mode_)
+        {
+            test_pub_pose_->publish(cloud_object_list.objects[0].pose);
+
+            // convert the bouinding boxes into ros message
+            mas_perception_msgs::msg::BoundingBoxList bounding_box_list;
+            bounding_box_list.bounding_boxes.resize(boxes.size());
+            // loop through boxes
+            for (size_t i = 0; i < boxes.size(); i++)
+            {
+                convertBoundingBox(boxes[i], bounding_box_list.bounding_boxes[i]);
+            }
+
+            bounding_box_visualizer_pc_.publish(bounding_box_list.bounding_boxes, target_frame_id_);
+        }
     }
 
     // commenting the rest of the code for now to test object detection
@@ -171,7 +187,11 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
         RCLCPP_INFO_STREAM(get_logger(), "Publishing images for recognition");
         pub_image_to_recognizer_->publish(image_list);
     }
+
+    // Object recognition
+
     RCLCPP_INFO_STREAM(get_logger(), "Waiting for message from Cloud and Image recognizer");
+    
     // loop till it received the message from the 3d and rgb recognition
     int loop_rate_hz = 30;
     int timeout_wait = 2; // secs

@@ -149,13 +149,10 @@ void SceneSegmentation::setVoxelGridParams(double leaf_size, const std::string &
 }
 
 void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter,
-                                             const std::string &field_name,
-                                             double limit_min,
-                                             double limit_max,
-                                             const std::string &field_y,
+                                             double limit_x_min,
+                                             double limit_x_max,
                                              double limit_y_min,
                                              double limit_y_max,
-                                             const std::string &field_z,
                                              double limit_z_min,
                                              double limit_z_max)
 {
@@ -169,8 +166,8 @@ void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter,
 
   // using cropbox filter to include filters in XYZ
   
-  crop_box_.setMin(Eigen::Vector4f(limit_min, limit_y_min, limit_z_min, 1.0));
-  crop_box_.setMax(Eigen::Vector4f(limit_max, limit_y_max, limit_z_max, 1.0));
+  crop_box_.setMin(Eigen::Vector4f(limit_x_min, limit_y_min, limit_z_min, 1.0));
+  crop_box_.setMax(Eigen::Vector4f(limit_x_max, limit_y_max, limit_z_max, 1.0));
 }
 
 void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int num_cores)

@@ -305,13 +305,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double voxel_filter_limit_min_;
         double voxel_filter_limit_max_;
         bool enable_passthrough_filter_;
-        std::string passthrough_filter_field_name_;
-        double passthrough_filter_limit_min_;
-        double passthrough_filter_limit_max_;
-        std::string passthrough_filter_field_y_;
+        double passthrough_filter_x_limit_min_;
+        double passthrough_filter_x_limit_max_;
         double passthrough_filter_y_limit_min_;
         double passthrough_filter_y_limit_max_;
-        std::string passthrough_filter_field_z_;
         double passthrough_filter_z_limit_min_;
         double passthrough_filter_z_limit_max_;
         double normal_radius_search_;
