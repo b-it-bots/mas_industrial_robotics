@@ -17,9 +17,6 @@ find_package(catkin REQUIRED
 find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
 find_package(OpenCV REQUIRED)
-#find_package(Boost REQUIRED python)
-#message(STATUS "opencv version ${OpenCV_VERSION}")
-#find_package(OpenCV REQUIRED COMPONENTS core imgcodecs videoio)
 
 catkin_package(
   INCLUDE_DIRS
@@ -89,3 +86,4 @@ install(
     ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
+
