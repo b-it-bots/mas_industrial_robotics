@@ -203,4 +203,3 @@ Bring up the robot and its basic components
         roslaunch mir_2dnav 2dnav.launch nav_mode:=dwa
 
 Click on the menu bar "File -> Open Config", navigate to "~/noetic/src/mas_industrial_robotics" and select the "youbot.rviz" file.
-

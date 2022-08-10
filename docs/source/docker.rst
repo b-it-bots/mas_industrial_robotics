@@ -128,4 +128,3 @@ You can create your own image by using b-it-bots image as base:
 
   # add your modification e.g. install tensorflow
   RUN pip install tensorflow
-
