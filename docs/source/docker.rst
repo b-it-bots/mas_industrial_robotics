@@ -39,48 +39,48 @@ Where `ros_distro` corresponds to the ros distribution i.e. `kinetic, melodic`.
 The main github branch of the each ros distro should always reflect `latest` 
 tag in the github registry, for example `kinetic` branch reflects 
 `mas_industrial_robotics/industrial-kinetic:latest`, while the `devel` branch
-always reflects `devel` tag, for example `kinetic` branch reflects  `mas_industrial_robotics/industrial-kinetic:devel`
+always reflects `devel` tag, for example `mas_industrial_robotics/industrial-kinetic:devel`.
 
-* **Start the container**
+.. _docker_cpu:
 
-  To start the container, `docker-compose <https://docs.docker.com/compose/install/>`_ 
-  is required, with which it is easier to define the environment and volumes from 
-  the host PC to the container. 
+Running the image with CPU only
+-------------------------------
 
-  .. code-block:: bash
-    
-    docker-compose -f start-container.yaml up industrial_<ros_distro>
+To start the container, `docker-compose <https://docs.docker.com/compose/install/>`_ 
+is required, with which it is easier to define the environment and volumes from 
+the host PC to the container. 
 
-  If there is no local image, docker will automatically pull from MIR github 
-  container registry. 
+Start the container
+^^^^^^^^^^^^^^^^^^^
 
-  The images can also be pulled manually without docker-compose.
+.. code-block:: bash
+  
+  docker-compose -f start-container.yaml up industrial_<ros_distro>
 
-  .. code-block:: bash
+If there is no local image, docker will automatically pull from MIR github 
+container registry. 
 
-    #kinetic image
-    docker pull  ghcr.io/b-it-bots/mas_industrial_robotics/industrial-kinetic:latest
+The images can also be pulled manually without docker-compose.
 
-    #melodic image
-    docker pull ghcr.io/b-it-bots/mas_industrial_robotics/industrial-melodic:latest
+.. code-block:: bash
 
-* **Log in to the container**
+  #kinetic image
+  docker pull  ghcr.io/b-it-bots/mas_industrial_robotics/industrial-kinetic:latest
 
-  .. code-block:: bash
-    
-    docker exec -it mas_industrial_robotics_industrial_kinetic_1 /bin/bash
+  #melodic image
+  docker pull ghcr.io/b-it-bots/mas_industrial_robotics/industrial-melodic:latest
 
-.. tip::
+Log in to the container
+^^^^^^^^^^^^^^^^^^^^^^^
 
-  The container is set up to use `host` network, and therefore when you run 
-  roscore or ros packages in either host or container, and both will have access 
-  to ros communication infrastructure such as topics and services.
-
+.. code-block:: bash
+  
+  docker exec -it mas_industrial_robotics_industrial_kinetic_1 /bin/bash
 
 .. _mounting_volumes:
 
-Mounting Local Volumes
-======================
+Mounting local volumes
+^^^^^^^^^^^^^^^^^^^^^^
 
 Since the codes in the image are not persistent, which means they will be 
 removed when the images are rebuilt, it is recommended to mount your local disk 
@@ -111,6 +111,28 @@ the package inside the container.
 .. note::
 
   This was only tested with Linux.
+
+.. tip::
+
+  The container is set up to use `host` network, and therefore when you run 
+  roscore or ros packages in either host or container, both will have access 
+  to ros communication infrastructure such as topics and services.
+
+.. _docker_gpu:
+
+Running the image with GPU support
+----------------------------------
+
+Running our image with a GPU support can be done using [rocker](https://github.com/osrf/rocker), 
+a tool that can inject local hardware supports to the container.
+
+Requirements:
+
+.. code-block:: bash
+
+  sudo apt-get install python3-rocker
+
+
 
 
 .. _creating_own_image:
