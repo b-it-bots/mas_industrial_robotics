@@ -209,4 +209,3 @@ Set the relative pose accordingly in the window (e.g. 0.1 in X to move forward 1
 .. code-block:: bash
 
     rostopic pub /mcr_navigation/direct_base_controller/coordinator/event_in std_msgs/String "data: 'e_start'"
-
