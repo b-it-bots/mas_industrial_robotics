@@ -21,8 +21,7 @@ RUN apt-get update -y -qq \
       nmap \
       unzip \
       gcc-multilib \
-      g++-multilib \ 
-      python-pip3 
+      g++-multilib 
 
 #update ROS GPG key: https://discourse.ros.org/t/ros-gpg-key-expiration-incident/20669
 RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
