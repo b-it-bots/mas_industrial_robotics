@@ -51,15 +51,10 @@ unsigned int pointcloud::centerPointCloud(const PointCloud &cloud_in, PointCloud
 
 unsigned int pointcloud::padPointCloud(PointCloud::Ptr &cloud_in, int num_points)
 {
-    if (cloud_in->empty()) 
-        return (0);
+  if (cloud_in->empty()) return (0);
 
-    unsigned int point_count;
-    point_count = static_cast<unsigned int>(cloud_in->size());
-
-    if (point_count > num_points) 
-    {
-        unsigned int point_diff = point_count - num_points;
+  unsigned int point_count;
+  point_count = static_cast<unsigned int>(cloud_in->size());
 
   std::random_device rd;   // get ran
   std::mt19937 eng(rd());  // seed the generator
@@ -69,9 +64,8 @@ unsigned int pointcloud::padPointCloud(PointCloud::Ptr &cloud_in, int num_points
     unsigned int point_diff = point_count - num_points;
 
     pcl::PointIndices::Ptr random_indices(new pcl::PointIndices());
-        boost::random::mt19937 rd; 
-        boost::random::uniform_int_distribution<> distr(0,point_count);
-        pcl::PointIndices::Ptr random_indices(new pcl::PointIndices());
+
+    for (int n = 0; n < num_points; ++n) random_indices->indices.push_back(distr(eng));
 
     pcl::ExtractIndices<PointT> extract;
     extract.setInputCloud(cloud_in);
