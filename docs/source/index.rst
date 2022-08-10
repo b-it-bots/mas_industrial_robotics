@@ -23,6 +23,7 @@ MAS Industrial Robotics
   mir_navigation/index.rst
   mir_planning/index.rst
   mir_simulation/index.rst
+  infrastructure
 
 .. toctree::
   :maxdepth: 2
