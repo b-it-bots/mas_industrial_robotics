@@ -32,9 +32,10 @@ endif()
 
 
 ### INSTALL ###
-#install(PROGRAMS
-#  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
+install(PROGRAMS
+  ros/scripts/teensy_gripper_controller_ros
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 install(DIRECTORY ros/launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
