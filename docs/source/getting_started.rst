@@ -12,6 +12,7 @@ The repository and its related components have been tested under the following U
 
 - ROS Kinetic: Ubuntu 16.04
 - ROS Melodic: Ubuntu 18.04
+- ROS Noetic: Ubuntu 20.04
 
 If you do not have a Ubuntu distribution on your computer you can download it `here <http://www.ubuntu.com/download>`_.
 
@@ -65,7 +66,7 @@ ROS - Robot Operating System
 
   The repository has been tested successfully with the following ROS distributions.
   Use the link behind a ROS distribution to get to the particular
-  `ROS Kinetic installation instructions <http://wiki.ros.org/kinetic/Installation/Ubuntu>`_.
+  `ROS Kinetic installation instructions <http://wiki.ros.org/noetic/Installation/Ubuntu>`_.
 
   .. note::
     Do not forget to update your .bashrc!
@@ -86,8 +87,8 @@ Setup catkin workspace
 
   .. code-block:: bash
 
-    source /opt/ros/kinetic/setup.bash
-    mkdir -p ~/kinetic/src; cd ~/kinetic/src
+    source /opt/ros/noetic/setup.bash
+    mkdir -p ~/noetic/src; cd ~/noetic/src
     catkin_init_workspace
     catkin build
 
@@ -97,16 +98,16 @@ Setup catkin workspace
 
   .. code-block:: bash
 
-    cd ~/kinetic/src;
+    cd ~/noetic/src;
     git clone git@github.com:b-it-bots/mas_industrial_robotics.git
 
   Then go on with installing further external dependencies:
 
   .. code-block:: bash
 
-    cd ~/kinetic/src/mas_industrial_robotics
+    cd ~/noetic/src/mas_industrial_robotics
     ./repository.debs
-    source ~/kinetic/devel/setup.bash
+    source ~/noetic/devel/setup.bash
 
   The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
 
@@ -114,7 +115,7 @@ Setup catkin workspace
 
   .. code-block:: bash
 
-    cd ~/kinetic
+    cd ~/noetic
     catkin build
 
   If no errors appear everything is ready to use. Great job!
@@ -201,4 +202,5 @@ Bring up the robot and its basic components
 
         roslaunch mir_2dnav 2dnav.launch nav_mode:=dwa
 
-Click on the menu bar "File -> Open Config", navigate to "~/indigo/src/mas_industrial_robotics" and select the "youbot.rviz" file.
+Click on the menu bar "File -> Open Config", navigate to "~/noetic/src/mas_industrial_robotics" and select the "youbot.rviz" file.
+
