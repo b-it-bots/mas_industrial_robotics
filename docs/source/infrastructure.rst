@@ -8,32 +8,28 @@ C025 Hub Server
 ===============
 
 You can use our workstation in C025 lab if you need computing facilities such as 
-GPU, but the available resouces are limited with 24 cores of CPU, 32GB RAM, and 
-Nvidia 3090 with 24 GB GPU memory. So if you need more resources, please request 
+GPU, but the available resouces are limited with 24 cores of CPU, 40GB RAM, and 2x
+Nvidia 3090 with 24 GB GPU memory each. However, if you need more resources, please request 
 access to `the university HPC cluster <https://wr0.wr.inf.h-brs.de/wr/index.html>`_.
 
 We also provide a JupyterHub server on the workstation so that you do not have to 
 setup the environment.
 
-Hub server
+Hub Server
 ----------
 
 The address of the JupyterHub server is `https://10.20.118.78:32025 <https://10.20.118.78:32025>`_ and 
 LDAP is used for the login.
 
-There are multiple environments available and described in `here <https://github.com/b-it-bots/docker>`_. 
+Multiple environments can be provided and is described in `here <https://github.com/b-it-bots/docker>`_. 
 You can choose the one that meets your needs or PR to the aforementioned repository 
-if you need to update the libraries.
-
-You can choose `Deep Learning env with Tensorflow and Pytorch` if you need GPU and 
-several machine learning libraries. We can, of course, provide more environment 
+if you need to update the libraries. We can, of course, provide more environment 
 options as per request.
 
-.. hint::
-
-  `Deep Learning env with Tensorflow and Pytorch` can only be requested by one user, 
-  as there is only one GPU available. If there is already a user running on that environment, 
-  your notebook server will not be scheduled.
+`Deep Learning env with Tensorflow and Pytorch` is default environment and contains 
+several deep learning libraries defined in `gpu-notebook <https://github.com/b-it-bots/docker/tree/master/gpu-notebook>`_.
+The GPUs are accessible by all authorized users and there is no individual GPU resouce 
+allocation.
 
 Access
 ------
