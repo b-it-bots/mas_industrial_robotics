@@ -48,10 +48,10 @@
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
   <!-- back camera -->
-  <include file="$(find mir_bringup)/components/realsense_camera.launch">
-      <arg name="serial_num" value="827312073531"/>
-      <arg name="camera_name" value="d435_back"/>
-  </include>
+  <!-- <include file="$(find mir_bringup)/components/realsense_camera.launch"> -->
+  <!--     <arg name="serial_num" value="827312073531"/> -->
+  <!--     <arg name="camera_name" value="d435_back"/> -->
+  <!-- </include> -->
 
   <!-- <node pkg="mir_debug_leds" type="debug_leds.py" name="debug_leds" output="screen"/> -->
 

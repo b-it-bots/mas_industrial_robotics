@@ -7,6 +7,7 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <math.h>
 #include <sys/time.h>
+#include <opencv2/imgproc/imgproc_c.h>
 
 #define PI 3.14159265
 
