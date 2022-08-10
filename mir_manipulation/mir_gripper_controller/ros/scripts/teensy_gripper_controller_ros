@@ -1,39 +1,71 @@
 #!/usr/bin/env python
 
-
 import rospy
 from std_msgs.msg import String
 from mcr_manipulation_msgs.msg import GripperCommand
-import teensy_gripper_controller
-command_to_sent = 0
+import serial_interface
 
-command_map = {0: '2', 1: '7'}
 
-def callback(data,cmdtosent):
-    #if cmdtosent!=data.command:
-    command_to_sent=command_map[data.command]
-    #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.command)
-    serial_msg.send_command(command_to_sent)
-    # https://answers.ros.org/question/231492/passing-arguments-to-callback-in-python/
-    #else:
-    #    ("The message was already sent")
+class GripperController:
+    """ROS wrapper for receiving commands for the gripper and forwarding them to the Teensy board.
+    """
 
-def robot_listener():
+    component_name = 'gripper_controller'
 
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
+    def __init__(self):
+        rospy.init_node(self.component_name, anonymous=True)
+        try:
+            self.serial_msg = serial_interface.SerialInterface(9600, 1, "239A")
+            self.serial_msg.open_port()
+            rospy.loginfo("Dynamixel gripper has been intialized successfully")
+            self.gripper_command_topic = rospy.get_param('~gripper_command_topic', '/arm_1/gripper_command')
+            self.cmd_listener = rospy.Subscriber(self.gripper_command_topic, GripperCommand, self.callback)
 
-    rospy.Subscriber('/arm_1/gripper_command', GripperCommand, callback,(command_to_sent))
+            self.gripper_feedback_topic = rospy.get_param('~gripper_feedback_topic', '/arm_1/gripper_feedback')
+            self.feedback_publisher = rospy.Publisher(self.gripper_feedback_topic, String, queue_size=1, latch=True)
 
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
+        except rospy.ROSInterruptException as ex:
+            rospy.logerr(ex)
+
+
+    def callback(self, data):
+        """Callback for receiving gripper command
+
+            Keyword arguments:
+            @param data -- command from the gripper
+        """
+        command = int(data.command)
+        json_command = {
+                "command": 0,
+        }
+
+        if command == 1:
+            rospy.logdebug('Closing the gripper.')
+            json_command['command'] = 1
+
+        else:
+            rospy.logdebug('Opening the gripper.')
+
+        self.serial_msg.send(json_command)
+    
+    def handle_msg(self):
+        """Function for receiving feedback from serial and publishing to ros
+        """
+        msgs = self.serial_msg.receive()
+        if msgs is not None:
+            for msg in msgs:
+                self.feedback_publisher.publish(str(msg))
+                rospy.sleep(0.1)
 
 if __name__ == '__main__':
 
-    serial_msg = teensy_gripper_controller.SerialInterface(9600,1,"/dev/youbot/gripper")
-    serial_msg.open_port()
-    robot_listener()
+    try:
+        gripper_controller = GripperController()
+        rate = rospy.Rate(10)
+
+        while not rospy.is_shutdown():
+            gripper_controller.handle_msg()
+            rate.sleep()
+    
+    except rospy.ROSInterruptException as ex:
+        rospy.logerr(ex)
