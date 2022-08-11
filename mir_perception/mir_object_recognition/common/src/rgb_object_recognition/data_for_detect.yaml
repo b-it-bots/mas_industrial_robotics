@@ -1,0 +1,5 @@
+train: /home/kvnptl/work/b_it_bot_work/2d_object_detection/b_it_bot_dataset/atwork_realdata_combined/training_copy_4/dataset/train/images
+val: /home/kvnptl/work/b_it_bot_work/2d_object_detection/b_it_bot_dataset/atwork_realdata_combined/training_copy_4/dataset/valid/images
+
+nc: 18
+names: ['axis', 'bearing', 'bearing_box_ax01', 'bearing_box_ax16', 'container_box_blue', 'container_box_red', 'distance_tube', 'em_01', 'em_02', 'f20_20_B', 'f20_20_G', 'm20', 'm20_100', 'm30', 'motor', 'r20', 's40_40_B', 's40_40_G']

@@ -11,7 +11,7 @@
   <arg name="object_info" default="$(find mir_object_recognition)/ros/config/objects.xml" />
 
   <include file="$(find mir_object_recognition)/ros/launch/rgb_object_recognition.launch" />
-  <include file="$(find mir_object_recognition)/ros/launch/pc_object_recognition.launch" />
+  <!-- <include file="$(find mir_object_recognition)/ros/launch/pc_object_recognition.launch" /> -->
   
   <group ns="mir_perception">
     <rosparam file="$(arg scene_segmentation_config_file)" command="load"/>
