@@ -50,7 +50,7 @@ class RGBObjectRecognizer():
                 elif self.model_name == 'ssdLiteMobilenet':
                     self.model = SSDLiteMobilenet(model_dir)
             elif self.net == 'classification':
-                print "TODO: MobileNet"
+                print("TODO: MobileNet")
         else:
             rospy.logerr("Config file: {} not found".format(config_file))
 
@@ -103,7 +103,7 @@ class RGBObjectRecognizer():
                     return
 
             elif self.net == 'classification':
-                print "TODO: MobileNet"
+                print("TODO: MobileNet")
 
     def remove_overlapping_bbox(self, objects):
         """
