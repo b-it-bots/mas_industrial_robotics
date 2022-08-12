@@ -788,6 +788,8 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
       config.passthrough_filter_field_name,
       config.passthrough_filter_limit_min,
       config.passthrough_filter_limit_max);
+  scene_segmentation_ros_->setCropBoxParams(config.enable_cropbox_filter, config.cropbox_filter_min_x, config.cropbox_filter_max_x,
+      config.cropbox_filter_min_y, config.cropbox_filter_max_y, config.cropbox_filter_min_z, config.cropbox_filter_max_z);
   scene_segmentation_ros_->setNormalParams(config.normal_radius_search, config.use_omp, config.num_cores);
   Eigen::Vector3f axis(config.sac_x_axis, config.sac_y_axis, config.sac_z_axis);
   scene_segmentation_ros_->setSACParams(config.sac_max_iterations, config.sac_distance_threshold,
