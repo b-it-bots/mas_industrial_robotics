@@ -119,8 +119,10 @@ class RGBObjectRecognizer():
                         result.name = labels[i].upper()
                         result.probability = probs[i]
                         roi = RegionOfInterest()
-                        roi.x_offset = int(bboxes[i][0])
-                        roi.y_offset = int(bboxes[i][1])
+                        roi.x_offset = int(
+                            bboxes[i][0]) - int(bboxes[i][2] / 2)
+                        roi.y_offset = int(
+                            bboxes[i][1]) + int(bboxes[i][3] / 2)
                         roi.width = int(bboxes[i][2])
                         roi.height = int(bboxes[i][3])
                         result.roi = roi
