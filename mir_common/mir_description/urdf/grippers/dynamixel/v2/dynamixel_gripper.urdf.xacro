@@ -29,14 +29,6 @@
     <link name="${name}_static_grasp_link">
     </link>
 
-    <joint name="${name}_static_grasp_link_joint" type="fixed" >
-        <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>
-      <parent link="${parent}" />
-      <child link="${name}_static_grasp_link" />
-    </joint>
-    <link name="${name}_static_grasp_link">
-    </link>
-
     <!-- motor mount -->
     <link name="${name}_motor_mount_link">
       <inertial>
