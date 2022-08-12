@@ -7,6 +7,7 @@
   <arg name="model_id" default="dgcnn" />
   <arg name="dataset" default="all" />
   <arg name="model_dir" default="$(find mir_pointcloud_object_recognition_models)/common/models/$(arg model_id)/$(arg dataset)" />
+mir_pointcloud_object_recognition_models/common/models/dgcnn/all/model.t7
 
   <group ns="mir_perception">
     <node pkg="mir_object_recognition" type="pc_object_recognizer_node" name="pc_object_recognizer_node" output="screen" 

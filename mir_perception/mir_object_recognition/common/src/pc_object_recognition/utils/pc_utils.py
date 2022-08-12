@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
+import open3d
+import open3d
 
 # copied from python-pcl
 def float_to_rgb(p_rgb):
@@ -160,3 +162,22 @@ def get_3d_grid_gmm(subdivisions=[5,5,5], variance=0.04):
     from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
     gmm.precisions_cholesky_ = _compute_precision_cholesky(covariances, 'diag')
     return gmm
+
+def extract_pcd(pointcloud, 
+                num_points=2048,
+                color=True, 
+                downsample_cloud=True,
+                pad_cloud=True,
+                normalize_cloud=True
+                ):
+
+        xyzrgb = pointcloud
+
+        #pad cloud until its size == num_points
+        if pad_cloud:
+            while xyzrgb.shape[0] < num_points:
+                rand_idx = np.random.randint(xyzrgb.shape[0])
+                xyzrgb = np.vstack([xyzrgb, xyzrgb[rand_idx]])
+
+            
+        return xyzrgb

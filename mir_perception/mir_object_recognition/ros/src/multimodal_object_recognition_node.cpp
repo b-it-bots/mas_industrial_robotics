@@ -82,7 +82,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   // debug topics
   pub_debug_cloud_plane_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud_plane", 1);
 
-  nh_.param<bool>("debug_mode", debug_mode_, false);
+  nh_.param<bool>("debug_mode", debug_mode_, true);
   ROS_WARN_STREAM("[multimodal_object_recognition] Debug mode: " <<debug_mode_);
   // Pub pose array
   pub_pc_object_pose_array_  = nh_.advertise<geometry_msgs::PoseArray>("output/pc_object_pose_array", 10);
@@ -104,6 +104,7 @@ MultimodalObjectRecognitionROS::~MultimodalObjectRecognitionROS()
 void MultimodalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::ImageConstPtr &image,
                       const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
+  ROS_INFO("sync callback");
   if (pointcloud_msg_received_count_ < 1)
   {
     ROS_INFO("[multimodal_object_recognition_ros] Received enough messages");
@@ -216,6 +217,7 @@ void MultimodalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::Obje
     sensor_msgs::PointCloud2 ros_pc2;
     pcl::toROSMsg(*cloud_debug, ros_pc2);
     ros_pc2.header.frame_id = target_frame_id_;
+    ROS_INFO("hello vamsi ");
     pub_debug_cloud_plane_.publish(ros_pc2);
   }
 }
@@ -745,6 +747,7 @@ void MultimodalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
 void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::ConstPtr &msg)
 {
   std_msgs::String event_out;
+  ROS_INFO("inside the event callback");
   if (msg->data == "e_start")
   {
     // Synchronize callback

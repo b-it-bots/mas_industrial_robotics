@@ -1,11 +1,16 @@
-import os
-import pickle
-import numpy as np
-import tensorflow as tf
 
-import pc_object_recognition.models.dgcnn as dgcnn
-import pc_object_recognition.utils.pc_utils as pc_utils
+
 from pc_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
+import torch
+import torch.nn as nn
+
+from pc_object_recognition.models.dgcnn import DGCNN
+from pc_object_recognition.utils.data import infer_data
+import torch.nn.functional as nnf
+from torch.utils.data import DataLoader
+
+
+
 
 class DGCNNClassifier(CNNBasedClassifiers):
     """
@@ -17,33 +22,23 @@ class DGCNNClassifier(CNNBasedClassifiers):
         super(DGCNNClassifier, self).__init__(**kwargs)
         
         # extract argumen from key word arg
-        checkpoint_path = kwargs.get("checkpoint_path", None)
+
         self.num_classes = kwargs.get("num_classes", None)
         self.num_points = kwargs.get("num_points", None)
         self.cloud_dim = kwargs.get("cloud_dim", None)
 
-        with tf.Graph().as_default():
-            pointcloud_pl = tf.placeholder(tf.float32, [1, self.num_points, self.cloud_dim])
-            is_training_pl = tf.placeholder(tf.bool)
-            
-            _, end_points = dgcnn.get_model(pointcloud_pl, num_classes=self.num_classes, 
-                                            is_training=is_training_pl)
-            
-            probabilities = end_points['Probabilities']
-            predictions = tf.argmax(probabilities, 1)
+        self.test_batch_size = 1 # only support batch size 1 for inferencing
+        self.cuda = kwargs.get("cuda", False)
+        self.model_path = kwargs.get("model_path", None)
 
-            self.ops = {'pointcloud': pointcloud_pl,
-                        'is_training': is_training_pl,
-                        'probabilities': probabilities,
-                        'predictions': predictions}
-                                
-            saver = tf.train.Saver()
-            
-            config = tf.ConfigProto()
-            config.allow_soft_placement = True
-            self.sess = tf.Session(config=config)
-            saver.restore(self.sess, checkpoint_path)
-    
+        self.args = {
+            "emb_dims": 1024,
+            "dropout": 0.5,
+            "k": 20
+        }# contains the arguments that are passed for the DGCNN model
+
+        # pytorch session
+
     def classify(self, pointcloud, center=True, rotate=True, pad=True): 
         """
         Classify point cloud
@@ -60,25 +55,28 @@ class DGCNNClassifier(CNNBasedClassifiers):
         :return:    Predicted label and probablity
         """
         
-        if center:
-            pointcloud = pc_utils.center_pointcloud(pointcloud)
-        
-        if rotate:
-            pointcloud = pc_utils.rotate_pointcloud(pointcloud)
+        test_loader = DataLoader(infer_data(num_points=self.num_points, pcl_path=pointcloud),
+                                batch_size=self.test_batch_size, shuffle=True, drop_last=False)
 
-        if pad:
-            pointcloud = pointcloud.tolist()
-            while (len(pointcloud) < self.num_points):
-                pointcloud.append([0,0,0,0,0,0])
+        device = torch.device("cuda" if self.cuda else "cpu")
+        model = DGCNN(self.args).to(device)
+        model = nn.DataParallel(model)
+        model.load_state_dict(torch.load(self.model_path))
+        model = model.eval()
 
-        pointcloud = pc_utils.scale_to_unit_sphere(np.asarray(pointcloud), normalize=False)
-        pointcloud = np.expand_dims(pointcloud, 0)
+        for pcl, label in test_loader:
 
-        feed_dict = {self.ops['pointcloud']: pointcloud,
-                     self.ops['is_training']: False}
-        
-        pred_label, probs = self.sess.run([self.ops['predictions'], self.ops['probabilities']],
-                                         feed_dict=feed_dict)
-        probs = probs[0][pred_label][0]
+            print("inferencing ...")
 
-        return pred_label[0], probs 
+            data = pcl.to(device)
+    
+            data = data.permute(0, 2, 1)
+
+            logits = model(data)
+
+            prob = nnf.softmax(logits, dim=1) # convert logits to probabilities
+            top_p, top_class = prob.topk(1, dim = 1)
+
+            print(f'Probability - {round(top_p.item(),2)} Class - {top_class[0].item()}')
+
+            return top_class[0].item(), top_p.item()

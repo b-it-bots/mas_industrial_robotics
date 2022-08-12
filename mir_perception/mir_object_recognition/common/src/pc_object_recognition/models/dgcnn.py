@@ -1,208 +1,159 @@
-import os
-import sys
-import math
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@Author: Yue Wang
+@Contact: yuewangx@mit.edu
+@File: model.py
+@Time: 2018/10/13 6:35 PM
+"""
 
-import tensorflow as tf
-import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-import pc_object_recognition.utils.tf_util as tf_util
-from transform_nets import input_transform_net
 
-def get_model(pointcloud, num_classes, is_training, base=False):
-    """ 
-    Classification model DGCNN, input is BxNx3, output Bxnum_classes 
+def knn(x, k):
+    inner = -2*torch.matmul(x.transpose(2, 1), x)
+    xx = torch.sum(x**2, dim=1, keepdim=True)
+    pairwise_distance = -xx - inner - xx.transpose(2, 1)
+ 
+    idx = pairwise_distance.topk(k=k, dim=-1)[1]   # (batch_size, num_points, k)
+    return idx
 
-    :param pointcloud:    The input pointcloud (BxNxD), D can be XYZ or XYZRGB
-    :type name:         Array
-    :param num_classes: The number of classes
-    :type name:         Int
-    :param is_training: Training mode or not
-    :type name:         Bool
-    :param base:        If true, return DGCNN backbone
-    :type name:         Bool
 
-    :return:    Logits and endpoints
-    """
-    batch_size = pointcloud.get_shape()[0].value
-    end_points = {}
-    k = 20
+def get_graph_feature(x, k=20, idx=None, flag_cat= True):
+    batch_size = x.size(0)
+    num_points = x.size(2)
+    x = x.view(batch_size, -1, num_points)
+    if idx is None:
+        idx = knn(x, k=k)   # (batch_size, num_points, k) 
+    device = torch.device('cuda')
 
-    adj_matrix = tf_util.pairwise_distance(pointcloud)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(pointcloud, nn_idx=nn_idx, k=k)
+    idx_base = torch.arange(0, batch_size, device=device).view(-1, 1, 1)*num_points
 
-    net = tf_util.conv2d(edge_feature, 64, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn1', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net1 = net
-    end_points['dgcnn1'] = net1
+    idx = idx + idx_base
 
-    adj_matrix = tf_util.pairwise_distance(net)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)
+    idx = idx.view(-1)
+ 
+    _, num_dims, _ = x.size()
 
-    net = tf_util.conv2d(edge_feature, 64, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn2', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net2 = net
-    end_points['dgcnn2'] = net2
+    x = x.transpose(2, 1).contiguous()   # (batch_size, num_points, num_dims)  -> (batch_size*num_points, num_dims) #   batch_size * num_points * k + range(0, batch_size*num_points)
 
-    adj_matrix = tf_util.pairwise_distance(net)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k) 
+    feature = x.view(batch_size*num_points, -1)[idx, :]
+    feature = feature.view(batch_size, num_points, k, num_dims) 
+    x = x.view(batch_size, num_points, 1, num_dims).repeat(1, 1, k, 1)
 
-    net = tf_util.conv2d(edge_feature, 64, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn3', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net3 = net
-    end_points['dgcnn3'] = net3
+    if flag_cat:
+        feature = torch.cat((feature-x, x-feature), dim=3).permute(0, 3, 1, 2).contiguous()
+    else:
+        feature = (feature - x).permute(0, 3, 1, 2).contiguous()
 
-    adj_matrix = tf_util.pairwise_distance(net)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)    
+    feature = feature.type(torch.cuda.FloatTensor) # weights are in FloatTensor format and not in DoubleTensor format
+    return feature
 
-    net = tf_util.conv2d(edge_feature, 128, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn4', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net4 = net
-    end_points['dgcnn4'] = net4
 
-    net = tf_util.conv2d(tf.concat([net1, net2, net3, net4], axis=-1), 1024, [1, 1], 
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='agg', bn_decay=None)
+class PointNet(nn.Module):
+    def __init__(self, args, output_channels=40):
+        super(PointNet, self).__init__()
+        self.args = args
+        self.conv1 = nn.Conv1d(3, 64, kernel_size=1, bias=False)
+        self.conv2 = nn.Conv1d(64, 64, kernel_size=1, bias=False)
+        self.conv3 = nn.Conv1d(64, 64, kernel_size=1, bias=False)
+        self.conv4 = nn.Conv1d(64, 128, kernel_size=1, bias=False)
+        self.conv5 = nn.Conv1d(128, self.emb_dims, kernel_size=1, bias=False)
+        self.bn1 = nn.BatchNorm1d(64)
+        self.bn2 = nn.BatchNorm1d(64)
+        self.bn3 = nn.BatchNorm1d(64)
+        self.bn4 = nn.BatchNorm1d(128)
+        self.bn5 = nn.BatchNorm1d(self.emb_dims)
+        self.linear1 = nn.Linear(self.emb_dims, 512, bias=False)
+        self.bn6 = nn.BatchNorm1d(512)
+        self.dp1 = nn.Dropout()
+        self.linear2 = nn.Linear(512, output_channels)
 
-    net = tf.reduce_max(net, axis=1, keep_dims=True) 
+    def forward(self, x):
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = F.relu(self.bn4(self.conv4(x)))
+        x = F.relu(self.bn5(self.conv5(x)))
+        x = F.adaptive_max_pool1d(x, 1).squeeze()
+        x = F.relu(self.bn6(self.linear1(x)))
+        x = self.dp1(x)
+        x = self.linear2(x)
+        return x
 
-    if base:
-        end_points['DGCNN_PreFC'] = net
-        return end_points
 
-    # MLP on global point cloud vector
-    net = tf.reshape(net, [batch_size, -1]) 
-    net = tf_util.fully_connected(net, 512, bn=True, is_training=is_training,
-                                     scope='fc1', bn_decay=None)
-    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training, scope='dp1')
-    
-    net = tf_util.fully_connected(net, 256, bn=True, is_training=is_training,
-                                     scope='fc2', bn_decay=None)
-    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training,scope='dp2')
+class DGCNN(nn.Module):
+    def __init__(self, args, output_channels=40):
+        super(DGCNN, self).__init__()
+        self.args = args
+        self.k = args['k']
+        self.emb_dims = args['emb_dims']
+        self.dropout = args['dropout']
+        
+        self.bn1 = nn.BatchNorm2d(64) # 64 is the number of channels in the output of the first convolutional layer
+        self.bn2 = nn.BatchNorm2d(64)
+        self.bn3 = nn.BatchNorm2d(128) 
+        self.bn4 = nn.BatchNorm2d(256)
+        self.bn5 = nn.BatchNorm1d(self.emb_dims)
 
-    net = tf_util.fully_connected(net, num_classes, activation_fn=None, scope='fc3')
+        self.conv1 = nn.Sequential(nn.Conv2d(6, 64, kernel_size=1, bias=False),
+                                   self.bn1,
+                                   nn.LeakyReLU(negative_slope=0.2))
+        self.conv2 = nn.Sequential(nn.Conv2d(64*2, 64, kernel_size=1, bias=False),
+                                   self.bn2,
+                                   nn.LeakyReLU(negative_slope=0.2))
+        self.conv3 = nn.Sequential(nn.Conv2d(64*2, 128, kernel_size=1, bias=False),
+                                   self.bn3,
+                                   nn.LeakyReLU(negative_slope=0.2))
+        self.conv4 = nn.Sequential(nn.Conv2d(128*2, 256, kernel_size=1, bias=False),
+                                   self.bn4,
+                                   nn.LeakyReLU(negative_slope=0.2))
+        self.conv5 = nn.Sequential(nn.Conv1d(512, self.emb_dims, kernel_size=1, bias=False),
+                                   self.bn5,
+                                   nn.LeakyReLU(negative_slope=0.2))
+        self.linear1 = nn.Linear(self.emb_dims*2, 512, bias=False)
+        self.bn6 = nn.BatchNorm1d(512)
+        self.dp1 = nn.Dropout(p=self.dropout)
+        self.linear2 = nn.Linear(512, 256)
+        self.bn7 = nn.BatchNorm1d(256)
+        self.dp2 = nn.Dropout(p=self.dropout)
+        self.linear3 = nn.Linear(256, output_channels)
 
-    end_points['Logits'] = net
-    end_points['Probabilities'] = tf.nn.softmax(net, name='Probabilities')
+    def forward(self, x):
 
-    return net, end_points
+        batch_size = x.size(0)
+        flag_cat = False
+        x = get_graph_feature(x, k=self.k, flag_cat=flag_cat)
+        
 
-def get_model_with_tfnet(pointcloud, num_classes, is_training, base=False):
-    """ 
-    Classification model DGCNN with tfnet, input is BxNx3, output Bxnum_classes 
-    :param pointcloud:    The input pointcloud
-    :type name: Array
-    :param num_classes:    The number of classes
-    :type name: Int
-    :param is_training:    True indicating training mode
-    :type name: Bool
-    :param base:    If true, return DGCNN backbone
-    :type name: Bool
+        x = self.conv1(x)
+        x1 = x.max(dim=-1, keepdim=False)[0]
 
-    :return:    Logits and endpoints
-    """
-    batch_size = pointcloud.get_shape()[0].value
-    pc_dim = pointcloud.get_shape()[2].value
-    end_points = {}
-    k = 20
+        x = get_graph_feature(x1, k=self.k)
+        x = self.conv2(x)
+        x2 = x.max(dim=-1, keepdim=False)[0]
 
-    adj_matrix = tf_util.pairwise_distance(pointcloud)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(pointcloud, nn_idx=nn_idx, k=k)
+        x = get_graph_feature(x2, k=self.k)
+        x = self.conv3(x)
+        x3 = x.max(dim=-1, keepdim=False)[0]
 
-    with tf.variable_scope('transform_net1') as sc:
-        transform = input_transform_net(edge_feature, is_training, K=pc_dim)
-        end_points['transform'] = transform
-    
-    pointcloud_transformed = tf.matmul(pointcloud, transform)
-    adj_matrix = tf_util.pairwise_distance(pointcloud_transformed)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(pointcloud_transformed, nn_idx=nn_idx, k=k)
+        x = get_graph_feature(x3, k=self.k)
+        x = self.conv4(x)
+        x4 = x.max(dim=-1, keepdim=False)[0]
 
-    net = tf_util.conv2d(edge_feature, 64, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn1', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net1 = net
-    end_points['dgcnn1'] = net1
+        x = torch.cat((x1, x2, x3, x4), dim=1)
 
-    adj_matrix = tf_util.pairwise_distance(net)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)
+        x = self.conv5(x)
+        x1 = F.adaptive_max_pool1d(x, 1).view(batch_size, -1)
+        x2 = F.adaptive_avg_pool1d(x, 1).view(batch_size, -1)
+        x = torch.cat((x1, x2), 1)
 
-    net = tf_util.conv2d(edge_feature, 64, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn2', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net2 = net
-    end_points['dgcnn2'] = net2
-
-    adj_matrix = tf_util.pairwise_distance(net)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k) 
-
-    net = tf_util.conv2d(edge_feature, 64, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn3', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net3 = net
-    end_points['dgcnn3'] = net3
-
-    adj_matrix = tf_util.pairwise_distance(net)
-    nn_idx = tf_util.knn(adj_matrix, k=k)
-    edge_feature = tf_util.get_edge_feature(net, nn_idx=nn_idx, k=k)    
-
-    net = tf_util.conv2d(edge_feature, 128, [1,1],
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='dgcnn4', bn_decay=None)
-    net = tf.reduce_max(net, axis=-2, keep_dims=True)
-    net4 = net
-    end_points['dgcnn4'] = net4
-
-    net = tf_util.conv2d(tf.concat([net1, net2, net3, net4], axis=-1), 1024, [1, 1], 
-                        padding='VALID', stride=[1,1],
-                        bn=True, is_training=is_training,
-                        scope='agg', bn_decay=None)
-
-    net = tf.reduce_max(net, axis=1, keep_dims=True) 
-
-    if base:
-        end_points['DGCNN_PreFC'] = net
-        return end_points
-
-    # MLP on global point cloud vector
-    net = tf.reshape(net, [batch_size, -1]) 
-    net = tf_util.fully_connected(net, 512, bn=True, is_training=is_training,
-                                     scope='fc1', bn_decay=None)
-    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training, scope='dp1')
-    
-    net = tf_util.fully_connected(net, 256, bn=True, is_training=is_training,
-                                     scope='fc2', bn_decay=None)
-    net = tf_util.dropout(net, keep_prob=0.5, is_training=is_training,scope='dp2')
-
-    net = tf_util.fully_connected(net, num_classes, activation_fn=None, scope='fc3')
-
-    end_points['Logits'] = net
-    end_points['Probabilities'] = tf.nn.softmax(net, name='Probabilities')
-
-    return net, end_points
+        x = F.leaky_relu(self.bn6(self.linear1(x)), negative_slope=0.2)
+        x = self.dp1(x)
+        x = F.leaky_relu(self.bn7(self.linear2(x)), negative_slope=0.2)
+        x = self.dp2(x)
+        x = self.linear3(x)
+        
+        return x

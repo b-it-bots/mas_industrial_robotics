@@ -1,27 +1,27 @@
 model:
   cnn_based:
     dgcnn:
-      num_classes: 15
+      num_classes: 14
       num_points: 2048
       cloud_dim: 6
   feature_based:
     fvrdd:
-      num_classes: 15
+      num_classes: 14
       num_points: None
       cloud_dim: 3
 objects:
-  0: 'AXIS'
-  1: 'BEARING'
-  2: 'BEARING_BOX'
-  3: 'CONTAINER_BOX_BLUE'
-  4: 'CONTAINER_BOX_RED'
-  5: 'DISTANCE_TUBE'
-  6: 'F20_20_B'
-  7: 'F20_20_G'
-  8: 'M20'
-  9: 'M20_100'
-  10: 'M30'
-  11: 'MOTOR'
-  12: 'R20'
-  13: 'S40_40_B'
-  14: 'S40_40_G'
+
+  0 : 'AXIS'
+  1 : 'BEARING_BOX'
+  2 : 'BLUE_CONTAINER'
+  3 : 'EM-01'
+  4 : 'EM-02'
+  5 : 'F20_20_B'
+  6 : 'F20_20_G'
+  7 : 'M20_100'
+  8 : 'M30'
+  9 : 'MOTOR'
+  10 : 'R20'
+  11 : 'RED_CONTAINER'
+  12 : 'S40_40_B'
+  13 : 'S40_40_G'

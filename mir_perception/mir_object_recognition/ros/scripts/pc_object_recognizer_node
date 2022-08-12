@@ -3,19 +3,18 @@
 import colorsys
 import importlib
 import os
-import struct
 
 import numpy as np
-import pc_object_recognition.utils.pc_utils as pc_utils
+import common.src.pc_object_recognition.utils.pc_utils as pc_utils
 import roslib
 import rospy
 import sensor_msgs.point_cloud2
 import yaml
 from mas_perception_msgs.msg import ObjectList
-from pc_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
-from pc_object_recognition.dgcnn_classifier import DGCNNClassifier
-from pc_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
-from pc_object_recognition.utils.features import FVRDDFeatureExtraction
+from common.src.pc_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
+from common.src.pc_object_recognition.dgcnn_classifier import DGCNNClassifier
+from common.src.pc_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
+from common.src.pc_object_recognition.utils.features import FVRDDFeatureExtraction
 
 
 class PointcloudObjectRecognizer():
@@ -41,7 +40,7 @@ class PointcloudObjectRecognizer():
         if os.path.isfile(model_config_file):
             configs = {}
             with open(model_config_file, 'r') as infile:
-                configs = yaml.load(infile)
+                configs = yaml.safe_load(infile)
             self.label_to_name = configs['objects']
         else:
             rospy.logerr("Model configuration not found for %s", model)
@@ -52,7 +51,9 @@ class PointcloudObjectRecognizer():
         self.pub = rospy.Publisher(
             "output/object_list", ObjectList, queue_size=1)
 
-        if model == "feature_based":
+        if model == "feature_based":        # we dont need this part now only use cnn_based
+
+
             feature_extraction = FVRDDFeatureExtraction(model_id)
             self.fe_method = feature_extraction.get_method()
             if model_id == "fvrdd":
@@ -68,16 +69,21 @@ class PointcloudObjectRecognizer():
                 classifier_file, label_encoder)
 
         elif model == "cnn_based":
-            checkpoint = os.path.join(model_dir, 'model.ckpt')
+
+            checkpoint = os.path.join(model_dir , 'model.t7') # model.t7 is the model file, we are not using .cpkt file
+
             module_name = "pc_object_recognition" + "." + model_id.lower()+"_"+"classifier"
+
             class_name = model_id.upper()+"Classifier"
             ClassifierClass = getattr(
                 importlib.import_module(module_name), class_name)
             model_configs = configs['model'][model][model_id.lower()]
-            self.classifier = ClassifierClass(checkpoint_path=checkpoint,
-                                              num_classes=model_configs['num_classes'],
-                                              num_points=model_configs['num_points'],
-                                              cloud_dim=model_configs['cloud_dim'])
+
+            self.classifier = ClassifierClass(model_path=checkpoint, 
+                                                num_classes=model_configs['num_classes'], 
+                                                num_points=model_configs['num_points'], 
+                                                cloud_dim=model_configs['cloud_dim'])
+
 
     def recognize_object_topic_cb(self, object_list):
         """
