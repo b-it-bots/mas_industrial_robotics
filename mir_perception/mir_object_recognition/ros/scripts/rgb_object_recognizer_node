@@ -82,6 +82,7 @@ class RGBObjectRecognizer():
                         predictions = yolov5_classifier.run(weights=self.model_dir,
                                                             data='/home/kvnptl/work/b_it_bots_ws/src/mas_industrial_robotics/mir_perception/mir_object_recognition/common/src/rgb_object_recognition/data_for_detect.yaml',
                                                             source=cv_image)
+                        # prediction bounding boxes are in [x1, y1, x2, y2] format
 
                         self.confidence_threshold = 0.6
 
@@ -119,12 +120,10 @@ class RGBObjectRecognizer():
                         result.name = labels[i].upper()
                         result.probability = probs[i]
                         roi = RegionOfInterest()
-                        roi.x_offset = int(
-                            bboxes[i][0]) - int(bboxes[i][2] / 2)
-                        roi.y_offset = int(
-                            bboxes[i][1]) + int(bboxes[i][3] / 2)
-                        roi.width = int(bboxes[i][2])
-                        roi.height = int(bboxes[i][3])
+                        roi.x_offset = int(bboxes[i][0])
+                        roi.y_offset = int(bboxes[i][1])
+                        roi.width = int(bboxes[i][2]) - int(bboxes[i][0])
+                        roi.height = int(bboxes[i][3]) - int(bboxes[i][1])
                         result.roi = roi
 
                         objects.append(result)
@@ -145,14 +144,14 @@ class RGBObjectRecognizer():
 
                         # draw bounding boxes on image, probability and class
                         for i in range(len(bboxes)):
-                            x = int(bboxes[i][0])
-                            y = int(bboxes[i][1])
-                            w = int(bboxes[i][2]) - int(bboxes[i][0])
-                            h = int(bboxes[i][3]) - int(bboxes[i][1])
-                            cv2.rectangle(debug_img, (x, y), (x + w, y + h),
+                            x1 = int(bboxes[i][0])
+                            y1 = int(bboxes[i][1])
+                            x2 = int(bboxes[i][2])
+                            y2 = int(bboxes[i][3])
+                            cv2.rectangle(debug_img, (x1, y1), (x2, y2),
                                           (0, 0, 255), 2)
                             cv2.putText(debug_img, "{} {:.2f}".format(classes[i], probs[i]),
-                                        (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                                        (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
                         # publish bbox and label
                         self.publish_debug_img(debug_img)
