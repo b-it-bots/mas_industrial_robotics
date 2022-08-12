@@ -16,8 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
     FILES
         Cavity.msg
-        Cavities.msg
-)
+        Cavities.msg)
 
 generate_messages(
     DEPENDENCIES

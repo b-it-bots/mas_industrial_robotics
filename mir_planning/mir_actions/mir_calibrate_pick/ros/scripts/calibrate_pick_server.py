@@ -18,12 +18,12 @@ class WaitForEventFromUser(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo("Have you placed the mockup pose? press y/n ")
-        input_from_user = raw_input()
+        input_from_user = input()
         if ('y' == input_from_user):
-	    rospy.loginfo("Received YES .. moving arm ")
+            rospy.loginfo("Received YES .. moving arm ")
             return 'success'
         else:
-	    rospy.loginfo("Received NO .. EXITING MOVING ARM ")
+            rospy.loginfo("Received NO .. EXITING MOVING ARM ")
             return 'failure'
 
 
@@ -42,7 +42,7 @@ def main():
         smach.StateMachine.add(
             "STOP_REFERENCE_FRAME_PUB",
             gbs.send_event([("/static_transform_publisher_node/event_in", "e_stop")]),
-            transitions={"success": "OPEN_GRIPPER"},
+            transitions={"success": "MOVE_ARM"},
         )
 
         smach.StateMachine.add(

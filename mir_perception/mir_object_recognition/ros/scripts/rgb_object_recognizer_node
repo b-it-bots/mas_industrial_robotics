@@ -48,7 +48,7 @@ class RGBObjectRecognizer():
                 elif self.model_name == 'ssdLiteMobilenet':
                     self.model = SSDLiteMobilenet(model_dir)
             elif self.net == 'classification':
-                print "TODO: MobileNet"
+                print("TODO: MobileNet")
         else:
             rospy.logerr("Config file: {} not found".format(config_file))
 
@@ -73,7 +73,6 @@ class RGBObjectRecognizer():
                         roi.height = int(bbox[3] - bbox[1])
                         result.roi = roi
                         objects.append(result)
-
                     # Publish result_list
                     result_list.objects = objects
                     self.pub_result.publish(result_list)
@@ -95,7 +94,7 @@ class RGBObjectRecognizer():
                     return
 
             elif self.net == 'classification':
-                print "TODO: MobileNet"
+                print("TODO: MobileNet")
                 
     def publish_debug_img(self, debug_img):
         debug_img = np.array(debug_img, dtype=np.uint8)

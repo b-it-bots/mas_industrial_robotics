@@ -28,6 +28,6 @@
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>cv_bridge</run_depend>
-
+  <run_depend>pointcloud_to_laserscan</run_depend>
   <test_depend>roslaunch</test_depend>
 </package>
