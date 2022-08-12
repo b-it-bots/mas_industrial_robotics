@@ -36,7 +36,8 @@ find_package(OpenCV 4 REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(rclcpp_components REQUIRED)
-
+find_package(yaml_cpp_vendor REQUIRED)
+find_package(yaml-cpp)
 
 find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
@@ -61,6 +62,7 @@ include_directories(
   ${visualization_msgs_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${cv_bridge_INCLUDE_DIRS}
+  ${YAML_CPP_VENDOR_INCLUDE_DIRS}
   ${mir_object_segmentation_INCLUDE_DIRS}
   ${mir_perception_utils_INCLUDE_DIRS}
   ${CMAKE_INSTALL_PREFIX}/../cv_bridge/include
@@ -70,7 +72,6 @@ include_directories(SYSTEM
   ${EIGEN3_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
-
 
 
 add_library(perception_visualization
@@ -84,6 +85,7 @@ add_library(perception_visualization
   ros/src/mir_perception_utils/planar_polygon_visualizer.cpp
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
+  ros/src/multimodal_object_recognition_utils.cpp
   # ros/src/mir_object_segmentation/laserscan_segmentation.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
   # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
@@ -115,7 +117,9 @@ ament_target_dependencies(scene_segmentation
 )
 
 add_library(mmor SHARED
-            ros/src/multimodal_object_recognition.cpp)
+            ros/src/multimodal_object_recognition.cpp
+            ros/src/multimodal_object_recognition_parameters.cpp
+            )
 
 target_compile_definitions(mmor
             PRIVATE "COMPOSITION_BUILDING_DLL")          
@@ -135,6 +139,7 @@ ament_target_dependencies(mmor
   OpenCV
   cv_bridge
   rclcpp_components
+  yaml_cpp_vendor
 )
 target_link_libraries(mmor
   perception_visualization
@@ -144,7 +149,9 @@ rclcpp_components_register_nodes(mmor "perception_namespace::MultiModalObjectRec
 
 add_library(data_collector SHARED
             ros/src/mmor_data_collector.cpp
-            ros/src/multimodal_object_recognition.cpp)
+            ros/src/multimodal_object_recognition.cpp
+            ros/src/multimodal_object_recognition_parameters.cpp
+            )
 
 target_compile_definitions(data_collector
             PRIVATE "COMPOSITION_BUILDING_DLL")          
@@ -163,6 +170,7 @@ ament_target_dependencies(data_collector
   OpenCV
   cv_bridge
   rclcpp_components
+  yaml_cpp_vendor
 )
 target_link_libraries(data_collector
   perception_visualization
