@@ -12,6 +12,8 @@
   <arg name="init_pos_y" default="0.0"/>
   <arg name="init_pos_z" default="0.08"/>
 
+  <arg name="use_arm_traj_ctrl" default="true"/>
+
   <!-- upload robot params (joint configurations) -->
   <include file="$(find mir_default_robot_config)/upload_param.launch" >
     <arg name="robot" value="$(arg robot)" />
@@ -44,6 +46,8 @@
   </node>
 
   <!-- load robot specific launch files -->
-  <include file="$(find mir_bringup_sim)/robots/$(arg robot).launch" />
+  <include file="$(find mir_bringup_sim)/robots/$(arg robot).launch">
+    <arg name="use_arm_traj_ctrl" value="$(arg use_arm_traj_ctrl)" />
+  </include>
 
 </launch>

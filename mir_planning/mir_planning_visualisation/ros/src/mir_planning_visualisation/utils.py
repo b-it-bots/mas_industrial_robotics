@@ -348,14 +348,14 @@ class Utils(object):
         ]
 
         # add arrow at the top of arc
-        mid = points[num_of_points / 2]
+        mid = points[num_of_points // 2]
         arrow_points = [
-            (copy.deepcopy(points[num_of_points / 2 + 1])),
+            (copy.deepcopy(points[num_of_points // 2 + 1])),
             Point(x=mid.x + delta_y / 2, y=mid.y + delta_x / 2, z=mid.z),
             Point(x=mid.x - delta_y / 2, y=mid.y - delta_x / 2, z=mid.z),
         ]
         for p in arrow_points:
-            points.insert(num_of_points / 2 + 2, p)
+            points.insert(num_of_points // 2 + 2, p)
 
         marker = Marker(type=Marker.LINE_STRIP)
         self.marker_counter += 1

@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import tf
+import rospy
+
+from brics_actuator.msg import JointPositions
+from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped, Pose, Quaternion
+
+from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
+
+MOVEIT_CONF_PUB = None
+MOVEIT_TRIGGER_PUB = None
+
+def send_arm_to_joint(joint_msg):
+    rospy.loginfo('Found solution')
+    rospy.loginfo(joint_msg)
+
+    rospy.loginfo('Sending arm to point')
+    MOVEIT_CONF_PUB.publish(joint_msg)
+    rospy.sleep(1.0)
+
+    MOVEIT_TRIGGER_PUB.publish(String(data='e_start'))
+    rospy.sleep(1.0)
+    rospy.loginfo('Test successful')
+
+def main():
+    global MOVEIT_CONF_PUB, MOVEIT_TRIGGER_PUB
+    MOVEIT_CONF_PUB = rospy.Publisher('/arm_moveit_client/target_configuration',
+                                      JointPositions, queue_size=1)
+    MOVEIT_TRIGGER_PUB = rospy.Publisher('/arm_moveit_client/event_in',
+                                         String, queue_size=1)
+    ik_solver = OrientationIndependentIK(debug=True)
+    rospy.sleep(0.5)
+    rospy.loginfo('Initialised')
+
+    goal = (0.65, 0.1, 0.1, 'base_link')
+    print('Goal:', goal)
+    joint_msg = ik_solver.get_joint_msg_from_point(*goal)
+    if joint_msg is None:
+        rospy.logerr('Test failed. Could not find IK solution')
+        return
+    send_arm_to_joint(joint_msg)
+    rospy.sleep(5.0)
+
+    goal = (0.65, 0.1, 0.1, -60.0, 10.0, 'base_link')
+    print('Goal:', goal)
+    joint_msg = ik_solver.get_joint_msg_from_point_and_pitch(*goal) 
+    if joint_msg is None:
+        rospy.logerr('Test failed. Could not find IK solution')
+        return
+    send_arm_to_joint(joint_msg)
+
+
+if __name__ == '__main__':
+    rospy.init_node('test_node')
+    main()

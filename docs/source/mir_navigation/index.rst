@@ -124,7 +124,7 @@ On workstation or your PC
 
   .. code-block:: bash
 
-      roslaunch mir_2dnav 2Dnav.launch
+      roslaunch mir_2dnav 2dnav.launch
 
 * Create navigation goals and orientations
 
@@ -150,7 +150,7 @@ On workstation or your PC
 
       roscd mcr_default_env_config
       cd brsu-C025
-      rosrun mcr_navigation_tools save_map_poses_to_file
+      rosrun mcr_navigation_tools save_base_map_poses_to_file
 
 * Test navigation goal using move_base
 
@@ -164,3 +164,48 @@ On workstation or your PC
 .. code-block:: bash
 
     roslaunch mir_basic_navigation_test refbox_parser.py
+
+.. _Direct_robot_control:
+
+Direct base controller
+======================
+
+The direct base controller is used to perform relative motions of the robot with respect to a reference frame. It has an optional feature to stop the motions when obstacles are detected with the laser scanners.
+
+* Bringup the robot
+
+.. code-block:: bash
+
+      roslaunch mir_bringup robot.launch
+
+* Launch the direct base controller
+
+.. code-block:: bash
+
+    roslaunch mir_direct_base_controller direct_base_controller.launch
+
+
+* Launch the pose mockup GUI on your PC:
+.. code-block:: bash
+
+    export ROS_MASTER_URI=http://<robot_ip_address>:11311
+    roslaunch mir_direct_base_controller pose_mock_up_gui.launch
+
+A GUI pop up window will appear.
+Set the relative pose accordingly in the window (e.g. 0.1 in X to move forward 10 cm).
+
+* Run rviz on your PC:
+
+  .. code-block:: bash
+
+    export ROS_MASTER_URI=http://<robot_ip_address>:11311
+    rviz
+
+  Set the 'Fixed Frame' to `odom`
+  Add a 'Pose' display and set the topic to '/mcr_navigation/direct_base_controller/input_pose'
+
+
+* Publish an `e_start` event to the direct base controller node
+.. code-block:: bash
+
+    rostopic pub /mcr_navigation/direct_base_controller/coordinator/event_in std_msgs/String "data: 'e_start'"

@@ -3,7 +3,12 @@
 Perception
 ##########
 
-MAS industrial robotics - perception tutorial
+Robot perception architecture
+
+.. figure:: images/perception_architecture.png   
+  :align: center
+
+  Robot perception architecture
 
 .. toctree::
 

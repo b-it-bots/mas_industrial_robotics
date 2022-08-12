@@ -10,10 +10,11 @@ import smach
 import smach_ros
 import std_msgs.msg
 import std_srvs.srv
-import tf
-from mas_perception_msgs.msg import Object, ObjectList
-from tf.transformations import euler_from_quaternion
 
+from mas_perception_msgs.msg import ObjectList, Object
+from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
+import tf
+from tf.transformations import euler_from_quaternion
 
 class Bunch:
     def __init__(self, **kwds):
@@ -44,6 +45,8 @@ class MoveitClient:
         TOPIC_TARGET_CONFIGURATION = "moveit_client/target_configuration"
 
         self.move_arm_to = target
+
+        self._point_ik_solver = OrientationIndependentIK()
 
         # Eventin publisher
         self.pub_event = rospy.Publisher(
@@ -91,9 +94,7 @@ class MoveitClient:
                 self.pub_target_config_name.publish(target)
 
             elif type(target) is list:  # target is a list ...
-                if (
-                    len(target) == 7
-                ):  # ... of 7 items: Cartesian pose (x, y, z, r, p, y, frame_id)
+                if len(target) == 7:  # ... of 7 items: Cartesian pose (x, y, z, r, p, y, frame_id)
                     pose = geometry_msgs.msg.PoseStamped()
                     pose.header.frame_id = target[6]
                     pose.pose.position.x = float(target[0])
@@ -109,6 +110,14 @@ class MoveitClient:
                     pose.pose.orientation.w = q[3]
 
                     self.pub_target_pose.publish(pose)
+                elif len(target) == 5:      # ... of 5 items: Joint space configuration
+                    self.pub_target_config.publish(self.list_to_brics_joint_positions(target))
+                elif len(target) == 4:      # ... of 3 items: Cartesian point (x, y, z, frame_id)
+                    brics_joint_pos_msg = self._point_ik_solver.get_joint_msg_from_point(*target)
+                    if brics_joint_pos_msg is None:
+                        rospy.logerr("Could not find IK")
+                        return 'failed'
+                    self.pub_target_config.publish(brics_joint_pos_msg)
                 elif len(target) == 5:  # ... of 5 items: Joint space configuration
                     self.pub_target_config.publish(
                         self.list_to_brics_joint_positions(target)
