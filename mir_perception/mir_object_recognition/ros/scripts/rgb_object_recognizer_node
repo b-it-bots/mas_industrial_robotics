@@ -38,6 +38,9 @@ class RGBObjectRecognizer():
         config_file = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
                                    'ros', 'config', "rgb_classifier_config.yaml")
 
+        self.yolo_data_config_file = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
+                                                  'common', 'src', 'rgb_object_recognition', "data_for_detect.yaml")
+
         if os.path.isfile(config_file):
             configs = {}
             with open(config_file, 'r') as infile:
@@ -80,7 +83,7 @@ class RGBObjectRecognizer():
                     if self.model_name == 'yolov5':
 
                         predictions = yolov5_classifier.run(weights=self.model_dir,
-                                                            data='/home/kvnptl/work/b_it_bots_ws/src/mas_industrial_robotics/mir_perception/mir_object_recognition/common/src/rgb_object_recognition/data_for_detect.yaml',
+                                                            data=self.yolo_data_config_file,
                                                             source=cv_image)
                         # prediction bounding boxes are in [x1, y1, x2, y2] format
 

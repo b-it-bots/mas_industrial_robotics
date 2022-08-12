@@ -12,6 +12,8 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 
+import roslib
+
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -124,14 +126,14 @@ def run(
         im0 = im0.copy()  # raw value need to change
 
         gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-        #print('Detection: ',det)
+        # print('Detection: ',det)
         if len(det):
             # Rescale boxes from img_size to im0 size
             det[:, :4] = scale_coords(im.shape[2:], det[:, :4], im0.shape).round()
             # Write results
             for *xyxy, conf, cls in det:
                 # print('xyxy',xyxy)
-                #print('Class : ',class_names[int(cls.item())], 'Conf : ', conf)
+                # print('Class : ',class_names[int(cls.item())], 'Conf : ', conf)
                 bbox.append([x.item() for x in xyxy])
                 confidence.append(conf.item())
                 classes.append(class_names[int(cls.item())])
@@ -147,12 +149,21 @@ def run(
 
 def main():
 
-    model_path = '/home/kvnptl/work/b_it_bot_work/2d_object_detection/b_it_bot_dataset/atwork_realdata_combined/training_copy_4/yolov5/runs/train/results_5/weights/best.pt'
-    image_path = '/home/kvnptl/work/b_it_bot_work/2d_object_detection/b_it_bot_dataset/atwork_realdata_combined/training_copy_4/inference_images/20190501_frame0012.jpg'
+    model_file = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                              'common', 'models', 'yolov5', 'atwork_realdata_combined', "best.pt")
+
+    inference_image_file = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
+                                        'common', 'src', 'rgb_object_recognition', 'yolov5', 'data',
+                                        'images', 'zidane.jpg')
+
+    data_yaml = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
+                             'common', 'src', 'rgb_object_recognition', "data_for_detect.yaml")
+
+    model_path = model_file
 
     predictions = run(weights=model_path,
-                      data='/home/kvnptl/work/b_it_bot_work/2d_object_detection/b_it_bot_dataset/atwork_realdata_combined/training_copy_4/data_for_detect.yaml',
-                      source=image_path)
+                      data=data_yaml,
+                      source=inference_image_file)
 
 
 if __name__ == "__main__":
