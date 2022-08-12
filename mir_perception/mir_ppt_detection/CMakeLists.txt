@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(mir_ppt_detection)
 
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 find_package(catkin REQUIRED COMPONENTS
     pcl_ros
@@ -16,8 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
     FILES
         Cavity.msg
-        Cavities.msg
-)
+        Cavities.msg)
 
 generate_messages(
     DEPENDENCIES
