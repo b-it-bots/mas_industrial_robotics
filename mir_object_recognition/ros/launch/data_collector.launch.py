@@ -19,12 +19,13 @@ def generate_launch_description():
         name="MMOR_container",
         namespace="",
         package="rclcpp_components",
-        executable="component_container_mt",
+        executable="component_container",
         composable_node_descriptions=[
+            
             ComposableNode(
                     package="mir_object_recognition",
-                    plugin="perception_namespace::MultiModalObjectRecognitionROS",
-                    name="mmor",
+                    plugin="perception_namespace::DataCollector",
+                    name="data_collector",
                     remappings=[
                     ("input_image_topic", "/camera/color/image_raw"),
                     ("input_cloud_topic", "/camera/depth/color/points"),
@@ -37,3 +38,12 @@ def generate_launch_description():
     ld.add_action(container)
     return ld
 
+# ComposableNode(
+#                     package="mir_object_recognition",
+#                     plugin="perception_namespace::MultiModalObjectRecognitionROS",
+#                     name="mmor",
+#                     remappings=[
+#                     ("input_image_topic", "/camera/color/image_raw"),
+#                     ("input_cloud_topic", "/camera/depth/color/points"),
+#                 ]
+#                 )

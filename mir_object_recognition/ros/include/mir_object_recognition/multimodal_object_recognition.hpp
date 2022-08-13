@@ -236,7 +236,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                         std::vector<mpu::object::BoundingBox> boxes);
         
         /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
-        void recognizeCloudAndImage();
+        virtual void recognizeCloudAndImage();
 
         /** \brief Adjust object pose, make it flat, adjust container, axis and bolt poses.
          * \param[in] Object_list.pose, .name,
