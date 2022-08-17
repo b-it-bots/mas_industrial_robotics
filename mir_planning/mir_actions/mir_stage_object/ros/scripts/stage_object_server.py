@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import mir_states.common.manipulation_states as gms  # move the arm, and gripper
+import mir_states.common.basic_states as mir_gbs
 import rospy
 import smach
 import smach_ros
@@ -206,6 +207,12 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
+            transitions={"succeeded": "WAIF_FOR_OBJECT_TO_BE_RELEASED"},
+        )
+
+        smach.StateMachine.add(
+            "WAIF_FOR_OBJECT_TO_BE_RELEASED",
+            mir_gbs.wait_for(1),
             transitions={"succeeded": "CHECK_IF_OBJECT_HEAVY_AGAIN"},
         )
 

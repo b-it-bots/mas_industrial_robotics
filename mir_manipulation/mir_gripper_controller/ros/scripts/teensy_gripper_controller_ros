@@ -6,6 +6,7 @@ from sensor_msgs.msg import JointState
 from mcr_manipulation_msgs.msg import GripperCommand
 import serial_interface
 import math
+import json
 
 
 class GripperController:
@@ -75,7 +76,7 @@ class GripperController:
         msgs = self.serial_msg.receive()
         if msgs is not None:
             for msg in msgs:
-                self.feedback_publisher.publish(str(msg))
+                self.feedback_publisher.publish(json.dumps(msg))
 
                 # convert gripper positions from degrees to radians
                 gripper_right_motor_position = math.radians(msg['right_gripper_pos'])

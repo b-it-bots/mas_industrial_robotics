@@ -231,8 +231,8 @@ def main():
     # Open the container
     sm.userdata.arm_pose_list = [
         "look_at_workspace_from_near",
-        "look_at_workspace_from_near_left",
-        "look_at_workspace_from_near_right",
+        # "look_at_workspace_from_near_left",
+        # "look_at_workspace_from_near_right",
     ]
     sm.userdata.arm_pose_index = 0
 

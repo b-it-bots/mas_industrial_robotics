@@ -396,6 +396,12 @@ def main():
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
+            transitions={"succeeded": "WAIT_FOR_GRIPPER_TO_GRASP"},
+        )
+
+        smach.StateMachine.add(
+            "WAIT_FOR_GRIPPER_TO_GRASP",
+            mir_gbs.wait_for(0.5),
             transitions={"succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE"},
         )
 
