@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import json
 import math
 import re
 
@@ -212,16 +213,26 @@ class control_gripper(smach.State):
         self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
         self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
         self.command = GripperCommand()
+        self.current_state = "GRIPPER_OPEN"
         if 'open' in target:
             self.command.command = GripperCommand.OPEN
         else:
             self.command.command = GripperCommand.CLOSE
+
     def feedback_cb(self, msg):
-        pass
+        json_obj = json.loads(msg.data)
+        self.current_state = json_obj["state"]
 
     def execute(self, userdata):
         self.pub.publish(self.command)
-        return 'succeeded'
+        while True:
+            if self.current_state == "GRIPPER_OPEN" and\
+                    self.command.command == GripperCommand.OPEN:
+                return "succeeded"
+            elif (self.current_state == "GRIPPER_CLOSED" or self.current_state == "OBJECT_GRASPED")\
+                    and self.command.command == GripperCommand.CLOSE:
+                return "succeeded"
+            rospy.sleep(0.1)
 
 
 class move_arm_and_gripper(smach.State):
