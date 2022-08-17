@@ -48,7 +48,9 @@
     <!-- NAVIGATION -->
     <!-- ========== -->
     <!-- move_base with dwa approach -->
-    <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
+
+    <!-- commenting the 2dnav launch to control continuous warnings in planning_bringup -->
+    <!-- <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" /> -->
 
     <!-- move_base action lib wrapper -->
     <include file="$(find mir_move_base_safe)/ros/launch/move_base.launch" />

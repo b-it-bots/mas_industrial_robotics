@@ -15,6 +15,8 @@ from mas_perception_msgs.msg import ObjectList, Object
 from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
 import tf
 from tf.transformations import euler_from_quaternion
+from mcr_manipulation_msgs.msg import GripperCommand
+from std_msgs.msg import String
 
 class Bunch:
     def __init__(self, **kwds):
@@ -203,25 +205,23 @@ class check_move_group_feedback(smach.State):
         else:
             return "failed"
 
-
 class control_gripper(smach.State):
     def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0):
         smach.State.__init__(self, outcomes=["succeeded"])
 
-        joint_names = ["gripper_motor_right_joint", "gripper_motor_left_joint"]
-        self.gripper_moveit_client = MoveitClient(
-            "/gripper_", target, timeout, joint_names
-        )
+        self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
+        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
+        self.command = GripperCommand()
+        if 'open' in target:
+            self.command.command = GripperCommand.OPEN
+        else:
+            self.command.command = GripperCommand.CLOSE
+    def feedback_cb(self, msg):
+        pass
 
     def execute(self, userdata):
-
-        while True:
-
-            status = self.gripper_moveit_client.execute(userdata)
-            if status == "succeeded":
-                break
-
-        return "succeeded"
+        self.pub.publish(self.command)
+        return 'succeeded'
 
 
 class move_arm_and_gripper(smach.State):
@@ -248,10 +248,13 @@ class move_arm_and_gripper(smach.State):
             "arm_joint_5",
         ]
         self.arm_moveit_client = MoveitClient("/arm_", target, timeout, joint_names)
-        self.pub = rospy.Publisher(
-            "/gripper_controller/command", std_msgs.msg.Float64, queue_size=1
-        )
+        self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
         self.conf = conf
+        self.gripper_command = GripperCommand()
+        if 'open' in self.conf:
+            self.gripper_command.command = GripperCommand.OPEN
+        else:
+            self.gripper_command.command = GripperCommand.CLOSE
 
     def get_targets(self, group_name):
         text = rospy.get_param("/robot_description_semantic")
@@ -271,10 +274,7 @@ class move_arm_and_gripper(smach.State):
         return angle
 
     def execute(self, userdata):
-        angle = self.get_targets("arm_1_gripper")
-        data = std_msgs.msg.Float64()
-        data.data = angle
-        self.pub.publish(data)
+        self.pub.publish(self.gripper_command)
         return self.arm_moveit_client.execute(userdata)
 
 
