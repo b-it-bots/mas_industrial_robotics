@@ -27,7 +27,7 @@ class RGBObjectRecognizer(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('~model_dir', '/home/mas/catkin_ws/src/mas_perception_msgs/models/'),
+                ('~model_dir', '/home/vivek/rolling_ws/src/mir_perception_models/mir_rgb_object_recognition_models/common/models/yolov5/atwork_realdata_combined/'),
                 ('~net', 'detection'),
                 ('~classifier', 'yolov5'),
                 # ('~dataset')
@@ -42,16 +42,16 @@ class RGBObjectRecognizer(Node):
         self.pub_debug = self.create_publisher(
             Image, "/mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image", 1)
         self.pub_result = self.create_publisher(
-            ObjectList, "output/object_list", 1)
+            ObjectList, "recognizer/rgb/output/object_list", 1)
         self.sub_img = self.create_subscription(
-            ImageList, "input/images", self.image_recognition_cb, 10)
+            ImageList, "recognizer/rgb/input/images", self.image_recognition_cb, 10)
         self.confidence_threshold = 0.6
 
-        config_file = os.path.join(get_package_share_directory("mir_object_recognition"),
-                                   'ros', 'config', "rgb_classifier_config.yaml")
+        config_file = "/home/vivek/rolling_ws/src/mir_object_recognition/ros/config/rgb_classifier_config.yaml"
+        # os.path.join(get_package_share_directory("mir_object_recognition"),'ros', 'config', "rgb_classifier_config.yaml")
 
-        self.yolo_data_config_file = os.path.join(get_package_share_directory("mir_recognizer_scripts"),
-                                        'mir_recognizer_scripts','rgb_object_recognition', "data_for_detect.yaml")
+        self.yolo_data_config_file = "/home/vivek/rolling_ws/src/mir_recognizer_scripts/mir_recognizer_scripts/rgb_object_recognition/data_for_detect.yaml"
+        # os.path.join(get_package_share_directory("mir_recognizer_scripts"),'mir_recognizer_scripts','rgb_object_recognition', "data_for_detect.yaml")
 
         if os.path.isfile(config_file):
             configs = {}

@@ -1,4 +1,5 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+
 from .utils.general import (check_img_size, non_max_suppression, print_args, scale_coords)
 import cv2
 from .utils.torch_utils import select_device

@@ -2,7 +2,7 @@
 """
 Common modules
 """
-
+import sys
 import json
 import math
 import platform
@@ -21,9 +21,9 @@ import yaml
 from PIL import Image
 from torch.cuda import amp
 
-from ..utils.dataloaders import exif_transpose, letterbox
-from ..utils.general import (LOGGER, check_requirements, check_suffix, check_version, colorstr, increment_path,
-                                                         make_divisible, non_max_suppression, scale_coords, xywh2xyxy, xyxy2xywh)
+
+from yolov5.utils.dataloaders import exif_transpose, letterbox
+from ..utils.general import (LOGGER, check_requirements, check_suffix, check_version, colorstr, increment_path, make_divisible, non_max_suppression, scale_coords, xywh2xyxy, xyxy2xywh)
 from ..utils.plots import Annotator, colors, save_one_box
 from ..utils.torch_utils import copy_attr, time_sync
 
