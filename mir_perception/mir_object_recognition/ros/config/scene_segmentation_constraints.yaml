@@ -37,7 +37,7 @@ multimodal_object_recognition:
   object_height_above_workspace: 0.022
   container_height: 0.07
   enable_rgb_recognizer: true
-  enable_pc_recognizer: false
+  enable_pc_recognizer: true
   rgb_roi_adjustment: 2
   rgb_bbox_min_diag: 21
   rgb_bbox_max_diag: 175

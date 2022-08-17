@@ -52,39 +52,48 @@ class DGCNNClassifier(CNNBasedClassifiers):
 
         :return:    Predicted label and probablity
         """
-
-        test_loader = DataLoader(infer_data(num_points=self.num_points, pcl_path=pointcloud),
-                                 batch_size=self.test_batch_size, shuffle=True, drop_last=False)
+        # Kevin: this code is returning len 1000 instead of len 1?
+        # Look into how original code is implemented
+        pointcloud_dataloader = DataLoader(infer_data(num_points=self.num_points, pcl_path=pointcloud),
+                                           batch_size=self.test_batch_size, shuffle=True, drop_last=False)
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = DGCNN(self.args).to(device)
         model = nn.DataParallel(model)
         model.load_state_dict(torch.load(
-            self.model_path, map_location=torch.device('cpu')))
+            self.model_path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
         model = model.eval()
 
-        for pcl, label in test_loader:
+        break_flag = False
 
-            print("inferencing ...")
+        for pcl, label in pointcloud_dataloader:
 
-            data = pcl.to(device)
+            if break_flag == False:
 
-            data = data.permute(0, 2, 1)
+                print("inferencing ...")
 
-            logits = model(data)
+                break_flag = True
 
-            # convert logits to probabilities
-            prob = nnf.softmax(logits, dim=1)
-            top_p, top_class = prob.topk(1, dim=1)
+                data = pcl.to(device)
 
-            # set probability threshold to 0.6
+                data = data.permute(0, 2, 1)
 
-            if top_p.item() > 0.6:  # if probability is greater than 0.6, then predict as that class
+                logits = model(data)
 
-                print(
-                    f'Probability - {round(top_p.item(),2)} Class - {top_class[0].item()}')
-                return top_class.item(), top_p.item()
+                # convert logits to probabilities
+                prob = nnf.softmax(logits, dim=1)
+                top_p, top_class = prob.topk(1, dim=1)
 
+                # set probability threshold to 0.6
+
+                if top_p.item() > 0.3:  # if probability is greater than 0.6, then predict as that class
+
+                    print(
+                        f'Probability - {round(top_p.item(),2)} Class - {top_class[0].item()}')
+                    return top_class.item(), top_p.item()
+
+                else:
+                    print("No object found")
+                    return None, None
             else:
-                print("No object found")
-                pass
+                break

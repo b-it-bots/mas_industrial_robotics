@@ -96,6 +96,7 @@ class PointcloudObjectRecognizer():
             rospy.loginfo("%d clouds received ", len(object_list.objects))
             recognized_object_list = ObjectList()
             recognized_object_list = object_list.objects
+
             for object in recognized_object_list:
                 if self.model == "feature_based":
                     cloud = self.extract_pointcloud(
@@ -107,13 +108,31 @@ class PointcloudObjectRecognizer():
                 elif self.model == "cnn_based":
                     cloud = self.extract_pointcloud(
                         object.views[0].point_cloud, color="rgb")
+
+                    # Kevin: something wrong with passing the cloud to the classifier
+                    # check further comments in the classifier code
                     label, probability = self.classifier.classify(
                         cloud, center=True, rotate=True, pad=True)
-                    name = self.label_to_name[label]
 
+                    if (label, probability) != (None, None):
+                        name = self.label_to_name[label]
+                        probability = probability
+                    else:
+                        name = "unknown object found"
+                        probability = 0.0
+                        continue
+
+                    print('\n######################')
+                    print('name: ', name)
+                    print('######################\n')
+
+                # Kevin: why are we not storing name and probability in object?
+                # here it's getting overwritten
                 object.name = name
                 object.probability = probability
 
+            # Kevin: why are we not updating recognized_object_list?
+            # this is just publishing incoming object_list
             self.pub.publish(recognized_object_list)
 
     def extract_pointcloud(self, pc, color="hsv"):
@@ -158,6 +177,6 @@ if __name__ == '__main__':
 
     object_recognizer = PointcloudObjectRecognizer(
         model, model_id, dataset, model_dir)
-    rospy.loginfo(
-        "PCL Recognizer is ready using: %s , model: %s ", model, model_id)
+    rospy.loginfo('\033[92m'+"PCL Recognizer is ready using %s , model: %s ",
+                  model, model_id)
     rospy.spin()
