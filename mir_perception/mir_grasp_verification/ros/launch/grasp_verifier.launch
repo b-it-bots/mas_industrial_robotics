@@ -3,12 +3,6 @@
 
     <arg name="debug" default="true" />
     <arg name="input_rgb_image_topic" default="/arm_cam3d/rgb/image_raw" />
-    <!-- <arg name="template_img_path" default="$(find mir_grasp_verification)/common/data/not_grasped.jpg" /> -->
-    <!-- <arg name="template_img_path" default="$(find mir_grasp_verification)/common/data/not_grasped_window.jpg" /> -->
-    <arg name="template_img_path" default="$(find mir_grasp_verification)/common/data/not_grasped_light.jpg" />
-    <!-- <arg name="template_img_path" default="$(find mir_grasp_verification)/common/data/not_grasped_window_plus_light.jpg" /> -->
-    <arg name="process_method" default="thr" />
-    <!-- <arg name="process_method" default="hsv" /> -->
     <arg name="config_file_path" default="$(find mir_grasp_verification)/ros/config/config.yaml" />
     <arg name="template_images_dir" default="$(find mir_grasp_verification)/template_images" />
 
@@ -17,8 +11,6 @@
         <remap from="~input_rgb_image" to="$(arg input_rgb_image_topic)"/>
 
         <param name="debug" type="bool" value="$(arg debug)"/>
-        <param name="template_img_path" type="str" value="$(arg template_img_path)"/>
-        <param name="process_method" type="str" value="$(arg process_method)"/>
         <param name="config_file_path" type="str" value="$(arg config_file_path)"/>
         <param name="template_images_dir" type="str" value="$(arg template_images_dir)"/>
     </node>

@@ -62,33 +62,12 @@ class GraspVerifier(object):
         self._smax = 255
         self._vmin = 30
         self._vmax = 255
-        if self._process_method == "thr":
-            self._process_img = self._process_img_thr
-        elif self._process_method == "hsv":
-            self._process_img = self._process_img_hsv
 
         config_read_success = self._read_config_file(config_file_path, template_images_dir)
         if not config_read_success:
             rospy.logfatal("config_file_path: " + config_file_path + " not as expected.")
             rospy.signal_shutdown("config_file_path: " + config_file_path + " not as expected")
             return
-
-
-        # load template image
-        if template_img_path is None:
-            rospy.logfatal("template_img_path is empty")
-            rospy.signal_shutdown("template_img_path is empty")
-            return
-        if not os.path.exists(template_img_path):
-            rospy.logfatal("template_img_path: " + template_img_path + " does not exist")
-            rospy.signal_shutdown("template_img_path: " + template_img_path + " does not exist")
-            return
-        template_img_raw = cv.imread(template_img_path)
-        if template_img_raw.size == 0:
-            rospy.logfatal("Could not read image at " + template_img_path)
-            rospy.signal_shutdown("Could not read image at " + template_img_path)
-            return
-        self._template_img = self._process_img(template_img_raw)
 
         # publishers
         self._event_out_pub = rospy.Publisher("~event_out", String, queue_size=1)
@@ -99,104 +78,6 @@ class GraspVerifier(object):
         self._image_sub = rospy.Subscriber("~input_rgb_image", Image, self._input_image_cb)
 
         rospy.loginfo("Initialised GraspVerifier")
-
-    def _event_in_cb(self, msg):
-        if msg.data == "e_start":
-            self._listening = True
-            self._event_out_pub.publish(String(data="e_started"))
-        if msg.data == "e_stop":
-            self._listening = False
-            self._event_out_pub.publish(String(data="e_stopped"))
-        if msg.data == "e_trigger":
-            self._listening = True
-
-    def _input_image_cb(self, msg):
-        """
-        Callback for image from camera. 
-
-        :msg: sensor_msgs.Image
-        :returns: None
-
-        """
-        if not self._listening:
-            return
-
-        try:
-            cv_image = self._bridge.imgmsg_to_cv2(msg, "bgr8")
-        except CvBridgeError as e:
-            rospy.logerr("Could not convert ros sensor msgs Image to opencv Image.")
-            rospy.logerr(str(e))
-            self._check_failure()
-            return
-
-        processed_test_img = self._process_img(cv_image)
-        processed_test_border_img = cv.copyMakeBorder(
-            processed_test_img,
-            top=self._bordersize,
-            bottom=self._bordersize,
-            left=self._bordersize,
-            right=self._bordersize,
-            borderType=cv.BORDER_CONSTANT,
-            value=0)
-        self._pub_debug_img(processed_test_img, encoding="passthrough")
-        # self._pub_debug_img(processed_test_img, encoding="bgr8")
-
-        # match test img with template
-        score_img = cv.matchTemplate(processed_test_border_img,
-                self._template_img, cv.TM_CCOEFF_NORMED)
-        _, max_value, _, _ = cv.minMaxLoc(score_img);
-        print("Matched:", round(max_value*100, 2), "%")
-        # self._pub_debug_img(score_img, encoding="passthrough")
-
-    def _pub_debug_img(self, img, encoding="bgr8"):
-        """
-        TODO
-        """
-        if self._debug:
-            try:
-                ros_debug_img = self._bridge.cv2_to_imgmsg(img, encoding=encoding)
-                self._debug_image_pub.publish(ros_debug_img)
-            except CvBridgeError as e:
-                rospy.logwarn("Could not convert debug cv image to ros image")
-                pass
-
-    def _process_img_thr(self, raw_img):
-        bw_raw_img = cv.cvtColor(raw_img, cv.COLOR_BGR2GRAY)
-        cropped_img = bw_raw_img[self._crop_bbox[1]:self._crop_bbox[1]+self._crop_bbox[3],
-                                 self._crop_bbox[0]:self._crop_bbox[0]+self._crop_bbox[2]]
-
-        # thresholding
-        adaptive_thr_img = cv.adaptiveThreshold(
-                cropped_img,
-                255,
-                cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-                cv.THRESH_BINARY_INV,
-                self._adaptive_threshold_ksize,
-                self._adaptive_threshold_c)
-
-        # add black polygon to remove background
-        polygon_img = adaptive_thr_img.copy()
-        cv.fillPoly(polygon_img, pts =[self._bg_polygon], color=(0,0,0))
-
-        # Blur image
-        blur_median_img = cv.medianBlur(polygon_img, self._median_blur_ksize)
-        return blur_median_img
-
-    def _process_img_hsv(self, raw_img):
-        cropped_img = raw_img[self._crop_bbox[1]:self._crop_bbox[1]+self._crop_bbox[3],
-                              self._crop_bbox[0]:self._crop_bbox[0]+self._crop_bbox[2]]
-
-        # normalise image (src: https://stackoverflow.com/a/66676709/10460994)
-        img_yuv = cv.cvtColor(cropped_img, cv.COLOR_BGR2YCrCb)
-        img_yuv[:,:,0] = cv.equalizeHist(img_yuv[:,:,0])
-        eq_hist_img = cv.cvtColor(img_yuv, cv.COLOR_YCrCb2BGR)
-
-        # apply hsv filter
-        hsv_raw_img = cv.cvtColor(eq_hist_img, cv.COLOR_BGR2HSV)
-        lower = np.array([self._hmin, self._smin, self._vmin], np.uint8)
-        upper = np.array([self._hmax, self._smax, self._vmax], np.uint8)
-        masked_img = cv.inRange(cropped_img, lower, upper)
-        return masked_img
 
     def _read_config_file(self, config_file_path, template_images_dir):
         with open(config_file_path, "r") as file_obj:
@@ -242,6 +123,110 @@ class GraspVerifier(object):
 
         self._tm_params = tm_params
         return True
+
+    def _event_in_cb(self, msg):
+        if msg.data == "e_start":
+            self._listening = True
+            self._event_out_pub.publish(String(data="e_started"))
+        if msg.data == "e_stop":
+            self._listening = False
+            self._event_out_pub.publish(String(data="e_stopped"))
+        if msg.data == "e_trigger":
+            self._listening = True
+
+    def _input_image_cb(self, msg):
+        """
+        Callback for image from camera. 
+
+        :msg: sensor_msgs.Image
+        :returns: None
+
+        """
+        if not self._listening:
+            return
+
+        try:
+            cv_image = self._bridge.imgmsg_to_cv2(msg, "bgr8")
+        except CvBridgeError as e:
+            rospy.logerr("Could not convert ros sensor msgs Image to opencv Image.")
+            rospy.logerr(str(e))
+            self._check_failure()
+            return
+
+        total_score = 0.0
+        for tm_param in self._tm_params:
+            process_method = tm_param["process_method"]
+            # process the input image based on `process_method`
+            processed_test_img = self._process_method_dict[process_method](cv_image)
+            # add border around for "robust" matching
+            processed_test_border_img = cv.copyMakeBorder(
+                processed_test_img,
+                top=self._bordersize,
+                bottom=self._bordersize,
+                left=self._bordersize,
+                right=self._bordersize,
+                borderType=cv.BORDER_CONSTANT,
+                value=0)
+            # if process_method == "hsv":
+            #     self._pub_debug_img(processed_test_img, encoding="passthrough")
+
+            # match test img with template_img
+            score_img = cv.matchTemplate(processed_test_border_img,
+                    tm_param["template_img"], cv.TM_CCOEFF_NORMED)
+            _, max_value, _, _ = cv.minMaxLoc(score_img);
+            score = round(max_value*100, 2)
+            total_score += score * tm_param["weight"]
+            print(process_method, "Matched:", score, "%")
+            # self._pub_debug_img(score_img, encoding="passthrough")
+        print("Total score:", total_score)
+        print()
+
+    def _pub_debug_img(self, img, encoding="bgr8"):
+        if self._debug:
+            try:
+                ros_debug_img = self._bridge.cv2_to_imgmsg(img, encoding=encoding)
+                self._debug_image_pub.publish(ros_debug_img)
+            except CvBridgeError as e:
+                rospy.logwarn("Could not convert debug cv image to ros image")
+                pass
+
+    def _process_img_thr(self, raw_img):
+        bw_raw_img = cv.cvtColor(raw_img, cv.COLOR_BGR2GRAY)
+        cropped_img = bw_raw_img[self._crop_bbox[1]:self._crop_bbox[1]+self._crop_bbox[3],
+                                 self._crop_bbox[0]:self._crop_bbox[0]+self._crop_bbox[2]]
+
+        # thresholding
+        adaptive_thr_img = cv.adaptiveThreshold(
+                cropped_img,
+                255,
+                cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv.THRESH_BINARY_INV,
+                self._adaptive_threshold_ksize,
+                self._adaptive_threshold_c)
+
+        # add black polygon to remove background
+        polygon_img = adaptive_thr_img.copy()
+        cv.fillPoly(polygon_img, pts =[self._bg_polygon], color=(0,0,0))
+
+        # Blur image
+        blur_median_img = cv.medianBlur(polygon_img, self._median_blur_ksize)
+        return blur_median_img
+
+    def _process_img_hsv(self, raw_img):
+        cropped_img = raw_img[self._crop_bbox[1]:self._crop_bbox[1]+self._crop_bbox[3],
+                              self._crop_bbox[0]:self._crop_bbox[0]+self._crop_bbox[2]]
+
+        # normalise image (src: https://stackoverflow.com/a/66676709/10460994)
+        img_yuv = cv.cvtColor(cropped_img, cv.COLOR_BGR2YCrCb)
+        img_yuv[:,:,0] = cv.equalizeHist(img_yuv[:,:,0])
+        eq_hist_img = cv.cvtColor(img_yuv, cv.COLOR_YCrCb2BGR)
+
+        # apply hsv filter
+        hsv_raw_img = cv.cvtColor(eq_hist_img, cv.COLOR_BGR2HSV)
+        lower = np.array([self._hmin, self._smin, self._vmin], np.uint8)
+        upper = np.array([self._hmax, self._smax, self._vmax], np.uint8)
+        masked_img = cv.inRange(cropped_img, lower, upper)
+        return masked_img
 
 if __name__ == "__main__":
     rospy.init_node("grasp_verifier")
