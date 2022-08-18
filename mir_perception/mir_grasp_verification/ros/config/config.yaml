@@ -1,0 +1,7 @@
+template_matching_params:
+    - img_name: "not_grasped_light.jpg"
+      process_method: "thr"
+      weight: 0.5
+    - img_name: "not_grasped_light.jpg"
+      process_method: "hsv"
+      weight: 0.5

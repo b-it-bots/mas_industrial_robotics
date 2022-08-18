@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="debug" default="true" />
+    <arg name="input_rgb_image_topic" default="/arm_cam3d/rgb/image_raw" />
+    <arg name="config_file_path" default="$(find mir_grasp_verification)/ros/config/config.yaml" />
+    <arg name="template_images_dir" default="$(find mir_grasp_verification)/template_images" />
+
+    <node pkg="mir_grasp_verification" type="grasp_verifier"
+          name="grasp_verifier" output="screen" ns="mir_perception">
+        <remap from="~input_rgb_image" to="$(arg input_rgb_image_topic)"/>
+
+        <param name="debug" type="bool" value="$(arg debug)"/>
+        <param name="config_file_path" type="str" value="$(arg config_file_path)"/>
+        <param name="template_images_dir" type="str" value="$(arg template_images_dir)"/>
+    </node>
+</launch>
