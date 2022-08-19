@@ -19,5 +19,3 @@ latex/
 
 # VSCode
 .vscode/
-
-mir_perception/mir_object_recognition/common/src/rgb_object_recognition/yolov5/runs/detect/inference_1
