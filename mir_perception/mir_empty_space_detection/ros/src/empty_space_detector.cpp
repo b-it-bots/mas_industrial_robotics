@@ -40,10 +40,21 @@ void EmptySpaceDetector::loadParams()
   nh_.param<std::string>("passthrough_filter_field_name", passthrough_filter_field_name, "x");
   nh_.param<float>("passthrough_filter_limit_min", passthrough_filter_limit_min, 0.0);
   nh_.param<float>("passthrough_filter_limit_max", passthrough_filter_limit_max, 0.8);
+  float cropbox_filter_min_x, cropbox_filter_max_x, cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z, cropbox_filter_max_z;
+  bool enable_cropbox_filter;
+  nh_.param<bool>("enable_cropbox_filter", enable_cropbox_filter, false);
+  nh_.param<float>("cropbox_filter_min_x", cropbox_filter_min_x, 0.0);
+  nh_.param<float>("cropbox_filter_max_x", cropbox_filter_max_x, 0.8);
+  nh_.param<float>("cropbox_filter_min_y", cropbox_filter_min_y, -0.5);
+  nh_.param<float>("cropbox_filter_max_y", cropbox_filter_max_y, 0.8);
+  nh_.param<float>("cropbox_filter_min_z", cropbox_filter_min_z, -0.2);
+  nh_.param<float>("cropbox_filter_max_z", cropbox_filter_max_z, 0.6);
   scene_segmentation_->setPassthroughParams(
       enable_passthrough_filter, passthrough_filter_field_name, passthrough_filter_limit_min,
       passthrough_filter_limit_max);
-
+  scene_segmentation_->setCropBoxParams(enable_cropbox_filter, cropbox_filter_min_x, cropbox_filter_max_x,
+                                       cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z,
+                                       cropbox_filter_max_z);
   float voxel_leaf_size, voxel_filter_limit_min, voxel_filter_limit_max;
   std::string voxel_filter_field_name;
   nh_.param<float>("voxel_leaf_size", voxel_leaf_size, 1.0);

@@ -8,6 +8,13 @@ multimodal_object_recognition:
   passthrough_filter_field_name: x
   passthrough_filter_limit_min: 0.0
   passthrough_filter_limit_max: 0.8
+  enable_cropbox_filter: false
+  cropbox_filter_min_x: 0.0
+  cropbox_filter_min_x: 0.8
+  cropbox_filter_min_y: -0.5
+  cropbox_filter_min_y: 0.8
+  cropbox_filter_min_z: -0.2
+  cropbox_filter_min_z: 0.6
   normal_radius_search: 0.03
   use_omp: False
   num_cores: 8

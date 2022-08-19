@@ -130,7 +130,6 @@ class RGBObjectRecognizer():
                         result.roi = roi
 
                         objects.append(result)
-
                     # Publish result_list
                     result_list.objects = objects
                     self.pub_result.publish(result_list)

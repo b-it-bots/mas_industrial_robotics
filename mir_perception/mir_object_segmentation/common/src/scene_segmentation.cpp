@@ -79,6 +79,12 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
     pass_through_.filter(*filtered);
   }
 
+  // cropbox filter to include filters in XYZ
+  if (enable_cropbox_filter_){
+    crop_box_.setInputCloud(filtered);
+    crop_box_.filter(*filtered);
+  }
+
   if (use_omp_) {
     normal_estimation_omp_.setInputCloud(filtered);
     normal_estimation_omp_.compute(*normals);
@@ -139,6 +145,14 @@ void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter,
   enable_passthrough_filter_ = enable_passthrough_filter;
   pass_through_.setFilterFieldName(field_name);
   pass_through_.setFilterLimits(limit_min, limit_max);
+}
+
+void SceneSegmentation::setCropBoxParams(bool enable_cropbox_filter, double min_x, double max_x,
+                                         double min_y, double max_y, double min_z, double max_z)
+{
+  enable_cropbox_filter_ = enable_cropbox_filter;
+  crop_box_.setMin(Eigen::Vector4f(min_x, min_y, min_z, 1.0));
+  crop_box_.setMax(Eigen::Vector4f(max_x, max_y, max_z, 1.0));
 }
 
 void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int num_cores)

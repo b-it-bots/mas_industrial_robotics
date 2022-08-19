@@ -1,10 +1,9 @@
 import struct
 import numpy as np
 from sklearn.mixture import GaussianMixture
+from sklearn.mixture._gaussian_mixture import _compute_precision_cholesky
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
-# import open3d
-# import open3d
 
 # copied from python-pcl
 
@@ -170,7 +169,6 @@ def get_3d_grid_gmm(subdivisions=[5, 5, 5], variance=0.04):
     gmm.weights_ = weights
     gmm.covariances_ = covariances
     gmm.means_ = means
-    from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
     gmm.precisions_cholesky_ = _compute_precision_cholesky(covariances, 'diag')
     return gmm
 
