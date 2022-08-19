@@ -10,7 +10,8 @@
     <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
 
     <!-- upload domain args - pddl problem that will be loaded as instrinsic knowledge -->
-    <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/minimum_required_facts.pddl" />
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/minimum_required_facts.pddl" /> -->
+    <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/local_2022_problem.pddl" />
 
     <!-- pddl problem gen - path for the pddl problem generator to save the created file, and for the planner to make plan -->
     <arg name="problem_path" default="$(arg base_path)/problems/p1.pddl" />
@@ -38,6 +39,7 @@
     <!-- automatic pddl problem generation from kb snapshot -->
     <include file="$(find mir_pddl_problem_generator)/ros/launch/pddl_problem_generator.launch">
         <arg name="problem_path" value="$(arg problem_path)" />
+        <arg name="max_goals" value="1" />
     </include>
 
     <!-- mir_task_planning (planners wrapped with ros action server) -->
