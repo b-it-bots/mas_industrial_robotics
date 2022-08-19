@@ -214,6 +214,7 @@ class control_gripper(smach.State):
         self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
         self.command = GripperCommand()
         self.current_state = "GRIPPER_OPEN"
+        self.grasped_counter = 0
         if 'open' in target:
             self.command.command = GripperCommand.OPEN
         else:
@@ -222,15 +223,24 @@ class control_gripper(smach.State):
     def feedback_cb(self, msg):
         json_obj = json.loads(msg.data)
         self.current_state = json_obj["state"]
+        if self.current_state == "OBJECT_GRASPED":
+            self.grasped_counter += 1
 
     def execute(self, userdata):
         self.pub.publish(self.command)
         while True:
             if self.current_state == "GRIPPER_OPEN" and\
                     self.command.command == GripperCommand.OPEN:
+                self.grasped_counter = 0
                 return "succeeded"
-            elif (self.current_state == "GRIPPER_CLOSED" or self.current_state == "OBJECT_GRASPED")\
-                    and self.command.command == GripperCommand.CLOSE:
+            elif self.current_state == "GRIPPER_CLOSED" and\
+                    self.command.command == GripperCommand.CLOSE:
+                self.grasped_counter = 0
+                return "succeeded"
+            elif self.current_state == "OBJECT_GRASPED" and\
+                    self.grasped_counter > 4 and\
+                    self.command.command == GripperCommand.CLOSE:
+                self.grasped_counter = 0
                 return "succeeded"
             rospy.sleep(0.1)
 

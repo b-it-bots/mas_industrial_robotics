@@ -33,6 +33,7 @@ class GripperController:
             # Perform gripper close open at initialization
             rospy.loginfo("Closing and opening the gripper at initialization.")
             self.serial_msg.send({'command': 1})
+            rospy.sleep(1)
             self.serial_msg.send({'command': 0})
 
         except rospy.ROSInterruptException as ex:
