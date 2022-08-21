@@ -28,7 +28,7 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::Nod
     // changing the debug mode to true for testing purposes, revert to false for production
     this->declare_parameter<bool>("debug_mode_", true);
     this->get_parameter("debug_mode_", debug_mode_);
-    this->declare_parameter<std::string>("logdir", "~/Downloads/");
+    this->declare_parameter<std::string>("logdir", "/tmp/");
     this->get_parameter("logdir", logdir_);
     
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
@@ -144,6 +144,7 @@ void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg:
 
 void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 {
+    RCLCPP_INFO(get_logger(),"Inside mmor node recognize cloud image function");
     mas_perception_msgs::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
@@ -155,7 +156,9 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
     if (!cloud_object_list.objects.empty() && enable_rgb_recognizer_)
     {
         // publish the recognized objects
-        RCLCPP_INFO_STREAM(get_logger(), "Publishing clouds for recognition");
+
+        RCLCPP_INFO_STREAM(get_logger(), "Publishing pointcloud for recognition");
+
         pub_cloud_to_recognizer_->publish(cloud_object_list);
 
         if (debug_mode_)
@@ -203,8 +206,8 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
         while (!received_recognized_cloud_list_flag_)
         {
             loop_rate_count += 1;
-            // not sure this will give same result as intended
-            rclcpp::spin_some(this->get_node_base_interface());
+            // not sure this will give same result as intended ANS:: It is not working as expected
+            // rclcpp::spin_some(this->get_node_base_interface());
             loop_rate.sleep();
             if (received_recognized_cloud_list_flag_ == true)
             {
@@ -238,7 +241,7 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
         {
             loop_rate_count += 1;
             // not sure this will give same result as intended
-            rclcpp::spin_some(this->get_node_base_interface());
+            // rclcpp::spin_some(this->get_node_base_interface());
             loop_rate.sleep();
             if (received_recognized_image_list_flag_ == true)
             {
@@ -714,11 +717,14 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     test_pub_pose_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("test/pose", 1);
 
     // Subscribe to cloud and rgb recognition topics
+    auto recognized_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+    auto recognized_sub_options = rclcpp::SubscriptionOptions();
+    recognized_sub_options.callback_group = recognized_callback_group_;
     sub_recognized_image_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
-        "recognizer/rgb/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1));
+        "recognizer/rgb/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1),recognized_sub_options);
 
     sub_recognized_cloud_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
-        "recognizer/pc/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1));
+        "recognizer/pc/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1),recognized_sub_options);
 
     // Pub combined object_list to object_list merger
     pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 1);
@@ -747,6 +753,11 @@ MultiModalObjectRecognitionROS::on_activate(const rclcpp_lifecycle::State &)
     pub_workspace_height_->on_activate();
     pub_debug_cloud_plane_->on_activate();
     pub_cloud_to_recognizer_->on_activate();
+    pub_image_to_recognizer_->on_activate();
+    pub_object_list_->on_activate();
+    pub_pc_object_pose_array_->on_activate();
+    pub_rgb_object_pose_array_->on_activate();
+
     std::this_thread::sleep_for(2s);
 
     //test 
