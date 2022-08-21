@@ -27,10 +27,12 @@ class RGBObjectRecognizer(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('~model_dir', '/home/vivek/rolling_ws/src/mir_perception_models/mir_rgb_object_recognition_models/common/models/yolov5/atwork_realdata_combined/'),
+                # ('~model_dir', '/home/vivek/rolling_ws/src/mir_perception_models/mir_rgb_object_recognition_models/common/models/yolov5/atwork_realdata_combined/'),
+                ('~model_dir',''),
                 ('~net', 'detection'),
                 ('~classifier', 'yolov5'),
-                # ('~dataset')
+                ('~rgb_config_file',''),
+                ('~yolo_data_config_file','')
             ])
 
         self.model_dir = self.get_parameter('~model_dir').value
@@ -47,10 +49,12 @@ class RGBObjectRecognizer(Node):
             ImageList, "recognizer/rgb/input/images", self.image_recognition_cb, 10)
         self.confidence_threshold = 0.6
 
-        config_file = "/home/vivek/rolling_ws/src/mir_object_recognition/ros/config/rgb_classifier_config.yaml"
+        config_file = self.get_parameter('~rgb_config_file').value
+        # config_file = "/home/vivek/rolling_ws/src/mir_object_recognition/ros/config/rgb_classifier_config.yaml"
         # os.path.join(get_package_share_directory("mir_object_recognition"),'ros', 'config', "rgb_classifier_config.yaml")
 
-        self.yolo_data_config_file = "/home/vivek/rolling_ws/src/mir_recognizer_scripts/mir_recognizer_scripts/rgb_object_recognition/data_for_detect.yaml"
+        self.yolo_data_config_file = self.get_parameter('~yolo_data_config_file').value
+        # self.yolo_data_config_file = "/home/vivek/rolling_ws/src/mir_recognizer_scripts/mir_recognizer_scripts/rgb_object_recognition/data_for_detect.yaml"
         # os.path.join(get_package_share_directory("mir_recognizer_scripts"),'mir_recognizer_scripts','rgb_object_recognition', "data_for_detect.yaml")
 
         if os.path.isfile(config_file):
@@ -185,23 +189,8 @@ class RGBObjectRecognizer(Node):
 
 def main():
     rclpy.init()
-
-    # net = rclpy.get_param("~net")
-    # classifier_name = rclpy.get_param("~classifier")
-    # dataset = rclpy.get_param("~dataset")
-    # model_dir = rclpy.get_param("~model_dir")
-
     recognizer = RGBObjectRecognizer(debug_mode=True)
-        # model_dir=model_dir, net=net, model_name=classifier_name, debug_mode=True)
-
     rclpy.spin(recognizer)
-
-    # recognizer.destroy_node()
-
-    # rclpy.shutdown()
-
-
-
 
 if __name__ == '__main__':
     main()

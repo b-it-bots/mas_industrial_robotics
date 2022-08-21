@@ -23,4 +23,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+install(DIRECTORY
+  common/models/yolov5/atwork_realdata_combined/
+  DESTINATION share/${PROJECT_NAME}/common/models/yolov5/atwork_realdata_combined
+)
+
+
 ament_package()

@@ -16,12 +16,8 @@
   <exec_depend>numpy</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>cv2</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
   <exec_depend>mas_perception_msgs</exec_depend>
-
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>python3-pytest</test_depend>
 
   <export>
     <build_type>ament_python</build_type>
