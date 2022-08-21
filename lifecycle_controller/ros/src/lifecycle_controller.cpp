@@ -47,7 +47,7 @@ void LifecycleController::init()
 
 
  
-bool LifecycleController::get_state(std::chrono::seconds time_out = 3s)
+bool LifecycleController::get_state(std::chrono::seconds time_out = 10s)
 {
 	auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
     
@@ -58,7 +58,7 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 	client_get_state_->get_service_name());
 		
 	RCLCPP_ERROR(
-	get_logger(), "Waited for 3 sec,  failed to get current state for node %s", lifecycle_node.c_str());
+	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
 	return false;
@@ -77,7 +77,7 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 	RCLCPP_ERROR(
 	get_logger(), "Server time out while getting current state for node %s", lifecycle_node.c_str());
 	RCLCPP_ERROR(
-	get_logger(), "Waited for 3 sec,  failed to get current state for node %s", lifecycle_node.c_str());
+	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
 	return false;
 	
@@ -92,14 +92,14 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 3s)
 	return true;
 	} else {
 	RCLCPP_ERROR(
-	get_logger(), "Waited for 3 sec,  failed to get current state for node %s", lifecycle_node.c_str());
+	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 	//return lifecycle_msgs::msg::State::PRIMARY_STATE_UNKNOWN;
 	return false;
 	}
 }
 
 
-bool LifecycleController::change_state(std::uint8_t transition, std::chrono::seconds time_out = 3s)
+bool LifecycleController::change_state(std::uint8_t transition, std::chrono::seconds time_out = 10s)
 {
 	auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
 	request->transition.id = transition;
