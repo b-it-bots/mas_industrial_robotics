@@ -11,6 +11,7 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/filters/passthrough.h>
+#include <pcl/filters/crop_box.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
@@ -32,6 +33,7 @@ class SceneSegmentation
 {
  private:
   pcl::PassThrough<PointT> pass_through_;
+  pcl::CropBox<PointT> crop_box_;
   pcl::VoxelGrid<PointT> voxel_grid_;
   pcl::NormalEstimation<PointT, PointNT> normal_estimation_;
   pcl::NormalEstimationOMP<PointT, PointNT> normal_estimation_omp_;
@@ -86,12 +88,12 @@ class SceneSegmentation
    * \param[in] The maximum allowed the field value
    * */
   void setPassthroughParams(bool enable_passthrough_filter, 
-                            const std::string &field_name,
-                            double limit_min, 
-                            double limit_max,
-                            const std::string &field_y, 
+                            double limit_x_min, 
+                            double limit_x_max,
                             double limit_y_min,
-                            double limit_y_max);
+                            double limit_y_max,
+                            double limit_z_min,
+                            double limit_z_max);
   /** \brief Set Normal param using radius
    * \param[in] Radius search
    * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu
