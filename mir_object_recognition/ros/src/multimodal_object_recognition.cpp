@@ -657,10 +657,10 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     image_sub_.subscribe(this, "input_image_topic");
     cloud_sub_.subscribe(this, "input_cloud_topic");
 
-    auto qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10)), rmw_qos_profile_sensor_data);
-    auto qos_parameters = rclcpp::QoS(rclcpp::KeepLast(1)), rmw_qos_profile_parameters);
-    auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10)), rmw_qos_profile_default);
-    auto qos_services = rclcpp::QoS(rclcpp::KeepLast(10)), rmw_qos_profile_services_default);
+    auto qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
+    auto qos_parameters = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_parameters);
+    auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
+    auto qos_services = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_services_default);
 
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",qos_sensor);
     pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/pc_object_pose_array", qos_default);
