@@ -178,9 +178,6 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
         }
     }
 
-    // commenting the rest of the code for now to test object detection
-
-    /* 
 
     mas_perception_msgs::msg::ImageList image_list;
     image_list.images.resize(1);
@@ -461,8 +458,6 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
             RCLCPP_INFO_STREAM(get_logger(), "Point cloud:" << filename << " saved to " << logdir_);
         }
     }
-    
- */
 }
 
 void MultiModalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::msg::ObjectList &object_list)
