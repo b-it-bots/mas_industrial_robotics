@@ -411,23 +411,10 @@ def main():
 
         smach.StateMachine.add(
             "VERIFY_OBJECT_GRASPED",
-            gbs.send_and_wait_events_combined(
-                event_in_list=[
-                    ("/gripper_controller/grasp_monitor/event_in", "e_trigger")
-                ],
-                event_out_list=[
-                    (
-                        "/gripper_controller/grasp_monitor/event_out",
-                        "e_object_grasped",
-                        True,
-                    )
-                ],
-                timeout_duration=5,
-            ),
+            gms.verify_object_grasped(5),
             transitions={
-                "success": "OVERALL_SUCCESS",
-                "timeout": "OVERALL_FAILED",
-                "failure": "OVERALL_FAILED",
+                "succeeded": "OVERALL_SUCCESS",
+                "failed": "OVERALL_FAILED",
             },
         )
 

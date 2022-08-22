@@ -244,6 +244,32 @@ class control_gripper(smach.State):
                 return "succeeded"
             rospy.sleep(0.1)
 
+class verify_object_grasped(smach.State):
+    def __init__(self, timeout=5.0):
+        smach.State.__init__(self, outcomes=["succeeded", "failed"])
+        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
+        self.current_state = "OBJECT_GRASPED"
+        self.grasped_counter = 0
+        self.timeout = rospy.Duration(timeout)
+
+    def feedback_cb(self, msg):
+        json_obj = json.loads(msg.data)
+        self.current_state = json_obj["state"]
+        if self.current_state == "OBJECT_GRASPED":
+            self.grasped_counter += 1
+
+    def execute(self, userdata):
+        start_time = rospy.Time.now()
+        while (rospy.Time.now() - start_time < self.timeout):
+            rospy.sleep(0.1)
+            if self.current_state == "GRIPPER_CLOSED" or\
+               self.current_state == "GRIPPER_OPEN":
+                return "failed"
+            elif self.current_state == "OBJECT_GRASPED" and\
+                        self.grasped_counter > 4:
+                self.grasped_counter = 0
+                return "succeeded"
+        return "failed"
 
 class move_arm_and_gripper(smach.State):
 
@@ -403,7 +429,6 @@ class compute_pregrasp_pose(smach.State):
         ]
 
         return "succeeded"
-
 
 class update_static_elements_in_planning_scene(smach.State):
 
