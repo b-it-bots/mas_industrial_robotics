@@ -108,7 +108,9 @@ endif()
 
 #set(CMAKE_NO_SYSTEM_FROM_IMPORTED true)
 include_directories(include
-$ENV{COLCON_PREFIX_PATH}/cv_bridge/include)
+  ${cv_bridge_INCLUDE_DIRS}
+  ${CMAKE_INSTALL_PREFIX}/../cv_bridge/include
+)
 
 set(node_plugins "")
 
