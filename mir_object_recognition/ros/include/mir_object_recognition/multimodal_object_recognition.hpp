@@ -268,11 +268,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
     // protected:
         //visualization
-        BoundingBoxVisualizer bounding_box_visualizer_pc_;
-        ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
-        LabelVisualizer label_visualizer_rgb_;
-        LabelVisualizer label_visualizer_pc_;
+        std::shared_ptr<BoundingBoxVisualizer> bounding_box_visualizer_pc_;
+        std::shared_ptr<ClusteredPointCloudVisualizer> cluster_visualizer_rgb_;
+        std::shared_ptr<ClusteredPointCloudVisualizer> cluster_visualizer_pc_;
+        std::shared_ptr<LabelVisualizer> label_visualizer_rgb_;
+        std::shared_ptr<LabelVisualizer> label_visualizer_pc_;
 
         //parameters
         bool debug_mode_;

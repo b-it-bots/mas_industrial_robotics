@@ -65,7 +65,7 @@ include_directories(
   ${YAML_CPP_VENDOR_INCLUDE_DIRS}
   ${mir_object_segmentation_INCLUDE_DIRS}
   ${mir_perception_utils_INCLUDE_DIRS}
-  ${CMAKE_INSTALL_PREFIX}/../cv_bridge/include
+  $ENV{COLCON_PREFIX_PATH}/cv_bridge/include
   )
 include_directories(SYSTEM
   ${PCL_INCLUDE_DIRS}
