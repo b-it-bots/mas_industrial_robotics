@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
 
 import mcr_states.common.basic_states as gbs
@@ -18,12 +18,12 @@ class WaitForEventFromUser(smach.State):
 
     def execute(self, userdata):
         rospy.loginfo("Have you placed the mockup pose? press y/n ")
-        input_from_user = raw_input()
+        input_from_user = input()
         if ('y' == input_from_user):
-	    rospy.loginfo("Received YES .. moving arm ")
+            rospy.loginfo("Received YES .. moving arm ")
             return 'success'
         else:
-	    rospy.loginfo("Received NO .. EXITING MOVING ARM ")
+            rospy.loginfo("Received NO .. EXITING MOVING ARM ")
             return 'failure'
 
 
