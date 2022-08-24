@@ -282,7 +282,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
   int timeout_wait = 10;  // secs
   ros::Rate loop_rate(loop_rate_hz);
   int loop_rate_count = 0;
-  if (cloud_object_list.objects.size() > 0)
+  if (cloud_object_list.objects.size() > 0 && enable_pc_recognizer_)
   {
     ROS_INFO_STREAM("[Cloud] Waiting message from PCL recognizer node");
     while (!received_recognized_cloud_list_flag_)

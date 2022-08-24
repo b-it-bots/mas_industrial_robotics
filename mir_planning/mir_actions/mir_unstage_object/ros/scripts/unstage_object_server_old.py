@@ -105,9 +105,53 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "SETUP_MOVE_ARM_STAGE"},
+            transitions={"succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE"},
         )
         # add states to the container
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_STAGE_INTERMEDIATE",
+            gms.move_arm("stage_intermediate"),
+            transitions={
+                "succeeded": "CHECK_IF_OBJECT_HEAVY",
+                "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "CHECK_IF_OBJECT_HEAVY",
+            IsObjectHeavy(),
+            transitions={
+                "heavy": "MOVE_ARM_TO_STAGE_INTERMEDIATE_2",
+                "light": "SETUP_MOVE_ARM_PRE_STAGE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_STAGE_INTERMEDIATE_2",
+            gms.move_arm("stage_intermediate_2"),
+            transitions={
+                "succeeded": "SETUP_MOVE_ARM_PRE_STAGE_HEAVY",
+                "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE_2",
+            },
+        )
+
+        smach.StateMachine.add(
+            "SETUP_MOVE_ARM_PRE_STAGE",
+            SetupMoveArm("pre"),
+            transitions={
+                "succeeded": "MOVE_ARM_PRE_STAGE",
+                "failed": "SETUP_MOVE_ARM_PRE_STAGE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_PRE_STAGE",
+            gms.move_arm(),
+            transitions={
+                "succeeded": "SETUP_MOVE_ARM_STAGE",
+                "failed": "MOVE_ARM_PRE_STAGE",
+            },
+        )
 
         smach.StateMachine.add(
             "SETUP_MOVE_ARM_STAGE",
@@ -128,9 +172,56 @@ def main():
         )
 
         smach.StateMachine.add(
+            "SETUP_MOVE_ARM_PRE_STAGE_HEAVY",
+            SetupMoveArm("pre", is_heavy=True),
+            transitions={
+                "succeeded": "MOVE_ARM_PRE_STAGE_HEAVY",
+                "failed": "SETUP_MOVE_ARM_PRE_STAGE_HEAVY",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_PRE_STAGE_HEAVY",
+            gms.move_arm(),
+            transitions={
+                "succeeded": "SETUP_MOVE_ARM_STAGE_HEAVY",
+                "failed": "MOVE_ARM_PRE_STAGE_HEAVY",
+            },
+        )
+
+        smach.StateMachine.add(
+            "SETUP_MOVE_ARM_STAGE_HEAVY",
+            SetupMoveArm("final", is_heavy=True),
+            transitions={
+                "succeeded": "MOVE_ARM_STAGE_HEAVY",
+                "failed": "SETUP_MOVE_ARM_STAGE_HEAVY",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_STAGE_HEAVY",
+            gms.move_arm(),
+            transitions={
+                "succeeded": "CLOSE_GRIPPER",
+                "failed": "MOVE_ARM_STAGE_HEAVY"
+            },
+        )
+
+        smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
-            transitions={"succeeded": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN"},
+            transitions={"succeeded": "CHECK_IF_OBJECT_HEAVY_AGAIN"},
+        )
+
+        # TODO: verify if object is grasped or not
+
+        smach.StateMachine.add(
+            "CHECK_IF_OBJECT_HEAVY_AGAIN",
+            IsObjectHeavy(),
+            transitions={
+                "heavy": "SETUP_MOVE_ARM_PRE_STAGE_HEAVY_AGAIN",
+                "light": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
+            },
         )
 
         smach.StateMachine.add(
@@ -148,6 +239,33 @@ def main():
             transitions={
                 "succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
                 "failed": "MOVE_ARM_PRE_STAGE_AGAIN",
+            },
+        )
+
+        smach.StateMachine.add(
+            "SETUP_MOVE_ARM_PRE_STAGE_HEAVY_AGAIN",
+            SetupMoveArm("pre", is_heavy=True),
+            transitions={
+                "succeeded": "MOVE_ARM_PRE_STAGE_HEAVY_AGAIN",
+                "failed": "SETUP_MOVE_ARM_PRE_STAGE_HEAVY_AGAIN",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_PRE_STAGE_HEAVY_AGAIN",
+            gms.move_arm(blocking=False),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE_2_FINAL",
+                "failed": "MOVE_ARM_PRE_STAGE_HEAVY_AGAIN",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_STAGE_INTERMEDIATE_2_FINAL",
+            gms.move_arm("stage_intermediate_2"),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
+                "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE_2_FINAL",
             },
         )
 
