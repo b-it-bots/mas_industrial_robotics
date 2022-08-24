@@ -130,7 +130,6 @@ class RGBObjectRecognizer():
                         result.roi = roi
 
                         objects.append(result)
-
                     # Publish result_list
                     result_list.objects = objects
                     self.pub_result.publish(result_list)
@@ -165,7 +164,7 @@ class RGBObjectRecognizer():
 
             elif self.net == 'classification':
                 print("TODO: MobileNet")
-
+                
     def publish_debug_img(self, debug_img):
         debug_img = np.array(debug_img, dtype=np.uint8)
         debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")

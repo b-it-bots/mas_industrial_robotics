@@ -11,6 +11,7 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/filters/passthrough.h>
+#include <pcl/filters/crop_box.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
@@ -32,6 +33,7 @@ class SceneSegmentation
 {
  private:
   pcl::PassThrough<PointT> pass_through_;
+  pcl::CropBox<PointT> crop_box_;
   pcl::VoxelGrid<PointT> voxel_grid_;
   pcl::NormalEstimation<PointT, PointNT> normal_estimation_;
   pcl::NormalEstimationOMP<PointT, PointNT> normal_estimation_omp_;
@@ -87,6 +89,18 @@ class SceneSegmentation
    * */
   void setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name,
                             double limit_min, double limit_max);
+
+  /** \brief Set crop box filter parameters to include filters in XYZ
+   * \param[in] Enable or disable crop box filter
+   * \param[in] X min
+   * \param[in] X max
+   * \param[in] Y min
+   * \param[in] Y max
+   * \param[in] Z min
+   * \param[in] Z max
+   * */
+  void setCropBoxParams(bool enable_cropbox_filter, double min_x, double max_x, double min_y,
+                        double max_y, double min_z, double max_z);                          
   /** \brief Set Normal param using radius
    * \param[in] Radius search
    * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu
@@ -137,6 +151,7 @@ class SceneSegmentation
 
  private:
   bool enable_passthrough_filter_;
+  bool enable_cropbox_filter_;
   bool use_omp_;
 };
 

@@ -2,10 +2,9 @@ enum34==1.1.10
 numpy==1.16.5
 markdown==2.6.11
 mock==3.0.5
-tensorflow==1.14.0
 setuptools==41.0.0
 h5py==2.9.0
-scipy==1.2.3
-scikit-learn==0.20.1
-easydict==1.9
-joblib==0.14.0
+scipy
+scikit-learn
+easydict
+joblib

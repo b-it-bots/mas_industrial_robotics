@@ -29,7 +29,7 @@
     <link name="${name}_static_grasp_link">
     </link>
 
-        <!-- motor mount -->
+    <!-- motor mount -->
     <link name="${name}_motor_mount_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>

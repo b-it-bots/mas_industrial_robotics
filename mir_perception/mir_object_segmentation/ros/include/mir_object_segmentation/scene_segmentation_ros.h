@@ -124,7 +124,17 @@ class SceneSegmentationROS
                             std::string passthrough_filter_field_name,
                             double passthrough_filter_limit_min,
                             double passthrough_filter_limit_max);
-
+  /** \brief Set crop box filter parameters to include filters in XYZ
+   * \param[in] Enable or disable crop box filter
+   * \param[in] X min
+   * \param[in] X max
+   * \param[in] Y min
+   * \param[in] Y max
+   * \param[in] Z min
+   * \param[in] Z max
+   * */
+  void setCropBoxParams(bool enable_cropbox_filter, double min_x, double max_x, double min_y,
+                        double max_y, double min_z, double max_z);
   /** \brief Set Normal param using radius
    * \param[in] Radius search
    * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu

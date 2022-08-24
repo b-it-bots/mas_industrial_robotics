@@ -42,7 +42,7 @@ def main():
         smach.StateMachine.add(
             "STOP_REFERENCE_FRAME_PUB",
             gbs.send_event([("/static_transform_publisher_node/event_in", "e_stop")]),
-            transitions={"success": "OPEN_GRIPPER"},
+            transitions={"success": "MOVE_ARM"},
         )
 
         smach.StateMachine.add(

@@ -1,6 +1,7 @@
 import numpy as np
 from pc_object_recognition.utils.pc_utils import scale_to_unit_sphere, center_and_rotate_pointcloud
 
+
 class FVRDDFeatureExtraction():
     """
     PointCloud feature extraction. Available methods are fisher vector and \

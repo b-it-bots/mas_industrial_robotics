@@ -28,7 +28,7 @@ class PointcloudObjectRecognizer():
     :param ngaussians:    Number of gaussians of FV
     :param variance:    Variance of gmm model for FV
     """
-
+    
     def __init__(self, model, model_id, dataset, model_dir, ngaussians=2, variance=0.05):
         self.model = model
         dataset_dir = model_id + "_" + dataset
@@ -60,13 +60,10 @@ class PointcloudObjectRecognizer():
                     subdivisions=[ngaussians, ngaussians, ngaussians], variance=variance)
                 feature_extraction.set_fv_params(gmm, use_rdd=True)
             elif model_id == "rdd":
-                feature_extraction.set_rdd_params(color=True)
-
+                feature_extraction.set_rdd_params(color=True)            
             classifier_file = os.path.join(model_dir, 'classifier.pkl')
             label_encoder = os.path.join(model_dir, 'label_encoder.pkl')
-            self.classifier = FeatureBasedClassifiers(
-                classifier_file, label_encoder)
-
+            self.classifier = FeatureBasedClassifiers(classifier_file, label_encoder)
         elif model == "cnn_based":
 
             # model.t7 is the model file, we are not using .cpkt file
@@ -130,9 +127,6 @@ class PointcloudObjectRecognizer():
                 # here it's getting overwritten
                 object.name = name
                 object.probability = probability
-
-            # Kevin: why are we not updating recognized_object_list?
-            # this is just publishing incoming object_list
             self.pub.publish(recognized_object_list)
 
     def extract_pointcloud(self, pc, color="hsv"):
