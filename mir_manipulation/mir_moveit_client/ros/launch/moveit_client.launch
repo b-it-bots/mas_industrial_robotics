@@ -3,7 +3,7 @@
     <node pkg="mcr_moveit_client" type="moveit_client_node" name="arm_moveit_client" output="screen">
         <rosparam command="load" file="$(find mir_moveit_client)/ros/config/arm_params.yaml"/>
     </node>
-    <node pkg="mcr_moveit_client" type="moveit_client_node" name="gripper_moveit_client" output="screen">
+    <!-- <node pkg="mcr_moveit_client" type="moveit_client_node" name="gripper_moveit_client" output="screen">
         <rosparam command="load" file="$(find mir_moveit_client)/ros/config/gripper_params.yaml"/>
-    </node>
+    </node> -->
 </launch>
