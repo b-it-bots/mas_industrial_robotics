@@ -15,7 +15,9 @@
     <include file="$(find mir_unstage_object)/ros/launch/unstage_object_server.launch" />
 
     <!-- perceive location action server -->
-    <include file="$(find mir_perceive_location)/ros/launch/perceive_location_server.launch" />
+    <include file="$(find mir_perceive_location)/ros/launch/perceive_location_server.launch">
+        <arg name="base_motion_enabled" value="true" />
+    </include>
 
     <!-- wbc pick action server -->
     <include file="$(find mir_pick_object)/ros/launch/pick_object_server.launch" />
