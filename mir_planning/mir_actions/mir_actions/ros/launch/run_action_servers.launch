@@ -2,10 +2,12 @@
 <launch>
 
     <arg name="align_with_workspace" default="false" />
+    <arg name="be_safe" default="false"/>
 
     <!-- move base safe action server -->
     <node pkg="mir_move_base_safe" type="move_base_safe_server.py" name="move_base_safe_server" output="screen" >
         <param name="align" type="bool" value="$(arg align_with_workspace)" />
+        <param name="be_safe" type="bool" value="$(arg be_safe)" />
     </node>
 
     <!-- stage action server -->
