@@ -40,7 +40,7 @@ class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
 
         self.place_pose = None
         self.status = None
-	self.empty_location = None
+        self.empty_location = None
 
     def pose_cb(self, msg):
         self.place_pose = msg.data
