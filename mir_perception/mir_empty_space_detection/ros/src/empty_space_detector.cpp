@@ -6,6 +6,7 @@
 
 EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
 {
+  
   nh_.param<std::string>("output_frame", output_frame_, "base_link");
   nh_.param<bool>("enable_debug_pc_pub", enable_debug_pc_pub_, true);
   float octree_resolution;
@@ -17,6 +18,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
 
   pc_sub_ = nh_.subscribe("input_point_cloud", 1, &EmptySpaceDetector::pcCallback, this);
   event_in_sub_ = nh_.subscribe("event_in", 1, &EmptySpaceDetector::eventInCallback, this);
+  tf_listener_.reset(new tf::TransformListener);
 
   if (enable_debug_pc_pub_) {
     pc_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("output_point_cloud", 1);
@@ -25,36 +27,38 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
   cloud_accumulation_ = CloudAccumulation::UPtr(new CloudAccumulation(octree_resolution));
   scene_segmentation_ = SceneSegmentationSPtr(new SceneSegmentation());
   loadParams();
-
-  tf_listener_.reset(new tf::TransformListener);
+  dynamic_reconfigure::Server<mir_empty_space_detection::EmptySpaceDetectionConfig>::CallbackType f =
+              boost::bind(&EmptySpaceDetector::configCallback, this, _1, _2);
+  server_.setCallback(f);
+  
   ROS_INFO("Initialised");
 }
 
 EmptySpaceDetector::~EmptySpaceDetector() {}
 void EmptySpaceDetector::loadParams()
 {
-  std::string passthrough_filter_field_name;
-  float passthrough_filter_limit_min, passthrough_filter_limit_max;
-  bool enable_passthrough_filter;
-  nh_.param<bool>("enable_passthrough_filter", enable_passthrough_filter, false);
-  nh_.param<std::string>("passthrough_filter_field_name", passthrough_filter_field_name, "x");
-  nh_.param<float>("passthrough_filter_limit_min", passthrough_filter_limit_min, 0.0);
-  nh_.param<float>("passthrough_filter_limit_max", passthrough_filter_limit_max, 0.8);
-  float cropbox_filter_min_x, cropbox_filter_max_x, cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z, cropbox_filter_max_z;
-  bool enable_cropbox_filter;
-  nh_.param<bool>("enable_cropbox_filter", enable_cropbox_filter, false);
-  nh_.param<float>("cropbox_filter_min_x", cropbox_filter_min_x, 0.0);
-  nh_.param<float>("cropbox_filter_max_x", cropbox_filter_max_x, 0.8);
-  nh_.param<float>("cropbox_filter_min_y", cropbox_filter_min_y, -0.5);
-  nh_.param<float>("cropbox_filter_max_y", cropbox_filter_max_y, 0.8);
-  nh_.param<float>("cropbox_filter_min_z", cropbox_filter_min_z, -0.2);
-  nh_.param<float>("cropbox_filter_max_z", cropbox_filter_max_z, 0.6);
-  scene_segmentation_->setPassthroughParams(
-      enable_passthrough_filter, passthrough_filter_field_name, passthrough_filter_limit_min,
-      passthrough_filter_limit_max);
-  scene_segmentation_->setCropBoxParams(enable_cropbox_filter, cropbox_filter_min_x, cropbox_filter_max_x,
-                                       cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z,
-                                       cropbox_filter_max_z);
+  // std::string passthrough_filter_field_name;
+  // float passthrough_filter_limit_min, passthrough_filter_limit_max;
+  // bool enable_passthrough_filter;
+  // nh_.param<bool>("enable_passthrough_filter", enable_passthrough_filter, false);
+  // nh_.param<std::string>("passthrough_filter_field_name", passthrough_filter_field_name, "x");
+  // nh_.param<float>("passthrough_filter_limit_min", passthrough_filter_limit_min, 0.0);
+  // nh_.param<float>("passthrough_filter_limit_max", passthrough_filter_limit_max, 0.8);
+  // float cropbox_filter_min_x, cropbox_filter_max_x, cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z, cropbox_filter_max_z;
+  // bool enable_cropbox_filter;
+  // nh_.param<bool>("enable_cropbox_filter", enable_cropbox_filter, false);
+  // nh_.param<float>("cropbox_filter_min_x", cropbox_filter_min_x, 0.0);
+  // nh_.param<float>("cropbox_filter_max_x", cropbox_filter_max_x, 0.8);
+  // nh_.param<float>("cropbox_filter_min_y", cropbox_filter_min_y, -0.5);
+  // nh_.param<float>("cropbox_filter_max_y", cropbox_filter_max_y, 0.8);
+  // nh_.param<float>("cropbox_filter_min_z", cropbox_filter_min_z, -0.2);
+  // nh_.param<float>("cropbox_filter_max_z", cropbox_filter_max_z, 0.6);
+  // scene_segmentation_->setPassthroughParams(
+  //     enable_passthrough_filter, passthrough_filter_field_name, passthrough_filter_limit_min,
+  //     passthrough_filter_limit_max);
+  // scene_segmentation_->setCropBoxParams(enable_cropbox_filter, cropbox_filter_min_x, cropbox_filter_max_x,
+  //                                      cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z,
+  //                                      cropbox_filter_max_z);
   float voxel_leaf_size, voxel_filter_limit_min, voxel_filter_limit_max;
   std::string voxel_filter_field_name;
   nh_.param<float>("voxel_leaf_size", voxel_leaf_size, 1.0);
@@ -152,16 +156,6 @@ bool EmptySpaceDetector::findEmptySpaces()
 
   pose_array_pub_.publish(empty_space_poses);
 
-  if (enable_debug_pc_pub_) {
-    /* publish debug pointcloud */
-    sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(*plane, output);
-    output.header.frame_id = output_frame_;
-    output.header.stamp = ros::Time::now();
-    pc_pub_.publish(output);
-    ROS_INFO("Publishing debug pointcloud");
-  }
-
   return true;
 }
 
@@ -230,26 +224,48 @@ void EmptySpaceDetector::findEmptySpacesOnPlane(const PointCloud::Ptr &plane,
 bool EmptySpaceDetector::findPlane(PointCloud::Ptr plane)
 {
   PointCloud::Ptr cloud_in(new PointCloud);
+  PointCloud::Ptr debug(new PointCloud);
   cloud_accumulation_->getAccumulatedCloud(*cloud_in);
 
   PointCloud::Ptr hull(new PointCloud);
   pcl::ModelCoefficients::Ptr model_coefficients(new pcl::ModelCoefficients);
   double workspace_height;
 
-  PointCloud::Ptr debug =
-      scene_segmentation_->findPlane(cloud_in, hull, plane, model_coefficients, workspace_height);
+  debug = scene_segmentation_->findPlane(cloud_in, hull, plane, model_coefficients, workspace_height);
+    
+  if (enable_debug_pc_pub_) {
+    /* publish debug pointcloud */
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*debug, output);
+    output.header.frame_id = output_frame_;
+    output.header.stamp = ros::Time::now();
+    pc_pub_.publish(output);
+    ROS_INFO("Publishing debug pointcloud");
+  }
+
   bool success = plane->points.size() > 0;
+
   return success;
+}
+
+void EmptySpaceDetector::configCallback(mir_empty_space_detection::EmptySpaceDetectionConfig &config, uint32_t level)
+{
+  scene_segmentation_->setPassthroughParams(config.enable_passthrough_filter,
+      config.passthrough_filter_field_name,
+      config.passthrough_filter_limit_min,
+      config.passthrough_filter_limit_max);
+  scene_segmentation_->setCropBoxParams(config.enable_cropbox_filter, config.cropbox_filter_min_x, config.cropbox_filter_max_x,
+      config.cropbox_filter_min_y, config.cropbox_filter_max_y, config.cropbox_filter_min_z, config.cropbox_filter_max_z);
 }
 
 int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "empty_space_detector");
   EmptySpaceDetector es_detector;
-  ros::Rate loop_rate(10.0);
+  ros::Rate loop_rate(30.0);
   while (ros::ok()) {
-    loop_rate.sleep();
     ros::spinOnce();
+    loop_rate.sleep();
   }
   return 0;
 }

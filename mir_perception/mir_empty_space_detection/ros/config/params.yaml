@@ -5,8 +5,8 @@ voxel_filter_limit_min: -0.15
 voxel_filter_limit_max: 0.3
 enable_passthrough_filter: false
 passthrough_filter_field_name: x
-passthrough_filter_limit_min: 0.0
-passthrough_filter_limit_max: 0.7
+passthrough_filter_limit_min: 0.4 # all the min distance starts from the baselink 
+passthrough_filter_limit_max: 0.9
 enable_cropbox_filter: false
 cropbox_filter_min_x: 0.0
 cropbox_filter_min_x: 0.8
