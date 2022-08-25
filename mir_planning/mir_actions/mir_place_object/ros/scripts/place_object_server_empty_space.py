@@ -112,30 +112,30 @@ class CheckIfLocationIsShelf(smach.State):
 
 class GetEmptyPositionOnTable(smach.State):
     def __init__(self,empty_spaces,topic_name_pub):
-	smach.State.__init__(
-		self,
-		outcomes=["success", "failure"],
+        
+        smach.State.__init__(self,outcomes=["success", "failure"],
 		input_keys=["empty_locations",],
-		output_keys=["feedback","result","empty_locations"])
-	self.empty_locations = None
-
+		output_keys=["feedback","result","empty_locations"]
+        )
+        
+        self.empty_locations = None
         self.timeout = rospy.Duration.from_sec(15.0)
         rospy.Subscriber(empty_spaces, PoseArray, self.empty_space_cb) # subscribing to empty_space locations published by empty_space_detector node
         rospy.sleep(0.1)
 
     def empty_space_cb(self, msg): # Callback for get empty_space_location from empty_space detector node 
         
-	self.empty_locations = msg
-
+        self.empty_locations = msg
+        
     def execute(self, userdata): # Getting data from empty space detector and giving all the poses it to next states 
         
-	userdata.result = GenericExecuteResult()
+        userdata.result = GenericExecuteResult()
         userdata.feedback = GenericExecuteFeedback(
-            current_state="POSE_RECEIVE", text="Receiving empty space location",)
-
-	userdata.empty_locations = self.empty_locations # The empty locations have all three empty poses 
-
-	return 'success'
+        current_state="POSE_RECEIVE", text="Receiving empty space location",)
+        
+        userdata.empty_locations = self.empty_locations # The empty locations have all three empty poses
+        
+        return 'success'
 
 # ===============================================================================
 
@@ -150,11 +150,10 @@ class PublishObjectPose(smach.State):
             "/mcr_perception/object_selector/output/object_pose",
             PoseStamped,
             queue_size=10)
-	self.selection_index = empty_pose_index
+        self.selection_index = empty_pose_index
 
     def execute(self, userdata):
-
-	empty_locations = userdata.empty_locations # Passing the empty location and publising the poses
+        empty_locations = userdata.empty_locations # Passing the empty location and publising the poses
 
 	# converiting the pose into desired format
         single_array = PoseStamped()
@@ -166,8 +165,9 @@ class PublishObjectPose(smach.State):
         rospy.loginfo(type(single_array))
         self.empty_pose_pub.publish(single_array)
 
-	rospy.sleep(0.3)
-	single_array = None
+        rospy.sleep(0.3)
+        single_array = None
+
         return "success"
 
 
@@ -178,30 +178,28 @@ class Unstage_to_place(smach.State):
     def __init__(self):
 
         smach.State.__init__(self, outcomes=["success","failed"],input_keys=["goal","heavy_objects", "platform","object"])
-	self.platform = "PLATFORM_MIDDLE"
-	self.obj = "M20"
+        self.platform = "PLATFORM_MIDDLE"
+        self.obj = "M20"
 
     def execute(self,userdata):
 
-	self.platform = Utils.get_value_of(userdata.goal.parameters, "platform")
-	self.obj = Utils.get_value_of(userdata.goal.parameters, "object")
+        self.platform = Utils.get_value_of(userdata.goal.parameters, "platform")
+        self.obj = Utils.get_value_of(userdata.goal.parameters, "object")
 
-	if self.obj is None:
-            rospy.logwarn('Missing parameter "object". Using default.')
-            self.obj = "light"
+        if self.obj is None:
+                rospy.logwarn('Missing parameter "object". Using default.')
+                self.obj = "light"
         for heavy_object in userdata.heavy_objects:
             if heavy_object.upper() in self.obj.upper():
                 self.obj =  "heavy"
-	    else:
-        	self.obj =  "light"
+        else:
+            self.obj =  "light"
 
 
         self.unstage_client = SimpleActionClient('unstage_object_server', GenericExecuteAction)
         self.unstage_client.wait_for_server()
-
-	# Assigning the goal
-
-	goal = GenericExecuteGoal()
+        
+        goal = GenericExecuteGoal()
         goal.parameters.append(KeyValue(key="platform", value=self.platform))
         goal.parameters.append(KeyValue(key="object", value=self.obj))
 
@@ -211,8 +209,8 @@ class Unstage_to_place(smach.State):
         rospy.loginfo("Unstaged from backplatform " + self.platform)
         rospy.loginfo("Sending following goal to unstage object server")
         rospy.loginfo(goal)
-
-	return "success"
+        
+        return "success"
 
 #=================================================================================
 
@@ -342,18 +340,17 @@ def main():
                 "failed": "MOVE_ARM_TO_PRE_PLACE",
             },
         )
+        
+        smach.StateMachine.add("EMPTY_POSITION_SELECTION",
 
-
-	smach.StateMachine.add("EMPTY_POSITION_SELECTION",
-
-		gbs.send_and_wait_events_combined(
-			event_in_list = [("/mir_perception/empty_space_detector/event_in","e_add_cloud")],
-			event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
-			timeout_duration=50,),
-	transitions={"success": "TRIGGER",
-		    "timeout": "EMPTY_POSITION_SELECTION",
-		    "failure": "EMPTY_POSITION_SELECTION",},
-	)
+            gbs.send_and_wait_events_combined(
+                event_in_list = [("/mir_perception/empty_space_detector/event_in","e_add_cloud")],
+                event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
+                timeout_duration=50,),
+        transitions={"success": "TRIGGER",
+                "timeout": "EMPTY_POSITION_SELECTION",
+                "failure": "EMPTY_POSITION_SELECTION",},
+        )
 
 
         smach.StateMachine.add("TRIGGER",
@@ -452,7 +449,7 @@ def main():
                 timeout_duration=20,
             ),
             transitions={
-                "success": "MOVE_ARM_TO_NEUTRAL",  # change it to OPEN_GRIPPER after repairing the gripper
+                "success": "OPEN_GRIPPER",  # change it to OPEN_GRIPPER after repairing the gripper
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
