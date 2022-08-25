@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="input_pointcloud_topic"  default="/arm_cam3d/depth_registered/points" />
+    <arg name="camera_name" default="arm_cam3d" />
+    <arg name="input_pointcloud_topic"  default="/$(arg camera_name)/depth_registered/points" />
     <arg name="params_file" default="$(find mir_handle_detection)/ros/config/params.yaml" />
 
     <group ns="mir_perception">

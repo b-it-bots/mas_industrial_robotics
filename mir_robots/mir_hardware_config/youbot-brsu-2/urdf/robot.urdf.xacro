@@ -69,9 +69,12 @@
 
   
 
-   <xacro:realsense_d435 name="arm_cam3d" parent="base_link">
-       <!--origin xyz="0.25 0.0 0.83" rpy="-0.05 0.917 -0.1" /-->  
+   <xacro:realsense_d435 name="tower_cam3d" parent="base_link">
        <origin xyz="0.30 -0.05 0.80" rpy="0.00 1.137 0.0" />  
+   </xacro:realsense_d435>
+
+   <xacro:realsense_d435  name="arm_cam3d" parent="arm_link_5">
+      <origin xyz="-0.005 -0.008 0.009" rpy="0.0 ${-M_PI / 2} ${-M_PI / 2}" />
    </xacro:realsense_d435>
 
    <joint name="fixed_camera_joint" type="fixed">

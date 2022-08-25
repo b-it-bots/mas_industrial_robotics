@@ -35,22 +35,13 @@
   <!-- top camera -->
   <include file="$(find mir_bringup)/components/realsense_camera.launch">
       <arg name="serial_num" value="827312073531"/>
-      <!-- <arg name="camera_name" value="tower_cam3d"/> -->
-      <arg name="camera_name" value="arm_cam3d"/>
+      <arg name="camera_name" value="tower_cam3d"/>
   </include>
 
   <!-- camera at arm end effector -->
   <include file="$(find mir_bringup)/components/realsense_camera.launch">
       <arg name="serial_num" value="727212070700"/>
-      <arg name="camera_name" value="arm_real_cam3d"/>
-      <!-- <arg name="camera_name" value="arm_cam3d"/>  -->
+      <arg name="camera_name" value="arm_cam3d"/> 
   </include>
-
-  <!-- 
-    TODO:
-
-    Using arm_cam3d name for tower_cam now, because the packages are not set to deal with different camera types.
-    - Later, make changes to handle both cameras for one robot. 
-  -->
 
 </launch>
