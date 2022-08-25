@@ -212,6 +212,48 @@ class Unstage_to_place(smach.State):
         
         return "success"
 
+# ===============================================================================
+
+
+class SetupMoveArm(smach.State):
+    """
+
+This class is added to set the arm at the location of platform for holding the object.
+This behaviour is only needed when handling single object
+
+"""
+    def __init__(self, arm_target, is_heavy=False):
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded", "failed"],
+            input_keys=["goal"],
+            output_keys=["feedback", "result", "move_arm_to"],
+        )
+        self.arm_target = arm_target
+        self.is_heavy = is_heavy
+
+    def execute(self, userdata):
+        platform = Utils.get_value_of(userdata.goal.parameters, "platform")
+        if platform is None:
+            rospy.logwarn('Missing parameter "platform". Using default.')
+            platform = "PLATFORM_MIDDLE"
+        platform = platform.lower()
+
+        if self.arm_target == "pre":
+            platform += "_pre"
+
+        if self.is_heavy:
+            platform += "_heavy"
+        userdata.move_arm_to = platform
+
+        # Add empty result msg (because if none of the state do it, action server gives error)
+        userdata.result = GenericExecuteResult()
+        userdata.feedback = GenericExecuteFeedback(
+            current_state="SetupMoveArm", text="Moving arm to " + platform
+        )
+        return "succeeded"
+
+
 #=================================================================================
 
 def transition_cb(*args, **kwargs):
@@ -242,6 +284,8 @@ def main():
 
     sm.userdata.empty_locations = None
     sm.userdata.heavy_objects = rospy.get_param("~heavy_objects", ["m20_100"])
+    # sm.userdata.move_arm_to = None
+
     with sm:
         # add states to the container
         smach.StateMachine.add(
@@ -249,9 +293,37 @@ def main():
             CheckIfLocationIsShelf(),
             transitions={
                 "shelf": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
-                "not_shelf": "MOVE_ARM_TO_PRE_PLACE",
+                "not_shelf": "SET_MOVE_ARM_STAGE",  # change it to MOVE_ARM_TO_PRE_PLACE when we use arm camera for empty space detection
             },
         )
+
+# Comment the below state when we use arm camera for empty space detection
+ 
+#=================================================================================
+
+        """
+        These states are added to keep the arm at the state of holding the object.
+        This behaviour is only needed when handling single object
+        """
+
+        smach.StateMachine.add(
+            "SET_MOVE_ARM_STAGE",
+            SetupMoveArm("pre", is_heavy=True),
+            transitions={
+                "succeeded": "MOVE_ARM_STAGE",
+                "failed": "SET_MOVE_ARM_STAGE"
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_STAGE",
+            gms.move_arm(),
+            transitions={
+                "succeeded": "EMPTY_POSITION_SELECTION",
+                "failed": "MOVE_ARM_STAGE"
+            },
+        )
+#=================================================================================
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_SHELF_INTERMEDIATE",
@@ -331,20 +403,23 @@ def main():
             },
         )
 
+## Uncomment the below code when we use arm camera for empty space detection
 
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_PRE_PLACE",
-            gms.move_arm("look_at_workspace"), # New change from turntable to workspace
-            transitions={
-                "succeeded": "EMPTY_POSITION_SELECTION",
-                "failed": "MOVE_ARM_TO_PRE_PLACE",
-            },
-        )
+        # smach.StateMachine.add(
+        #     "MOVE_ARM_TO_PRE_PLACE",
+        #     gms.move_arm("look_at_workspace"), # New change from turntable to workspace
+        #     transitions={
+        #         "succeeded": "EMPTY_POSITION_SELECTION",
+        #         "failed": "MOVE_ARM_TO_PRE_PLACE",
+        #     },
+        # )
         
         smach.StateMachine.add("EMPTY_POSITION_SELECTION",
 
             gbs.send_and_wait_events_combined(
-                event_in_list = [("/mir_perception/empty_space_detector/event_in","e_add_cloud")],
+                event_in_list = [
+                    ("/mir_perception/empty_space_detector/event_in","e_add_cloud"),
+                                ],
                 event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
                 timeout_duration=50,),
         transitions={"success": "TRIGGER",

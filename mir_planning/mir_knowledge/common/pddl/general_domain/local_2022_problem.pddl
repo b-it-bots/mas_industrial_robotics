@@ -3,7 +3,7 @@
 (:domain general_domain)
 
 (:objects
-    WS02 WS03 START - location
+    WS00 WS03 WS05 START - location
     R20 AXIS - object
     YOUBOT-BRSU - robot
     PLATFORM_MIDDLE - robot_platform
@@ -16,14 +16,13 @@
 
     (at YOUBOT-BRSU START)
     (gripper_is_free YOUBOT-BRSU)
-    (on R20 WS02)
-    (on AXIS WS02)
- 
+    (on R20 WS00)
+    (on AXIS WS00)
 )
 
 (:goal (and
-    (on R20 WS03)
-    (on AXIS WS03)
+    (on R20 WS05)
+    (on AXIS WS05)
     )
 )
 
