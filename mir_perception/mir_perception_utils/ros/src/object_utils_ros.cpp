@@ -52,7 +52,7 @@ void object::estimatePose(const BoundingBox &box, geometry_msgs::PoseStamped &po
   pose.pose.orientation.w = q.w();
 }
 
-void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
+PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
                           std::string shape, float passthrough_lim_min_offset,
                           float passthrough_lim_max_offset)
 {
@@ -70,10 +70,44 @@ void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs:
     pcl::getMinMax3D(*xyz_input_cloud, min_pt, max_pt);
     double limit_min = min_pt.z + passthrough_lim_min_offset;
     double limit_max = max_pt.z + passthrough_lim_max_offset;
+
+    // print min and max z values
+    ROS_INFO_STREAM("min z: " << min_pt.z);
+    ROS_INFO_STREAM("max z: " << max_pt.z);
+
+    // print limin min and max z values
+    ROS_INFO_STREAM("lim_min: " << limit_min);
+    ROS_INFO_STREAM("lim_max: " << limit_max);
+
+    // print pass through limits
+    ROS_INFO_STREAM("passthrough_lim_min: " << passthrough_lim_min_offset);
+    ROS_INFO_STREAM("passthrough_lim_max: " << passthrough_lim_max_offset);
+
     pass_through.setFilterLimits(limit_min, limit_max);
     pass_through.setInputCloud(xyz_input_cloud);
     pass_through.filter(filtered_cloud);
   }
+
+
+  ////////////////////
+  // publish filtered cloud on topic for debugging
+  ///////////////////
+
+  // #include <sensor_msgs/PointCloud2.h>
+
+  // ros::NodeHandle nh("~");
+  // ros::Publisher pub_filtered_cloud_;
+  // pub_filtered_cloud_ = nh.advertise<sensor_msgs::PointCloud2>("CUSTOM_pub_filtered_cloud_", 1);
+
+  // // publish filtered cloud on topic for debugging
+
+  // sensor_msgs::PointCloud2 filtered_cloud_msg;
+  // pcl::toROSMsg(filtered_cloud, filtered_cloud_msg);
+  // filtered_cloud_msg.header.frame_id = "base_link";
+  // pub_filtered_cloud_.publish(filtered_cloud_msg);
+  // ROS_INFO_STREAM("\n************************");
+  // ROS_INFO_STREAM("############   filtered cloud published ##############");
+  // ROS_INFO_STREAM("*************************\n");
 
   Eigen::Vector4f centroid;
   pcl::compute3DCentroid(filtered_cloud, centroid);
@@ -123,6 +157,8 @@ void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs:
   m.getRPY(roll, pitch, yaw);
 
   pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw);
+
+  return filtered_cloud;
 }
 
 void object::transformPose(const boost::shared_ptr<tf::TransformListener> tf_listener,

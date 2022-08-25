@@ -48,7 +48,7 @@ multimodal_object_recognition:
   rgb_roi_adjustment: 2
   rgb_bbox_min_diag: 21
   rgb_bbox_max_diag: 175
-  rgb_cluster_filter_limit_min: 0.0060
+  rgb_cluster_filter_limit_min: 0.015 # for tower camera configuration (youbot 2)
   rgb_cluster_filter_limit_max: 0.35
   rgb_cluster_remove_outliers: True
   enable_roi: True
