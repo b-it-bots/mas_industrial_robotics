@@ -169,10 +169,12 @@ class PopulateResultWithObjects(smach.State):
         self.perceived_obj_db_id = []
 
     def objects_callback(self, msg):
+        print(f'inside callback with {len(msg.objects)} objects')
         self.perceived_obj_names = [str(obj.name) for obj in msg.objects]
         self.perceived_obj_db_id = [str(obj.database_id) for obj in msg.objects]
 
     def execute(self, userdata):
+        print('[perc_obj_ser] inside executor')
         result = GenericExecuteResult()
         for i, obj in enumerate(self.perceived_obj_names):
             result.results.append(KeyValue(key="obj_" + str(i + 1), value=obj))
@@ -313,12 +315,21 @@ def main():
             },
         )
 
+        # smach.StateMachine.add(
+        #     "SET_NEXT_BASE_POSE",
+        #     SetupMoveBaseWithDBC(),
+        #     transitions={
+        #         "pose_set": "MOVE_BASE_WITH_DIRECT_BASE_CONTROLLER",
+        #         "tried_all": "POPULATE_RESULT_WITH_OBJECTS",
+        #     },
+        # )
+
         smach.StateMachine.add(
             "SET_NEXT_BASE_POSE",
             SetupMoveBaseWithDBC(),
             transitions={
                 "pose_set": "MOVE_BASE_WITH_DIRECT_BASE_CONTROLLER",
-                "tried_all": "POPULATE_RESULT_WITH_OBJECTS",
+                "tried_all": "STOP_OBJECT_LIST_MERGER",
             },
         )
 

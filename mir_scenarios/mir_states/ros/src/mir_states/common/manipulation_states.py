@@ -210,8 +210,6 @@ class control_gripper(smach.State):
     def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0):
         smach.State.__init__(self, outcomes=["succeeded"])
 
-        self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
-        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
         self.command = GripperCommand()
         self.current_state = "GRIPPER_OPEN"
         self.grasped_counter = 0
@@ -219,6 +217,8 @@ class control_gripper(smach.State):
             self.command.command = GripperCommand.OPEN
         else:
             self.command.command = GripperCommand.CLOSE
+        self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
+        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
 
     def feedback_cb(self, msg):
         json_obj = json.loads(msg.data)
@@ -247,10 +247,11 @@ class control_gripper(smach.State):
 class verify_object_grasped(smach.State):
     def __init__(self, timeout=5.0):
         smach.State.__init__(self, outcomes=["succeeded", "failed"])
-        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
+        
         self.current_state = "OBJECT_GRASPED"
         self.grasped_counter = 0
         self.timeout = rospy.Duration(timeout)
+        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
 
     def feedback_cb(self, msg):
         json_obj = json.loads(msg.data)
