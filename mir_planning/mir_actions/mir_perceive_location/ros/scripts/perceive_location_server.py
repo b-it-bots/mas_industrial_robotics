@@ -403,7 +403,7 @@ def main():
                         True,
                     )
                 ],
-                timeout_duration=10,
+                timeout_duration=60,
             ),
             transitions={
                 "success": "STOP_RECOGNITION",
