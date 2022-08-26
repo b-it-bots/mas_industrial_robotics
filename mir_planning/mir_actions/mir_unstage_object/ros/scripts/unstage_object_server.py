@@ -130,7 +130,16 @@ def main():
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
-            transitions={"succeeded": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN"},
+            transitions={"succeeded": "VERIFY_OBJECT_GRASPED"},
+        )
+
+        smach.StateMachine.add(
+            "VERIFY_OBJECT_GRASPED",
+            gms.verify_object_grasped(5),
+            transitions={
+                "succeeded": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
+                "failed": "OVERALL_FAILED",
+            },
         )
 
         smach.StateMachine.add(
@@ -164,7 +173,7 @@ def main():
     sm.register_start_cb(start_cb)
 
     # smach viewer
-    if rospy.get_param("~viewer_enabled", False):
+    if rospy.get_param("~viewer_enabled", True):
         sis = smach_ros.IntrospectionServer(
             "unstage_object_smach_viewer", sm, "/UNSTAGE_OBJECT_SMACH_VIEWER"
         )

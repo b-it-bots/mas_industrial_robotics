@@ -395,8 +395,8 @@ def main():
             "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
             gms.move_arm("shelf_intermediate"),
             transitions={
-                "succeeded": "MOVE_ARM_TO_NEUTRAL",
-                "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
+                    "succeeded": "MOVE_ARM_TO_NEUTRAL",
+                    "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
             },
         )
 
@@ -411,29 +411,29 @@ def main():
         #     },
         # )
         
-        smach.StateMachine.add("EMPTY_POSITION_SELECTION",
-
+        smach.StateMachine.add(
+            "EMPTY_POSITION_SELECTION",
             gbs.send_and_wait_events_combined(
                 event_in_list = [
                     ("/mir_perception/empty_space_detector/event_in","e_add_cloud"),
                                 ],
                 event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
                 timeout_duration=50,),
-        transitions={"success": "TRIGGER",
-                "timeout": "EMPTY_POSITION_SELECTION",
-                "failure": "EMPTY_POSITION_SELECTION",},
+            transitions={"success": "TRIGGER",
+                        "timeout": "EMPTY_POSITION_SELECTION",
+                        "failure": "EMPTY_POSITION_SELECTION",},
         )
 
 
-        smach.StateMachine.add("TRIGGER",
-
-                gbs.send_and_wait_events_combined(
-                   event_in_list = [("/mir_perception/empty_space_detector/event_in","e_trigger")],
-		   event_out_list = [("/mir_perception/empty_space_detector/event_out","e_success",True)],
-		   timeout_duration = 50,),
-        transitions={"success": "POSE_RECEIVE",
-		     "timeout": "TRIGGER",
-		     "failure": "TRIGGER",},
+        smach.StateMachine.add(
+            "TRIGGER",
+            gbs.send_and_wait_events_combined(
+                event_in_list = [("/mir_perception/empty_space_detector/event_in","e_trigger")],
+		        event_out_list = [("/mir_perception/empty_space_detector/event_out","e_success",True)],
+		        timeout_duration = 50,),
+            transitions={"success": "POSE_RECEIVE",
+                        "timeout": "TRIGGER",
+                        "failure": "TRIGGER",},
         )
 
 
@@ -496,12 +496,13 @@ def main():
 
 
         smach.StateMachine.add(
-                "UNSTAGE_FOR_PLACING",
-                Unstage_to_place(),
-        transitions={
+            "UNSTAGE_FOR_PLACING",
+            Unstage_to_place(),
+            transitions=
+            {
                 "success":"GO_TO_PRE_GRASP_POSE", # change it to OPEN_GRIPPER when gripper is repaired 
                 "failed":"MOVE_ARM_TO_NEUTRAL",
-          },
+            },
         )
 
 
@@ -509,15 +510,13 @@ def main():
             "GO_TO_PRE_GRASP_POSE",
             gbs.send_and_wait_events_combined(
                 event_in_list=[
-                    ("/waypoint_trajectory_generation/event_in", "e_start")
-                ],
+                    ("/waypoint_trajectory_generation/event_in", "e_start")],
                 event_out_list=[
                     (
                         "/waypoint_trajectory_generation/event_out",
                         "e_success",
                         True,
-                    )
-                ],
+                    )],
                 timeout_duration=20,
             ),
             transitions={
@@ -529,19 +528,19 @@ def main():
 
 
         smach.StateMachine.add(
-                    "OPEN_GRIPPER",
-                    gms.control_gripper("open"),
-                    transitions={
-			"succeeded": "MOVE_ARM_TO_NEUTRAL"},
+                "OPEN_GRIPPER",
+                gms.control_gripper("open"),
+                transitions={
+			        "succeeded": "MOVE_ARM_TO_NEUTRAL"},
                 )
 
 
         smach.StateMachine.add(
-                    "MOVE_ARM_TO_NEUTRAL",
-                    gms.move_arm("barrier_tape"),
-                    transitions={
-                        "succeeded": "OVERALL_SUCCESS",
-                        "failed": "MOVE_ARM_TO_NEUTRAL",
+                "MOVE_ARM_TO_NEUTRAL",
+                gms.move_arm("barrier_tape"),
+                transitions={
+                    "succeeded": "OVERALL_SUCCESS",
+                    "failed": "MOVE_ARM_TO_NEUTRAL",
                     },
                 )
 
