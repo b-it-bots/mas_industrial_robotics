@@ -293,7 +293,7 @@ def main():
             CheckIfLocationIsShelf(),
             transitions={
                 "shelf": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
-                "not_shelf": "SET_MOVE_ARM_STAGE",  # change it to MOVE_ARM_TO_PRE_PLACE when we use arm camera for empty space detection
+                "not_shelf": "MOVE_ARM_STAGE",  # change it to MOVE_ARM_TO_PRE_PLACE when we use arm camera for empty space detection
             },
         )
 
@@ -305,19 +305,9 @@ def main():
         These states are added to keep the arm at the state of holding the object.
         This behaviour is only needed when handling single object
         """
-
-        smach.StateMachine.add(
-            "SET_MOVE_ARM_STAGE",
-            SetupMoveArm("pre", is_heavy=True),
-            transitions={
-                "succeeded": "MOVE_ARM_STAGE",
-                "failed": "SET_MOVE_ARM_STAGE"
-            },
-        )
-
         smach.StateMachine.add(
             "MOVE_ARM_STAGE",
-            gms.move_arm(),
+            gms.move_arm("platform_middle"),
             transitions={
                 "succeeded": "EMPTY_POSITION_SELECTION",
                 "failed": "MOVE_ARM_STAGE"

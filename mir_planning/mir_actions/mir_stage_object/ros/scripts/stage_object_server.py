@@ -210,6 +210,7 @@ def main():
             transitions={"succeeded": "OVERALL_SUCCESS"},
         )
 
+# =============================================================================== flow is ending here
         smach.StateMachine.add(
             "CHECK_IF_OBJECT_HEAVY_AGAIN",
             IsObjectHeavy(),
