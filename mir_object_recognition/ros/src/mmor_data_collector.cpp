@@ -8,7 +8,6 @@ public:
     
     DataCollector(const rclcpp::NodeOptions& options): MultiModalObjectRecognitionROS(options)
     {
-        RCLCPP_INFO(get_logger(), "Hello from callback");
     }
     void recognizeCloudAndImage();
 };
@@ -20,16 +19,15 @@ public:
         std::vector<mpu::object::BoundingBox> boxes;
 
         this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);
-
+        
             std::string filename;
+            RCLCPP_INFO(get_logger(),"Saving pointcloud clusters");
             for (auto& cluster : clusters_3d)
-            {
-                RCLCPP_INFO(get_logger(),"Should be saving pointcloud");
+            {                
                 filename = "";
                 filename.append("pcd_cluster_");
-                // filename.append(std::to_string(cluster -> header.timestamp)); // get the proper format for the timestamp
+                filename.append(std::to_string(this->get_clock()->now().seconds()));
                 mpu::object::savePcd(cluster, logdir_, filename);
-                // ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m" << logdir_);
             }
                 // Save raw image
             cv_bridge::CvImagePtr raw_cv_image;
@@ -38,9 +36,8 @@ public:
                 RCLCPP_INFO(get_logger(),"Should be saving RGB Image");
                 std::string filename = "";
                 filename.append("rgb_raw_");
-                // filename.append(std::to_string(raw_cv_image->header.timestamp)); // get the proper format for the timestamp
+                filename.append(std::to_string(this->get_clock()->now().seconds()));
                 mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
-                // ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
             }
             else
             {
