@@ -837,15 +837,8 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
   rgb_roi_adjustment_ = config.rgb_roi_adjustment;
   rgb_bbox_min_diag_ = config.rgb_bbox_min_diag;
   rgb_bbox_max_diag_ = config.rgb_bbox_max_diag;
-
-  // print rgb_roi_adjustment_, rgb_bbox_min_diag_, rgb_bbox_max_diag_
-  ROS_INFO_STREAM("rgb_roi_adjustment_: " << rgb_roi_adjustment_);
-  ROS_INFO_STREAM("rgb_bbox_min_diag_: " << rgb_bbox_min_diag_);
-  ROS_INFO_STREAM("rgb_bbox_max_diag_: " << rgb_bbox_max_diag_);
-
   rgb_cluster_filter_limit_min_ = config.rgb_cluster_filter_limit_min;
   rgb_cluster_filter_limit_max_ = config.rgb_cluster_filter_limit_max;
-
   rgb_cluster_remove_outliers_ = config.rgb_cluster_remove_outliers;
   // ROI params
   enable_roi_ = config.enable_roi;
