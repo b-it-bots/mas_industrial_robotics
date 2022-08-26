@@ -31,7 +31,8 @@ MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::Nod
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
 
     MultiModalObjectRecognitionROS::declare_all_parameters();
-    object_info_path_ = "src/mir_object_recognition/ros/config/objects.yaml";
+    object_info_path_ = ament_index_cpp::get_package_share_directory("mir_object_recognition");
+    object_info_path_.append("/ros/config/objects.yaml");
 }
 
 void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image,

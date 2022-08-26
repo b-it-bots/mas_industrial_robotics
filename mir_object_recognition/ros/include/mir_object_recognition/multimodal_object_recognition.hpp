@@ -62,7 +62,7 @@
 // just for testing, remove later
 #include "mir_perception_utils/planar_polygon_visualizer.hpp"
 
-
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
