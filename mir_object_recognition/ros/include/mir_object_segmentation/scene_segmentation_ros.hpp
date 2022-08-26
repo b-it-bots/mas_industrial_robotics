@@ -125,12 +125,12 @@ public:
    * \param[in] The maximum allowed the field value
    * */
   void setPassthroughParams(bool enable_passthrough_filter,
-                            std::string passthrough_filter_field_name,
-                            double passthrough_filter_limit_min,
-                            double passthrough_filter_limit_max,
-                            std::string passthrough_filter_field_y,
+                            double passthrough_filter_x_limit_min,
+                            double passthrough_filter_x_limit_max,
                             double passthrough_filter_limit_y_min,
-                            double passthrough_filter_limit_y_max);
+                            double passthrough_filter_limit_y_max,
+                            double passthrough_filter_limit_z_min,
+                            double passthrough_filter_limit_z_max);
 
   /** \brief Set Normal param using radius
    * \param[in] Radius search

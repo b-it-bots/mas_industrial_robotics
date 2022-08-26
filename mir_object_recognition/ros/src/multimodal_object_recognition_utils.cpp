@@ -62,7 +62,7 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   reg.extract(clusters);
   // find the biggest cluster
   pcl::PointIndices::Ptr filtered_cluster(new pcl::PointIndices() );
-  int largest_index, largest_cluster;
+  size_t largest_index, largest_cluster;
   if (clusters.size() == 0)
   {
     return;
@@ -83,7 +83,7 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
       }
     }
   }
-  int counter = 0;
+  size_t counter = 0;
   while (counter < clusters[largest_index].indices.size ())
   {
     filtered_cluster->indices.push_back(clusters[largest_index].indices[counter]);
@@ -105,7 +105,7 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   // pub_pc_cluster_.publish(ros_pointcloud);
   // find centroid
   Eigen::Vector4f centroid;
-  unsigned int valid_points = pcl::compute3DCentroid(*cloud_filtered, centroid);
+  unsigned int __attribute__ ((unused)) valid_points = pcl::compute3DCentroid(*cloud_filtered, centroid);
   // Change the center of object
   container_object.pose.pose.position.x = centroid[0];
   container_object.pose.pose.position.y = centroid[1];
@@ -123,14 +123,14 @@ void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::m
   pcl::PointCloud<pcl::PointXYZ>::Ptr point_at_z(new pcl::PointCloud<pcl::PointXYZ>);
 
   Eigen::Vector4f centroid;
-  for (size_t i = 0; i < pcl_point_size; i++ )
+  for (int i = 0; i < pcl_point_size; i++ )
   {
     if (xyz_cloud->points[i].z == max_pt.z)
     {
       point_at_z->points.push_back(xyz_cloud->points[i]);
     }
   }
-  unsigned int valid_points = pcl::compute3DCentroid(*point_at_z, centroid);
+  unsigned int __attribute__ ((unused)) valid_points = pcl::compute3DCentroid(*point_at_z, centroid);
   if (object.name == "M20_100")
   {
     // ROS_INFO_STREAM("Updating M20_100 pose from object id: " << object.database_id);
