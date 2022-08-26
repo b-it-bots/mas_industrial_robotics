@@ -58,6 +58,7 @@
 #include "mir_perception_utils/pointcloud_utils_ros.hpp"
 #include "mir_object_segmentation/scene_segmentation_ros.hpp"
 #include "mir_perception_utils/bounding_box.hpp"
+#include "multimodal_object_recognition_utils.hpp"
 
 // just for testing, remove later
 #include "mir_perception_utils/planar_polygon_visualizer.hpp"
@@ -194,6 +195,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
         typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
         SceneSegmentationROSSPtr scene_segmentation_ros_;
+        typedef std::shared_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsSPtr;
+        MultimodalObjectRecognitionUtilsSPtr mm_object_recognition_utils_;
 
         // Publisher for clouds and images recognizer
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_cloud_to_recognizer_;
@@ -233,7 +236,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
          **/
         void segmentPointCloud(mas_perception_msgs::msg::ObjectList &object_list,
                         std::vector<PointCloudBSPtr> &clusters,
-                        std::vector<mpu::object::BoundingBox> boxes);
+                        std::vector<mpu::object::BoundingBox> &boxes);
         
         /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
         virtual void recognizeCloudAndImage();
@@ -265,11 +268,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
     // protected:
         //visualization
-        BoundingBoxVisualizer bounding_box_visualizer_pc_;
-        ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
-        ClusteredPointCloudVisualizer cluster_visualizer_pc_;
-        LabelVisualizer label_visualizer_rgb_;
-        LabelVisualizer label_visualizer_pc_;
+        std::shared_ptr<BoundingBoxVisualizer> bounding_box_visualizer_pc_;
+        std::shared_ptr<ClusteredPointCloudVisualizer> cluster_visualizer_rgb_;
+        std::shared_ptr<ClusteredPointCloudVisualizer> cluster_visualizer_pc_;
+        std::shared_ptr<LabelVisualizer> label_visualizer_rgb_;
+        std::shared_ptr<LabelVisualizer> label_visualizer_pc_;
 
         //parameters
         bool debug_mode_;
@@ -302,12 +305,12 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double voxel_filter_limit_min_;
         double voxel_filter_limit_max_;
         bool enable_passthrough_filter_;
-        std::string passthrough_filter_field_name_;
-        double passthrough_filter_limit_min_;
-        double passthrough_filter_limit_max_;
-        std::string passthrough_filter_field_y_;
+        double passthrough_filter_x_limit_min_;
+        double passthrough_filter_x_limit_max_;
         double passthrough_filter_y_limit_min_;
         double passthrough_filter_y_limit_max_;
+        double passthrough_filter_z_limit_min_;
+        double passthrough_filter_z_limit_max_;
         double normal_radius_search_;
         bool use_omp_;
         int num_cores_;
@@ -368,6 +371,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double roi_base_link_to_laser_distance_;
         double roi_max_object_pose_x_to_base_link_;
         double roi_min_bbox_z_;
+
+
+        // test publishers
+
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseStamped>> test_pub_pose_;
 
 };
 

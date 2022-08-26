@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 
-import colorsys
-import os
-import pickle
-import struct
-import sys
-import time
+# author: Kevin Patel
 
 import cv2
 import numpy as np
-from ament_index_python.packages import get_package_share_directory
+import os
 import rclpy
 from rclpy.node import Node
 import yaml
 from cv_bridge import CvBridge, CvBridgeError
 from mas_perception_msgs.msg import ImageList, Object, ObjectList
-from mas_perception_msgs.srv import RecognizeImage
 # from rgb_object_recognition import SqueezeDetClassifier, SSDLiteMobilenet, util
 from .rgb_object_recognition.yolov5 import yolov5_classifier
 from sensor_msgs.msg import Image, RegionOfInterest
@@ -27,7 +21,6 @@ class RGBObjectRecognizer(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                # ('~model_dir', '/home/vivek/rolling_ws/src/mir_perception_models/mir_rgb_object_recognition_models/common/models/yolov5/atwork_realdata_combined/'),
                 ('~model_dir',''),
                 ('~net', 'detection'),
                 ('~classifier', 'yolov5'),
@@ -50,12 +43,8 @@ class RGBObjectRecognizer(Node):
         self.confidence_threshold = 0.6
 
         config_file = self.get_parameter('~rgb_config_file').value
-        # config_file = "/home/vivek/rolling_ws/src/mir_object_recognition/ros/config/rgb_classifier_config.yaml"
-        # os.path.join(get_package_share_directory("mir_object_recognition"),'ros', 'config', "rgb_classifier_config.yaml")
 
         self.yolo_data_config_file = self.get_parameter('~yolo_data_config_file').value
-        # self.yolo_data_config_file = "/home/vivek/rolling_ws/src/mir_recognizer_scripts/mir_recognizer_scripts/rgb_object_recognition/data_for_detect.yaml"
-        # os.path.join(get_package_share_directory("mir_recognizer_scripts"),'mir_recognizer_scripts','rgb_object_recognition', "data_for_detect.yaml")
 
         if os.path.isfile(config_file):
             configs = {}
@@ -67,12 +56,6 @@ class RGBObjectRecognizer(Node):
             self.colors = configs['colors']
 
             if self.net == 'detection':
-                # if self.model_name == 'squeezeDet':
-                #     self.model = SqueezeDetClassifier(config=model_config,
-                #                                       checkpoint_path=model_dir)
-
-                # elif self.model_name == 'ssdLiteMobilenet':
-                #     self.model = SSDLiteMobilenet(model_dir)
                 if self.model_name == 'dummy':
                     pass
 
@@ -115,6 +98,7 @@ class RGBObjectRecognizer(Node):
                         # Extract required objects from prediction output with confidence score greater than 0.5
                         print("---------------------------")
                         print("Name of the objects, Score\n")
+                        self.get_logger().info("Name of the objects, Score\n")
                         for idx, value in enumerate(output_labels_ary):
                             object_name = value
                             score = output_scores_ary[idx]
@@ -125,6 +109,7 @@ class RGBObjectRecognizer(Node):
                                 detected_bb_list.append(output_bb_ary[idx])
 
                                 print("{}, {}".format(object_name, score))
+                                self.get_logger().info("{}, {}".format(object_name, score))
 
                         print("---------------------------")
 
@@ -172,6 +157,7 @@ class RGBObjectRecognizer(Node):
                                         (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
                         # publish bbox and label
+                        self.get_logger().info("Publishing debug image")
                         self.publish_debug_img(debug_img)
 
                 except CvBridgeError as e:

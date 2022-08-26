@@ -100,6 +100,7 @@ bool pointcloud::getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
                              PointCloudBSPtr &cloud_roi,
                              float roi_size_adjustment, bool remove_outliers)
 {
+    // changing the roi pre-check to change height <= 1 to < 1
     if (cloud_in -> height <= 1 || cloud_in -> width <= 1){
         RCLCPP_ERROR(rclcpp::get_logger("mir_perception_utils"), "Cloud is empty.");
         return (false);
