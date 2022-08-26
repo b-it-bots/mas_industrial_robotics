@@ -87,8 +87,6 @@ class RGBObjectRecognizer():
                                                             source=cv_image)
                         # prediction bounding boxes are in [x1, y1, x2, y2] format
 
-                        self.confidence_threshold = 0.6
-
                         output_bb_ary = predictions['boxes']
                         output_labels_ary = predictions['labels']
                         output_scores_ary = predictions['scores']
