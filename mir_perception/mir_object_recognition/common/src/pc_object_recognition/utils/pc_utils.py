@@ -4,8 +4,6 @@ from sklearn.mixture import GaussianMixture
 from sklearn.mixture._gaussian_mixture import _compute_precision_cholesky
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
-# import open3d
-# import open3d
 
 # copied from python-pcl
 

@@ -111,6 +111,7 @@ class MultimodalObjectRecognitionROS
     ros::Publisher pub_rgb_object_pose_array_;
     // Publisher debug
     ros::Publisher pub_debug_cloud_plane_;
+    ros::Publisher pub_filtered_rgb_cloud_plane_;
 
     // Synchronize callback for image and pointcloud
     message_filters::Subscriber<sensor_msgs::Image> *image_sub_;
@@ -175,8 +176,8 @@ class MultimodalObjectRecognitionROS
     int rgb_roi_adjustment_;
     int rgb_bbox_min_diag_;
     int rgb_bbox_max_diag_;
-    int rgb_cluster_filter_limit_min_;
-    int rgb_cluster_filter_limit_max_;
+    double rgb_cluster_filter_limit_min_;
+    double rgb_cluster_filter_limit_max_;
     bool enable_roi_;
     double roi_base_link_to_laser_distance_;
     double roi_max_object_pose_x_to_base_link_;

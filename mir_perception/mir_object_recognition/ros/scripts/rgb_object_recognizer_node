@@ -33,7 +33,7 @@ class RGBObjectRecognizer():
         self.net = net
         self.model_name = model_name
         self.model_dir = model_dir
-        self.confidence_threshold = 0.6
+        self.confidence_threshold = 0.8
 
         config_file = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
                                    'ros', 'config', "rgb_classifier_config.yaml")

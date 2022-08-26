@@ -28,7 +28,7 @@ class PointcloudObjectRecognizer():
     :param ngaussians:    Number of gaussians of FV
     :param variance:    Variance of gmm model for FV
     """
-    
+
     def __init__(self, model, model_id, dataset, model_dir, ngaussians=2, variance=0.05):
         self.model = model
         dataset_dir = model_id + "_" + dataset

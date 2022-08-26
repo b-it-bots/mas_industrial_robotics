@@ -1,5 +1,7 @@
 train: dataset/train/images
 val: dataset/valid/images
 
-nc: 18
-names: ['axis', 'bearing', 'bearing_box_ax01', 'bearing_box_ax16', 'container_box_blue', 'container_box_red', 'distance_tube', 'em_01', 'em_02', 'f20_20_B', 'f20_20_G', 'm20', 'm20_100', 'm30', 'motor', 'r20', 's40_40_B', 's40_40_G']
+nc: 20
+names: ['R20', 'tennis_ball', 'F20_20_B', 'pringles', 'insulation_tape', 'bearing_box', 'sponge', 'towel', 
+               'screw_driver', 'spoon', 'motor', 'dishwasher_soap', 'S40_40_B', 'brown_box', 'cup', 'axis', 
+               'S40_40_G', 'bracket', 'eye_glasses', 'toothbrush']

@@ -95,6 +95,9 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   nh_.param<std::string>("logdir", logdir_, "/tmp/");
   nh_.param<std::string>("object_info", object_info_path_, "None");
   loadObjectInfo(object_info_path_);
+
+  pub_filtered_rgb_cloud_plane_ =
+      nh_.advertise<sensor_msgs::PointCloud2>("filtered_rgb_cloud_plane", 1);
 }
 
 MultimodalObjectRecognitionROS::~MultimodalObjectRecognitionROS()
@@ -419,8 +422,24 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
           clusters_2d.push_back(cloud_roi);
           // Get pose
           geometry_msgs::PoseStamped pose;
-          mpu::object::estimatePose(cloud_roi, pose, object.shape.shape,
-                        rgb_cluster_filter_limit_min_, rgb_cluster_filter_limit_max_);
+
+          // ************************************************
+          // Publish filtered point cloud from RGB recognizer
+          // ************************************************
+          
+          PointCloud filtered_rgb_pointcloud;
+          filtered_rgb_pointcloud = mpu::object::estimatePose(cloud_roi, pose, object.shape.shape,
+                                                              rgb_cluster_filter_limit_min_,
+                                                              rgb_cluster_filter_limit_max_);
+
+          sensor_msgs::PointCloud2 ros_filtered_rgb_pointcloud;
+          pcl::toROSMsg(filtered_rgb_pointcloud, ros_filtered_rgb_pointcloud);
+          ros_filtered_rgb_pointcloud.header.frame_id = target_frame_id_;
+
+          pub_filtered_rgb_cloud_plane_.publish(ros_filtered_rgb_pointcloud);
+
+          // sleep for 3 seconds
+          ros::Duration(2.0).sleep();
 
           // Transform pose
           std::string frame_id = cloud_->header.frame_id;
