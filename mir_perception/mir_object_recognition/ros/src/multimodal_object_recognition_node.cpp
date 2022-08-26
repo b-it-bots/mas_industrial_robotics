@@ -439,7 +439,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
           pub_filtered_rgb_cloud_plane_.publish(ros_filtered_rgb_pointcloud);
 
           // sleep for 3 seconds
-          ros::Duration(2.0).sleep();
+          // ros::Duration(2.0).sleep();
 
           // Transform pose
           std::string frame_id = cloud_->header.frame_id;

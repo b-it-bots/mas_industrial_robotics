@@ -71,18 +71,6 @@ PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry
     double limit_min = min_pt.z + passthrough_lim_min_offset;
     double limit_max = max_pt.z + passthrough_lim_max_offset;
 
-    // print min and max z values
-    ROS_INFO_STREAM("min z: " << min_pt.z);
-    ROS_INFO_STREAM("max z: " << max_pt.z);
-
-    // print limin min and max z values
-    ROS_INFO_STREAM("lim_min: " << limit_min);
-    ROS_INFO_STREAM("lim_max: " << limit_max);
-
-    // print pass through limits
-    ROS_INFO_STREAM("passthrough_lim_min: " << passthrough_lim_min_offset);
-    ROS_INFO_STREAM("passthrough_lim_max: " << passthrough_lim_max_offset);
-
     pass_through.setFilterLimits(limit_min, limit_max);
     pass_through.setInputCloud(xyz_input_cloud);
     pass_through.filter(filtered_cloud);
