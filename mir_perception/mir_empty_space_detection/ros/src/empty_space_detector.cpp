@@ -92,6 +92,8 @@ void EmptySpaceDetector::loadParams()
                                     sac_optimize_coefficients, axis, sac_eps_angle,
                                     sac_normal_distance_weight);
 
+  float object_height_above_workspace_;
+  nh_.param<float>("object_height_above_workspace", object_height_above_workspace_, 0.01);
   nh_.param<float>("empty_space_point_count_percentage_threshold", empty_space_pnt_cnt_perc_thresh_,
                    0.8);
   nh_.param<float>("empty_space_radius", empty_space_radius_, 0.05);

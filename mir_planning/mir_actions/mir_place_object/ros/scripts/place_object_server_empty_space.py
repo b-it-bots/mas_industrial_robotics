@@ -22,6 +22,10 @@ from actionlib_msgs.msg import GoalStatus
 
 # ===============================================================================
 class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
+    """
+    Not being used anymore.
+    GetEmptyPositionOnTable is used instead.
+    """
     def __init__(self, topic_name_pub, topic_name_sub, event_sub, timeout_duration):
         smach.State.__init__(
             self,
@@ -160,6 +164,8 @@ class PublishObjectPose(smach.State):
         single_array.header = empty_locations.header
         single_array.pose = empty_locations.poses[self.selection_index]
 
+        single_array.pose.position.z += rospy.get_param("object_height_above_workspace", 0.03)
+        
         rospy.loginfo("Publishing single pose to pregrasp planner")
 
         rospy.loginfo(type(single_array))
@@ -200,6 +206,7 @@ class Unstage_to_place(smach.State):
         self.unstage_client.wait_for_server()
         
         goal = GenericExecuteGoal()
+
         goal.parameters.append(KeyValue(key="platform", value=self.platform))
         goal.parameters.append(KeyValue(key="object", value=self.obj))
 

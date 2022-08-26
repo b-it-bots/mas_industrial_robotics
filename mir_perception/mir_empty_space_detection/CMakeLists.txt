@@ -16,7 +16,6 @@ find_package(catkin REQUIRED
 
 generate_dynamic_reconfigure_options(
   ros/config/EmptySpaceDetection.cfg
-  ros/config/Tutorials.cfg
 )
 
 add_compile_options(
