@@ -672,6 +672,12 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     {
       yaw = 0.0;
     }
+    // update pringles pose
+    if (object_list.objects[i].name == "PRINGLES")
+    {
+      change_in_pitch = -1.5708;
+    }
+
     // Update container pose
     if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
         object_list.objects[i].name == "CONTAINER_BOX_BLUE")
@@ -690,7 +696,8 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     object_list.objects[i].pose.pose.orientation.w = q2.w();
 
     // Update workspace height
-    if (scene_segmentation_ros_->getWorkspaceHeight() != -1000.0)
+    if (scene_segmentation_ros_->getWorkspaceHeight() != -1000.0 && 
+        object_list.objects[i].name != "PRINGLES")
     {
       object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
                               object_height_above_workspace_;
@@ -702,6 +709,7 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
         ROS_WARN_STREAM("Updated container height: " << object_list.objects[i].pose.pose.position.z );
       }
     }
+    
     // Update axis or bolt pose
     if (object_list.objects[i].name == "M20_100" || object_list.objects[i].name == "AXIS")
     {
