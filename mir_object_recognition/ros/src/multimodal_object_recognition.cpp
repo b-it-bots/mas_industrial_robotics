@@ -1,14 +1,10 @@
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
+#include "rclcpp/wait_set.hpp"
 
 namespace perception_namespace
 {
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options) : 
                     rclcpp_lifecycle::LifecycleNode("mmor_node",options),
-                    // bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
-                    // cluster_visualizer_rgb_("output/tabletop_cluster_rgb", true),
-                    // cluster_visualizer_pc_("output/tabletop_cluster_pc"),
-                    // label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
-                    // label_visualizer_pc_("output/pc_labels", Color(Color::IVORY)),
                     rgb_object_id_(100),
                     container_height_(0.05),
                     received_recognized_image_list_flag_(false),
@@ -41,7 +37,6 @@ void MultiModalObjectRecognitionROS::synchronizeCallback(const std::shared_ptr<s
 {
 
     RCLCPP_INFO(get_logger(), "synchro callback");
-    RCLCPP_INFO(get_logger(), "TS: [%u]; [%u]", image->header.stamp.sec, cloud->header.stamp.sec);
     
     pointcloud_msg_ = cloud;
     image_msg_ = image;
@@ -76,6 +71,7 @@ void MultiModalObjectRecognitionROS::recognizedImageCallback(const mas_perceptio
         recognized_image_list_ = msg;
         received_recognized_image_list_flag_ = true;
     }
+    RCLCPP_INFO(get_logger(), "[RGB] Received %d objects from rgb recognizer", (int)(recognized_image_list_.objects.size()));
 }
 
 void MultiModalObjectRecognitionROS::recognizedCloudCallback(const mas_perception_msgs::msg::ObjectList &msg)
@@ -106,9 +102,6 @@ void MultiModalObjectRecognitionROS::preprocessPointCloud(const std::shared_ptr<
 
     cloud_ = PointCloudBSPtr(new PointCloud);
     pcl::fromPCLPointCloud2(*pc2, *cloud_);
-
-    // print cloud_ height and width
-    RCLCPP_INFO(get_logger(), "cloud_ height: %d, width: %d", cloud_->height, cloud_->width);
 
     RCLCPP_INFO(get_logger(), "Point cloud transformed.");
 }
@@ -194,31 +187,56 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
     RCLCPP_INFO_STREAM(get_logger(), "Waiting for message from Cloud and Image recognizer");
     
     // loop till it received the message from the 3d and rgb recognition
-    int loop_rate_hz = 30;
-    int timeout_wait = 2; // secs
-    rclcpp::Rate loop_rate(loop_rate_hz);
-    int loop_rate_count = 0;
-    if (cloud_object_list.objects.size() > 0)
-    {
-        RCLCPP_INFO_STREAM(get_logger(), "[Cloud] Waiting message from PCL recognizer node");
-        while (!received_recognized_cloud_list_flag_)
-        {
-            loop_rate_count += 1;
-            // not sure this will give same result as intended ANS:: It is not working as expected
-            // rclcpp::spin_some(this->get_node_base_interface());
-            loop_rate.sleep();
-            if (received_recognized_cloud_list_flag_ == true)
-            {
-                RCLCPP_INFO(get_logger(), "[Cloud] Received %ld objects from pcl recognizer", recognized_cloud_list_.objects.size());
-            }
-            if (loop_rate_count > loop_rate_hz * timeout_wait)
-            {
-                received_recognized_cloud_list_flag_ = false;
-                RCLCPP_WARN(get_logger(), "[Cloud] No message received from PCL recognizer.");
-                break;
-            }
-        }
-    }
+    // int loop_rate_hz = 30;
+    // int timeout_wait = 2; // secs
+    // rclcpp::Rate loop_rate(loop_rate_hz);
+    // int loop_rate_count = 0;
+
+    // add pc and image recog subscribers to waitset
+
+    
+    // auto ret = wait_set.wait(std::chrono::seconds(5));
+
+    // if (ret.kind() == rclcpp::WaitResultKind::Ready)
+    // {
+    //     // create object list from the received message
+    //     mas_perception_msgs::msg::ObjectList recognized_object_list;
+    //     rclcpp::MessageInfo info;
+    //     auto ret_take = sub_recognized_cloud_list_->take(recognized_object_list, info);
+    //     if (ret_take)
+    //     {
+    //         RCLCPP_INFO(this->get_logger(), "[RGB] Received %ld objects from rgb recognizer", recognized_cloud_list_.objects.size());
+    //     }
+    //     else
+    //     {
+    //         RCLCPP_ERROR(this->get_logger(), "[RGB] Failed to receive message from rgb recognizer");
+    //     }
+    // }
+    // else
+    // {
+    //     RCLCPP_ERROR(this->get_logger(), "[RGB] Couldn't wait for message");
+    // }
+
+
+    // if (cloud_object_list.objects.size() > 0)
+    // {
+    //     RCLCPP_INFO_STREAM(get_logger(), "[Cloud] Waiting message from PCL recognizer node");
+    //     while (!received_recognized_cloud_list_flag_)
+    //     {
+    //         // loop_rate_count += 1;
+    //         // loop_rate.sleep();
+    //         if (received_recognized_cloud_list_flag_ == true)
+    //         {
+    //             RCLCPP_INFO(get_logger(), "[Cloud] Received %ld objects from pcl recognizer", recognized_cloud_list_.objects.size());
+    //         }
+    //         if (loop_rate_count > loop_rate_hz * timeout_wait)
+    //         {
+    //             received_recognized_cloud_list_flag_ = false;
+    //             RCLCPP_WARN(get_logger(), "[Cloud] No message received from PCL recognizer.");
+    //             break;
+    //         }
+    //     }
+    // }
 
     // Merge recognized_cloud_list and rgb_object_list
     mas_perception_msgs::msg::ObjectList combined_object_list;
@@ -229,30 +247,30 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
                                             recognized_cloud_list_.objects.end());
     }
 
-    loop_rate_count = 0;
-    timeout_wait = 3; //  secs
+    // loop_rate_count = 0;
+    // timeout_wait = 3; //  secs
 
-    if (image_list.images.size() > 0)
-    {
-        RCLCPP_INFO_STREAM(get_logger(), "[RGB] Waiting message from RGB recognizer node");
-        while (!received_recognized_image_list_flag_)
-        {
-            loop_rate_count += 1;
-            // spin once 
-            // rclcpp::spin_some(this->get_node_base_interface());
-            loop_rate.sleep();
-            if (received_recognized_image_list_flag_ == true)
-            {
-                RCLCPP_INFO(get_logger(), "[RGB] Received %d objects from rgb recognizer", (int)(recognized_image_list_.objects.size()));
-            }
-            if (loop_rate_count > loop_rate_hz * timeout_wait)
-            {
-                received_recognized_image_list_flag_ = false;
-                RCLCPP_WARN(get_logger(), "[RGB] No message received from RGB recognizer.");
-                break;
-            }
-        }
-    }
+    // if (image_list.images.size() > 0)
+    // {
+    //     RCLCPP_INFO_STREAM(get_logger(), "[RGB] Waiting message from RGB recognizer node");
+    //     while (!received_recognized_image_list_flag_)
+    //     {
+    //         loop_rate_count += 1;
+    //         // spin once 
+    //         // rclcpp::spin_some(this->get_node_base_interface());
+    //         loop_rate.sleep();
+    //         if (received_recognized_image_list_flag_ == true)
+    //         {
+    //             RCLCPP_INFO(get_logger(), "[RGB] Received %d objects from rgb recognizer", (int)(recognized_image_list_.objects.size()));
+    //         }
+    //         if (loop_rate_count > loop_rate_hz * timeout_wait)
+    //         {
+    //             received_recognized_image_list_flag_ = false;
+    //             RCLCPP_WARN(get_logger(), "[RGB] No message received from RGB recognizer.");
+    //             break;
+    //         }
+    //     }
+    // }
 
     // Reset recognition callback flags
     received_recognized_cloud_list_flag_ = false;
@@ -336,6 +354,9 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
                     pcl_conversions::fromPCL(*pc2, ros_pc2);
                     ros_pc2.header.frame_id = target_frame_id_;
                     ros_pc2.header.stamp = this->get_clock()->now();
+
+                    rgb_object_list.objects[i].views.resize(1);
+                    rgb_object_list.objects[i].views[0].point_cloud = ros_pc2;
 
                     clusters_2d.push_back(cloud_roi);
                     
@@ -676,6 +697,9 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 
     sub_recognized_cloud_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
         "recognizer/pc/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1),recognized_sub_options);
+
+    
+    wait_set.add_subscription(sub_recognized_image_list_);
 
     // Pub combined object_list to object_list merger
     pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 1);
