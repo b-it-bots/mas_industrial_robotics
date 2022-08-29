@@ -220,7 +220,6 @@ void MultimodalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::Obje
     sensor_msgs::PointCloud2 ros_pc2;
     pcl::toROSMsg(*cloud_debug, ros_pc2);
     ros_pc2.header.frame_id = target_frame_id_;
-    ROS_INFO("hello vamsi publish my segmented cloud");
     pub_debug_cloud_plane_.publish(ros_pc2);
   }
 }
@@ -691,11 +690,6 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     {
       yaw = 0.0;
     }
-    // update pringles pose
-    if (object_list.objects[i].name == "PRINGLES")
-    {
-      change_in_pitch = -1.5708;
-    }
 
     // Update container pose
     if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
@@ -707,12 +701,26 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
         mm_object_recognition_utils_->adjustContainerPose(object_list.objects[i], container_height_);
       }
     }
-    // Make pose flat
-    tf::Quaternion q2 = tf::createQuaternionFromRPY(0.0, change_in_pitch , yaw);
-    object_list.objects[i].pose.pose.orientation.x = q2.x();
-    object_list.objects[i].pose.pose.orientation.y = q2.y();
-    object_list.objects[i].pose.pose.orientation.z = q2.z();
-    object_list.objects[i].pose.pose.orientation.w = q2.w();
+    
+    if (object_list.objects[i].name == "PRINGLES")
+    {
+      tf::Quaternion q2;
+      q2.setRPY(0.0, -1.57, 0.0);
+      object_list.objects[i].pose.pose.orientation.x = q2.x();
+      object_list.objects[i].pose.pose.orientation.y = q2.y();
+      object_list.objects[i].pose.pose.orientation.z = q2.z();
+      object_list.objects[i].pose.pose.orientation.w = q2.w();
+      object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() + 0.1;
+    }
+    else
+    {
+      // Make pose flat
+      tf::Quaternion q2 = tf::createQuaternionFromRPY(0.0, change_in_pitch , yaw);
+      object_list.objects[i].pose.pose.orientation.x = q2.x();
+      object_list.objects[i].pose.pose.orientation.y = q2.y();
+      object_list.objects[i].pose.pose.orientation.z = q2.z();
+      object_list.objects[i].pose.pose.orientation.w = q2.w(); 
+    }
 
     // Update workspace height
     if (scene_segmentation_ros_->getWorkspaceHeight() != -1000.0 && 
