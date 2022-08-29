@@ -235,6 +235,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
   if (data_collection_)
   {
     std::string filename;
+    
+    // Save PCD (point cloud) cluster 
     for (auto& cluster : clusters_3d)
     {
       filename = "";
@@ -243,7 +245,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       mpu::object::savePcd(cluster, logdir_, filename);
       ROS_INFO_STREAM("\033[1;35mSaving point cloud to \033[0m" << logdir_);
     }
-        // Save raw image
+    
+    // Save raw image
     cv_bridge::CvImagePtr raw_cv_image;
     if (mpu::object::getCVImage(image_msg_, raw_cv_image))
     {
@@ -431,14 +434,41 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                                                               rgb_cluster_filter_limit_min_,
                                                               rgb_cluster_filter_limit_max_);
 
+          // check if object is pringles
+          if (object.name == "PRINGLES")
+          {
+            PointT min_pt;
+            PointT max_pt;
+            pcl::getMinMax3D(*cloud_roi, min_pt, max_pt);
+
+            // Publisher to visualize a point 3D
+
+            // // create a point stamped publisher
+            // ros::Publisher max_pt_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/pringles_point", 1);
+
+            // // print the max point
+            // ROS_INFO("[RGB] Max point: %f, %f, %f", max_pt.x, max_pt.y, max_pt.z);
+
+            // // publish the max point 
+            // geometry_msgs::PointStamped max_pt_msg;
+            // max_pt_msg.header.frame_id = target_frame_id_;
+            // max_pt_msg.header.stamp = ros::Time::now();
+            // max_pt_msg.point.x = max_pt.x;
+            // max_pt_msg.point.y = max_pt.y;
+            // max_pt_msg.point.z = max_pt.z;
+            // max_pt_pub_.publish(max_pt_msg);
+          }
+
           sensor_msgs::PointCloud2 ros_filtered_rgb_pointcloud;
           pcl::toROSMsg(filtered_rgb_pointcloud, ros_filtered_rgb_pointcloud);
           ros_filtered_rgb_pointcloud.header.frame_id = target_frame_id_;
 
           pub_filtered_rgb_cloud_plane_.publish(ros_filtered_rgb_pointcloud);
 
-          // sleep for 3 seconds
-          // ros::Duration(2.0).sleep();
+          // To visualize the filtered point cloud, sleep for 3 seconds after every point cloud
+          // ros::Duration(3.0).sleep();
+
+          //*********************************
 
           // Transform pose
           std::string frame_id = cloud_->header.frame_id;
@@ -543,16 +573,17 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       ROS_ERROR("Cannot generate cv image...");
     }
 
+    // Kevin: not saving point cloud cluster as it's not needed for SS22 competition
     // Save pointcloud debug
-    for (auto& cluster : clusters_3d)
-    {
-      std::string filename = "";
-      filename = "";
-      filename.append("pcd_cluster_");
-      filename.append(std::to_string(time_now.toSec()));
-      mpu::object::savePcd(cluster, logdir_, filename);
-      ROS_INFO_STREAM("Point cloud:" << filename << " saved to " << logdir_);
-    }
+    // for (auto& cluster : clusters_3d)
+    // {
+    //   std::string filename = "";
+    //   filename = "";
+    //   filename.append("pcd_cluster_");
+    //   filename.append(std::to_string(time_now.toSec()));
+    //   mpu::object::savePcd(cluster, logdir_, filename);
+    //   ROS_INFO_STREAM("Point cloud:" << filename << " saved to " << logdir_);
+    // }
   }
 }
 
@@ -710,7 +741,14 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       object_list.objects[i].pose.pose.orientation.y = q2.y();
       object_list.objects[i].pose.pose.orientation.z = q2.z();
       object_list.objects[i].pose.pose.orientation.w = q2.w();
-      object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() + 0.1;
+      
+      // print pringles height
+      ROS_INFO_STREAM("Pringles height: " << object_list.objects[i].pose.pose.position.z);
+
+      object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() + 0.14;
+
+      ROS_INFO_STREAM("Pringles new height: " << object_list.objects[i].pose.pose.position.z);
+
     }
     else
     {
