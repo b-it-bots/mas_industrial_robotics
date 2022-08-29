@@ -40,6 +40,7 @@
     <include file="$(find mir_pddl_problem_generator)/ros/launch/pddl_problem_generator.launch">
         <arg name="problem_path" value="$(arg problem_path)" />
         <arg name="max_goals" value="1" />
+        <arg name="prefer_goals_with_same_source_ws" value="false" />
     </include>
 
     <!-- mir_task_planning (planners wrapped with ros action server) -->
