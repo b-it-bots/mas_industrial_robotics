@@ -291,7 +291,6 @@ def main():
 
     sm.userdata.empty_locations = None
     sm.userdata.heavy_objects = rospy.get_param("~heavy_objects", ["m20_100"])
-    # sm.userdata.move_arm_to = None
 
     with sm:
         # add states to the container
@@ -300,7 +299,7 @@ def main():
             CheckIfLocationIsShelf(),
             transitions={
                 "shelf": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
-                "not_shelf": "MOVE_ARM_STAGE",  # change it to MOVE_ARM_TO_PRE_PLACE when we use arm camera for empty space detection
+                "not_shelf": "EMPTY_POSITION_SELECTION",  # change it to MOVE_ARM_TO_PRE_PLACE when we use arm camera for empty space detection
             },
         )
 
@@ -308,18 +307,18 @@ def main():
  
 #=================================================================================
 
-        """
-        These states are added to keep the arm at the state of holding the object.
-        This behaviour is only needed when handling single object
-        """
-        smach.StateMachine.add(
-            "MOVE_ARM_STAGE",
-            gms.move_arm("platform_middle"),
-            transitions={
-                "succeeded": "EMPTY_POSITION_SELECTION",
-                "failed": "MOVE_ARM_STAGE"
-            },
-        )
+        # """
+        # These states are added to keep the arm at the state of holding the object.
+        # This behaviour is only needed when handling single object
+        # """
+        # smach.StateMachine.add(
+        #     "MOVE_ARM_STAGE",
+        #     gms.move_arm("platform_middle"),
+        #     transitions={
+        #         "succeeded": "EMPTY_POSITION_SELECTION",
+        #         "failed": "MOVE_ARM_STAGE"
+        #     },
+        # )
 #=================================================================================
 
         smach.StateMachine.add(
@@ -450,7 +449,6 @@ def main():
 	   },
 	)
 
-
         smach.StateMachine.add(
             "PUBLISH_OBJECT_POSE_1",
             PublishObjectPose(0),
@@ -487,7 +485,7 @@ def main():
                 timeout_duration=20,
             ),
             transitions={
-                "success": "UNSTAGE_FOR_PLACING",
+                "success": "GO_TO_PRE_GRASP_POSE",
                 "timeout": "OVERALL_FAILED",
                 "failure": "EMPTY_POSITION_SELECTION",
             },
@@ -495,15 +493,15 @@ def main():
 
 
 
-        smach.StateMachine.add(
-            "UNSTAGE_FOR_PLACING",
-            Unstage_to_place(),
-            transitions=
-            {
-                "success":"GO_TO_PRE_GRASP_POSE", # change it to OPEN_GRIPPER when gripper is repaired 
-                "failed":"MOVE_ARM_TO_NEUTRAL",
-            },
-        )
+        # smach.StateMachine.add(
+        #     "UNSTAGE_FOR_PLACING",
+        #     Unstage_to_place(),
+        #     transitions=
+        #     {
+        #         "success":"GO_TO_PRE_GRASP_POSE", # change it to OPEN_GRIPPER when gripper is repaired 
+        #         "failed":"MOVE_ARM_TO_NEUTRAL",
+        #     },
+        # )
 
 
         smach.StateMachine.add(
