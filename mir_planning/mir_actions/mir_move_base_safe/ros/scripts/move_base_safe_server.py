@@ -85,6 +85,9 @@ class PrepareArmForNextAction(smach.State):
         )
 
     def execute(self, userdata):
+        prepare_arm_for_next_action = rospy.get_param("~prepare_arm_for_next_action", True)
+        if not prepare_arm_for_next_action:
+            return "skipped"
         if Utils.get_value_of(userdata.goal.parameters, "next_action") == "PERCEIVE":
             arm_goal = "look_at_workspace_from_near"
         elif Utils.get_value_of(userdata.goal.parameters, "next_action") == "UNSTAGE":

@@ -3,11 +3,13 @@
 
     <arg name="align_with_workspace" default="false" />
     <arg name="be_safe" default="false"/>
+    <arg name="prepare_arm_for_next_action" default="false" />
 
     <!-- move base safe action server -->
     <node pkg="mir_move_base_safe" type="move_base_safe_server.py" name="move_base_safe_server" output="screen" >
         <param name="align" type="bool" value="$(arg align_with_workspace)" />
         <param name="be_safe" type="bool" value="$(arg be_safe)" />
+        <param name="prepare_arm_for_next_action" type="bool" value="$(arg prepare_arm_for_next_action)" />
     </node>
 
     <!-- stage action server -->
@@ -29,6 +31,7 @@
 
     <!-- place object action server -->
     <node pkg="mir_place_object" type="place_object_server.py" name="place_object_server" output="screen" />
+    <!-- <node pkg="mir_place_object" type="place_object_server_empty_space.py" name="place_object_server" output="screen" /> -->
 
     <!-- insert object in object server -->
     <node pkg="mir_insert_object" type="insert_object_server.py" name="insert_object_server" output="screen" />
