@@ -3,10 +3,10 @@ voxel_leaf_size: 0.01
 voxel_filter_field_name: z
 voxel_filter_limit_min: -0.15
 voxel_filter_limit_max: 0.3
-enable_passthrough_filter: false
+enable_passthrough_filter: true
 passthrough_filter_field_name: x
 passthrough_filter_limit_min: 0.4 # all the min distance starts from the baselink 
-passthrough_filter_limit_max: 0.9
+passthrough_filter_limit_max: 0.7
 enable_cropbox_filter: false
 cropbox_filter_min_x: 0.0
 cropbox_filter_min_x: 0.8
@@ -37,9 +37,9 @@ cluster_max_height: 0.09
 cluster_max_length: 0.25
 cluster_min_distance_to_polygon: 0.04
 octree_resolution: 0.01
-object_height_above_workspace: 0.052
+object_height_above_workspace: 0.03
 # parameters for finding empty spaces on a plane
 empty_space_point_count_percentage_threshold: 0.8
-empty_space_radius: 0.05
+empty_space_radius: 0.03
 num_of_empty_spaces_required: 3
 trial_duration: 3.0
