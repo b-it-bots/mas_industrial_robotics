@@ -325,6 +325,16 @@ class PregraspPlannerPipeline(object):
             self.selected_pose.publish(reachable_pose)
             self.joint_configuration.publish(joint_msg)
 
+            joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
+            joint_config = [p.value for p in joint_msg.positions]
+            if len(joint_config) == 5:
+                grasp_msg = std_msgs.msg.Float64MultiArray()
+                grasp_msg.data = joint_config
+                joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
+                self.joint_waypoint_list_pub.publish(joint_waypoints)
+            else:
+                print("*************************************************** f**ked up")
+
             self.event_out.publish("e_success")
             self.reset_component_data()
             return 'INIT'
@@ -367,6 +377,7 @@ class PregraspPlannerPipeline(object):
         self.selected_pose.publish(reachable_pose)
         self.joint_configuration.publish(brics_joint_config)
 
+        joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
         # if we want to reach a pre-pregrasp pose (specified by joint offsets)
         # before reaching the final pose, generate a waypoint list
         if abs(max(self.joint_offset, key=abs)) > 0 and self.generate_pregrasp_waypoint:
@@ -380,12 +391,12 @@ class PregraspPlannerPipeline(object):
                 )
             pregrasp_msg = std_msgs.msg.Float64MultiArray()
             pregrasp_msg.data = pregrasp_waypoint
-            grasp_msg = std_msgs.msg.Float64MultiArray()
-            grasp_msg.data = joint_config
-            joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
             joint_waypoints.list_of_joint_values_lists.append(pregrasp_msg)
-            joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
-            self.joint_waypoint_list_pub.publish(joint_waypoints)
+
+        grasp_msg = std_msgs.msg.Float64MultiArray()
+        grasp_msg.data = joint_config
+        joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
+        self.joint_waypoint_list_pub.publish(joint_waypoints)
 
         self.event_out.publish("e_success")
         self.reset_component_data()
