@@ -434,30 +434,34 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
                                                               rgb_cluster_filter_limit_min_,
                                                               rgb_cluster_filter_limit_max_);
 
-          // check if object is pringles
-          if (object.name == "PRINGLES")
+          PointT min_pt;
+          PointT max_pt;
+          pcl::getMinMax3D(*cloud_roi, min_pt, max_pt);
+
+          rgb_object_list.objects[i].dimensions.vector.z = max_pt.z - min_pt.z;
+          ROS_INFO("[RGB Object Height] Object %s length: %f", object.name.c_str(), rgb_object_list.objects[i].dimensions.vector.z);
+
+          if (max_pt.z > 0.09)
           {
-            PointT min_pt;
-            PointT max_pt;
-            pcl::getMinMax3D(*cloud_roi, min_pt, max_pt);
-
-            // Publisher to visualize a point 3D
-
-            // // create a point stamped publisher
-            // ros::Publisher max_pt_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/pringles_point", 1);
-
-            // // print the max point
-            // ROS_INFO("[RGB] Max point: %f, %f, %f", max_pt.x, max_pt.y, max_pt.z);
-
-            // // publish the max point 
-            // geometry_msgs::PointStamped max_pt_msg;
-            // max_pt_msg.header.frame_id = target_frame_id_;
-            // max_pt_msg.header.stamp = ros::Time::now();
-            // max_pt_msg.point.x = max_pt.x;
-            // max_pt_msg.point.y = max_pt.y;
-            // max_pt_msg.point.z = max_pt.z;
-            // max_pt_pub_.publish(max_pt_msg);
+            ROS_INFO("[RGB Object Height] Object %s length is greater than 9cm: %f", object.name.c_str(), max_pt.z);
           }
+
+          // Publisher to visualize a point 3D
+
+          // // create a point stamped publisher
+          // ros::Publisher max_pt_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/pringles_point", 1);
+
+          // // print the max point
+          // ROS_INFO("[RGB] Max point: %f, %f, %f", max_pt.x, max_pt.y, max_pt.z);
+
+          // // publish the max point 
+          // geometry_msgs::PointStamped max_pt_msg;
+          // max_pt_msg.header.frame_id = target_frame_id_;
+          // max_pt_msg.header.stamp = ros::Time::now();
+          // max_pt_msg.point.x = max_pt.x;
+          // max_pt_msg.point.y = max_pt.y;
+          // max_pt_msg.point.z = max_pt.z;
+          // max_pt_pub_.publish(max_pt_msg);
 
           sensor_msgs::PointCloud2 ros_filtered_rgb_pointcloud;
           pcl::toROSMsg(filtered_rgb_pointcloud, ros_filtered_rgb_pointcloud);
@@ -733,7 +737,7 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       }
     }
     
-    if (object_list.objects[i].name == "PRINGLES")
+    if (object_list.objects[i].dimensions.vector.z > 0.09)
     {
       tf::Quaternion q2;
       q2.setRPY(0.0, -1.57, 0.0);
@@ -743,11 +747,11 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       object_list.objects[i].pose.pose.orientation.w = q2.w();
       
       // print pringles height
-      ROS_INFO_STREAM("Pringles height: " << object_list.objects[i].pose.pose.position.z);
+      ROS_INFO_STREAM("[Adjust pose] Object: " << object_list.objects[i].name << "pose z: " << object_list.objects[i].pose.pose.position.z);
 
-      object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() + 0.14;
+      // object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() + 0.14;
 
-      ROS_INFO_STREAM("Pringles new height: " << object_list.objects[i].pose.pose.position.z);
+      // ROS_INFO_STREAM("Pringles new height: " << object_list.objects[i].pose.pose.position.z);
 
     }
     else
