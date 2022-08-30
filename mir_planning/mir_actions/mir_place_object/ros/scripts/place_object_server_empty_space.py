@@ -398,6 +398,7 @@ def main():
                     "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
             },
         )
+# till above the state machine is for shelf
 
 ## Uncomment the below code when we use arm camera for empty space detection
 
