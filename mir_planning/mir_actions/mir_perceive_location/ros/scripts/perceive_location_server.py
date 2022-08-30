@@ -111,13 +111,15 @@ class SetupMoveBaseWithDBC(smach.State):
         # set base pose to next pose in list
         dbc_pose = PoseStamped()
         dbc_pose.header.stamp = rospy.Time.now()
-        dbc_pose.header.frame_id = "base_link_static"
+        dbc_pose.header.frame_id = "map"
         dbc_pose.pose.position.x = target_pose_dict["x"]
         dbc_pose.pose.position.y = target_pose_dict["y"]
-        quat = tf.transformations.quaternion_from_euler(
-            0.0, 0.0, target_pose_dict["theta"]
-        )
-        dbc_pose.pose.orientation = Quaternion(*quat)
+        dbc_pose.pose.position.z = 0.0
+        q = tf.transformations.quaternion_from_euler(0, 0, target_pose_dict["theta"])
+        dbc_pose.pose.orientation.x = q[0]
+        dbc_pose.pose.orientation.y = q[1]
+        dbc_pose.pose.orientation.z = q[2]
+        dbc_pose.pose.orientation.w = q[3]
 
         userdata.base_pose_index += 1
         print(dbc_pose)
@@ -241,10 +243,14 @@ def main():
     base_x_offset = rospy.get_param("~base_x_offset", 0.0)
     base_y_offset = rospy.get_param("~base_y_offset", 0.25)
     base_theta_offset = rospy.get_param("~base_theta_offset", 0.0)
+    
+    # TODO: hardcoding the perceive locations for local-competition-22
+    # have to change it later to take workspace name and use that location
+
     sm.userdata.base_pose_list = [
-        {"x": 0.0, "y": 0.0, "theta": 0.0},
-        {"x": base_x_offset, "y": base_y_offset, "theta": base_theta_offset},
-        {"x": base_x_offset, "y": -base_y_offset, "theta": -base_theta_offset},
+        {"x": 0.634491, "y": 0.323470, "theta": 1.477926},
+        {"x": 0.209886, "y": 0.364541, "theta": 1.473944},
+        {"x": 1.025839, "y": 0.282464, "theta": 1.465480},
     ]
     sm.userdata.base_pose_index = 0
 
