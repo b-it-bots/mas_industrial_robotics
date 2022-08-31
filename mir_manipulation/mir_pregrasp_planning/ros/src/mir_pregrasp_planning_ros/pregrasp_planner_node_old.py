@@ -276,15 +276,6 @@ class PregraspPlannerPipeline(object):
         else:
             return "IDLE"
 
-    def is_graspable(self):
-        # gripper_width = 0.1
-        # obj_width = rospy.get_param("mir_perception/object_width")
-        # if obj_width < (gripper_width - 0.02):
-        #     return True
-        # else:
-        #     return False
-        return True
-
     def running_state(self):
         """
         Executes the RUNNING state of the state machine.
@@ -316,7 +307,37 @@ class PregraspPlannerPipeline(object):
             self.reset_component_data()
             return "INIT"
 
-        rospy.loginfo('[Pregrasp Planning] Tying to find solution for default pick config.')
+        if self.ignore_orientation:
+            input_pose = geometry_msgs.msg.PoseStamped()
+            input_pose.header = transformed_pose.header
+            input_pose.pose.position = transformed_pose.pose.position
+            solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
+                    input_pose.pose.position.x, input_pose.pose.position.y,
+                    input_pose.pose.position.z, input_pose.header.frame_id)
+            if solution is None:
+                rospy.logerr("Could not find IK solution")
+                status = 'e_failure'
+                self.event_out.publish(status)
+                self.reset_component_data()
+                return 'INIT'
+            reachable_pose, joint_msg = solution
+            rospy.loginfo('Found solution')
+            self.selected_pose.publish(reachable_pose)
+            self.joint_configuration.publish(joint_msg)
+
+            joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
+            joint_config = [p.value for p in joint_msg.positions]
+            if len(joint_config) == 5:
+                grasp_msg = std_msgs.msg.Float64MultiArray()
+                grasp_msg.data = joint_config
+                joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
+                self.joint_waypoint_list_pub.publish(joint_waypoints)
+            else:
+                print("*************************************************** f**ked up")
+
+            self.event_out.publish("e_success")
+            self.reset_component_data()
+            return 'INIT'
 
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
             transformed_pose,
@@ -343,46 +364,15 @@ class PregraspPlannerPipeline(object):
             brics_joint_config,
             joint_config,
         ) = self.reachability_pose_selector.get_reachable_pose_and_configuration(
-            pose_samples, self.linear_offset, modified_pose
+            pose_samples, self.linear_offset
         )
 
-        if not reachable_pose and self.is_graspable():
-            rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
-            rospy.loginfo("[Pregrasp Planning] Tryinng orientation independent planning.")
-            input_pose = geometry_msgs.msg.PoseStamped()
-            input_pose.header = transformed_pose.header
-            input_pose.pose.position = transformed_pose.pose.position
-            solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
-                    input_pose.pose.position.x, input_pose.pose.position.y,
-                    input_pose.pose.position.z, input_pose.header.frame_id)
-            
-            if solution is None:
-                rospy.logerr("[Pregrasp Planning] Could not find IK solution for orientation independent planning.")
-                status = 'e_failure'
-                self.event_out.publish(status)
-                self.reset_component_data()
-                return 'INIT'
-
-            reachable_pose, joint_msg = solution
-            rospy.loginfo('[Pregrasp Planning] Found solution')
-            self.selected_pose.publish(reachable_pose)
-            self.joint_configuration.publish(joint_msg)
-
-            joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
-            joint_config = [p.value for p in joint_msg.positions]
-            if len(joint_config) == 5:
-                grasp_msg = std_msgs.msg.Float64MultiArray()
-                grasp_msg.data = joint_config
-                joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
-                self.joint_waypoint_list_pub.publish(joint_waypoints)
-            else:
-                print("*************************************************** f**ked up")
-
-            self.event_out.publish("e_success")
+        if not reachable_pose:
+            rospy.logerr("Could not find IK solution")
+            status = "e_failure"
+            self.event_out.publish(status)
             self.reset_component_data()
-            return 'INIT'
-
-        rospy.loginfo('[Pregrasp Planning] Found solution')
+            return "INIT"
 
         self.selected_pose.publish(reachable_pose)
         self.joint_configuration.publish(brics_joint_config)

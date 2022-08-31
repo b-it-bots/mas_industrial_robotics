@@ -39,11 +39,11 @@
         <joint name="arm_joint_5" value="2.9831" />
     </group_state>
     <group_state name="barrier_tape" group="arm_1">
-        <joint name="arm_joint_1" value="2.1763" />
-        <joint name="arm_joint_2" value="0.0685" />
-        <joint name="arm_joint_3" value="-1.61714" />
-        <joint name="arm_joint_4" value="3.1683" />
-        <joint name="arm_joint_5" value="2.9422" />
+        <joint name="arm_joint_1" value="2.4021" />
+        <joint name="arm_joint_2" value="0.0686" />
+        <joint name="arm_joint_3" value="-1.6174" />
+        <joint name="arm_joint_4" value="3.1682" />
+        <joint name="arm_joint_5" value="2.9425" />
     </group_state>
     <group_state name="barrier_tape_back" group="arm_1">
         <joint name="arm_joint_1" value="5.33172" />
@@ -326,6 +326,8 @@
         <joint name="arm_joint_4" value="3.14951" />
         <joint name="arm_joint_5" value="2.90371" />
     </group_state>
+
+<!-- 10cm poses    -->
     <group_state name="10cm/pose1" group="arm_1">
         <joint name="arm_joint_1" value="2.5499" />
         <joint name="arm_joint_2" value="2.3957" />
@@ -361,6 +363,43 @@
         <joint name="arm_joint_4" value="2.8688" />
         <joint name="arm_joint_5" value="3.0660" />
     </group_state>
+
+    <group_state name="10cm/pose6" group="arm_1">
+        <joint name="arm_joint_1" value="2.9249" />
+        <joint name="arm_joint_2" value="2.5190" />
+        <joint name="arm_joint_3" value="-2.5614" />
+        <joint name="arm_joint_4" value="3.2363" />
+        <joint name="arm_joint_5" value="2.9811" />
+    </group_state>
+    <group_state name="10cm/pose7" group="arm_1">
+        <joint name="arm_joint_1" value="2.7814" />
+        <joint name="arm_joint_2" value="2.3841" />
+        <joint name="arm_joint_3" value="-2.3162" />
+        <joint name="arm_joint_4" value="2.9381" />
+        <joint name="arm_joint_5" value="2.9831" />
+    </group_state>
+    <group_state name="10cm/pose8" group="arm_1">
+        <joint name="arm_joint_1" value="2.6729" />
+        <joint name="arm_joint_2" value="2.3140" />
+        <joint name="arm_joint_3" value="-2.3161" />
+        <joint name="arm_joint_4" value="3.3484" />
+        <joint name="arm_joint_5" value="2.9830" />
+    </group_state>
+    <group_state name="10cm/pose9" group="arm_1">
+        <joint name="arm_joint_1" value="2.4492" />
+        <joint name="arm_joint_2" value="2.3140" />
+        <joint name="arm_joint_3" value="-2.3162" />
+        <joint name="arm_joint_4" value="3.3480" />
+        <joint name="arm_joint_5" value="2.9830" />
+    </group_state>
+    <group_state name="10cm/pose10" group="arm_1">
+        <joint name="arm_joint_1" value="1.9648" />
+        <joint name="arm_joint_2" value="2.3841" />
+        <joint name="arm_joint_3" value="-2.3162" />
+        <joint name="arm_joint_4" value="2.9381" />
+        <joint name="arm_joint_5" value="2.9831" />
+    </group_state>
+    
     <group_state name="5cm/pose1" group="arm_1">
         <joint name="arm_joint_1" value="2.5498" />
         <joint name="arm_joint_2" value="2.51416" />
