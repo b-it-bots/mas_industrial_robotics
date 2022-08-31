@@ -47,6 +47,7 @@ class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
         )
 
         location = Utils.get_value_of(userdata.goal.parameters, "location")
+        # location = 'WS05' # TODO: remove it later 
         if location is None:
             rospy.logwarn('"location" not provided. Using default.')
             return "failed"

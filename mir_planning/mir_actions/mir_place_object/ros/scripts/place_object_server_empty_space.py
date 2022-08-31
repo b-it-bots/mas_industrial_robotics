@@ -165,6 +165,10 @@ class PublishObjectPose(smach.State):
         single_array.pose = empty_locations.poses[self.selection_index]
 
         single_array.pose.position.z += rospy.get_param("object_height_above_workspace", 0.03)
+        single_array.pose.orientation.x = 0
+        single_array.pose.orientation.y = 0
+        single_array.pose.orientation.z = 0
+
         
         rospy.loginfo("Publishing single pose to pregrasp planner")
 
