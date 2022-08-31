@@ -248,9 +248,9 @@ def main():
     # have to change it later to take workspace name and use that location
 
     sm.userdata.base_pose_list = [
-        {"x": 0.634491, "y": 0.323470, "theta": 1.477926},
-        {"x": 0.209886, "y": 0.364541, "theta": 1.473944},
-        {"x": 1.025839, "y": 0.282464, "theta": 1.465480},
+        {"x": 2.377984, "y": 0.683127, "theta": 1.399252},
+        {"x": 2.800784, "y": 0.615974, "theta": 1.435454},
+        {"x": 3.309543, "y": 0.525256, "theta": 1.455039},
     ]
     sm.userdata.base_pose_index = 0
 
