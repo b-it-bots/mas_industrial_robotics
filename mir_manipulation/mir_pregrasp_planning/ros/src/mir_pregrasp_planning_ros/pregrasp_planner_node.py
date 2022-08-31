@@ -46,6 +46,7 @@ parameters for all the components and starts/stops them accordingly.
 import math
 
 import brics_actuator.msg
+import copy
 import geometry_msgs.msg
 import mcr_common_converters_ros.joint_configuration_shifter
 import mcr_manipulation_measurers_ros.pose_transformer
@@ -315,11 +316,13 @@ class PregraspPlannerPipeline(object):
             self.event_out.publish(status)
             self.reset_component_data()
             return "INIT"
-
+        transformed_pose.pose.position.x -= 0.01
         rospy.loginfo('[Pregrasp Planning] Tying to find solution for default pick config.')
 
+        normal_pose = copy.deepcopy(transformed_pose)
+        normal_pose.pose.position.y += 0.2
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
-            transformed_pose,
+            normal_pose,
             self.height_tolerance,
             angular_tolerance=self.angular_tolerance,
         )
@@ -355,7 +358,7 @@ class PregraspPlannerPipeline(object):
             solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
                     input_pose.pose.position.x, input_pose.pose.position.y,
                     input_pose.pose.position.z, input_pose.header.frame_id)
-            
+
             if solution is None:
                 rospy.logerr("[Pregrasp Planning] Could not find IK solution for orientation independent planning.")
                 status = 'e_failure'
@@ -370,13 +373,34 @@ class PregraspPlannerPipeline(object):
 
             joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
             joint_config = [p.value for p in joint_msg.positions]
+            if grasp_type == "side_grasp" and self.generate_pregrasp_waypoint:
+                pregrasp_input_pose = copy.deepcopy(input_pose)
+                pregrasp_input_pose.pose.position.x -= 0.05
+                pregrasp_solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
+                        pregrasp_input_pose.pose.position.x,
+                        pregrasp_input_pose.pose.position.y,
+                        pregrasp_input_pose.pose.position.z,
+                        pregrasp_input_pose.header.frame_id)
+
+                if pregrasp_solution is None:
+                    rospy.logerr("[Pregrasp Planning] Could not find IK solution for\
+                            orientation independent planning for pregrasp pose.")
+                    status = 'e_failure'
+                    self.event_out.publish(status)
+                    self.reset_component_data()
+                    return 'INIT'
+                pregrasp_reachable_pose, pregrasp_joint_msg = pregrasp_solution
+                rospy.loginfo('[Pregrasp Planning] Found solution pregrasp')
+                pregrasp_msg = std_msgs.msg.Float64MultiArray()
+                pregrasp_joint_config = [p.value for p in pregrasp_joint_msg.positions]
+                pregrasp_msg.data = pregrasp_joint_config
+                joint_waypoints.list_of_joint_values_lists.append(pregrasp_msg)
+
             if len(joint_config) == 5:
                 grasp_msg = std_msgs.msg.Float64MultiArray()
                 grasp_msg.data = joint_config
                 joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
                 self.joint_waypoint_list_pub.publish(joint_waypoints)
-            else:
-                print("*************************************************** f**ked up")
 
             self.event_out.publish("e_success")
             self.reset_component_data()
@@ -405,6 +429,7 @@ class PregraspPlannerPipeline(object):
 
         grasp_msg = std_msgs.msg.Float64MultiArray()
         grasp_msg.data = joint_config
+
         joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
         self.joint_waypoint_list_pub.publish(joint_waypoints)
 
