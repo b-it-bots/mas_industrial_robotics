@@ -3,11 +3,19 @@
 
     <arg name="large_objects" default="['S40_40_B', 'S40_40_G', 'M30', 'BEARING_BOX', 'MOTOR']" />
 
+
+    <!-- This rollable objects are only for ss22_competition-->
+    <arg name="rollable_objects" default="['R20', 'TENNIS_BALL', 'PRINGLES', 'INSULATION_TAPE', 'MOTOR','CUP','AXIS']" />
+
     <node pkg="mir_pick_object" type="pick_object_server.py"
           name="wbc_pick_object_server" output="screen">
         <rosparam param="large_objects" subst_value="True">
             $(arg large_objects)
         </rosparam>
+        <rosparam param="rollable_objects" subst_value="True">
+            $(arg rollable_objects)
+        </rosparam>
+
         <param name="reperceive" type="bool" value="true"/>
     </node>
 
