@@ -316,13 +316,10 @@ class PregraspPlannerPipeline(object):
             self.event_out.publish(status)
             self.reset_component_data()
             return "INIT"
-        transformed_pose.pose.position.x -= 0.01
         rospy.loginfo('[Pregrasp Planning] Tying to find solution for default pick config.')
 
-        normal_pose = copy.deepcopy(transformed_pose)
-        normal_pose.pose.position.y += 0.2
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
-            normal_pose,
+            transformed_pose,
             self.height_tolerance,
             angular_tolerance=self.angular_tolerance,
         )
@@ -338,6 +335,10 @@ class PregraspPlannerPipeline(object):
         else:
             grasp_type = "side_grasp"
 
+        if grasp_type == "side_grasp":
+            modified_pose.pose.position.y += 0.02
+            modified_pose.pose.position.x -= 0.01
+
         self.grasp_type.publish(grasp_type)
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
         self.pose_samples_pub.publish(pose_samples)
@@ -351,10 +352,13 @@ class PregraspPlannerPipeline(object):
 
         if not reachable_pose and self.is_graspable():
             rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
-            rospy.loginfo("[Pregrasp Planning] Tryinng orientation independent planning.")
+            rospy.loginfo('\033[92m'+"[Pregrasp Planning] Tryinng orientation independent planning.")
             input_pose = geometry_msgs.msg.PoseStamped()
             input_pose.header = transformed_pose.header
             input_pose.pose.position = transformed_pose.pose.position
+            if grasp_type == "side_grasp":
+                # input_pose.pose.position.y -= 0.01
+                input_pose.pose.position.x -= 0.01
             solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
                     input_pose.pose.position.x, input_pose.pose.position.y,
                     input_pose.pose.position.z, input_pose.header.frame_id)
