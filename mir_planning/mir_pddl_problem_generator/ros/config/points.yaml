@@ -36,19 +36,19 @@ bearing_box: 15
 motor: 15
 bracket: 10
 insulation_tape: 10
-axis: 6
-screw_driver: 5
-f20_20_b: 1
-s40_40_b: 1
-s40_40_g: 1
+screw_driver: 6
+axis: 5
+f20_20_b: 5
+s40_40_b: 5
+s40_40_g: 5
 
 sponge: 21
 towel: 17
 tennis_ball: 16
 dishwasher_soap: 10
 brown_box: 6
+eye_glasses: 4
 cup: 2
-eye_glasses: 1
 toothbrush: 1
 spoon: 1
 pringles: 1
