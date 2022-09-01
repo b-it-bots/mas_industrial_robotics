@@ -12,6 +12,7 @@ find_package(catkin REQUIRED
     actionlib
     rosplan_dispatch_msgs
     mir_planning_msgs
+    mir_audio_receiver
 )
 
 add_definitions(-std=c++11)
