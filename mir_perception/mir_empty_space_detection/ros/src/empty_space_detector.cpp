@@ -37,28 +37,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
 EmptySpaceDetector::~EmptySpaceDetector() {}
 void EmptySpaceDetector::loadParams()
 {
-  // std::string passthrough_filter_field_name;
-  // float passthrough_filter_limit_min, passthrough_filter_limit_max;
-  // bool enable_passthrough_filter;
-  // nh_.param<bool>("enable_passthrough_filter", enable_passthrough_filter, false);
-  // nh_.param<std::string>("passthrough_filter_field_name", passthrough_filter_field_name, "x");
-  // nh_.param<float>("passthrough_filter_limit_min", passthrough_filter_limit_min, 0.0);
-  // nh_.param<float>("passthrough_filter_limit_max", passthrough_filter_limit_max, 0.8);
-  // float cropbox_filter_min_x, cropbox_filter_max_x, cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z, cropbox_filter_max_z;
-  // bool enable_cropbox_filter;
-  // nh_.param<bool>("enable_cropbox_filter", enable_cropbox_filter, false);
-  // nh_.param<float>("cropbox_filter_min_x", cropbox_filter_min_x, 0.0);
-  // nh_.param<float>("cropbox_filter_max_x", cropbox_filter_max_x, 0.8);
-  // nh_.param<float>("cropbox_filter_min_y", cropbox_filter_min_y, -0.5);
-  // nh_.param<float>("cropbox_filter_max_y", cropbox_filter_max_y, 0.8);
-  // nh_.param<float>("cropbox_filter_min_z", cropbox_filter_min_z, -0.2);
-  // nh_.param<float>("cropbox_filter_max_z", cropbox_filter_max_z, 0.6);
-  // scene_segmentation_->setPassthroughParams(
-  //     enable_passthrough_filter, passthrough_filter_field_name, passthrough_filter_limit_min,
-  //     passthrough_filter_limit_max);
-  // scene_segmentation_->setCropBoxParams(enable_cropbox_filter, cropbox_filter_min_x, cropbox_filter_max_x,
-  //                                      cropbox_filter_min_y, cropbox_filter_max_y, cropbox_filter_min_z,
-  //                                      cropbox_filter_max_z);
+
   float voxel_leaf_size, voxel_filter_limit_min, voxel_filter_limit_max;
   std::string voxel_filter_field_name;
   nh_.param<float>("voxel_leaf_size", voxel_leaf_size, 1.0);
@@ -93,9 +72,13 @@ void EmptySpaceDetector::loadParams()
                                     sac_normal_distance_weight);
 
   float object_height_above_workspace_;
+  int num_of_empty_spaces_required;
   nh_.param<float>("object_height_above_workspace", object_height_above_workspace_, 0.01);
   nh_.param<float>("empty_space_point_count_percentage_threshold", empty_space_pnt_cnt_perc_thresh_,
                    0.8);
+  //add no of empty space locations as a parameter
+  nh_.param<int>("num_of_empty_spaces_required", num_of_empty_spaces_required, 3);
+
   nh_.param<float>("empty_space_radius", empty_space_radius_, 0.05);
   expected_num_of_points_ =
       (empty_space_radius_ * empty_space_radius_ * M_PI) / (voxel_leaf_size * voxel_leaf_size);
@@ -112,7 +95,14 @@ void EmptySpaceDetector::eventInCallback(const std_msgs::String::ConstPtr &msg)
     event_out.data = "e_add_cloud_stopped";
   } else if (msg->data == "e_trigger") {
     bool success = findEmptySpaces();
-    event_out.data = (success) ? "e_success" : "e_failure";
+    if (success) {
+      event_out.data = "e_success";
+      cloud_accumulation_->reset(); //resetting the octree
+    } else {
+      event_out.data = "e_failure";
+      add_to_octree_ = true;
+    }
+    //event_out.data = (success) ? "e_success" : "e_failure";
   } else {
     return;
   }
