@@ -27,7 +27,7 @@ class RGBObjectRecognizer():
                  classify=False,
                  augment=False,
                  device='cpu',
-                 debug_mode=False):
+                 debug_mode=True):
         import sys
         sys.path.insert(0, os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
                            'common', 'src', 'rgb_object_recognition', 'yolov7'))
@@ -149,7 +149,8 @@ class RGBObjectRecognizer():
                         roi.width = int(bboxes[i][2]) - int(bboxes[i][0])
                         roi.height = int(bboxes[i][3]) - int(bboxes[i][1])
                         result.roi = roi
-
+                        if self.debug: 
+                            print("DETECTED OBJECT: ", result.name)
                         objects.append(result)
                     # Publish result_list
                     result_list.objects = objects
