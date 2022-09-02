@@ -124,34 +124,36 @@ class RGBObjectRecognizer():
                                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], cv_img.shape).round()
 
                                 # Write results
-                                if self.debug:
-                                    for *xyxy, conf, cls in reversed(det):
+                                for *xyxy, conf, cls in reversed(det):
+                                    if self.debug:
                                         label = f'{self.names[int(cls)]} {conf:.2f}'
                                         plot_one_box(xyxy, cv_img, label=label, color=self.colors[int(cls)],
                                                      line_thickness=1)
+                                    #xywh = (xyxy2xywh(torch.tensor(xyxy).view(-1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                                    bboxes.append(xyxy)
+                                    probs.append(conf)
+                                    labels.append(self.names[int(cls)])
+                                if self.debug:
                                     # publish bbox and label
                                     self.publish_debug_img(cv_img)
-                                #xywh = (xyxy2xywh(torch.tensor(xyxy).view(-1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                                bboxes.append(xyxy)
-                                probs.append(conf)
-                                labels.append(self.names[int(cls)])
+                        print(labels)
+                        for i in range(len(labels)):
+                            result = Object()
+                            result.name = labels[i].upper()
+                            result.probability = probs[i]
+                            roi = RegionOfInterest()
+                            roi.x_offset = int(bboxes[i][0])
+                            roi.y_offset = int(bboxes[i][1])
+                            roi.width = int(bboxes[i][2]) - int(bboxes[i][0])
+                            roi.height = int(bboxes[i][3]) - int(bboxes[i][1])
+                            result.roi = roi
+                            objects.append(result)
+                        if self.debug:
+                            print("DETECTED OBJECTS: ", labels)
 
                     else:
                         bboxes, probs, labels = self.model.classify(cv_img)
 
-                    for i in range(len(labels)):
-                        result = Object()
-                        result.name = labels[i].upper()
-                        result.probability = probs[i]
-                        roi = RegionOfInterest()
-                        roi.x_offset = int(bboxes[i][0])
-                        roi.y_offset = int(bboxes[i][1])
-                        roi.width = int(bboxes[i][2]) - int(bboxes[i][0])
-                        roi.height = int(bboxes[i][3]) - int(bboxes[i][1])
-                        result.roi = roi
-                        if self.debug: 
-                            print("DETECTED OBJECT: ", result.name)
-                        objects.append(result)
                     # Publish result_list
                     result_list.objects = objects
                     self.pub_result.publish(result_list)
