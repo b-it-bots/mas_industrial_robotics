@@ -131,8 +131,8 @@ class RGBObjectRecognizer():
                                                      line_thickness=1)
                                     # publish bbox and label
                                     self.publish_debug_img(cv_img)
-                                xywh = (xyxy2xywh(torch.tensor(xyxy).view(-1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                                bboxes.append(xywh)
+                                #xywh = (xyxy2xywh(torch.tensor(xyxy).view(-1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                                bboxes.append(xyxy)
                                 probs.append(conf)
                                 labels.append(self.names[int(cls)])
 
