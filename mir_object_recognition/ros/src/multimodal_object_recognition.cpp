@@ -157,7 +157,7 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
 
         if (debug_mode_)
         {
-            test_pub_pose_->publish(cloud_object_list.objects[0].pose);
+            // test_pub_pose_->publish(cloud_object_list.objects[0].pose);
 
             // convert the bouinding boxes into ros message
             mas_perception_msgs::msg::BoundingBoxList bounding_box_list;
@@ -366,10 +366,13 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
                                                 rgb_cluster_filter_limit_min_, 
                                                 rgb_cluster_filter_limit_max_);
 
+                                                             
+
                     // Transform pose
                     std::string frame_id = cloud_ -> header.frame_id;
                     pose.header.stamp = this->get_clock()->now();
                     pose.header.frame_id = frame_id;
+                    // test_pub_pose_->publish(pose);       
                     if (frame_id != target_frame_id_)
                     {
                         mpu::object::transformPose(tf_buffer_, target_frame_id_,
@@ -392,6 +395,8 @@ void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
             }
             else
             {
+                // print line number
+                RCLCPP_INFO_STREAM(get_logger(), "Line: " << __LINE__);
                 RCLCPP_DEBUG(get_logger(), "[RGB] DECOY");
                 rgb_object_list.objects[i].name = "DECOY";
                 rgb_object_list.objects[i].database_id = rgb_object_id_;
@@ -582,6 +587,8 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
     }
     if (clusters_2d.size() > 0)
     {
+        // print line number
+        RCLCPP_INFO_STREAM(get_logger(), "Line number: " << __LINE__);
         cluster_visualizer_rgb_->publish(clusters_2d, target_frame_id_);
         // RGB Pose array for debug mode only
         geometry_msgs::msg::PoseArray rgb_object_pose_array;
