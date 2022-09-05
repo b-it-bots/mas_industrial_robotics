@@ -55,7 +55,7 @@ namespace mir_perception_utils
          * \param[in] Minimum value of the field z allowed
          * \param[in] Maximum value of the field z allowed
          */
-        void estimatePose(const PointCloudConstBSPtr &xyz_input_cloud,
+        void estimatePose(const PointCloudBSPtr &xyz_input_cloud,
                           geometry_msgs::msg::PoseStamped &pose,
                           const std::string shape = "None",
                           const float passthrough_lim_min = 0.0060,

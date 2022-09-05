@@ -100,7 +100,6 @@ bool pointcloud::getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
                              PointCloudBSPtr &cloud_roi,
                              float roi_size_adjustment, bool remove_outliers)
 {
-    // changing the roi pre-check to change height <= 1 to < 1
     if (cloud_in -> height <= 1 || cloud_in -> width <= 1){
         RCLCPP_ERROR(rclcpp::get_logger("mir_perception_utils"), "Cloud is empty.");
         return (false);
@@ -109,7 +108,7 @@ bool pointcloud::getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
     int min_y = roi.y_offset;
     int max_x = roi.x_offset + roi.width;
     int max_y = roi.y_offset + roi.height;
-
+    // Adjust roi
     if (roi.x_offset > roi_size_adjustment) min_x -= roi_size_adjustment;
     if (roi.y_offset > roi_size_adjustment) min_y -= roi_size_adjustment;
     if (roi.width + roi_size_adjustment < cloud_in -> width) max_x += roi_size_adjustment;
@@ -119,7 +118,10 @@ bool pointcloud::getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
 
     for (int i = min_x; i < max_x; i++){
         for (int j = min_y; j < max_y; j++){
-            pixel_loc.push_back(cv::Point(i, j));
+            cv::Point loc;
+            loc.x = i;
+            loc.y = j;
+            pixel_loc.push_back(loc);
         }
     }
     for (size_t i = 0; i < pixel_loc.size(); i++){

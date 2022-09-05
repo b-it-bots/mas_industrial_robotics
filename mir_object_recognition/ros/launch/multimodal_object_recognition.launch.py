@@ -32,7 +32,8 @@ def generate_launch_description():
                 )
                 ],
                 parameters=[config],
-                output="screen"
+                output="screen",
+                # prefix=['xterm -e gdb -ex run --args'],
             )   
     ld.add_action(container)
     return ld

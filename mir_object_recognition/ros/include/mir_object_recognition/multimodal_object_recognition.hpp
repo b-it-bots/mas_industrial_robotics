@@ -89,6 +89,8 @@ namespace perception_namespace
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
     public:
+        rclcpp::WaitSet wait_set;
+        
         // COMPOSITION_PUBLIC
         // explicit MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms);
         explicit MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options);
