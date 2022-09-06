@@ -28,10 +28,29 @@ LifecycleController::LifecycleController(const std::string & node_name)
 : Node(node_name)
 {
 	// defualt lifecycle_node_name = lc_talker.
-	this->declare_parameter<std::string>("lc_name", "mmor");
+	this->declare_parameter<std::string>("lc_name", "");
+	this->declare_parameter<std::string>("get_state_topic", "");
+	this->declare_parameter<std::string>("change_state_topic", "");
+
 	this->get_parameter("lc_name", lifecycle_node);
-	node_get_state_topic = lifecycle_node + "/get_state"; 
-	node_change_state_topic = lifecycle_node + "/change_state";  
+	this->get_parameter("get_state_topic", get_state_topic);
+	this->get_parameter("change_state_topic", change_state_topic);
+
+	if (lifecycle_node == ""){
+		RCLCPP_WARN(get_logger(), "Please set the lifecycle node argument name while running. Ex: --ros-args -p lc_name:=mmor");
+	    std::cout<<"Exiting the node"<<std::endl;
+	    rclcpp::shutdown();
+	}
+
+	if (get_state_topic == "" && change_state_topic ==""){
+		node_get_state_topic = lifecycle_node + "/get_state"; 
+	    node_change_state_topic = lifecycle_node + "/change_state";
+	}
+	else{
+
+		node_get_state_topic = get_state_topic; 
+	    node_change_state_topic = change_state_topic;
+	}
   
 }
   

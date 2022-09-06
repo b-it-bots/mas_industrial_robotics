@@ -1,4 +1,5 @@
 #include "mir_perception_utils/bounding_box_visualizer.hpp"
+#include "rmw/qos_profiles.h"
 
 using mir_perception_utils::visualization::Color;
 
@@ -10,16 +11,19 @@ namespace mir_perception_utils
                                                      const std::string &topic_name, Color color,
                                                      bool check_subscribers) : color_(color), check_subscribers_(check_subscribers)
         {
+            
+            auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);    
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(
-                topic_name, 1);
+                topic_name, qos_default);
         }
 
         BoundingBoxVisualizer::BoundingBoxVisualizer(const std::string &topic_name, Color color,
                                                      bool check_subscribers) : color_(color), check_subscribers_(check_subscribers)
         {
+            auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
             auto node = rclcpp::Node::make_shared("_");
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(
-                topic_name, 1);
+                topic_name, qos_default);
         }
 
         int BoundingBoxVisualizer::getNumSubscribers() { return marker_publisher_->get_subscription_count(); }

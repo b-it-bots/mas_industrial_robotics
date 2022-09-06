@@ -1,6 +1,7 @@
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 #include "rclcpp/wait_set.hpp"
 
+
 namespace perception_namespace
 {
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options) : 
@@ -669,7 +670,15 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 
     image_sub_.subscribe(this, "input_image_topic");
     cloud_sub_.subscribe(this, "input_cloud_topic");
-    publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",10);
+
+    auto qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
+    auto qos_parameters = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_parameters);
+    auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
+    auto qos_services = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_services_default);
+
+    publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformer/pointcloud",qos_sensor);
+    pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/pc_object_pose_array", qos_default);
+    pub_rgb_object_pose_array_  = this->create_publisher<geometry_msgs::msg::PoseArray>("output/rgb_object_pose_array", qos_default);
 
     // msg_sync_.reset(new Sync(msgSyncPolicy(10), image_sub_, cloud_sub_));
     msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
@@ -684,14 +693,14 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     MultiModalObjectRecognitionROS::loadObjectInfo(object_info_path_);
 
     // publish workspace height
-    pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", 1);
+    pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", qos_parameters);
 
     // publish debug
-    pub_debug_cloud_plane_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("output/debug_cloud_plane", 1);
+    pub_debug_cloud_plane_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("output/debug_cloud_plane", qos_sensor);
 
     // Publish cloud and images to cloud and rgb recognition topics
-    pub_cloud_to_recognizer_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("recognizer/pc/input/object_list", 1);
-    pub_image_to_recognizer_ = this->create_publisher<mas_perception_msgs::msg::ImageList>("recognizer/rgb/input/images", 1);
+    pub_cloud_to_recognizer_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("recognizer/pc/input/object_list", qos_parameters);
+    pub_image_to_recognizer_ = this->create_publisher<mas_perception_msgs::msg::ImageList>("recognizer/rgb/input/images", qos_parameters);
 
     test_pub_pose_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("test/pose", 1);
 
@@ -700,20 +709,16 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     auto recognized_sub_options = rclcpp::SubscriptionOptions();
     recognized_sub_options.callback_group = recognized_callback_group_;
     sub_recognized_image_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
-        "recognizer/rgb/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1),recognized_sub_options);
+        "recognizer/rgb/output/object_list", qos_parameters, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1),recognized_sub_options);
 
     sub_recognized_cloud_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
-        "recognizer/pc/output/object_list", 1, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1),recognized_sub_options);
+        "recognizer/pc/output/object_list", qos_parameters, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1),recognized_sub_options);
 
     
     wait_set.add_subscription(sub_recognized_image_list_);
 
     // Pub combined object_list to object_list merger
-    pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", 1);
-
-    // Pub pose array
-    pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/pc_object_pose_array", 10);
-    pub_rgb_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/rgb_object_pose_array", 10);
+    pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", qos_parameters);
 
     
     // initialize bounding box visualizer

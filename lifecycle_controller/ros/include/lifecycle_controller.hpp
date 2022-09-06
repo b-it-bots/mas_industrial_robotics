@@ -85,6 +85,8 @@ private:
   std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::GetState>> client_get_state_;
   std::shared_ptr<rclcpp::Client<lifecycle_msgs::srv::ChangeState>> client_change_state_;
   std::string lifecycle_node;
+  std::string get_state_topic; 
+	std::string change_state_topic;
   std::string node_get_state_topic;
   std::string node_change_state_topic;
  
