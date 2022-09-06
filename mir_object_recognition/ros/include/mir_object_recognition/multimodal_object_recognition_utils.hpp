@@ -28,8 +28,6 @@ class MultimodalObjectRecognitionUtils
     virtual ~MultimodalObjectRecognitionUtils();
     // explicit MultimodalObjectRecognitionUtils(const rclcpp::NodeOptions& options);
 
-
-  public:
     /** \brief Make adjustment for AXIS and Bolt (M20_100) pose. Adjust it so that the pose
      *     is around to the center of mass (the tip).
      * \param[in] object
