@@ -6,12 +6,16 @@
     voxel_filter_limit_min: -0.15
     voxel_filter_limit_max: 0.3
     enable_passthrough_filter: false
-    passthrough_filter_x_limit_min: 0.0
-    passthrough_filter_x_limit_max: 0.8
-    passthrough_filter_y_limit_min: -0.5
-    passthrough_filter_y_limit_max: 0.8
-    passthrough_filter_z_limit_min: -0.2
-    passthrough_filter_z_limit_max: 0.6
+    passthrough_filter_field_name: 'x'
+    passthrough_filter_limit_min: 0.0
+    passthrough_filter_limit_max: 0.8
+    enable_cropbox_filter: true
+    cropbox_filter_x_limit_min: 0.0
+    cropbox_filter_x_limit_max: 0.8
+    cropbox_filter_y_limit_min: -0.4
+    cropbox_filter_y_limit_max: 0.4
+    cropbox_filter_z_limit_min: -0.2
+    cropbox_filter_z_limit_max: 0.6
     normal_radius_search: 0.03
     use_omp: false
     num_cores: 8

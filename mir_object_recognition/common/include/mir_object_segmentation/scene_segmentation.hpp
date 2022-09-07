@@ -87,13 +87,21 @@ class SceneSegmentation
    * \param[in] The minimum allowed the field value
    * \param[in] The maximum allowed the field value
    * */
-  void setPassthroughParams(bool enable_passthrough_filter, 
-                            double limit_x_min, 
-                            double limit_x_max,
-                            double limit_y_min,
-                            double limit_y_max,
-                            double limit_z_min,
-                            double limit_z_max);
+  void setPassthroughParams(bool enable_passthrough_filter, const std::string &field_name,
+                            double limit_min, double limit_max);
+
+  /** \brief Set cropbox filter parameters
+   * \param[in] Enable or disable cropbox filter
+   * \param[in] x_min - min x value
+   * \param[in] x_max - max x value
+   * \param[in] y_min - min y value
+   * \param[in] y_max - max y value
+   * \param[in] z_min - min z value
+   * \param[in] z_max - max z value
+   * */
+  void setCropBoxParams(bool enable_cropbox_filter, double x_min, double x_max, double y_min,
+                        double y_max, double z_min, double z_max);
+
   /** \brief Set Normal param using radius
    * \param[in] Radius search
    * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu
@@ -144,6 +152,7 @@ class SceneSegmentation
 
  private:
   bool enable_passthrough_filter_;
+  bool enable_cropbox_filter_;
   bool use_omp_;
 };
 

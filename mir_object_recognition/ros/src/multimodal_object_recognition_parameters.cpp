@@ -32,51 +32,75 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor5;
-    descriptor5.description = "Enable passthrough filter";
-    this->declare_parameter("enable_passthrough_filter", false, descriptor5);
+    // Passthrough filter parameters
+    rcl_interfaces::msg::ParameterDescriptor descr_enable_passthrough_filter;
+    descr_enable_passthrough_filter.description = "Enable passthrough filter";
+    this->declare_parameter("enable_passthrough_filter", false, descr_enable_passthrough_filter);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor7;
-    descriptor7.description = "The minimum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range7;
-    range7.set__from_value(-10.0).set__to_value(10.0);
-    descriptor7.floating_point_range = {range7};
-    this->declare_parameter("passthrough_filter_x_limit_min", 0.0, descriptor7);
+    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_field_name;
+    descr_passthrough_filter_field_name.description = "The field name used for filtering";
+    this->declare_parameter("passthrough_filter_field_name", "x", descr_passthrough_filter_field_name);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor8;
-    descriptor8.description = "The maximum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range8;
-    range8.set__from_value(-10.0).set__to_value(10.0);
-    descriptor8.floating_point_range = {range8};
-    this->declare_parameter("passthrough_filter_x_limit_max", 0.8, descriptor8);
+    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_limit_min;
+    descr_passthrough_filter_limit_min.description = "The minimum allowed field value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_limit_min;
+    range_passthrough_filter_limit_min.set__from_value(-10.0).set__to_value(10.0);
+    descr_passthrough_filter_limit_min.floating_point_range = {range_passthrough_filter_limit_min};
+    this->declare_parameter("passthrough_filter_limit_min", 0.0, descr_passthrough_filter_limit_min);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_y_lim_min;
-    descr_passthrough_filter_y_lim_min.description = "The minimum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_y_lim_min;
-    range_passthrough_filter_y_lim_min.set__from_value(-10.0).set__to_value(10.0);
-    descr_passthrough_filter_y_lim_min.floating_point_range = {range_passthrough_filter_y_lim_min};
-    this->declare_parameter("passthrough_filter_y_limit_min", -0.5, descr_passthrough_filter_y_lim_min);
+    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_limit_max;
+    descr_passthrough_filter_limit_max.description = "The maximum allowed field value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_limit_max;
+    range_passthrough_filter_limit_max.set__from_value(-10.0).set__to_value(10.0);
+    descr_passthrough_filter_limit_max.floating_point_range = {range_passthrough_filter_limit_max};
+    this->declare_parameter("passthrough_filter_limit_max", 0.8, descr_passthrough_filter_limit_max);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_y_lim_max;
-    descr_passthrough_filter_y_lim_max.description = "The maximum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_y_lim_max;
-    range_passthrough_filter_y_lim_max.set__from_value(-10.0).set__to_value(10.0);
-    descr_passthrough_filter_y_lim_max.floating_point_range = {range_passthrough_filter_y_lim_max};
-    this->declare_parameter("passthrough_filter_y_limit_max", 0.8, descr_passthrough_filter_y_lim_max);
+    // Crop box filter parameters
+    rcl_interfaces::msg::ParameterDescriptor descr_enable_cropbox_filter;
+    descr_enable_cropbox_filter.description = "Enable crop box filter";
+    this->declare_parameter("enable_cropbox_filter", false, descr_enable_cropbox_filter);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_z_lim_min;
-    descr_passthrough_filter_z_lim_min.description = "The minimum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_z_lim_min;
-    range_passthrough_filter_z_lim_min.set__from_value(-10.0).set__to_value(10.0);
-    descr_passthrough_filter_z_lim_min.floating_point_range = {range_passthrough_filter_z_lim_min};
-    this->declare_parameter("passthrough_filter_z_limit_min", -0.2, descr_passthrough_filter_z_lim_min);
+    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_x_limit_min;
+    descr_cropbox_filter_x_limit_min.description = "The minimum allowed x value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_x_limit_min;
+    range_cropbox_filter_x_limit_min.set__from_value(-10.0).set__to_value(10.0);
+    descr_cropbox_filter_x_limit_min.floating_point_range = {range_cropbox_filter_x_limit_min};
+    this->declare_parameter("cropbox_filter_x_limit_min", 0.0, descr_cropbox_filter_x_limit_min);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_z_lim_max;
-    descr_passthrough_filter_z_lim_max.description = "The maximum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_z_lim_max;
-    range_passthrough_filter_z_lim_max.set__from_value(-10.0).set__to_value(10.0);
-    descr_passthrough_filter_z_lim_max.floating_point_range = {range_passthrough_filter_z_lim_max};
-    this->declare_parameter("passthrough_filter_z_limit_max", 0.6, descr_passthrough_filter_z_lim_max);
+    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_x_limit_max;
+    descr_cropbox_filter_x_limit_max.description = "The maximum allowed x value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_x_limit_max;
+    range_cropbox_filter_x_limit_max.set__from_value(-10.0).set__to_value(10.0);
+    descr_cropbox_filter_x_limit_max.floating_point_range = {range_cropbox_filter_x_limit_max};
+    this->declare_parameter("cropbox_filter_x_limit_max", 0.8, descr_cropbox_filter_x_limit_max);
+
+    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_y_limit_min;
+    descr_cropbox_filter_y_limit_min.description = "The minimum allowed y value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_y_limit_min;
+    range_cropbox_filter_y_limit_min.set__from_value(-10.0).set__to_value(10.0);
+    descr_cropbox_filter_y_limit_min.floating_point_range = {range_cropbox_filter_y_limit_min};
+    this->declare_parameter("cropbox_filter_y_limit_min", -0.4, descr_cropbox_filter_y_limit_min);
+
+    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_y_limit_max;
+    descr_cropbox_filter_y_limit_max.description = "The maximum allowed y value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_y_limit_max;
+    range_cropbox_filter_y_limit_max.set__from_value(-10.0).set__to_value(10.0);
+    descr_cropbox_filter_y_limit_max.floating_point_range = {range_cropbox_filter_y_limit_max};
+    this->declare_parameter("cropbox_filter_y_limit_max", 0.4, descr_cropbox_filter_y_limit_max);
+
+    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_z_limit_min;
+    descr_cropbox_filter_z_limit_min.description = "The minimum allowed z value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_z_limit_min;
+    range_cropbox_filter_z_limit_min.set__from_value(-10.0).set__to_value(10.0);
+    descr_cropbox_filter_z_limit_min.floating_point_range = {range_cropbox_filter_z_limit_min};
+    this->declare_parameter("cropbox_filter_z_limit_min", -0.2, descr_cropbox_filter_z_limit_min);
+
+    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_z_limit_max;
+    descr_cropbox_filter_z_limit_max.description = "The maximum allowed z value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_z_limit_max;
+    range_cropbox_filter_z_limit_max.set__from_value(-10.0).set__to_value(10.0);
+    descr_cropbox_filter_z_limit_max.floating_point_range = {range_cropbox_filter_z_limit_max};
+    this->declare_parameter("cropbox_filter_z_limit_max", 0.6, descr_cropbox_filter_z_limit_max);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -355,12 +379,16 @@ void MultiModalObjectRecognitionROS::get_all_parameters()
     this->get_parameter("voxel_filter_limit_min", voxel_filter_limit_min_);
     this->get_parameter("voxel_filter_limit_max", voxel_filter_limit_max_);
     this->get_parameter("enable_passthrough_filter", enable_passthrough_filter_);
-    this->get_parameter("passthrough_filter_x_limit_min", passthrough_filter_x_limit_min_);
-    this->get_parameter("passthrough_filter_x_limit_max", passthrough_filter_x_limit_max_);
-    this->get_parameter("passthrough_filter_y_limit_min", passthrough_filter_y_limit_min_);
-    this->get_parameter("passthrough_filter_y_limit_max", passthrough_filter_y_limit_max_);
-    this->get_parameter("passthrough_filter_z_limit_min", passthrough_filter_z_limit_min_);
-    this->get_parameter("passthrough_filter_z_limit_max", passthrough_filter_z_limit_max_);
+    this->get_parameter("passthrough_filter_field_name", passthrough_filter_field_name_);
+    this->get_parameter("passthrough_filter_limit_min", passthrough_filter_limit_min_);
+    this->get_parameter("passthrough_filter_limit_max", passthrough_filter_limit_max_);
+    this->get_parameter("enable_cropbox_filter", enable_cropbox_filter_);
+    this->get_parameter("cropbox_filter_x_limit_min", cropbox_filter_x_limit_min_);
+    this->get_parameter("cropbox_filter_x_limit_max", cropbox_filter_x_limit_max_);
+    this->get_parameter("cropbox_filter_y_limit_min", cropbox_filter_y_limit_min_);
+    this->get_parameter("cropbox_filter_y_limit_max", cropbox_filter_y_limit_max_);
+    this->get_parameter("cropbox_filter_z_limit_min", cropbox_filter_z_limit_min_);
+    this->get_parameter("cropbox_filter_z_limit_max", cropbox_filter_z_limit_max_);
     this->get_parameter("normal_radius_search", normal_radius_search_);
     this->get_parameter("use_omp", use_omp_);
     this->get_parameter("num_cores", num_cores_);
@@ -404,13 +432,23 @@ void MultiModalObjectRecognitionROS::get_all_parameters()
 
     scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
         voxel_filter_limit_min_, voxel_filter_limit_max_);
-    scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
-        passthrough_filter_x_limit_min_,
-        passthrough_filter_x_limit_max_,
-        passthrough_filter_y_limit_min_,
-        passthrough_filter_y_limit_max_,
-        passthrough_filter_z_limit_min_,
-        passthrough_filter_z_limit_max_);
+    
+    // use either passthrough or cropbox filter
+    if (enable_passthrough_filter_) {
+        scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_, passthrough_filter_field_name_,
+            passthrough_filter_limit_min_, passthrough_filter_limit_max_);
+    } else if (enable_cropbox_filter_) {
+        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    } else if (enable_cropbox_filter_ && enable_passthrough_filter_) {
+        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled. \\
+                            Only cropbox filter will take effect. Please disable one of them.");
+        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    }
+
     scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
     Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
     scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
@@ -455,29 +493,45 @@ MultiModalObjectRecognitionROS::parametersCallback(
         {
             this->enable_passthrough_filter_ = param.get_value<bool>();
         }
-        if (param.get_name() == "passthrough_filter_x_limit_min")
+        if (param.get_name() == "passthrough_filter_field_name")
         {
-            this->passthrough_filter_x_limit_min_ = param.get_value<double>();
+            this->passthrough_filter_field_name_ = param.get_value<std::string>();
         }
-        if (param.get_name() == "passthrough_filter_x_limit_max")
+        if (param.get_name() == "passthrough_filter_limit_min")
         {
-            this->passthrough_filter_x_limit_max_ = param.get_value<double>();
+            this->passthrough_filter_limit_min_ = param.get_value<double>();
         }
-        if (param.get_name() == "passthrough_filter_y_limit_min")
+        if (param.get_name() == "passthrough_filter_limit_max")
         {
-            this->passthrough_filter_y_limit_min_ = param.get_value<double>();
+            this->passthrough_filter_limit_max_ = param.get_value<double>();
         }
-        if (param.get_name() == "passthrough_filter_y_limit_max")
+        if (param.get_name() == "enable_cropbox_filter")
         {
-            this->passthrough_filter_y_limit_max_ = param.get_value<double>();
+            this->enable_cropbox_filter_ = param.get_value<bool>();
         }
-        if (param.get_name() == "passthrough_filter_z_limit_min")
+        if (param.get_name() == "cropbox_filter_x_limit_min")
         {
-            this->passthrough_filter_z_limit_min_ = param.get_value<double>();
+            this->cropbox_filter_x_limit_min_ = param.get_value<double>();
         }
-        if (param.get_name() == "passthrough_filter_z_limit_max")
+        if (param.get_name() == "cropbox_filter_x_limit_max")
         {
-            this->passthrough_filter_z_limit_max_ = param.get_value<double>();
+            this->cropbox_filter_x_limit_max_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cropbox_filter_y_limit_min")
+        {
+            this->cropbox_filter_y_limit_min_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cropbox_filter_y_limit_max")
+        {
+            this->cropbox_filter_y_limit_max_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cropbox_filter_z_limit_min")
+        {
+            this->cropbox_filter_z_limit_min_ = param.get_value<double>();
+        }
+        if (param.get_name() == "cropbox_filter_z_limit_max")
+        {
+            this->cropbox_filter_z_limit_max_ = param.get_value<double>();
         }
         if (param.get_name() == "normal_radius_search")
         {
@@ -643,13 +697,21 @@ MultiModalObjectRecognitionROS::parametersCallback(
     
     scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
         voxel_filter_limit_min_, voxel_filter_limit_max_);
-    scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_,
-        passthrough_filter_x_limit_min_,
-        passthrough_filter_x_limit_max_,
-        passthrough_filter_y_limit_min_,
-        passthrough_filter_y_limit_max_,
-        passthrough_filter_z_limit_min_,
-        passthrough_filter_z_limit_max_);
+    // use either passthrough or cropbox filter
+    if (enable_passthrough_filter_) {
+        scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_, passthrough_filter_field_name_,
+            passthrough_filter_limit_min_, passthrough_filter_limit_max_);
+    } else if (enable_cropbox_filter_) {
+        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    } else if (enable_cropbox_filter_ && enable_passthrough_filter_) {
+        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled. \\
+                            Only cropbox filter will take effect. Please disable one of them.");
+        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    }
     scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
     Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
     scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
