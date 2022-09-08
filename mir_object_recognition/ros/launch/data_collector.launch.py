@@ -37,13 +37,3 @@ def generate_launch_description():
             )   
     ld.add_action(container)
     return ld
-
-# ComposableNode(
-#                     package="mir_object_recognition",
-#                     plugin="perception_namespace::MultiModalObjectRecognitionROS",
-#                     name="mmor",
-#                     remappings=[
-#                     ("input_image_topic", "/camera/color/image_raw"),
-#                     ("input_cloud_topic", "/camera/depth/color/points"),
-#                 ]
-#                 )
