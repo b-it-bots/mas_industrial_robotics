@@ -404,7 +404,6 @@ void MultiModalObjectRecognitionROS::publishObjectList(mas_perception_msgs::msg:
         }
     }
     // Publish object list to object list merger
-    RCLCPP_INFO(get_logger(), "Publishing object list");
     pub_object_list_ -> publish(object_list);
 }
 
@@ -493,6 +492,7 @@ void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::Obje
         // Publish pose array
         if (rgb_object_pose_array.poses.size() > 0)
         {
+            RCLCPP_INFO_STREAM(get_logger(), "[RGB] Publishing pose array");
             pub_rgb_object_pose_array_->publish(rgb_object_pose_array);
         }
         // Publish label visualizer

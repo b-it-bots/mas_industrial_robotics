@@ -7,8 +7,12 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     this->declare_parameter<std::string>("target_frame_id", "base_link");
     this->get_parameter("target_frame_id", target_frame_id_);
     
-    this->declare_parameter<bool>("debug_mode_", false);
-    this->get_parameter("debug_mode_", debug_mode_);
+    rcl_interfaces::msg::ParameterDescriptor debug_mode_descriptor;
+    debug_mode_descriptor.description = "Debug mode";
+    debug_mode_descriptor.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
+    this->declare_parameter("debug_mode", false, debug_mode_descriptor);
+    this->get_parameter("debug_mode", debug_mode_);
+
     this->declare_parameter<std::string>("logdir", "/tmp/");
     this->get_parameter("logdir", logdir_);
 
@@ -388,6 +392,9 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
 
 void MultiModalObjectRecognitionROS::get_all_parameters()
 {
+    this->get_parameter("debug_mode", debug_mode_);
+    this->get_parameter("target_frame_id", target_frame_id_);
+    this->get_parameter("logdir", logdir_);
     this->get_parameter("objects_info", objects_info_path_);
     this->get_parameter("voxel_leaf_size", voxel_leaf_size_);
     this->get_parameter("voxel_filter_field_name", voxel_filter_field_name_);
@@ -488,6 +495,18 @@ MultiModalObjectRecognitionROS::parametersCallback(
     for (const auto &param : parameters)
     {
         RCLCPP_INFO(this->get_logger(), "Value of param %s changed to %s", param.get_name().c_str(), param.value_to_string().c_str());
+        if (param.get_name() == "debug_mode")
+        {
+            this->debug_mode_ = param.get_value<bool>();
+        }
+        if (param.get_name() == "logdir")
+        {
+            this->logdir_ = param.get_value<std::string>();
+        }
+        if (param.get_name() == "target_frame_id")
+        {
+            this->target_frame_id_ = param.get_value<std::string>();
+        }
         if (param.get_name() == "voxel_leaf_size")
         {
             this->voxel_leaf_size_ = param.get_value<double>();

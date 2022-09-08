@@ -6,10 +6,11 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /PointCloud21
         - /PointCloud21/Topic1
         - /PointCloud23/Topic1
+        - /PoseArray1
         - /PoseArray1/Topic1
-        - /Marker1
         - /Marker1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 1190
@@ -80,7 +81,7 @@ Visualization Manager:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
-        History Policy: Keep Last
+        History Policy: Keep All
         Reliability Policy: Best Effort
         Value: /output/debug_cloud_plane
       Use Fixed Frame: true
@@ -123,8 +124,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.05514252185821533
-        Min Value: 0.0116194486618042
+        Max Value: 0.055160701274871826
+        Min Value: 0.003587484359741211
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -173,7 +174,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Best Effort
-        Value: /output/pc_object_pose_array
+        Value: /output/rgb_object_pose_array
       Value: true
     - Class: rviz_default_plugins/Image
       Enabled: true
@@ -193,7 +194,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        bounding_box: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -263,10 +264,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.784795343875885
+      Pitch: 0.9697954058647156
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.693560600280762
+      Yaw: 4.643562316894531
     Saved: ~
 Window Geometry:
   Displays:
