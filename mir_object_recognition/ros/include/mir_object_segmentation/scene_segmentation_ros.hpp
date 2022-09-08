@@ -125,12 +125,22 @@ public:
    * \param[in] The maximum allowed the field value
    * */
   void setPassthroughParams(bool enable_passthrough_filter,
-                            double passthrough_filter_x_limit_min,
-                            double passthrough_filter_x_limit_max,
-                            double passthrough_filter_limit_y_min,
-                            double passthrough_filter_limit_y_max,
-                            double passthrough_filter_limit_z_min,
-                            double passthrough_filter_limit_z_max);
+                            std::string passthrough_filter_field_name,
+                            double passthrough_filter_limit_min,
+                            double passthrough_filter_limit_max);
+
+  /** \brief Set cropbox filter parameters
+   * \param[in] Enable or disable cropbox filter
+   * \param[in] x_min - min x value
+   * \param[in] x_max - max x value
+   * \param[in] y_min - min y value
+   * \param[in] y_max - max y value
+   * \param[in] z_min - min z value
+   * \param[in] z_max - max z value
+   * */
+  void setCropBoxParams(bool enable_cropbox_filter, double cropbox_x_min, double cropbox_x_max,
+                        double cropbox_y_min, double cropbox_y_max, double cropbox_z_min,
+                        double cropbox_z_max);
 
   /** \brief Set Normal param using radius
    * \param[in] Radius search

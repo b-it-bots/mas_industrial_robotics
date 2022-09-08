@@ -76,13 +76,22 @@ PointCloudBSPtr SceneSegmentation::findPlane(const PointCloudConstBSPtr &cloud,
   voxel_grid_.setInputCloud(cloud);
   voxel_grid_.filter(*filtered);
 
-  if (enable_passthrough_filter_)
+  if (enable_passthrough_filter_ && !enable_cropbox_filter_)
   {
-    // pass_through_.setInputCloud(filtered);
-    // pass_through_.filter(*filtered);
+    pass_through_.setInputCloud(filtered);
+    pass_through_.filter(*filtered);
+  }
 
-    // using cropbox filter to include filters in XYZ
+  if (enable_cropbox_filter_ && !enable_passthrough_filter_)
+  {
+    crop_box_.setInputCloud(filtered);
+    crop_box_.filter(*filtered);
+  }
 
+  if (enable_passthrough_filter_ && enable_cropbox_filter_)
+  {
+    std::cout << "Both passthrough and cropbox filters are enabled. Please disable one of them." 
+              << std::endl;
     crop_box_.setInputCloud(filtered);
     crop_box_.filter(*filtered);
   }
@@ -149,23 +158,23 @@ void SceneSegmentation::setVoxelGridParams(double leaf_size, const std::string &
 }
 
 void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter,
-                                             double limit_x_min,
-                                             double limit_x_max,
-                                             double limit_y_min,
-                                             double limit_y_max,
-                                             double limit_z_min,
-                                             double limit_z_max)
+                                             const std::string &filter_field, double limit_min,
+                                             double limit_max)
 {
   enable_passthrough_filter_ = enable_passthrough_filter;
-  // pass_through_.setFilterFieldName(field_name);
-  // pass_through_.setFilterLimits(limit_min, limit_max);
-  // pass_through_.setFilterFieldName(field_y);
-  // pass_through_.setFilterLimits(limit_y_min, limit_y_max);
-  // pass_through_.setFilterFieldName(field_z);
-  // pass_through_.setFilterLimits(limit_z_min, limit_z_max);
+  pass_through_.setFilterFieldName(filter_field);
+  pass_through_.setFilterLimits(limit_min, limit_max);
+}
 
-  // using cropbox filter to include filters in XYZ
-  
+void SceneSegmentation::setCropBoxParams(bool enable_cropbox_filter,
+                                         double limit_x_min,
+                                         double limit_x_max,
+                                         double limit_y_min,
+                                         double limit_y_max,
+                                         double limit_z_min,
+                                         double limit_z_max)
+{
+  enable_cropbox_filter_ = enable_cropbox_filter;
   crop_box_.setMin(Eigen::Vector4f(limit_x_min, limit_y_min, limit_z_min, 1.0));
   crop_box_.setMax(Eigen::Vector4f(limit_x_max, limit_y_max, limit_z_max, 1.0));
 }

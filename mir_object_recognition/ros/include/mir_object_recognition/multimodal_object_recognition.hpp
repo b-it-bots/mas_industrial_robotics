@@ -2,9 +2,6 @@
 #ifndef MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 #define MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 
-// #ifndef COMPOSITION__SERVER_COMPONENT_HPP_
-// #define COMPOSITION__SERVER_COMPONENT_HPP_
-
 #include <chrono>
 #include <iostream>
 #include <filesystem>
@@ -22,33 +19,29 @@
 #include "rclcpp/logger.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
-#include <std_msgs/msg/float64.hpp>
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+#include "rcutils/logging_macros.h"
 
-// For Qos porfiles
 #include "rmw/qos_profiles.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-// #include "composition/visibility_control.h"
-
+#include "std_msgs/msg/string.hpp"
+#include <std_msgs/msg/float64.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 
 #include "mas_perception_msgs/msg/object_list.hpp"
 #include "mas_perception_msgs/msg/bounding_box_list.hpp"
 #include "mas_perception_msgs/msg/image_list.hpp"
 
-#include "rcutils/logging_macros.h"
-#include "std_msgs/msg/string.hpp"
-
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
-#include <geometry_msgs/msg/transform_stamped.hpp>
 
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_ros/transforms.hpp>
@@ -62,9 +55,6 @@
 #include "mir_object_segmentation/scene_segmentation_ros.hpp"
 #include "mir_perception_utils/bounding_box.hpp"
 #include "multimodal_object_recognition_utils.hpp"
-
-// just for testing, remove later
-#include "mir_perception_utils/planar_polygon_visualizer.hpp"
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
@@ -92,94 +82,32 @@ namespace perception_namespace
 class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 {
     public:
-        rclcpp::WaitSet wait_set;
-        
-        // COMPOSITION_PUBLIC
-        // explicit MultiModalObjectRecognitionROS(const std::string & node_name, bool intra_process_comms);
         explicit MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options);
 
-
         /// Transition callback for state configuring
-        /**
-         * on_configure callback is being called when the lifecycle node
-         * enters the "configuring" state.
-         * Depending on the return value of this function, the state machine
-         * either invokes a transition to the "inactive" state or stays
-         * in "unconfigured".
-         * TRANSITION_CALLBACK_SUCCESS transitions to "inactive"
-         * TRANSITION_CALLBACK_FAILURE transitions to "unconfigured"
-         * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-         */
-
-        rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters);
-
-        void declare_all_parameters();
-        void get_all_parameters();
-
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_configure(const rclcpp_lifecycle::State &);
 
         /// Transition callback for state activating
-        /**
-         * on_activate callback is being called when the lifecycle node
-         * enters the "activating" state.
-         * Depending on the return value of this function, the state machine
-         * either invokes a transition to the "active" state or stays
-         * in "inactive".
-         * TRANSITION_CALLBACK_SUCCESS transitions to "active"
-         * TRANSITION_CALLBACK_FAILURE transitions to "inactive"
-         * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-         */
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_activate(const rclcpp_lifecycle::State & state);
 
         /// Transition callback for state deactivating
-        /**
-         * on_deactivate callback is being called when the lifecycle node
-         * enters the "deactivating" state.
-         * Depending on the return value of this function, the state machine
-         * either invokes a transition to the "inactive" state or stays
-         * in "active".
-         * TRANSITION_CALLBACK_SUCCESS transitions to "inactive"
-         * TRANSITION_CALLBACK_FAILURE transitions to "active"
-         * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-         */
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_deactivate(const rclcpp_lifecycle::State & state);
 
          /// Transition callback for state cleaningup
-        /**
-         * on_cleanup callback is being called when the lifecycle node
-         * enters the "cleaningup" state.
-         * Depending on the return value of this function, the state machine
-         * either invokes a transition to the "unconfigured" state or stays
-         * in "inactive".
-         * TRANSITION_CALLBACK_SUCCESS transitions to "unconfigured"
-         * TRANSITION_CALLBACK_FAILURE transitions to "inactive"
-         * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-         */
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_cleanup(const rclcpp_lifecycle::State &);
 
         /// Transition callback for state shutting down
-        /**
-         * on_shutdown callback is being called when the lifecycle node
-         * enters the "shuttingdown" state.
-         * Depending on the return value of this function, the state machine
-         * either invokes a transition to the "finalized" state or stays
-         * in its current state.
-         * TRANSITION_CALLBACK_SUCCESS transitions to "finalized"
-         * TRANSITION_CALLBACK_FAILURE transitions to current state
-         * TRANSITION_CALLBACK_ERROR or any uncaught exceptions to "errorprocessing"
-         */
         rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
         on_shutdown(const rclcpp_lifecycle::State & state);
 
     // private:
-        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> obj_list_pub_;
-        
+        OnSetParametersCallbackHandle::SharedPtr callback_handle_;
+
         message_filters::Subscriber<sensor_msgs::msg::Image, rclcpp_lifecycle::LifecycleNode> image_sub_;
-        
         message_filters::Subscriber<sensor_msgs::msg::PointCloud2, rclcpp_lifecycle::LifecycleNode> cloud_sub_;
         
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image,
@@ -189,23 +117,26 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
         std::shared_ptr<tf2_ros::TransformListener> tf_listener_{nullptr};
         std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
-        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> publisher_;
-        // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
-
-        // publisher object list
-        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>> pub_workspace_height_;
-
-        // publisher debug
-        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> pub_debug_cloud_plane_;
 
         typedef std::shared_ptr<SceneSegmentationROS> SceneSegmentationROSSPtr;
         SceneSegmentationROSSPtr scene_segmentation_ros_;
         typedef std::shared_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsSPtr;
         MultimodalObjectRecognitionUtilsSPtr mm_object_recognition_utils_;
+        
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>> pub_workspace_height_;
+
+        // publisher debug
+        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> pub_debug_cloud_plane_;
 
         // Publisher for clouds and images recognizer
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_cloud_to_recognizer_;
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ImageList>> pub_image_to_recognizer_;
+
+        // Callback group for subscribers
+        rclcpp::CallbackGroup::SharedPtr recognized_callback_group_;
+
+        // Subscription options
+        rclcpp::SubscriptionOptions recognized_sub_options;
 
         // Subscriber for clouds and images recognizer
         std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_image_list_;
@@ -219,17 +150,28 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_rgb_object_pose_array_;
 
         // --------------------------- function declarations -----------------------------------
+
+        rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters);
+
+        /** @brief method to declare all parameters of this node */
+        void declare_all_parameters();
+
+        /** @brief method to load all parameters into node variables */
+        void get_all_parameters();
         
+        /**
+         * \brief Callback for the synchronized image and point cloud messages
+         * \param[in] image_msg
+         * \param[in] cloud_msg
+         */
         void synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image, 
                 const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud);
 
-        OnSetParametersCallbackHandle::SharedPtr callback_handle_;
-        
         // Recognize Clouds and Image callback
         void recognizedImageCallback(const mas_perception_msgs::msg::ObjectList &msg);
         void recognizedCloudCallback(const mas_perception_msgs::msg::ObjectList &msg);
 
-        /** \brief Transform pointcloud to the given frame id ("base_link" by default)
+        /** \brief Transform pointcloud to the given target frame id ("base_link" by default)
          * \param[in] PointCloud2 input
         */
         void preprocessPointCloud(const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud_msg);
@@ -237,23 +179,23 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         /** \brief Add cloud accumulation, segment accumulated pointcloud, find the plane, 
          *     clusters table top objects, find object heights.
          * \param[out] 3D object list with unknown label
-         * \param[out] Table top pointcloud clusters
+         * \param[out] Tabletop pointcloud clusters
          **/
         void segmentPointCloud(mas_perception_msgs::msg::ObjectList &object_list,
                         std::vector<PointCloudBSPtr> &clusters,
                         std::vector<mpu::object::BoundingBox> &boxes);
         
-        /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list*/
+        /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list */
         virtual void recognizeCloudAndImage();
 
         /** \brief Adjust object pose, make it flat, adjust container, axis and bolt poses.
-         * \param[in] Object_list.pose, .name,
+         * \param[in] Object_list
          * 
          **/
         void adjustObjectPose(mas_perception_msgs::msg::ObjectList &object_list);
 
         /** \brief Publish object_list to object_list merger 
-         * \param[in] Object list to publish
+         * \param[in] Object_list to publish
          **/
         void publishObjectList(mas_perception_msgs::msg::ObjectList &object_list);
         
@@ -267,7 +209,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
                                                 std::vector<PointCloudBSPtr> &clusters_2d);
 
         /** \brief Load qualitative object info
-         * \param[in] Path to the xml object file
+         * \param[in] Path to the yaml object file
          * */ 
         void loadObjectInfo(const std::string &filename);
 
@@ -283,26 +225,15 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         bool debug_mode_;
         std::string pointcloud_source_frame_id_;
         std::string target_frame_id_;
-        // std::set<std::string> round_objects_;
-        bool data_collection_ = false;
         std::set<std::string> round_objects_;
         
-        struct Object
-        {
-            std::string name;
-            std::string shape;
-            std::string color;
-        };
-        typedef std::vector<Object> ObjectInfo;
         ObjectInfo object_info_;
-        std::string object_info_path_;
-
+        std::string objects_info_path_;
 
         // Used to store pointcloud and image received from callback
         std::shared_ptr<sensor_msgs::msg::PointCloud2> pointcloud_msg_;
         std::shared_ptr<sensor_msgs::msg::Image> image_msg_;
         PointCloudBSPtr cloud_;
-
 
         // Dynamic parameter
         double voxel_leaf_size_;
@@ -310,12 +241,16 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double voxel_filter_limit_min_;
         double voxel_filter_limit_max_;
         bool enable_passthrough_filter_;
-        double passthrough_filter_x_limit_min_;
-        double passthrough_filter_x_limit_max_;
-        double passthrough_filter_y_limit_min_;
-        double passthrough_filter_y_limit_max_;
-        double passthrough_filter_z_limit_min_;
-        double passthrough_filter_z_limit_max_;
+        std::string passthrough_filter_field_name_;
+        double passthrough_filter_limit_min_;
+        double passthrough_filter_limit_max_;
+        bool enable_cropbox_filter_;
+        double cropbox_filter_x_limit_min_;
+        double cropbox_filter_x_limit_max_;
+        double cropbox_filter_y_limit_min_;
+        double cropbox_filter_y_limit_max_;
+        double cropbox_filter_z_limit_min_;
+        double cropbox_filter_z_limit_max_;
         double normal_radius_search_;
         bool use_omp_;
         int num_cores_;
@@ -376,12 +311,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double roi_base_link_to_laser_distance_;
         double roi_max_object_pose_x_to_base_link_;
         double roi_min_bbox_z_;
-
-
-        // test publishers
-
-        std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseStamped>> test_pub_pose_;
-
 };
 
 } // namespace perception_namespace ends

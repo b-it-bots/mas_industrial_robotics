@@ -119,21 +119,21 @@ void SceneSegmentationROS::setVoxelGridParams(double voxel_leaf_size,
 }
 
 void SceneSegmentationROS::setPassthroughParams(bool enable_passthrough_filter,
-                                                double passthrough_filter_x_limit_min,
-                                                double passthrough_filter_x_limit_max,
-                                                double passthrough_filter_limit_y_min,
-                                                double passthrough_filter_limit_y_max,
-                                                double passthrough_filter_limit_z_min,
-                                                double passthrough_filter_limit_z_max)
+                                                std::string passthrough_filter_field_name,
+                                                double passthrough_filter_limit_min,
+                                                double passthrough_filter_limit_max)
 {
-  scene_segmentation_->setPassthroughParams(
-      enable_passthrough_filter, 
-      passthrough_filter_x_limit_min,
-      passthrough_filter_x_limit_max,
-      passthrough_filter_limit_y_min,
-      passthrough_filter_limit_y_max,
-      passthrough_filter_limit_z_min,
-      passthrough_filter_limit_z_max);
+  scene_segmentation_->setPassthroughParams(enable_passthrough_filter, passthrough_filter_field_name,
+                                            passthrough_filter_limit_min,
+                                            passthrough_filter_limit_max);
+}
+
+void SceneSegmentationROS::setCropBoxParams(bool enable_cropbox_filter, double cropbox_x_min, double cropbox_x_max,
+                                            double cropbox_y_min, double cropbox_y_max, double cropbox_z_min,
+                                            double cropbox_z_max)
+{
+  scene_segmentation_->setCropBoxParams(enable_cropbox_filter, cropbox_x_min, cropbox_x_max, cropbox_y_min,
+                                        cropbox_y_max, cropbox_z_min, cropbox_z_max);
 }
 
 void SceneSegmentationROS::setNormalParams(double normal_radius_search, bool use_omp, int num_cores)
