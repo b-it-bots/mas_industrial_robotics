@@ -80,7 +80,6 @@ add_library(perception_visualization
   common/src/bounding_box.cpp
   common/src/pointcloud_utils.cpp
   common/src/cloud_accumulation.cpp
-  # common/src/scene_segmentation.cpp
   ros/src/mir_perception_utils/bounding_box_visualizer.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
   ros/src/mir_perception_utils/label_visualizer.cpp
@@ -88,9 +87,6 @@ add_library(perception_visualization
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
   ros/src/multimodal_object_recognition_utils.cpp
-  # ros/src/mir_object_segmentation/laserscan_segmentation.cpp
-  # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
-  # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
 
 ament_target_dependencies(perception_visualization 
@@ -104,7 +100,6 @@ add_library( scene_segmentation
   common/src/scene_segmentation.cpp
   ros/src/mir_object_segmentation/laserscan_segmentation.cpp
   ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
-  #ros/src/mir_object_segmentation/scene_segmentation_node.cpp
 )
 
 target_link_libraries(scene_segmentation
@@ -125,7 +120,6 @@ add_library(mmor SHARED
 
 target_compile_definitions(mmor
             PRIVATE "COMPOSITION_BUILDING_DLL")          
-# add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor 
   rclcpp
   rclcpp_lifecycle 
@@ -157,7 +151,6 @@ add_library(data_collector SHARED
 
 target_compile_definitions(data_collector
             PRIVATE "COMPOSITION_BUILDING_DLL")          
-# add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(data_collector
   rclcpp
   rclcpp_lifecycle 
@@ -181,7 +174,6 @@ target_link_libraries(data_collector
 rclcpp_components_register_nodes(data_collector "perception_namespace::DataCollector")
 
 ament_export_include_directories(include)
-# ament_export_interfaces(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_libraries(${PROJECT_NAME}_node)
 
 if(BUILD_TESTING)

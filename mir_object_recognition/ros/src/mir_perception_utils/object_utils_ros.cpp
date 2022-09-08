@@ -128,14 +128,10 @@ void object::estimatePose(const PointCloudBSPtr &xyz_input_cloud,
     pose.pose.orientation.w = orientation.w();
 
     tf2::Quaternion quaternion;
-    // convertsion method changed in tf2 - need to verify
-    // original - tf::quaternionMsgToTF(pose.pose.orientation, quaternion);
     tf2::convert(pose.pose.orientation, quaternion);
     tf2::Matrix3x3 m(quaternion);
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
-    // convertsion method changed in tf2 - need to verify
-    // original - pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw);
     tf2::Quaternion q;
     q.setRPY(0, 0, yaw);
     pose.pose.orientation = tf2::toMsg(q);
