@@ -24,8 +24,6 @@ def generate_launch_description():
         'objects.yaml'
         )
 
-    objects_info_path = 'package://' + objects_info
-
     container = ComposableNodeContainer(
         name="MMOR_container",
         namespace="",
