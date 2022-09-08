@@ -4,6 +4,20 @@ namespace perception_namespace
 {
 void MultiModalObjectRecognitionROS::declare_all_parameters()
 {
+    this->declare_parameter<std::string>("target_frame_id", "base_link");
+    this->get_parameter("target_frame_id", target_frame_id_);
+    
+    this->declare_parameter<bool>("debug_mode_", false);
+    this->get_parameter("debug_mode_", debug_mode_);
+    this->declare_parameter<std::string>("logdir", "/tmp/");
+    this->get_parameter("logdir", logdir_);
+
+    // get object_info parameter from launch file
+    rcl_interfaces::msg::ParameterDescriptor object_info_path_descriptor;
+    object_info_path_descriptor.description = "Path to objects.yaml";
+    object_info_path_descriptor.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+    this->declare_parameter("objects_info", "", object_info_path_descriptor);
+    this->get_parameter<std::string>("objects_info", objects_info_path_);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor1;
     descriptor1.description = "The size of a leaf (on x,y,z) used for downsampling.";
@@ -374,6 +388,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
 
 void MultiModalObjectRecognitionROS::get_all_parameters()
 {
+    this->get_parameter("objects_info", objects_info_path_);
     this->get_parameter("voxel_leaf_size", voxel_leaf_size_);
     this->get_parameter("voxel_filter_field_name", voxel_filter_field_name_);
     this->get_parameter("voxel_filter_limit_min", voxel_filter_limit_min_);
@@ -442,8 +457,8 @@ void MultiModalObjectRecognitionROS::get_all_parameters()
             cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
             cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
     } else if (enable_cropbox_filter_ && enable_passthrough_filter_) {
-        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled. \\
-                            Only cropbox filter will take effect. Please disable one of them.");
+        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled."
+                            "Only cropbox filter will take effect. Please disable one of them.");
         scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
             cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
             cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
@@ -706,8 +721,8 @@ MultiModalObjectRecognitionROS::parametersCallback(
             cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
             cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
     } else if (enable_cropbox_filter_ && enable_passthrough_filter_) {
-        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled. \\
-                            Only cropbox filter will take effect. Please disable one of them.");
+        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled."
+                            "Only cropbox filter will take effect. Please disable one of them.");
         scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
             cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
             cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
