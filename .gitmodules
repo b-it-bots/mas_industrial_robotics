@@ -1,3 +1,6 @@
 [submodule "third_party/sphinx_rtd_theme"]
 	path = third_party/sphinx_rtd_theme
 	url = https://github.com/readthedocs/sphinx_rtd_theme.git
+[submodule "mir_perception/mir_object_recognition/common/src/rgb_object_recognition/yolov7"]
+	path = mir_perception/mir_object_recognition/common/src/rgb_object_recognition/yolov7
+	url = https://github.com/WongKinYiu/yolov7.git
