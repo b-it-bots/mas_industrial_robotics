@@ -1,7 +1,5 @@
 #include "mir_perception_utils/planar_polygon_visualizer.hpp"
 
-#include "rmw/qos_profiles.h"
-
 namespace mir_perception_utils
 {
     namespace visualization
@@ -11,7 +9,7 @@ namespace mir_perception_utils
                                                          bool check_subscribers, double thickness)
             : color_(color), check_subscribers_(check_subscribers), thickness_(thickness)
         {
-            auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
+            qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(topic_name, qos_default);
         }
 
@@ -19,7 +17,7 @@ namespace mir_perception_utils
                                                          bool check_subscribers, double thickness)
             : color_(color), check_subscribers_(check_subscribers), thickness_(thickness)
         {
-            auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
+            qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
             auto node = rclcpp::Node::make_shared("_");
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(topic_name, qos_default);
         }

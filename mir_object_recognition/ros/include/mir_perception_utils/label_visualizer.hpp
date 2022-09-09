@@ -6,6 +6,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rmw/qos_profiles.h"
 
 #include "geometry_msgs/msg/pose_array.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -36,6 +37,8 @@ namespace mir_perception_utils
             rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
             const Color color_;
             bool check_subscribers_;
+            rclcpp::QoS qos_default;
+            
         };
     }
 }

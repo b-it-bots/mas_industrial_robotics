@@ -9,6 +9,7 @@
 #include <pcl/point_cloud.h>
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rmw/qos_profiles.h"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/color.hpp"
@@ -37,6 +38,8 @@ namespace mir_perception_utils
 
       static const size_t COLORS_NUM = 32;
       float COLORS[COLORS_NUM];
+      rclcpp::QoS qos_sensor;
+      
     };
 
   } // namespace visualization

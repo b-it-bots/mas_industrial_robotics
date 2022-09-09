@@ -563,10 +563,9 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
-    auto qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
-    auto qos_parameters = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_parameters);
-    auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
-    auto qos_services = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_services_default);
+    qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
+    qos_parameters = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_parameters);
+    qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
 
     // publish workspace height
     pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", qos_parameters);

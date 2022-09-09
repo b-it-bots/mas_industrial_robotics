@@ -125,6 +125,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::Float64>> pub_workspace_height_;
 
+        rclcpp::QoS qos_sensor;
+        rclcpp::QoS qos_parameters;
+        rclcpp::QoS qos_default;
+
         // publisher debug
         std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> pub_debug_cloud_plane_;
 
