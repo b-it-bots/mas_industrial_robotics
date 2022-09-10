@@ -44,11 +44,6 @@ find_package(yaml-cpp)
 find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
 
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
-
-# message(${CMAKE_INSTALL_PREFIX})
 include_directories(
   ros/include
   common/include
@@ -75,12 +70,10 @@ include_directories(SYSTEM
   ${OpenCV_INCLUDE_DIRS}
 )
 
-
 add_library(perception_visualization
   common/src/bounding_box.cpp
   common/src/pointcloud_utils.cpp
   common/src/cloud_accumulation.cpp
-  # common/src/scene_segmentation.cpp
   ros/src/mir_perception_utils/bounding_box_visualizer.cpp
   ros/src/mir_perception_utils/clustered_point_cloud_visualizer.cpp
   ros/src/mir_perception_utils/label_visualizer.cpp
@@ -88,9 +81,6 @@ add_library(perception_visualization
   ros/src/mir_perception_utils/object_utils_ros.cpp
   ros/src/mir_perception_utils/pointcloud_utils_ros.cpp
   ros/src/multimodal_object_recognition_utils.cpp
-  # ros/src/mir_object_segmentation/laserscan_segmentation.cpp
-  # ros/src/mir_object_segmentation/scene_segmentation_node.cpp
-  # ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
 
 ament_target_dependencies(perception_visualization 
@@ -102,9 +92,8 @@ ament_target_dependencies(perception_visualization
 add_library( scene_segmentation
   common/src/cloud_accumulation.cpp
   common/src/scene_segmentation.cpp
-  ros/src/mir_object_segmentation/laserscan_segmentation.cpp
+  common/src/laserscan_segmentation.cpp
   ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
-  #ros/src/mir_object_segmentation/scene_segmentation_node.cpp
 )
 
 target_link_libraries(scene_segmentation
@@ -125,7 +114,6 @@ add_library(mmor SHARED
 
 target_compile_definitions(mmor
             PRIVATE "COMPOSITION_BUILDING_DLL")          
-# add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(mmor 
   rclcpp
   rclcpp_lifecycle 
@@ -157,7 +145,6 @@ add_library(data_collector SHARED
 
 target_compile_definitions(data_collector
             PRIVATE "COMPOSITION_BUILDING_DLL")          
-# add_executable(mmor ros/src/multimodal_object_recognition.cpp)
 ament_target_dependencies(data_collector
   rclcpp
   rclcpp_lifecycle 

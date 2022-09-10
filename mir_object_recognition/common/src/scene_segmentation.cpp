@@ -4,9 +4,6 @@
  * Author: Mohammad Wasil, Santosh Thoduka
  *
  */
-#include <iostream>
-#include <string>
-#include <vector>
 
 #include <mir_object_segmentation/scene_segmentation.hpp>
 

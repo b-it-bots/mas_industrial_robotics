@@ -1,13 +1,4 @@
-#include "rmw/qos_profiles.h"
-
 #include "mir_perception_utils/clustered_point_cloud_visualizer.hpp"
-
-#include "pcl_conversions/pcl_conversions.h"
-#include "pcl/PCLPointCloud2.h"
-#include "pcl/conversions.h"
-
-#include "mir_perception_utils/aliases.hpp"
-#include "mir_perception_utils/color.hpp"
 
 using mir_perception_utils::visualization::Color;
 
@@ -34,7 +25,7 @@ namespace mir_perception_utils
             : check_subscribers_(check_subscribers)
         {
             auto qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
-            auto node = rclcpp::Node::make_shared("_");
+            rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("_");
             cloud_publisher_ = node->create_publisher<sensor_msgs::msg::PointCloud2>(
                 topic_name, qos_sensor);
             for (size_t i = 0; i < COLORS_NUM; i++)
@@ -47,7 +38,6 @@ namespace mir_perception_utils
         {
             return cloud_publisher_->get_subscription_count();
         }
-
         
         void ClusteredPointCloudVisualizer::publish(
             const std::vector<PointCloudBSPtr> &clusters,

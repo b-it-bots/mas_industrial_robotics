@@ -161,7 +161,7 @@ void object::transformPose(const std::unique_ptr<tf2_ros::Buffer> &tf_buffer,
             }
         }
         else{
-            auto steady_clock = rclcpp::Clock();
+            rclcpp::Clock steady_clock = rclcpp::Clock();
             RCLCPP_ERROR_THROTTLE(rclcpp::get_logger("mir_perception_utils_logger"), steady_clock,
                                     2000, "[ObjectUtils]: Pose cannot be transformed.");
             transformed_pose = pose;

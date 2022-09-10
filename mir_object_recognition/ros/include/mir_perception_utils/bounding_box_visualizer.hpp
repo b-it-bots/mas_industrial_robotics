@@ -1,6 +1,9 @@
 #ifndef BOUNDING_BOX_VISUALIZER_HPP
 #define BOUNDING_BOX_VISUALIZER_HPP
 
+#include <string>
+#include <vector>
+
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "visualization_msgs/msg/marker.hpp"
@@ -8,8 +11,7 @@
 #include "mas_perception_msgs/msg/bounding_box.hpp"
 #include "mir_perception_utils/color.hpp"
 
-#include <string>
-#include <vector>
+#include "rmw/qos_profiles.h"
 
 using mir_perception_utils::visualization::Color;
 
@@ -40,5 +42,4 @@ namespace mir_perception_utils
         };
     }
 }
-//#include "mir_perception_utils/impl/bounding_box_visualizer.hpp"
 #endif /* BOUNDING_BOX_VISUALIZER_HPP */

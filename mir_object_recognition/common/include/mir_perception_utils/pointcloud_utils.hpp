@@ -1,6 +1,11 @@
 #ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_HPP
 #define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_HPP
 
+#include <random>
+#include <pcl/PointIndices.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/common/centroid.h>
+#include <pcl/common/io.h>
 #include "mir_perception_utils/aliases.hpp"
 
 namespace mir_perception_utils

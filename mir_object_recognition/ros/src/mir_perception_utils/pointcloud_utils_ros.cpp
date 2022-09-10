@@ -26,7 +26,7 @@ bool pointcloud::transformPointCloudMsg(const std::unique_ptr<tf2_ros::Buffer> &
         }
     }
     else{
-        auto steady_clock = rclcpp::Clock();
+        rclcpp::Clock steady_clock = rclcpp::Clock();
         RCLCPP_ERROR_THROTTLE(rclcpp::get_logger("mir_perception_utils_logger"), steady_clock,
                                     2000, "[ObjectUtils]: TF buffer is not initialized.");
         return (false);
@@ -54,7 +54,7 @@ bool pointcloud::transformPointCloud(const std::unique_ptr<tf2_ros::Buffer> &tf_
         }
     }
     else{
-        auto steady_clock = rclcpp::Clock();
+        rclcpp::Clock steady_clock = rclcpp::Clock();
         RCLCPP_ERROR_THROTTLE(rclcpp::get_logger("mir_perception_utils_logger"), steady_clock,
                                     2000, "[ObjectUtils]: TF buffer is not initialized.");
         return (false);
@@ -86,14 +86,13 @@ bool pointcloud::transformPointCloud2(const std::unique_ptr<tf2_ros::Buffer> &tf
         }
     }
     else{
-        auto steady_clock = rclcpp::Clock();
+        rclcpp::Clock steady_clock = rclcpp::Clock();
         RCLCPP_ERROR_THROTTLE(rclcpp::get_logger("mir_perception_utils_logger"), steady_clock,
                                     2000, "[ObjectUtils]: TF buffer is not initialized.");
         return (false);
     }
     return (true);
 }
-
 
 bool pointcloud::getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
                              const PointCloudBSPtr &cloud_in,
@@ -125,6 +124,11 @@ bool pointcloud::getPointCloudROI(const sensor_msgs::msg::RegionOfInterest &roi,
         }
     }
     for (size_t i = 0; i < pixel_loc.size(); i++){
+        // check cloud_in size
+        if (pixel_loc[i].x >= cloud_in -> width || pixel_loc[i].y >= cloud_in -> height){
+            RCLCPP_ERROR(rclcpp::get_logger("mir_perception_utils"), "Pixel location is out of range.");
+            return (false);
+        }
         PointT pcl_point = cloud_in -> at(pixel_loc[i].x, pixel_loc[i].y);
         if ((!std::isnan(pcl_point.x)) && (!std::isnan(pcl_point.y)) && (!std::isnan(pcl_point.z)) &&
             (!std::isnan(pcl_point.r)) && (!std::isnan(pcl_point.g)) && (!std::isnan(pcl_point.b))){

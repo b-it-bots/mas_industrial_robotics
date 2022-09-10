@@ -7,6 +7,10 @@
 #ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP
 #define MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_HPP
 
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include <pcl/ModelCoefficients.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h>
@@ -66,6 +70,7 @@ class SceneSegmentation
   /** \brief Find plane
    * \param[in] Point cloud
    * \param[out] Convex hull
+   * \param[out] Plane cloud
    * \param[out] Model coefficients
    * \param[out] Workspace height
    * */
@@ -109,6 +114,7 @@ class SceneSegmentation
    * \param[in] Number of cores to use for computing normal with OMP (default=4)
    * */
   void setNormalParams(double radius_search, bool use_omp = false, int num_cores = 4);
+  
   /** \brief Set SAC parameters
    * \param[in] The maximum number of iterations the algorithm will run for
    * \param[in] The distance to model threshold
@@ -121,6 +127,7 @@ class SceneSegmentation
    * */
   void setSACParams(int max_iterations, double distance_threshold, bool optimize_coefficients,
                     Eigen::Vector3f axis, double eps_angle, double normal_distance_weight);
+  
   /** \brief Set prism parameters
    * \param[in] The minimum height above the plane from which to construct the
    * polygonal prism
@@ -128,6 +135,7 @@ class SceneSegmentation
    * polygonal prism
    * */
   void setPrismParams(double min_height, double max_height);
+  
   /** \brief Set outliers parameters
    * \param[in] Radius of the sphere that will determine which points are
    * neighbors.
@@ -135,6 +143,7 @@ class SceneSegmentation
    * classified as an inlier.
    * */
   void setOutlierParams(double radius_search, int min_neighbors);
+  
   /** \brief Set cluster parameters
    * \param[in] The spatial tolerance as a measure in the L2 Euclidean space
    * \param[in] The minimum number of points that a cluster must contain in

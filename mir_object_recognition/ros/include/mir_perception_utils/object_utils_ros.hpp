@@ -79,10 +79,15 @@ namespace mir_perception_utils
         void convertBboxToMsg(const BoundingBox &bbox,
                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
 
+        /** \brief Save debug pointcloud with data_collector node
+         * \param[in] Pointcloud pointer
+         * \param[in] logdir (default /tmp)
+         * \param[in] object_name (default unknown)
+         * */
         void savePcd(const PointCloudConstBSPtr &pointcloud,
             std::string log_dir, std::string obj_name = "unknown");
 
-        /** \brief Save debug image if debug_mode is enabled
+        /** \brief Save debug image with data_collector node
          * \param[in] image with boundix boxes of objects drawn
          * \param[in] raw_image
          * \param[in] logdir (default /tmp)
