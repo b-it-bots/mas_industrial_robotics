@@ -44,6 +44,8 @@ namespace mir_perception_utils
             Color color_;
             bool check_subscribers_;
             double thickness_;
+        
+        protected:
             rclcpp::QoS qos_default;
         };       
     }

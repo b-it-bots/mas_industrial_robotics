@@ -38,6 +38,8 @@ namespace mir_perception_utils
 
       static const size_t COLORS_NUM = 32;
       float COLORS[COLORS_NUM];
+    
+    protected:
       rclcpp::QoS qos_sensor;
       
     };

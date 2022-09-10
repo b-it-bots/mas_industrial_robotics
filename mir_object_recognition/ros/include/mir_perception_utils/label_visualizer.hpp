@@ -37,6 +37,8 @@ namespace mir_perception_utils
             rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
             const Color color_;
             bool check_subscribers_;
+        
+        protected:
             rclcpp::QoS qos_default;
             
         };
