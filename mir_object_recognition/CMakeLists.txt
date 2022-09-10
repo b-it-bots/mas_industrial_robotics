@@ -44,11 +44,6 @@ find_package(yaml-cpp)
 find_package(PCL 1.10 REQUIRED)
 find_package(VTK REQUIRED)
 
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
-
-# message(${CMAKE_INSTALL_PREFIX})
 include_directories(
   ros/include
   common/include
@@ -75,7 +70,6 @@ include_directories(SYSTEM
   ${OpenCV_INCLUDE_DIRS}
 )
 
-
 add_library(perception_visualization
   common/src/bounding_box.cpp
   common/src/pointcloud_utils.cpp
@@ -98,7 +92,7 @@ ament_target_dependencies(perception_visualization
 add_library( scene_segmentation
   common/src/cloud_accumulation.cpp
   common/src/scene_segmentation.cpp
-  ros/src/mir_object_segmentation/laserscan_segmentation.cpp
+  common/src/laserscan_segmentation.cpp
   ros/src/mir_object_segmentation/scene_segmentation_ros.cpp
 )
 

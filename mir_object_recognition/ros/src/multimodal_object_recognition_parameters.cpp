@@ -10,7 +10,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     rcl_interfaces::msg::ParameterDescriptor debug_mode_descriptor;
     debug_mode_descriptor.description = "Debug mode";
     debug_mode_descriptor.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
-    this->declare_parameter("debug_mode", false, debug_mode_descriptor);
+    this->declare_parameter("debug_mode", true, debug_mode_descriptor);
     this->get_parameter("debug_mode", debug_mode_);
 
     this->declare_parameter<std::string>("logdir", "/tmp/");
@@ -76,7 +76,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     // Crop box filter parameters
     rcl_interfaces::msg::ParameterDescriptor descr_enable_cropbox_filter;
     descr_enable_cropbox_filter.description = "Enable crop box filter";
-    this->declare_parameter("enable_cropbox_filter", false, descr_enable_cropbox_filter);
+    this->declare_parameter("enable_cropbox_filter", true, descr_enable_cropbox_filter);
 
     rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_x_limit_min;
     descr_cropbox_filter_x_limit_min.description = "The minimum allowed x value a point will be considered from";
@@ -348,7 +348,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
 
     rcl_interfaces::msg::ParameterDescriptor descriptor42;
     descriptor42.description = "Enable ROI filter";
-    this->declare_parameter("enable_roi", true, descriptor42);
+    this->declare_parameter("enable_roi", false, descriptor42);
 
     rcl_interfaces::msg::ParameterDescriptor descriptor43;
     descriptor43.description = "Base link to laser distance";
@@ -379,7 +379,7 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
 
     rcl_interfaces::msg::ParameterDescriptor descriptor47;
     descriptor47.description = "Enable pointcloud object detection and recognition";
-    this->declare_parameter("enable_pc_recognizer", true, descriptor47);
+    this->declare_parameter("enable_pc_recognizer", false, descriptor47);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     rcl_interfaces::msg::ParameterDescriptor descriptor48;

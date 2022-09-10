@@ -5,17 +5,6 @@
  *
  */
 
-#include <pcl/point_types.h>
-#include <pcl/common/common.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/common/centroid.h>
-#include <pcl/common/transforms.h>
-#include <pcl/filters/statistical_outlier_removal.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/segmentation/region_growing.h>
-#include <pcl/filters/extract_indices.h>
-
 #include "mir_object_recognition/multimodal_object_recognition_utils.hpp"
 
 MultimodalObjectRecognitionUtils::MultimodalObjectRecognitionUtils() {}

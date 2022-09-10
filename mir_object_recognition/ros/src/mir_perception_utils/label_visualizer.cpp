@@ -1,9 +1,5 @@
 #include "mir_perception_utils/label_visualizer.hpp"
 
-#include "visualization_msgs/msg/marker.hpp"
-
-#include "rmw/qos_profiles.h"
-
 using mir_perception_utils::visualization::Color;
 
 namespace mir_perception_utils
@@ -25,7 +21,7 @@ namespace mir_perception_utils
             : color_(color), check_subscribers_(check_subscribers)
         {
             auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
-            auto node = rclcpp::Node::make_shared("_");
+            rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("_");
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::MarkerArray>(
                 topic_name, qos_default);
         }

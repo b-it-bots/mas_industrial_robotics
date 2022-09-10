@@ -1,12 +1,4 @@
-
-#include <algorithm>
-#include <limits>
-#include <opencv4/opencv2/opencv.hpp>
-
-#include <pcl/common/transforms.h>
-
 #include "mir_perception_utils/bounding_box.hpp"
-
 
 using namespace mir_perception_utils::object;
 
@@ -27,10 +19,6 @@ BoundingBox BoundingBox::create(const PointCloudConstBSPtr &cloud, const Eigen::
     // Initialization example taken from:
     // http://opencv.willowgarage.com/documentation/dynamic_structures.html#seqsort
 
-    // ---------- change---------------
-    // CvMemStorage *storage = cvCreateMemStorage(0);
-    // CvSeq *points = cvCreateSeq(CV_32SC2, sizeof(CvSeq), sizeof(CvPoint), storage);
-
     std::vector<cv::Point> *points = new std::vector<cv::Point>();
 
     // CvPoints are made of integers, so we will need to scale our points (which
@@ -47,8 +35,6 @@ BoundingBox BoundingBox::create(const PointCloudConstBSPtr &cloud, const Eigen::
             cv::Point p;
             p.x = pt.x * SCALE;
             p.y = pt.y * SCALE;
-            // ---------- change---------------
-            // cvSeqPush(points, &p);
             points->push_back(p);
             if (pt.z > max_z)
                 max_z = pt.z;
@@ -57,10 +43,7 @@ BoundingBox BoundingBox::create(const PointCloudConstBSPtr &cloud, const Eigen::
         }
     }
 
-    // ---------- change---------------
-    // CvBox2D box2d = cvMinAreaRect2(points);
     cv::RotatedRect box2d = cv::minAreaRect(*points);
-    // cvReleaseMemStorage(&storage);
     box.dimensions_[0] = max_z - min_z;
     box.dimensions_[1] = std::max(box2d.size.width, box2d.size.height) / SCALE;
     box.dimensions_[2] = std::min(box2d.size.width, box2d.size.height) / SCALE;

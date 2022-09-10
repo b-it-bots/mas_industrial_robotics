@@ -11,10 +11,17 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <fstream>
+#include <iostream>
 
+#include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
-#include "rclcpp/rclcpp.hpp"
-// #include <ros/ros.h>
+
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+// #include <pcl_ros/point_cloud.hpp>
+
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/transform_listener.h>
 
@@ -24,6 +31,8 @@
 #include <mir_object_segmentation/cloud_accumulation.hpp>
 #include <mir_object_segmentation/scene_segmentation.hpp>
 
+#include <mir_perception_utils/object_utils_ros.hpp>
+#include <mir_perception_utils/pointcloud_utils.hpp>
 #include <mir_perception_utils/bounding_box.hpp>
 #include <mir_perception_utils/object_utils_ros.hpp>
 
