@@ -168,7 +168,6 @@ target_link_libraries(data_collector
 rclcpp_components_register_nodes(data_collector "perception_namespace::DataCollector")
 
 ament_export_include_directories(include)
-# ament_export_interfaces(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_libraries(${PROJECT_NAME}_node)
 
 if(BUILD_TESTING)

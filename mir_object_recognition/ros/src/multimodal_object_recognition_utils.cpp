@@ -82,14 +82,6 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   c_filter.setInputCloud(cloud);
   c_filter.setIndices(filtered_cluster);
   c_filter.filter(*cloud_filtered);
-  // publish selected cluster
-  // PointCloud::Ptr colored_cloud = reg.getColoredCloud();
-  // sensor_msgs::PointCloud2 ros_pointcloud;
-  // pcl::PCLPointCloud2::Ptr cloud_cl(new pcl::PCLPointCloud2);
-  // pcl::toPCLPointCloud2(*cloud_filtered, *cloud_cl);
-  // pcl_conversions::fromPCL(*cloud_cl, ros_pointcloud);
-  // ros_pointcloud.header.frame_id = target_frame_id_;
-  // pub_pc_cluster_.publish(ros_pointcloud);
   // find centroid
   Eigen::Vector4f centroid;
   unsigned int __attribute__ ((unused)) valid_points = pcl::compute3DCentroid(*cloud_filtered, centroid);
