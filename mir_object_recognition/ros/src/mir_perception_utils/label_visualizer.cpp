@@ -12,18 +12,18 @@ namespace mir_perception_utils
         LabelVisualizer::LabelVisualizer(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> &node,
                                          const std::string &topic_name, Color color,
                                          bool check_subscribers)
-            : color_(color), check_subscribers_(check_subscribers)
+            : color_(color), check_subscribers_(check_subscribers), qos_default(rclcpp::KeepLast(10), rmw_qos_profile_default)
         {
-            qos_default(rclcpp::KeepLast(10), rmw_qos_profile_default);
+            
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::MarkerArray>(
                 topic_name, qos_default);
         }
 
         LabelVisualizer::LabelVisualizer(const std::string &topic_name, Color color,
                                          bool check_subscribers)
-            : color_(color), check_subscribers_(check_subscribers)
+            : color_(color), check_subscribers_(check_subscribers), qos_default(rclcpp::KeepLast(10), rmw_qos_profile_default)
         {
-            qos_default(rclcpp::KeepLast(10), rmw_qos_profile_default);
+            
             auto node = rclcpp::Node::make_shared("_");
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::MarkerArray>(
                 topic_name, qos_default);

@@ -33,12 +33,12 @@ namespace mir_perception_utils
 
             int getNumSubscribers();
 
-            rclcpp::QoS qos_default;
         
         private:
             rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
             const Color color_;
             bool check_subscribers_;
+            rclcpp::QoS qos_default;
         
             
         };
