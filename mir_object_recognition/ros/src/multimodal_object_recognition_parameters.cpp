@@ -23,371 +23,371 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     this->declare_parameter("objects_info", "", object_info_path_descriptor);
     this->get_parameter<std::string>("objects_info", objects_info_path_);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor1;
-    descriptor1.description = "The size of a leaf (on x,y,z) used for downsampling.";
-    rcl_interfaces::msg::FloatingPointRange range1;
-    range1.set__from_value(0.0).set__to_value(1.0);
-    descriptor1.floating_point_range = {range1};
-    this->declare_parameter("voxel_leaf_size", 0.009, descriptor1);
+    rcl_interfaces::msg::ParameterDescriptor voxel_leaf_size_descriptor;
+    voxel_leaf_size_descriptor.description = "The size of a leaf (on x,y,z) used for downsampling.";
+    rcl_interfaces::msg::FloatingPointRange voxel_leaf_size_range;
+    voxel_leaf_size_range.set__from_value(0.0).set__to_value(1.0);
+    voxel_leaf_size_descriptor.floating_point_range = {voxel_leaf_size_range};
+    this->declare_parameter("voxel_leaf_size", 0.009, voxel_leaf_size_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor2;
-    descriptor2.description = "The field name used for filtering";
-    this->declare_parameter("voxel_filter_field_name", "z", descriptor2);
+    rcl_interfaces::msg::ParameterDescriptor voxel_filter_field_name_descriptor;
+    voxel_filter_field_name_descriptor.description = "The field name used for filtering";
+    this->declare_parameter("voxel_filter_field_name", "z", voxel_filter_field_name_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor3;
-    descriptor3.description = "The minimum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range3;
-    range3.set__from_value(-10.0).set__to_value(10.0);
-    descriptor3.floating_point_range = {range3};
-    this->declare_parameter("voxel_filter_limit_min", -0.15, descriptor3);
+    rcl_interfaces::msg::ParameterDescriptor voxel_filter_limit_min_descriptor;
+    voxel_filter_limit_min_descriptor.description = "The minimum allowed field value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange voxel_filter_limit_min_range;
+    voxel_filter_limit_min_range.set__from_value(-10.0).set__to_value(10.0);
+    voxel_filter_limit_min_descriptor.floating_point_range = {voxel_filter_limit_min_range};
+    this->declare_parameter("voxel_filter_limit_min", -0.15, voxel_filter_limit_min_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor4;
-    descriptor4.description = "The maximum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range4;
-    range4.set__from_value(-10.0).set__to_value(10.0);
-    descriptor4.floating_point_range = {range4};
-    this->declare_parameter("voxel_filter_limit_max", 0.3, descriptor4);
+    rcl_interfaces::msg::ParameterDescriptor voxel_filter_limit_max_descriptor;
+    voxel_filter_limit_max_descriptor.description = "The maximum allowed field value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange voxel_filter_limit_max_range;
+    voxel_filter_limit_max_range.set__from_value(-10.0).set__to_value(10.0);
+    voxel_filter_limit_max_descriptor.floating_point_range = {voxel_filter_limit_max_range};
+    this->declare_parameter("voxel_filter_limit_max", 0.3, voxel_filter_limit_max_descriptor);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Passthrough filter parameters
-    rcl_interfaces::msg::ParameterDescriptor descr_enable_passthrough_filter;
-    descr_enable_passthrough_filter.description = "Enable passthrough filter";
-    this->declare_parameter("enable_passthrough_filter", false, descr_enable_passthrough_filter);
+    rcl_interfaces::msg::ParameterDescriptor enable_passthrough_filter_descriptor;
+    enable_passthrough_filter_descriptor.description = "Enable passthrough filter";
+    this->declare_parameter("enable_passthrough_filter", false, enable_passthrough_filter_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_field_name;
-    descr_passthrough_filter_field_name.description = "The field name used for filtering";
-    this->declare_parameter("passthrough_filter_field_name", "x", descr_passthrough_filter_field_name);
+    rcl_interfaces::msg::ParameterDescriptor passthrough_filter_field_name_descriptor;
+    passthrough_filter_field_name_descriptor.description = "The field name used for filtering";
+    this->declare_parameter("passthrough_filter_field_name", "x", passthrough_filter_field_name_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_limit_min;
-    descr_passthrough_filter_limit_min.description = "The minimum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_limit_min;
-    range_passthrough_filter_limit_min.set__from_value(-10.0).set__to_value(10.0);
-    descr_passthrough_filter_limit_min.floating_point_range = {range_passthrough_filter_limit_min};
-    this->declare_parameter("passthrough_filter_limit_min", 0.0, descr_passthrough_filter_limit_min);
+    rcl_interfaces::msg::ParameterDescriptor passthrough_filter_limit_min_descriptor;
+    passthrough_filter_limit_min_descriptor.description = "The minimum allowed field value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange passthrough_filter_limit_min_range;
+    passthrough_filter_limit_min_range.set__from_value(-10.0).set__to_value(10.0);
+    passthrough_filter_limit_min_descriptor.floating_point_range = {passthrough_filter_limit_min_range};
+    this->declare_parameter("passthrough_filter_limit_min", 0.0, passthrough_filter_limit_min_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_passthrough_filter_limit_max;
-    descr_passthrough_filter_limit_max.description = "The maximum allowed field value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_passthrough_filter_limit_max;
-    range_passthrough_filter_limit_max.set__from_value(-10.0).set__to_value(10.0);
-    descr_passthrough_filter_limit_max.floating_point_range = {range_passthrough_filter_limit_max};
-    this->declare_parameter("passthrough_filter_limit_max", 0.8, descr_passthrough_filter_limit_max);
+    rcl_interfaces::msg::ParameterDescriptor passthrough_filter_limit_max_descriptor;
+    passthrough_filter_limit_max_descriptor.description = "The maximum allowed field value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange passthrough_filter_limit_max_range;
+    passthrough_filter_limit_max_range.set__from_value(-10.0).set__to_value(10.0);
+    passthrough_filter_limit_max_descriptor.floating_point_range = {passthrough_filter_limit_max_range};
+    this->declare_parameter("passthrough_filter_limit_max", 0.8, passthrough_filter_limit_max_descriptor);
 
     // Crop box filter parameters
-    rcl_interfaces::msg::ParameterDescriptor descr_enable_cropbox_filter;
-    descr_enable_cropbox_filter.description = "Enable crop box filter";
-    this->declare_parameter("enable_cropbox_filter", true, descr_enable_cropbox_filter);
+    rcl_interfaces::msg::ParameterDescriptor enable_cropbox_filter_descriptor;
+    enable_cropbox_filter_descriptor.description = "Enable crop box filter";
+    this->declare_parameter("enable_cropbox_filter", true, enable_cropbox_filter_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_x_limit_min;
-    descr_cropbox_filter_x_limit_min.description = "The minimum allowed x value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_x_limit_min;
-    range_cropbox_filter_x_limit_min.set__from_value(-10.0).set__to_value(10.0);
-    descr_cropbox_filter_x_limit_min.floating_point_range = {range_cropbox_filter_x_limit_min};
-    this->declare_parameter("cropbox_filter_x_limit_min", 0.0, descr_cropbox_filter_x_limit_min);
+    rcl_interfaces::msg::ParameterDescriptor cropbox_filter_x_limit_min_descriptor;
+    cropbox_filter_x_limit_min_descriptor.description = "The minimum allowed x value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange cropbox_filter_x_limit_min_range;
+    cropbox_filter_x_limit_min_range.set__from_value(-10.0).set__to_value(10.0);
+    cropbox_filter_x_limit_min_descriptor.floating_point_range = {cropbox_filter_x_limit_min_range};
+    this->declare_parameter("cropbox_filter_x_limit_min", 0.0, cropbox_filter_x_limit_min_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_x_limit_max;
-    descr_cropbox_filter_x_limit_max.description = "The maximum allowed x value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_x_limit_max;
-    range_cropbox_filter_x_limit_max.set__from_value(-10.0).set__to_value(10.0);
-    descr_cropbox_filter_x_limit_max.floating_point_range = {range_cropbox_filter_x_limit_max};
-    this->declare_parameter("cropbox_filter_x_limit_max", 0.8, descr_cropbox_filter_x_limit_max);
+    rcl_interfaces::msg::ParameterDescriptor cropbox_filter_x_limit_max_descriptor;
+    cropbox_filter_x_limit_max_descriptor.description = "The maximum allowed x value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange cropbox_filter_x_limit_max_range;
+    cropbox_filter_x_limit_max_range.set__from_value(-10.0).set__to_value(10.0);
+    cropbox_filter_x_limit_max_descriptor.floating_point_range = {cropbox_filter_x_limit_max_range};
+    this->declare_parameter("cropbox_filter_x_limit_max", 0.8, cropbox_filter_x_limit_max_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_y_limit_min;
-    descr_cropbox_filter_y_limit_min.description = "The minimum allowed y value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_y_limit_min;
-    range_cropbox_filter_y_limit_min.set__from_value(-10.0).set__to_value(10.0);
-    descr_cropbox_filter_y_limit_min.floating_point_range = {range_cropbox_filter_y_limit_min};
-    this->declare_parameter("cropbox_filter_y_limit_min", -0.4, descr_cropbox_filter_y_limit_min);
+    rcl_interfaces::msg::ParameterDescriptor cropbox_filter_y_limit_min_descriptor;
+    cropbox_filter_y_limit_min_descriptor.description = "The minimum allowed y value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange cropbox_filter_y_limit_min_range;
+    cropbox_filter_y_limit_min_range.set__from_value(-10.0).set__to_value(10.0);
+    cropbox_filter_y_limit_min_descriptor.floating_point_range = {cropbox_filter_y_limit_min_range};
+    this->declare_parameter("cropbox_filter_y_limit_min", -0.4, cropbox_filter_y_limit_min_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_y_limit_max;
-    descr_cropbox_filter_y_limit_max.description = "The maximum allowed y value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_y_limit_max;
-    range_cropbox_filter_y_limit_max.set__from_value(-10.0).set__to_value(10.0);
-    descr_cropbox_filter_y_limit_max.floating_point_range = {range_cropbox_filter_y_limit_max};
-    this->declare_parameter("cropbox_filter_y_limit_max", 0.4, descr_cropbox_filter_y_limit_max);
+    rcl_interfaces::msg::ParameterDescriptor cropbox_filter_y_limit_max_descriptor;
+    cropbox_filter_y_limit_max_descriptor.description = "The maximum allowed y value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange cropbox_filter_y_limit_max_range;
+    cropbox_filter_y_limit_max_range.set__from_value(-10.0).set__to_value(10.0);
+    cropbox_filter_y_limit_max_descriptor.floating_point_range = {cropbox_filter_y_limit_max_range};
+    this->declare_parameter("cropbox_filter_y_limit_max", 0.4, cropbox_filter_y_limit_max_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_z_limit_min;
-    descr_cropbox_filter_z_limit_min.description = "The minimum allowed z value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_z_limit_min;
-    range_cropbox_filter_z_limit_min.set__from_value(-10.0).set__to_value(10.0);
-    descr_cropbox_filter_z_limit_min.floating_point_range = {range_cropbox_filter_z_limit_min};
-    this->declare_parameter("cropbox_filter_z_limit_min", -0.2, descr_cropbox_filter_z_limit_min);
+    rcl_interfaces::msg::ParameterDescriptor cropbox_filter_z_limit_min_descriptor;
+    cropbox_filter_z_limit_min_descriptor.description = "The minimum allowed z value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange cropbox_filter_z_limit_min_range;
+    cropbox_filter_z_limit_min_range.set__from_value(-10.0).set__to_value(10.0);
+    cropbox_filter_z_limit_min_descriptor.floating_point_range = {cropbox_filter_z_limit_min_range};
+    this->declare_parameter("cropbox_filter_z_limit_min", -0.2, cropbox_filter_z_limit_min_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descr_cropbox_filter_z_limit_max;
-    descr_cropbox_filter_z_limit_max.description = "The maximum allowed z value a point will be considered from";
-    rcl_interfaces::msg::FloatingPointRange range_cropbox_filter_z_limit_max;
-    range_cropbox_filter_z_limit_max.set__from_value(-10.0).set__to_value(10.0);
-    descr_cropbox_filter_z_limit_max.floating_point_range = {range_cropbox_filter_z_limit_max};
-    this->declare_parameter("cropbox_filter_z_limit_max", 0.6, descr_cropbox_filter_z_limit_max);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor9;
-    descriptor9.description = "Sphere radius for nearest neighbor search";
-    rcl_interfaces::msg::FloatingPointRange range9;
-    range9.set__from_value(0.0).set__to_value(0.5);
-    descriptor9.floating_point_range = {range9};
-    this->declare_parameter("normal_radius_search", 0.03, descriptor9);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor10;
-    descriptor10.description = "Use Open MP to estimate normal";
-    this->declare_parameter("use_omp", false, descriptor10);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor11;
-    descriptor11.description = "The number of cores to use for OMP normal estimation";
-    rcl_interfaces::msg::IntegerRange range11;
-    range11.set__from_value(1).set__to_value(16);
-    descriptor11.integer_range = {range11};
-    this->declare_parameter("num_cores", 8, descriptor11);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor12;
-    descriptor12.description = "The maximum number of iterations the algorithm will run for";
-    rcl_interfaces::msg::IntegerRange range12;
-    range12.set__from_value(0).set__to_value(100000);
-    descriptor12.integer_range = {range12};
-    this->declare_parameter("sac_max_iterations", 1000, descriptor12);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor13;
-    descriptor13.description = "The distance to model threshold";
-    rcl_interfaces::msg::FloatingPointRange range13;
-    range13.set__from_value(0.0).set__to_value(1.0);
-    descriptor13.floating_point_range = {range13};
-    this->declare_parameter("sac_distance_threshold", 0.01, descriptor13);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor14;
-    descriptor14.description = "Model coefficient refinement";
-    this->declare_parameter("sac_optimize_coefficients", true, descriptor14);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor15;
-    descriptor15.description = "The x axis to which the plane should be perpendicular, the eps angle > 0 to activate axis-angle constraint";
-    rcl_interfaces::msg::FloatingPointRange range15;
-    range15.set__from_value(0.0).set__to_value(1.0);
-    descriptor15.floating_point_range = {range15};
-    this->declare_parameter("sac_x_axis", 0.0, descriptor15);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor16;
-    descriptor16.description = "The y axis to which the plane should be perpendicular, the eps angle > 0 to activate axis-angle constraint";
-    rcl_interfaces::msg::FloatingPointRange range16;
-    range16.set__from_value(0.0).set__to_value(1.0);
-    descriptor16.floating_point_range = {range16};
-    this->declare_parameter("sac_y_axis", 0.0, descriptor16);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor17;
-    descriptor17.description = "The z axis to which the plane should be perpendicular, the eps angle > 0 to activate axis-angle constraint";
-    rcl_interfaces::msg::FloatingPointRange range17;
-    range17.set__from_value(0.0).set__to_value(1.0);
-    descriptor17.floating_point_range = {range17};
-    this->declare_parameter("sac_z_axis", 1.0, descriptor17);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor18;
-    descriptor18.description = "The maximum allowed difference between the model normal and the given axis in radians.";
-    rcl_interfaces::msg::FloatingPointRange range18;
-    range18.set__from_value(0.0).set__to_value(1.5707);
-    descriptor18.floating_point_range = {range18};
-    this->declare_parameter("sac_eps_angle", 0.09, descriptor18);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor19;
-    descriptor19.description = "The relative weight (between 0 and 1) to give to the angular distance (0 to pi/2) between point normals and the plane normal.";
-    rcl_interfaces::msg::FloatingPointRange range19;
-    range19.set__from_value(0.0).set__to_value(1.0);
-    descriptor19.floating_point_range = {range19};
-    this->declare_parameter("sac_normal_distance_weight", 0.05, descriptor19);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor20;
-    descriptor20.description = "The minimum height above the plane from which to construct the polygonal prism";
-    rcl_interfaces::msg::FloatingPointRange range20;
-    range20.set__from_value(0.0).set__to_value(5.0);
-    descriptor20.floating_point_range = {range20};
-    this->declare_parameter("prism_min_height", 0.01, descriptor20);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor21;
-    descriptor21.description = "The maximum height above the plane from which to construct the polygonal prism";
-    rcl_interfaces::msg::FloatingPointRange range21;
-    range21.set__from_value(0.0).set__to_value(5.0);
-    descriptor21.floating_point_range = {range21};
-    this->declare_parameter("prism_max_height", 0.1, descriptor21);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor22;
-    descriptor22.description = "Radius of the sphere that will determine which points are neighbors.";
-    rcl_interfaces::msg::FloatingPointRange range22;
-    range22.set__from_value(0.0).set__to_value(10.0);
-    descriptor22.floating_point_range = {range22};
-    this->declare_parameter("outlier_radius_search", 0.03, descriptor22);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor23;
-    descriptor23.description = "The number of neighbors that need to be present in order to be classified as an inlier.";
-    rcl_interfaces::msg::IntegerRange range23;
-    range23.set__from_value(0).set__to_value(1000);
-    descriptor23.integer_range = {range23};
-    this->declare_parameter("outlier_min_neighbors", 20, descriptor23);
+    rcl_interfaces::msg::ParameterDescriptor cropbox_filter_z_limit_max_descriptor;
+    cropbox_filter_z_limit_max_descriptor.description = "The maximum allowed z value a point will be considered from";
+    rcl_interfaces::msg::FloatingPointRange cropbox_filter_z_limit_max_range;
+    cropbox_filter_z_limit_max_range.set__from_value(-10.0).set__to_value(10.0);
+    cropbox_filter_z_limit_max_descriptor.floating_point_range = {cropbox_filter_z_limit_max_range};
+    this->declare_parameter("cropbox_filter_z_limit_max", 0.6, cropbox_filter_z_limit_max_descriptor);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor24;
-    descriptor24.description = "The spatial tolerance as a measure in the L2 Euclidean space";
-    rcl_interfaces::msg::FloatingPointRange range24;
-    range24.set__from_value(0.0).set__to_value(2.0);
-    descriptor24.floating_point_range = {range24};
-    this->declare_parameter("cluster_tolerance", 0.02, descriptor24);
+    rcl_interfaces::msg::ParameterDescriptor normal_radius_search_descriptor;
+    normal_radius_search_descriptor.description = "Sphere radius for nearest neighbor search";
+    rcl_interfaces::msg::FloatingPointRange normal_radius_search_range;
+    normal_radius_search_range.set__from_value(0.0).set__to_value(0.5);
+    normal_radius_search_descriptor.floating_point_range = {normal_radius_search_range};
+    this->declare_parameter("normal_radius_search", 0.03, normal_radius_search_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor25;
-    descriptor25.description = "The minimum number of points that a cluster must contain in order to be accepted";
-    rcl_interfaces::msg::IntegerRange range25;
-    range25.set__from_value(0).set__to_value(1000);
-    descriptor25.integer_range = {range25};
-    this->declare_parameter("cluster_min_size", 25, descriptor25);
+    rcl_interfaces::msg::ParameterDescriptor use_omp_descriptor;
+    use_omp_descriptor.description = "Use Open MP to estimate normal";
+    this->declare_parameter("use_omp", false, use_omp_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor26;
-    descriptor26.description = "The maximum number of points that a cluster must contain in order to be accepted";
-    rcl_interfaces::msg::IntegerRange range26;
-    range26.set__from_value(0).set__to_value(2147483647);
-    descriptor26.integer_range = {range26};
-    this->declare_parameter("cluster_max_size", 20000, descriptor26);
+    rcl_interfaces::msg::ParameterDescriptor num_cores_descriptor;
+    num_cores_descriptor.description = "The number of cores to use for OMP normal estimation";
+    rcl_interfaces::msg::IntegerRange num_cores_range;
+    num_cores_range.set__from_value(1).set__to_value(16);
+    num_cores_descriptor.integer_range = {num_cores_range};
+    this->declare_parameter("num_cores", 8, num_cores_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor27;
-    descriptor27.description = "The minimum height of the cluster above the given polygon";
-    rcl_interfaces::msg::FloatingPointRange range27;
-    range27.set__from_value(0.0).set__to_value(5.0);
-    descriptor27.floating_point_range = {range27};
-    this->declare_parameter("cluster_min_height", 0.011, descriptor27);
+    rcl_interfaces::msg::ParameterDescriptor sac_max_iterations_descriptor;
+    sac_max_iterations_descriptor.description = "The maximum number of iterations the algorithm will run for";
+    rcl_interfaces::msg::IntegerRange sac_max_iterations_range;
+    sac_max_iterations_range.set__from_value(0).set__to_value(100000);
+    sac_max_iterations_descriptor.integer_range = {sac_max_iterations_range};
+    this->declare_parameter("sac_max_iterations", 1000, sac_max_iterations_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor28;
-    descriptor28.description = "The maximum height of the cluster above the given polygon";
-    rcl_interfaces::msg::FloatingPointRange range28;
-    range28.set__from_value(0.0).set__to_value(5.0);
-    descriptor28.floating_point_range = {range28};
-    this->declare_parameter("cluster_max_height", 0.09, descriptor28);
+    rcl_interfaces::msg::ParameterDescriptor sac_distance_threshold_descriptor;
+    sac_distance_threshold_descriptor.description = "The distance to model threshold";
+    rcl_interfaces::msg::FloatingPointRange sac_distance_threshold_range;
+    sac_distance_threshold_range.set__from_value(0.0).set__to_value(1.0);
+    sac_distance_threshold_descriptor.floating_point_range = {sac_distance_threshold_range};
+    this->declare_parameter("sac_distance_threshold", 0.01, sac_distance_threshold_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor29;
-    descriptor29.description = "The maximum length of the cluster";
-    rcl_interfaces::msg::FloatingPointRange range29;
-    range29.set__from_value(0.0).set__to_value(5.0);
-    descriptor29.floating_point_range = {range29};
-    this->declare_parameter("cluster_max_length", 0.25, descriptor29);
+    rcl_interfaces::msg::ParameterDescriptor sac_optimize_coefficients_descriptor;
+    sac_optimize_coefficients_descriptor.description = "Model coefficient refinement";
+    this->declare_parameter("sac_optimize_coefficients", true, sac_optimize_coefficients_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor30;
-    descriptor30.description = "The minimum height of the cluster above the given polygon";
-    rcl_interfaces::msg::FloatingPointRange range30;
-    range30.set__from_value(0.0).set__to_value(5.0);
-    descriptor30.floating_point_range = {range30};
-    this->declare_parameter("cluster_min_distance_to_polygon", 0.04, descriptor30);
+    rcl_interfaces::msg::ParameterDescriptor sac_x_axis_descriptor;
+    sac_x_axis_descriptor.description = "The x axis to which the plane should be perpendicular, the eps angle > 0 to activate axis-angle constraint";
+    rcl_interfaces::msg::FloatingPointRange sac_x_axis_range;
+    sac_x_axis_range.set__from_value(0.0).set__to_value(1.0);
+    sac_x_axis_descriptor.floating_point_range = {sac_x_axis_range};
+    this->declare_parameter("sac_x_axis", 0.0, sac_x_axis_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor31;
-    descriptor31.description = "Center cluster";
-    this->declare_parameter("center_cluster", false, descriptor31);
+    rcl_interfaces::msg::ParameterDescriptor sac_y_axis_descriptor;
+    sac_y_axis_descriptor.description = "The y axis to which the plane should be perpendicular, the eps angle > 0 to activate axis-angle constraint";
+    rcl_interfaces::msg::FloatingPointRange sac_y_axis_range;
+    sac_y_axis_range.set__from_value(0.0).set__to_value(1.0);
+    sac_y_axis_descriptor.floating_point_range = {sac_y_axis_range};
+    this->declare_parameter("sac_y_axis", 0.0, sac_y_axis_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor32;
-    descriptor32.description = "Pad cluster so that it has the same size";
-    this->declare_parameter("pad_cluster", true, descriptor32);
+    rcl_interfaces::msg::ParameterDescriptor sac_z_axis_descriptor;
+    sac_z_axis_descriptor.description = "The z axis to which the plane should be perpendicular, the eps angle > 0 to activate axis-angle constraint";
+    rcl_interfaces::msg::FloatingPointRange sac_z_axis_range;
+    sac_z_axis_range.set__from_value(0.0).set__to_value(1.0);
+    sac_z_axis_descriptor.floating_point_range = {sac_z_axis_range};
+    this->declare_parameter("sac_z_axis", 1.0, sac_z_axis_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor33;
-    descriptor33.description = "The size of the padded cluster";
-    rcl_interfaces::msg::IntegerRange range33;
-    range33.set__from_value(128).set__to_value(4096);
-    descriptor33.integer_range = {range33};
-    this->declare_parameter("padded_cluster_size", 2048, descriptor33);
+    rcl_interfaces::msg::ParameterDescriptor sac_eps_angle_descriptor;
+    sac_eps_angle_descriptor.description = "The maximum allowed difference between the model normal and the given axis in radians.";
+    rcl_interfaces::msg::FloatingPointRange sac_eps_angle_range;
+    sac_eps_angle_range.set__from_value(0.0).set__to_value(1.5707);
+    sac_eps_angle_descriptor.floating_point_range = {sac_eps_angle_range};
+    this->declare_parameter("sac_eps_angle", 0.09, sac_eps_angle_descriptor);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    rcl_interfaces::msg::ParameterDescriptor sac_normal_distance_weight_descriptor;
+    sac_normal_distance_weight_descriptor.description = "The relative weight (between 0 and 1) to give to the angular distance (0 to pi/2) between point normals and the plane normal.";
+    rcl_interfaces::msg::FloatingPointRange sac_normal_distance_weight_range;
+    sac_normal_distance_weight_range.set__from_value(0.0).set__to_value(1.0);
+    sac_normal_distance_weight_descriptor.floating_point_range = {sac_normal_distance_weight_range};
+    this->declare_parameter("sac_normal_distance_weight", 0.05, sac_normal_distance_weight_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor34;
-    descriptor34.description = "The height of the object above the workspace";
-    rcl_interfaces::msg::FloatingPointRange range34;
-    range34.set__from_value(0.0).set__to_value(2.0);
-    descriptor34.floating_point_range = {range34};
-    this->declare_parameter("object_height_above_workspace", 0.022, descriptor34);
+    rcl_interfaces::msg::ParameterDescriptor prism_min_height_descriptor;
+    prism_min_height_descriptor.description = "The minimum height above the plane from which to construct the polygonal prism";
+    rcl_interfaces::msg::FloatingPointRange prism_min_height_range;
+    prism_min_height_range.set__from_value(0.0).set__to_value(5.0);
+    prism_min_height_descriptor.floating_point_range = {prism_min_height_range};
+    this->declare_parameter("prism_min_height", 0.01, prism_min_height_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor35;
-    descriptor35.description = "The height of the container pose";
-    rcl_interfaces::msg::FloatingPointRange range35;
-    range35.set__from_value(0.0).set__to_value(2.0);
-    descriptor35.floating_point_range = {range35};
-    this->declare_parameter("container_height", 0.07, descriptor35);
+    rcl_interfaces::msg::ParameterDescriptor prism_max_height_descriptor;
+    prism_max_height_descriptor.description = "The maximum height above the plane from which to construct the polygonal prism";
+    rcl_interfaces::msg::FloatingPointRange prism_max_height_range;
+    prism_max_height_range.set__from_value(0.0).set__to_value(5.0);
+    prism_max_height_descriptor.floating_point_range = {prism_max_height_range};
+    this->declare_parameter("prism_max_height", 0.1, prism_max_height_descriptor);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    rcl_interfaces::msg::ParameterDescriptor outlier_radius_search_descriptor;
+    outlier_radius_search_descriptor.description = "Radius of the sphere that will determine which points are neighbors.";
+    rcl_interfaces::msg::FloatingPointRange outlier_radius_search_range;
+    outlier_radius_search_range.set__from_value(0.0).set__to_value(10.0);
+    outlier_radius_search_descriptor.floating_point_range = {outlier_radius_search_range};
+    this->declare_parameter("outlier_radius_search", 0.03, outlier_radius_search_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor36;
-    descriptor36.description = "RGB bounding box/ROI adjustment in pixel";
-    rcl_interfaces::msg::IntegerRange range36;
-    range36.set__from_value(0).set__to_value(50);
-    descriptor36.integer_range = {range36};
-    this->declare_parameter("rgb_roi_adjustment", 2, descriptor36);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor37;
-    descriptor37.description = "Allowed RGB bounding box min diagonal";
-    rcl_interfaces::msg::IntegerRange range37;
-    range37.set__from_value(0).set__to_value(500);
-    descriptor37.integer_range = {range37};
-    this->declare_parameter("rgb_bbox_min_diag", 21, descriptor37);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor38;
-    descriptor38.description = "Allowed RGB bounding box max diagonal";
-    rcl_interfaces::msg::IntegerRange range38;
-    range38.set__from_value(0).set__to_value(500);
-    descriptor38.integer_range = {range38};
-    this->declare_parameter("rgb_bbox_max_diag", 175, descriptor38);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor39;
-    descriptor39.description = "Passthrough filter min for the generated pc from rgb proposal";
-    rcl_interfaces::msg::FloatingPointRange range39;
-    range39.set__from_value(-1.0).set__to_value(1.0);
-    descriptor39.floating_point_range = {range39};
-    this->declare_parameter("rgb_cluster_filter_limit_min", 0.0060, descriptor39);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor40;
-    descriptor40.description = "Passthrough filter max for the generated pc from rgb proposal";
-    rcl_interfaces::msg::FloatingPointRange range40;
-    range40.set__from_value(-1.0).set__to_value(1.0);
-    descriptor40.floating_point_range = {range40};
-    this->declare_parameter("rgb_cluster_filter_limit_max", 0.35, descriptor40);
-
-    rcl_interfaces::msg::ParameterDescriptor descriptor41;
-    descriptor41.description = "Remove cloud cluster generated from RGB ROI";
-    this->declare_parameter("rgb_cluster_remove_outliers", true, descriptor41);
+    rcl_interfaces::msg::ParameterDescriptor outlier_min_neighbors_descriptor;
+    outlier_min_neighbors_descriptor.description = "The number of neighbors that need to be present in order to be classified as an inlier.";
+    rcl_interfaces::msg::IntegerRange outlier_min_neighbors_range;
+    outlier_min_neighbors_range.set__from_value(0).set__to_value(1000);
+    outlier_min_neighbors_descriptor.integer_range = {outlier_min_neighbors_range};
+    this->declare_parameter("outlier_min_neighbors", 20, outlier_min_neighbors_descriptor);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor42;
-    descriptor42.description = "Enable ROI filter";
-    this->declare_parameter("enable_roi", false, descriptor42);
+    rcl_interfaces::msg::ParameterDescriptor cluster_tolerance_descriptor;
+    cluster_tolerance_descriptor.description = "The spatial tolerance as a measure in the L2 Euclidean space";
+    rcl_interfaces::msg::FloatingPointRange cluster_tolerance_range;
+    cluster_tolerance_range.set__from_value(0.0).set__to_value(2.0);
+    cluster_tolerance_descriptor.floating_point_range = {cluster_tolerance_range};
+    this->declare_parameter("cluster_tolerance", 0.02, cluster_tolerance_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor43;
-    descriptor43.description = "Base link to laser distance";
-    rcl_interfaces::msg::FloatingPointRange range43;
-    range43.set__from_value(0.0).set__to_value(1.0);
-    descriptor43.floating_point_range = {range43};
-    this->declare_parameter("roi_base_link_to_laser_distance", 0.350, descriptor43);
+    rcl_interfaces::msg::ParameterDescriptor cluster_min_size_descriptor;
+    cluster_min_size_descriptor.description = "The minimum number of points that a cluster must contain in order to be accepted";
+    rcl_interfaces::msg::IntegerRange cluster_min_size_range;
+    cluster_min_size_range.set__from_value(0).set__to_value(1000);
+    cluster_min_size_descriptor.integer_range = {cluster_min_size_range};
+    this->declare_parameter("cluster_min_size", 25, cluster_min_size_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor44;
-    descriptor44.description = "Max object pose x distance to base link";
-    rcl_interfaces::msg::FloatingPointRange range44;
-    range44.set__from_value(0.0).set__to_value(2.0);
-    descriptor44.floating_point_range = {range44};
-    this->declare_parameter("roi_max_object_pose_x_to_base_link", 0.700, descriptor44);
+    rcl_interfaces::msg::ParameterDescriptor cluster_max_size_descriptor;
+    cluster_max_size_descriptor.description = "The maximum number of points that a cluster must contain in order to be accepted";
+    rcl_interfaces::msg::IntegerRange cluster_max_size_range;
+    cluster_max_size_range.set__from_value(0).set__to_value(2147483647);
+    cluster_max_size_descriptor.integer_range = {cluster_max_size_range};
+    this->declare_parameter("cluster_max_size", 20000, cluster_max_size_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor45;
-    descriptor45.description = "Min height of objects";
-    rcl_interfaces::msg::FloatingPointRange range45;
-    range45.set__from_value(0.0).set__to_value(1.0);
-    descriptor45.floating_point_range = {range45};
-    this->declare_parameter("roi_min_bbox_z", 0.03, descriptor45);
+    rcl_interfaces::msg::ParameterDescriptor cluster_min_height_descriptor;
+    cluster_min_height_descriptor.description = "The minimum height of the cluster above the given polygon";
+    rcl_interfaces::msg::FloatingPointRange cluster_min_height_range;
+    cluster_min_height_range.set__from_value(0.0).set__to_value(5.0);
+    cluster_min_height_descriptor.floating_point_range = {cluster_min_height_range};
+    this->declare_parameter("cluster_min_height", 0.011, cluster_min_height_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor cluster_max_height_descriptor;
+    cluster_max_height_descriptor.description = "The maximum height of the cluster above the given polygon";
+    rcl_interfaces::msg::FloatingPointRange cluster_max_height_range;
+    cluster_max_height_range.set__from_value(0.0).set__to_value(5.0);
+    cluster_max_height_descriptor.floating_point_range = {cluster_max_height_range};
+    this->declare_parameter("cluster_max_height", 0.09, cluster_max_height_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor cluster_max_length_descriptor;
+    cluster_max_length_descriptor.description = "The maximum length of the cluster";
+    rcl_interfaces::msg::FloatingPointRange cluster_max_length_range;
+    cluster_max_length_range.set__from_value(0.0).set__to_value(5.0);
+    cluster_max_length_descriptor.floating_point_range = {cluster_max_length_range};
+    this->declare_parameter("cluster_max_length", 0.25, cluster_max_length_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor cluster_min_distance_to_polygon_descriptor;
+    cluster_min_distance_to_polygon_descriptor.description = "The minimum height of the cluster above the given polygon";
+    rcl_interfaces::msg::FloatingPointRange cluster_min_distance_to_polygon_range;
+    cluster_min_distance_to_polygon_range.set__from_value(0.0).set__to_value(5.0);
+    cluster_min_distance_to_polygon_descriptor.floating_point_range = {cluster_min_distance_to_polygon_range};
+    this->declare_parameter("cluster_min_distance_to_polygon", 0.04, cluster_min_distance_to_polygon_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor center_cluster_descriptor;
+    center_cluster_descriptor.description = "Center cluster";
+    this->declare_parameter("center_cluster", false, center_cluster_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor pad_cluster_descriptor;
+    pad_cluster_descriptor.description = "Pad cluster so that it has the same size";
+    this->declare_parameter("pad_cluster", true, pad_cluster_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor padded_cluster_size_descriptor;
+    padded_cluster_size_descriptor.description = "The size of the padded cluster";
+    rcl_interfaces::msg::IntegerRange padded_cluster_size_range;
+    padded_cluster_size_range.set__from_value(128).set__to_value(4096);
+    padded_cluster_size_descriptor.integer_range = {padded_cluster_size_range};
+    this->declare_parameter("padded_cluster_size", 2048, padded_cluster_size_descriptor);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor46;
-    descriptor46.description = "Enable rgb object detection and recognition";
-    this->declare_parameter("enable_rgb_recognizer", true, descriptor46);
+    rcl_interfaces::msg::ParameterDescriptor object_height_above_workspace_descriptor;
+    object_height_above_workspace_descriptor.description = "The height of the object above the workspace";
+    rcl_interfaces::msg::FloatingPointRange object_height_above_workspace_range;
+    object_height_above_workspace_range.set__from_value(0.0).set__to_value(2.0);
+    object_height_above_workspace_descriptor.floating_point_range = {object_height_above_workspace_range};
+    this->declare_parameter("object_height_above_workspace", 0.022, object_height_above_workspace_descriptor);
 
-    rcl_interfaces::msg::ParameterDescriptor descriptor47;
-    descriptor47.description = "Enable pointcloud object detection and recognition";
-    this->declare_parameter("enable_pc_recognizer", false, descriptor47);
+    rcl_interfaces::msg::ParameterDescriptor container_height_descriptor;
+    container_height_descriptor.description = "The height of the container pose";
+    rcl_interfaces::msg::FloatingPointRange container_height_range;
+    container_height_range.set__from_value(0.0).set__to_value(2.0);
+    container_height_descriptor.floating_point_range = {container_height_range};
+    this->declare_parameter("container_height", 0.07, container_height_descriptor);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    rcl_interfaces::msg::ParameterDescriptor descriptor48;
-    descriptor48.description = "Octree resolution";
-    rcl_interfaces::msg::FloatingPointRange range48;
-    range48.set__from_value(0.0).set__to_value(2.0);
-    descriptor48.floating_point_range = {range48};
-    this->declare_parameter("octree_resolution", 0.0025, descriptor48);
+
+    rcl_interfaces::msg::ParameterDescriptor rgb_roi_adjustment_descriptor;
+    rgb_roi_adjustment_descriptor.description = "RGB bounding box/ROI adjustment in pixel";
+    rcl_interfaces::msg::IntegerRange rgb_roi_adjustment_range;
+    rgb_roi_adjustment_range.set__from_value(0).set__to_value(50);
+    rgb_roi_adjustment_descriptor.integer_range = {rgb_roi_adjustment_range};
+    this->declare_parameter("rgb_roi_adjustment", 2, rgb_roi_adjustment_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor rgb_bbox_min_diag_descriptor;
+    rgb_bbox_min_diag_descriptor.description = "Allowed RGB bounding box min diagonal";
+    rcl_interfaces::msg::IntegerRange rgb_bbox_min_diag_range;
+    rgb_bbox_min_diag_range.set__from_value(0).set__to_value(500);
+    rgb_bbox_min_diag_descriptor.integer_range = {rgb_bbox_min_diag_range};
+    this->declare_parameter("rgb_bbox_min_diag", 21, rgb_bbox_min_diag_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor rgb_bbox_max_diag_descriptor;
+    rgb_bbox_max_diag_descriptor.description = "Allowed RGB bounding box max diagonal";
+    rcl_interfaces::msg::IntegerRange rgb_bbox_max_diag_range;
+    rgb_bbox_max_diag_range.set__from_value(0).set__to_value(500);
+    rgb_bbox_max_diag_descriptor.integer_range = {rgb_bbox_max_diag_range};
+    this->declare_parameter("rgb_bbox_max_diag", 175, rgb_bbox_max_diag_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor rgb_cluster_filter_limit_min_descriptor;
+    rgb_cluster_filter_limit_min_descriptor.description = "Passthrough filter min for the generated pc from rgb proposal";
+    rcl_interfaces::msg::FloatingPointRange rgb_cluster_filter_limit_min_range;
+    rgb_cluster_filter_limit_min_range.set__from_value(-1.0).set__to_value(1.0);
+    rgb_cluster_filter_limit_min_descriptor.floating_point_range = {rgb_cluster_filter_limit_min_range};
+    this->declare_parameter("rgb_cluster_filter_limit_min", 0.0060, rgb_cluster_filter_limit_min_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor rgb_cluster_filter_limit_max_descriptor;
+    rgb_cluster_filter_limit_max_descriptor.description = "Passthrough filter max for the generated pc from rgb proposal";
+    rcl_interfaces::msg::FloatingPointRange rgb_cluster_filter_limit_max_range;
+    rgb_cluster_filter_limit_max_range.set__from_value(-1.0).set__to_value(1.0);
+    rgb_cluster_filter_limit_max_descriptor.floating_point_range = {rgb_cluster_filter_limit_max_range};
+    this->declare_parameter("rgb_cluster_filter_limit_max", 0.35, rgb_cluster_filter_limit_max_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor rgb_cluster_remove_outliers_descriptor;
+    rgb_cluster_remove_outliers_descriptor.description = "Remove cloud cluster generated from RGB ROI";
+    this->declare_parameter("rgb_cluster_remove_outliers", true, rgb_cluster_remove_outliers_descriptor);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    rcl_interfaces::msg::ParameterDescriptor enable_roi_descriptor;
+    enable_roi_descriptor.description = "Enable ROI filter";
+    this->declare_parameter("enable_roi", false, enable_roi_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor roi_base_link_to_laser_distance_descriptor;
+    roi_base_link_to_laser_distance_descriptor.description = "Base link to laser distance";
+    rcl_interfaces::msg::FloatingPointRange roi_base_link_to_laser_distance_range;
+    roi_base_link_to_laser_distance_range.set__from_value(0.0).set__to_value(1.0);
+    roi_base_link_to_laser_distance_descriptor.floating_point_range = {roi_base_link_to_laser_distance_range};
+    this->declare_parameter("roi_base_link_to_laser_distance", 0.350, roi_base_link_to_laser_distance_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor roi_max_object_pose_x_to_base_link_descriptor;
+    roi_max_object_pose_x_to_base_link_descriptor.description = "Max object pose x distance to base link";
+    rcl_interfaces::msg::FloatingPointRange roi_max_object_pose_x_to_base_link_range;
+    roi_max_object_pose_x_to_base_link_range.set__from_value(0.0).set__to_value(2.0);
+    roi_max_object_pose_x_to_base_link_descriptor.floating_point_range = {roi_max_object_pose_x_to_base_link_range};
+    this->declare_parameter("roi_max_object_pose_x_to_base_link", 0.700, roi_max_object_pose_x_to_base_link_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor roi_min_bbox_z_descriptor;
+    roi_min_bbox_z_descriptor.description = "Min height of objects";
+    rcl_interfaces::msg::FloatingPointRange roi_min_bbox_z_range;
+    roi_min_bbox_z_range.set__from_value(0.0).set__to_value(1.0);
+    roi_min_bbox_z_descriptor.floating_point_range = {roi_min_bbox_z_range};
+    this->declare_parameter("roi_min_bbox_z", 0.03, roi_min_bbox_z_descriptor);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    rcl_interfaces::msg::ParameterDescriptor enable_rgb_recognizer_descriptor;
+    enable_rgb_recognizer_descriptor.description = "Enable rgb object detection and recognition";
+    this->declare_parameter("enable_rgb_recognizer", true, enable_rgb_recognizer_descriptor);
+
+    rcl_interfaces::msg::ParameterDescriptor enable_pc_recognizer_descriptor;
+    enable_pc_recognizer_descriptor.description = "Enable pointcloud object detection and recognition";
+    this->declare_parameter("enable_pc_recognizer", false, enable_pc_recognizer_descriptor);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    rcl_interfaces::msg::ParameterDescriptor octree_resolution_descriptor;
+    octree_resolution_descriptor.description = "Octree resolution";
+    rcl_interfaces::msg::FloatingPointRange octree_resolution_range;
+    octree_resolution_range.set__from_value(0.0).set__to_value(2.0);
+    octree_resolution_descriptor.floating_point_range = {octree_resolution_range};
+    this->declare_parameter("octree_resolution", 0.0025, octree_resolution_descriptor);
 }
 
 void MultiModalObjectRecognitionROS::get_all_parameters()
@@ -481,7 +481,6 @@ void MultiModalObjectRecognitionROS::get_all_parameters()
     scene_segmentation_ros_->setClusterParams(cluster_tolerance_, cluster_min_size_, cluster_max_size_,
         cluster_min_height_, cluster_max_height_, cluster_max_length_,
         cluster_min_distance_to_polygon_);
-
 }
 
 rcl_interfaces::msg::SetParametersResult
@@ -759,11 +758,4 @@ MultiModalObjectRecognitionROS::parametersCallback(
 
     return result;
 }
-
-
 } //end of namespace
-
-
-
-
-// RCLCPP_COMPONENTS_REGISTER_NODE(perception_namespace::MultiModalObjectRecognitionROS)
