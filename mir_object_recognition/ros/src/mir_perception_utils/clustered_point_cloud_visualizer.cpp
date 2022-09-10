@@ -18,7 +18,7 @@ namespace mir_perception_utils
             const std::string &topic_name, bool check_subscribers)
             : check_subscribers_(check_subscribers)
         {
-            qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
+            qos_sensor(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
             cloud_publisher_ = node->create_publisher<sensor_msgs::msg::PointCloud2>(
                 topic_name, qos_sensor);
             for (size_t i = 0; i < COLORS_NUM; i++)
@@ -31,7 +31,7 @@ namespace mir_perception_utils
             const std::string &topic_name, bool check_subscribers)
             : check_subscribers_(check_subscribers)
         {
-            qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
+            qos_sensor(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
             auto node = rclcpp::Node::make_shared("_");
             cloud_publisher_ = node->create_publisher<sensor_msgs::msg::PointCloud2>(
                 topic_name, qos_sensor);
