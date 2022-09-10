@@ -1,3 +1,10 @@
+/*
+ * Copyright 2019 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil
+ *
+ */
+
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
 namespace perception_namespace

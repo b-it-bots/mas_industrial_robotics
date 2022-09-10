@@ -1,3 +1,10 @@
+/*
+ * Copyright 2020 Bonn-Rhein-Sieg University
+ *
+ * Author: Iswariya Manivannan, Mohammad Wasil
+ *
+ */
+
 #include "mir_perception_utils/planar_polygon_visualizer.hpp"
 
 namespace mir_perception_utils

@@ -1,3 +1,10 @@
+/*
+ * Copyright 2016 Bonn-Rhein-Sieg University
+ *
+ * Author: Sergey Alexandrov
+ *
+ */
+
 #ifndef MIR_PERCEPTION_UTILS_OCTREE_POINTCLOUD_OCCUPANCY_COLORED_HPP
 #define MIR_PERCEPTION_UTILS_OCTREE_POINTCLOUD_OCCUPANCY_COLORED_HPP
 

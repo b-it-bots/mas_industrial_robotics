@@ -1,3 +1,10 @@
+/*
+ * Copyright 2022 Bonn-Rhein-Sieg University
+ *
+ * Author: Shubham Shinde
+ *
+ */
+
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
 namespace perception_namespace

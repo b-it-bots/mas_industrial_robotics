@@ -1,3 +1,10 @@
+/*
+ * Copyright 2020 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil
+ *
+ */
+
 #include "mir_perception_utils/pointcloud_utils.hpp"
 
 using namespace mir_perception_utils;

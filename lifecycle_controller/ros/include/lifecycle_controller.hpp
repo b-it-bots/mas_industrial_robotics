@@ -1,3 +1,10 @@
+/*
+ * Copyright 2022 Bonn-Rhein-Sieg University
+ *
+ * Author: Hamsadatta Perur
+ *
+ */
+
 #ifndef LIFECYCLE_CONTROLLER_HPP
 #define LIFECYCLE_CONTROLLER_HPP
 

@@ -1,3 +1,10 @@
+/*
+ * Copyright 2016 Bonn-Rhein-Sieg University
+ *
+ * Author: Santosh Thoduka, Sergey Alexandrov
+ *
+ */
+
 #ifndef MIR_PERCEPTION_UTILS_LABEL_VISUALIZER_HPP
 #define MIR_PERCEPTION_UTILS_LABEL_VISUALIZER_HPP
 

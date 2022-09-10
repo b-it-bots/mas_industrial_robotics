@@ -1,3 +1,10 @@
+/*
+ * Copyright 2020 Bonn-Rhein-Sieg University
+ *
+ * Author: Iswariya Manivannan, Mohammad Wasil
+ *
+ */
+
 #ifndef MIR_PERCCEPTION_UTILS_HELPERS_HPP
 #define MIR_PERCCEPTION_UTILS_HELPERS_HPP
 

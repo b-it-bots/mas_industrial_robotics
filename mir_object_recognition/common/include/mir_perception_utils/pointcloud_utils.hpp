@@ -1,3 +1,10 @@
+/*
+ * Copyright 2020 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil
+ *
+ */
+
 #ifndef MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_HPP
 #define MIR_PERCCEPTION_UTILS_POINTCLOUD_UTILS_HPP
 

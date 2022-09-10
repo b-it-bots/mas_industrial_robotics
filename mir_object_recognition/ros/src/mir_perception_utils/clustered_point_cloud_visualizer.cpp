@@ -1,3 +1,10 @@
+/*
+ * Copyright 2020 Bonn-Rhein-Sieg University
+ *
+ * Author: Iswariya Manivannan, Mohammad Wasil
+ *
+ */
+
 #include "mir_perception_utils/clustered_point_cloud_visualizer.hpp"
 
 using mir_perception_utils::visualization::Color;

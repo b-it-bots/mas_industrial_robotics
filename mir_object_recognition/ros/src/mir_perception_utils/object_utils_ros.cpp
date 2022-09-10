@@ -1,3 +1,10 @@
+/*
+ * Copyright 2019 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil, Santosh Thoduka
+ *
+ */
+
 #include <fstream>
 #include <chrono>
 #include <iostream>
