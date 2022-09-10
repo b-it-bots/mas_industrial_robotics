@@ -32,14 +32,14 @@ namespace mir_perception_utils
             void publish(const std::vector<std::string> &labels, const geometry_msgs::msg::PoseArray &poses);
 
             int getNumSubscribers();
+
+            rclcpp::QoS qos_default;
         
         private:
             rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
             const Color color_;
             bool check_subscribers_;
         
-        protected:
-            rclcpp::QoS qos_default;
             
         };
     }

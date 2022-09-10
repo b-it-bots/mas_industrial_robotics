@@ -37,6 +37,8 @@ namespace mir_perception_utils
             void buildPolygonMarker(const typename PointCloud::VectorType &points,
                                     visualization_msgs::msg::Marker &marker,
                                     const std::string &frame_id, int id = 1);
+            
+            rclcpp::QoS qos_default;
 
         private:
             rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher_;
@@ -45,8 +47,6 @@ namespace mir_perception_utils
             bool check_subscribers_;
             double thickness_;
         
-        protected:
-            rclcpp::QoS qos_default;
         };       
     }
 }
