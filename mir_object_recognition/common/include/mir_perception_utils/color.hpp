@@ -99,9 +99,7 @@ namespace mir_perception_utils
         return color;
       }
     };
-
   } // namespace visualization
-
 } // namespace mir
 
 #endif // MIR_PERCEPTION_UTILS_COLOR_HPP

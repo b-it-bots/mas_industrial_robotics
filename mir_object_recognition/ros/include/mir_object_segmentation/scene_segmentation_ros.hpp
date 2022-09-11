@@ -21,6 +21,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
+// pcl_ros is not converted into ros2 yet
 // #include <pcl_ros/point_cloud.hpp>
 
 #include <sensor_msgs/msg/point_cloud2.hpp>

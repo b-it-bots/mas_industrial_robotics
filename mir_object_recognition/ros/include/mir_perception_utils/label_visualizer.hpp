@@ -28,31 +28,28 @@ using mir_perception_utils::visualization::Color;
 
 namespace mir_perception_utils
 {
-    namespace visualization
+  namespace visualization
+  {
+    class LabelVisualizer
     {
-        class LabelVisualizer
-        {
-        public:
-            LabelVisualizer(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> &node,
-                            const std::string &topic_name, Color color,
-                            bool check_subscribers = true);
+    public:
+      LabelVisualizer(const std::shared_ptr<rclcpp_lifecycle::LifecycleNode> &node,
+                      const std::string &topic_name, Color color,
+                      bool check_subscribers = true);
 
-            LabelVisualizer(const std::string &topic_name, Color color,
-                            bool check_subscribers = true);
+      LabelVisualizer(const std::string &topic_name, Color color,
+                      bool check_subscribers = true);
 
-            void publish(const std::vector<std::string> &labels, const geometry_msgs::msg::PoseArray &poses);
+      void publish(const std::vector<std::string> &labels, const geometry_msgs::msg::PoseArray &poses);
 
-            int getNumSubscribers();
+      int getNumSubscribers();
 
-        
-        private:
-            rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
-            const Color color_;
-            bool check_subscribers_;
-            rclcpp::QoS qos_default;
-        
-            
-        };
-    }
+    private:
+      rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_publisher_;
+      const Color color_;
+      bool check_subscribers_;
+      rclcpp::QoS qos_default;
+    };
+  }
 }
 #endif // MIR_PERCEPTION_UTILS_LABEL_VISUALIZER_HPP

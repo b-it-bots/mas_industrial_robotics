@@ -9,11 +9,11 @@
 
 namespace perception_namespace
 {
-void MultiModalObjectRecognitionROS::declare_all_parameters()
-{
+  void MultiModalObjectRecognitionROS::declare_all_parameters()
+  {
     this->declare_parameter<std::string>("target_frame_id", "base_link");
     this->get_parameter("target_frame_id", target_frame_id_);
-    
+
     rcl_interfaces::msg::ParameterDescriptor debug_mode_descriptor;
     debug_mode_descriptor.description = "Debug mode";
     debug_mode_descriptor.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
@@ -395,10 +395,10 @@ void MultiModalObjectRecognitionROS::declare_all_parameters()
     octree_resolution_range.set__from_value(0.0).set__to_value(2.0);
     octree_resolution_descriptor.floating_point_range = {octree_resolution_range};
     this->declare_parameter("octree_resolution", 0.0025, octree_resolution_descriptor);
-}
+  }
 
-void MultiModalObjectRecognitionROS::get_all_parameters()
-{
+  void MultiModalObjectRecognitionROS::get_all_parameters()
+  {
     this->get_parameter("debug_mode", debug_mode_);
     this->get_parameter("target_frame_id", target_frame_id_);
     this->get_parameter("logdir", logdir_);
@@ -460,309 +460,319 @@ void MultiModalObjectRecognitionROS::get_all_parameters()
     this->get_parameter("roi_min_bbox_z", roi_min_bbox_z_);
 
     scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
-        voxel_filter_limit_min_, voxel_filter_limit_max_);
-    
+                                                voxel_filter_limit_min_, voxel_filter_limit_max_);
+
     // use either passthrough or cropbox filter
-    if (enable_passthrough_filter_) {
-        scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_, passthrough_filter_field_name_,
-            passthrough_filter_limit_min_, passthrough_filter_limit_max_);
-    } else if (enable_cropbox_filter_) {
-        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
-            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
-            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
-    } else if (enable_cropbox_filter_ && enable_passthrough_filter_) {
-        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled."
-                            "Only cropbox filter will take effect. Please disable one of them.");
-        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
-            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
-            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    if (enable_passthrough_filter_)
+    {
+      scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_, passthrough_filter_field_name_,
+                                                    passthrough_filter_limit_min_, passthrough_filter_limit_max_);
+    }
+    else if (enable_cropbox_filter_)
+    {
+      scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+                                                cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+                                                cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    }
+    else if (enable_cropbox_filter_ && enable_passthrough_filter_)
+    {
+      RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled."
+                                      "Only cropbox filter will take effect. Please disable one of them.");
+      scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+                                                cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+                                                cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
     }
 
     scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
     Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
     scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
-        sac_optimize_coefficients_, axis, sac_eps_angle_,
-        sac_normal_distance_weight_);
+                                          sac_optimize_coefficients_, axis, sac_eps_angle_,
+                                          sac_normal_distance_weight_);
     scene_segmentation_ros_->setPrismParams(prism_min_height_, prism_max_height_);
     scene_segmentation_ros_->setOutlierParams(outlier_radius_search_, outlier_min_neighbors_);
     scene_segmentation_ros_->setClusterParams(cluster_tolerance_, cluster_min_size_, cluster_max_size_,
-        cluster_min_height_, cluster_max_height_, cluster_max_length_,
-        cluster_min_distance_to_polygon_);
-}
+                                              cluster_min_height_, cluster_max_height_, cluster_max_length_,
+                                              cluster_min_distance_to_polygon_);
+  }
 
-rcl_interfaces::msg::SetParametersResult
-MultiModalObjectRecognitionROS::parametersCallback(
-    const std::vector<rclcpp::Parameter> &parameters)
-{
+  rcl_interfaces::msg::SetParametersResult
+  MultiModalObjectRecognitionROS::parametersCallback(
+      const std::vector<rclcpp::Parameter> &parameters)
+  {
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
     result.reason = "success";
-    
+
     for (const auto &param : parameters)
     {
-        RCLCPP_INFO(this->get_logger(), "Value of param %s changed to %s", param.get_name().c_str(), param.value_to_string().c_str());
-        if (param.get_name() == "debug_mode")
-        {
-            this->debug_mode_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "logdir")
-        {
-            this->logdir_ = param.get_value<std::string>();
-        }
-        if (param.get_name() == "target_frame_id")
-        {
-            this->target_frame_id_ = param.get_value<std::string>();
-        }
-        if (param.get_name() == "voxel_leaf_size")
-        {
-            this->voxel_leaf_size_ = param.get_value<double>();
-        }
-        if (param.get_name() == "voxel_filter_field_name")
-        {
-            this->voxel_filter_field_name_ = param.get_value<std::string>();
-        }
-        if (param.get_name() == "voxel_filter_limit_min")
-        {
-            this->voxel_filter_limit_min_ = param.get_value<double>();
-        }
-        if (param.get_name() == "voxel_filter_limit_max")
-        {
-            this->voxel_filter_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "enable_passthrough_filter")
-        {
-            this->enable_passthrough_filter_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "passthrough_filter_field_name")
-        {
-            this->passthrough_filter_field_name_ = param.get_value<std::string>();
-        }
-        if (param.get_name() == "passthrough_filter_limit_min")
-        {
-            this->passthrough_filter_limit_min_ = param.get_value<double>();
-        }
-        if (param.get_name() == "passthrough_filter_limit_max")
-        {
-            this->passthrough_filter_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "enable_cropbox_filter")
-        {
-            this->enable_cropbox_filter_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "cropbox_filter_x_limit_min")
-        {
-            this->cropbox_filter_x_limit_min_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cropbox_filter_x_limit_max")
-        {
-            this->cropbox_filter_x_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cropbox_filter_y_limit_min")
-        {
-            this->cropbox_filter_y_limit_min_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cropbox_filter_y_limit_max")
-        {
-            this->cropbox_filter_y_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cropbox_filter_z_limit_min")
-        {
-            this->cropbox_filter_z_limit_min_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cropbox_filter_z_limit_max")
-        {
-            this->cropbox_filter_z_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "normal_radius_search")
-        {
-            this->normal_radius_search_ = param.get_value<double>();
-        }
-        if (param.get_name() == "use_omp")
-        {
-            this->use_omp_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "num_cores")
-        {
-            this->num_cores_ = param.get_value<int>();
-        }
-        if (param.get_name() == "sac_max_iterations")
-        {
-            this->sac_max_iterations_ = param.get_value<int>();
-        }
-        if (param.get_name() == "sac_distance_threshold")
-        {
-            this->sac_distance_threshold_ = param.get_value<double>();
-        }
-        if (param.get_name() == "sac_optimize_coefficients")
-        {
-            this->sac_optimize_coefficients_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "sac_x_axis")
-        {
-            this->sac_x_axis_ = param.get_value<double>();
-        }
-        if (param.get_name() == "sac_y_axis")
-        {
-            this->sac_y_axis_ = param.get_value<double>();
-        }
-        if (param.get_name() == "sac_z_axis")
-        {
-            this->sac_z_axis_ = param.get_value<double>();
-        }
-        if (param.get_name() == "sac_eps_angle")
-        {
-            this->sac_eps_angle_ = param.get_value<double>();
-        }
-        if (param.get_name() == "sac_normal_distance_weight")
-        {
-            this->sac_normal_distance_weight_ = param.get_value<double>();
-        }
-        if (param.get_name() == "prism_min_height")
-        {
-            this->prism_min_height_ = param.get_value<double>();
-        }
-        if (param.get_name() == "prism_max_height")
-        {
-            this->prism_max_height_ = param.get_value<double>();
-        }
-        if (param.get_name() == "outlier_radius_search")
-        {
-            this->outlier_radius_search_ = param.get_value<double>();
-        }
-        if (param.get_name() == "outlier_min_neighbors")
-        {
-            this->outlier_min_neighbors_ = param.get_value<int>();
-        }
-        if (param.get_name() == "cluster_tolerance")
-        {
-            this->cluster_tolerance_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cluster_min_size")
-        {
-            this->cluster_min_size_ = param.get_value<int>();
-        }
-        if (param.get_name() == "cluster_max_size")
-        {
-            this->cluster_max_size_ = param.get_value<int>();
-        }
-        if (param.get_name() == "cluster_min_height")
-        {
-            this->cluster_min_height_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cluster_max_height")
-        {
-            this->cluster_max_height_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cluster_max_length")
-        {
-            this->cluster_max_length_ = param.get_value<double>();
-        }
-        if (param.get_name() == "cluster_min_distance_to_polygon")
-        {
-            this->cluster_min_distance_to_polygon_ = param.get_value<double>();
-        }
-        if (param.get_name() == "center_cluster")
-        {
-            this->center_cluster_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "pad_cluster")
-        {
-            this->pad_cluster_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "padded_cluster_size")
-        {
-            this->padded_cluster_size_ = param.get_value<int>();
-        }
-        if (param.get_name() == "octree_resolution")
-        {
-            this->octree_resolution_ = param.get_value<double>();
-        }
-        if (param.get_name() == "object_height_above_workspace")
-        {
-            this->object_height_above_workspace_ = param.get_value<double>();
-        }
-        if (param.get_name() == "container_height")
-        {
-            this->container_height_ = param.get_value<double>();
-        }
-        if (param.get_name() == "enable_rgb_recognizer")
-        {
-            this->enable_rgb_recognizer_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "enable_pc_recognizer")
-        {
-            this->enable_pc_recognizer_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "rgb_roi_adjustment")
-        {
-            this->rgb_roi_adjustment_ = param.get_value<int>();
-        }
-        if (param.get_name() == "rgb_bbox_min_diag")
-        {
-            this->rgb_bbox_min_diag_ = param.get_value<int>();
-        }
-        if (param.get_name() == "rgb_bbox_max_diag")
-        {
-            this->rgb_bbox_max_diag_ = param.get_value<int>();
-        }
-        if (param.get_name() == "rgb_cluster_filter_limit_min")
-        {
-            this->rgb_cluster_filter_limit_min_ = param.get_value<double>();
-        }
-        if (param.get_name() == "rgb_cluster_filter_limit_max")
-        {
-            this->rgb_cluster_filter_limit_max_ = param.get_value<double>();
-        }
-        if (param.get_name() == "rgb_cluster_remove_outliers")
-        {
-            this->rgb_cluster_remove_outliers_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "enable_roi")
-        {
-            this->enable_roi_ = param.get_value<bool>();
-        }
-        if (param.get_name() == "roi_base_link_to_laser_distance")
-        {
-            this->roi_base_link_to_laser_distance_ = param.get_value<double>();
-        }
-        if (param.get_name() == "roi_max_object_pose_x_to_base_link")
-        {
-            this->roi_max_object_pose_x_to_base_link_ = param.get_value<double>();
-        }
-        if (param.get_name() == "roi_min_bbox_z")
-        {
-            this->roi_min_bbox_z_ = param.get_value<double>();
-        }
+      RCLCPP_INFO(this->get_logger(), "Value of param %s changed to %s", param.get_name().c_str(), param.value_to_string().c_str());
+      if (param.get_name() == "debug_mode")
+      {
+        this->debug_mode_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "logdir")
+      {
+        this->logdir_ = param.get_value<std::string>();
+      }
+      if (param.get_name() == "target_frame_id")
+      {
+        this->target_frame_id_ = param.get_value<std::string>();
+      }
+      if (param.get_name() == "voxel_leaf_size")
+      {
+        this->voxel_leaf_size_ = param.get_value<double>();
+      }
+      if (param.get_name() == "voxel_filter_field_name")
+      {
+        this->voxel_filter_field_name_ = param.get_value<std::string>();
+      }
+      if (param.get_name() == "voxel_filter_limit_min")
+      {
+        this->voxel_filter_limit_min_ = param.get_value<double>();
+      }
+      if (param.get_name() == "voxel_filter_limit_max")
+      {
+        this->voxel_filter_limit_max_ = param.get_value<double>();
+      }
+      if (param.get_name() == "enable_passthrough_filter")
+      {
+        this->enable_passthrough_filter_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "passthrough_filter_field_name")
+      {
+        this->passthrough_filter_field_name_ = param.get_value<std::string>();
+      }
+      if (param.get_name() == "passthrough_filter_limit_min")
+      {
+        this->passthrough_filter_limit_min_ = param.get_value<double>();
+      }
+      if (param.get_name() == "passthrough_filter_limit_max")
+      {
+        this->passthrough_filter_limit_max_ = param.get_value<double>();
+      }
+      if (param.get_name() == "enable_cropbox_filter")
+      {
+        this->enable_cropbox_filter_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "cropbox_filter_x_limit_min")
+      {
+        this->cropbox_filter_x_limit_min_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cropbox_filter_x_limit_max")
+      {
+        this->cropbox_filter_x_limit_max_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cropbox_filter_y_limit_min")
+      {
+        this->cropbox_filter_y_limit_min_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cropbox_filter_y_limit_max")
+      {
+        this->cropbox_filter_y_limit_max_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cropbox_filter_z_limit_min")
+      {
+        this->cropbox_filter_z_limit_min_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cropbox_filter_z_limit_max")
+      {
+        this->cropbox_filter_z_limit_max_ = param.get_value<double>();
+      }
+      if (param.get_name() == "normal_radius_search")
+      {
+        this->normal_radius_search_ = param.get_value<double>();
+      }
+      if (param.get_name() == "use_omp")
+      {
+        this->use_omp_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "num_cores")
+      {
+        this->num_cores_ = param.get_value<int>();
+      }
+      if (param.get_name() == "sac_max_iterations")
+      {
+        this->sac_max_iterations_ = param.get_value<int>();
+      }
+      if (param.get_name() == "sac_distance_threshold")
+      {
+        this->sac_distance_threshold_ = param.get_value<double>();
+      }
+      if (param.get_name() == "sac_optimize_coefficients")
+      {
+        this->sac_optimize_coefficients_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "sac_x_axis")
+      {
+        this->sac_x_axis_ = param.get_value<double>();
+      }
+      if (param.get_name() == "sac_y_axis")
+      {
+        this->sac_y_axis_ = param.get_value<double>();
+      }
+      if (param.get_name() == "sac_z_axis")
+      {
+        this->sac_z_axis_ = param.get_value<double>();
+      }
+      if (param.get_name() == "sac_eps_angle")
+      {
+        this->sac_eps_angle_ = param.get_value<double>();
+      }
+      if (param.get_name() == "sac_normal_distance_weight")
+      {
+        this->sac_normal_distance_weight_ = param.get_value<double>();
+      }
+      if (param.get_name() == "prism_min_height")
+      {
+        this->prism_min_height_ = param.get_value<double>();
+      }
+      if (param.get_name() == "prism_max_height")
+      {
+        this->prism_max_height_ = param.get_value<double>();
+      }
+      if (param.get_name() == "outlier_radius_search")
+      {
+        this->outlier_radius_search_ = param.get_value<double>();
+      }
+      if (param.get_name() == "outlier_min_neighbors")
+      {
+        this->outlier_min_neighbors_ = param.get_value<int>();
+      }
+      if (param.get_name() == "cluster_tolerance")
+      {
+        this->cluster_tolerance_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cluster_min_size")
+      {
+        this->cluster_min_size_ = param.get_value<int>();
+      }
+      if (param.get_name() == "cluster_max_size")
+      {
+        this->cluster_max_size_ = param.get_value<int>();
+      }
+      if (param.get_name() == "cluster_min_height")
+      {
+        this->cluster_min_height_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cluster_max_height")
+      {
+        this->cluster_max_height_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cluster_max_length")
+      {
+        this->cluster_max_length_ = param.get_value<double>();
+      }
+      if (param.get_name() == "cluster_min_distance_to_polygon")
+      {
+        this->cluster_min_distance_to_polygon_ = param.get_value<double>();
+      }
+      if (param.get_name() == "center_cluster")
+      {
+        this->center_cluster_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "pad_cluster")
+      {
+        this->pad_cluster_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "padded_cluster_size")
+      {
+        this->padded_cluster_size_ = param.get_value<int>();
+      }
+      if (param.get_name() == "octree_resolution")
+      {
+        this->octree_resolution_ = param.get_value<double>();
+      }
+      if (param.get_name() == "object_height_above_workspace")
+      {
+        this->object_height_above_workspace_ = param.get_value<double>();
+      }
+      if (param.get_name() == "container_height")
+      {
+        this->container_height_ = param.get_value<double>();
+      }
+      if (param.get_name() == "enable_rgb_recognizer")
+      {
+        this->enable_rgb_recognizer_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "enable_pc_recognizer")
+      {
+        this->enable_pc_recognizer_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "rgb_roi_adjustment")
+      {
+        this->rgb_roi_adjustment_ = param.get_value<int>();
+      }
+      if (param.get_name() == "rgb_bbox_min_diag")
+      {
+        this->rgb_bbox_min_diag_ = param.get_value<int>();
+      }
+      if (param.get_name() == "rgb_bbox_max_diag")
+      {
+        this->rgb_bbox_max_diag_ = param.get_value<int>();
+      }
+      if (param.get_name() == "rgb_cluster_filter_limit_min")
+      {
+        this->rgb_cluster_filter_limit_min_ = param.get_value<double>();
+      }
+      if (param.get_name() == "rgb_cluster_filter_limit_max")
+      {
+        this->rgb_cluster_filter_limit_max_ = param.get_value<double>();
+      }
+      if (param.get_name() == "rgb_cluster_remove_outliers")
+      {
+        this->rgb_cluster_remove_outliers_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "enable_roi")
+      {
+        this->enable_roi_ = param.get_value<bool>();
+      }
+      if (param.get_name() == "roi_base_link_to_laser_distance")
+      {
+        this->roi_base_link_to_laser_distance_ = param.get_value<double>();
+      }
+      if (param.get_name() == "roi_max_object_pose_x_to_base_link")
+      {
+        this->roi_max_object_pose_x_to_base_link_ = param.get_value<double>();
+      }
+      if (param.get_name() == "roi_min_bbox_z")
+      {
+        this->roi_min_bbox_z_ = param.get_value<double>();
+      }
     }
-    
+
     scene_segmentation_ros_->setVoxelGridParams(voxel_leaf_size_, voxel_filter_field_name_,
-        voxel_filter_limit_min_, voxel_filter_limit_max_);
+                                                voxel_filter_limit_min_, voxel_filter_limit_max_);
     // use either passthrough or cropbox filter
-    if (enable_passthrough_filter_) {
-        scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_, passthrough_filter_field_name_,
-            passthrough_filter_limit_min_, passthrough_filter_limit_max_);
-    } else if (enable_cropbox_filter_) {
-        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
-            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
-            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
-    } else if (enable_cropbox_filter_ && enable_passthrough_filter_) {
-        RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled."
-                            "Only cropbox filter will take effect. Please disable one of them.");
-        scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
-            cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
-            cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    if (enable_passthrough_filter_)
+    {
+      scene_segmentation_ros_->setPassthroughParams(enable_passthrough_filter_, passthrough_filter_field_name_,
+                                                    passthrough_filter_limit_min_, passthrough_filter_limit_max_);
+    }
+    else if (enable_cropbox_filter_)
+    {
+      scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+                                                cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+                                                cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
+    }
+    else if (enable_cropbox_filter_ && enable_passthrough_filter_)
+    {
+      RCLCPP_WARN(this->get_logger(), "Both passthrough and cropbox filters are enabled."
+                                      "Only cropbox filter will take effect. Please disable one of them.");
+      scene_segmentation_ros_->setCropBoxParams(enable_cropbox_filter_, cropbox_filter_x_limit_min_,
+                                                cropbox_filter_x_limit_max_, cropbox_filter_y_limit_min_, cropbox_filter_y_limit_max_,
+                                                cropbox_filter_z_limit_min_, cropbox_filter_z_limit_max_);
     }
     scene_segmentation_ros_->setNormalParams(normal_radius_search_, use_omp_, num_cores_);
     Eigen::Vector3f axis(sac_x_axis_, sac_y_axis_, sac_z_axis_);
     scene_segmentation_ros_->setSACParams(sac_max_iterations_, sac_distance_threshold_,
-        sac_optimize_coefficients_, axis, sac_eps_angle_,
-        sac_normal_distance_weight_);
+                                          sac_optimize_coefficients_, axis, sac_eps_angle_,
+                                          sac_normal_distance_weight_);
     scene_segmentation_ros_->setPrismParams(prism_min_height_, prism_max_height_);
     scene_segmentation_ros_->setOutlierParams(outlier_radius_search_, outlier_min_neighbors_);
     scene_segmentation_ros_->setClusterParams(cluster_tolerance_, cluster_min_size_, cluster_max_size_,
-        cluster_min_height_, cluster_max_height_, cluster_max_length_,
-        cluster_min_distance_to_polygon_);
+                                              cluster_min_height_, cluster_max_height_, cluster_max_length_,
+                                              cluster_min_distance_to_polygon_);
 
     return result;
-}
-} //end of namespace
+  }
+} // end of namespace

@@ -1,6 +1,6 @@
 /*!
  * @copyright 2018 Bonn-Rhein-Sieg University
- * ROS2 contributors: Vamsi Kalagaturu.
+ * ROS2 contributors: Hamsa Datta Perur.
  */
 
 #include <mir_object_segmentation/laserscan_segmentation.hpp>

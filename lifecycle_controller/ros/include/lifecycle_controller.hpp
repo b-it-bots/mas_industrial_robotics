@@ -25,7 +25,6 @@
 
 #include "rcutils/logging_macros.h"
 
-
 extern char key;
 extern const char* display;
 
@@ -39,11 +38,9 @@ extern const char* display;
 // <node name>/get_state
 // <node name>/change_state 
 
-
 template<typename FutureT, typename WaitTimeT>
 std::future_status 
 wait_for_result( FutureT & future,  WaitTimeT time_to_wait);
-
 
 class LifecycleController : public rclcpp::Node
 {
