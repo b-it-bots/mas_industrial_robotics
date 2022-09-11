@@ -1,6 +1,5 @@
 #include "mir_perception_utils/bounding_box_visualizer.hpp"
 
-
 using mir_perception_utils::visualization::Color;
 
 namespace mir_perception_utils
@@ -22,8 +21,9 @@ namespace mir_perception_utils
                                                      bool check_subscribers) : color_(color), check_subscribers_(check_subscribers),
                                                      qos_default (rclcpp::KeepLast(10), rmw_qos_profile_default)
         {
-            
+
             auto node = rclcpp::Node::make_shared("_");
+
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(
                 topic_name, qos_default);
         }
@@ -51,8 +51,6 @@ namespace mir_perception_utils
 
             visualization_msgs::msg::Marker lines;
             lines.header.frame_id = frame_id;
-            // getting current time is not properly defined in ros2
-            // the below line might not work
             lines.header.stamp = rclcpp::Clock().now();
             lines.type = visualization_msgs::msg::Marker::LINE_LIST;
             lines.action = visualization_msgs::msg::Marker::ADD;

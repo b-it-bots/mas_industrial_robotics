@@ -1,8 +1,14 @@
 #ifndef MIR_PERCEPTION_UTILS_BOUNDING_BOX_HPP
 #define MIR_PERCEPTION_UTILS_BOUNDING_BOX_HPP
 
-#include "mir_perception_utils/aliases.hpp"
 #include <vector>
+#include <algorithm>
+#include <limits>
+
+#include <opencv4/opencv2/opencv.hpp>
+#include "mir_perception_utils/aliases.hpp"
+
+#include <pcl/common/transforms.h>
 
 namespace mir_perception_utils
 {
@@ -18,6 +24,7 @@ namespace mir_perception_utils
       inline const Points &getVertices() const { return vertices_; }
       inline Eigen::Vector3f getDimensions() const { return dimensions_; }
       inline float getVolume() const { return dimensions_[0] * dimensions_[1] * dimensions_[2]; }
+      
       /** \brief Create a bounding box around the cloud, restricting it to be
        * parallel to the plane defined by the normal.
        * \param[in] Point cloud

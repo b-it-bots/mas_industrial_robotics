@@ -12,6 +12,7 @@
 #include "visualization_msgs/msg/marker.hpp"
 #include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/color.hpp"
+#include "rmw/qos_profiles.h"
 
 namespace mir_perception_utils
 {
@@ -26,7 +27,6 @@ namespace mir_perception_utils
 
             PlanarPolygonVisualizer(const std::string &topic_name, Color color,
                                     bool check_subscribers = true, double thickness = 0.005);
-
             
             void publish(const PlanarPolygon &polygon,
                          const std::string &frame_id);

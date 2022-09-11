@@ -7,7 +7,6 @@
 #include <cmath>
 #include <rclcpp/clock.hpp>
 
-
 #include <geometry_msgs/msg/pose.hpp>
 #include <mas_perception_msgs/msg/laser_scan_segment.hpp>
 #include <mas_perception_msgs/msg/laser_scan_segment_list.hpp>

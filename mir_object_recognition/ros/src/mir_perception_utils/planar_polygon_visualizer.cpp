@@ -19,11 +19,11 @@ namespace mir_perception_utils
             : color_(color), check_subscribers_(check_subscribers), thickness_(thickness),
               qos_default(rclcpp::KeepLast(10), rmw_qos_profile_default)
         {
-            
+
             auto node = rclcpp::Node::make_shared("_");
+
             marker_publisher_ = node->create_publisher<visualization_msgs::msg::Marker>(topic_name, qos_default);
         }
-
         
         void PlanarPolygonVisualizer::publish(const PlanarPolygon &polygon,
                                               const std::string &frame_id)
@@ -69,7 +69,6 @@ namespace mir_perception_utils
                 point.y = points[i].y;
                 point.z = points[i].z;
                 marker.points.push_back(point);
-                // marker.points.push_back(point);
             }
             marker.points.push_back(first_point);
         }

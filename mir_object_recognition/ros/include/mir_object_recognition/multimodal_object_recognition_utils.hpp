@@ -10,14 +10,23 @@
 #include <cv_bridge/cv_bridge.h>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
-// #include <tf/transform_listener.h>
 #include <tf2_ros/transform_listener.h>
 
-// #include <ros/ros.h>
 #include <rclcpp/rclcpp.hpp>
 
 #include "mir_perception_utils/aliases.hpp"
 #include "mas_perception_msgs/msg/object.hpp"
+
+#include <pcl/point_types.h>
+#include <pcl/common/common.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/common/centroid.h>
+#include <pcl/common/transforms.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/segmentation/region_growing.h>
+#include <pcl/filters/extract_indices.h>
 
 class MultimodalObjectRecognitionUtils
 {
@@ -37,7 +46,7 @@ class MultimodalObjectRecognitionUtils
 
     /** \brief Adjust container pose by finding the largest cluster to find the center
      * \param[in] object.views[0].point_cloud
-     * \param[in] the height adjustment of the container, default 10cm
+     * \param[in] height adjustment of the container, default 10cm
     */
     void adjustContainerPose(mas_perception_msgs::msg::Object &container_object, float container_height=0.1);
 };

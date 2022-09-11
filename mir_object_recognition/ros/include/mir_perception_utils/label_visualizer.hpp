@@ -9,9 +9,12 @@
 #include "rmw/qos_profiles.h"
 
 #include "geometry_msgs/msg/pose_array.hpp"
+#include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 #include "mir_perception_utils/aliases.hpp"
 #include "mir_perception_utils/color.hpp"
+
+#include "rmw/qos_profiles.h"
 
 using mir_perception_utils::visualization::Color;
 

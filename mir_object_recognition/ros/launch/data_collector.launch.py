@@ -15,6 +15,12 @@ def generate_launch_description():
         'config',
         'scene_segmentation_constraints.yaml'
         )
+    objects_info = os.path.join(
+        get_package_share_directory('mir_object_recognition'),
+        'ros',
+        'config',
+        'objects.yaml'
+        )
     container = ComposableNodeContainer(
         name="MMOR_container",
         namespace="",
@@ -29,7 +35,8 @@ def generate_launch_description():
                     remappings=[
                     ("input_image_topic", "/camera/color/image_raw"),
                     ("input_cloud_topic", "/camera/depth/color/points"),
-                ]
+                    ],
+                    parameters=[{'objects_info': objects_info}]
                 )
                 ],
                 parameters=[config],
