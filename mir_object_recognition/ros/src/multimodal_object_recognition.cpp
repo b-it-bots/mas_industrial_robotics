@@ -568,8 +568,7 @@ namespace perception_namespace
     rgb_roi_adjustment_ = 2;
     rgb_cluster_remove_outliers_ = true;
 
-    image_sub_.subscribe(this, "input_image_topic");
-    cloud_sub_.subscribe(this, "input_cloud_topic");
+    
     msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
 
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
@@ -623,6 +622,9 @@ namespace perception_namespace
 
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 
+    image_sub_.subscribe(this, "input_image_topic");
+    cloud_sub_.subscribe(this, "input_cloud_topic");
+
     pub_workspace_height_->on_activate();
     pub_debug_cloud_plane_->on_activate();
     pub_cloud_to_recognizer_->on_activate();
@@ -654,9 +656,6 @@ namespace perception_namespace
     image_sub_.unsubscribe();
     cloud_sub_.unsubscribe();
 
-    sub_recognized_image_list_.reset();
-    sub_recognized_cloud_list_.reset();
-
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
 
@@ -667,6 +666,8 @@ namespace perception_namespace
 
     RCUTILS_LOG_INFO_NAMED(get_name(), "on cleanup is called.");
 
+    image_sub_.unsubscribe();
+    cloud_sub_.unsubscribe();
     msg_sync_.reset();
     tf_buffer_.reset();
     tf_listener_.reset();

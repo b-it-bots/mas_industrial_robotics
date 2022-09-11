@@ -6,12 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /PointCloud21
-        - /PointCloud21/Topic1
-        - /PointCloud23/Topic1
-        - /PoseArray1
-        - /PoseArray1/Topic1
-        - /Marker1/Topic1
+        - /detected_plane1/Topic1
+        - /rgb_pc_clusters1/Topic1
+        - /rgb_pose_array1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 1190
   - Class: rviz_common/Selection
@@ -62,6 +59,40 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz_default_plugins/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: input_cloud
+      Position Transformer: XYZ
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /camera/depth/color/points
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz_default_plugins/PointCloud2
       Color: 255; 0; 0
       Color Transformer: FlatColor
       Decay Time: 0
@@ -71,7 +102,7 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
+      Name: detected_plane
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
@@ -87,45 +118,38 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz_default_plugins/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: RGB8
-      Decay Time: 0
+    - Class: rviz_default_plugins/Marker
       Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: PointCloud2
-      Position Transformer: XYZ
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.009999999776482582
-      Style: Points
+      Name: pc_bounding_boxes
+      Namespaces:
+        bounding_box: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /output/bounding_boxes
+      Value: true
+    - Class: rviz_default_plugins/Image
+      Enabled: true
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: rgb_recog_output
+      Normalize Range: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /camera/depth/color/points
-      Use Fixed Frame: true
-      Use rainbow: true
+        Value: /mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.055160701274871826
-        Min Value: 0.003587484359741211
+        Max Value: 0.05571550130844116
+        Min Value: 0.01058948040008545
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -139,7 +163,7 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
+      Name: rgb_pc_clusters
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
@@ -164,7 +188,7 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.07000000029802322
       Head Radius: 0.029999999329447746
-      Name: PoseArray
+      Name: rgb_pose_array
       Shaft Length: 0.23000000417232513
       Shaft Radius: 0.009999999776482582
       Shape: Arrow (3D)
@@ -175,33 +199,6 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Best Effort
         Value: /output/rgb_object_pose_array
-      Value: true
-    - Class: rviz_default_plugins/Image
-      Enabled: true
-      Max Value: 1
-      Median window: 5
-      Min Value: 0
-      Name: Image
-      Normalize Range: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image
-      Value: true
-    - Class: rviz_default_plugins/Marker
-      Enabled: true
-      Name: Marker
-      Namespaces:
-        bounding_box: true
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Best Effort
-        Value: /output/bounding_boxes
       Value: true
   Enabled: true
   Global Options:
@@ -275,9 +272,7 @@ Window Geometry:
   Height: 2432
   Hide Left Dock: false
   Hide Right Dock: false
-  Image:
-    collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000003bd0000087efc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000006e0000059e0000018200fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d0061006700650100000618000002d40000004a00ffffff000000010000015f0000087efc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000006e0000087e0000013200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000f880000005afc0100000002fb0000000800540069006d0065010000000000000f880000057100fffffffb0000000800540069006d0065010000000000000450000000000000000000000a540000087e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000003bd0000087efc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000006e0000059e0000018200fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000020007200670062005f007200650063006f0067005f006f007500740070007500740100000618000002d40000004a00ffffff000000010000015f0000087efc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000006e0000087e0000013200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000f880000005afc0100000002fb0000000800540069006d0065010000000000000f880000057100fffffffb0000000800540069006d0065010000000000000450000000000000000000000a540000087e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -289,3 +284,5 @@ Window Geometry:
   Width: 3976
   X: 120
   Y: 54
+  rgb_recog_output:
+    collapsed: false
