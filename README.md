@@ -6,7 +6,7 @@
 * A universal lifecycle controller node.
 * Composition of nodes.
 * Dynamic paramter reconfiguration using rqt_reconfigure for runtime manipulation of parameters.
-* Integrated RGB Object recogntion using YOLOv5 from [b-it-bots]().
+* Integrated RGB Object recogntion using YOLOv5 from [b-it-bots](https://github.com/b-it-bots/mas_industrial_robotics/pull/257).
 
 > Note: The code is only tested with the RGB recognition. The depth recognition is not tested due to the lack of 3D object recognition models.
 
@@ -82,9 +82,6 @@ git clone https://github.com/IntelRealSense/realsense-ros.git -b ros2-beta
 colcon build 
 source install/setup.bash
 ```
-
-* Refer to our [wiki](https://github.com/HBRS-SDP/ss22-ros2-perception/wiki/Issues) to troubleshoot any known issues with the build.
-
 
 ## Steps to run
 
@@ -165,7 +162,7 @@ ros2 run lifecycle_controller lifecycle_controller --ros-args -p lc_name:=mmor
 * lifecycle_controller needs the lifecycle node name as a parameter to run. 
 * Here, we are passing `mmor` for our multimodal_object_recognition (mmor) node.
 
-* To know more about how to use the lifecycle controller, refer to the [wiki]().
+* To know more about how to use the lifecycle controller, refer to the [wiki](https://github.com/HBRS-SDP/ss22-ros2-perception/wiki).
 
 **Step 6:**
 
@@ -192,7 +189,7 @@ To perform RGB object recognition, follow the steps below:
 * The `mmor` node then process the image and point cloud data and publishes the recognized objects list, along with their poses and bounding boxes.
 * The object recognition from RGB recognizer, bounding boxes and poses from pointcloud can be visualized in `rviz2`.
 * To terminate the `mmor` node, enter `X` in the `lifecycle_controller` terminal, which will shut down the node.
-* To know more about the process flow of this project, refer to the [wiki]().
+* To know more about the process flow of this project, refer to the [wiki](https://github.com/HBRS-SDP/ss22-ros2-perception/wiki).
 
 
 > More details about the concepts, issues and resources can be found on the wiki page.
