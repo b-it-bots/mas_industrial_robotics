@@ -213,6 +213,9 @@ ros2 run lifecycle_controller lifecycle_controller --ros-args -p lc_name:=data_c
 
 Press C to transition the data_collector component from UNCONFIGURED to INACTIVE state, and then press A to transition it to ACTIVE state. 
 In this state, the component will start saving the pointcloud clusters and the RGB image. By default, the location is the '/tmp/' directory, 
-but if you want to change this, you can provide the desired location in the launchfile.
+but if you want to change this, you can provide the desired location as an argument to the launchfile like the following example:
+```
+ros2 launch mir_object_recognition data_collector.launch.py log_directory:=/home/user/Pictures/
+```
 
 > More details about the concepts, issues and resources can be found on the wiki page.
