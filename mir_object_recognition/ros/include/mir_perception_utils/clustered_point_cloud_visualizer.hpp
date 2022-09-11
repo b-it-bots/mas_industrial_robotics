@@ -46,7 +46,6 @@ namespace mir_perception_utils
                    const std::string &frame_id);
       int getNumSubscribers();
 
-
     private:
       rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_publisher_;
 
@@ -55,8 +54,6 @@ namespace mir_perception_utils
       static const size_t COLORS_NUM = 32;
       float COLORS[COLORS_NUM];
       rclcpp::QoS qos_sensor;
-      
-      
     };
 
   } // namespace visualization

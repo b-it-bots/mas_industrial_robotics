@@ -52,7 +52,6 @@ LifecycleController::LifecycleController(const std::string & node_name)
 		node_get_state_topic = get_state_topic; 
 	    node_change_state_topic = change_state_topic;
 	}
-  
 }
   
 void LifecycleController::init()
@@ -68,15 +67,15 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 10s)
 	auto request = std::make_shared<lifecycle_msgs::srv::GetState::Request>();
     
 	if (!client_get_state_->wait_for_service(time_out)) {
-	RCLCPP_ERROR(
-	get_logger(),
-	"Service %s is not available.",
-	client_get_state_->get_service_name());
-		
-	RCLCPP_ERROR(
-	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
+		RCLCPP_ERROR(
+		get_logger(),
+		"Service %s is not available.",
+		client_get_state_->get_service_name());
+			
+		RCLCPP_ERROR(
+		get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 
-	return false;
+		return false;
 	}
 
 	// We send the service request for asking the current
@@ -86,23 +85,23 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 10s)
 	auto future_status = wait_for_result(future_result, time_out);
 
 	if (future_status != std::future_status::ready) {
-	RCLCPP_ERROR(
-	get_logger(), "Server time out while getting current state for node %s", lifecycle_node.c_str());
-	RCLCPP_ERROR(
-	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
-	return false;
+		RCLCPP_ERROR(
+		get_logger(), "Server time out while getting current state for node %s", lifecycle_node.c_str());
+		RCLCPP_ERROR(
+		get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
+		return false;
 	}
 
 	// We have an succesful answer. So let's print the current state.
 	if (future_result.get()) {
-	RCLCPP_INFO(
-	get_logger(), "Node %s has current state %s.",
-	lifecycle_node.c_str(), future_result.get()->current_state.label.c_str());
-	return true;
+		RCLCPP_INFO(
+		get_logger(), "Node %s has current state %s.",
+		lifecycle_node.c_str(), future_result.get()->current_state.label.c_str());
+		return true;
 	} else {
-	RCLCPP_ERROR(
-	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
-	return false;
+		RCLCPP_ERROR(
+		get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
+		return false;
 	}
 }
 
@@ -127,13 +126,13 @@ bool LifecycleController::change_state(std::uint8_t transition, std::chrono::sec
 
 	// We have an answer, let's print our success.
 	if (future_result.get()->success) {
-	RCLCPP_INFO(
-	get_logger(), "Transition %d successfully triggered.", static_cast<int>(transition));
-	return true;
+		RCLCPP_INFO(
+		get_logger(), "Transition %d successfully triggered.", static_cast<int>(transition));
+		return true;
 	} else {
-	RCLCPP_ERROR(
-	get_logger(), "Failed to trigger transition %u", static_cast<unsigned int>(transition));
-	return false;
+		RCLCPP_ERROR(
+		get_logger(), "Failed to trigger transition %u", static_cast<unsigned int>(transition));
+		return false;
 	}
 }
 // For non-blocking keyboard inputs
@@ -189,86 +188,85 @@ X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
  */
 void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 {
-
 	std::cout<<display<<std::endl;
 	int lc_state = lifecycle_controller->get_state();
 	
 	while(lc_state){
-    std::cout<<"Enter the key or press T to terminate and exit :"<<std::endl;
-	key = getch();
+		std::cout<<"Enter the key or press T to terminate and exit :"<<std::endl;
+		key = getch();
 
-    // UNCONFIGURED -->  Configuring   --> INACTIVE
-    if (key == 'C'){
+		// UNCONFIGURED -->  Configuring   --> INACTIVE
+		if (key == 'C'){
 
-	std::cout<<"configure"<<std::endl;
-	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
-	lc_state=lifecycle_controller->get_state();
-	}
+			std::cout<<"configure"<<std::endl;
+			lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
+			lc_state=lifecycle_controller->get_state();
+			
+		}
 
-	// INACTIVE     -->  Activating    --> ACTIVE
-	if (key == 'A'){
-	
-	std::cout<<"activate"<<std::endl;
-	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
-	lc_state=lifecycle_controller->get_state();
+		// INACTIVE     -->  Activating    --> ACTIVE
+		if (key == 'A'){
+		
+			std::cout<<"activate"<<std::endl;
+			lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);
+			lc_state=lifecycle_controller->get_state();
 
-	}
+		}
 
-	// ACTIVE       -->  Configuring   --> INACTIVE
-	if (key == 'D'){
+		// ACTIVE       -->  Configuring   --> INACTIVE
+		if (key == 'D'){
 
-	std::cout<<"deactivate"<<std::endl;
-	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
-	lc_state=lifecycle_controller->get_state();
-	
-	}
+			std::cout<<"deactivate"<<std::endl;
+			lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE);
+			lc_state=lifecycle_controller->get_state();
+		
+		}
 
-	// INACTIVE     -->  CleaningUp    --> UNCONFIGURED
-	if (key == 'R'){
-	
-	std::cout<<"cleanup"<<std::endl;  
-	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
-	lc_state=lifecycle_controller->get_state();	
+		// INACTIVE     -->  CleaningUp    --> UNCONFIGURED
+		if (key == 'R'){
+		
+			std::cout<<"cleanup"<<std::endl;  
+			lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_CLEANUP);
+			lc_state=lifecycle_controller->get_state();	
 
-	}
-	
-	// INACTIVE     -->  ShuttingDown  --> FINALIZED
-	if (key == 'W'){
+		}
+		
+		// INACTIVE     -->  ShuttingDown  --> FINALIZED
+		if (key == 'W'){
 
-	std::cout<<"inactive shutdown"<<std::endl;  
-	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
-	lc_state=lifecycle_controller->get_state();	
+			std::cout<<"inactive shutdown"<<std::endl;  
+			lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_INACTIVE_SHUTDOWN);
+			lc_state=lifecycle_controller->get_state();	
 
-	}
+		}
 
-	// ACTIVE       -->  ShuttingDown  --> FINALIZED
-	if (key == 'X'){
-	
-	std::cout<<"active shutdown"<<std::endl;  
-	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
-	lc_state=lifecycle_controller->get_state();	
+		// ACTIVE       -->  ShuttingDown  --> FINALIZED
+		if (key == 'X'){
+		
+			std::cout<<"active shutdown"<<std::endl;  
+			lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVE_SHUTDOWN);
+			lc_state=lifecycle_controller->get_state();	
 
-	}
+		}
 
-	// UNCONFIGURED -->  ShuttingDown  --> FINALIZED
-	if (key == 'S'){
-	
-	std::cout<<"unconfig shutdown"<<std::endl;
-	lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
-	lc_state=lifecycle_controller->get_state();
-	
-	}
+		// UNCONFIGURED -->  ShuttingDown  --> FINALIZED
+		if (key == 'S'){
+		
+			std::cout<<"unconfig shutdown"<<std::endl;
+			lc_state=lifecycle_controller->change_state(lifecycle_msgs::msg::Transition::TRANSITION_UNCONFIGURED_SHUTDOWN);
+			lc_state=lifecycle_controller->get_state();
+		
+		}
 
-	// Terminate
-	if (key == 'T'){
-	break;
-	}
+		// Terminate
+		if (key == 'T'){
+			break;
+		}
 
 	}
 
 	std::cout<<"Exiting the node"<<std::endl;
 	rclcpp::shutdown();
-
 }
 
 int main(int argc, char ** argv)

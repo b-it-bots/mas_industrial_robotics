@@ -11,9 +11,9 @@ namespace perception_namespace
 {
 class DataCollector : public MultiModalObjectRecognitionROS
 {
-    public:
-        explicit DataCollector(const rclcpp::NodeOptions& options);
-        void recognizeCloudAndImage();
+  public:
+    explicit DataCollector(const rclcpp::NodeOptions& options);
+    void recognizeCloudAndImage();
 };
     
 } // namespace perception_namespace

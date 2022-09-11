@@ -9,7 +9,9 @@
 #include "mir_object_recognition/multimodal_object_recognition_utils.hpp"
 
 MultimodalObjectRecognitionUtils::MultimodalObjectRecognitionUtils() {}
+
 MultimodalObjectRecognitionUtils::~MultimodalObjectRecognitionUtils() {}
+
 void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::msg::Object &container_object,
                                float container_height)
 {
@@ -91,6 +93,7 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   container_object.pose.pose.position.y = centroid[1];
   container_object.pose.pose.position.z = max_pt.z + container_height;
 }
+
 void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::msg::Object &object)
 {
   pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_cloud(new pcl::PointCloud<pcl::PointXYZ>);

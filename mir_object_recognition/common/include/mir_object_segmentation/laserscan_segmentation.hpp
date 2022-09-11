@@ -1,6 +1,6 @@
 /*!
  * @copyright 2018 Bonn-Rhein-Sieg University
- * ROS2 contributors: Hamsa Datta Perur, Vamsi Kalagaturu.
+ * ROS2 contributors: Hamsa Datta Perur.
  */
 
 #ifndef MIR_OBJECT_SEGMENTATION_LASERSCAN_SEGMENTATION_HPP

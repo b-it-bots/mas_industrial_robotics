@@ -17,7 +17,6 @@ find_package(lifecycle_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
-
 include_directories(
   ros/include
   )

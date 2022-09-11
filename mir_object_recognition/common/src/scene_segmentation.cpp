@@ -14,6 +14,7 @@ SceneSegmentation::SceneSegmentation() : use_omp_(false)
   normal_estimation_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
   normal_estimation_omp_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
 }
+
 SceneSegmentation::~SceneSegmentation()
 {
 }
@@ -190,6 +191,7 @@ void SceneSegmentation::setNormalParams(double radius_search, bool use_omp, int 
     normal_estimation_.setRadiusSearch(radius_search);
   }
 }
+
 void SceneSegmentation::setSACParams(int max_iterations, double distance_threshold,
                                      bool optimize_coefficients, Eigen::Vector3f axis,
                                      double eps_angle, double normal_distance_weight)
@@ -201,6 +203,7 @@ void SceneSegmentation::setSACParams(int max_iterations, double distance_thresho
   sac_.setOptimizeCoefficients(optimize_coefficients);
   sac_.setNormalDistanceWeight(normal_distance_weight);
 }
+
 void SceneSegmentation::setPrismParams(double min_height, double max_height)
 {
   extract_polygonal_prism_.setHeightLimits(min_height, max_height);
@@ -211,6 +214,7 @@ void SceneSegmentation::setOutlierParams(double radius_search, int min_neighbors
   radius_outlier_.setRadiusSearch(radius_search);
   radius_outlier_.setMinNeighborsInRadius(min_neighbors);
 }
+
 void SceneSegmentation::setClusterParams(double cluster_tolerance, int cluster_min_size,
                                          int cluster_max_size, double cluster_min_height,
                                          double cluster_max_height, double max_length,
