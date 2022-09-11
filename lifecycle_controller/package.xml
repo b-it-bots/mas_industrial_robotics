@@ -5,9 +5,9 @@
   <version>0.20.2</version>
   <description>Package for lifecycle_controller implementation</description>
 
-  <maintainer email="sdp_ss22@hbrs.de">sdp_ss22</maintainer>
+  <maintainer email="mwasil@outlook.co.id">Mohammad Wasil</maintainer>
 
-  <license>Apache License 2.0</license>
+  <license>GPLv3</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
