@@ -1,3 +1,12 @@
+/*
+ * Copyright 2016 Bonn-Rhein-Sieg University
+ *
+ * Maintainer: Mohammad Wasil
+ * Author: Sergey Alexandrov
+ * ROS2 contributor: Vamsi Kalagaturu.
+ *
+ */
+
 #ifndef MIR_PERCEPTION_UTILS_BOUNDING_BOX_HPP
 #define MIR_PERCEPTION_UTILS_BOUNDING_BOX_HPP
 

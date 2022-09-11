@@ -1,3 +1,11 @@
+/*
+ * Copyright 2019 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil, Santosh Thoduka
+ * ROS2 contributors: Hamsa Datta Perur, Vamsi Kalagaturu, Vivek Mannava.
+ *
+ */
+
 #ifndef MIR_PERCCEPTION_UTILS_OBJECT_UTILS_HPP
 #define MIR_PERCCEPTION_UTILS_OBJECT_UTILS_HPP
 

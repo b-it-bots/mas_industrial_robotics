@@ -2,8 +2,10 @@
  * Copyright 2019 Bonn-Rhein-Sieg University
  *
  * Author: Mohammad Wasil
+ * ROS2 contributors: Shubham Shinde, Vamsi Kalagaturu.
  *
  */
+
 #ifndef MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_UTILS_HPP
 #define MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_UTILS_HPP
 

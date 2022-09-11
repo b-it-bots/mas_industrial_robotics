@@ -1,3 +1,11 @@
+/*
+ * Copyright 2019 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil
+ * ROS2 contributors: Hamsa Datta Perur, Shubham Shinde, Vamsi Kalagaturu, Vivek Mannava.
+ *
+ */
+
 #include "mir_object_recognition/multimodal_object_recognition.hpp"
 
 namespace perception_namespace

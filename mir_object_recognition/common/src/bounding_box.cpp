@@ -1,3 +1,12 @@
+/*
+ * Copyright 2016 Bonn-Rhein-Sieg University
+ *
+ * Maintainer: Mohammad Wasil
+ * Author: Sergey Alexandrov
+ * ROS2 contributors: Vamsi Kalagaturu, Vivek Mannava.
+ *
+ */
+
 #include "mir_perception_utils/bounding_box.hpp"
 
 using namespace mir_perception_utils::object;

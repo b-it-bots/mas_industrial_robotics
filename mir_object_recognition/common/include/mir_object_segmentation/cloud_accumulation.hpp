@@ -3,8 +3,10 @@
  *
  * Maintainer: Mohammad Wasil
  * Author: Sergey Alexandrov
+ * ROS2 contributor: Hamsa Datta Perur
  *
  */
+
 #ifndef MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP
 #define MIR_OBJECT_SEGMENTATION_CLOUD_ACCUMULATION_HPP
 

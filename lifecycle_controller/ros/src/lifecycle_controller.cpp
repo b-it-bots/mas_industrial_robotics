@@ -1,5 +1,11 @@
-#include "lifecycle_controller.hpp"
+/*
+ * Copyright 2022 Bonn-Rhein-Sieg University
+ *
+ * Author: Hamsa Datta Perur
+ *
+ */
 
+#include "lifecycle_controller.hpp"
 
 using namespace std::chrono_literals;
 
@@ -74,7 +80,6 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 10s)
 	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 
 	return false;
-	
 	}
 
 	// We send the service request for asking the current
@@ -89,7 +94,6 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 10s)
 	RCLCPP_ERROR(
 	get_logger(), "Waited for 10 sec,  failed to get current state for node %s", lifecycle_node.c_str());
 	return false;
-	
 	}
 
 	// We have an succesful answer. So let's print the current state.
@@ -122,7 +126,6 @@ bool LifecycleController::change_state(std::uint8_t transition, std::chrono::sec
 	auto future_status = wait_for_result(future_result, time_out);
 
 	if (future_status != std::future_status::ready) {
-	
 		return false;
 	}
 

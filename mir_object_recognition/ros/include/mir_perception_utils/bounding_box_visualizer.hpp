@@ -1,3 +1,11 @@
+/*
+ * Copyright 2016 Bonn-Rhein-Sieg University
+ *
+ * Author: Sergey Alexandrov
+ * ROS2 contributors: Hamsa Datta Perur, Vamsi Kalagaturu.
+ *
+ */
+
 #ifndef BOUNDING_BOX_VISUALIZER_HPP
 #define BOUNDING_BOX_VISUALIZER_HPP
 

@@ -1,3 +1,10 @@
+/*
+ * Copyright 2022 Bonn-Rhein-Sieg University
+ *
+ * Author: Vivek Mannava
+ *
+ */
+
 #include "mir_object_recognition/mmor_data_collector.hpp"
 namespace perception_namespace
 {

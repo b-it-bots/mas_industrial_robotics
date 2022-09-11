@@ -1,3 +1,11 @@
+/*
+ * Copyright 2020 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil
+ * ROS2 contributors: Hamsa Datta Perur, Vamsi Kalagaturu, Vivek Mannava.
+ *
+ */
+
 #include "mir_perception_utils/pointcloud_utils.hpp"
 
 using namespace mir_perception_utils;

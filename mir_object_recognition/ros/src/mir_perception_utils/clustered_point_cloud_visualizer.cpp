@@ -1,3 +1,11 @@
+/*
+ * Copyright 2020 Bonn-Rhein-Sieg University
+ *
+ * Author: Iswariya Manivannan, Mohammad Wasil
+ * ROS2 contributors: Hamsa Datta Perur, Vamsi Kalagaturu, Vivek Mannava.
+ *
+ */
+
 #include "mir_perception_utils/clustered_point_cloud_visualizer.hpp"
 
 using mir_perception_utils::visualization::Color;

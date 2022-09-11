@@ -1,3 +1,11 @@
+/*
+ * Copyright 2019 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil, Santosh Thoduka
+ * ROS2 contributors: Vamsi Kalagaturu, Vivek Mannava.
+ *
+ */
+
 #include <fstream>
 #include <chrono>
 #include <iostream>

@@ -1,3 +1,10 @@
+/*
+ * Copyright 2019 Bonn-Rhein-Sieg University
+ *
+ * Author: Mohammad Wasil
+ * ROS2 contributors: Hamsa Datta Perur, Shubham Shinde, Vamsi Kalagaturu, Vivek Mannava.
+ *
+ */
 
 #ifndef MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H
 #define MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_ROS_H

@@ -1,3 +1,11 @@
+/*
+ * Copyright 2016 Bonn-Rhein-Sieg University
+ *
+ * Author: Sergey Alexandrov
+ * ROS2 contributors: Vamsi Kalagaturu.
+ *
+ */
+
 #ifndef MIR_PERCEPTION_UTILS_PLANAR_POLYGON_VISUALIZER_HPP
 #define MIR_PERCEPTION_UTILS_PLANAR_POLYGON_VISUALIZER_HPP
 
