@@ -83,7 +83,7 @@ colcon build
 source install/setup.bash
 ```
 
-## Steps to run
+## Steps to run the mmor component:
 
 > Note: Make sure to source the ROS rolling and devel in all the terminals
 
@@ -191,5 +191,28 @@ To perform RGB object recognition, follow the steps below:
 * To terminate the `mmor` node, enter `X` in the `lifecycle_controller` terminal, which will shut down the node.
 * To know more about the process flow of this project, refer to the [wiki](https://github.com/HBRS-SDP/ss22-ros2-perception/wiki).
 
+## Steps to run the data collector component:
+
+**Step 1:**
+
+Follow the first step for the MMOR component and run either the bagfile or the realsense node. 
+
+**Step 2:**
+In a new terminal with the workspace sourced, run the launch file for the data collector component
+```
+ros2 launch mir_object_recognition data_collector.launch.py
+```
+
+**Step 3:**
+In another terminal, run the lifecycle controller node and pass 'data_collector' as the lc_name argument.
+```
+ros2 run lifecycle_controller lifecycle_controller --ros-args -p lc_name:=data_collector
+```
+
+**Step 4:**
+
+Press C to transition the data_collector component from UNCONFIGURED to INACTIVE state, and then press A to transition it to ACTIVE state. 
+In this state, the component will start saving the pointcloud clusters and the RGB image. By default, the location is the '/tmp/' directory, 
+but if you want to change this, you can provide the desired location in the launchfile.
 
 > More details about the concepts, issues and resources can be found on the wiki page.
