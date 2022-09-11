@@ -5,11 +5,12 @@ from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 import os
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import DeclareLaunchArgument
 
 
 def generate_launch_description():
   ld = LaunchDescription()
-
+  log_directory = "/tmp/"   # Files save path. change this to your own path if required. 
   config = os.path.join(
     get_package_share_directory('mir_object_recognition'),
     'ros',
@@ -39,7 +40,7 @@ def generate_launch_description():
                     ("input_image_topic", "/camera/color/image_raw"),
                     ("input_cloud_topic", "/camera/depth/color/points"),
             ],
-            parameters=[{'objects_info': objects_info}]
+            parameters=[{'objects_info': objects_info}, {'logdir': log_directory}],
         )
     ],
     parameters=[config],

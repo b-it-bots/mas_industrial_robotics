@@ -10,6 +10,8 @@ namespace perception_namespace
 {
   DataCollector::DataCollector(const rclcpp::NodeOptions &options) : MultiModalObjectRecognitionROS(options)
   {
+    this->declare_parameter<std::string>("logdir", "/tmp/");
+    this->get_parameter("logdir", logdir_);
   }
   void DataCollector::recognizeCloudAndImage()
   {
@@ -17,7 +19,6 @@ namespace perception_namespace
     mas_perception_msgs::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
-
     this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);
 
     std::string filename;

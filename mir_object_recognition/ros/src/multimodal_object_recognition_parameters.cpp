@@ -20,9 +20,6 @@ namespace perception_namespace
     this->declare_parameter("debug_mode", true, debug_mode_descriptor);
     this->get_parameter("debug_mode", debug_mode_);
 
-    this->declare_parameter<std::string>("logdir", "/tmp/");
-    this->get_parameter("logdir", logdir_);
-
     // get object_info parameter from launch file
     rcl_interfaces::msg::ParameterDescriptor object_info_path_descriptor;
     object_info_path_descriptor.description = "Path to objects.yaml";
@@ -401,7 +398,6 @@ namespace perception_namespace
   {
     this->get_parameter("debug_mode", debug_mode_);
     this->get_parameter("target_frame_id", target_frame_id_);
-    this->get_parameter("logdir", logdir_);
     this->get_parameter("objects_info", objects_info_path_);
     this->get_parameter("voxel_leaf_size", voxel_leaf_size_);
     this->get_parameter("voxel_filter_field_name", voxel_filter_field_name_);
@@ -509,10 +505,6 @@ namespace perception_namespace
       if (param.get_name() == "debug_mode")
       {
         this->debug_mode_ = param.get_value<bool>();
-      }
-      if (param.get_name() == "logdir")
-      {
-        this->logdir_ = param.get_value<std::string>();
       }
       if (param.get_name() == "target_frame_id")
       {
