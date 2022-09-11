@@ -3,9 +3,9 @@
 <package format="3">
   <name>mir_recognizer_scripts</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="vivek.mannava@smail.inf.h-brs.de">vivek</maintainer>
-  <license>TODO: License declaration</license>
+  <description>The mir_recognizer_scripts package</description>
+  <maintainer email="mwasil@outlook.co.id">Mohammad Wasil</maintainer>
+  <license>GPLv3</license>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
