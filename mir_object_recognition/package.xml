@@ -3,9 +3,9 @@
 <package format="3">
   <name>mir_object_recognition</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="vk@todo.todo">vk</maintainer>
-  <license>TODO: License declaration</license>
+  <description>The mir_object_recognition package</description>
+  <maintainer email="mwasil@outlook.co.id">Mohammad Wasil</maintainer>
+  <license>GPLv3</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
