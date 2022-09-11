@@ -706,6 +706,29 @@ namespace perception_namespace
         "on shutdown is called from state %s.",
         state.label().c_str());
 
+    image_sub_.unsubscribe();
+    cloud_sub_.unsubscribe();
+    msg_sync_.reset();
+    tf_buffer_.reset();
+    tf_listener_.reset();
+
+    pub_workspace_height_.reset();
+    pub_debug_cloud_plane_.reset();
+    pub_cloud_to_recognizer_.reset();
+    pub_image_to_recognizer_.reset();
+    pub_object_list_.reset();
+    pub_pc_object_pose_array_.reset();
+    pub_rgb_object_pose_array_.reset();
+
+    sub_recognized_image_list_.reset();
+    sub_recognized_cloud_list_.reset();
+
+    bounding_box_visualizer_pc_.reset();
+    cluster_visualizer_rgb_.reset();
+    cluster_visualizer_pc_.reset();
+    label_visualizer_rgb_.reset();
+    label_visualizer_pc_.reset();
+
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
 

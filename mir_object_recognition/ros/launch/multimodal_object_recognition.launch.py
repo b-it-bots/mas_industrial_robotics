@@ -5,16 +5,20 @@ Author: Vamsi Kalagaturu, Vivek Mannava
 
 """
 from launch import LaunchDescription
-from launch_ros.actions import LifecycleNode
-from launch_ros.actions import Node
+from launch.actions import RegisterEventHandler, EmitEvent, LogInfo
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
-import os
+from launch_ros.events.lifecycle import ChangeState
+from launch_ros.events.lifecycle import matches_node_name
 from ament_index_python.packages import get_package_share_directory
+from launch.event_handlers.on_shutdown import OnShutdown
 
+import lifecycle_msgs.msg
+import os
 
 def generate_launch_description():
   ld = LaunchDescription()
+  node_name = "mmor"
 
   scene_seg_constraints = os.path.join(
     get_package_share_directory('mir_object_recognition'),
@@ -39,7 +43,7 @@ def generate_launch_description():
         ComposableNode(
             package="mir_object_recognition",
             plugin="perception_namespace::MultiModalObjectRecognitionROS",
-            name="mmor",
+            name=node_name,
             remappings=[
                 ("input_image_topic", "/camera/color/image_raw"),
                 ("input_cloud_topic", "/camera/depth/color/points"),
@@ -51,5 +55,21 @@ def generate_launch_description():
     output="screen",
     # prefix=['xterm -e gdb -ex run --args'],
   )
+
+  # transition mmor node to shutdown before SIGINT
+  shutdown_event = RegisterEventHandler(
+    OnShutdown(
+      on_shutdown=[
+        EmitEvent(event=ChangeState(
+          lifecycle_node_matcher=matches_node_name(node_name=node_name),
+          transition_id=lifecycle_msgs.msg.Transition.TRANSITION_ACTIVE_SHUTDOWN,
+        )),
+        LogInfo(
+            msg="[mmor_launch] mmor node is exiting."),
+      ],
+    )
+  )
+
+  ld.add_action(shutdown_event)
   ld.add_action(container)
   return ld
