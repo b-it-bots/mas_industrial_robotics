@@ -315,10 +315,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double roi_max_object_pose_x_to_base_link_;
         double roi_min_bbox_z_;
 
-        private:
-        rclcpp::QoS qos_sensor;
-        rclcpp::QoS qos_parameters;
-        rclcpp::QoS qos_default;
+     
+    private:
+        rclcpp::SensorDataQoS qos_sensor;
+        rclcpp::ParametersQoS qos_parameters;
+        rclcpp::SystemDefaultsQoS qos_default;
 };
 
 } // namespace perception_namespace ends

@@ -550,6 +550,11 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     MultiModalObjectRecognitionROS::get_all_parameters();
     MultiModalObjectRecognitionROS::loadObjectInfo(objects_info_path_);
 
+    // declare qos profile
+    qos_sensor = rclcpp::SensorDataQoS(rclcpp::KeepLast(10));
+    qos_parameters = rclcpp::ParametersQoS(rclcpp::KeepLast(1));
+    qos_default = rclcpp::SystemDefaultsQoS(rclcpp::KeepLast(10));
+
     // initializing variables
     rgb_object_id_ = 100;
     container_height_ = 0.05;

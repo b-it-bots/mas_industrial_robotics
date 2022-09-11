@@ -1,5 +1,4 @@
 #include "mir_perception_utils/label_visualizer.hpp"
-#include "visualization_msgs/msg/marker.hpp"
 
 using mir_perception_utils::visualization::Color;
 
