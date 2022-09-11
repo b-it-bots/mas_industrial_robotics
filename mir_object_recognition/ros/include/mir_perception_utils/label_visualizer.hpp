@@ -2,6 +2,7 @@
  * Copyright 2016 Bonn-Rhein-Sieg University
  *
  * Author: Santosh Thoduka, Sergey Alexandrov
+ * ROS2 contributor: Vamsi Kalagaturu.
  *
  */
 

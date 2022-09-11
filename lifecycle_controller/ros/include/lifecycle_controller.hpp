@@ -1,7 +1,7 @@
 /*
  * Copyright 2022 Bonn-Rhein-Sieg University
  *
- * Author: Hamsadatta Perur
+ * Author: Hamsa Datta Perur
  *
  */
 

@@ -3,6 +3,7 @@
  *
  * Maintainer: Mohammad Wasil
  * Author: Sergey Alexandrov
+ * ROS2 contributor: Vamsi Kalagaturu.
  *
  */
 

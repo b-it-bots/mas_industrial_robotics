@@ -2,6 +2,7 @@
  * Copyright 2020 Bonn-Rhein-Sieg University
  *
  * Author: Iswariya Manivannan, Mohammad Wasil
+ * ROS2 contributors: Hamsa Datta Perur, Vamsi Kalagaturu, Vivek Mannava.
  *
  */
 

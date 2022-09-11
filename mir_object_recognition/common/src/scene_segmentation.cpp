@@ -2,6 +2,7 @@
  * Copyright 2018 Bonn-Rhein-Sieg University
  *
  * Author: Mohammad Wasil, Santosh Thoduka
+ * ROS2 contributors: Hamsa Datta Perur, Shubham Shinde, Vamsi Kalagaturu, Vivek Mannava.
  *
  */
 

@@ -2,6 +2,7 @@
  * Copyright 2019 Bonn-Rhein-Sieg University
  *
  * Author: Mohammad Wasil, Santosh Thoduka
+ * ROS2 contributors: Hamsa Datta Perur, Vamsi Kalagaturu.
  *
  */
 #ifndef MIR_OBJECT_SEGMENTATION_SCENE_SEGMENTATION_ROS_HPP
