@@ -176,7 +176,7 @@ ros2 launch mir_recognizer_scripts rgb_recognizer.launch.py
 ```
 rviz2
 ```
-* Once the rviz is open, load the `/home/vamsi/mir_object_recognition/src/mir_object_recognition/ros/rviz/mir_object_recognition.rviz` file to view the recognized objects and their poses.
+* Once the rviz is open, load the `~/mir_object_recognition/src/mir_object_recognition/ros/rviz/mir_object_recognition.rviz` file to view the recognized objects and their poses.
 
 **Step 8:**
 

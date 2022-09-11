@@ -1,3 +1,9 @@
+"""
+Copyright 2022 Bonn-Rhein-Sieg University
+
+Author: Vamsi Kalagaturu, Vivek Mannava
+
+"""
 from launch import LaunchDescription
 from launch_ros.actions import LifecycleNode
 from launch_ros.actions import Node

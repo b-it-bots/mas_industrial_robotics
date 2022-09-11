@@ -226,7 +226,7 @@ namespace perception_namespace
         }
 
         // Remove large 2d misdetected bbox (misdetection)
-        double len_diag = sqrt(powf(((roi_2d.width + roi_2d.width) >> 1), 2));
+        double len_diag = sqrt(pow(roi_2d.width, 2) + pow(roi_2d.height, 2));
         if (len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_)
         {
           PointCloudBSPtr cloud_roi(new PointCloud);

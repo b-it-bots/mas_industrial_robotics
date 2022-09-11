@@ -1,3 +1,9 @@
+"""
+Copyright 2022 Bonn-Rhein-Sieg University
+
+Author: Vivek Mannava, Vamsi Kalagaturu
+
+"""
 from launch import LaunchDescription
 from launch_ros.actions import LifecycleNode
 from launch_ros.actions import Node
@@ -6,11 +12,16 @@ from launch_ros.descriptions import ComposableNode
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import DeclareLaunchArgument
-
+from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
   ld = LaunchDescription()
-  log_directory = "/tmp/"   # Files save path. change this to your own path if required. 
+  # declare the launch arguments
+  log_directory = LaunchConfiguration('log_directory')
+  log_directory_arg = DeclareLaunchArgument('log_directory',
+                                            default_value='/tmp/', 
+                                            description='Log directory to store the logs, debug images and point clouds')
+  
   config = os.path.join(
     get_package_share_directory('mir_object_recognition'),
     'ros',
@@ -47,6 +58,6 @@ def generate_launch_description():
     output="screen",
     # prefix=['xterm -e gdb -ex run --args'],
   )
-
+  ld.add_action(log_directory_arg)
   ld.add_action(container)
   return ld
