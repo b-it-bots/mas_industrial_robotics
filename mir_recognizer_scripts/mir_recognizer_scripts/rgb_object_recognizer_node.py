@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+"""
+Copyright 2022 Bonn-Rhein-Sieg University
 
-# author: Kevin Patel
+Author: Kevin Patel
+
+"""
 
 import cv2
 import numpy as np

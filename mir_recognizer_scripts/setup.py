@@ -1,3 +1,9 @@
+"""
+Copyright 2022 Bonn-Rhein-Sieg University
+
+Author: Vivek Mannava
+
+"""
 from setuptools import setup
 import os
 from glob import glob
