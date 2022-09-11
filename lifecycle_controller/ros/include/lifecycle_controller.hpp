@@ -70,7 +70,6 @@ private:
 };
 
 int getch(void);
-
 void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller);
 
 #endif  

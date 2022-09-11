@@ -11,7 +11,11 @@
 namespace perception_namespace
 {
 MultiModalObjectRecognitionROS::MultiModalObjectRecognitionROS(const rclcpp::NodeOptions& options) : 
-                    rclcpp_lifecycle::LifecycleNode("mmor_node",options)
+                    rclcpp_lifecycle::LifecycleNode("mmor_node",options),
+                    qos_sensor(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data),
+                    qos_parameters(rclcpp::KeepLast(1), rmw_qos_profile_parameters),
+                    qos_default(rclcpp::KeepLast(10), rmw_qos_profile_default)
+
 {
     scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
     mm_object_recognition_utils_ = MultimodalObjectRecognitionUtilsSPtr(new MultimodalObjectRecognitionUtils());
@@ -554,6 +558,11 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
     MultiModalObjectRecognitionROS::get_all_parameters();
     MultiModalObjectRecognitionROS::loadObjectInfo(objects_info_path_);
 
+    // declare qos profile
+    qos_sensor = rclcpp::SensorDataQoS(rclcpp::KeepLast(10));
+    qos_parameters = rclcpp::ParametersQoS(rclcpp::KeepLast(1));
+    qos_default = rclcpp::SystemDefaultsQoS(rclcpp::KeepLast(10));
+
     // initializing variables
     rgb_object_id_ = 100;
     container_height_ = 0.05;
@@ -570,11 +579,6 @@ MultiModalObjectRecognitionROS::on_configure(const rclcpp_lifecycle::State &)
 
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
-
-    auto qos_sensor = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_sensor_data);
-    auto qos_parameters = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_parameters);
-    auto qos_default = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_default);
-    auto qos_services = rclcpp::QoS(rclcpp::KeepLast(10), rmw_qos_profile_services_default);
 
     // publish workspace height
     pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", qos_parameters);

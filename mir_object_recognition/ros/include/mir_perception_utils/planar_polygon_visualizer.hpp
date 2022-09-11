@@ -13,6 +13,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rmw/qos_profiles.h"
+
 #include "pcl/geometry/planar_polygon.h"
 #include "pcl/point_cloud.h"
 #include "visualization_msgs/msg/marker.hpp"
@@ -43,6 +45,7 @@ namespace mir_perception_utils
             void buildPolygonMarker(const typename PointCloud::VectorType &points,
                                     visualization_msgs::msg::Marker &marker,
                                     const std::string &frame_id, int id = 1);
+            
 
         private:
             rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher_;
@@ -50,6 +53,7 @@ namespace mir_perception_utils
             Color color_;
             bool check_subscribers_;
             double thickness_;
+            rclcpp::QoS qos_default;
         };       
     }
 }

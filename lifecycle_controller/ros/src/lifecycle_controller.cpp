@@ -26,7 +26,6 @@ std::future_status wait_for_result( FutureT & future, WaitTimeT time_to_wait)
 	return status;
 }
 
-
 LifecycleController::LifecycleController(const std::string & node_name)
 : Node(node_name)
 {
@@ -56,7 +55,6 @@ LifecycleController::LifecycleController(const std::string & node_name)
   
 }
   
-
 void LifecycleController::init()
 {
 	client_get_state_ = this->create_client<lifecycle_msgs::srv::GetState>(
@@ -64,7 +62,6 @@ void LifecycleController::init()
 	client_change_state_ = this->create_client<lifecycle_msgs::srv::ChangeState>(
 	node_change_state_topic);
 }
-
 
 bool LifecycleController::get_state(std::chrono::seconds time_out = 10s)
 {
@@ -109,7 +106,6 @@ bool LifecycleController::get_state(std::chrono::seconds time_out = 10s)
 	}
 }
 
-
 bool LifecycleController::change_state(std::uint8_t transition, std::chrono::seconds time_out = 10s)
 {
 	auto request = std::make_shared<lifecycle_msgs::srv::ChangeState::Request>();
@@ -140,8 +136,6 @@ bool LifecycleController::change_state(std::uint8_t transition, std::chrono::sec
 	return false;
 	}
 }
-
-
 // For non-blocking keyboard inputs
 // Source: ROS teleop_twist_keyboard package
 int getch(void)
@@ -172,7 +166,6 @@ int getch(void)
 	return ch;
 }
 
-
 const char* display = R"(
 Reading from the keyboard and changing states!
 ########################################################################
@@ -188,7 +181,6 @@ X:  | ACTIVE       -->  ShuttingDown  --> FINALIZED
 
 ########################################################################
 )";
-
 
 /**
  * This is a little independent
@@ -279,7 +271,6 @@ void callee_script(std::shared_ptr<LifecycleController> lifecycle_controller)
 
 }
 
-
 int main(int argc, char ** argv)
 {
 	// force flush of the stdout buffer.
@@ -294,7 +285,6 @@ int main(int argc, char ** argv)
 	
 	rclcpp::executors::SingleThreadedExecutor exe;
 	exe.add_node(lifecycle_controller);
-
 
 	std::shared_future<void> script = std::async(
 	std::launch::async,

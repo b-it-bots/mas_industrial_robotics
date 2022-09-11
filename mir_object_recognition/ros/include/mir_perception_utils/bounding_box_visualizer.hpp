@@ -14,6 +14,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rmw/qos_profiles.h"
 #include "visualization_msgs/msg/marker.hpp"
 
 #include "mas_perception_msgs/msg/bounding_box.hpp"
@@ -41,12 +42,15 @@ namespace mir_perception_utils
 
             void publish(const std::vector<mas_perception_msgs::msg::BoundingBox> &boxes, const std::string &frame_id);
 
-            int getNumSubscribers();
+            int getNumSubscribers();            
 
         private:
             rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_publisher_;
             const Color color_;
             bool check_subscribers_;
+            rclcpp::QoS qos_default;
+               
+
         };
     }
 }

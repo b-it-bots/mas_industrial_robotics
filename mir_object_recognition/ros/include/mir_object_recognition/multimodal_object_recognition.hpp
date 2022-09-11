@@ -228,6 +228,9 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         std::shared_ptr<LabelVisualizer> label_visualizer_rgb_;
         std::shared_ptr<LabelVisualizer> label_visualizer_pc_;
 
+        //Qos profiles
+       
+
         //parameters
         bool debug_mode_;
         std::string pointcloud_source_frame_id_;
@@ -318,6 +321,12 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
         double roi_base_link_to_laser_distance_;
         double roi_max_object_pose_x_to_base_link_;
         double roi_min_bbox_z_;
+
+     
+    private:
+        rclcpp::SensorDataQoS qos_sensor;
+        rclcpp::ParametersQoS qos_parameters;
+        rclcpp::SystemDefaultsQoS qos_default;
 };
 
 } // namespace perception_namespace ends
