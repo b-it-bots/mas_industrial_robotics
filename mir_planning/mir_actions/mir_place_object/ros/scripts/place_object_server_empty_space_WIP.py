@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+
+# threshold checking for TF calculation WIP
+
+
+
 from selectors import PollSelector
 import mcr_states.common.basic_states as gbs
 import mir_states.common.manipulation_states as gms  # move the arm, and gripper
@@ -133,6 +138,7 @@ class Threshold_calculation(smach.State):
 
         if userdata.threshold_counter >= max_tries:
             result = "reached"
+            userdata.threshold_counter = 0
         else:
             userdata.threshold_counter += 1
             result =  "continue"
@@ -169,7 +175,7 @@ class GetEmptyPositionOnTable(smach.State):
         userdata.result = GenericExecuteResult()
         userdata.feedback = GenericExecuteFeedback(
         current_state="EMPTY_POSE_RECEIVE", text="Receiving empty space location",)
-        
+        rospy.loginfo("<<--- getting empty position --->>")
         userdata.empty_locations = self.empty_locations # The empty locations have all the empty poses
         
         return 'success'
@@ -309,7 +315,7 @@ def main():
         input_keys=["goal", "feedback", "result"],
         output_keys=["feedback", "result"],)
 
-
+    sm.userdata.threshold_counter = 0
     sm.userdata.empty_locations = None
     sm.userdata.heavy_objects = rospy.get_param("~heavy_objects", ["m20_100"])
     sm.userdata.max_allowed_tries = rospy.get_param("~max_allowed_IK_tries", 3)
@@ -337,7 +343,7 @@ def main():
         #     "MOVE_ARM_STAGE",
         #     gms.move_arm("platform_middle"),
         #     transitions={
-        #         "succeeded": "EMPTY_POSITION_SELECTION",
+        #         "succeeded": "EMPTY_SPACE_CLOUD_ADD",
         #         "failed": "MOVE_ARM_STAGE"
         #     },
         # )
@@ -428,7 +434,7 @@ def main():
         #     "MOVE_ARM_TO_PRE_PLACE",
         #     gms.move_arm("look_at_workspace"), # New change from turntable to workspace
         #     transitions={
-        #         "succeeded": "EMPTY_POSITION_SELECTION",
+        #         "succeeded": "EMPTY_SPACE_CLOUD_ADD",
         #         "failed": "MOVE_ARM_TO_PRE_PLACE",
         #     },
         # )
@@ -438,7 +444,7 @@ def main():
             "CHECK_MAX_TRY_THRESHOLD",
             Threshold_calculation(),
             transitions={
-                "continue": "EMPTY_POSITION_SELECTION",
+                "continue": "EMPTY_SPACE_CLOUD_ADD",
                 "reached": "GO_DEFAULT_THRESHOLD",
             },
             # remapping={
@@ -450,7 +456,7 @@ def main():
 
         smach.StateMachine.add(
             "GO_DEFAULT_THRESHOLD",
-            gms.move_arm("default_place"),
+            gms.move_arm("look_at_workspace"), # change it to default place later
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "GO_DEFAULT_THRESHOLD",
@@ -458,7 +464,7 @@ def main():
         )
 
         smach.StateMachine.add(
-            "EMPTY_POSITION_SELECTION",
+            "EMPTY_SPACE_CLOUD_ADD",
             gbs.send_and_wait_events_combined(
                 event_in_list = [
                     ("/mir_perception/empty_space_detector/event_in","e_add_cloud"),
@@ -466,8 +472,8 @@ def main():
                 event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
                 timeout_duration=50,),
             transitions={"success": "EMPTY_SPACE_TRIGGER",
-                        "timeout": "EMPTY_POSITION_SELECTION",
-                        "failure": "EMPTY_POSITION_SELECTION",},
+                        "timeout": "CHECK_MAX_TRY_THRESHOLD",
+                        "failure": "EMPTY_SPACE_CLOUD_ADD",},
         )
 
 
@@ -478,8 +484,8 @@ def main():
 		        event_out_list = [("/mir_perception/empty_space_detector/event_out","e_success",True)],
 		        timeout_duration = 50,),
             transitions={"success": "EMPTY_POSE_RECEIVE",
-                        "timeout": "EMPTY_SPACE_TRIGGER",
-                        "failure": "EMPTY_POSITION_SELECTION",},
+                        "timeout": "EMPTY_SPACE_CLOUD_ADD",
+                        "failure": "CHECK_MAX_TRY_THRESHOLD",},
         )
 
 
@@ -490,7 +496,7 @@ def main():
 
         transitions={
                 "success": "PUBLISH_OBJECT_POSE_FOR_VERIFICATION",
-                "failure": "EMPTY_POSITION_SELECTION",
+                "failure": "EMPTY_SPACE_CLOUD_ADD",
 	   },
 	)
 
@@ -519,8 +525,8 @@ def main():
             ),
             transitions={
                 "success": "GO_TO_PRE_GRASP_POSE",
-                "timeout": "OVERALL_FAILED", 
-                "failure": "EMPTY_POSITION_SELECTION",
+                "timeout": "CHECK_MAX_TRY_THRESHOLD", 
+                "failure": "CHECK_MAX_TRY_THRESHOLD",
             },
         )
 
@@ -564,6 +570,7 @@ def main():
 
     sm.register_transition_cb(transition_cb)
     sm.register_start_cb(start_cb)
+    sm.userdata.threshold_counter = 0
 
     # smach viewer
     if rospy.get_param("~viewer_enabled", True):
