@@ -4,6 +4,8 @@
  * Author: Mohammad Wasil
  *
  */
+#include <algorithm>
+
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -396,7 +398,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
               cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(0, 255, 0), 1);
       }
       // Remove large 2d misdetected bbox (misdetection)
-      double len_diag = sqrt(powf(((roi_2d.width + roi_2d.width) >> 1), 2));
+      double len_diag = sqrt(powf(roi_2d.width, 2) + powf(roi_2d.height, 2));
+
       if (len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_)
       {
         PointCloud::Ptr cloud_roi(new PointCloud);
