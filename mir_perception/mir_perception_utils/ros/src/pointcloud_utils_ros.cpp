@@ -128,9 +128,15 @@ bool pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi,
     }
   }
   for (size_t i = 0; i < pixel_loc.size(); i++) {
+    // check cloud_in size
+    if (pixel_loc[i].x >= static_cast<int>(cloud_in->width) || pixel_loc[i].y >= static_cast<int>(cloud_in->height))
+    {
+      ROS_ERROR("Pixel location is out of range.");
+      return (false);
+    }
     PointT pcl_point = cloud_in->at(pixel_loc[i].x, pixel_loc[i].y);
-    if ((!pcl_isnan(pcl_point.x)) && (!pcl_isnan(pcl_point.y)) && (!pcl_isnan(pcl_point.z)) &&
-        (!pcl_isnan(pcl_point.r)) && (!pcl_isnan(pcl_point.g)) && (!pcl_isnan(pcl_point.b))) {
+    if ((!std::isnan(pcl_point.x)) && (!std::isnan(pcl_point.y)) && (!std::isnan(pcl_point.z)) &&
+        (!std::isnan(pcl_point.r)) && (!std::isnan(pcl_point.g)) && (!std::isnan(pcl_point.b))) {
       cloud_roi->points.push_back(pcl_point);
     }
   }
