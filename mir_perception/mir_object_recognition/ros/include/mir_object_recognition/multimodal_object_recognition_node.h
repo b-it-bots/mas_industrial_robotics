@@ -112,6 +112,7 @@ class MultimodalObjectRecognitionROS
     // Publisher debug
     ros::Publisher pub_debug_cloud_plane_;
     ros::Publisher pub_filtered_rgb_cloud_plane_;
+    std::string horizontal_object_list[9];
 
     // Synchronize callback for image and pointcloud
     message_filters::Subscriber<sensor_msgs::Image> *image_sub_;
