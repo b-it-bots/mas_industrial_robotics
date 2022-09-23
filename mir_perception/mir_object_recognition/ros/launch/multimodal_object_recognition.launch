@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   
-  <arg name="camera_name" default="arm_cam3d" />
+  <arg name="camera_name" default="tower_cam3d" />
   <arg name="input_pointcloud_topic"  default="/$(arg camera_name)/depth_registered/points" />
   <arg name="input_image_topic" default="/$(arg camera_name)/rgb/image_raw" />
   <arg name="target_frame" default="base_link" />
