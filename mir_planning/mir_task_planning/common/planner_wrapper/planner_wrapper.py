@@ -12,7 +12,6 @@ import time
 
 import rospkg
 import yaml
-from datetime import datetime
 
 class PlannerWrapper(object):
 
@@ -36,7 +35,6 @@ class PlannerWrapper(object):
         self._planner_commands = planner_commands
         self._plan_dir = kwargs.get("plan_dir", "/tmp/plan")
         self._plan_backup_dir = kwargs.get("plan_backup_dir", "~/.ros")
-        self._plan_log_dir = kwargs.get("plan_log_dir", "~/.ros")
         self._plan_file_name = kwargs.get("plan_file_name", "task_plan")
         self._time_limit = kwargs.get("time_limit", 5)
         self._rospack_obj = rospkg.RosPack()
@@ -44,14 +42,11 @@ class PlannerWrapper(object):
         # replace ~ with full path (if present)
         self._plan_dir = os.path.expanduser(self._plan_dir)
         self._plan_backup_dir = os.path.expanduser(self._plan_backup_dir)
-        self._plan_log_dir = os.path.expanduser(self._plan_log_dir)
         # create directories if they don't exist
         if not os.path.isdir(self._plan_dir):
             os.makedirs(self._plan_dir)
         if not os.path.isdir(self._plan_backup_dir):
             os.makedirs(self._plan_backup_dir)
-        if not os.path.isdir(self._plan_log_dir):
-            os.makedirs(self._plan_log_dir)
 
     def plan(self, planner, domain_file, problem_file, fast_mode=False):
         """
@@ -102,10 +97,6 @@ class PlannerWrapper(object):
                     os.path.join(self._plan_backup_dir, "task_plan.plan"), "w"
                 ) as file_obj:
                     file_obj.writelines(["%s\n" % action for action in task_plan])
-
-                log_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                with open(os.path.join(self._plan_log_dir, f"log_task_plan_{log_time}.plan"), "w") as log_obj:
-                        log_obj.writelines(["%s\n" % action for action in task_plan])
 
                 return task_plan
         print("[planner_wrapper] Plan call failed")

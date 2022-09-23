@@ -12,43 +12,21 @@ cb: 0
 # ======================  objects  =============================================
 # ==============================================================================
 
-# long objects
-# f20_20_b: 20
-# f20_20_g: 20
-# s40_40_b: 20
-# s40_40_g: 20
-# m20_100: 20
-# axis: 20
+long objects
+f20_20_b: 20
+f20_20_g: 20
+s40_40_b: 20
+s40_40_g: 20
+m20_100: 20
+axis: 20
 
-# # medium objects
-# r20: 20
-# m30: 20
-# motor: 20
-# bearing_box: 20
-
-# # small objects
-# distance_tube: 10
-# bearing: 10
-# m20: 10
-
+# medium objects
 r20: 20
-bearing_box: 15
-motor: 15
-bracket: 10
-insulation_tape: 10
-screw_driver: 6
-axis: 5
-f20_20_b: 5
-s40_40_b: 5
-s40_40_g: 5
+m30: 20
+motor: 20
+bearing_box: 20
 
-sponge: 21
-towel: 17
-tennis_ball: 16
-dishwasher_soap: 10
-brown_box: 6
-eye_glasses: 4
-cup: 2
-toothbrush: 1
-spoon: 1
-pringles: 1
+# small objects
+distance_tube: 10
+bearing: 10
+m20: 10

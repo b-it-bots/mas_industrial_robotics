@@ -16,7 +16,7 @@
 #include <mir_planner_executor/actions/stage/stage_action.h>
 #include <mir_planner_executor/actions/unstage/unstage_action.h>
 
-#include <mir_audio_receiver/AudioMessage.h>
+// #include <mir_audio_receiver/AudioMessage.h>
 
 PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh) : server_(nh, "execute_plan", false)
 {
@@ -26,9 +26,9 @@ PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh) : server_(nh, "execute_pla
   ros::NodeHandle private_nh("~");
   knowledge_updater_ = new KnowledgeUpdater(nh);
 
-  audio_publisher_ =
-  private_nh.advertise<mir_audio_receiver::AudioMessage>("/mir_audio_receiver/tts_request",
-  1);
+  // audio_publisher_ =
+  // private_nh.advertise<mir_audio_receiver::AudioMessage>("/mir_audio_receiver/tts_request",
+  // 1);
 
   addActionExecutor("PICK", new CombinedPickAction());
   addActionExecutor("PLACE", new PlaceAction());
@@ -143,12 +143,13 @@ void PlannerExecutor::announceAction(std::string action_name,
   }
 
   /* announce action with audio */
-  mir_audio_receiver::AudioMessage audio_msg;
+/*   mir_audio_receiver::AudioMessage audio_msg;
   std::string action_name_string(action_name.c_str());
   std::replace(action_name_string.begin(), action_name_string.end(), '_', ' ');
+  ROS_INFO("Announcing action \"%s\"", action_name_string.c_str());
   std::string audio_message_string = "Executing action " + action_name_string;
   audio_msg.message = audio_message_string;
-  audio_publisher_.publish(audio_msg);
+  audio_publisher_.publish(audio_msg); */
 }
 
 std::string PlannerExecutor::toUpper(std::string str)
