@@ -22,9 +22,9 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 
-class_names = ['R20', 'tennis_ball', 'F20_20_B', 'pringles', 'insulation_tape', 'bearing_box', 'sponge', 'towel',
-               'screw_driver', 'spoon', 'motor', 'dishwasher_soap', 'S40_40_B', 'brown_box', 'cup', 'axis',
-               'S40_40_G', 'bracket', 'eye_glasses', 'toothbrush']
+class_names = ['F20_20_B', 'R20', 'S40_40_B', 'S40_40_G', 'axis', 'bearing_box', 'bracket', 'brown_box', 'cup', 
+               'dishwasher_soap', 'eye_glasses', 'insulation_tape', 'motor', 'pringles', 'screw_driver', 'sponge', 
+               'spoon', 'tennis_ball', 'toothbrush', 'towel']
 
 
 def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
