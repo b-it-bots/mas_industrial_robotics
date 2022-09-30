@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:macro name="rear_platform_v2" params="parent name *origin">
+
+        <!-- base plate -->
+		<joint name="${name}_base_joint" type="fixed" >
+			<xacro:insert_block name="origin" />
+			<parent link="${parent}" />
+			<child link="${name}_base_link" />
+		</joint>
+
+		<link name="${name}_base_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="2.062"/>
+				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+			</inertial>
+
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_base.dae" scale="0.001 0.001 0.001" />
+				</geometry>
+			</visual>
+
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_base_convex_hull.dae" scale="0.001 0.001 0.001" />
+				</geometry>
+			</collision>
+		</link>
+
+
+		<!-- fence -->
+		<joint name="${name}_fence_joint" type="fixed" >
+			<parent link="${name}_base_link" />
+			<child link="${name}_fence_link" />
+		</joint>
+
+		<link name="${name}_fence_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="${4 * 0.204}"/>
+				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+			</inertial>
+
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_fence.dae" scale="0.001 0.001 0.001" />
+				</geometry>
+			</visual>
+
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://mir_description/meshes/misc/rear_platform_v2_fence_convex_hull.dae" scale="0.001 0.001 0.001" />
+				</geometry>
+			</collision>
+		</link>
+
+	</xacro:macro>
+
+</robot>
