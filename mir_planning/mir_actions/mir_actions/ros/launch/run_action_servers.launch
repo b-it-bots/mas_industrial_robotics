@@ -30,8 +30,7 @@
     <include file="$(find mir_pick_from_shelf)/ros/launch/pick_from_shelf.launch" />
 
     <!-- place object action server -->
-    <!-- <node pkg="mir_place_object" type="place_object_server.py" name="place_object_server" output="screen" /> -->
-    <node pkg="mir_place_object" type="place_object_server_empty_space.py" name="place_object_server" output="screen" />
+    <include file="$(find mir_place_object)/ros/launch/place_object_server.launch" />
 
     <!-- insert object in object server -->
     <node pkg="mir_insert_object" type="insert_object_server.py" name="insert_object_server" output="screen" />
