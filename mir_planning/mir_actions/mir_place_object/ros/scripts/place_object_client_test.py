@@ -14,10 +14,19 @@ if __name__ == "__main__":
     client = SimpleActionClient("place_object_server", GenericExecuteAction)
     client.wait_for_server()
 
-    goal = GenericExecuteGoal()
     if len(sys.argv) > 1:
-        location = str(sys.argv[1]).upper()
-        goal.parameters.append(KeyValue(key="location", value=location))
+        platform = str(sys.argv[1]).upper()
+        if len(sys.argv) > 2:
+            obj = str(sys.argv[2]).upper()
+        else:
+            obj = "M20"
+    else:
+        platform = "PLATFORM_MIDDLE"
+        obj = "M20"
+
+    goal = GenericExecuteGoal()
+    goal.parameters.append(KeyValue(key="platform", value=platform))
+    goal.parameters.append(KeyValue(key="object", value=obj))
 
     rospy.loginfo("Sending following goal to place object server")
     rospy.loginfo(goal)
