@@ -155,7 +155,7 @@ def main():
             "MOVE_ARM_PRE_STAGE_AGAIN",
             gms.move_arm(blocking=True),
             transitions={
-                "succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
+                "succeeded": "MOVE_ARM_TO_BARRIER_TAPE",
                 "failed": "MOVE_ARM_PRE_STAGE_AGAIN",
             },
         )
@@ -166,6 +166,15 @@ def main():
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_BARRIER_TAPE",
+            gms.move_arm("barrier_tape"),
+            transitions={
+                "succeeded": "OVERALL_SUCCESS",
+                "failed": "MOVE_ARM_TO_BARRIER_TAPE",
             },
         )
 
