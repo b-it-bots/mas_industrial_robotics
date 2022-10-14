@@ -13,56 +13,30 @@ import xacro
 
 def generate_launch_description():
 
-    robot_name = os.environ['ROBOT']
-
-    # planning_context
-    youbot_xacro_file = os.path.join(get_package_share_directory('mir_hardware_config'), robot_name, 'urdf',
-                                     'robot.urdf.xacro')
-    robot_description_config = Command(
-        [FindExecutable(name='xacro'), ' ', youbot_xacro_file])
-
-    robot_description = {'robot_description': ParameterValue(robot_description_config, value_type=str)}
-
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='both',
-        parameters=[robot_description],
-    )
-
-    joint_state_publisher = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        arguments=[youbot_xacro_file],
-    )
-
     youbot_oodl_driver_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('mir_bringup'), 'components'),
-                '/youbot_oodl_driver.launch.py']),
-            launch_arguments={
-                'youBotHasBase': 'True',
-                'youBotHasArms': 'True',
-            }.items()
-    )
-
-    teleop_joypad_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('mir_teleop'), 'ros', 'launch'),
-                '/teleop_joypad.launch.py'])
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('mir_bringup'), 'components'),
+            '/youbot_oodl_driver.launch.py']),
+        launch_arguments={
+            'youBotHasBase': 'True',
+            'youBotHasArms': 'True',
+        }.items()
     )
 
     lasers_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('mir_teleop'), 'ros', 'launch'),
-                '/urg_node.launch.py'])
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('mir_bringup'), 'components'),
+            '/urg_node.launch.py'])
     )
+
+    teleop_joypad_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('mir_teleop'), 'ros', 'launch'),
+            '/teleop_joypad.launch.py'])
+    )
+
     return LaunchDescription([
-        robot_state_publisher,
         youbot_oodl_driver_launch,
         teleop_joypad_launch,
         lasers_launch,
-        joint_state_publisher,
     ])

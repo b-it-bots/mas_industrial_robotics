@@ -31,12 +31,12 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
-    joint_state_publisher = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        arguments=[youbot_xacro_file],
-    )
+    # joint_state_publisher = Node(
+    #     package='joint_state_publisher',
+    #     executable='joint_state_publisher',
+    #     name='joint_state_publisher',
+    #     arguments=[youbot_xacro_file],
+    # )
 
     robot_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
@@ -47,5 +47,5 @@ def generate_launch_description():
     return LaunchDescription([
         robot_state_publisher,
         robot_launch,
-        joint_state_publisher,
+        # joint_state_publisher,
     ])

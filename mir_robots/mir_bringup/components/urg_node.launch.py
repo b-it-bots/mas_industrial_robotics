@@ -11,14 +11,16 @@ import xacro
 
 def generate_launch_description():
 
+    robot_name = os.environ['ROBOT']
+
     front_laser_config_path = os.path.join(
-        get_package_share_directory('mir_teleop'),
-        'ros', 'config',
+        get_package_share_directory('mir_hardware_config'),
+        robot_name, 'config',
         'front_laser_config.yaml')
 
     rear_laser_config_path = os.path.join(
-        get_package_share_directory('mir_teleop'),
-        'ros', 'config',
+        get_package_share_directory('mir_hardware_config'),
+        robot_name, 'config',
         'rear_laser_config.yaml')
 
     front_urg_node = Node(
