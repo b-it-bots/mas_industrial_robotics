@@ -35,8 +35,8 @@ set(
     launch
 )
 
-foreach(robot ${robot_list})
-  install(DIRECTORY ${robot}
+foreach(dir ${INSTALL_DIRS})
+  install(DIRECTORY ${dir}
     DESTINATION share/${PROJECT_NAME})
 endforeach()
 
