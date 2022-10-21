@@ -20,7 +20,7 @@
 
     <!-- perceive location action server -->
     <include file="$(find mir_perceive_location)/ros/launch/perceive_location_server.launch">
-        <arg name="base_motion_enabled" value="true" />
+        <arg name="base_motion_enabled" value="false" />
     </include>
 
     <!-- wbc pick action server -->
