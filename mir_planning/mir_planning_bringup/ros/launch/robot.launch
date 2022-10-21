@@ -10,7 +10,7 @@
     <arg name="object_perception_target_frame" default="/base_link_static"/>
     <arg name="base_cmd_topic" default="/cmd_vel_safe"/>
     <arg name="use_mokeup_pose" default="false"/>
-    <arg name="domain" default="general_domain" />
+    <arg name="domain" default="additional_domain" />
     <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
     <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
     <!--arg name="domain_path" default="$(arg base_path)/domain_with_perception_cost.pddl" /-->
@@ -172,6 +172,7 @@
     <!-- youbot actions (action lib) : move base safe, perceive, pick, stage, unstage, insert -->
     <include file="$(find mir_actions)/ros/launch/run_action_servers.launch">
         <arg name="align_with_workspace" value="$(arg align_with_workspace)" />
+        <arg name="domain" value="$(arg domain)" />
     </include>
 
 </launch>

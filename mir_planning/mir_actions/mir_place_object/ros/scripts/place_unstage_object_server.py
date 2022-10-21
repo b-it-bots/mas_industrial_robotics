@@ -3,12 +3,12 @@
 
 # threshold checking for TF calculation WIP
 
+"""
+This file is for eye in hand configuration of the robot
+unstage will happen inside the place object server
 
 """
-This file is for eye to hand configuration of the robot
-unstage will happen outside the place object server
 
-"""
 
 
 from selectors import PollSelector
@@ -186,6 +186,51 @@ class GetEmptyPositionOnTable(smach.State):
         
         return 'success'
 
+#=================================================================================
+
+# class from unstage server for unstaging the object 
+
+class Unstage_to_place(smach.State):
+
+    def __init__(self):
+
+        smach.State.__init__(self, outcomes=["success","failed"],input_keys=["goal","heavy_objects", "platform","object"])
+        self.platform = "PLATFORM_MIDDLE"
+        self.obj = "M20"
+
+    def execute(self,userdata):
+
+        self.platform = Utils.get_value_of(userdata.goal.parameters, "platform")
+        self.obj = Utils.get_value_of(userdata.goal.parameters, "object")
+
+        if self.obj is None:
+            rospy.logwarn('Missing parameter "object". Using default.')
+            self.obj = "light"
+        for heavy_object in userdata.heavy_objects:
+            if heavy_object.upper() in self.obj.upper():
+                self.obj =  "heavy"
+        else:
+            self.obj =  "light"
+
+
+        self.unstage_client = SimpleActionClient('unstage_object_server', GenericExecuteAction)
+        self.unstage_client.wait_for_server()
+
+	# Assigning the goal    
+
+        goal = GenericExecuteGoal()
+        goal.parameters.append(KeyValue(key="platform", value=self.platform))
+        goal.parameters.append(KeyValue(key="object", value=self.obj))
+
+        self.unstage_client.send_goal(goal)
+        self.unstage_client.wait_for_result(rospy.Duration.from_sec(15.0))
+
+        rospy.loginfo("Unstaged from backplatform " + self.platform)
+        rospy.loginfo("Sending following goal to unstage object server")
+        rospy.loginfo(goal)
+
+        return "success"
+
 # ===============================================================================
 
 # new class for publishing the empty pose
@@ -237,6 +282,8 @@ class PublishObjectPose(smach.State):
             nearest_pose = PoseStamped()
             nearest_pose.header = empty_locations.header
             nearest_pose.pose = empty_locations.poses[index]
+
+        # nearest_pose.pose.position.z = 0.1 + 0.05 - 0.0815  
 
         """
         This z value should be tested
@@ -294,27 +341,33 @@ def main():
             CheckIfLocationIsShelf(),
             transitions={
                 "shelf": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
-                "not_shelf": "CHECK_MAX_TRY_THRESHOLD",  # change it to MOVE_ARM_TO_PRE_PLACE when we use arm camera for empty space detection
+                "not_shelf": "MOVE_ARM_TO_PRE_PERCEIVE",  
             },
         )
 
-# Comment the below state when we use arm camera for empty space detection
- 
-#=================================================================================
 
-        # """
-        # These states are added to keep the arm at the state of holding the object.
-        # This behaviour is only needed when handling single object
-        # """
-        # smach.StateMachine.add(
-        #     "MOVE_ARM_STAGE",
-        #     gms.move_arm("platform_middle"),
-        #     transitions={
-        #         "succeeded": "EMPTY_SPACE_CLOUD_ADD",
-        #         "failed": "MOVE_ARM_STAGE"
-        #     },
-        # )
-#=================================================================================
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRE_PERCEIVE",
+            gms.move_arm("platform_middle_pre"),
+            transitions={ 
+                "succeeded": "MOVE_ARM_TO_PRECEIVE",
+                "failed": "MOVE_ARM_TO_PRE_PERCEIVE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRECEIVE",
+            gms.move_arm("look_at_workspace"),
+            transitions={ 
+                "succeeded": "CHECK_MAX_TRY_THRESHOLD",
+                "failed": "MOVE_ARM_TO_PRECEIVE",
+            },
+        )
+        
+
+
+
+
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_SHELF_INTERMEDIATE",
@@ -395,40 +448,48 @@ def main():
         )
 # till above the state machine is for shelf
 
-## Uncomment the below code when we use arm camera for empty space detection
-
-        # smach.StateMachine.add(
-        #     "MOVE_ARM_TO_PRE_PLACE",
-        #     gms.move_arm("look_at_workspace"), # New change from turntable to workspace
-        #     transitions={
-        #         "succeeded": "EMPTY_SPACE_CLOUD_ADD",
-        #         "failed": "MOVE_ARM_TO_PRE_PLACE",
-        #     },
-        # )
-        
-
         smach.StateMachine.add(
             "CHECK_MAX_TRY_THRESHOLD",
             Threshold_calculation(),
             transitions={
                 "continue": "EMPTY_SPACE_CLOUD_ADD",
-                "reached": "GO_DEFAULT_THRESHOLD",
+                "reached": "MOVE_ARM_TO_PRE_DEFAULT",
             },
-            # remapping={
-            #     "threshold_counter_in": "threshold_counter",
-            #     "threshold_counter_out": "threshold_counter",
-            # },
         )
 
 
         smach.StateMachine.add(
+                "CLOSE_GRIPPER",
+                gms.control_gripper("close"),
+                transitions={
+			        "succeeded": "MOVE_ARM_TO_PRE_DEFAULT"},
+                )
+
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRE_DEFAULT",
+            gms.move_arm("platform_middle_pre"),
+            transitions={ 
+                "succeeded": "GO_DEFAULT_THRESHOLD",
+                "failed": "MOVE_ARM_TO_PRE_DEFAULT",
+            },
+        )
+
+        smach.StateMachine.add(
             "GO_DEFAULT_THRESHOLD",
-            gms.move_arm("look_at_workspace"), # change it to default place later
+            gms.move_arm("place_default"),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "GO_DEFAULT_THRESHOLD",
             }
         )
+
+        """
+        Assumption:
+        The camera should be looking at the workspace to find
+        the empty locations. The camera should be mounted on the arm
+        """
+        
 
         smach.StateMachine.add(
             "EMPTY_SPACE_CLOUD_ADD",
@@ -491,10 +552,29 @@ def main():
                 timeout_duration=20,
             ),
             transitions={
-                "success": "GO_TO_PRE_GRASP_POSE",
+                "success": "MOVE_ARM_TO_PRE_UNSTAGE",
                 "timeout": "CHECK_MAX_TRY_THRESHOLD", 
                 "failure": "CHECK_MAX_TRY_THRESHOLD",
             },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRE_UNSTAGE",
+            gms.move_arm("platform_middle_pre"),
+            transitions={ 
+                "succeeded": "UNSTAGE_FOR_PLACING",
+                "failed": "MOVE_ARM_TO_PRE_UNSTAGE",
+            },
+        )
+
+
+        smach.StateMachine.add(
+                "UNSTAGE_FOR_PLACING",
+                Unstage_to_place(),
+        transitions={
+                "success":"GO_TO_PRE_GRASP_POSE", 
+                "failed":"MOVE_ARM_TO_NEUTRAL",
+          },
         )
 
         smach.StateMachine.add(
@@ -548,7 +628,7 @@ def main():
 
     # Construct action server wrapper
     asw = ActionServerWrapper(
-        server_name="place_object_server",
+        server_name="place_unstage_object_server",
         action_spec=GenericExecuteAction,
         wrapped_container=sm,
         succeeded_outcomes=["OVERALL_SUCCESS"],

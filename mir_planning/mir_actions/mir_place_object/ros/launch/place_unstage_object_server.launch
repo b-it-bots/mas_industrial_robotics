@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="max_allowed_tries" default= "3" />
+
+    <node pkg="mir_place_object" type="place_unstage_object_server.py"
+          name="place_unstage_object_server" output="screen">
+        <rosparam param="max_allowed_tries" subst_value="True">
+            $(arg max_allowed_tries)
+        </rosparam>
+    </node>
+
+</launch>

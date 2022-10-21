@@ -4,8 +4,8 @@
     <arg name="problem_path" default="/tmp/problem.pddl" />
     <arg name="points_config_file" default="$(find mir_pddl_problem_generator)/ros/config/points.yaml" />
     <arg name="knowledge_base" default="rosplan_knowledge_base" />
-    <arg name="prefer_goals_with_same_source_ws" default="true" />
-    <arg name="max_goals" default="3" />
+    <arg name="prefer_goals_with_same_source_ws" default="false" />
+    <arg name="max_goals" default="1" />
 
     <group ns="mir_planning">
 
