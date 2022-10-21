@@ -341,9 +341,33 @@ def main():
             CheckIfLocationIsShelf(),
             transitions={
                 "shelf": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
-                "not_shelf": "CHECK_MAX_TRY_THRESHOLD",  
+                "not_shelf": "MOVE_ARM_TO_PRE_PERCEIVE",  
             },
         )
+
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRE_PERCEIVE",
+            gms.move_arm("platform_middle_pre"),
+            transitions={ 
+                "succeeded": "MOVE_ARM_TO_PRECEIVE",
+                "failed": "MOVE_ARM_TO_PRE_PERCEIVE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRECEIVE",
+            gms.move_arm("look_at_workspace"),
+            transitions={ 
+                "succeeded": "CHECK_MAX_TRY_THRESHOLD",
+                "failed": "MOVE_ARM_TO_PRECEIVE",
+            },
+        )
+        
+
+
+
+
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_SHELF_INTERMEDIATE",
@@ -428,8 +452,26 @@ def main():
             "CHECK_MAX_TRY_THRESHOLD",
             Threshold_calculation(),
             transitions={
-                "continue": "MOVE_ARM_TO_PRE_PLACE",
-                "reached": "GO_DEFAULT_THRESHOLD",
+                "continue": "EMPTY_SPACE_CLOUD_ADD",
+                "reached": "MOVE_ARM_TO_PRE_DEFAULT",
+            },
+        )
+
+
+        smach.StateMachine.add(
+                "CLOSE_GRIPPER",
+                gms.control_gripper("close"),
+                transitions={
+			        "succeeded": "MOVE_ARM_TO_PRE_DEFAULT"},
+                )
+
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRE_DEFAULT",
+            gms.move_arm("platform_middle_pre"),
+            transitions={ 
+                "succeeded": "GO_DEFAULT_THRESHOLD",
+                "failed": "MOVE_ARM_TO_PRE_DEFAULT",
             },
         )
 
@@ -448,15 +490,7 @@ def main():
         the empty locations. The camera should be mounted on the arm
         """
         
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_PRE_PLACE",
-            gms.move_arm("look_at_workspace"),
-            transitions={ 
-                "succeeded": "EMPTY_SPACE_CLOUD_ADD",
-                "failed": "MOVE_ARM_TO_PRE_PLACE",
-            },
-        )
-        
+
         smach.StateMachine.add(
             "EMPTY_SPACE_CLOUD_ADD",
             gbs.send_and_wait_events_combined(
@@ -518,9 +552,18 @@ def main():
                 timeout_duration=20,
             ),
             transitions={
-                "success": "UNSTAGE_FOR_PLACING",
+                "success": "MOVE_ARM_TO_PRE_UNSTAGE",
                 "timeout": "CHECK_MAX_TRY_THRESHOLD", 
                 "failure": "CHECK_MAX_TRY_THRESHOLD",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRE_UNSTAGE",
+            gms.move_arm("platform_middle_pre"),
+            transitions={ 
+                "succeeded": "UNSTAGE_FOR_PLACING",
+                "failed": "MOVE_ARM_TO_PRE_UNSTAGE",
             },
         )
 
@@ -585,7 +628,7 @@ def main():
 
     # Construct action server wrapper
     asw = ActionServerWrapper(
-        server_name="place_object_server",
+        server_name="place_unstage_object_server",
         action_spec=GenericExecuteAction,
         wrapped_container=sm,
         succeeded_outcomes=["OVERALL_SUCCESS"],
