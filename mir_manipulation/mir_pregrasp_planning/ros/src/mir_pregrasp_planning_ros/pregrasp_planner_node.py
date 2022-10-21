@@ -277,15 +277,6 @@ class PregraspPlannerPipeline(object):
         else:
             return "IDLE"
 
-    def is_graspable(self):
-        # gripper_width = 0.1
-        # obj_width = rospy.get_param("mir_perception/object_width")
-        # if obj_width < (gripper_width - 0.02):
-        #     return True
-        # else:
-        #     return False
-        return True
-
     def running_state(self):
         """
         Executes the RUNNING state of the state machine.
@@ -350,7 +341,8 @@ class PregraspPlannerPipeline(object):
             pose_samples, self.linear_offset, modified_pose
         )
 
-        if not reachable_pose and self.is_graspable():
+        # if default IK failed and ignore orientation is set to true, try again with orientation independent IK
+        if not reachable_pose and self.ignore_orientation:
             rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
             rospy.loginfo('\033[92m'+"[Pregrasp Planning] Tryinng orientation independent planning.")
             input_pose = geometry_msgs.msg.PoseStamped()
@@ -409,6 +401,14 @@ class PregraspPlannerPipeline(object):
             self.event_out.publish("e_success")
             self.reset_component_data()
             return 'INIT'
+
+        else:
+            if not reachable_pose:
+                rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
+                status = "e_failure"
+                self.event_out.publish(status)
+                self.reset_component_data()
+                return "INIT"
 
         rospy.loginfo('[Pregrasp Planning] Found solution')
 
