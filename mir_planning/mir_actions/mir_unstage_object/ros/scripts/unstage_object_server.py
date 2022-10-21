@@ -160,15 +160,6 @@ def main():
             },
         )
 
-        # smach.StateMachine.add(
-        #     "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
-        #     gms.move_arm("stage_intermediate"),
-        #     transitions={
-        #         "succeeded": "OVERALL_SUCCESS",
-        #         "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE_FINAL",
-        #     },
-        # )
-
         """
         Barrier tape configuration is modified so while unstaging 
         the arm should go to barrier tape config in yb2-robot-configuration
