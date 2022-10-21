@@ -1,17 +1,10 @@
 #!/usr/bin/env python
-
-
-# threshold checking for TF calculation WIP
-
 """
 This file is for eye in hand configuration of the robot
 unstage will happen inside the place object server
 
 """
 
-
-
-from selectors import PollSelector
 import mcr_states.common.basic_states as gbs
 import mir_states.common.manipulation_states as gms  # move the arm, and gripper
 import rospy
@@ -30,80 +23,6 @@ from geometry_msgs.msg import PoseStamped
 from diagnostic_msgs.msg import KeyValue
 from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
-
-
-# ===============================================================================
-class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
-    """
-    Not being used anymore.
-    GetEmptyPositionOnTable is used instead.
-    """
-    def __init__(self, topic_name_pub, topic_name_sub, event_sub, timeout_duration):
-        smach.State.__init__(
-            self,
-            outcomes=["succeeded", "failed"],
-            input_keys=["goal", "feedback"],
-            output_keys=["feedback", "result", "move_arm_to"],
-        )
-
-        self.timeout = rospy.Duration.from_sec(timeout_duration)
-        # create publisher
-        self.platform_name_pub = rospy.Publisher(topic_name_pub, String, queue_size=10)
-        rospy.Subscriber(topic_name_sub, String, self.pose_cb)
-        rospy.Subscriber(event_sub, String, self.event_cb)
-
-        rospy.sleep(0.1)  # time for publisher to register
-
-        self.place_pose = None
-        self.status = None
-        self.empty_location = None
-
-    def pose_cb(self, msg):
-        self.place_pose = msg.data
-
-    def event_cb(self, msg):
-        self.status = msg.data
-
-    def execute(self, userdata):
-        # Add empty result msg (because if none of the state do it, action server gives error)
-        userdata.result = GenericExecuteResult()
-        userdata.feedback = GenericExecuteFeedback(
-            current_state="GetPoseToPlaceOject", text="Getting pose to place obj",
-        )
-
-        location = Utils.get_value_of(userdata.goal.parameters, "location")
-
-        if location is None:
-            rospy.logwarn('"location" not provided. Using default.')
-            return "failed"
-
-        self.place_pose = None
-        self.status = None
-        self.platform_name_pub.publish(String(data=location))
-
-        # wait for messages to arrive
-        start_time = rospy.Time.now()
-        rate = rospy.Rate(10)  # 10hz
-        while not (rospy.is_shutdown()):
-            if rospy.Time.now() - start_time > self.timeout:
-                break
-            if self.place_pose is not None and self.status is not None:
-                break
-            rate.sleep()
-
-        if (
-            self.place_pose is not None
-            and self.status is not None
-            and self.status == "e_success"
-        ):
-            userdata.move_arm_to = self.place_pose
-            return "succeeded"
-        else:
-            return "failed"
-
-
-# ===============================================================================
-
 
 class CheckIfLocationIsShelf(smach.State):
     def __init__(self):
@@ -124,7 +43,6 @@ class CheckIfLocationIsShelf(smach.State):
 
 
 # ===============================================================================
-
 # new class for threshold calculation to go to default place
 class Threshold_calculation(smach.State):
 
@@ -247,12 +165,7 @@ class PublishObjectPose(smach.State):
 
     def execute(self, userdata):
 
-        empty_locations = userdata.empty_locations # This have all the empty poses
-	    # converting the pose into desired format
-        # nearest_pose = PoseStamped()
-        # nearest_pose.header = empty_locations.header
-        # nearest_pose.pose = empty_locations.poses[0]
-        # prioritise the empty space location closer to the base link 
+        empty_locations = userdata.empty_locations
 
         if len(empty_locations.poses) > 0:
 
@@ -274,7 +187,6 @@ class PublishObjectPose(smach.State):
             for i in range(len(empty_locations.poses)):
                 empty_locations_temp.pose = empty_locations.poses[i]
                 distance_list.append(Utils.get_distance_between_poses(base_link_pose, empty_locations_temp))
-                print("count", i)
             
             # return the index of min value in the list
             index = distance_list.index(min(distance_list))
@@ -283,13 +195,10 @@ class PublishObjectPose(smach.State):
             nearest_pose.header = empty_locations.header
             nearest_pose.pose = empty_locations.poses[index]
 
-        # nearest_pose.pose.position.z = 0.1 + 0.05 - 0.0815  
+        # TODO: This z value should be tested
 
-        """
-        This z value should be tested
-        """
         nearest_pose.pose.position.z += rospy.get_param("object_height_above_workspace", 0.035) # adding the height of the object above the workspace Should be change for vertical object
-
+        nearest_pose.pose.position.z += 0.03 # add 3cm height for droping the object
         
         rospy.loginfo(nearest_pose.pose.position.z)
         rospy.loginfo("Publishing single pose to pregrasp planner")
@@ -345,7 +254,6 @@ def main():
             },
         )
 
-
         smach.StateMachine.add(
             "MOVE_ARM_TO_PRE_PERCEIVE",
             gms.move_arm("platform_middle_pre"),
@@ -364,11 +272,6 @@ def main():
             },
         )
         
-
-
-
-
-
         smach.StateMachine.add(
             "MOVE_ARM_TO_SHELF_INTERMEDIATE",
             gms.move_arm("shelf_intermediate"),
@@ -408,7 +311,8 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_SHELF",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT"},
+            transitions={"succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT"
+            },
         )
 
         smach.StateMachine.add(
@@ -457,13 +361,13 @@ def main():
             },
         )
 
-
         smach.StateMachine.add(
-                "CLOSE_GRIPPER",
-                gms.control_gripper("close"),
-                transitions={
-			        "succeeded": "MOVE_ARM_TO_PRE_DEFAULT"},
-                )
+            "CLOSE_GRIPPER",
+            gms.control_gripper("close"),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_PRE_DEFAULT"
+            },
+        )
 
 
         smach.StateMachine.add(
@@ -489,8 +393,7 @@ def main():
         The camera should be looking at the workspace to find
         the empty locations. The camera should be mounted on the arm
         """
-        
-
+    
         smach.StateMachine.add(
             "EMPTY_SPACE_CLOUD_ADD",
             gbs.send_and_wait_events_combined(
@@ -513,7 +416,8 @@ def main():
 		        timeout_duration = 50,),
             transitions={"success": "EMPTY_POSE_RECEIVE",
                         "timeout": "EMPTY_SPACE_CLOUD_ADD",
-                        "failure": "CHECK_MAX_TRY_THRESHOLD",},
+                        "failure": "CHECK_MAX_TRY_THRESHOLD",
+            },
         )
 
 
@@ -525,15 +429,15 @@ def main():
         transitions={
                 "success": "PUBLISH_OBJECT_POSE_FOR_VERIFICATION",
                 "failure": "EMPTY_SPACE_CLOUD_ADD",
-	   },
-	)
+            },
+        )
 
         smach.StateMachine.add(
             "PUBLISH_OBJECT_POSE_FOR_VERIFICATION",
             PublishObjectPose(),
             transitions={"success": "CHECK_PRE_GRASP_POSE_IK", 
-                         "failed": "PUBLISH_OBJECT_POSE_FOR_VERIFICATION"}
-
+                         "failed": "PUBLISH_OBJECT_POSE_FOR_VERIFICATION"
+            }
         )
         
         smach.StateMachine.add(
@@ -597,14 +501,13 @@ def main():
             },
         )
 
-
         smach.StateMachine.add(
                 "OPEN_GRIPPER",
                 gms.control_gripper("open"),
                 transitions={
-			        "succeeded": "MOVE_ARM_TO_NEUTRAL"},
-                )
-
+			        "succeeded": "MOVE_ARM_TO_NEUTRAL"
+            },
+        )
 
         smach.StateMachine.add(
                 "MOVE_ARM_TO_NEUTRAL",
@@ -612,8 +515,8 @@ def main():
                 transitions={
                     "succeeded": "OVERALL_SUCCESS",
                     "failed": "MOVE_ARM_TO_NEUTRAL",
-                    },
-                )
+            },
+        )
 
     sm.register_transition_cb(transition_cb)
     sm.register_start_cb(start_cb)

@@ -33,78 +33,6 @@ from actionlib_msgs.msg import GoalStatus
 
 
 # ===============================================================================
-class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
-    """
-    Not being used anymore.
-    GetEmptyPositionOnTable is used instead.
-    """
-    def __init__(self, topic_name_pub, topic_name_sub, event_sub, timeout_duration):
-        smach.State.__init__(
-            self,
-            outcomes=["succeeded", "failed"],
-            input_keys=["goal", "feedback"],
-            output_keys=["feedback", "result", "move_arm_to"],
-        )
-
-        self.timeout = rospy.Duration.from_sec(timeout_duration)
-        # create publisher
-        self.platform_name_pub = rospy.Publisher(topic_name_pub, String, queue_size=10)
-        rospy.Subscriber(topic_name_sub, String, self.pose_cb)
-        rospy.Subscriber(event_sub, String, self.event_cb)
-
-        rospy.sleep(0.1)  # time for publisher to register
-
-        self.place_pose = None
-        self.status = None
-        self.empty_location = None
-
-    def pose_cb(self, msg):
-        self.place_pose = msg.data
-
-    def event_cb(self, msg):
-        self.status = msg.data
-
-    def execute(self, userdata):
-        # Add empty result msg (because if none of the state do it, action server gives error)
-        userdata.result = GenericExecuteResult()
-        userdata.feedback = GenericExecuteFeedback(
-            current_state="GetPoseToPlaceOject", text="Getting pose to place obj",
-        )
-
-        location = Utils.get_value_of(userdata.goal.parameters, "location")
-
-        if location is None:
-            rospy.logwarn('"location" not provided. Using default.')
-            return "failed"
-
-        self.place_pose = None
-        self.status = None
-        self.platform_name_pub.publish(String(data=location))
-
-        # wait for messages to arrive
-        start_time = rospy.Time.now()
-        rate = rospy.Rate(10)  # 10hz
-        while not (rospy.is_shutdown()):
-            if rospy.Time.now() - start_time > self.timeout:
-                break
-            if self.place_pose is not None and self.status is not None:
-                break
-            rate.sleep()
-
-        if (
-            self.place_pose is not None
-            and self.status is not None
-            and self.status == "e_success"
-        ):
-            userdata.move_arm_to = self.place_pose
-            return "succeeded"
-        else:
-            return "failed"
-
-
-# ===============================================================================
-
-
 class CheckIfLocationIsShelf(smach.State):
     def __init__(self):
         smach.State.__init__(
@@ -202,12 +130,7 @@ class PublishObjectPose(smach.State):
 
     def execute(self, userdata):
 
-        empty_locations = userdata.empty_locations # This have all the empty poses
-	    # converting the pose into desired format
-        # nearest_pose = PoseStamped()
-        # nearest_pose.header = empty_locations.header
-        # nearest_pose.pose = empty_locations.poses[0]
-        # prioritise the empty space location closer to the base link 
+        empty_locations = userdata.empty_locations 
 
         if len(empty_locations.poses) > 0:
 
@@ -229,20 +152,18 @@ class PublishObjectPose(smach.State):
             for i in range(len(empty_locations.poses)):
                 empty_locations_temp.pose = empty_locations.poses[i]
                 distance_list.append(Utils.get_distance_between_poses(base_link_pose, empty_locations_temp))
-                print("count", i)
             
-            # return the index of min value in the list
             index = distance_list.index(min(distance_list))
 
             nearest_pose = PoseStamped()
             nearest_pose.header = empty_locations.header
             nearest_pose.pose = empty_locations.poses[index]
 
-        """
-        This z value should be tested
-        """
+        
+        # TODO: This z value should be tested
+        
         nearest_pose.pose.position.z += rospy.get_param("object_height_above_workspace", 0.035) # adding the height of the object above the workspace Should be change for vertical object
-
+        nearest_pose.pose.position.z += 0.03 # add 3cm height for droping the object
         
         rospy.loginfo(nearest_pose.pose.position.z)
         rospy.loginfo("Publishing single pose to pregrasp planner")
@@ -294,27 +215,9 @@ def main():
             CheckIfLocationIsShelf(),
             transitions={
                 "shelf": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
-                "not_shelf": "CHECK_MAX_TRY_THRESHOLD",  # change it to MOVE_ARM_TO_PRE_PLACE when we use arm camera for empty space detection
+                "not_shelf": "CHECK_MAX_TRY_THRESHOLD", 
             },
         )
-
-# Comment the below state when we use arm camera for empty space detection
- 
-#=================================================================================
-
-        # """
-        # These states are added to keep the arm at the state of holding the object.
-        # This behaviour is only needed when handling single object
-        # """
-        # smach.StateMachine.add(
-        #     "MOVE_ARM_STAGE",
-        #     gms.move_arm("platform_middle"),
-        #     transitions={
-        #         "succeeded": "EMPTY_SPACE_CLOUD_ADD",
-        #         "failed": "MOVE_ARM_STAGE"
-        #     },
-        # )
-#=================================================================================
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_SHELF_INTERMEDIATE",
@@ -395,18 +298,6 @@ def main():
         )
 # till above the state machine is for shelf
 
-## Uncomment the below code when we use arm camera for empty space detection
-
-        # smach.StateMachine.add(
-        #     "MOVE_ARM_TO_PRE_PLACE",
-        #     gms.move_arm("look_at_workspace"), # New change from turntable to workspace
-        #     transitions={
-        #         "succeeded": "EMPTY_SPACE_CLOUD_ADD",
-        #         "failed": "MOVE_ARM_TO_PRE_PLACE",
-        #     },
-        # )
-        
-
         smach.StateMachine.add(
             "CHECK_MAX_TRY_THRESHOLD",
             Threshold_calculation(),
@@ -414,16 +305,12 @@ def main():
                 "continue": "EMPTY_SPACE_CLOUD_ADD",
                 "reached": "GO_DEFAULT_THRESHOLD",
             },
-            # remapping={
-            #     "threshold_counter_in": "threshold_counter",
-            #     "threshold_counter_out": "threshold_counter",
-            # },
         )
 
 
         smach.StateMachine.add(
             "GO_DEFAULT_THRESHOLD",
-            gms.move_arm("look_at_workspace"), # change it to default place later
+            gms.move_arm("place_default"),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "GO_DEFAULT_THRESHOLD",
@@ -438,9 +325,11 @@ def main():
                                 ],
                 event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
                 timeout_duration=50,),
-            transitions={"success": "EMPTY_SPACE_TRIGGER",
-                        "timeout": "CHECK_MAX_TRY_THRESHOLD",
-                        "failure": "EMPTY_SPACE_CLOUD_ADD",},
+            transitions={
+                "success": "EMPTY_SPACE_TRIGGER",
+                "timeout": "CHECK_MAX_TRY_THRESHOLD",
+                "failure": "EMPTY_SPACE_CLOUD_ADD",
+            },
         )
 
 
@@ -450,28 +339,31 @@ def main():
                 event_in_list = [("/mir_perception/empty_space_detector/event_in","e_trigger")],
 		        event_out_list = [("/mir_perception/empty_space_detector/event_out","e_success",True)],
 		        timeout_duration = 50,),
-            transitions={"success": "EMPTY_POSE_RECEIVE",
-                        "timeout": "EMPTY_SPACE_CLOUD_ADD",
-                        "failure": "CHECK_MAX_TRY_THRESHOLD",},
+            transitions={
+                "success": "EMPTY_POSE_RECEIVE",
+                "timeout": "EMPTY_SPACE_CLOUD_ADD",
+                "failure": "CHECK_MAX_TRY_THRESHOLD",
+            },
         )
 
 
         smach.StateMachine.add(
-		"EMPTY_POSE_RECEIVE",
-                GetEmptyPositionOnTable(
-			"/mir_perception/empty_space_detector/empty_spaces"),
+		    "EMPTY_POSE_RECEIVE",
+            GetEmptyPositionOnTable("/mir_perception/empty_space_detector/empty_spaces"),
 
         transitions={
                 "success": "PUBLISH_OBJECT_POSE_FOR_VERIFICATION",
                 "failure": "EMPTY_SPACE_CLOUD_ADD",
-	   },
-	)
+            },
+	    )
 
         smach.StateMachine.add(
             "PUBLISH_OBJECT_POSE_FOR_VERIFICATION",
             PublishObjectPose(),
-            transitions={"success": "CHECK_PRE_GRASP_POSE_IK", 
-                         "failed": "PUBLISH_OBJECT_POSE_FOR_VERIFICATION"}
+            transitions={
+                "success": "CHECK_PRE_GRASP_POSE_IK", 
+                "failed": "PUBLISH_OBJECT_POSE_FOR_VERIFICATION"
+            }
 
         )
         
@@ -522,8 +414,9 @@ def main():
                 "OPEN_GRIPPER",
                 gms.control_gripper("open"),
                 transitions={
-			        "succeeded": "MOVE_ARM_TO_NEUTRAL"},
-                )
+			        "succeeded": "MOVE_ARM_TO_NEUTRAL"
+                },
+        )
 
 
         smach.StateMachine.add(
@@ -532,8 +425,8 @@ def main():
                 transitions={
                     "succeeded": "OVERALL_SUCCESS",
                     "failed": "MOVE_ARM_TO_NEUTRAL",
-                    },
-                )
+            },
+        )
 
     sm.register_transition_cb(transition_cb)
     sm.register_start_cb(start_cb)
