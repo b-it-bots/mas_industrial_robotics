@@ -748,14 +748,6 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       object_list.objects[i].pose.pose.orientation.y = q2.y();
       object_list.objects[i].pose.pose.orientation.z = q2.z();
       object_list.objects[i].pose.pose.orientation.w = q2.w();
-      
-      // print pringles height
-      ROS_INFO_STREAM("[Adjust pose] Object: " << object_list.objects[i].name << "pose z: " << object_list.objects[i].pose.pose.position.z);
-
-      // object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() + 0.14;
-
-      // ROS_INFO_STREAM("Pringles new height: " << object_list.objects[i].pose.pose.position.z);
-
     }
     else
     {
@@ -765,17 +757,18 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       object_list.objects[i].pose.pose.orientation.y = q2.y();
       object_list.objects[i].pose.pose.orientation.z = q2.z();
       object_list.objects[i].pose.pose.orientation.w = q2.w(); 
+
+      object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
+                              object_height_above_workspace_;      
     }
 
     // Update workspace height
-    if (scene_segmentation_ros_->getWorkspaceHeight() != -1000.0 && 
-        object_list.objects[i].name != "PRINGLES")
+    if (scene_segmentation_ros_->getWorkspaceHeight() != -1000.0)
     {
-      object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
-                              object_height_above_workspace_;
       if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
           object_list.objects[i].name == "CONTAINER_BOX_BLUE")
       {
+
         object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
                               container_height_;
         ROS_WARN_STREAM("Updated container height: " << object_list.objects[i].pose.pose.position.z );
