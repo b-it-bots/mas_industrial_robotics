@@ -1,11 +1,22 @@
 <?xml version="1.0"?>
 <launch>
 
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="base_motion_enabled" default="false" />
     <arg name="base_y_offset" default="0.5"/>
 
-    <node pkg="mir_perceive_location" type="perceive_location_server.py" name="perceive_location_server" output="screen">
-        <param name="base_motion_enabled" type="bool" value="$(arg base_motion_enabled)" />
-        <param name="base_y_offset" type="double" value="$(arg base_y_offset)" />
-    </node>
+    <group if="$(eval arg (robot)=='youbot-brsu-2')">
+        <node pkg="mir_perceive_location" type="perceive_location_server.py" name="perceive_location_server" output="screen">
+            <param name="base_motion_enabled" type="bool" value="$(arg base_motion_enabled)" />
+            <param name="base_y_offset" type="double" value="$(arg base_y_offset)" />
+        </node>
+    </group>
+
+    <group if="$(eval arg (robot)=='youbot-brsu-4')">
+        <node pkg="mir_perceive_location" type="perceive_location_server_yb4.py" name="perceive_location_server" output="screen">
+            <param name="base_motion_enabled" type="bool" value="$(arg base_motion_enabled)" />
+            <param name="base_y_offset" type="double" value="$(arg base_y_offset)" />
+        </node>
+    </group>
+
 </launch>
