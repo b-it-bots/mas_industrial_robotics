@@ -172,6 +172,7 @@
     <!-- youbot actions (action lib) : move base safe, perceive, pick, stage, unstage, insert -->
     <include file="$(find mir_actions)/ros/launch/run_action_servers.launch">
         <arg name="align_with_workspace" value="$(arg align_with_workspace)" />
+        <arg name="domain" value="$(arg domain)" />
     </include>
 
 </launch>
