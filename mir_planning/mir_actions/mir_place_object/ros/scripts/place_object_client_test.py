@@ -11,8 +11,9 @@ from mir_planning_msgs.msg import GenericExecuteAction, GenericExecuteGoal
 if __name__ == "__main__":
     rospy.init_node("place_object_client_tester")
 
-    client = SimpleActionClient("place_object_server", GenericExecuteAction)
+    client = SimpleActionClient("place_unstage_object_server", GenericExecuteAction)
     client.wait_for_server()
+    print("Server found")
 
     if len(sys.argv) > 1:
         platform = str(sys.argv[1]).upper()
