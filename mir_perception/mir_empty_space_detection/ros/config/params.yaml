@@ -3,16 +3,16 @@ voxel_leaf_size: 0.01
 voxel_filter_field_name: z
 voxel_filter_limit_min: -0.15
 voxel_filter_limit_max: 0.3
-enable_passthrough_filter: true
+enable_passthrough_filter: False
 passthrough_filter_field_name: x
 passthrough_filter_limit_min: 0.45 # all the min distance starts from the baselink 
 passthrough_filter_limit_max: 0.7
-enable_cropbox_filter: false
+enable_cropbox_filter: True
 cropbox_filter_min_x: 0.45
 cropbox_filter_max_x: 0.8
 cropbox_filter_min_y: -0.4
 cropbox_filter_max_y: 0.4
-cropbox_filter_min_z: -0.2
+cropbox_filter_min_z: 0.0
 cropbox_filter_max_z: 0.6
 normal_radius_search: 0.03
 use_omp: true
