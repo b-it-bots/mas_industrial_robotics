@@ -1,13 +1,25 @@
 <?xml version="1.0"?>
 <launch>
 
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="heavy_objects" default="['m20_100']" />
 
-    <node pkg="mir_stage_object" type="stage_object_server.py"
-          name="stage_object_server" output="screen">
-        <rosparam param="heavy_objects" subst_value="True">
-            $(arg heavy_objects)
-        </rosparam>
-    </node>
+    <group if="$(eval arg (robot)=='youbot-brsu-2')">
+        <node pkg="mir_stage_object" type="stage_object_server.py"
+            name="stage_object_server" output="screen">
+            <rosparam param="heavy_objects" subst_value="True">
+                $(arg heavy_objects)
+            </rosparam>
+        </node>
+    </group>
+
+    <group if="$(eval arg (robot)=='youbot-brsu-4')">
+        <node pkg="mir_stage_object" type="stage_object_server_yb4.py"
+            name="stage_object_server" output="screen">
+            <rosparam param="heavy_objects" subst_value="True">
+                $(arg heavy_objects)
+            </rosparam>
+        </node>
+    </group>
 
 </launch>
