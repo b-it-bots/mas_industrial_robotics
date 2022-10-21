@@ -15,6 +15,7 @@
 #include <mir_planner_executor/actions/place/place_action.h>
 #include <mir_planner_executor/actions/stage/stage_action.h>
 #include <mir_planner_executor/actions/unstage/unstage_action.h>
+#include <mir_planner_executor/actions/place_unstage/place_unstage_action.h>
 
 // #include <mir_audio_receiver/AudioMessage.h>
 
@@ -37,6 +38,7 @@ PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh) : server_(nh, "execute_pla
   addActionExecutor("MOVE_BASE", new MoveAction());
   addActionExecutor("INSERT", new CombinedInsertAction());
   addActionExecutor("PERCEIVE", new CombinedPerceiveAction());
+  addActionExecutor("PLACE_UNSTAGE", new PlaceUnstageAction());
   ROS_INFO("Node initialized. PlannerExecutor is available!!!");
 }
 
