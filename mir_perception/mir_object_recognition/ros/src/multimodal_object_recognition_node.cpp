@@ -84,7 +84,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   // debug topics
   pub_debug_cloud_plane_ = nh_.advertise<sensor_msgs::PointCloud2>("output/debug_cloud_plane", 1);
 
-  nh_.param<bool>("debug_mode", debug_mode_, true);
+  nh_.param<bool>("debug_mode", debug_mode_, false);
   ROS_WARN_STREAM("[multimodal_object_recognition] Debug mode: " <<debug_mode_);
   // Pub pose array
   pub_pc_object_pose_array_  = nh_.advertise<geometry_msgs::PoseArray>("output/pc_object_pose_array", 10);
@@ -109,7 +109,6 @@ MultimodalObjectRecognitionROS::~MultimodalObjectRecognitionROS()
 void MultimodalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::ImageConstPtr &image,
                       const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
-  ROS_INFO("sync callback");
   if (pointcloud_msg_received_count_ < 1)
   {
     ROS_INFO("[multimodal_object_recognition_ros] Received enough messages");
@@ -449,23 +448,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             ROS_INFO("[RGB Object Height] Object %s length is greater than 9cm: %f", object.name.c_str(), max_pt.z);
           }
 
-          // Publisher to visualize a point 3D
-
-          // // create a point stamped publisher
-          // ros::Publisher max_pt_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/pringles_point", 1);
-
-          // // print the max point
-          // ROS_INFO("[RGB] Max point: %f, %f, %f", max_pt.x, max_pt.y, max_pt.z);
-
-          // // publish the max point 
-          // geometry_msgs::PointStamped max_pt_msg;
-          // max_pt_msg.header.frame_id = target_frame_id_;
-          // max_pt_msg.header.stamp = ros::Time::now();
-          // max_pt_msg.point.x = max_pt.x;
-          // max_pt_msg.point.y = max_pt.y;
-          // max_pt_msg.point.z = max_pt.z;
-          // max_pt_pub_.publish(max_pt_msg);
-
           sensor_msgs::PointCloud2 ros_filtered_rgb_pointcloud;
           pcl::toROSMsg(filtered_rgb_pointcloud, ros_filtered_rgb_pointcloud);
           ros_filtered_rgb_pointcloud.header.frame_id = target_frame_id_;
@@ -580,17 +562,16 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       ROS_ERROR("Cannot generate cv image...");
     }
 
-    // Kevin: not saving point cloud cluster as it's not needed for SS22 competition
     // Save pointcloud debug
-    // for (auto& cluster : clusters_3d)
-    // {
-    //   std::string filename = "";
-    //   filename = "";
-    //   filename.append("pcd_cluster_");
-    //   filename.append(std::to_string(time_now.toSec()));
-    //   mpu::object::savePcd(cluster, logdir_, filename);
-    //   ROS_INFO_STREAM("Point cloud:" << filename << " saved to " << logdir_);
-    // }
+    for (auto& cluster : clusters_3d)
+    {
+      std::string filename = "";
+      filename = "";
+      filename.append("pcd_cluster_");
+      filename.append(std::to_string(time_now.toSec()));
+      mpu::object::savePcd(cluster, logdir_, filename);
+      ROS_INFO_STREAM("Point cloud:" << filename << " saved to " << logdir_);
+    }
   }
 }
 
@@ -820,7 +801,6 @@ void MultimodalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
 void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::ConstPtr &msg)
 {
   std_msgs::String event_out;
-  ROS_INFO("inside the event callback");
   if (msg->data == "e_start")
   {
     // Synchronize callback
