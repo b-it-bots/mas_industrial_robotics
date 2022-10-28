@@ -4,7 +4,7 @@
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="heavy_objects" default="['m20_100']" />
 
-    <group if="$(eval arg('robot') =='youbot-brsu-2')">
+    <group if="$(eval robot == 'youbot-brsu-2')">
         <node pkg="mir_unstage_object" type="unstage_object_server.py"
           name="unstage_object_server" output="screen">
             <rosparam param="heavy_objects" subst_value="True">
@@ -14,7 +14,7 @@
     </group>
 
 
-    <group if="$(eval arg('robot') =='youbot-brsu-4')">
+    <group if="$(eval robot == 'youbot-brsu-4')">
         <node pkg="mir_unstage_object" type="unstage_object_server_yb4.py"
           name="unstage_object_server" output="screen">
             <rosparam param="heavy_objects" subst_value="True">
