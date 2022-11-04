@@ -196,8 +196,12 @@ class PregraspPlannerPipeline(object):
             config.linear_offset_y,
             config.linear_offset_z,
         ]
+
         self.generate_pregrasp_waypoint = config.generate_pregrasp_waypoint
-        self.ignore_orientation = config.ignore_orientation
+        self.default_ik_flag = config.default_ik_flag
+        self.orientation_independent_ik_flag = config.orientation_independent_ik_flag
+        self.adaptive_ik_flag = config.adaptive_ik_flag
+        
         self.joint_offset = [
             config.joint_1_offset,
             config.joint_2_offset,
@@ -277,6 +281,103 @@ class PregraspPlannerPipeline(object):
         else:
             return "IDLE"
 
+    def default_ik_routine(self, pose_samples, modified_pose, grasp_type):
+        rospy.loginfo('[Pregrasp Planning] Tying to find solution for default pick config.')
+
+        (
+            reachable_pose,
+            brics_joint_config,
+            joint_config,
+        ) = self.reachability_pose_selector.get_reachable_pose_and_configuration(
+            pose_samples, self.linear_offset, modified_pose
+        )
+
+        if reachable_pose:
+            rospy.loginfo('[Pregrasp Planning] Found solution')
+            self.selected_pose.publish(reachable_pose)
+            self.joint_configuration.publish(brics_joint_config)
+
+            joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
+            # if we want to reach a pre-pregrasp pose (specified by joint offsets)
+            # before reaching the final pose, generate a waypoint list
+            if abs(max(self.joint_offset, key=abs)) > 0 and self.generate_pregrasp_waypoint:
+                if grasp_type == "side_grasp":
+                    pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(
+                        joint_config, self.joint_offset_side_grasp
+                    )
+                elif grasp_type == "top_grasp":
+                    pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(
+                        joint_config, self.joint_offset
+                    )
+                pregrasp_msg = std_msgs.msg.Float64MultiArray()
+                pregrasp_msg.data = pregrasp_waypoint
+                joint_waypoints.list_of_joint_values_lists.append(pregrasp_msg)
+
+            grasp_msg = std_msgs.msg.Float64MultiArray()
+            grasp_msg.data = joint_config
+
+            joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
+            self.joint_waypoint_list_pub.publish(joint_waypoints)
+
+            rospy.loginfo('[Pregrasp Planning] Found solution using default pick config.')
+            return True
+        else:
+            rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
+            return False
+
+    def orientation_independent_ik_routine(self, transformed_pose, grasp_type):
+        rospy.loginfo("[Pregrasp Planning] Tryinng orientation independent planning.")
+        input_pose = geometry_msgs.msg.PoseStamped()
+        input_pose.header = transformed_pose.header
+        input_pose.pose.position = transformed_pose.pose.position
+        if grasp_type == "side_grasp":
+            # input_pose.pose.position.y -= 0.01
+            input_pose.pose.position.x -= 0.01
+        solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
+                input_pose.pose.position.x, input_pose.pose.position.y,
+                input_pose.pose.position.z, input_pose.header.frame_id)
+
+        if solution is None:
+            rospy.logerr('[Pregrasp Planning] Failed to find solution for orientation independent pick config.')
+            return False
+
+        reachable_pose, joint_msg = solution
+        rospy.loginfo('[Pregrasp Planning] Found solution')
+        self.selected_pose.publish(reachable_pose)
+        self.joint_configuration.publish(joint_msg)
+
+        joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
+        joint_config = [p.value for p in joint_msg.positions]
+        if grasp_type == "side_grasp" and self.generate_pregrasp_waypoint:
+            pregrasp_input_pose = copy.deepcopy(input_pose)
+            pregrasp_input_pose.pose.position.x -= 0.05
+            pregrasp_solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
+                    pregrasp_input_pose.pose.position.x,
+                    pregrasp_input_pose.pose.position.y,
+                    pregrasp_input_pose.pose.position.z,
+                    pregrasp_input_pose.header.frame_id)
+
+            if pregrasp_solution is None:
+                rospy.logerr("[Pregrasp Planning] Could not find IK solution for\
+                            orientation independent planning for pregrasp pose.")
+                return False
+
+            pregrasp_reachable_pose, pregrasp_joint_msg = pregrasp_solution
+            rospy.loginfo('[Pregrasp Planning] Found solution')
+            pregrasp_msg = std_msgs.msg.Float64MultiArray()
+            pregrasp_joint_config = [p.value for p in pregrasp_joint_msg.positions]
+            pregrasp_msg.data = pregrasp_joint_config
+            joint_waypoints.list_of_joint_values_lists.append(pregrasp_msg)
+
+        if len(joint_config) == 5:
+            grasp_msg = std_msgs.msg.Float64MultiArray()
+            grasp_msg.data = joint_config
+            joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
+            self.joint_waypoint_list_pub.publish(joint_waypoints)
+        
+        rospy.loginfo('[Pregrasp Planning] Found solution using orientation independent pick config.')
+        return True
+
     def running_state(self):
         """
         Executes the RUNNING state of the state machine.
@@ -307,7 +408,6 @@ class PregraspPlannerPipeline(object):
             self.event_out.publish(status)
             self.reset_component_data()
             return "INIT"
-        rospy.loginfo('[Pregrasp Planning] Tying to find solution for default pick config.')
 
         modified_pose, object_is_upwards = pregrasp_planner_utils.modify_pose(
             transformed_pose,
@@ -333,113 +433,45 @@ class PregraspPlannerPipeline(object):
         self.grasp_type.publish(grasp_type)
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
         self.pose_samples_pub.publish(pose_samples)
-        (
-            reachable_pose,
-            brics_joint_config,
-            joint_config,
-        ) = self.reachability_pose_selector.get_reachable_pose_and_configuration(
-            pose_samples, self.linear_offset, modified_pose
-        )
 
-        # if default IK failed and ignore orientation is set to true, try again with orientation independent IK
-        if not reachable_pose and self.ignore_orientation:
-            rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
-            rospy.loginfo('\033[92m'+"[Pregrasp Planning] Tryinng orientation independent planning.")
-            input_pose = geometry_msgs.msg.PoseStamped()
-            input_pose.header = transformed_pose.header
-            input_pose.pose.position = transformed_pose.pose.position
-            if grasp_type == "side_grasp":
-                # input_pose.pose.position.y -= 0.01
-                input_pose.pose.position.x -= 0.01
-            solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
-                    input_pose.pose.position.x, input_pose.pose.position.y,
-                    input_pose.pose.position.z, input_pose.header.frame_id)
-
-            if solution is None:
-                rospy.logerr("[Pregrasp Planning] Could not find IK solution for orientation independent planning.")
-                status = 'e_failure'
+        # if default ik is true, try default ik routine
+        if self.default_ik_flag and not self.adaptive_ik_flag:
+            if self.default_ik_routine(pose_samples, modified_pose, grasp_type):
+                status = "succeeded"
                 self.event_out.publish(status)
                 self.reset_component_data()
-                return 'INIT'
-
-            reachable_pose, joint_msg = solution
-            rospy.loginfo('[Pregrasp Planning] Found solution')
-            self.selected_pose.publish(reachable_pose)
-            self.joint_configuration.publish(joint_msg)
-
-            joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
-            joint_config = [p.value for p in joint_msg.positions]
-            if grasp_type == "side_grasp" and self.generate_pregrasp_waypoint:
-                pregrasp_input_pose = copy.deepcopy(input_pose)
-                pregrasp_input_pose.pose.position.x -= 0.05
-                pregrasp_solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
-                        pregrasp_input_pose.pose.position.x,
-                        pregrasp_input_pose.pose.position.y,
-                        pregrasp_input_pose.pose.position.z,
-                        pregrasp_input_pose.header.frame_id)
-
-                if pregrasp_solution is None:
-                    rospy.logerr("[Pregrasp Planning] Could not find IK solution for\
-                            orientation independent planning for pregrasp pose.")
-                    status = 'e_failure'
-                    self.event_out.publish(status)
-                    self.reset_component_data()
-                    return 'INIT'
-                pregrasp_reachable_pose, pregrasp_joint_msg = pregrasp_solution
-                rospy.loginfo('[Pregrasp Planning] Found solution pregrasp')
-                pregrasp_msg = std_msgs.msg.Float64MultiArray()
-                pregrasp_joint_config = [p.value for p in pregrasp_joint_msg.positions]
-                pregrasp_msg.data = pregrasp_joint_config
-                joint_waypoints.list_of_joint_values_lists.append(pregrasp_msg)
-
-            if len(joint_config) == 5:
-                grasp_msg = std_msgs.msg.Float64MultiArray()
-                grasp_msg.data = joint_config
-                joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
-                self.joint_waypoint_list_pub.publish(joint_waypoints)
-
-            self.event_out.publish("e_success")
-            self.reset_component_data()
-            return 'INIT'
-
-        else:
-            if not reachable_pose:
-                rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
+                return "INIT"
+            else:
                 status = "e_failure"
                 self.event_out.publish(status)
                 self.reset_component_data()
                 return "INIT"
+            
+        # if orientation independent IK failed and adaptive IK is set to true, try again with orientation independent IK
+        if self.orientation_independent_ik_flag and not self.adaptive_ik_flag:
+            if self.orientation_independent_ik_routine(transformed_pose, grasp_type):
+                self.event_out.publish("e_success")
+                self.reset_component_data()
+                return 'INIT'
+            else:
+                self.event_out.publish("e_failure")
+                self.reset_component_data()
+                return 'INIT'
 
-        rospy.loginfo('[Pregrasp Planning] Found solution')
-
-        self.selected_pose.publish(reachable_pose)
-        self.joint_configuration.publish(brics_joint_config)
-
-        joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
-        # if we want to reach a pre-pregrasp pose (specified by joint offsets)
-        # before reaching the final pose, generate a waypoint list
-        if abs(max(self.joint_offset, key=abs)) > 0 and self.generate_pregrasp_waypoint:
-            if grasp_type == "side_grasp":
-                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(
-                    joint_config, self.joint_offset_side_grasp
-                )
-            elif grasp_type == "top_grasp":
-                pregrasp_waypoint = self.joint_config_shifter.shift_joint_configuration(
-                    joint_config, self.joint_offset
-                )
-            pregrasp_msg = std_msgs.msg.Float64MultiArray()
-            pregrasp_msg.data = pregrasp_waypoint
-            joint_waypoints.list_of_joint_values_lists.append(pregrasp_msg)
-
-        grasp_msg = std_msgs.msg.Float64MultiArray()
-        grasp_msg.data = joint_config
-
-        joint_waypoints.list_of_joint_values_lists.append(grasp_msg)
-        self.joint_waypoint_list_pub.publish(joint_waypoints)
-
-        self.event_out.publish("e_success")
-        self.reset_component_data()
-        return "INIT"
+        # if adaptive IK is set to true, try both default and orientation independent IK routines
+        if self.adaptive_ik_flag:
+            if self.default_ik_routine(pose_samples, modified_pose, grasp_type):
+                self.event_out.publish("e_success")
+                self.reset_component_data()
+                return "INIT"
+            elif self.orientation_independent_ik_routine(transformed_pose, grasp_type):
+                self.event_out.publish("e_success")
+                self.reset_component_data()
+                return 'INIT'
+            else:
+                self.event_out.publish("e_failure")
+                self.reset_component_data()
+                return 'INIT'
 
     def reset_component_data(self):
         self.pose_in = None
