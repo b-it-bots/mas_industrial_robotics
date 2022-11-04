@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="domain" default="additional_domain" />
+    <arg name="domain" default="general_domain" />
     <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
     <arg name="domain_file" default="$(arg base_path)/domain.pddl" />
     <arg name="problem_file" default="$(arg base_path)/problems/p1.pddl" />
