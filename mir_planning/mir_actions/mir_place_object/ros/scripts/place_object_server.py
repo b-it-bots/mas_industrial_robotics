@@ -162,8 +162,8 @@ class PublishObjectPose(smach.State):
         
         # TODO: This z value should be tested
         
-        nearest_pose.pose.position.z += rospy.get_param("object_height_above_workspace", 0.035) # adding the height of the object above the workspace Should be change for vertical object
-        nearest_pose.pose.position.z += 0.03 # add 3cm height for droping the object
+        nearest_pose.pose.position.z += rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
+        nearest_pose.pose.position.z += 0.015 # add 3cm height for droping the object
         
         rospy.loginfo(nearest_pose.pose.position.z)
         rospy.loginfo("Publishing single pose to pregrasp planner")
@@ -312,7 +312,7 @@ def main():
             "GO_DEFAULT_THRESHOLD",
             gms.move_arm("place_default"),
             transitions={
-                "succeeded": "OVERALL_SUCCESS",
+                "succeeded": "OPEN_GRIPPER",
                 "failed": "GO_DEFAULT_THRESHOLD",
             }
         )
@@ -324,7 +324,8 @@ def main():
                     ("/mir_perception/empty_space_detector/event_in","e_add_cloud"),
                                 ],
                 event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
-                timeout_duration=50,),
+                timeout_duration=50,
+            ),
             transitions={
                 "success": "EMPTY_SPACE_TRIGGER",
                 "timeout": "CHECK_MAX_TRY_THRESHOLD",
@@ -338,7 +339,8 @@ def main():
             gbs.send_and_wait_events_combined(
                 event_in_list = [("/mir_perception/empty_space_detector/event_in","e_trigger")],
 		        event_out_list = [("/mir_perception/empty_space_detector/event_out","e_success",True)],
-		        timeout_duration = 50,),
+		        timeout_duration = 50,
+            ),
             transitions={
                 "success": "EMPTY_POSE_RECEIVE",
                 "timeout": "EMPTY_SPACE_CLOUD_ADD",

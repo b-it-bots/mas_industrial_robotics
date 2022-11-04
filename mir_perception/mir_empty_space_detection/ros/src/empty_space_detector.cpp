@@ -8,7 +8,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
 {
   
   nh_.param<std::string>("output_frame", output_frame_, "base_link");
-  nh_.param<bool>("enable_debug_pc_pub", enable_debug_pc_pub_, true);
+  nh_.param<bool>("enable_debug_pc", enable_debug_pc_pub_, false);
   float octree_resolution;
   nh_.param<float>("octree_resolution", octree_resolution, 0.0025);
   add_to_octree_ = false;
