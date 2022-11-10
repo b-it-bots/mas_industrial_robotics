@@ -163,7 +163,6 @@ class PublishObjectPose(smach.State):
         # TODO: This z value should be tested
         
         nearest_pose.pose.position.z += rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
-        nearest_pose.pose.position.z += 0.015 # add 3cm height for droping the object
         
         rospy.loginfo(nearest_pose.pose.position.z)
         rospy.loginfo("Publishing single pose to pregrasp planner")
