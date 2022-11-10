@@ -5,7 +5,7 @@ from __future__ import print_function
 import copy
 import rospy
 
-from atwork_commander_msgs.msg import Task, Object
+from atwork_commander_msgs.msg import Task, Object, RobotState
 from mir_knowledge_ros.problem_uploader import ProblemUploader
 from rosplan_knowledge_msgs.srv import KnowledgeUpdateServiceRequest as Req
 
@@ -18,9 +18,16 @@ class AtworkCommanderClient(object):
         self._debug = rospy.get_param("~debug", False)
         self._ignore_pick_locations = rospy.get_param("~ignore_pick_location", [])
         self._ignore_place_locations = rospy.get_param("~ignore_place_location", [])
+        self._robot_name = rospy.get_param("~robot_name", "ybrsu-bot")
         
         # subscribers
         self._task_sub = rospy.Subscriber("~task", Task, self._task_cb)
+        self._robot_state_pub = rospy.Publisher("~robot_state", RobotState, queue_size=1)
+        self._timer = rospy.Timer(rospy.Duration(0.5), self._timer_callback)
+
+        self._robot_state = RobotState()
+        self._robot_state.sender.team_name = "b-it-bots"
+        self._robot_state.sender.robot_name = self._robot_name
 
         # class variables
         self._processed_task_ids = []
@@ -30,6 +37,10 @@ class AtworkCommanderClient(object):
         self._obj_code_to_name = AtworkCommanderClient.get_obj_code_to_name_dict()
         self._cavity_start_code = getattr(Object, "CAVITY_START")
         self._cavity_end_code = getattr(Object, "CAVITY_END")
+
+    def _timer_callback(self, event):
+        self._robot_state.sender.header.stamp = rospy.Time.now()
+        self._robot_state_pub.publish(self._robot_state)
         
     def _task_cb(self, msg):
         task = copy.deepcopy(msg)
@@ -303,7 +314,7 @@ class AtworkCommanderClient(object):
                 ['on', [['o', 'r20'], ['l', 'SH01']]],
         """
         kv_list = [
-            [key, value.encode("utf-8")]
+            [key, value]
             for key, value in zip(self._attr_to_obj_type[attr_name], values)
         ]
         return [attr_name, kv_list]
