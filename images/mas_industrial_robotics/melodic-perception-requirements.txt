@@ -1,5 +1,5 @@
 enum34==1.1.10
-numpy==1.16.5
+numpy==1.22.0
 markdown==2.6.11
 mock==3.0.5
 tensorflow==2.7.2
