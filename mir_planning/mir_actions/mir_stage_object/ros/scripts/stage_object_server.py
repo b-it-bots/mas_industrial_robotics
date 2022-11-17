@@ -15,7 +15,6 @@ from smach_ros import ActionServerWrapper
 
 # ===============================================================================
 
-
 class SetupMoveArm(smach.State):
     def __init__(self, arm_target, is_heavy=False):
         smach.State.__init__(
@@ -47,29 +46,6 @@ class SetupMoveArm(smach.State):
             current_state="SetupMoveArm", text="Moving arm to " + platform
         )
         return "succeeded"
-
-
-# ===============================================================================
-
-class IsObjectHeavy(smach.State):
-    def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=["heavy", "light"],
-            input_keys=["goal", "heavy_objects"],
-            output_keys=[],
-        )
-
-    def execute(self, userdata):
-        obj = Utils.get_value_of(userdata.goal.parameters, "object")
-        if obj is None:
-            rospy.logwarn('Missing parameter "object". Using default.')
-            return "light"
-        for heavy_object in userdata.heavy_objects:
-            if heavy_object.upper() in obj.upper():
-                return "heavy"
-        return "light"
-
 
 # ===============================================================================
 
@@ -109,26 +85,8 @@ def main():
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",
             gms.move_arm("stage_intermediate"),
             transitions={
-                "succeeded": "CHECK_IF_OBJECT_HEAVY",
+                "succeeded": "SETUP_MOVE_ARM_PRE_STAGE",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            },
-        )
-
-        smach.StateMachine.add(
-            "CHECK_IF_OBJECT_HEAVY",
-            IsObjectHeavy(),
-            transitions={
-                "heavy": "MOVE_ARM_TO_STAGE_INTERMEDIATE_2",
-                "light": "SETUP_MOVE_ARM_PRE_STAGE",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_STAGE_INTERMEDIATE_2",
-            gms.move_arm("stage_intermediate_2"),
-            transitions={
-                "succeeded": "SETUP_MOVE_ARM_PRE_STAGE_HEAVY",
-                "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE_2",
             },
         )
 
@@ -165,42 +123,6 @@ def main():
             transitions={
                 "succeeded": "OPEN_GRIPPER",
                 "failed": "MOVE_ARM_STAGE"
-            },
-        )
-
-        smach.StateMachine.add(
-            "SETUP_MOVE_ARM_PRE_STAGE_HEAVY",
-            SetupMoveArm("pre", is_heavy=True),
-            transitions={
-                "succeeded": "MOVE_ARM_PRE_STAGE_HEAVY",
-                "failed": "SETUP_MOVE_ARM_PRE_STAGE_HEAVY",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_PRE_STAGE_HEAVY",
-            gms.move_arm(),
-            transitions={
-                "succeeded": "SETUP_MOVE_ARM_STAGE_HEAVY",
-                "failed": "MOVE_ARM_PRE_STAGE_HEAVY",
-            },
-        )
-
-        smach.StateMachine.add(
-            "SETUP_MOVE_ARM_STAGE_HEAVY",
-            SetupMoveArm("final", is_heavy=True),
-            transitions={
-                "succeeded": "MOVE_ARM_STAGE_HEAVY",
-                "failed": "SETUP_MOVE_ARM_STAGE_HEAVY",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_STAGE_HEAVY",
-            gms.move_arm(),
-            transitions={
-                "succeeded": "OPEN_GRIPPER",
-                "failed": "MOVE_ARM_STAGE_HEAVY"
             },
         )
 
