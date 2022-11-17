@@ -6,7 +6,7 @@
     YOUBOT-BRSU - robot
 
     ; robot available platforms, to store objects inside the robot
-    PLATFORM_MIDDLE PLATFORM_LEFT PLATFORM_RIGHT - robot_platform
+    PLATFORM_MIDDLE - robot_platform
 
     ; locations
     START END - location
