@@ -39,3 +39,5 @@ loop_rate: 10.0
 move_group: move_group
 arm: arm_1
 gripper_config_matrix: youbot_dynamixel_gripper
+side_grasp_offset_x: -0.01
+side_grasp_offset_y: 0.02

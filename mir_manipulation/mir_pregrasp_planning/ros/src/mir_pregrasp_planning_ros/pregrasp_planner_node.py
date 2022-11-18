@@ -202,6 +202,9 @@ class PregraspPlannerPipeline(object):
         self.orientation_independent_ik_flag = config.orientation_independent_ik_flag
         self.adaptive_ik_flag = config.adaptive_ik_flag
         
+        self.side_grasp_offset_x = config.side_grasp_offset_x
+        self.side_grasp_offset_y = config.side_grasp_offset_y
+
         self.joint_offset = [
             config.joint_1_offset,
             config.joint_2_offset,
@@ -331,8 +334,7 @@ class PregraspPlannerPipeline(object):
         input_pose.header = transformed_pose.header
         input_pose.pose.position = transformed_pose.pose.position
         if grasp_type == "side_grasp":
-            # input_pose.pose.position.y -= 0.01
-            input_pose.pose.position.x -= 0.01
+            input_pose.pose.position.x += self.side_grasp_offset_x
         solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
                 input_pose.pose.position.x, input_pose.pose.position.y,
                 input_pose.pose.position.z, input_pose.header.frame_id)
@@ -426,9 +428,10 @@ class PregraspPlannerPipeline(object):
         else:
             grasp_type = "side_grasp"
 
-        if grasp_type == "side_grasp":
-            modified_pose.pose.position.y += 0.02
-            modified_pose.pose.position.x -= 0.01
+        if grasp_type == "side_grasp": 
+
+            modified_pose.pose.position.x += self.side_grasp_offset_x
+            modified_pose.pose.position.y += self.side_grasp_offset_y
 
         self.grasp_type.publish(grasp_type)
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
