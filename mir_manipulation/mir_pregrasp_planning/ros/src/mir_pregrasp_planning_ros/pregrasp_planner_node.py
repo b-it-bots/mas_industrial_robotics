@@ -429,7 +429,8 @@ class PregraspPlannerPipeline(object):
             grasp_type = "side_grasp"
 
         if grasp_type == "side_grasp": 
-
+            
+            # Adding offset for side grasp to compensate for error in side grasp pose
             modified_pose.pose.position.x += self.side_grasp_offset_x
             modified_pose.pose.position.y += self.side_grasp_offset_y
 
