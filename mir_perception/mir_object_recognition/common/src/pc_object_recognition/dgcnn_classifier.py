@@ -52,8 +52,6 @@ class DGCNNClassifier(CNNBasedClassifiers):
 
         :return:    Predicted label and probablity
         """
-        # Kevin: this code is returning len 1000 instead of len 1?
-        # Look into how original code is implemented
         pointcloud_dataloader = DataLoader(infer_data(num_points=self.num_points, pcl_path=pointcloud),
                                            batch_size=self.test_batch_size, shuffle=True, drop_last=False)
 

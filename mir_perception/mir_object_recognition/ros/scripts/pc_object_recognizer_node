@@ -106,8 +106,6 @@ class PointcloudObjectRecognizer():
                     cloud = self.extract_pointcloud(
                         object.views[0].point_cloud, color="rgb")
 
-                    # Kevin: something wrong with passing the cloud to the classifier
-                    # check further comments in the classifier code
                     label, probability = self.classifier.classify(
                         cloud, center=True, rotate=True, pad=True)
 
@@ -123,8 +121,6 @@ class PointcloudObjectRecognizer():
                     print('name: ', name)
                     print('######################\n')
 
-                # Kevin: why are we not storing name and probability in object?
-                # here it's getting overwritten
                 object.name = name
                 object.probability = probability
             self.pub.publish(recognized_object_list)
