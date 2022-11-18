@@ -8,8 +8,6 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.descriptions import ParameterValue
 import os
-import xacro
-
 
 def generate_launch_description():
 
@@ -31,21 +29,13 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
-    # joint_state_publisher = Node(
-    #     package='joint_state_publisher',
-    #     executable='joint_state_publisher',
-    #     name='joint_state_publisher',
-    #     arguments=[youbot_xacro_file],
-    # )
-
-    robot_launch = IncludeLaunchDescription(
+    robot_common_launch = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('mir_bringup'), 'robots',),
-                f'/{robot_name}.launch.py'])
+                f'/youbot-brsu-common.launch.py'])
     )
 
     return LaunchDescription([
         robot_state_publisher,
-        robot_launch,
-        # joint_state_publisher,
+        robot_common_launch,
     ])

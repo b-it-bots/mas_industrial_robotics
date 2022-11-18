@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://ros.org/wiki/xacro"
+       name="youbot" >
+
+  <!-- The following included files set up definitions of parts of the robot body -->
+  <!-- misc common stuff -->
+  <xacro:include filename="$(find youbot_description)/urdf/common.xacro" />
+  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <!-- youbot base and rear platform -->
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform_v2.urdf.xacro" />
+  <!-- youbot arm and gripper-->
+  <xacro:include filename="$(find youbot_description)/urdf/youbot_arm/arm.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/misc/full_platform.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.urdf.xacro" />
+  <!--xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/d435_center/dynamixel_gripper.urdf.xacro" /-->
+  <!-- controller manager -->
+  <xacro:include filename="$(find youbot_description)/controller/ros_controller.urdf.xacro" />
+  <!-- materials for visualization -->
+  <xacro:include filename="$(find youbot_description)/urdf/materials.urdf.xacro" />
+  <!-- sensors -->
+  <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/asus_xtion_camera_mount.urdf.xacro"/>
+
+  <!-- Now we can start using the macros included above to define the actual youbot -->
+
+  <!-- standard youBot configuration -->
+  <xacro:youbot_base name="base"/>
+
+  <!-- Arm Plate moving arm 8cm foward and 45 degree rotation -->
+  <xacro:full_platform name="full_platform" parent="base_link" arm_angle="${-M_PI / 4}">
+    <origin xyz="0.0 0.0 ${0.021 + 0.025 + 0.025}" rpy="0 0 0" />    <!-- ${alignment with base top + spacer height + spacer height } -->
+  </xacro:full_platform>
+
+  <xacro:youbot_arm name="arm" parent="full_platform_arm_root_link">
+    <origin xyz="-0.022 0.0 0.037" rpy="0 0 0" />
+  </xacro:youbot_arm>
+
+  <!-- base laser front -->
+  <xacro:hokuyo_urg04_laser name="base_laser_front" parent="base" ros_topic="scan_front" update_rate="10" min_angle="-1.57" max_angle="1.57">
+    <origin xyz="0.3 0 -0.035" rpy="${M_PI} 0 0"/>
+  </xacro:hokuyo_urg04_laser>
+
+  <!-- base laser rear -->
+  <xacro:hokuyo_urg04_laser name="base_laser_rear" parent="base" ros_topic="scan_rear" update_rate="10" min_angle="-1.57" max_angle="1.57" >
+     <origin xyz="-0.3 0.0 -0.035" rpy="${M_PI} 0 ${M_PI}" />
+  </xacro:hokuyo_urg04_laser>
+
+  <xacro:dynamixel_gripper_v2 name="gripper" parent="arm_link_5">
+    <origin xyz="0.003 0 0.0052" rpy="0 0 0" />
+  </xacro:dynamixel_gripper_v2>
+
+  <!-- camera mount for Intel RealSense F200 -->
+  <!--xacro:asus_xtion_camera_mount  name="camera_mount" parent="gripper_motor_mount_link">
+      <origin xyz="0.035 -0.00 0.0" rpy="0 0.025 ${M_PI/2} " />
+  </xacro:asus_xtion_camera_mount-->
+
+  <!-- 3D camera on arm -->
+  <!-- xacro:intel_realsense_f200_camera name="arm_cam3d" parent="camera_mount_link">
+    <origin xyz="-0.05 -0.01 0.03" rpy="0.0 -${M_PI/2 - 0.03} 0.0" />
+  </xacro:intel_realsense_f200_camera -->
+
+  
+
+   <xacro:realsense_d435 name="arm_cam3d" parent="base_link">
+       <!--origin xyz="0.25 0.0 0.83" rpy="-0.05 0.917 -0.1" /-->  
+       <origin xyz="0.30 -0.05 0.80" rpy="0.00 1.137 0.0" />  
+   </xacro:realsense_d435>
+
+   <joint name="fixed_camera_joint" type="fixed">
+       <origin xyz="0.0149 0.0325 0.0125" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+       <parent link="arm_cam3d_camera_link"/>
+       <child link="fixed_camera_link"/>
+   </joint>
+   <!-- we create a fixed link from arm_cam3d_camera_link to
+        arm_cam3d_camera_color_optical_frame. See commit: https://github.com/b-it-bots/mas_industrial_robotics/commit/f6e3bfa997b430278adbf4b552a285ce43e47936 -->
+        <!-- this also means you have to edit the source frame of the input
+             pointcloud before transforming it. see commit: https://github.com/b-it-bots/mas_industrial_robotics/commit/f4dd2f3124779fbedd28beb636e9ca7019baa9cf -->
+   <link name="fixed_camera_link">
+       <visual>
+           <geometry>
+               <box size="0.0000001 0.000001 0.000001"/>
+           </geometry>
+       </visual>
+       <collision>
+           <geometry>
+               <box size="0.0000001 0.000001 0.000001"/>
+           </geometry>
+       </collision>
+   </link>
+
+
+</robot>
