@@ -149,7 +149,7 @@ class RGBObjectRecognizer():
                             result.roi = roi
                             objects.append(result)
                         if self.debug:
-                            print("DETECTED OBJECTS: ", labels)
+                            rospy.logdebug("DETECTED OBJECTS: ", labels)
 
                     else:
                         bboxes, probs, labels = self.model.classify(cv_img)
@@ -159,11 +159,11 @@ class RGBObjectRecognizer():
                     self.pub_result.publish(result_list)
 
                 except CvBridgeError as e:
-                    print(e)
+                    rospy.logerr(e)
                     return
 
             elif self.net == 'classification':
-                print("TODO: MobileNet")
+                rospy.logwarn("TODO: MobileNet")
 
     def publish_debug_img(self, debug_img):
         debug_img = np.array(debug_img, dtype=np.uint8)

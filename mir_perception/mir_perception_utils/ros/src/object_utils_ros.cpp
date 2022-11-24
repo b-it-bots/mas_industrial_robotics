@@ -76,27 +76,6 @@ PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry
     pass_through.filter(filtered_cloud);
   }
 
-
-  ////////////////////
-  // publish filtered cloud on topic for debugging
-  ///////////////////
-
-  // #include <sensor_msgs/PointCloud2.h>
-
-  // ros::NodeHandle nh("~");
-  // ros::Publisher pub_filtered_cloud_;
-  // pub_filtered_cloud_ = nh.advertise<sensor_msgs::PointCloud2>("CUSTOM_pub_filtered_cloud_", 1);
-
-  // // publish filtered cloud on topic for debugging
-
-  // sensor_msgs::PointCloud2 filtered_cloud_msg;
-  // pcl::toROSMsg(filtered_cloud, filtered_cloud_msg);
-  // filtered_cloud_msg.header.frame_id = "base_link";
-  // pub_filtered_cloud_.publish(filtered_cloud_msg);
-  // ROS_INFO_STREAM("\n************************");
-  // ROS_INFO_STREAM("############   filtered cloud published ##############");
-  // ROS_INFO_STREAM("*************************\n");
-
   Eigen::Vector4f centroid;
   pcl::compute3DCentroid(filtered_cloud, centroid);
 

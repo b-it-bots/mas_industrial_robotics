@@ -64,13 +64,10 @@ class PointcloudObjectRecognizer():
             classifier_file = os.path.join(model_dir, 'classifier.pkl')
             label_encoder = os.path.join(model_dir, 'label_encoder.pkl')
             self.classifier = FeatureBasedClassifiers(classifier_file, label_encoder)
+        
         elif model == "cnn_based":
-
-            # model.t7 is the model file, we are not using .cpkt file
             checkpoint = os.path.join(model_dir, 'model.t7')
-
             module_name = "pc_object_recognition" + "." + model_id.lower()+"_"+"classifier"
-
             class_name = model_id.upper()+"Classifier"
             ClassifierClass = getattr(
                 importlib.import_module(module_name), class_name)
@@ -116,11 +113,7 @@ class PointcloudObjectRecognizer():
                         name = "unknown object found"
                         probability = 0.0
                         continue
-
-                    print('\n######################')
-                    print('name: ', name)
-                    print('######################\n')
-
+                    rospy.loginfo('Name of the object found: ',name)
                 object.name = name
                 object.probability = probability
             self.pub.publish(recognized_object_list)
