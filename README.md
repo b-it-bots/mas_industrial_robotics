@@ -1,5 +1,5 @@
 ## Noetic status
-The code currently compiles, but there's no guarantee that the code works (e.g. Python/Tensorflow related code will not work since the dependencies are not installed etc.). However, you should be able to launch the robot in simulation and run the navigation stack.
+The code currently compiles, the full pipeline works with rgb-recognizer but pc object recognition is not tested. The refree box interface is tested.
 
 - You may need to install the following packages:
   - ros-noetic-octomap
