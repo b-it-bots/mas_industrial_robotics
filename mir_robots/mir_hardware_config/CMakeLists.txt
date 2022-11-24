@@ -11,6 +11,7 @@ find_package(mir_description REQUIRED)
 find_package(youbot_description REQUIRED)
 
 set(robot_list
+  youbot-brsu-2
   youbot-brsu-3
 )
 
