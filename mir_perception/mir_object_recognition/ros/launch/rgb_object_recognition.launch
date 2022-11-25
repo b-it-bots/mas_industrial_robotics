@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="net" default="detection" />
-  <arg name="classifier" default="yolov5" />
-  <arg name="dataset" default="summer_competition_22_dataset" />
+  <arg name="classifier" default="yolov7" />
+  <arg name="dataset" default="ss22_local_competition" />
   <arg name="model_dir" default="$(find mir_rgb_object_recognition_models)/common/models/$(arg classifier)/$(arg dataset)" />
 
   <group ns="mir_perception">

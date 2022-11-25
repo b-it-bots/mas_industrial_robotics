@@ -174,10 +174,15 @@ class RGBObjectRecognizer():
 if __name__ == '__main__':
     rospy.init_node("rgb_object_recognizer")
     rospy.loginfo('Started object recognition node.')
+    net = rospy.get_param("~net")
+    classifier_name = rospy.get_param("~classifier")
+    dataset = rospy.get_param("~dataset")
+    model_dir = rospy.get_param("~model_dir")
     weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                           'common', 'models', 'yolov7', 'ss22_local_competition', "best.pt")
+                           'common', 'models', classifier_name, dataset, "best.pt")
 
     object_recognizer = RGBObjectRecognizer(
         weights=weights, debug_mode=True)
-    rospy.loginfo('Using %s with weights: %s', object_recognizer.model_name, weights)
+    rospy.loginfo("RGB Recognizer is ready using %s : %s , dataset: %s ",
+                  net, classifier_name, dataset)
     rospy.spin()
