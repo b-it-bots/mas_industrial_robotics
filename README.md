@@ -13,7 +13,7 @@ mkdir -p ~/mir/src
 ```bash
 cd ~/mir/src
 
-git clone -b humble/devel https://github.com/vamsikalagaturu/mas_industrial_robotics.git
+git clone -b humble/bringup https://github.com/vamsikalagaturu/mas_industrial_robotics.git
 ```
 
 - Clone the dependency packages
@@ -21,4 +21,9 @@ git clone -b humble/devel https://github.com/vamsikalagaturu/mas_industrial_robo
 cd ~/mir/src
 
 vcs import < mas_industrial_robots/mir.repos
+```
+
+- Launch the bringup
+```bash
+ros2 launch mir_bringup robot.launch.py
 ```
