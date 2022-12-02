@@ -58,7 +58,7 @@ TeleOpJoypad::TeleOpJoypad() :
                         "/cmd_vel", 1);
   pub_arm_cart_vel_ = this->create_publisher<geometry_msgs::msg::TwistStamped>(
           "/arm_1/arm_controller/cartesian_velocity_command", 1);
- //pub_gripper_command_ = this->create_publisher<mcr_manipulation_msgs::GripperCommand>("gripper_command", 1);
+  pub_gripper_command_ = this->create_publisher<mir_interfaces::msg::GripperCommand>("/arm_1/gripper_command", 1);
 
   srv_base_motors_on_ = this->create_client<std_srvs::srv::Empty>("/base/switchOnMotors");
   srv_base_motors_off_ = this->create_client<std_srvs::srv::Empty>("/base/switchOffMotors");
@@ -229,14 +229,12 @@ bool TeleOpJoypad::getArmParameter()
 
 bool TeleOpJoypad::moveGripper(int gripper_command)
 {
-  /*
-  mcr_manipulation_msgs::GripperCommand command_msgs;
+  mir_interfaces::msg::GripperCommand command_msg;
 
-  command_msgs.command = gripper_command;
+  command_msg.command = gripper_command;
 
-  pub_gripper_command_.publish(command_msgs);
+  pub_gripper_command_ -> publish(command_msg);
 
-  */
   return true;
 }
 
@@ -365,10 +363,10 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::msg::Joy::SharedPtr command)
       button_gripper_active_ = !button_gripper_active_;
       if (button_gripper_active_) {
         RCLCPP_INFO(this->get_logger(), "open gripper");
-        //this->moveGripper(mcr_manipulation_msgs::GripperCommand::OPEN);
+        this->moveGripper(mir_interfaces::msg::GripperCommand::OPEN);
       } else {
         RCLCPP_INFO(this->get_logger(), "close gripper");
-        //this->moveGripper(mcr_manipulation_msgs::GripperCommand::CLOSE);
+        this->moveGripper(mir_interfaces::msg::GripperCommand::CLOSE);
       }
     }
 

@@ -21,6 +21,7 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "std_srvs/srv/empty.hpp"
+#include "mir_interfaces/msg/gripper_command.hpp"
 
 #define MAX_JOYPAD 1.0
 
@@ -99,7 +100,7 @@ class TeleOpJoypad : public rclcpp::Node
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_base_cart_vel_;
   rclcpp::Publisher<brics_actuator::msg::JointVelocities>::SharedPtr  pub_arm_joint_vel_;
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr  pub_arm_cart_vel_;
-  //rclcpp::Publisher<mcr_manipulation_msgs::msg::GripperCommand>  pub_gripper_command_;
+  rclcpp::Publisher<mir_interfaces::msg::GripperCommand>::SharedPtr  pub_gripper_command_;
 
   // Service clients
   rclcpp::Client<std_srvs::srv::Empty>::SharedPtr srv_arm_motors_on_;

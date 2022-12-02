@@ -13,6 +13,7 @@ find_package(joy REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(moveit_msgs REQUIRED)
+find_package(mir_interfaces REQUIRED)
 
 include_directories(
   ros/include
@@ -29,6 +30,7 @@ ament_target_dependencies(teleop_joypad_node
     sensor_msgs
     std_srvs
     moveit_msgs
+    mir_interfaces
 )
 
 
