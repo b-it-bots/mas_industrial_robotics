@@ -149,7 +149,7 @@ class RGBObjectRecognizer():
                             result.roi = roi
                             objects.append(result)
                         if self.debug:
-                            rospy.logdebug("DETECTED OBJECTS: ", labels)
+                            rospy.logdebug("Detected Objects: %s", labels)
 
                     else:
                         bboxes, probs, labels = self.model.classify(cv_img)

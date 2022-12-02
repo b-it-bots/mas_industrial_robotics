@@ -113,7 +113,7 @@ class PointcloudObjectRecognizer():
                         name = "unknown object found"
                         probability = 0.0
                         continue
-                    rospy.loginfo('Name of the object found: ',name)
+                    rospy.loginfo('Name of the object found: %s', name)
                 object.name = name
                 object.probability = probability
             self.pub.publish(recognized_object_list)
