@@ -14,6 +14,7 @@ find_package(robot_state_publisher REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(youbot_description REQUIRED)
 find_package(youbot_driver_ros_interface REQUIRED)
+find_package(mir_hardware_config REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

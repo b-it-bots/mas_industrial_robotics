@@ -9,6 +9,17 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <exec_depend>mir_hardware_config</exec_depend>
+  <exec_depend>mir_teleop</exec_depend>
+  <exec_depend>youbot_description</exec_depend>
+  <exec_depend>mir_description</exec_depend>
+  <exec_depend>mcr_description</exec_depend>
+  <exec_depend>brics_actuator</exec_depend>
+  <exec_depend>youbot_driver</exec_depend>
+
+  <depend>youbot_driver_ros_interface</depend>
+
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
