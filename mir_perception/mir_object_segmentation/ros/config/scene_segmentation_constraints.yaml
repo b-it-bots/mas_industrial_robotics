@@ -4,7 +4,7 @@ scene_segmentation:
     voxel_filter_field_name: z
     voxel_filter_limit_min: -0.15
     voxel_filter_limit_max: 0.3
-    enable_passthrough_filter: false
+    enable_passthrough_filter: true
     passthrough_filter_field_name: x
     passthrough_filter_limit_min: 0.0
     passthrough_filter_limit_max: 0.8

@@ -13,7 +13,6 @@ import time
 import rospkg
 import yaml
 
-
 class PlannerWrapper(object):
 
     """A common planner wrapper which calls other planner wrapper based on

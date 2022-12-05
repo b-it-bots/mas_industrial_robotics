@@ -41,6 +41,7 @@ add_executable(planner_executor
     ros/src/actions/pick/combined_pick_action.cpp
 
     ros/src/actions/place/place_action.cpp
+    ros/src/actions/place_unstage/place_unstage_action.cpp
 
     ros/src/actions/perceive/base_perceive_action.cpp
     ros/src/actions/perceive/perceive_action.cpp

@@ -5,6 +5,7 @@ from __future__ import print_function
 import geometry_msgs.msg
 import rospy
 import tf
+import math
 
 class Utils(object):
 
@@ -101,3 +102,23 @@ class Utils(object):
             pose.pose.orientation.w = q[3]
 
             return pose
+    
+    @staticmethod
+    def get_distance_between_poses(pose1, pose2):
+        """
+        param pose1: the first pose.
+        type pose1: geometry_msgs.msg.PoseStamped()
+        param pose2: the second pose.
+        type pose2: geometry_msgs.msg.PoseStamped()
+        return: the distance between the two poses.
+        return type: float
+        """
+
+        print("pose1: {}".format(pose1.pose.position))
+        print("pose2: {}".format(pose2.pose.position))
+
+        return math.sqrt(
+            math.pow(pose1.pose.position.x - pose2.pose.position.x, 2) +
+            math.pow(pose1.pose.position.y - pose2.pose.position.y, 2) +
+            math.pow(pose1.pose.position.z - pose2.pose.position.z, 2)
+        )

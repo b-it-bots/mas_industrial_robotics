@@ -26,6 +26,8 @@
     <!-- should WBC only move the base to align with the object and not use pregrasp planner?-->
     <arg name="base_motion_only" default="false"/>
 
+    <arg name="camera_name" default="tower_cam3d" />
+
     <!-- =================================================================== -->
 
     <!-- ======= -->
@@ -48,7 +50,9 @@
     <!-- NAVIGATION -->
     <!-- ========== -->
     <!-- move_base with dwa approach -->
-    <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" />
+
+    <!-- commenting the 2dnav launch to control continuous warnings in planning_bringup -->
+    <!-- <include file="$(find mir_2dnav)/ros/launch/2dnav.launch" /> -->
 
     <!-- move_base action lib wrapper -->
     <include file="$(find mir_move_base_safe)/ros/launch/move_base.launch" />
@@ -97,7 +101,9 @@
     <!-- PERCEPTION -->
     <!-- ========== -->
     <!-- barrier tape detection -->
-    <include file="$(find mir_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch" />
+    <include file="$(find mir_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch">
+        <arg name="camera_name" value="$(arg camera_name)"/>
+    </include>
 
     <!-- <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" > -->
     <!--     <arg name="target_frame" value="$(arg object_perception_target_frame)" /> -->
@@ -124,7 +130,9 @@
 
     <!-- cavity finder -->
     <!-- <include file="$(find mcr_cavity_detector)/ros/launch/detector_selector_cavity.launch"/> -->
-    <include file="$(find mir_ppt_detection)/launch/ppt_detector.launch"/>
+    <include file="$(find mir_ppt_detection)/launch/ppt_detector.launch">
+        <arg name="camera_name" value="$(arg camera_name)"/>
+    </include>
 
     <!-- RGB image recognition finder -->
     <!-- <include file="$(find mcr_multimodal_object_identification)/ros/launch/multimodal_object_identification.launch"/> -->
@@ -132,12 +140,20 @@
     <!-- Multimodal object recognition-->
     <include file="$(find mir_object_recognition)/ros/launch/multimodal_object_recognition.launch">
         <arg name="target_frame" value="base_link_static"/>
+        <arg name="camera_name" value="$(arg camera_name)"/>
     </include>
     <!-- trims 3 last characters of objects in case they come with count information -->
     <!--include file="$(find mcr_poses_along_object)/ros/launch/poses_along_object.launch"/-->
 
-    <include file="$(find mir_perceive_mock)/ros/launch/perceive_aruco_server.launch"/>
+    <include file="$(find mir_perceive_mock)/ros/launch/perceive_aruco_server.launch">
+        <arg name="camera_name" value="$(arg camera_name)"/>
+    </include>
 
+    <!-- Empty space detector -->
+
+    <include file = "$(find mir_empty_space_detection)/ros/launch/empty_space_detector.launch">
+        <arg name="camera_name" value="$(arg camera_name)"/>
+    </include>
 
     <!-- =================================================================== -->
 
@@ -156,6 +172,7 @@
     <!-- youbot actions (action lib) : move base safe, perceive, pick, stage, unstage, insert -->
     <include file="$(find mir_actions)/ros/launch/run_action_servers.launch">
         <arg name="align_with_workspace" value="$(arg align_with_workspace)" />
+        <arg name="domain" value="$(arg domain)" />
     </include>
 
 </launch>

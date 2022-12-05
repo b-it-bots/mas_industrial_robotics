@@ -114,9 +114,7 @@ class SetupMoveBaseWithDBC(smach.State):
         dbc_pose.header.frame_id = "base_link_static"
         dbc_pose.pose.position.x = target_pose_dict["x"]
         dbc_pose.pose.position.y = target_pose_dict["y"]
-        quat = tf.transformations.quaternion_from_euler(
-            0.0, 0.0, target_pose_dict["theta"]
-        )
+        quat = tf.transformations.quaternion_from_euler(0, 0, target_pose_dict["theta"])
         dbc_pose.pose.orientation = Quaternion(*quat)
 
         userdata.base_pose_index += 1
@@ -231,14 +229,13 @@ def main():
     # Open the container
     sm.userdata.arm_pose_list = [
         "look_at_workspace_from_near",
-        "look_at_workspace_from_near_left",
-        "look_at_workspace_from_near_right",
     ]
     sm.userdata.arm_pose_index = 0
 
     base_x_offset = rospy.get_param("~base_x_offset", 0.0)
     base_y_offset = rospy.get_param("~base_y_offset", 0.25)
     base_theta_offset = rospy.get_param("~base_theta_offset", 0.0)
+    
     sm.userdata.base_pose_list = [
         {"x": 0.0, "y": 0.0, "theta": 0.0},
         {"x": base_x_offset, "y": base_y_offset, "theta": base_theta_offset},
@@ -318,7 +315,7 @@ def main():
             SetupMoveBaseWithDBC(),
             transitions={
                 "pose_set": "MOVE_BASE_WITH_DIRECT_BASE_CONTROLLER",
-                "tried_all": "POPULATE_RESULT_WITH_OBJECTS",
+                "tried_all": "STOP_OBJECT_LIST_MERGER",
             },
         )
 
@@ -392,7 +389,7 @@ def main():
                         True,
                     )
                 ],
-                timeout_duration=10,
+                timeout_duration=60,
             ),
             transitions={
                 "success": "STOP_RECOGNITION",

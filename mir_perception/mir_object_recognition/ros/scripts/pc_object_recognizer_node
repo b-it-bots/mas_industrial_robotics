@@ -1,17 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import colorsys
 import importlib
 import os
-import struct
 
 import numpy as np
-import pc_object_recognition.utils.pc_utils as pc_utils
 import roslib
 import rospy
 import sensor_msgs.point_cloud2
 import yaml
 from mas_perception_msgs.msg import ObjectList
+import pc_object_recognition.utils.pc_utils as pc_utils
 from pc_object_recognition.cnn_based_classifiers import CNNBasedClassifiers
 from pc_object_recognition.dgcnn_classifier import DGCNNClassifier
 from pc_object_recognition.feature_based_classifiers import FeatureBasedClassifiers
@@ -29,48 +28,55 @@ class PointcloudObjectRecognizer():
     :param ngaussians:    Number of gaussians of FV
     :param variance:    Variance of gmm model for FV
     """
-    
+
     def __init__(self, model, model_id, dataset, model_dir, ngaussians=2, variance=0.05):
         self.model = model
         dataset_dir = model_id + "_" + dataset
         #cfg_folder = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"), 'common', 'config')
-        
-        model_config_file = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"), 
-                            'ros', 'config', "pc_classifier_config.yaml")
-        
+
+        model_config_file = os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
+                                         'ros', 'config', "pc_classifier_config.yaml")
+
         if os.path.isfile(model_config_file):
             configs = {}
             with open(model_config_file, 'r') as infile:
-                configs = yaml.load(infile)
+                configs = yaml.safe_load(infile)
             self.label_to_name = configs['objects']
         else:
             rospy.logerr("Model configuration not found for %s", model)
 
         # Subscriber and publisher
-        self.sub = rospy.Subscriber("input/object_list",ObjectList, self.recognize_object_topic_cb)
-        self.pub = rospy.Publisher("output/object_list",ObjectList, queue_size=1)
+        self.sub = rospy.Subscriber(
+            "input/object_list", ObjectList, self.recognize_object_topic_cb)
+        self.pub = rospy.Publisher(
+            "output/object_list", ObjectList, queue_size=1)
 
-        if model == "feature_based":        
+        if model == "feature_based":        # we dont need this part now only use cnn_based
+
             feature_extraction = FVRDDFeatureExtraction(model_id)
             self.fe_method = feature_extraction.get_method()
             if model_id == "fvrdd":
-                gmm = pc_utils.get_3d_grid_gmm(subdivisions=[ngaussians, ngaussians, ngaussians], variance=variance)
+                gmm = pc_utils.get_3d_grid_gmm(
+                    subdivisions=[ngaussians, ngaussians, ngaussians], variance=variance)
                 feature_extraction.set_fv_params(gmm, use_rdd=True)
             elif model_id == "rdd":
                 feature_extraction.set_rdd_params(color=True)            
             classifier_file = os.path.join(model_dir, 'classifier.pkl')
             label_encoder = os.path.join(model_dir, 'label_encoder.pkl')
             self.classifier = FeatureBasedClassifiers(classifier_file, label_encoder)
+        
         elif model == "cnn_based":
-            checkpoint = os.path.join(model_dir , 'model.ckpt')
+            checkpoint = os.path.join(model_dir, 'model.t7')
             module_name = "pc_object_recognition" + "." + model_id.lower()+"_"+"classifier"
             class_name = model_id.upper()+"Classifier"
-            ClassifierClass = getattr(importlib.import_module(module_name), class_name)
+            ClassifierClass = getattr(
+                importlib.import_module(module_name), class_name)
             model_configs = configs['model'][model][model_id.lower()]
-            self.classifier = ClassifierClass(checkpoint_path=checkpoint, 
-                                                num_classes=model_configs['num_classes'], 
-                                                num_points=model_configs['num_points'], 
-                                                cloud_dim=model_configs['cloud_dim'])
+
+            self.classifier = ClassifierClass(model_path=checkpoint,
+                                              num_classes=model_configs['num_classes'],
+                                              num_points=model_configs['num_points'],
+                                              cloud_dim=model_configs['cloud_dim'])
 
     def recognize_object_topic_cb(self, object_list):
         """
@@ -79,22 +85,35 @@ class PointcloudObjectRecognizer():
         :param object_list:     Object list
         :type:                    mas_perception_msgs.object_list
         """
-        
+
         if object_list.objects:
             rospy.loginfo("%d clouds received ", len(object_list.objects))
             recognized_object_list = ObjectList()
             recognized_object_list = object_list.objects
+
             for object in recognized_object_list:
                 if self.model == "feature_based":
-                    cloud = self.extract_pointcloud(object.views[0].point_cloud, color="hsv")
+                    cloud = self.extract_pointcloud(
+                        object.views[0].point_cloud, color="hsv")
                     features = self.fe_method(cloud)
-                    features = np.reshape(features, (1,-1))
+                    features = np.reshape(features, (1, -1))
                     name, probability = self.classifier.classify(features)
                     name = name[0]
                 elif self.model == "cnn_based":
-                    cloud = self.extract_pointcloud(object.views[0].point_cloud, color="rgb")
-                    label, probability = self.classifier.classify(cloud, center=True, rotate=True, pad=True)
-                    name = self.label_to_name[label]
+                    cloud = self.extract_pointcloud(
+                        object.views[0].point_cloud, color="rgb")
+
+                    label, probability = self.classifier.classify(
+                        cloud, center=True, rotate=True, pad=True)
+
+                    if (label, probability) != (None, None):
+                        name = self.label_to_name[label]
+                        probability = probability
+                    else:
+                        name = "unknown object found"
+                        probability = 0.0
+                        continue
+                    rospy.loginfo('Name of the object found: %s', name)
                 object.name = name
                 object.probability = probability
             self.pub.publish(recognized_object_list)
@@ -111,21 +130,25 @@ class PointcloudObjectRecognizer():
         :return:        Extracted pointcloud
         :return type:     numpy.array
         """
-        xyzrgb_gen = sensor_msgs.point_cloud2.read_points(pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
+        xyzrgb_gen = sensor_msgs.point_cloud2.read_points(
+            pc, skip_nans=False, field_names=("x", "y", "z", "rgb"))
 
         pointcloud = [list(elem) for elem in list(xyzrgb_gen)]
         pointcloud = np.array(pointcloud)
-        float_rgb = pointcloud[:,3][np.newaxis].T
+        float_rgb = pointcloud[:, 3][np.newaxis].T
 
         # Convert float rgb to hsv/rgb
         if color == "hsv":
-            pc_color = np.array([list(colorsys.rgb_to_hsv(*pc_utils.float_to_rgb(frgb))) for frgb in float_rgb])
+            pc_color = np.array(
+                [list(colorsys.rgb_to_hsv(*pc_utils.float_to_rgb(frgb))) for frgb in float_rgb])
         elif color == "rgb":
-            pc_color = np.array([list(pc_utils.float_to_rgb(frgb)) for frgb in float_rgb])
+            pc_color = np.array([list(pc_utils.float_to_rgb(frgb))
+                                for frgb in float_rgb])
 
-        pointcloud = np.hstack([pointcloud[:,0:3], pc_color])
+        pointcloud = np.hstack([pointcloud[:, 0:3], pc_color])
 
         return pointcloud
+
 
 if __name__ == '__main__':
     rospy.init_node('pc_object_recognizer')
@@ -135,6 +158,8 @@ if __name__ == '__main__':
     model_dir = rospy.get_param("~model_dir")
     dataset = rospy.get_param("~dataset")
 
-    object_recognizer = PointcloudObjectRecognizer(model, model_id, dataset, model_dir)
-    rospy.loginfo("PCL Recognizer is ready using: %s , model: %s ", model, model_id)
+    object_recognizer = PointcloudObjectRecognizer(
+        model, model_id, dataset, model_dir)
+    rospy.loginfo('\033[92m'+"PCL Recognizer is ready using %s , model: %s ",
+                  model, model_id)
     rospy.spin()

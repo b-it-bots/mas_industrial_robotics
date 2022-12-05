@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
+    <arg name="camera_name" default="arm_cam3d" />
     <arg name="target_frame" default="base_link" />
     <arg name="marker_length" default="0.04" /> <!-- in meters -->
     <arg name="retry_attempts" default="3" />
@@ -9,8 +10,8 @@
 
     <node pkg="mir_perceive_aruco_cube" type="perceive_aruco_cube"
           name="aruco_cube_perceiver" output="screen" ns="mir_perception">
-        <remap from="~input_rgb_image" to="/arm_cam3d/rgb/image_raw"/>
-        <remap from="~camera_info" to="/arm_cam3d/rgb/camera_info"/>
+        <remap from="~input_rgb_image" to="/$(arg camera_name)/rgb/image_raw"/>
+        <remap from="~camera_info" to="/$(arg camera_name)/rgb/camera_info"/>
         <remap from="~output_pose" to="/mir_perception/aruco_cube_perceiver/object_pose"/>
         <remap from="~output_object_list" to="$(arg output_object_list)"/>
 

@@ -52,7 +52,7 @@ void object::estimatePose(const BoundingBox &box, geometry_msgs::PoseStamped &po
   pose.pose.orientation.w = q.w();
 }
 
-void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
+PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
                           std::string shape, float passthrough_lim_min_offset,
                           float passthrough_lim_max_offset)
 {
@@ -70,6 +70,7 @@ void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs:
     pcl::getMinMax3D(*xyz_input_cloud, min_pt, max_pt);
     double limit_min = min_pt.z + passthrough_lim_min_offset;
     double limit_max = max_pt.z + passthrough_lim_max_offset;
+
     pass_through.setFilterLimits(limit_min, limit_max);
     pass_through.setInputCloud(xyz_input_cloud);
     pass_through.filter(filtered_cloud);
@@ -123,6 +124,8 @@ void object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs:
   m.getRPY(roll, pitch, yaw);
 
   pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw);
+
+  return filtered_cloud;
 }
 
 void object::transformPose(const boost::shared_ptr<tf::TransformListener> tf_listener,

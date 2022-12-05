@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
     <arg name="debug" default="true" />
     <arg name="ignore_pick_location" default="['tt']" />
     <arg name="ignore_place_location" default="[]" />
@@ -11,12 +12,16 @@
               name="atwork_commander_client" output="screen" >
 
             <remap from="~task" to="/atwork_commander/task"/>
+            <remap from="~robot_state" to="/atwork_commander/robot_state"/>
             <param name="debug" type="bool" value="$(arg debug)"/>
             <rosparam param="ignore_pick_location" subst_value="True">
                 $(arg ignore_pick_location)
             </rosparam>
             <rosparam param="ignore_place_location" subst_value="True">
                 $(arg ignore_place_location)
+            </rosparam>
+            <rosparam param="robot_name" subst_value="True">
+                $(arg robot)
             </rosparam>
         </node>
 

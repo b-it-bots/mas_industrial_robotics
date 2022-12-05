@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
+    <arg name="camera_name" default="arm_cam3d" />
     <arg name="object_shape_learned_params_file"
          default="$(find mir_ppt_detection)/config/object_shape_learned_params.yaml"/>
 
@@ -13,7 +14,7 @@
 
         <node pkg="mir_ppt_detection" type="ppt_detector" name="ppt_detector" output="screen">
 
-            <remap from="~points" to="/arm_cam3d/depth_registered/points"/>
+            <remap from="~points" to="/$(arg camera_name)/depth_registered/points"/>
             <remap from="~output_cavity" to="/mcr_perception/cavity_pose_selector/cavity" />
             <remap from="~event_in" to="/mcr_perception/cavity_finder/input/event_in" />
             <remap from="~event_out" to="/mcr_perception/cavity_finder/output/event_out" />

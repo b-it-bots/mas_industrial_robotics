@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <launch>
 
+    <arg name="camera_name" default="arm_cam3d" />
     <arg name="static_transform_frame" default="base_link_static" />
     <arg name="base_motion_enabled" default="false" />
 
     <include file="$(find mir_perceive_aruco_cube)/ros/launch/perceive_aruco_cube.launch" >
       <arg name="target_frame" value="$(arg static_transform_frame)" />
+      <arg name="camera_name" value="$(arg camera_name)" />
     </include>
 
 

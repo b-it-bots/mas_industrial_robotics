@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import json
 import math
 import re
 
@@ -15,6 +16,8 @@ from mas_perception_msgs.msg import ObjectList, Object
 from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
 import tf
 from tf.transformations import euler_from_quaternion
+from mcr_manipulation_msgs.msg import GripperCommand
+from std_msgs.msg import String
 
 class Bunch:
     def __init__(self, **kwds):
@@ -203,26 +206,71 @@ class check_move_group_feedback(smach.State):
         else:
             return "failed"
 
-
 class control_gripper(smach.State):
     def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0):
         smach.State.__init__(self, outcomes=["succeeded"])
 
-        joint_names = ["gripper_motor_right_joint", "gripper_motor_left_joint"]
-        self.gripper_moveit_client = MoveitClient(
-            "/gripper_", target, timeout, joint_names
-        )
+        self.command = GripperCommand()
+        self.current_state = "GRIPPER_OPEN"
+        self.grasped_counter = 0
+        if 'open' in target:
+            self.command.command = GripperCommand.OPEN
+        else:
+            self.command.command = GripperCommand.CLOSE
+        self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
+        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
+
+    def feedback_cb(self, msg):
+        json_obj = json.loads(msg.data)
+        self.current_state = json_obj["state"]
+        if self.current_state == "OBJECT_GRASPED":
+            self.grasped_counter += 1
 
     def execute(self, userdata):
-
+        self.pub.publish(self.command)
         while True:
+            if self.current_state == "GRIPPER_OPEN" and\
+                    self.command.command == GripperCommand.OPEN:
+                self.grasped_counter = 0
+                return "succeeded"
+            elif self.current_state == "GRIPPER_CLOSED" and\
+                    self.command.command == GripperCommand.CLOSE:
+                self.grasped_counter = 0
+                return "succeeded"
+            elif self.current_state == "OBJECT_GRASPED" and\
+                    self.grasped_counter > 4 and\
+                    self.command.command == GripperCommand.CLOSE:
+                self.grasped_counter = 0
+                return "succeeded"
+            rospy.sleep(0.1)
 
-            status = self.gripper_moveit_client.execute(userdata)
-            if status == "succeeded":
-                break
+class verify_object_grasped(smach.State):
+    def __init__(self, timeout=5.0):
+        smach.State.__init__(self, outcomes=["succeeded", "failed"])
+        
+        self.current_state = "OBJECT_GRASPED"
+        self.grasped_counter = 0
+        self.timeout = rospy.Duration(timeout)
+        self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
 
-        return "succeeded"
+    def feedback_cb(self, msg):
+        json_obj = json.loads(msg.data)
+        self.current_state = json_obj["state"]
+        if self.current_state == "OBJECT_GRASPED":
+            self.grasped_counter += 1
 
+    def execute(self, userdata):
+        start_time = rospy.Time.now()
+        while (rospy.Time.now() - start_time < self.timeout):
+            rospy.sleep(0.1)
+            if self.current_state == "GRIPPER_CLOSED" or\
+               self.current_state == "GRIPPER_OPEN":
+                return "failed"
+            elif self.current_state == "OBJECT_GRASPED" and\
+                        self.grasped_counter > 4:
+                self.grasped_counter = 0
+                return "succeeded"
+        return "failed"
 
 class move_arm_and_gripper(smach.State):
 
@@ -248,10 +296,13 @@ class move_arm_and_gripper(smach.State):
             "arm_joint_5",
         ]
         self.arm_moveit_client = MoveitClient("/arm_", target, timeout, joint_names)
-        self.pub = rospy.Publisher(
-            "/gripper_controller/command", std_msgs.msg.Float64, queue_size=1
-        )
+        self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
         self.conf = conf
+        self.gripper_command = GripperCommand()
+        if 'open' in self.conf:
+            self.gripper_command.command = GripperCommand.OPEN
+        else:
+            self.gripper_command.command = GripperCommand.CLOSE
 
     def get_targets(self, group_name):
         text = rospy.get_param("/robot_description_semantic")
@@ -271,10 +322,7 @@ class move_arm_and_gripper(smach.State):
         return angle
 
     def execute(self, userdata):
-        angle = self.get_targets("arm_1_gripper")
-        data = std_msgs.msg.Float64()
-        data.data = angle
-        self.pub.publish(data)
+        self.pub.publish(self.gripper_command)
         return self.arm_moveit_client.execute(userdata)
 
 
@@ -382,7 +430,6 @@ class compute_pregrasp_pose(smach.State):
         ]
 
         return "succeeded"
-
 
 class update_static_elements_in_planning_scene(smach.State):
 

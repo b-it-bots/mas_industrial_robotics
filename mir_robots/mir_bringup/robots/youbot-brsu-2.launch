@@ -35,8 +35,13 @@
   <!-- top camera -->
   <include file="$(find mir_bringup)/components/realsense_camera.launch">
       <arg name="serial_num" value="827312073531"/>
-      <arg name="camera_name" value="arm_cam3d"/>
+      <arg name="camera_name" value="tower_cam3d"/>
   </include>
 
+  <!-- camera at arm end effector -->
+  <!-- <include file="$(find mir_bringup)/components/realsense_camera.launch">
+      <arg name="serial_num" value="727212070700"/>
+      <arg name="camera_name" value="arm_cam3d"/> 
+  </include> -->
 
 </launch>

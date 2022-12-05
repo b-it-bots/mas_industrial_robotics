@@ -14,6 +14,10 @@ find_package(catkin REQUIRED
   mir_perception_utils
 )
 
+generate_dynamic_reconfigure_options(
+  ros/config/EmptySpaceDetection.cfg
+)
+
 add_compile_options(
   -O3
 )
@@ -27,6 +31,10 @@ include_directories(
 
 add_executable(empty_space_detector
   ros/src/empty_space_detector.cpp
+)
+
+add_dependencies(empty_space_detector
+  ${PROJECT_NAME}_gencfg
 )
 target_link_libraries(empty_space_detector
   ${catkin_LIBRARIES}

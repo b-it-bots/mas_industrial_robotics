@@ -11,6 +11,9 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/String.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <mir_empty_space_detection/EmptySpaceDetectionConfig.h>
+
 #include <mir_object_segmentation/cloud_accumulation.h>
 #include <mir_object_segmentation/scene_segmentation.h>
 #include <mir_perception_utils/pointcloud_utils_ros.h>
@@ -30,6 +33,8 @@ class EmptySpaceDetector
   ros::Publisher pc_pub_;
   ros::Publisher pose_array_pub_;
   ros::Publisher event_out_pub_;
+
+  dynamic_reconfigure::Server<mir_empty_space_detection::EmptySpaceDetectionConfig> server_;
 
   std::string output_frame_;
   bool enable_debug_pc_pub_;
@@ -56,5 +61,9 @@ class EmptySpaceDetector
   bool findPlane(PointCloud::Ptr plane);
   void findEmptySpacesOnPlane(const PointCloud::Ptr &plane,
                               geometry_msgs::PoseArray &empty_space_poses);
+  
+  /** \brief Dynamic reconfigure callback
+  * */
+  void configCallback(mir_empty_space_detection::EmptySpaceDetectionConfig &config, uint32_t level);
 };
 #endif

@@ -37,5 +37,5 @@ joint_limits:
     max_velocity: 6.178465545
     has_acceleration_limits: true
     max_acceleration: 1.5
-default_velocity_scaling_factor: 1.0
-default_acceleration_scaling_factor: 1.0
+default_velocity_scaling_factor: 0.7
+default_acceleration_scaling_factor: 0.7

@@ -10,12 +10,13 @@ class FVRDDFeatureExtraction():
     :param method:        feature extraction method to use
     :type method:         string
     """
+
     def __init__(self, method="fvrdd"):
         if method == "fvrdd":
             self.method = self.calculate_fvrdd_features
         elif method == "rdd":
             self.method = self.calculate_mean_circle_features
-    
+
     def get_method(self):
         """
         Get feature extraction method
@@ -36,7 +37,7 @@ class FVRDDFeatureExtraction():
         """
         self.gmm = gmm_grid
         self.use_rdd = use_rdd
-    
+
     def set_rdd_params(self, color=True):
         """
         Set radial density distribution feature param
@@ -67,7 +68,6 @@ class FVRDDFeatureExtraction():
 
         return (max_x + min_x) / 2.0
 
-
     def calculate_mean_colour(self, pointcloud):
         """
         Returns mean H, S and V components of colour
@@ -85,7 +85,6 @@ class FVRDDFeatureExtraction():
         mean_v = np.mean(pointcloud[:, 5])
 
         return np.array([mean_h, mean_s, mean_v])
-
 
     def calculate_median_colour(self, pointcloud):
         """
@@ -105,7 +104,6 @@ class FVRDDFeatureExtraction():
 
         return np.array([median_h, median_s, median_v])
 
-
     def calculate_bounding_box(self, pointcloud):
         """
         Returns length of pointcloud in x, y and z axes
@@ -122,7 +120,6 @@ class FVRDDFeatureExtraction():
         min_point = np.min(pc, axis=0)
 
         return max_point - min_point
-
 
     def fit_circle(self, pointcloud, dim1, dim2):
         """
@@ -170,7 +167,8 @@ class FVRDDFeatureExtraction():
         projected_angles[negative_angles] += 2 * np.pi
 
         # convert angle to bin number
-        bin_numbers = np.round((number_of_bins-1) * projected_angles / (2 * np.pi))
+        bin_numbers = np.round((number_of_bins-1) *
+                               projected_angles / (2 * np.pi))
 
         # populate the histogram
         for bin_number in bin_numbers:
@@ -179,12 +177,14 @@ class FVRDDFeatureExtraction():
         # if there are points in any of the bins calculate radial density
         # otherwise return 0 for all features (radius, errors, radial density)
         if np.max(histogram) > 0:
-            radial_density = np.sum(histogram / np.max(histogram)) / number_of_bins
+            radial_density = np.sum(
+                histogram / np.max(histogram)) / number_of_bins
         else:
             return 0, 0, 0, 0
 
         # radius of mean circle - mean distance of all points from the origin
-        distance_to_origin = np.sqrt(np.sum(np.multiply(pointcloud[:, 0:2], pointcloud[:, 0:2]), axis=1))
+        distance_to_origin = np.sqrt(
+            np.sum(np.multiply(pointcloud[:, 0:2], pointcloud[:, 0:2]), axis=1))
         radius = np.mean(distance_to_origin)
 
         diff = distance_to_origin - radius
@@ -196,7 +196,6 @@ class FVRDDFeatureExtraction():
         outlier_error = np.mean(np.multiply(outlier_errors, outlier_errors))
 
         return radius, inlier_error, outlier_error, radial_density
-
 
     def calculate_slices_description(self, pointcloud, number_of_slices):
         """
@@ -226,7 +225,8 @@ class FVRDDFeatureExtraction():
         right_edge = left_edge + step
 
         slice_size = pointcloud_xyz.shape[0]
-        slices = np.zeros([number_of_slices, slice_size, pointcloud_xyz.shape[1]])
+        slices = np.zeros(
+            [number_of_slices, slice_size, pointcloud_xyz.shape[1]])
 
         for k in range(number_of_slices):
             # define the points in the slice as all points between left and right edge
@@ -239,8 +239,10 @@ class FVRDDFeatureExtraction():
             slices[k, 0:slice.shape[0], :] = slice
             #print ("slice shape: {}, k: {}, slices shape: {}".format(slice.shape, k, slices.shape))
             # calculate features for the slice
-            radius, inlier_error, outlier_error, radial_density = self.fit_circle(slice, 1, 2)
-            slices[k, slice.shape[0], :] = np.array([radius, outlier_error/inlier_error, radial_density])
+            radius, inlier_error, outlier_error, radial_density = self.fit_circle(
+                slice, 1, 2)
+            slices[k, slice.shape[0], :] = np.array(
+                [radius, outlier_error/inlier_error, radial_density])
 
             # move to the next slice
             left_edge += step
@@ -283,7 +285,8 @@ class FVRDDFeatureExtraction():
         xyz = self.calculate_bounding_box(pointcloud)
 
         # CoG: 1
-        centre_of_gravity_offset = self.calculate_centre_of_gravity_offset(pointcloud)
+        centre_of_gravity_offset = self.calculate_centre_of_gravity_offset(
+            pointcloud)
 
         features = np.array([])
         features = np.append(features, xyz)
@@ -297,7 +300,8 @@ class FVRDDFeatureExtraction():
 
         # Fit circle for whole points
         # plane radius: 1, plane radial density: 1, plane_error_rate: 1
-        plane_radius, plane_inlier_error, plane_outlier_error, plane_radial_density = fit_circle(pointcloud, 0, 1)
+        plane_radius, plane_inlier_error, plane_outlier_error, plane_radial_density = fit_circle(
+            pointcloud, 0, 1)
         plane_error_rate = plane_outlier_error / plane_inlier_error
         features = np.append(features, plane_radius)
         features = np.append(features, plane_error_rate)
@@ -306,7 +310,7 @@ class FVRDDFeatureExtraction():
         slices = self.calculate_slices_description(pointcloud, 8)
         for k in range(slices.shape[0]):
             slice = slices[k, :, :]
-            slice = slice[np.where(np.sum(np.abs(slice),axis=1) > 0)]
+            slice = slice[np.where(np.sum(np.abs(slice), axis=1) > 0)]
             if slice.shape[0] < 1:
                 features = np.append(features, np.zeros([3]))
             else:
@@ -343,8 +347,9 @@ class FVRDDFeatureExtraction():
             right_edge = left_edge + step
 
             slice_size = pointcloud_xyz.shape[0]
-            
-            slices = np.zeros([number_of_slices, slice_size, pointcloud_xyz.shape[1]])
+
+            slices = np.zeros(
+                [number_of_slices, slice_size, pointcloud_xyz.shape[1]])
 
             if i == 0:
                 dim1 = 0
@@ -353,7 +358,7 @@ class FVRDDFeatureExtraction():
                 dim1 = 0
                 dim2 = 2
             elif i == 2:
-                dim1 =1
+                dim1 = 1
                 dim2 = 2
 
             for k in range(number_of_slices):
@@ -366,14 +371,16 @@ class FVRDDFeatureExtraction():
                     continue
                 slices[k, 0:slice.shape[0], :] = slice
                 # calculate features for the slice
-                radius, inlier_error, outlier_error, radial_density = self.fit_circle(slice, dim1, dim2)
-                slices[k, slice.shape[0], :] = np.array([radius, outlier_error/inlier_error, radial_density])
+                radius, inlier_error, outlier_error, radial_density = self.fit_circle(
+                    slice, dim1, dim2)
+                slices[k, slice.shape[0], :] = np.array(
+                    [radius, outlier_error/inlier_error, radial_density])
                 # move to the next slice
                 left_edge += step
                 right_edge += step
-                        
+
             axis_features.append(slices)
-        
+
         return axis_features
 
     # Compute Fisher Vector
@@ -397,26 +404,29 @@ class FVRDDFeatureExtraction():
             s_feature = []
             for k in range(slices.shape[0]):
                 slice = slices[k, :, :]
-                slice = slice[np.where(np.sum(np.abs(slice),axis=1) > 0)]
+                slice = slice[np.where(np.sum(np.abs(slice), axis=1) > 0)]
                 if slice.shape[0] < 1:
                     s_feature.append(np.zeros([3]))
                 else:
                     s_feature.append(slice[-1, :])
-            s_feature = np.asarray(s_feature).flatten()    
+            s_feature = np.asarray(s_feature).flatten()
             features.extend(s_feature)
 
-        # Also compute additional radial density distribution feature feature 
+        # Also compute additional radial density distribution feature feature
         # such as color, BBox, outlier error
         if self.use_rdd:
-            plane_radius, plane_inlier_error, plane_outlier_error, plane_radial_density = self.fit_circle(pointcloud, 0, 1)
-            plane_error_rate = np.divide(plane_outlier_error, plane_inlier_error)
+            plane_radius, plane_inlier_error, plane_outlier_error, plane_radial_density = self.fit_circle(
+                pointcloud, 0, 1)
+            plane_error_rate = np.divide(
+                plane_outlier_error, plane_inlier_error)
             features.append(plane_radius)
             features.append(plane_error_rate)
             features.append(plane_radial_density)
 
             bbox = self.calculate_bounding_box(pointcloud)
-            centre_of_gravity_offset = self.calculate_centre_of_gravity_offset(pointcloud)
-            
+            centre_of_gravity_offset = self.calculate_centre_of_gravity_offset(
+                pointcloud)
+
             # Bounding box does improve classifier
             features.append(bbox[0])
             features.append(bbox[1])
@@ -434,27 +444,28 @@ class FVRDDFeatureExtraction():
             features.append(colour_median[2])
 
         rdd_features = np.asarray(features).flatten()
-        
+
         # Use color feature
-        pcl_color = pointcloud[:,3:6]
+        pcl_color = pointcloud[:, 3:6]
         pcl_color = center_and_rotate_pointcloud(pcl_color)
         pcl_color = scale_to_unit_sphere(pcl_color)
         pcl_color = np.expand_dims(pcl_color, 0)
-        fv_color = self.get_3DmFV(pcl_color, self.gmm.weights_, self.gmm.means_, np.sqrt(self.gmm.covariances_))
-        
+        fv_color = self.get_3DmFV(
+            pcl_color, self.gmm.weights_, self.gmm.means_, np.sqrt(self.gmm.covariances_))
+
         # Point feature
-        pointcloud = pointcloud[:,0:3]
+        pointcloud = pointcloud[:, 0:3]
         pointcloud = center_and_rotate_pointcloud(pointcloud)
         pointcloud = scale_to_unit_sphere(pointcloud)
         pointcloud = np.expand_dims(pointcloud, 0)
-        fv = self.get_3DmFV(pointcloud, self.gmm.weights_, self.gmm.means_, np.sqrt(self.gmm.covariances_))
+        fv = self.get_3DmFV(pointcloud, self.gmm.weights_,
+                            self.gmm.means_, np.sqrt(self.gmm.covariances_))
         fv = np.concatenate([fv_color, fv])
         fv = fv.flatten()
 
         fvrdd_features = np.hstack((rdd_features, fv))
-        
-        return fvrdd_features
 
+        return fvrdd_features
 
     def l2_normalize(self, v, dim=1):
         """
@@ -485,15 +496,17 @@ class FVRDDFeatureExtraction():
         D = mu.shape[1]
 
         # Expand dimension for batch compatibility
-        batch_sig = np.tile(np.expand_dims(sigma, 0), [n_points, 1, 1])    
-        batch_sig = np.tile(np.expand_dims(batch_sig, 0), [n_batches, 1, 1, 1]) 
-        batch_mu = np.tile(np.expand_dims(mu, 0), [n_points, 1, 1]) 
-        batch_mu = np.tile(np.expand_dims(batch_mu, 0), [n_batches, 1, 1, 1])    
-        batch_w = np.tile(np.expand_dims(np.expand_dims(w, 0), 0), [n_batches, n_points, 1])    
-        batch_points = np.tile(np.expand_dims(points, -2), [1, 1, n_gaussians, 1]) 
+        batch_sig = np.tile(np.expand_dims(sigma, 0), [n_points, 1, 1])
+        batch_sig = np.tile(np.expand_dims(batch_sig, 0), [n_batches, 1, 1, 1])
+        batch_mu = np.tile(np.expand_dims(mu, 0), [n_points, 1, 1])
+        batch_mu = np.tile(np.expand_dims(batch_mu, 0), [n_batches, 1, 1, 1])
+        batch_w = np.tile(np.expand_dims(np.expand_dims(w, 0), 0), [
+                          n_batches, n_points, 1])
+        batch_points = np.tile(np.expand_dims(
+            points, -2), [1, 1, n_gaussians, 1])
         # Compute derivatives
         w_per_batch_per_d = np.tile(np.expand_dims(np.expand_dims(w, 0), -1),
-                                    [n_batches, 1, 3*D])    
+                                    [n_batches, 1, 3*D])
         # Define multivariate noraml distributions
         # Compute probability per point
         p_per_point = (1.0 / (np.power(2.0 * np.pi, D / 2.0) * np.power(batch_sig[:, :, :, 0], D))) * np.exp(
@@ -504,20 +517,22 @@ class FVRDDFeatureExtraction():
         Q_per_d = np.tile(np.expand_dims(Q, -1), [1, 1, 1, D])
 
         d_pi_all = np.expand_dims((Q - batch_w) / (np.sqrt(batch_w)), -1)
-        d_pi = np.concatenate([np.max(d_pi_all, axis=1), np.sum(d_pi_all, axis=1)], axis=2)
+        d_pi = np.concatenate(
+            [np.max(d_pi_all, axis=1), np.sum(d_pi_all, axis=1)], axis=2)
 
         d_mu_all = Q_per_d * (batch_points - batch_mu) / batch_sig
-        d_mu = (1 / (np.sqrt(w_per_batch_per_d))) * np.concatenate([np.max(d_mu_all, axis=1), 
-                np.min(d_mu_all, axis=1), np.sum(d_mu_all, axis=1)], axis=2)
+        d_mu = (1 / (np.sqrt(w_per_batch_per_d))) * np.concatenate([np.max(d_mu_all, axis=1),
+                                                                    np.min(d_mu_all, axis=1), np.sum(d_mu_all, axis=1)], axis=2)
 
-        d_sig_all = Q_per_d * (np.square((batch_points - batch_mu) / batch_sig) - 1)
-        d_sigma = (1 / (np.sqrt(2 * w_per_batch_per_d))) * np.concatenate([np.max(d_sig_all, axis=1), 
-                    np.min(d_sig_all, axis=1), np.sum(d_sig_all, axis=1)], axis=2)
+        d_sig_all = Q_per_d * \
+            (np.square((batch_points - batch_mu) / batch_sig) - 1)
+        d_sigma = (1 / (np.sqrt(2 * w_per_batch_per_d))) * np.concatenate([np.max(d_sig_all, axis=1),
+                                                                           np.min(d_sig_all, axis=1), np.sum(d_sig_all, axis=1)], axis=2)
 
         # number of points    normaliation
         d_pi = d_pi / n_points
         d_mu = d_mu / n_points
-        d_sigma =d_sigma / n_points
+        d_sigma = d_sigma / n_points
 
         if normalize:
             # Power normaliation
@@ -527,10 +542,12 @@ class FVRDDFeatureExtraction():
             d_sigma = np.sign(d_sigma) * np.power(np.abs(d_sigma), alpha)
 
             # L2 normaliation
-            d_pi = np.array([self.l2_normalize(d_pi[i, :, :], dim=0) for i in range(n_batches)])
-            d_mu = np.array([self.l2_normalize(d_mu[i, :, :], dim=0) for i in range(n_batches)])
-            d_sigma = np.array([self.l2_normalize(d_sigma[i, :, :], dim=0) for i in range(n_batches)])
-
+            d_pi = np.array([self.l2_normalize(d_pi[i, :, :], dim=0)
+                            for i in range(n_batches)])
+            d_mu = np.array([self.l2_normalize(d_mu[i, :, :], dim=0)
+                            for i in range(n_batches)])
+            d_sigma = np.array(
+                [self.l2_normalize(d_sigma[i, :, :], dim=0) for i in range(n_batches)])
 
         fv = np.concatenate([d_pi, d_mu, d_sigma], axis=2)
         fv = np.transpose(fv, axes=[0, 2, 1])

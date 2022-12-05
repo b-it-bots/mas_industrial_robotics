@@ -6,13 +6,15 @@ from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
 
 # copied from python-pcl
+
+
 def float_to_rgb(p_rgb):
     """
     Get rgb color from float rgb
-    
+
     :param p_rgb:         24 bit packed rgb 
     :type:                numpy.array
-    
+
     :return:            The rgb color
     :rtype:             numpy.array
     """
@@ -20,10 +22,11 @@ def float_to_rgb(p_rgb):
     rgb_bytes = struct.pack('f', p_rgb)
     rgb = struct.unpack('I', rgb_bytes)[0]
     r = (rgb >> 16) & 0x0000ff
-    g = (rgb >> 8)    & 0x0000ff
-    b = (rgb)         & 0x0000ff
+    g = (rgb >> 8) & 0x0000ff
+    b = (rgb) & 0x0000ff
 
-    return (r/255.0),(g/255.0),(b/255.0)
+    return (r/255.0), (g/255.0), (b/255.0)
+
 
 def scale_to_unit_sphere(pointcloud, normalize=True):
     """
@@ -33,19 +36,20 @@ def scale_to_unit_sphere(pointcloud, normalize=True):
     :type:                numpy.array
     :param normalize:     True if pointcloud needs to be normalized
     :type:                bool
-    
+
     :return:            The rotated pointcloud
     :rtype:             numpy.array
     """
     if normalize:
         centroid = np.mean(pointcloud, axis=0)
         pointcloud = pointcloud - centroid
-        
+
     scale = np.max(np.sqrt(np.sum(pointcloud**2, axis=1)))
     if scale > 0.0:
         pointcloud = pointcloud / scale
 
-    return pointcloud    
+    return pointcloud
+
 
 def pca_compress(pointcloud, n_components=3):
     """
@@ -63,6 +67,7 @@ def pca_compress(pointcloud, n_components=3):
 
     return pca
 
+
 def rotate_pointcloud(normalized_pointcloud):
     """
     Find first three principal components and rotate pointcloud so the first principal
@@ -78,8 +83,10 @@ def rotate_pointcloud(normalized_pointcloud):
     """
     pointcloud_xyz = normalized_pointcloud[:, 0:3]
     principal_components = pca_compress(pointcloud_xyz).components_
-    squared_length_principal_components = np.multiply(principal_components, principal_components)
-    length_principal_components = np.sqrt(np.sum(squared_length_principal_components, axis=1))
+    squared_length_principal_components = np.multiply(
+        principal_components, principal_components)
+    length_principal_components = np.sqrt(
+        np.sum(squared_length_principal_components, axis=1))
 
     # Calculate rotation matrix
     R = principal_components
@@ -90,10 +97,11 @@ def rotate_pointcloud(normalized_pointcloud):
     pointcloud_xyz = R.dot(pointcloud_xyz.T).T
 
     # if colour is part of the pointcloud
-    if normalized_pointcloud.shape[1] > 3: 
+    if normalized_pointcloud.shape[1] > 3:
         return np.hstack([pointcloud_xyz, normalized_pointcloud[:, 3:]])
     else:
         return pointcloud_xyz
+
 
 def center_pointcloud(pointcloud):
     """
@@ -111,11 +119,12 @@ def center_pointcloud(pointcloud):
     pointcloud_xyz[:, 1] -= centre[1]
     pointcloud_xyz[:, 2] -= centre[2]
 
-     # if colour is part of the pointcloud
-    if pointcloud.shape[1] > 3: 
+    # if colour is part of the pointcloud
+    if pointcloud.shape[1] > 3:
         return np.hstack([pointcloud_xyz, pointcloud[:, 3:]])
     else:
         return pointcloud_xyz
+
 
 def center_and_rotate_pointcloud(pointcloud):
     """
@@ -132,12 +141,13 @@ def center_and_rotate_pointcloud(pointcloud):
     pointcloud = center_pointcloud(pointcloud)
     rotated_cloud = rotate_pointcloud(pointcloud[:, 0:3])
 
-    if pointcloud.shape[1] > 3: 
+    if pointcloud.shape[1] > 3:
         return np.hstack([rotated_cloud, pointcloud[:, 3:]])
     else:
         return rotated_cloud
 
-def get_3d_grid_gmm(subdivisions=[5,5,5], variance=0.04):
+
+def get_3d_grid_gmm(subdivisions=[5, 5, 5], variance=0.04):
     """
     Compute the weight, mean and covariance of a gmm placed on a 3D grid
     :param subdivisions: 2 element list of number of subdivisions of the 3D space in each axes to form the grid
@@ -146,11 +156,12 @@ def get_3d_grid_gmm(subdivisions=[5,5,5], variance=0.04):
     """
     # n_gaussians = reduce(lambda x, y: x*y,subdivisions)
     n_gaussians = np.prod(np.array(subdivisions))
-    step = [1.0/(subdivisions[0]),    1.0/(subdivisions[1]),    1.0/(subdivisions[2])]
+    step = [1.0/(subdivisions[0]),    1.0 /
+            (subdivisions[1]),    1.0/(subdivisions[2])]
 
-    means = np.mgrid[ step[0]-1: 1.0-step[0]: complex(0, subdivisions[0]),
-                        step[1]-1: 1.0-step[1]: complex(0, subdivisions[1]),
-                        step[2]-1: 1.0-step[2]: complex(0, subdivisions[2])]
+    means = np.mgrid[step[0]-1: 1.0-step[0]: complex(0, subdivisions[0]),
+                     step[1]-1: 1.0-step[1]: complex(0, subdivisions[1]),
+                     step[2]-1: 1.0-step[2]: complex(0, subdivisions[2])]
     means = np.reshape(means, [3, -1]).T
     covariances = variance*np.ones_like(means)
     weights = (1.0/n_gaussians)*np.ones(n_gaussians)
@@ -160,3 +171,22 @@ def get_3d_grid_gmm(subdivisions=[5,5,5], variance=0.04):
     gmm.means_ = means
     gmm.precisions_cholesky_ = _compute_precision_cholesky(covariances, 'diag')
     return gmm
+
+
+def extract_pcd(pointcloud,
+                num_points=2048,
+                color=True,
+                downsample_cloud=True,
+                pad_cloud=True,
+                normalize_cloud=True
+                ):
+
+    xyzrgb = pointcloud
+
+    # pad cloud until its size == num_points
+    if pad_cloud:
+        while xyzrgb.shape[0] < num_points:
+            rand_idx = np.random.randint(xyzrgb.shape[0])
+            xyzrgb = np.vstack([xyzrgb, xyzrgb[rand_idx]])
+
+    return xyzrgb

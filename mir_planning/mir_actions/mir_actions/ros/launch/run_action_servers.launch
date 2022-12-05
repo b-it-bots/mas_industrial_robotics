@@ -2,20 +2,39 @@
 <launch>
 
     <arg name="align_with_workspace" default="false" />
+    <arg name="be_safe" default="false"/>
+    <arg name="prepare_arm_for_next_action" default="false" />
+    <arg name="domain" default="general_domain" />
+
+    <group if="$(eval arg('domain') =='general_domain')">
+        <!-- unstage action server -->
+        <include file="$(find mir_unstage_object)/ros/launch/unstage_object_server.launch" />
+        <!-- place object action server -->
+        <include file="$(find mir_place_object)/ros/launch/place_object_server.launch" />
+    </group>
+
+    <group if="$(eval arg('domain') =='additional_domain')">
+        <!-- empty space place object action server -->
+        <include file="$(find mir_place_object)/ros/launch/place_unstage_object_server.launch" />
+
+    </group>
 
     <!-- move base safe action server -->
     <node pkg="mir_move_base_safe" type="move_base_safe_server.py" name="move_base_safe_server" output="screen" >
         <param name="align" type="bool" value="$(arg align_with_workspace)" />
+        <param name="be_safe" type="bool" value="$(arg be_safe)" />
+        <param name="prepare_arm_for_next_action" type="bool" value="$(arg prepare_arm_for_next_action)" />
     </node>
 
     <!-- stage action server -->
     <include file="$(find mir_stage_object)/ros/launch/stage_object_server.launch" />
 
-    <!-- unstage action server -->
-    <include file="$(find mir_unstage_object)/ros/launch/unstage_object_server.launch" />
+    
 
     <!-- perceive location action server -->
-    <include file="$(find mir_perceive_location)/ros/launch/perceive_location_server.launch" />
+    <include file="$(find mir_perceive_location)/ros/launch/perceive_location_server.launch">
+        <arg name="base_motion_enabled" value="false" />
+    </include>
 
     <!-- wbc pick action server -->
     <include file="$(find mir_pick_object)/ros/launch/pick_object_server.launch" />
@@ -23,8 +42,7 @@
     <!-- pick from shelf action server -->
     <include file="$(find mir_pick_from_shelf)/ros/launch/pick_from_shelf.launch" />
 
-    <!-- place object action server -->
-    <node pkg="mir_place_object" type="place_object_server.py" name="place_object_server" output="screen" />
+    
 
     <!-- insert object in object server -->
     <node pkg="mir_insert_object" type="insert_object_server.py" name="insert_object_server" output="screen" />

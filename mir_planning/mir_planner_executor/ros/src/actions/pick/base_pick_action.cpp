@@ -28,6 +28,7 @@ void BasePickAction::update_knowledge_base(bool success,
     ROS_WARN("Pick for object \"%s\" failed %d times", object.c_str(), count);
     if (count > N) {
       knowledge_updater_->remGoalsWithObject(object);
+      knowledge_updater_->remKnowledge("perceived", {{"l", location}});
       ROS_WARN("Pick failed %d times, remove goals with object \"%s\"", count, object.c_str());
       failure_count_[object] = 0;
     } else {

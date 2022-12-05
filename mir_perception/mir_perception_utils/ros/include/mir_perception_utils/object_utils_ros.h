@@ -54,7 +54,7 @@ void estimatePose(const BoundingBox &box, geometry_msgs::PoseStamped &pose);
  * \param[in] Minimum value of the field z allowed
  * \param[in] Maximum value of the field z allowed
 */
-void estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
+PointCloud estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
                   std::string shape = "None", float passthrough_lim_min = 0.0060,
                   float passthrough_lim_max = 0.0);
 

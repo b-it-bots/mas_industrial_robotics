@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="camera_name" default="arm_cam3d" />
+
     <group ns="mir_perception">
         <node pkg="mir_perception_selectors" type="cavity_pose_selector_node" name="cavity_pose_selector" output="screen">
             <remap from="~cavity_pose" to="/mir_perception/object_selector/output/object_pose" />
@@ -7,10 +9,9 @@
             <rosparam command="load" file="$(find mir_perception_selectors)/ros/config/object_cavity_pairs.yaml"/>
         </node>
         <node pkg="mir_cavity_detector" type="cavity_finder" name="cavity_finder" output="screen" respawn="false" >
-            <remap from="~input/pointcloud" to="/arm_cam3d/depth_registered/points" />
-            <remap from="~image" to="/arm_cam3d/rgb/image_raw" />
+            <remap from="~input/pointcloud" to="/$(arg camera_name)/depth_registered/points" />
+            <remap from="~image" to="/$(arg camera_name)/rgb/image_raw" />
             <remap from="~output/cavity" to="/mir_perception/cavity_pose_selector/cavity" />
-            <remap from="~image" to="/arm_cam3d/rgb/image_raw" />
             <param name="target_frame" type="string" value="base_link_static"/>
         </node>
       

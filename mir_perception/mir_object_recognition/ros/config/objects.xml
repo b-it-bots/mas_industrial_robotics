@@ -16,4 +16,8 @@
   <object><name>BEARING_BOX</name><shape>box</shape><color>gray</color></object>
   <object><name>BEARING</name><shape>sphere</shape><color>gray</color></object>
   <object><name>AXIS</name><shape>cylinder</shape><color>gray</color></object>
+
+  <object><name>BLUE_CONTAINER</name><shape>box</shape><color>blue</color></object>
+  <object><name>RED_CONTAINER</name><shape>box</shape><color>red</color></object>
+
 </object_info>

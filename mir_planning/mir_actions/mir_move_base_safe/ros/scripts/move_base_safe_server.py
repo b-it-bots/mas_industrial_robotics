@@ -63,16 +63,13 @@ class AlignWithWorkspace(smach.State):  # inherit from the State base class
 # ===============================================================================
 
 
-class CheckDontBeSafe(smach.State):
+class CheckBeSafe(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=["safe", "unsafe"], input_keys=["goal"])
 
     def execute(self, userdata):
-        dont_be_safe_flag = Utils.get_value_of(userdata.goal.parameters, "dont_be_safe")
-        if dont_be_safe_flag is not None and dont_be_safe_flag.upper() == "TRUE":
-            return "unsafe"
-        else:
-            return "safe"
+        be_safe = rospy.get_param("~be_safe", True)
+        return "safe" if be_safe else "unsafe"
 
 
 # ===============================================================================
@@ -88,6 +85,9 @@ class PrepareArmForNextAction(smach.State):
         )
 
     def execute(self, userdata):
+        prepare_arm_for_next_action = rospy.get_param("~prepare_arm_for_next_action", True)
+        if not prepare_arm_for_next_action:
+            return "skipped"
         if Utils.get_value_of(userdata.goal.parameters, "next_action") == "PERCEIVE":
             arm_goal = "look_at_workspace_from_near"
         elif Utils.get_value_of(userdata.goal.parameters, "next_action") == "UNSTAGE":
@@ -237,10 +237,11 @@ def main():
         input_keys=["goal"],
         output_keys=["feedback", "result"],
     )
+
     with sm:
         smach.StateMachine.add(
             "CHECK_IF_BARRIER_TAPE_ENABLED",
-            CheckDontBeSafe(),
+            CheckBeSafe(),
             transitions={
                 "safe": "START_BARRIER_TAPE_DETECTION",
                 "unsafe": "SETUP_MOVE_BASE",

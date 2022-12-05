@@ -82,7 +82,7 @@ void extract_features(string image_path, ofstream &output, string image_name)
         return;
     }
 /// Convert image to gray and blur it
-    cvtColor( src, src_gray, CV_BGR2GRAY );
+    cvtColor( src, src_gray, cv::COLOR_BGR2GRAY );
     blur( src_gray, src_gray, Size(3,3) );
 
     //Mat element = getStructuringElement( morph_elem, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
