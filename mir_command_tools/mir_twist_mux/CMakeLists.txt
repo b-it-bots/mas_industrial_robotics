@@ -10,9 +10,9 @@ find_package(ament_cmake REQUIRED)
 find_package(twist_mux REQUIRED)
 
 install(DIRECTORY config
-    DESTINATION share/${PROJECT_NAME}/ros/config)
+    DESTINATION share/${PROJECT_NAME}/ros/)
 
 install(DIRECTORY launch
-    DESTINATION share/${PROJECT_NAME}/ros/launch)
+    DESTINATION share/${PROJECT_NAME}/ros/)
 
 ament_package()

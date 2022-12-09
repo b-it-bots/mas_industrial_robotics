@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+
+Copyright 2022 Bonn-Rhein-Sieg University
+
+Author: Vamsi Kalagaturu
+
+"""
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
@@ -32,7 +39,7 @@ def generate_launch_description():
 
     twist_mux_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('mir_twist_mux'), 'launch'),
+            get_package_share_directory('mir_twist_mux'), 'ros', 'launch'),
             '/twist_mux.launch.py'])
     )
 

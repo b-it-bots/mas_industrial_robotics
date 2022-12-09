@@ -16,7 +16,7 @@
   <exec_depend>brics_actuator</exec_depend>
   <exec_depend>youbot_driver</exec_depend>
   <exec_depend>mir_twist_mux</exec_depend>
-  <exec_depend>mir_gripper_controller</exec_depend>
+  <depend>mir_gripper_controller</depend>
 
   <depend>youbot_driver_ros_interface</depend>
 

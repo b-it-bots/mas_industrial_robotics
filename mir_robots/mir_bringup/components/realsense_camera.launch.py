@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 
-# launch file for realsense camera
+"""
 
+Copyright 2022 Bonn-Rhein-Sieg University
+
+Author: Vamsi Kalagaturu
+
+"""
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription

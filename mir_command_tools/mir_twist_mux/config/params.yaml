@@ -14,7 +14,7 @@
 #                       to detect that the publisher is alive; the timeout in seconds allows
 #                       to detect that, and if the publisher dies we will enable the lock
 # - priority: priority in the range [0, 255], so all the topics with priority lower than it
-#             will be stopped/disabled
+#             will be stopped/disabled`
 
 /twist_mux:
   ros__parameters:

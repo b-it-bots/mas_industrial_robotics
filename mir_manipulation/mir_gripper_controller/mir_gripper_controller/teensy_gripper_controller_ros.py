@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+"""
+
+Copyright 2022 Bonn-Rhein-Sieg University
+
+Author: Michal Stolarz
+
+ROS2 Contributor: Vamsi Kalagaturu
+
+"""
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String

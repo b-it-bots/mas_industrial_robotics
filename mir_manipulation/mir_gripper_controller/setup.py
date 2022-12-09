@@ -18,8 +18,8 @@ setup(
     zip_safe=True,
     maintainer='robocup',
     maintainer_email='vamsikalagaturu@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='gripper controller package using teensy board',
+    license='GPLv3',
     entry_points={
         'console_scripts': [
             'gripper_controller = mir_gripper_controller.teensy_gripper_controller_ros:main',

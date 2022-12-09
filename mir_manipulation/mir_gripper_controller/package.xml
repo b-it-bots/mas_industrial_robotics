@@ -3,9 +3,9 @@
 <package format="3">
   <name>mir_gripper_controller</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>gripper controller package using teensy board</description>
   <maintainer email="vamsikalagaturu@gmail.com">robocup</maintainer>
-  <license>TODO: License declaration</license>
+  <license>GPLv3</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

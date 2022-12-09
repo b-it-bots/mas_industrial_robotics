@@ -1,4 +1,12 @@
 """
+
+Copyright 2022 Bonn-Rhein-Sieg University
+
+Author: Michal Stolarz
+
+"""
+
+"""
 This module contains a component that communicates with
 the particular arduino board and sends the message framework via
 serial port with specified baudrate, timeout and board pid.

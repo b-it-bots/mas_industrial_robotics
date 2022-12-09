@@ -1,10 +1,12 @@
 /*
- * Copyright [2012] <Bonn-Rhein-Sieg University>
+ * Copyright [2022] <Bonn-Rhein-Sieg University>
  *
- * teleop_joypad.h
+ * teleop_joypad.cpp
  *
  *  Created on: May 27, 2012
  *      Author: Frederik Hegger
+ *  
+ *  ROS2 contributors: Santosh Thoduka, Vamsi Kalagaturu, Vivek Mannava.
  */
 
 #ifndef MIR_TELEOP_TELEOP_JOYPAD_H_
