@@ -8,7 +8,7 @@
   <!-- The following included files set up definitions of parts of the robot body -->
   <!-- misc common stuff -->
   <xacro:include filename="$(find youbot_description)/urdf/common.xacro" />
-  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/materials.urdf.xacro" />
   <!-- youbot base and rear platform -->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform_v2.urdf.xacro" />
@@ -24,9 +24,9 @@
   <!-- sensors -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/asus_xtion_camera_mount.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
@@ -96,5 +96,51 @@
        </collision>
    </link>
 
+  <!-- tower camera stand link -->
+
+  <link name="tower_camera_stand_link">
+    <visual>
+      <geometry>
+        <box size="0.025 0.025 0.80"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.025 0.025 0.80"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tower_camera_stand_joint" type="fixed">
+    <origin xyz="-0.10 0.0 0.40" rpy="0 0 0" />
+    <parent link="full_platform_link"/>
+    <child link="tower_camera_stand_link"/>
+  </joint>
+
+  <!-- tower camera mount link -->
+  <link name="tower_camera_stand_link_2">
+    <visual>
+      <geometry>
+        <box size="0.025 0.025 0.44"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.025 0.025 0.44"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tower_camera_stand_joint_2" type="fixed">
+    <origin xyz="0.16 0.0 0.31" rpy="0 ${M_PI/2} 0" />
+    <parent link="tower_camera_stand_link"/>
+    <child link="tower_camera_stand_link_2"/>
+  </joint>
 
 </robot>
