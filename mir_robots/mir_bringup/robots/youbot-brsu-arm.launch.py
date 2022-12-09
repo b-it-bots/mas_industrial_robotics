@@ -13,38 +13,15 @@ def generate_launch_description():
             get_package_share_directory('mir_bringup'), 'components'),
             '/youbot_oodl_driver.launch.py']),
         launch_arguments={
-            'youBotHasBase': 'True',
+            'youBotHasBase': 'False',
             'youBotHasArms': 'True',
         }.items()
-    )
-
-    lasers_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('mir_bringup'), 'components'),
-            '/urg_node.launch.py'])
     )
 
     teleop_joypad_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('mir_teleop'), 'ros', 'launch'),
             '/teleop_joypad.launch.py'])
-    )
-
-    twist_mux_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('mir_twist_mux'), 'launch'),
-            '/twist_mux.launch.py'])
-    )
-
-    # D435 camera
-    camera_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('mir_bringup'), 'components'),
-            '/realsense_camera.launch.py']),
-        launch_arguments={
-            'camera_name': 'tower_cam3d',
-            'camera_serial': "'827312073531'",
-        }.items()
     )
 
     # gripper launch file
@@ -57,8 +34,5 @@ def generate_launch_description():
     return LaunchDescription([
         youbot_oodl_driver_launch,
         teleop_joypad_launch,
-        twist_mux_launch,
-        lasers_launch,
-        camera_launch,
         gripper_launch,
     ])
