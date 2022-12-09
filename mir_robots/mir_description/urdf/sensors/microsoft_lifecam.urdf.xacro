@@ -5,7 +5,7 @@
       xmlns:xacro="http://ros.org/wiki/xacro">
   
 
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/microsoft_lifecam.gazebo.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/microsoft_lifecam.gazebo.xacro"/>
 
   <xacro:macro name="microsoft_lifecam" params="name parent *origin">
    <joint name="${name}_camera_joint" type="fixed">
@@ -26,14 +26,14 @@
     <visual>
       <origin xyz="-0.04 -0.0035 -0.031" rpy="${M_PI/2} 0 ${M_PI/2}" />
       <geometry>
-       <mesh filename="package://mcr_description/meshes/sensors/microsoft_lifecam.dae" scale="0.001 0.001 0.001"/>
+       <mesh filename="file://$(find mir_description)/meshes/sensors/microsoft_lifecam.dae" scale="0.001 0.001 0.001"/>
       </geometry>
     </visual>
 
     <collision>
       <origin xyz="-0.04 -0.0035 -0.031" rpy="${M_PI/2} 0 ${M_PI/2}" />
       <geometry>
-        <mesh filename="package://mcr_description/meshes/sensors/microsoft_lifecam.dae" scale="0.001 0.001 0.001"/>
+        <mesh filename="file://$(find mir_description)/meshes/sensors/microsoft_lifecam.dae" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>

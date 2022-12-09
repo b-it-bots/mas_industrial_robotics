@@ -8,7 +8,7 @@
   <!-- The following included files set up definitions of parts of the robot body -->
   <!-- misc common stuff -->
   <xacro:include filename="$(find youbot_description)/urdf/common.xacro" />
-  <xacro:include filename="$(find mcr_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/materials.urdf.xacro" />
   <!-- youbot base and rear platform -->
   <xacro:include filename="$(find youbot_description)/urdf/youbot_base/base.urdf.xacro" />
   <xacro:include filename="$(find mir_description)/urdf/misc/rear_platform_v2.urdf.xacro" />
@@ -23,7 +23,7 @@
   <!-- sensors -->
   <xacro:include filename="$(find youbot_description)/urdf/sensors/hokuyo_urg04_laser.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
+  <xacro:include filename="$(find mir_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
 
   <!-- Now we can start using the macros included above to define the actual youbot -->
 

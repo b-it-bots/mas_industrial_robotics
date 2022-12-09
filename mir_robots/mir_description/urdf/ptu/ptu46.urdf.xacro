@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-	<xacro:include filename="$(find mcr_description)/urdf/ptu/ptu46.gazebo.xacro" />
-	<xacro:include filename="$(find mcr_description)/urdf/ptu/ptu46.transmission.xacro" />
+	<xacro:include filename="$(find mir_description)/urdf/ptu/ptu46.gazebo.xacro" />
+	<xacro:include filename="$(find mir_description)/urdf/ptu/ptu46.transmission.xacro" />
 
 	<xacro:macro name="ptu46" params="parent name *origin">
 		<link name="${name}_link">

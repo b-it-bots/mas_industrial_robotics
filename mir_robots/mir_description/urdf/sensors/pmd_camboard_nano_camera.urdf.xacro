@@ -5,7 +5,7 @@
       xmlns:xacro="http://ros.org/wiki/xacro">
 
 
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/pmd_camboard_nano_camera.gazebo.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/sensors/pmd_camboard_nano_camera.gazebo.xacro" />
 
   <xacro:macro name="pmd_camboard_nano_camera" params="name parent *origin">
     <joint name="${name}_frame_joint" type="fixed">

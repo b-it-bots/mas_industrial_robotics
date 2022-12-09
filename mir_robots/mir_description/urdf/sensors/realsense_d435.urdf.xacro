@@ -10,7 +10,7 @@ aluminum peripherial evaluation case.
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_d435.gazebo.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/sensors/realsense_d435.gazebo.xacro" />
 
   <xacro:macro name="realsense_d435" params="name parent *origin">
     <xacro:property name="M_PI" value="3.1415926535897931" />
@@ -51,7 +51,7 @@ aluminum peripherial evaluation case.
       <visual>
       <origin xyz="${d435_cam_mount_from_center_offset} 0.0 ${d435_cam_height/2}" rpy="${M_PI/2} 0 ${M_PI/2}"/>
         <geometry>
-          <mesh filename="package://mcr_description/meshes/sensors/realsense_d435.dae" />
+          <mesh filename="file://$(find mir_description)/meshes/sensors/realsense_d435.dae" />
         </geometry>
         <material name="${name}_aluminum"/>
       </visual>

@@ -4,7 +4,7 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.gazebo.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/sensors/intel_realsense_f200_camera.gazebo.xacro" />
 
   <xacro:property name="eye_x_offset" value="-0.015" />   
   <xacro:property name="eye_y_offset" value="0.024" />  
@@ -38,14 +38,14 @@
       <visual>
         <origin xyz="0 -0.074 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/sensors/intel_realsense_f200_camera.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find mir_description)/meshes/sensors/intel_realsense_f200_camera.dae" scale="0.001 0.001 0.001" />
         </geometry>
       </visual>
 
       <collision>
         <origin xyz="0 -0.074 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/sensors/intel_realsense_f200_camera_convex_hull.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find mir_description)/meshes/sensors/intel_realsense_f200_camera_convex_hull.dae" scale="0.001 0.001 0.001" />
         </geometry>
      </collision>
     </link>

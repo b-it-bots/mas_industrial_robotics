@@ -4,8 +4,8 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
        
-  <xacro:include filename="$(find mcr_description)/urdf/motors/dynamixel_motor_ax-12a.gazebo.xacro" />
-  <xacro:include filename="$(find mcr_description)/urdf/motors/dynamixel_motor_ax-12a.transmission.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/motors/dynamixel_motor_ax-12a.gazebo.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/motors/dynamixel_motor_ax-12a.transmission.xacro" />
 
   <xacro:macro name="dynamixel_motor_AX-12A" params="parent name *origin motor_direction position_offset">
 
@@ -25,14 +25,14 @@
       <visual>
         <origin xyz="0 0 0.03" rpy="0 ${M_PI/2} 0" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/motors/dynamixel_motor_ax-12a.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find mir_description)/meshes/motors/dynamixel_motor_ax-12a.dae" scale="0.001 0.001 0.001" />
         </geometry>
       </visual>
 
       <collision>
         <origin xyz="0 0 0.03" rpy="0 ${M_PI/2} 0" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/motors/dynamixel_motor_ax-12a_convex_hull.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find mir_description)/meshes/motors/dynamixel_motor_ax-12a_convex_hull.dae" scale="0.001 0.001 0.001" />
         </geometry>
       </collision>
     </link>
@@ -42,6 +42,7 @@
       <child link="${name}_link" />
       <origin xyz="0 0 0.03" rpy="${position_offset} 0 ${M_PI}"/>
       <axis xyz="${motor_direction} 0 0"/>
+      <dynamics damping="1.0" friction="1.0" />
       <limit effort="1.5" lower="-${M_PI / 180 * 150}" upper="${M_PI / 180 * 150}" velocity="6.178465545"/>
     </joint>
 

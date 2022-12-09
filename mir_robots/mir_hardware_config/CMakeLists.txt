@@ -6,7 +6,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(mcr_description REQUIRED)
+find_package(mir_description REQUIRED)
 find_package(mir_description REQUIRED)
 find_package(youbot_description REQUIRED)
 

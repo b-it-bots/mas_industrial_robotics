@@ -15,7 +15,7 @@
       <visual>
         <origin xyz="-0.015 0.04 -0.055" rpy="0 0 -1.57079633" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/mounts/microsoft_lifecam_1080_mount.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find mir_description)/meshes/mounts/microsoft_lifecam_1080_mount.dae" scale="0.001 0.001 0.001" />
         </geometry>
         <material name="Black" />
       </visual>
@@ -23,7 +23,7 @@
       <collision>
         <origin xyz="-0.015 0.04 -0.055" rpy="0 0 -1.57079633" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/mounts/microsoft_lifecam_1080_mount_convexhull.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="file://$(find mir_description)/meshes/mounts/microsoft_lifecam_1080_mount_convexhull.dae" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision >
     </link>

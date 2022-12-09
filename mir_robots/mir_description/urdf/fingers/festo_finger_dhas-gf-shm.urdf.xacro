@@ -4,7 +4,7 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:macro name="dynamixel_bracket_FP04-F2" params="parent name *origin">
+  <xacro:macro name="festo_finger_DHAS-GF-shm" params="parent name *origin">
 
     <joint name="${name}_joint" type="fixed" >
       <xacro:insert_block name="origin" />
@@ -15,25 +15,25 @@
     <link name="${name}_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.011"/>
+        <mass value="0.015"/>
         <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
       </inertial>
 
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/motors/dynamixel_bracket_fp04-f2.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find mir_description)/meshes/fingers/festo_finger_dhas-gf-shm.dae" scale="0.001 0.001 0.001" />
         </geometry>
       </visual>
 
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}" />
         <geometry>
-          <mesh filename="package://mcr_description/meshes/motors/dynamixel_bracket_fp04-f2_convex_hull.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="file://$(find mir_description)/meshes/fingers/festo_finger_dhas-gf-shm_convex_hull.dae" scale="0.001 0.001 0.001" />
         </geometry>
       </collision>
     </link>
-
+    
   </xacro:macro>
 
 </robot>
