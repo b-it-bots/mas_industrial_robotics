@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:macro name="ptu46_gazebo" params="name">
+		<gazebo reference="${name}_link">
+			<material>Gazebo/Blue</material>
+			<turnGravityOff>false</turnGravityOff>
+		</gazebo>
+
+		<gazebo reference="${name}_pan_link">
+			<material>Gazebo/Red</material>
+			<turnGravityOff>false</turnGravityOff>
+		</gazebo>
+
+		<gazebo reference="${name}_tilt_link">
+			<material>Gazebo/Blue</material>
+			<turnGravityOff>false</turnGravityOff>
+		</gazebo>
+	</xacro:macro>
+
+</robot>

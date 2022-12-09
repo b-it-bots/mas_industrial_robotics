@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!--xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.gazebo.xacro" /-->
+  <!--xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper.transmission.xacro" /-->
+  <!--xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/dynamixel_gripper_limits.urdf.xacro" /-->
+  <xacro:include filename="$(find mir_description)/urdf/motors/dynamixel_motor_ax-12a.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/motors/dynamixel_bracket_fp04-f2.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/grippers/dynamixel/v2/festo_finger_mount.urdf.xacro" />
+  <xacro:include filename="$(find mir_description)/urdf/fingers/festo_finger_dhas-gf-shm.urdf.xacro" />
+
+  <xacro:arg name="grasp_link_offset" default="0.11"/>
+
+  <xacro:macro name="dynamixel_gripper_v2" params="parent name *origin">
+
+    <joint name="${name}_motor_mount_joint" type="fixed" >
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${parent}" />
+      <child link="${name}_motor_mount_link" />
+    </joint>
+
+    <joint name="${name}_static_grasp_link_joint" type="fixed" >
+      <origin xyz="0 0 $(arg grasp_link_offset)" rpy="0 0 0"/>
+      <parent link="${parent}" />
+      <child link="${name}_static_grasp_link" />
+    </joint>
+    <link name="${name}_static_grasp_link">
+    </link>
+
+    <!-- motor mount -->
+    <link name="${name}_motor_mount_link">
+      <inertial>
+        <origin xyz="-0.0225 -0.046 0.0245" rpy="0 ${M_PI/2} 0" />
+        <mass value="0.038"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+
+      <visual>
+        <origin xyz="-0.023 -0.046 0.024" rpy="0 ${M_PI/2} 0" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v3/dynamixel_intel_camera_combined.stl" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+        </material>
+      </visual>
+
+      <collision>
+        <origin xyz="-0.0225 -0.046 0.0245" rpy="0 ${M_PI/2} 0" />
+        <geometry>
+          <mesh filename="package://mir_description/meshes/grippers/dynamixel/v2/dynamixel_motor_mount_convex_hull.dae" scale="0.001 0.001 0.001" />
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- motors -->
+    <xacro:dynamixel_motor_AX-12A name="${name}_motor_left" parent="${name}_motor_mount_link" motor_direction="-1" position_offset="0.065">
+      <origin xyz="0.0 0.034 -0.009" rpy="0 0 0" />
+    </xacro:dynamixel_motor_AX-12A>
+
+    <xacro:dynamixel_motor_AX-12A name="${name}_motor_right" parent="${name}_motor_mount_link" motor_direction="1" position_offset="-0.065">
+      <origin xyz="0.0 -0.034 -0.009" rpy="0 0 0" />
+    </xacro:dynamixel_motor_AX-12A>
+
+    <!-- brackets -->
+    <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_left" parent="${name}_motor_left_base_link">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:dynamixel_bracket_FP04-F2>
+
+    <xacro:dynamixel_bracket_FP04-F2 name="${name}_bracket_right" parent="${name}_motor_right_base_link">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:dynamixel_bracket_FP04-F2>
+
+    <!-- finger mounts -->
+    <xacro:festo_finger_mount name="${name}_finger_mount_left" parent="${name}_bracket_left_link">
+      <origin xyz="0.014 +0.0125 0.026" rpy="0 0 ${M_PI}" />
+    </xacro:festo_finger_mount>
+
+    <xacro:festo_finger_mount name="${name}_finger_mount_right" parent="${name}_bracket_right_link">
+      <origin xyz="-0.014 -0.0125 0.026" rpy="0 0 0" />
+    </xacro:festo_finger_mount>
+
+    <!-- fingers -->
+    <xacro:festo_finger_DHAS-GF-shm name="${name}_finger_left" parent="${name}_finger_mount_left_link">
+      <origin xyz="0.004 0 0.0045" rpy="0 0 0" />
+    </xacro:festo_finger_DHAS-GF-shm>
+
+    <xacro:festo_finger_DHAS-GF-shm name="${name}_finger_right" parent="${name}_finger_mount_right_link">
+      <origin xyz="0.004 0 0.0045" rpy="0 0 0" />
+    </xacro:festo_finger_DHAS-GF-shm>
+  </xacro:macro>
+
+</robot>

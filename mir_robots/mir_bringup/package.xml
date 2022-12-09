@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mir_bringup</name>
+  <version>0.0.0</version>
+  <description>launch files to bring up a complete robot or only specific components</description>
+  <maintainer email="vamsikalagaturu@gmail.com">Vamsi Kalagaturu</maintainer>
+  <license>GPLv3</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>mir_hardware_config</exec_depend>
+  <exec_depend>mir_teleop</exec_depend>
+  <exec_depend>youbot_description</exec_depend>
+  <exec_depend>mir_description</exec_depend>
+  <exec_depend>brics_actuator</exec_depend>
+  <exec_depend>youbot_driver</exec_depend>
+  <exec_depend>mir_twist_mux</exec_depend>
+  <depend>mir_gripper_controller</depend>
+
+  <depend>youbot_driver_ros_interface</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

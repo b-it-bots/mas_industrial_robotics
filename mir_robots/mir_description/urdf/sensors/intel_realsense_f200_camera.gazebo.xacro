@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<root xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+      xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+      xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+      xmlns:xacro="http://ros.org/wiki/xacro">
+  
+<xacro:macro name="intel_realsense_f200_camera_gazebo" params="name">
+  <xacro:intel_realsense_f200_depth_camera_gazebo name="${name}" />
+  <xacro:intel_realsense_f200_rgb_camera_gazebo name="${name}" />
+</xacro:macro>
+
+<xacro:macro name="intel_realsense_f200_depth_camera_gazebo" params="name">
+  <gazebo reference="${name}_depth_frame">
+    <sensor type="camera" name="${name}_depth_frame_sensor">
+      <update_rate>20.0</update_rate>
+      <camera name="${name}_depth_frame_sensor">
+        <horizontal_fov>1.3439</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>1.2</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="${name}_depth_frame_controller" filename="libgazebo_ros_camera.so">
+        <baseline>0.2</baseline>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>1.0</updateRate>
+        <cameraName>${name}_ir</cameraName>
+        <imageTopicName>/${name}/depth/image_raw</imageTopicName>
+        <cameraInfoTopicName>/${name}/depth/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/${name}/depth/image_raw</depthImageTopicName>
+        <depthImageInfoTopicName>/${name}/depth/camera_info</depthImageInfoTopicName>
+        <pointCloudTopicName>/${name}/depth/points</pointCloudTopicName>
+        <frameName>/${name}_depth_optical_frame</frameName>
+        <pointCloudCutoff>0.05</pointCloudCutoff>
+        <distortionK1>0.00000001</distortionK1>
+        <distortionK2>0.00000001</distortionK2>
+        <distortionK3>0.00000001</distortionK3>
+        <distortionT1>0.00000001</distortionT1>
+        <distortionT2>0.00000001</distortionT2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>
+  </gazebo>
+</xacro:macro>
+
+
+<xacro:macro name="intel_realsense_f200_rgb_camera_gazebo" params="name">
+  <gazebo reference="${name}_rgb_frame">
+    <sensor type="camera" name="${name}_rgb_frame_sensor">
+      <update_rate>20.0</update_rate>
+      <camera name="${name}_rgb_frame_sensor">
+        <horizontal_fov>1.3439</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>1.2</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="${name}_rgb_frame_controller" filename="libgazebo_ros_camera.so">
+        <baseline>0.2</baseline>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>1.0</updateRate>
+        <cameraName>${name}_rgb</cameraName>
+        <imageTopicName>/${name}/rgb/image_raw</imageTopicName>
+        <cameraInfoTopicName>/${name}/rgb/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/${name}/rgb/image_raw</depthImageTopicName>
+        <depthImageInfoTopicName>/${name}/rgb/camera_info</depthImageInfoTopicName>
+        <pointCloudTopicName>/${name}/depth_registered/points</pointCloudTopicName>
+        <frameName>/${name}_rgb_optical_frame</frameName>
+        <pointCloudCutoff>0.05</pointCloudCutoff>
+        <distortionK1>0.00000001</distortionK1>
+        <distortionK2>0.00000001</distortionK2>
+        <distortionK3>0.00000001</distortionK3>
+        <distortionT1>0.00000001</distortionT1>
+        <distortionT2>0.00000001</distortionT2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>  
+  </gazebo>
+</xacro:macro>
+
+</root>

@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<root xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+      xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+      xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+      xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+  <xacro:include filename="$(find mir_description)/urdf/sensors/pmd_camboard_nano_camera.gazebo.xacro" />
+
+  <xacro:macro name="pmd_camboard_nano_camera" params="name parent *origin">
+    <joint name="${name}_frame_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_frame"/>
+    </joint>
+
+    <link name="${name}_frame">
+      <inertial>
+        <mass value="0.05" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.01"  ixy="0.0"  ixz="0.0"
+                 iyy="0.01"  iyz="0.0"
+                 izz="0.01" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+			<box size="0.035 0.028 0.03"/>
+        </geometry>
+		<material name="Black" />
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.035 0.028 0.03"/>
+        </geometry>
+      </collision>
+    </link>
+
+
+    <joint name="${name}_depth_optical_frame_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
+      <parent link="${name}_frame"/>
+      <child link="${name}_depth_optical_frame"/>
+    </joint>
+    <link name="${name}_depth_optical_frame" />
+
+    <!-- extensions -->
+    <xacro:pmd_camboard_nano_camera_gazebo name="${name}" />
+  </xacro:macro>
+
+</root>
+
