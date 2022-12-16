@@ -23,7 +23,7 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   pcl::getMinMax3D(*cloud, min_pt, max_pt);
   RCLCPP_INFO(rclcpp::get_logger("mmor_utils_logger"), "Min and max z %f, %f", min_pt.z, max_pt.z);
   // estimate normal
-  pcl::search::Search<pcl::PointXYZRGB>::Ptr tree = boost::shared_ptr<pcl::search::Search<pcl::PointXYZRGB> > (new pcl::search::KdTree<pcl::PointXYZRGB>);
+  pcl::search::Search<pcl::PointXYZRGB>::Ptr tree = std::shared_ptr<pcl::search::Search<pcl::PointXYZRGB> > (new pcl::search::KdTree<pcl::PointXYZRGB>);
   pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud <pcl::Normal>);
   pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> normal_estimator;
   normal_estimator.setSearchMethod(tree);

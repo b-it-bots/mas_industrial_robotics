@@ -34,7 +34,7 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 // pcl_ros is not converted to ros2 yet, hence commented out
 // #include <pcl_ros/point_cloud.hpp>
 

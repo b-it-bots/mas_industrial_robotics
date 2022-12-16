@@ -6,7 +6,7 @@
  *
  */
 
-#include <pcl/octree/octree_impl.h>
+#include <pcl/octree/octree.h>
 
 #include <mir_object_segmentation/cloud_accumulation.hpp>
 

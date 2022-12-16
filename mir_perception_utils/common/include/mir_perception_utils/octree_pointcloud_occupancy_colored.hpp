@@ -47,7 +47,8 @@ public:
   void setOccupiedVoxelsAtPointsFromCloud(const PointCloudConstBSPtr &cloud)
   {
     for (size_t i = 0; i < cloud->points.size(); i++)
-      if (isFinite(cloud->points[i]))
+      if (std::isfinite(cloud->points[i].x) && std::isfinite(cloud->points[i].y) &&
+          std::isfinite(cloud->points[i].z))
         this->setOccupiedVoxelAtPoint(cloud->points[i]);
   }
 

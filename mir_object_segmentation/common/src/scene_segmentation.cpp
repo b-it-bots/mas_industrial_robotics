@@ -10,9 +10,9 @@
 
 SceneSegmentation::SceneSegmentation() : use_omp_(false)
 {
-  cluster_extraction_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
-  normal_estimation_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
-  normal_estimation_omp_.setSearchMethod(boost::make_shared<pcl::search::KdTree<PointT>>());
+  cluster_extraction_.setSearchMethod(std::make_shared<pcl::search::KdTree<PointT>>());
+  normal_estimation_.setSearchMethod(std::make_shared<pcl::search::KdTree<PointT>>());
+  normal_estimation_omp_.setSearchMethod(std::make_shared<pcl::search::KdTree<PointT>>());
 }
 
 SceneSegmentation::~SceneSegmentation()

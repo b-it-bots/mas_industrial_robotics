@@ -37,11 +37,6 @@ typedef std::vector<PlanarPolygon, Eigen::aligned_allocator<PlanarPolygon>> Plan
 typedef std::shared_ptr<PlanarPolygon> PlanarPolygonPtr;
 typedef std::shared_ptr<const PlanarPolygon> PlanarPolygonConstPtr;
 
-typedef std::shared_ptr<PointCloud> PointCloudSPtr;
-typedef std::shared_ptr<const PointCloud> PointCloudConstSPtr;
-typedef PointCloud::Ptr PointCloudBSPtr;
-typedef PointCloud::ConstPtr PointCloudConstBSPtr;
-
 typedef pcl::PlanarRegion<PointT> PlanarRegion;
 typedef std::vector<PlanarRegion, Eigen::aligned_allocator<PlanarRegion>> PlanarRegionVector;
 

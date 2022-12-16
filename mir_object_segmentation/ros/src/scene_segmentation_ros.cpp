@@ -6,7 +6,7 @@
  *
  */
 
-#include <mir_object_segmentation/scene_segmentation_ros.hpp>
+#include "mir_object_segmentation/scene_segmentation_ros.hpp"
 
 namespace mpu = mir_perception_utils;
 

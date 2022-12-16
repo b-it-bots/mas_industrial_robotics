@@ -38,7 +38,7 @@ def generate_launch_description():
     name="MMOR_container",
     namespace="",
     package="rclcpp_components",
-    executable="component_container_mt",
+    executable="component_container",
     composable_node_descriptions=[
         ComposableNode(
             package="mir_object_recognition",

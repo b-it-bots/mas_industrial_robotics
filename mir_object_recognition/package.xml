@@ -42,6 +42,9 @@
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>rclcpp_components</exec_depend>
 
+  <depend>mir_object_segmentation</depend>
+  <depend>mir_perception_utils</depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>

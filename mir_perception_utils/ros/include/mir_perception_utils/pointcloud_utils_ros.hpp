@@ -20,7 +20,10 @@
 #include <tf2_ros/transform_broadcaster.h>
 
 #include "mir_perception_utils/aliases.hpp"
+
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/region_of_interest.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 
 namespace mir_perception_utils
 {

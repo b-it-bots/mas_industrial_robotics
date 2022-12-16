@@ -12,7 +12,7 @@
 
 #include <mir_perception_utils/aliases.hpp>
 #include <mir_perception_utils/octree_pointcloud_occupancy_colored.hpp>
-//#include <pcl/octree/octree_pointcloud_occupancy.hpp>
+// #include <pcl/octree/octree2buf_base.h>
 #include <memory>
 
 /** This class accumulates input point clouds in the occupancy octree with a
