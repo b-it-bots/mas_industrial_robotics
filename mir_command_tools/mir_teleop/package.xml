@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mir_teleop</name>
+  <version>0.0.1</version>
+  <description>teleoperation via joypad</description>
+
+  <maintainer email="vamsikalagaturu@gmail.com">Vamsi Kalagaturu</maintainer>
+
+  <license>GPLv3</license>
+
+  <author email="frederik.hegger@h-brs.de">Frederik Hegger</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>brics_actuator</depend>
+  <depend>geometry_msgs</depend>
+  <depend>joy</depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>mir_interfaces</depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
