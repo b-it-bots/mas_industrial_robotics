@@ -137,6 +137,10 @@ rclcpp_components_register_nodes(data_collector "perception_namespace::DataColle
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME}_node)
 
+add_executable(yolo_inference ros/src/yolo_inference.cpp)
+target_link_libraries(yolo_inference ${OpenCV_LIBS})
+ament_target_dependencies(yolo_inference rclcpp)
+
 install(TARGETS
   mmor
   data_collector
@@ -151,9 +155,10 @@ install(TARGETS
 install(TARGETS
   mmor
   data_collector
+  yolo_inference
 
   DESTINATION lib/${PROJECT_NAME})
-  
+
 install(DIRECTORY
   ros/launch/
   DESTINATION share/${PROJECT_NAME}/ros/launch
