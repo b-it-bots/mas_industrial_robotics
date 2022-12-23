@@ -88,7 +88,7 @@ public:
    * size
    * \param[in] Number of padded points
    * */
-  void segmentCloud(const PointCloudConstBSPtr &cloud, mas_perception_msgs::msg::ObjectList &obj_list,
+  void segmentCloud(const PointCloudConstBSPtr &cloud, mir_interfaces::msg::ObjectList &obj_list,
                     std::vector<PointCloudBSPtr> &clusters, std::vector<BoundingBox> &boxes,
                     bool center_cluster, bool pad_cluster, int num_points);
 

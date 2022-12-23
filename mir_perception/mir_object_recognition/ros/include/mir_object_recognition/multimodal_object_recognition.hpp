@@ -131,8 +131,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> pub_debug_cloud_plane_;
 
     // Publisher for clouds and images recognizer
-    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_cloud_to_recognizer_;
-    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ImageList>> pub_image_to_recognizer_;
+    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mir_interfaces::msg::ObjectList>> pub_cloud_to_recognizer_;
+    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mir_interfaces::msg::ImageList>> pub_image_to_recognizer_;
 
     // Callback group for subscribers
     rclcpp::CallbackGroup::SharedPtr recognized_callback_group_;
@@ -141,11 +141,11 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     rclcpp::SubscriptionOptions recognized_sub_options;
 
     // Subscriber for clouds and images recognizer
-    std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_image_list_;
-    std::shared_ptr<rclcpp::Subscription<mas_perception_msgs::msg::ObjectList>> sub_recognized_cloud_list_;
+    std::shared_ptr<rclcpp::Subscription<mir_interfaces::msg::ObjectList>> sub_recognized_image_list_;
+    std::shared_ptr<rclcpp::Subscription<mir_interfaces::msg::ObjectList>> sub_recognized_cloud_list_;
 
     // Publisher object lsit
-    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mas_perception_msgs::msg::ObjectList>> pub_object_list_;
+    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mir_interfaces::msg::ObjectList>> pub_object_list_;
 
     // Publisher pose array (debug_mode only)
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::PoseArray>> pub_pc_object_pose_array_;
@@ -170,8 +170,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
             const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud);
 
     // Recognize Clouds and Image callback
-    void recognizedImageCallback(const mas_perception_msgs::msg::ObjectList &msg);
-    void recognizedCloudCallback(const mas_perception_msgs::msg::ObjectList &msg);
+    void recognizedImageCallback(const mir_interfaces::msg::ObjectList &msg);
+    void recognizedCloudCallback(const mir_interfaces::msg::ObjectList &msg);
 
     /** \brief Transform pointcloud to the given target frame id ("base_link" by default)
       * \param[in] PointCloud2 input
@@ -187,19 +187,19 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
       * \param[in] Object_list
       * 
       **/
-    void adjustObjectPose(mas_perception_msgs::msg::ObjectList &object_list);
+    void adjustObjectPose(mir_interfaces::msg::ObjectList &object_list);
 
     /** \brief Publish object_list to object_list merger 
       * \param[in] Object_list to publish
       **/
-    void publishObjectList(mas_perception_msgs::msg::ObjectList &object_list);
+    void publishObjectList(mir_interfaces::msg::ObjectList &object_list);
     
     /** \brief Publish debug info such as bbox, poses, labels for both 2D and 3D objects.
       * \param[in] combined object list
       * \param[in] 3D pointcloud cluster from 3D object segmentation
       * \param[in] 3D pointcloud cluster from 2D bounding box proposal
       **/
-    void publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
+    void publishDebug(mir_interfaces::msg::ObjectList &combined_object_list,
                                             std::vector<PointCloudBSPtr> &clusters_3d,
                                             std::vector<PointCloudBSPtr> &clusters_2d);
 
@@ -294,8 +294,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     bool received_recognized_cloud_list_flag_;
 
     //Recognized image list
-    mas_perception_msgs::msg::ObjectList recognized_cloud_list_; 
-    mas_perception_msgs::msg::ObjectList recognized_image_list_;
+    mir_interfaces::msg::ObjectList recognized_cloud_list_; 
+    mir_interfaces::msg::ObjectList recognized_image_list_;
 
     // Enable recognizer
     bool enable_rgb_recognizer_;
@@ -322,7 +322,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
       * \param[out] 3D object list with unknown label
       * \param[out] Tabletop pointcloud clusters
       **/
-    void segmentPointCloud(mas_perception_msgs::msg::ObjectList &object_list,
+    void segmentPointCloud(mir_interfaces::msg::ObjectList &object_list,
                     std::vector<PointCloudBSPtr> &clusters,
                     std::vector<mpu::object::BoundingBox> &boxes);
 };

@@ -19,7 +19,7 @@ using namespace mir_perception_utils::object;
 
 /** Convert from PCL PlanarPolygon to ROS message. */
 inline void convertPlanarPolygon(const PlanarPolygon &polygon,
-                                 mas_perception_msgs::msg::PlanarPolygon &polygon_msg)
+                                 mir_interfaces::msg::PlanarPolygon &polygon_msg)
 {
   for (int i = 0; i < 4; ++i)
   {
@@ -38,7 +38,7 @@ inline void convertPlanarPolygon(const PlanarPolygon &polygon,
 }
 
 /** Convert from ROS message to PCL PlanarPolygon. */
-inline void convertPlanarPolygon(const mas_perception_msgs::msg::PlanarPolygon &polygon_msg,
+inline void convertPlanarPolygon(const mir_interfaces::msg::PlanarPolygon &polygon_msg,
                                  PlanarPolygon &polygon)
 {
   Eigen::Vector4f coefficients(polygon_msg.coefficients._M_elems);
@@ -79,7 +79,7 @@ inline double computePlanarPolygonArea(const PlanarPolygon &polygon)
 
 /** Convert from BoundingBox object to ROS message. */
 inline void convertBoundingBox(const BoundingBox &bounding_box,
-                               mas_perception_msgs::msg::BoundingBox &bounding_box_msg)
+                               mir_interfaces::msg::BoundingBox &bounding_box_msg)
 {
   const BoundingBox::Point &center = bounding_box.getCenter();
   bounding_box_msg.center.x = center[0];

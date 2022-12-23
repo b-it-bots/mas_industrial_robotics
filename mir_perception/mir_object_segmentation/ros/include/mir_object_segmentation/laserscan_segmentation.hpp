@@ -22,7 +22,7 @@ class LaserScanSegmentation
                         unsigned int unMinimumPointsPerSegment);
   ~LaserScanSegmentation();
 
-  mas_perception_msgs::msg::LaserScanSegmentList getSegments(
+  mir_interfaces::msg::LaserScanSegmentList getSegments(
       const std::shared_ptr<const sensor_msgs::msg::LaserScan> &inputScan, bool store_data_points = false);
 
  private:

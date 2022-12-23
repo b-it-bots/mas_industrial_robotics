@@ -16,7 +16,7 @@ namespace perception_namespace
   void DataCollector::recognizeCloudAndImage()
   {
     RCLCPP_INFO(get_logger(), "Inside data collection node recognize cloud image function");
-    mas_perception_msgs::msg::ObjectList cloud_object_list;
+    mir_interfaces::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
     this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);

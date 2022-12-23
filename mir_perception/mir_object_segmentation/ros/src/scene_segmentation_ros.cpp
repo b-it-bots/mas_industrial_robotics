@@ -21,7 +21,7 @@ SceneSegmentationROS::SceneSegmentationROS(double octree_resolution)
 
 SceneSegmentationROS::~SceneSegmentationROS() {}
 void SceneSegmentationROS::segmentCloud(const PointCloudConstBSPtr &cloud,
-                                        mas_perception_msgs::msg::ObjectList &object_list,
+                                        mir_interfaces::msg::ObjectList &object_list,
                                         std::vector<PointCloudBSPtr> &clusters,
                                         std::vector<BoundingBox> &boxes, bool center_cluster,
                                         bool pad_cluster, int num_points)

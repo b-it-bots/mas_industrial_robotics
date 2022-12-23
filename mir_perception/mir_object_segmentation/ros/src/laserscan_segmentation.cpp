@@ -15,10 +15,10 @@ LaserScanSegmentation::LaserScanSegmentation(double dThresholdDistanceBetweenAda
 
 LaserScanSegmentation::~LaserScanSegmentation() = default;
 
-mas_perception_msgs::msg::LaserScanSegmentList LaserScanSegmentation::getSegments(
+mir_interfaces::msg::LaserScanSegmentList LaserScanSegmentation::getSegments(
     const std::shared_ptr<const sensor_msgs::msg::LaserScan> &inputScan, bool store_data_points)
 {
-  mas_perception_msgs::msg::LaserScanSegmentList segments;
+  mir_interfaces::msg::LaserScanSegmentList segments;
   std::vector<geometry_msgs::msg::Point> data_points;
 
   double dNumberofPointsBetweenStartAndEnd = 0;
@@ -65,7 +65,7 @@ mas_perception_msgs::msg::LaserScanSegmentList LaserScanSegmentation::getSegment
         double dDistanceToSegment = sqrt(pow(centerPoint.x, 2.0) + pow(centerPoint.y, 2.0));
 
         if (dDistanceToSegment < 5.0) {
-          mas_perception_msgs::msg::LaserScanSegment seg;
+          mir_interfaces::msg::LaserScanSegment seg;
 
           seg.header = inputScan->header;
           seg.header.stamp = rclcpp::Clock().now();

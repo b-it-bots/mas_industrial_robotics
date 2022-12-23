@@ -38,9 +38,9 @@ namespace mir_perception_utils
         BoundingBoxVisualizer(const std::string &topic_name, Color color,
                               bool check_subscribers = true);
 
-        void publish(const mas_perception_msgs::msg::BoundingBox &box, const std::string &frame_id);
+        void publish(const mir_interfaces::msg::BoundingBox &box, const std::string &frame_id);
 
-        void publish(const std::vector<mas_perception_msgs::msg::BoundingBox> &boxes, const std::string &frame_id);
+        void publish(const std::vector<mir_interfaces::msg::BoundingBox> &boxes, const std::string &frame_id);
 
         int getNumSubscribers();            
 

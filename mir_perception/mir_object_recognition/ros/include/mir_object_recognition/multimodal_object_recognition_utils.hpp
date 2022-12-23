@@ -44,12 +44,12 @@ class MultimodalObjectRecognitionUtils
      * \param[in] object
      * 
     */
-    void adjustAxisBoltPose(mas_perception_msgs::msg::Object &object);
+    void adjustAxisBoltPose(mir_interfaces::msg::Object &object);
 
     /** \brief Adjust container pose by finding the largest cluster to find the center
      * \param[in] object.views[0].point_cloud
      * \param[in] height adjustment of the container, default 10cm
     */
-    void adjustContainerPose(mas_perception_msgs::msg::Object &container_object, float container_height=0.1);
+    void adjustContainerPose(mir_interfaces::msg::Object &container_object, float container_height=0.1);
 };
 #endif  // MIR_OBJECT_RECOGNITION_MULTIMODAL_OBJECT_RECOGNITION_UTILS_HPP

@@ -42,7 +42,7 @@ namespace mir_perception_utils
     void get3DBoundingBox(const PointCloudConstBSPtr &cloud,
                           const Eigen::Vector3f &normal,
                           BoundingBox &bbox,
-                          mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
+                          mir_interfaces::msg::BoundingBox &bounding_box_msg);
 
     /** \brief Estimate pose given bounding box
      * \param[in] Bounding box
@@ -85,7 +85,7 @@ namespace mir_perception_utils
      * \param[out] Bounding box message
      * */
     void convertBboxToMsg(const BoundingBox &bbox,
-                          mas_perception_msgs::msg::BoundingBox &bounding_box_msg);
+                          mir_interfaces::msg::BoundingBox &bounding_box_msg);
 
     /** \brief Save debug pointcloud with data_collector node
      * \param[in] Pointcloud pointer

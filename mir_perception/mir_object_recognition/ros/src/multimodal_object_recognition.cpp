@@ -44,7 +44,7 @@ namespace perception_namespace
     scene_segmentation_ros_->resetCloudAccumulation();
   }
 
-  void MultiModalObjectRecognitionROS::recognizedImageCallback(const mas_perception_msgs::msg::ObjectList &msg)
+  void MultiModalObjectRecognitionROS::recognizedImageCallback(const mir_interfaces::msg::ObjectList &msg)
   {
     RCLCPP_INFO(get_logger(), "Received recognized image callback");
     if (!received_recognized_image_list_flag_)
@@ -54,7 +54,7 @@ namespace perception_namespace
     }
   }
 
-  void MultiModalObjectRecognitionROS::recognizedCloudCallback(const mas_perception_msgs::msg::ObjectList &msg)
+  void MultiModalObjectRecognitionROS::recognizedCloudCallback(const mir_interfaces::msg::ObjectList &msg)
   {
     RCLCPP_INFO(get_logger(), "Received recognized cloud callback");
     if (!received_recognized_cloud_list_flag_)
@@ -84,7 +84,7 @@ namespace perception_namespace
     pcl::fromPCLPointCloud2(*pc2, *cloud_);
   }
 
-  void MultiModalObjectRecognitionROS::segmentPointCloud(mas_perception_msgs::msg::ObjectList &object_list,
+  void MultiModalObjectRecognitionROS::segmentPointCloud(mir_interfaces::msg::ObjectList &object_list,
                                                          std::vector<PointCloudBSPtr> &clusters,
                                                          std::vector<mpu::object::BoundingBox> &boxes)
   {
@@ -116,7 +116,7 @@ namespace perception_namespace
 
   void MultiModalObjectRecognitionROS::recognizeCloudAndImage()
   {
-    mas_perception_msgs::msg::ObjectList cloud_object_list;
+    mir_interfaces::msg::ObjectList cloud_object_list;
     std::vector<PointCloudBSPtr> clusters_3d;
     std::vector<mpu::object::BoundingBox> boxes;
 
@@ -135,7 +135,7 @@ namespace perception_namespace
       if (debug_mode_)
       {
         // convert the bouinding boxes into ros message
-        mas_perception_msgs::msg::BoundingBoxList bounding_box_list;
+        mir_interfaces::msg::BoundingBoxList bounding_box_list;
         bounding_box_list.bounding_boxes.resize(boxes.size());
         // loop through boxes
         for (size_t i = 0; i < boxes.size(); i++)
@@ -146,7 +146,7 @@ namespace perception_namespace
       }
     }
 
-    mas_perception_msgs::msg::ImageList image_list;
+    mir_interfaces::msg::ImageList image_list;
     image_list.images.resize(1);
     image_list.images[0] = *image_msg_;
     if (!image_list.images.empty() && enable_rgb_recognizer_)
@@ -159,7 +159,7 @@ namespace perception_namespace
 
     RCLCPP_INFO_STREAM(get_logger(), "Waiting for message from Cloud and Image recognizer");
 
-    mas_perception_msgs::msg::ObjectList combined_object_list;
+    mir_interfaces::msg::ObjectList combined_object_list;
     if (!recognized_cloud_list_.objects.empty())
     {
       combined_object_list.objects.insert(combined_object_list.objects.end(),
@@ -171,8 +171,8 @@ namespace perception_namespace
     received_recognized_cloud_list_flag_ = false;
     received_recognized_image_list_flag_ = false;
 
-    mas_perception_msgs::msg::ObjectList rgb_object_list;
-    mas_perception_msgs::msg::BoundingBoxList bounding_boxes;
+    mir_interfaces::msg::ObjectList rgb_object_list;
+    mir_interfaces::msg::BoundingBoxList bounding_boxes;
     std::vector<PointCloudBSPtr> clusters_2d;
 
     cv_bridge::CvImagePtr cv_image;
@@ -193,7 +193,7 @@ namespace perception_namespace
 
       for (size_t i = 0; i < recognized_image_list_.objects.size(); i++)
       {
-        mas_perception_msgs::msg::Object object = recognized_image_list_.objects[i];
+        mir_interfaces::msg::Object object = recognized_image_list_.objects[i];
         // Check qualitative info of the object
         if (round_objects_.count(recognized_image_list_.objects[i].name))
         {
@@ -334,7 +334,7 @@ namespace perception_namespace
     }
   }
 
-  void MultiModalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::msg::ObjectList &object_list)
+  void MultiModalObjectRecognitionROS::adjustObjectPose(mir_interfaces::msg::ObjectList &object_list)
   {
     for (size_t i = 0; i < object_list.objects.size(); i++)
     {
@@ -392,7 +392,7 @@ namespace perception_namespace
     }
   }
 
-  void MultiModalObjectRecognitionROS::publishObjectList(mas_perception_msgs::msg::ObjectList &object_list)
+  void MultiModalObjectRecognitionROS::publishObjectList(mir_interfaces::msg::ObjectList &object_list)
   {
     for (size_t i = 0; i < object_list.objects.size(); i++)
     {
@@ -414,7 +414,7 @@ namespace perception_namespace
     pub_object_list_->publish(object_list);
   }
 
-  void MultiModalObjectRecognitionROS::publishDebug(mas_perception_msgs::msg::ObjectList &combined_object_list,
+  void MultiModalObjectRecognitionROS::publishDebug(mir_interfaces::msg::ObjectList &combined_object_list,
                                                     std::vector<PointCloudBSPtr> &clusters_3d,
                                                     std::vector<PointCloudBSPtr> &clusters_2d)
   {
@@ -431,7 +431,7 @@ namespace perception_namespace
       // Bounding boxes
       if (clusters_3d.size() > 0)
       {
-        mas_perception_msgs::msg::BoundingBoxList bounding_boxes;
+        mir_interfaces::msg::BoundingBoxList bounding_boxes;
         cluster_visualizer_pc_->publish(clusters_3d, target_frame_id_);
         bounding_boxes.bounding_boxes.resize(clusters_3d.size());
         for (size_t i = 0; i < clusters_3d.size(); i++)
@@ -514,7 +514,7 @@ namespace perception_namespace
   void MultiModalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
   {
     YAML::Node config = YAML::LoadFile(filename);
-    mas_perception_msgs::msg::Object object1;
+    mir_interfaces::msg::Object object1;
     if (config["object_info"])
     {
       for (unsigned j = 0; j < config["object_info"]["object"].size(); ++j)
@@ -581,17 +581,17 @@ namespace perception_namespace
     pub_debug_cloud_plane_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("output/debug_cloud_plane", qos_sensor);
 
     // Publish cloud and images to cloud and rgb recognition topics
-    pub_cloud_to_recognizer_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("recognizer/pc/input/object_list", qos_parameters);
-    pub_image_to_recognizer_ = this->create_publisher<mas_perception_msgs::msg::ImageList>("recognizer/rgb/input/images", qos_parameters);
+    pub_cloud_to_recognizer_ = this->create_publisher<mir_interfaces::msg::ObjectList>("recognizer/pc/input/object_list", qos_parameters);
+    pub_image_to_recognizer_ = this->create_publisher<mir_interfaces::msg::ImageList>("recognizer/rgb/input/images", qos_parameters);
 
     // Subscribe to cloud and rgb recognition topics
     recognized_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
     recognized_sub_options = rclcpp::SubscriptionOptions();
     recognized_sub_options.callback_group = recognized_callback_group_;
-    sub_recognized_image_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
+    sub_recognized_image_list_ = this->create_subscription<mir_interfaces::msg::ObjectList>(
         "recognizer/rgb/output/object_list", qos_parameters, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1), recognized_sub_options);
 
-    sub_recognized_cloud_list_ = this->create_subscription<mas_perception_msgs::msg::ObjectList>(
+    sub_recognized_cloud_list_ = this->create_subscription<mir_interfaces::msg::ObjectList>(
         "recognizer/pc/output/object_list", qos_parameters, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1), recognized_sub_options);
 
     // publish pose arrays
@@ -599,7 +599,7 @@ namespace perception_namespace
     pub_rgb_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/rgb_object_pose_array", qos_default);
 
     // Pub combined object_list to object_list merger
-    pub_object_list_ = this->create_publisher<mas_perception_msgs::msg::ObjectList>("output/object_list", qos_parameters);
+    pub_object_list_ = this->create_publisher<mir_interfaces::msg::ObjectList>("output/object_list", qos_parameters);
 
     // initialize bounding box visualizer
     bounding_box_visualizer_pc_ = std::make_shared<BoundingBoxVisualizer>(shared_from_this(), "output/bounding_boxes", Color(Color::IVORY));

@@ -35,15 +35,15 @@ namespace mir_perception_utils
 
     int BoundingBoxVisualizer::getNumSubscribers() { return marker_publisher_->get_subscription_count(); }
 
-    void BoundingBoxVisualizer::publish(const mas_perception_msgs::msg::BoundingBox &box,
+    void BoundingBoxVisualizer::publish(const mir_interfaces::msg::BoundingBox &box,
                                         const std::string &frame_id)
     {
-      std::vector<mas_perception_msgs::msg::BoundingBox> boxes;
+      std::vector<mir_interfaces::msg::BoundingBox> boxes;
       boxes.push_back(box);
       publish(boxes, frame_id);
     }
 
-    void BoundingBoxVisualizer::publish(const std::vector<mas_perception_msgs::msg::BoundingBox> &boxes,
+    void BoundingBoxVisualizer::publish(const std::vector<mir_interfaces::msg::BoundingBox> &boxes,
                                         const std::string &frame_id)
     {
       if (check_subscribers_ && marker_publisher_->get_subscription_count() == 0)
