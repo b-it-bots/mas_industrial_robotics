@@ -7,10 +7,36 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+
+find_package(builtin_interfaces REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-rosidl_generate_interfaces(${PROJECT_NAME}
+set(manipulation_msg_files
   "mir_manipulation/msg/GripperCommand.msg"
+)
+
+set(perception_msg_files
+  "mir_perception/msg/BoundingBox.msg"
+  "mir_perception/msg/BoundingBoxList.msg"
+  "mir_perception/msg/ImageList.msg"
+  "mir_perception/msg/LaserScanSegment.msg"
+  "mir_perception/msg/LaserScanSegmentList.msg"
+  "mir_perception/msg/Object.msg"
+  "mir_perception/msg/ObjectEmbedding.msg"
+  "mir_perception/msg/ObjectList.msg"
+  "mir_perception/msg/ObjectView.msg"
+  "mir_perception/msg/PlanarPolygon.msg"
+  "mir_perception/msg/NamedShape.msg"
+  "mir_perception/msg/NamedColor.msg"
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${manipulation_msg_files}
+  ${perception_msg_files}
+  DEPENDENCIES builtin_interfaces std_msgs geometry_msgs sensor_msgs
 )
 
 if(BUILD_TESTING)
