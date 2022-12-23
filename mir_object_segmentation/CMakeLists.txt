@@ -62,22 +62,35 @@ add_library(${PROJECT_NAME}
   ros/src/scene_segmentation_ros.cpp
 )
 
-# target_link_libraries(${PROJECT_NAME} 
-#   mir_perception_utils
-# )
+target_link_libraries(${PROJECT_NAME} 
+  mir_perception_utils::mir_perception_utils
+)
 
 ament_target_dependencies(${PROJECT_NAME} 
   tf2_ros 
   pcl_ros
   cv_bridge
   visualization_msgs
-  mir_perception_utils
   std_msgs 
   sensor_msgs 
   geometry_msgs
 )
 
-ament_export_libraries(${PROJECT_NAME})
+install (
+  DIRECTORY common/include/${PROJECT_NAME}/ ros/include/${PROJECT_NAME}/
+  DESTINATION include/${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -90,20 +103,5 @@ if(BUILD_TESTING)
   # set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
-install (
-  DIRECTORY common/include/${PROJECT_NAME}/ ros/include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-)
-
-install(
-  TARGETS ${PROJECT_NAME}
-  # EXPORT ${PROJECT_NAME} 
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
-ament_export_include_directories(include)
 
 ament_package()

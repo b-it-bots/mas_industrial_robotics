@@ -96,13 +96,11 @@ ament_target_dependencies(mmor
   cv_bridge
   rclcpp_components
   yaml_cpp_vendor
-  mir_object_segmentation
-  mir_perception_utils
 )
-# target_link_libraries(mmor
-#   perception_visualization
-#   scene_segmentation
-# )
+target_link_libraries(mmor
+  mir_object_segmentation::mir_object_segmentation
+  mir_perception_utils::mir_perception_utils
+)
 rclcpp_components_register_nodes(mmor "perception_namespace::MultiModalObjectRecognitionROS")
 
 add_library(data_collector SHARED
@@ -128,28 +126,16 @@ ament_target_dependencies(data_collector
   cv_bridge
   rclcpp_components
   yaml_cpp_vendor
-  mir_object_segmentation
-  mir_perception_utils
+
 )
-# target_link_libraries(data_collector
-#   perception_visualization
-#   scene_segmentation
-# )
+target_link_libraries(data_collector
+  mir_object_segmentation::mir_object_segmentation
+  mir_perception_utils::mir_perception_utils
+)
 rclcpp_components_register_nodes(data_collector "perception_namespace::DataCollector")
 
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME}_node)
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
 
 install(TARGETS
   mmor

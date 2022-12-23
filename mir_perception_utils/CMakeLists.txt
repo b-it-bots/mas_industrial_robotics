@@ -63,7 +63,21 @@ ament_target_dependencies(${PROJECT_NAME}
   geometry_msgs
 )
 
-ament_export_libraries(${PROJECT_NAME})
+install(
+  DIRECTORY ros/include/${PROJECT_NAME}/ common/include/${PROJECT_NAME}/
+  DESTINATION include/${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -76,21 +90,5 @@ if(BUILD_TESTING)
   # set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
-install(
-  DIRECTORY ros/include/${PROJECT_NAME}/ common/include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-)
-
-install(
-  TARGETS ${PROJECT_NAME}
-  # EXPORT ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-  # INCLUDES DESTINATION include
-)
-
-ament_export_include_directories(include)
 
 ament_package()
