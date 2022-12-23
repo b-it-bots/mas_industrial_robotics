@@ -1,7 +1,7 @@
 /*
  * Copyright 2022 Bonn-Rhein-Sieg University
  *
- * Author: Kevin Patel
+ * Author: Kevin Patel, Vamsi Kalagaturu
  *
  */
 
@@ -9,17 +9,35 @@
 
 YoloInference::YoloInference(std::string net_file, std::string classes_file)
 {
-    // get ros package path
-    std::string package_path = ament_index_cpp::get_package_share_directory("mir_object_recognition");
+    try {
+        YAML::Node config = YAML::LoadFile(classes_file);
 
-    ifstream ifs(package_path + "/ros/config/yolo_inference/" + classes_file);
-    string line;
-    while (getline(ifs, line))
-    {
-        class_list.push_back(line);
+        if (config["class_names"])
+        {
+            for (auto class_name : config["class_names"])
+            {
+                class_list.push_back(class_name.as<std::string>());
+            }
+        }
+        else
+        {
+            std::cerr << "[Yolo Inference] No class_names found in %s" << classes_file.c_str() << endl;
+        }
+    }
+    catch (const YAML::ParserException& ex) {
+        std::cerr << ex.what() << std::endl;
+        return;
     }
 
-    net = readNet(net_file);
+    try
+    {
+        net = readNet(net_file);
+    }
+    catch (cv::Exception& e)
+    {
+        std::cerr << endl << endl << e.msg << endl << endl;
+        return;
+    }
 }
 
 YoloInference::~YoloInference()
@@ -125,7 +143,7 @@ RecognizedObjectList YoloInference::post_process(Mat &input_image, vector<Mat> &
     vector<int> indices;
     NMSBoxes(boxes, confidences, SCORE_THRESHOLD, NMS_THRESHOLD, indices);
 
-    for (int i=0; i < indices.size(); i++)
+    for (size_t i=0; i<indices.size(); i++)
     {
         int idx = indices[i];
         RecognizedObject obj;
@@ -133,7 +151,7 @@ RecognizedObjectList YoloInference::post_process(Mat &input_image, vector<Mat> &
         obj.roi = {box.x, box.y, box.width, box.height};
         string cls_name = class_list[class_ids[idx]];
         std::transform(cls_name.begin(), cls_name.end(), cls_name.begin(), ::toupper);
-        obj.class_name = cls_name[class_ids[idx]];
+        obj.class_name = cls_name;
         obj.confidence = confidences[idx];
         recognized_object_list.push_back(obj);
     }
@@ -158,7 +176,7 @@ int main(int argc, char ** argv)
     
     RecognizedObjectList recoglist = yolo_inference.run_inference(frame);
 
-    for (int i = 0; i < recoglist.size(); i++)
+    for (size_t i = 0; i < recoglist.size(); i++)
     {
         RecognizedObject obj = recoglist[i];
         int left = obj.roi[0];

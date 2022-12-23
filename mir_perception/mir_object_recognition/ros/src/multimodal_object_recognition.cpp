@@ -32,7 +32,6 @@ namespace perception_namespace
 
     // Reset received recognized cloud and image
     received_recognized_cloud_list_flag_ = false;
-    received_recognized_image_list_flag_ = false;
 
     // reset object id
     scene_segmentation_ros_->resetPclObjectId();
@@ -42,16 +41,6 @@ namespace perception_namespace
     recognized_cloud_list_.objects.clear();
 
     scene_segmentation_ros_->resetCloudAccumulation();
-  }
-
-  void MultiModalObjectRecognitionROS::recognizedImageCallback(const mir_interfaces::msg::ObjectList &msg)
-  {
-    RCLCPP_INFO(get_logger(), "Received recognized image callback");
-    if (!received_recognized_image_list_flag_)
-    {
-      recognized_image_list_ = msg;
-      received_recognized_image_list_flag_ = true;
-    }
   }
 
   void MultiModalObjectRecognitionROS::recognizedCloudCallback(const mir_interfaces::msg::ObjectList &msg)
@@ -124,40 +113,91 @@ namespace perception_namespace
 
     this->segmentPointCloud(cloud_object_list, clusters_3d, boxes);
 
-    if (!cloud_object_list.objects.empty() && enable_rgb_recognizer_)
+    if (debug_mode_)
     {
-      // publish the recognized objects
+      // convert the bouinding boxes into ros message
+      mir_interfaces::msg::BoundingBoxList bounding_box_list;
+      bounding_box_list.bounding_boxes.resize(boxes.size());
+      // loop through boxes
+      for (size_t i = 0; i < boxes.size(); i++)
+      {
+        convertBoundingBox(boxes[i], bounding_box_list.bounding_boxes[i]);
+      }
+      bounding_box_visualizer_pc_->publish(bounding_box_list.bounding_boxes, target_frame_id_);
+    }
 
+    // publish segmented cloud object list for recognition
+    if (!cloud_object_list.objects.empty() && enable_pc_recognizer_)
+    {
       RCLCPP_INFO_STREAM(get_logger(), "Publishing pointcloud for recognition");
 
       pub_cloud_to_recognizer_->publish(cloud_object_list);
+    }
+
+    // RGB Object recognition
+
+    if (recognized_image_list_.objects.empty() && enable_rgb_recognizer_)
+    {
+      RCLCPP_INFO_STREAM(get_logger(), "Performing RGB recognition");
+      // convert the image_msg_ into cv::Mat
+      cv_bridge::CvImagePtr image_cv_ptr;
+      try
+      {
+        image_cv_ptr = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
+      }
+      catch (cv_bridge::Exception &e)
+      {
+        RCLCPP_ERROR(get_logger(), "cv_bridge exception: %s", e.what());
+        return;
+      }
+
+      // pass the image to the rgb yolov inference class and get the recognized objects list
+      RecognizedObjectList rgb_recog_list = yolo_inference_->run_inference(image_cv_ptr->image);
+
+      recognized_image_list_.objects.resize(rgb_recog_list.size());
+      for (size_t i = 0; i < rgb_recog_list.size(); i++)
+      {
+        recognized_image_list_.objects[i].name = rgb_recog_list[i].class_name;
+        recognized_image_list_.objects[i].probability = rgb_recog_list[i].confidence;
+        recognized_image_list_.objects[i].roi.x_offset = rgb_recog_list[i].roi[0];
+        recognized_image_list_.objects[i].roi.y_offset = rgb_recog_list[i].roi[1];
+        recognized_image_list_.objects[i].roi.width = rgb_recog_list[i].roi[2];
+        recognized_image_list_.objects[i].roi.height = rgb_recog_list[i].roi[3];
+      }
 
       if (debug_mode_)
       {
-        // convert the bouinding boxes into ros message
-        mir_interfaces::msg::BoundingBoxList bounding_box_list;
-        bounding_box_list.bounding_boxes.resize(boxes.size());
-        // loop through boxes
-        for (size_t i = 0; i < boxes.size(); i++)
+        for (size_t i = 0; i < rgb_recog_list.size(); i++)
         {
-          convertBoundingBox(boxes[i], bounding_box_list.bounding_boxes[i]);
+            RecognizedObject obj = rgb_recog_list[i];
+            int left = obj.roi[0];
+            int top = obj.roi[1];
+            int width = obj.roi[2];
+            int height = obj.roi[3];
+            string class_name = obj.class_name;
+            float conf = obj.confidence;
+            // Draw bounding box.
+            rectangle(image_cv_ptr->image, Point(left, top), Point(left + width, top + height), BLUE, 3 * THICKNESS);
+            // Get the label for the class name and its confidence.
+            string label = format("%.2f", conf);
+            label = class_name + ":" + label;
+            // Draw class labels.
+            yolo_inference_->draw_label(image_cv_ptr->image, label, left, top);
         }
-        bounding_box_visualizer_pc_->publish(bounding_box_list.bounding_boxes, target_frame_id_);
+        vector<double> layersTimes;
+        double freq = getTickFrequency() / 1000;
+        double t = yolo_inference_->net.getPerfProfile(layersTimes) / freq;
+        string label = format("Inference time : %.2f ms", t);
+        putText(image_cv_ptr->image, label, Point(20, 40), FONT_FACE, FONT_SCALE, RED);
+
+        // convert the cv::Mat into ros message and publish
+        std::shared_ptr<sensor_msgs::msg::Image> image_msg = image_cv_ptr->toImageMsg();
+        image_msg->header.frame_id = target_frame_id_;
+        pub_debug_rgb_image_->publish(*image_msg);
       }
     }
 
-    mir_interfaces::msg::ImageList image_list;
-    image_list.images.resize(1);
-    image_list.images[0] = *image_msg_;
-    if (!image_list.images.empty() && enable_rgb_recognizer_)
-    {
-      RCLCPP_INFO_STREAM(get_logger(), "Publishing images for recognition");
-      pub_image_to_recognizer_->publish(image_list);
-    }
-
-    // Object recognition
-
-    RCLCPP_INFO_STREAM(get_logger(), "Waiting for message from Cloud and Image recognizer");
+    // TODO: Test PC object recognition
 
     mir_interfaces::msg::ObjectList combined_object_list;
     if (!recognized_cloud_list_.objects.empty())
@@ -169,7 +209,6 @@ namespace perception_namespace
 
     // Reset recognition callback flags
     received_recognized_cloud_list_flag_ = false;
-    received_recognized_image_list_flag_ = false;
 
     mir_interfaces::msg::ObjectList rgb_object_list;
     mir_interfaces::msg::BoundingBoxList bounding_boxes;
@@ -553,6 +592,9 @@ namespace perception_namespace
     MultiModalObjectRecognitionROS::get_all_parameters();
     MultiModalObjectRecognitionROS::loadObjectInfo(objects_info_path_);
 
+    // initialize yolo_inference
+    yolo_inference_ = std::make_shared<YoloInference>(yolo_weights_path_, yolo_classes_info_path_);
+
     // declare qos profile
     qos_sensor = rclcpp::SensorDataQoS(rclcpp::KeepLast(10));
     qos_parameters = rclcpp::ParametersQoS(rclcpp::KeepLast(1));
@@ -561,13 +603,11 @@ namespace perception_namespace
     // initializing variables
     rgb_object_id_ = 100;
     container_height_ = 0.05;
-    received_recognized_image_list_flag_ = false;
     received_recognized_cloud_list_flag_ = false;
     enable_rgb_recognizer_ = true;
-    enable_pc_recognizer_ = true;
+    enable_pc_recognizer_ = false;
     rgb_roi_adjustment_ = 2;
     rgb_cluster_remove_outliers_ = true;
-
     
     msg_sync_ = std::make_shared<Sync>(msgSyncPolicy(10), image_sub_, cloud_sub_);
 
@@ -575,42 +615,42 @@ namespace perception_namespace
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
     // publish workspace height
-    pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("workspace_height", qos_parameters);
+    pub_workspace_height_ = this->create_publisher<std_msgs::msg::Float64>("~/workspace_height", qos_parameters);
 
     // publish debug
-    pub_debug_cloud_plane_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("output/debug_cloud_plane", qos_sensor);
+    pub_debug_cloud_plane_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("~/output/debug_cloud_plane", qos_sensor);
 
     // Publish cloud and images to cloud and rgb recognition topics
     pub_cloud_to_recognizer_ = this->create_publisher<mir_interfaces::msg::ObjectList>("recognizer/pc/input/object_list", qos_parameters);
-    pub_image_to_recognizer_ = this->create_publisher<mir_interfaces::msg::ImageList>("recognizer/rgb/input/images", qos_parameters);
+
+    // rgb image debug publisher
+    pub_debug_rgb_image_ = this->create_publisher<sensor_msgs::msg::Image>("~/recognizer/rgb/debug_image", qos_default);
 
     // Subscribe to cloud and rgb recognition topics
     recognized_callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
     recognized_sub_options = rclcpp::SubscriptionOptions();
     recognized_sub_options.callback_group = recognized_callback_group_;
-    sub_recognized_image_list_ = this->create_subscription<mir_interfaces::msg::ObjectList>(
-        "recognizer/rgb/output/object_list", qos_parameters, std::bind(&MultiModalObjectRecognitionROS::recognizedImageCallback, this, std::placeholders::_1), recognized_sub_options);
 
     sub_recognized_cloud_list_ = this->create_subscription<mir_interfaces::msg::ObjectList>(
         "recognizer/pc/output/object_list", qos_parameters, std::bind(&MultiModalObjectRecognitionROS::recognizedCloudCallback, this, std::placeholders::_1), recognized_sub_options);
 
     // publish pose arrays
-    pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/pc_object_pose_array", qos_default);
-    pub_rgb_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("output/rgb_object_pose_array", qos_default);
+    pub_pc_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("~/output/pc_object_pose_array", qos_default);
+    pub_rgb_object_pose_array_ = this->create_publisher<geometry_msgs::msg::PoseArray>("~/output/rgb_object_pose_array", qos_default);
 
     // Pub combined object_list to object_list merger
-    pub_object_list_ = this->create_publisher<mir_interfaces::msg::ObjectList>("output/object_list", qos_parameters);
+    pub_object_list_ = this->create_publisher<mir_interfaces::msg::ObjectList>("~/output/object_list", qos_parameters);
 
     // initialize bounding box visualizer
-    bounding_box_visualizer_pc_ = std::make_shared<BoundingBoxVisualizer>(shared_from_this(), "output/bounding_boxes", Color(Color::IVORY));
+    bounding_box_visualizer_pc_ = std::make_shared<BoundingBoxVisualizer>(shared_from_this(), "~/output/bounding_boxes", Color(Color::IVORY));
 
     // initialize cluster visualizer for rgb and pc
-    cluster_visualizer_rgb_ = std::make_shared<ClusteredPointCloudVisualizer>(shared_from_this(), "output/tabletop_cluster_rgb", true);
-    cluster_visualizer_pc_ = std::make_shared<ClusteredPointCloudVisualizer>(shared_from_this(), "output/tabletop_cluster_pc");
+    cluster_visualizer_rgb_ = std::make_shared<ClusteredPointCloudVisualizer>(shared_from_this(), "~/output/tabletop_cluster_rgb", true);
+    cluster_visualizer_pc_ = std::make_shared<ClusteredPointCloudVisualizer>(shared_from_this(), "~/output/tabletop_cluster_pc");
 
     // initialize label visualizer for rgb and pc
-    label_visualizer_rgb_ = std::make_shared<LabelVisualizer>(shared_from_this(), "output/rgb_labels", Color(Color::SEA_GREEN));
-    label_visualizer_pc_ = std::make_shared<LabelVisualizer>(shared_from_this(), "output/pc_labels", Color(Color::IVORY));
+    label_visualizer_rgb_ = std::make_shared<LabelVisualizer>(shared_from_this(), "~/output/rgb_labels", Color(Color::SEA_GREEN));
+    label_visualizer_pc_ = std::make_shared<LabelVisualizer>(shared_from_this(), "~/output/pc_labels", Color(Color::IVORY));
 
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
@@ -627,8 +667,8 @@ namespace perception_namespace
 
     pub_workspace_height_->on_activate();
     pub_debug_cloud_plane_->on_activate();
+    pub_debug_rgb_image_->on_activate();
     pub_cloud_to_recognizer_->on_activate();
-    pub_image_to_recognizer_->on_activate();
     pub_object_list_->on_activate();
     pub_pc_object_pose_array_->on_activate();
     pub_rgb_object_pose_array_->on_activate();
@@ -647,8 +687,8 @@ namespace perception_namespace
 
     pub_workspace_height_->on_deactivate();
     pub_debug_cloud_plane_->on_deactivate();
+    pub_debug_rgb_image_->on_deactivate();
     pub_cloud_to_recognizer_->on_deactivate();
-    pub_image_to_recognizer_->on_deactivate();
     pub_object_list_->on_deactivate();
     pub_pc_object_pose_array_->on_deactivate();
     pub_rgb_object_pose_array_->on_deactivate();
@@ -674,13 +714,12 @@ namespace perception_namespace
 
     pub_workspace_height_.reset();
     pub_debug_cloud_plane_.reset();
+    pub_debug_rgb_image_.reset();
     pub_cloud_to_recognizer_.reset();
-    pub_image_to_recognizer_.reset();
     pub_object_list_.reset();
     pub_pc_object_pose_array_.reset();
     pub_rgb_object_pose_array_.reset();
 
-    sub_recognized_image_list_.reset();
     sub_recognized_cloud_list_.reset();
 
     bounding_box_visualizer_pc_.reset();
@@ -714,13 +753,12 @@ namespace perception_namespace
 
     pub_workspace_height_.reset();
     pub_debug_cloud_plane_.reset();
+    pub_debug_rgb_image_.reset();
     pub_cloud_to_recognizer_.reset();
-    pub_image_to_recognizer_.reset();
     pub_object_list_.reset();
     pub_pc_object_pose_array_.reset();
     pub_rgb_object_pose_array_.reset();
 
-    sub_recognized_image_list_.reset();
     sub_recognized_cloud_list_.reset();
 
     bounding_box_visualizer_pc_.reset();

@@ -63,6 +63,8 @@
 #include "mir_perception_utils/bounding_box.hpp"
 #include "multimodal_object_recognition_utils.hpp"
 
+#include "yolo_inference.hpp"
+
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 using std::placeholders::_1;
@@ -129,10 +131,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
 
     // publisher debug
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>> pub_debug_cloud_plane_;
+    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::Image>> pub_debug_rgb_image_;
 
-    // Publisher for clouds and images recognizer
+    // Publisher for cloud recognizer
     std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mir_interfaces::msg::ObjectList>> pub_cloud_to_recognizer_;
-    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<mir_interfaces::msg::ImageList>> pub_image_to_recognizer_;
 
     // Callback group for subscribers
     rclcpp::CallbackGroup::SharedPtr recognized_callback_group_;
@@ -140,8 +142,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     // Subscription options
     rclcpp::SubscriptionOptions recognized_sub_options;
 
-    // Subscriber for clouds and images recognizer
-    std::shared_ptr<rclcpp::Subscription<mir_interfaces::msg::ObjectList>> sub_recognized_image_list_;
+    // Subscriber for cloud recognizer
     std::shared_ptr<rclcpp::Subscription<mir_interfaces::msg::ObjectList>> sub_recognized_cloud_list_;
 
     // Publisher object lsit
@@ -169,8 +170,7 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     void synchronizeCallback(const std::shared_ptr<sensor_msgs::msg::Image> &image, 
             const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud);
 
-    // Recognize Clouds and Image callback
-    void recognizedImageCallback(const mir_interfaces::msg::ObjectList &msg);
+    // Recognize Clouds callback
     void recognizedCloudCallback(const mir_interfaces::msg::ObjectList &msg);
 
     /** \brief Transform pointcloud to the given target frame id ("base_link" by default)
@@ -178,8 +178,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     */
     void preprocessPointCloud(const std::shared_ptr<sensor_msgs::msg::PointCloud2> &cloud_msg);
 
-    
-    
     /** \brief Recognize 2D and 3D objects, estimate their pose, filter them, and publish the object_list */
     virtual void recognizeCloudAndImage();
 
@@ -213,6 +211,8 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     SceneSegmentationROSSPtr scene_segmentation_ros_;
     typedef std::shared_ptr<MultimodalObjectRecognitionUtils> MultimodalObjectRecognitionUtilsSPtr;
     MultimodalObjectRecognitionUtilsSPtr mm_object_recognition_utils_;
+    typedef std::shared_ptr<YoloInference> YoloInferenceSPtr;
+    YoloInferenceSPtr yolo_inference_;
 
     //visualization
     std::shared_ptr<BoundingBoxVisualizer> bounding_box_visualizer_pc_;
@@ -229,6 +229,10 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     
     ObjectInfo object_info_;
     std::string objects_info_path_;
+
+    // yolo inference file paths
+    std::string yolo_classes_info_path_;
+    std::string yolo_weights_path_;
 
     // Used to store pointcloud and image received from callback
     std::shared_ptr<sensor_msgs::msg::PointCloud2> pointcloud_msg_;
@@ -290,7 +294,6 @@ class MultiModalObjectRecognitionROS: public rclcpp_lifecycle::LifecycleNode
     double container_height_;
 
     // Flags for object recognition
-    bool received_recognized_image_list_flag_;
     bool received_recognized_cloud_list_flag_;
 
     //Recognized image list

@@ -76,10 +76,12 @@ add_library(mmor SHARED
             ros/src/multimodal_object_recognition.cpp
             ros/src/multimodal_object_recognition_parameters.cpp
             ros/src/multimodal_object_recognition_utils.cpp
+            ros/src/yolo_inference.cpp
             )
 
 target_compile_definitions(mmor
-            PRIVATE "COMPOSITION_BUILDING_DLL")          
+            PRIVATE "COMPOSITION_BUILDING_DLL")      
+                
 ament_target_dependencies(mmor 
   rclcpp
   rclcpp_lifecycle 
@@ -97,10 +99,12 @@ ament_target_dependencies(mmor
   rclcpp_components
   yaml_cpp_vendor
 )
+
 target_link_libraries(mmor
   mir_object_segmentation::mir_object_segmentation
   mir_perception_utils::mir_perception_utils
 )
+
 rclcpp_components_register_nodes(mmor "perception_namespace::MultiModalObjectRecognitionROS")
 
 add_library(data_collector SHARED
@@ -110,7 +114,8 @@ add_library(data_collector SHARED
             )
 
 target_compile_definitions(data_collector
-            PRIVATE "COMPOSITION_BUILDING_DLL")          
+            PRIVATE "COMPOSITION_BUILDING_DLL")
+                  
 ament_target_dependencies(data_collector
   rclcpp
   rclcpp_lifecycle 
@@ -126,12 +131,13 @@ ament_target_dependencies(data_collector
   cv_bridge
   rclcpp_components
   yaml_cpp_vendor
-
 )
+
 target_link_libraries(data_collector
   mir_object_segmentation::mir_object_segmentation
   mir_perception_utils::mir_perception_utils
 )
+
 rclcpp_components_register_nodes(data_collector "perception_namespace::DataCollector")
 
 ament_export_include_directories(include)
@@ -139,7 +145,7 @@ ament_export_libraries(${PROJECT_NAME}_node)
 
 add_executable(yolo_inference ros/src/yolo_inference.cpp)
 target_link_libraries(yolo_inference ${OpenCV_LIBS})
-ament_target_dependencies(yolo_inference rclcpp)
+ament_target_dependencies(yolo_inference rclcpp yaml_cpp_vendor)
 
 install(TARGETS
   mmor

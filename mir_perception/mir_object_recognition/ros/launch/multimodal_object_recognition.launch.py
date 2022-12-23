@@ -10,7 +10,7 @@ from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 from launch_ros.events.lifecycle import ChangeState
 from launch_ros.events.lifecycle import matches_node_name
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_share_directory, get_package_prefix, get_resource
 from launch.event_handlers.on_shutdown import OnShutdown
 
 import lifecycle_msgs.msg
@@ -34,6 +34,20 @@ def generate_launch_description():
     'objects.yaml'
   )
 
+  yolo_classes_info = os.path.join(
+    get_package_share_directory('mir_object_recognition'),
+    'ros',
+    'config',
+    'yolo_inference',
+    'ss22_competition.yaml'
+  )
+
+  yolo_weights = os.path.join(
+    get_package_share_directory('mir_perception_models'),
+    'yolo',
+    'ss22_competition_best.onnx'
+  )
+
   container = ComposableNodeContainer(
     name="MMOR_container",
     namespace="",
@@ -48,7 +62,9 @@ def generate_launch_description():
                 ("input_image_topic", "/camera/color/image_raw"),
                 ("input_cloud_topic", "/camera/depth/color/points"),
             ],
-            parameters=[{'objects_info': objects_info}]
+            parameters=[{'objects_info': objects_info},
+                        {'yolo_classes_info': yolo_classes_info},
+                        {'yolo_weights': yolo_weights}]
         )
     ],
     parameters=[scene_seg_constraints],

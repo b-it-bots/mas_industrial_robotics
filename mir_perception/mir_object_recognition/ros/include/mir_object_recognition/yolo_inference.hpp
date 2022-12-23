@@ -9,8 +9,8 @@
 #define MIR_OBJECT_RECOGNITION_YOLO_INFERENCE_HPP
 
 #include <opencv2/opencv.hpp>
-#include <fstream>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <yaml-cpp/yaml.h>
 
 // Namespaces.
 using namespace cv;
@@ -31,10 +31,10 @@ inline const int FONT_FACE = FONT_HERSHEY_SIMPLEX;
 inline const int THICKNESS = 1;
 
 // Colors.
-Scalar BLACK = Scalar(0, 0, 0);
-Scalar BLUE = Scalar(255, 178, 50);
-Scalar YELLOW = Scalar(0, 255, 255);
-Scalar RED = Scalar(0, 0, 255);
+inline Scalar BLACK = Scalar(0, 0, 0);
+inline Scalar BLUE = Scalar(255, 178, 50);
+inline Scalar YELLOW = Scalar(0, 255, 255);
+inline Scalar RED = Scalar(0, 0, 255);
 
 struct RecognizedObject
 {

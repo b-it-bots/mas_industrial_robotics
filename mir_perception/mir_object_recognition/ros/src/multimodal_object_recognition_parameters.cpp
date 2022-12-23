@@ -27,6 +27,20 @@ namespace perception_namespace
     this->declare_parameter("objects_info", "", object_info_path_descriptor);
     this->get_parameter<std::string>("objects_info", objects_info_path_);
 
+    // get yolo_classes_info parameter from launch file
+    rcl_interfaces::msg::ParameterDescriptor yolo_classes_info_path_descriptor;
+    yolo_classes_info_path_descriptor.description = "Path to yolo_classes_info (.names) file";
+    yolo_classes_info_path_descriptor.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+    this->declare_parameter("yolo_classes_info", "", yolo_classes_info_path_descriptor);
+    this->get_parameter<std::string>("yolo_classes_info", yolo_classes_info_path_);
+
+    // get yolo_weights parameter from launch file
+    rcl_interfaces::msg::ParameterDescriptor yolo_weights_path_descriptor;
+    yolo_weights_path_descriptor.description = "Path to yolo weights (.onnx) file";
+    yolo_weights_path_descriptor.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
+    this->declare_parameter("yolo_weights", "", yolo_weights_path_descriptor);
+    this->get_parameter<std::string>("yolo_weights", yolo_weights_path_);
+
     rcl_interfaces::msg::ParameterDescriptor voxel_leaf_size_descriptor;
     voxel_leaf_size_descriptor.description = "The size of a leaf (on x,y,z) used for downsampling.";
     rcl_interfaces::msg::FloatingPointRange voxel_leaf_size_range;
@@ -399,6 +413,8 @@ namespace perception_namespace
     this->get_parameter("debug_mode", debug_mode_);
     this->get_parameter("target_frame_id", target_frame_id_);
     this->get_parameter("objects_info", objects_info_path_);
+    this->get_parameter("yolo_classes_info", yolo_classes_info_path_);
+    this->get_parameter("yolo_weights", yolo_weights_path_);
     this->get_parameter("voxel_leaf_size", voxel_leaf_size_);
     this->get_parameter("voxel_filter_field_name", voxel_filter_field_name_);
     this->get_parameter("voxel_filter_limit_min", voxel_filter_limit_min_);

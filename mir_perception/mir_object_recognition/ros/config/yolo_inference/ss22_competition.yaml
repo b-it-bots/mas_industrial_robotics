@@ -1,0 +1,21 @@
+class_names:
+  - F20_20_B
+  - R20
+  - S40_40_B
+  - S40_40_G
+  - axis
+  - bearing_box
+  - bracket
+  - brown_box
+  - cup
+  - dishwasher_soap
+  - eye_glasses
+  - insulation_tape
+  - motor
+  - pringles
+  - screw_driver
+  - sponge
+  - spoon
+  - tennis_ball
+  - toothbrush
+  - towel
