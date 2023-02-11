@@ -126,6 +126,12 @@ On workstation or your PC
 
       roslaunch mir_2dnav 2dnav.launch
 
+* Launch the planning bringup
+
+  .. code-block:: bash
+
+      roslaunch mir_planning_bringup robot.launch
+
 * Create navigation goals and orientations
 
   First you need to create the files where goals will be saved:
@@ -157,7 +163,7 @@ On workstation or your PC
 .. code-block:: bash
 
     rosrun mir_move_base_safe move_base_safe_server.py
-    rosrun mir_move_base_safe move_base_safe_client_test.py [source] [dest]
+    rosrun mir_move_base_safe move_base_safe_client_test.py [dest]
 
 * Navigation test using refbox
 
