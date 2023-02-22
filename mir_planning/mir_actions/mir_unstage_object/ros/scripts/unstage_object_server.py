@@ -15,7 +15,7 @@ from smach_ros import ActionServerWrapper
 # ===============================================================================
 
 class SetupMoveArm(smach.State):
-    def __init__(self, arm_target, is_heavy=False):
+    def __init__(self, arm_target):
         smach.State.__init__(
             self,
             outcomes=["succeeded", "failed"],
@@ -23,20 +23,18 @@ class SetupMoveArm(smach.State):
             output_keys=["feedback", "result", "move_arm_to"],
         )
         self.arm_target = arm_target
-        self.is_heavy = is_heavy
+        
 
     def execute(self, userdata):
         platform = Utils.get_value_of(userdata.goal.parameters, "platform")
         if platform is None:
             rospy.logwarn('Missing parameter "platform". Using default.')
-            platform = "PLATFORM_MIDDLE"
+            platform = "PLATFORM_LEFT"
         platform = platform.lower()
 
         if self.arm_target == "pre":
             platform += "_pre"
 
-        if self.is_heavy:
-            platform += "_heavy"
         userdata.move_arm_to = platform
 
         # Add empty result msg (because if none of the state do it, action server gives error)
@@ -45,29 +43,6 @@ class SetupMoveArm(smach.State):
             current_state="SetupMoveArm", text="Moving arm to " + platform
         )
         return "succeeded"
-
-
-# ===============================================================================
-
-class IsObjectHeavy(smach.State):
-    def __init__(self):
-        smach.State.__init__(
-            self,
-            outcomes=["heavy", "light"],
-            input_keys=["goal", "heavy_objects"],
-            output_keys=[],
-        )
-
-    def execute(self, userdata):
-        obj = Utils.get_value_of(userdata.goal.parameters, "object")
-        if obj is None:
-            rospy.logwarn('Missing parameter "object". Using default.')
-            return "light"
-        for heavy_object in userdata.heavy_objects:
-            if heavy_object.upper() in obj.upper():
-                return "heavy"
-        return "light"
-
 
 # ===============================================================================
 
@@ -97,9 +72,6 @@ def main():
         input_keys=["goal"],
         output_keys=["feedback", "result"],
     )
-
-    # read heavy object list
-    sm.userdata.heavy_objects = rospy.get_param("~heavy_objects", ["m20_100"])
 
     with sm:
         smach.StateMachine.add(
@@ -155,22 +127,22 @@ def main():
             "MOVE_ARM_PRE_STAGE_AGAIN",
             gms.move_arm(blocking=True),
             transitions={
-                "succeeded": "MOVE_ARM_TO_BARRIER_TAPE",
+                "succeeded": "MOVE_ARM_TO_PRE_PLACE",
                 "failed": "MOVE_ARM_PRE_STAGE_AGAIN",
             },
         )
 
         """
         Barrier tape configuration is modified so while unstaging 
-        the arm should go to barrier tape config in yb2-robot-configuration
+        the arm should go to pre place tape config in yb2-robot-configuration
         inorder to avoid any occlution in the camera 
         """
         smach.StateMachine.add(
-            "MOVE_ARM_TO_BARRIER_TAPE",
-            gms.move_arm("barrier_tape"),
+            "MOVE_ARM_TO_PRE_PLACE",
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
-                "failed": "MOVE_ARM_TO_BARRIER_TAPE",
+                "failed": "MOVE_ARM_TO_PRE_PLACE",
             },
         )
 
