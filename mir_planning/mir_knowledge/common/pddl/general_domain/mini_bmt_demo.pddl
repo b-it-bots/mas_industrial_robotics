@@ -3,10 +3,10 @@
 (:domain general_domain)
 
 (:objects
-    WS03 WS05 WS01 START EXIT - location
+    WS01 WS02 WS03 WS04 WS05 WS06 SH01 RT01 PP01 START EXIT - location
     R20 F20_20_B INSULATION_TAPE BEARING_BOX SCREW_DRIVER MOTOR S40_40_B AXIS S40_40_G BRACKET TENNIS_BALL PRINGLES SPONGE TOWEL SPOON DISHWASHER_SOAP BROWN_BOX CUP EYE_GLASSES TOOTHBRUSH - object
     YOUBOT-BRSU - robot
-    PLATFORM_MIDDLE - robot_platform
+    PLATFORM_LEFT PLATFORM_MIDDLE PLATFORM_RIGHT - robot_platform
 )
 
 (:init
@@ -16,13 +16,13 @@
 
     (at YOUBOT-BRSU START)
     (gripper_is_free YOUBOT-BRSU)
-    (on F20_20_B WS03)
-    (on AXIS WS03)
+    (on S40_40_B WS01)
+    (on INSULATION_TAPE WS01)
 )
 
 (:goal (and
-    (on F20_20_B WS01)
-    (on AXIS WS01)
+    (on S40_40_B SH01)
+    (on INSULATION_TAPE SH01)
     )
 )
 
