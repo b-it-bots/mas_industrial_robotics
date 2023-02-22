@@ -222,26 +222,8 @@ def main():
             "MOVE_ARM_TO_SHELF_INTERMEDIATE",
             gms.move_arm("shelf_intermediate"),
             transitions={
-                "succeeded": "MOVE_ARM_TO_SHELF_INTERMEDIATE_2",
-                "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_SHELF_INTERMEDIATE_2",
-            gms.move_arm("shelf_intermediate_2"),
-            transitions={
-                "succeeded": "MOVE_ARM_TO_PRE_GRASP_LOWER",
-                "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE_2",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_PRE_GRASP_LOWER",
-            gms.move_arm("shelf_pre_grasp_lower"),
-            transitions={
                 "succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL",
-                "failed": "MOVE_ARM_TO_PRE_GRASP_LOWER",
+                "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
             },
         )
 
@@ -257,44 +239,18 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_SHELF",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT"},
+            transitions={"succeeded": "MOVE_ARM_TO_SHELF_RETRACT"},
         )
 
         smach.StateMachine.add(
-            "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT",
-            gms.move_arm("shelf_place_final"),
-            transitions={
-                "succeeded": "MOVE_ARM_TO_PRE_GRASP_LOWER_RETRACT",
-                "failed": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_PRE_GRASP_LOWER_RETRACT",
-            gms.move_arm("shelf_pre_grasp_lower"),
-            transitions={
-                "succeeded": "MOVE_ARM_TO_SHELF_INTERMEDIATE_2_RETRACT",
-                "failed": "MOVE_ARM_TO_PRE_GRASP_LOWER_RETRACT",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_SHELF_INTERMEDIATE_2_RETRACT",
-            gms.move_arm("shelf_intermediate_2"),
-            transitions={
-                "succeeded": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
-                "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE_2_RETRACT",
-            },
-        )
-
-        smach.StateMachine.add(
-            "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
+            "MOVE_ARM_TO_SHELF_RETRACT",
             gms.move_arm("shelf_intermediate"),
             transitions={
-                    "succeeded": "MOVE_ARM_TO_NEUTRAL",
-                    "failed": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
+                "succeeded": "MOVE_ARM_TO_NEUTRAL",
+                "failed": "MOVE_ARM_TO_SHELF_RETRACT",
             },
         )
+
 # till above the state machine is for shelf
 
         smach.StateMachine.add(
