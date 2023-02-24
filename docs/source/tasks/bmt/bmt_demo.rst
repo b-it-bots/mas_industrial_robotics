@@ -142,7 +142,7 @@ Steps to follow for BMT setup
 
 * Once the file is loaded then localize the youbot using ``2d pose esitimate`` as show in the image below
 
-.. figure:: images/rviz_config_1_1.png   
+.. figure:: ../images/rviz_config_1_1.png   
     :align: center
 
 * Then place the green arrow at location where youbot is actually present in the arena, and rotate the robot till the amcl particles (the tiny red arrows) consolidate. This means the robot is now localized.
