@@ -181,22 +181,6 @@
         <joint name="arm_joint_5" value="3.2597" />
     </group_state>
 
-    <!-- <group_state name="platform_middle" group="arm_1">
-        <joint name="arm_joint_1" value="3.7119" />
-        <joint name="arm_joint_2" value="1.368" />
-        <joint name="arm_joint_3" value="-1.1829" />
-        <joint name="arm_joint_4" value="3.3044" />
-        <joint name="arm_joint_5" value="2.933" />
-    </group_state>
-
-    <group_state name="platform_middle_pre" group="arm_1">
-        <joint name="arm_joint_1" value="3.7119" />
-        <joint name="arm_joint_2" value="1.1017" />
-        <joint name="arm_joint_3" value="-1.1829" />
-        <joint name="arm_joint_4" value="3.3044" />
-        <joint name="arm_joint_5" value="2.933" />
-    </group_state> -->
-
 <!-- start for robot before placing and at the end of unstage -->
     <group_state name="pre_place" group="arm_1">
         <joint name="arm_joint_1" value="2.40303" />
@@ -205,57 +189,6 @@
         <joint name="arm_joint_4" value="3.40478" />
         <joint name="arm_joint_5" value="2.94234" />
     </group_state>
-
-    <!-- dont run this in yb2
-    <group_state name="platform_intermediate" group="arm_1">
-        <joint name="arm_joint_1" value="2.1642" />
-        <joint name="arm_joint_2" value="1.86356" />
-        <joint name="arm_joint_3" value="-4.1407" />
-        <joint name="arm_joint_4" value="1.08195" />
-        <joint name="arm_joint_5" value="2.8894" />
-    </group_state>
-    <group_state name="platform_middle_heavy" group="arm_1">
-        <joint name="arm_joint_1" value="3.8159" />
-        <joint name="arm_joint_2" value="1.368" />
-        <joint name="arm_joint_3" value="-1.1829" />
-        <joint name="arm_joint_4" value="3.3044" />
-        <joint name="arm_joint_5" value="2.933" />
-    </group_state>
-    <group_state name="platform_middle_heavy_pre" group="arm_1">
-        <joint name="arm_joint_1" value="3.8159" />
-        <joint name="arm_joint_2" value="1.1017" />
-        <joint name="arm_joint_3" value="-1.1829" />
-        <joint name="arm_joint_4" value="3.3044" />
-        <joint name="arm_joint_5" value="2.933" />
-    </group_state>
-    <group_state name="platform_left" group="arm_1">
-        <joint name="arm_joint_1" value="2.471" />
-        <joint name="arm_joint_2" value="0.5207" />
-        <joint name="arm_joint_3" value="-3.4836" />
-        <joint name="arm_joint_4" value="0.2853" />
-        <joint name="arm_joint_5" value="3.2877" />
-    </group_state>
-    <group_state name="platform_left_pre" group="arm_1">
-        <joint name="arm_joint_1" value="2.52048" />
-        <joint name="arm_joint_2" value="0.79142" />
-        <joint name="arm_joint_3" value="-3.4582" />
-        <joint name="arm_joint_4" value="0.24957" />
-        <joint name="arm_joint_5" value="3.22097" />
-    </group_state>
-    <group_state name="platform_right" group="arm_1">
-        <joint name="arm_joint_1" value="1.8139" />
-        <joint name="arm_joint_2" value="0.5266" />
-        <joint name="arm_joint_3" value="-3.497" />
-        <joint name="arm_joint_4" value="0.2875" />
-        <joint name="arm_joint_5" value="2.5359" />
-    </group_state>
-    <group_state name="platform_right_pre" group="arm_1">
-        <joint name="arm_joint_1" value="1.77694" />
-        <joint name="arm_joint_2" value="0.91176" />
-        <joint name="arm_joint_3" value="-3.56979" />
-        <joint name="arm_joint_4" value="0.28413" />
-        <joint name="arm_joint_5" value="2.53602" />
-    </group_state> -->
 
     <group_state name="pre_grasp_old" group="arm_1">
         <joint name="arm_joint_1" value="2.2219" />
@@ -403,41 +336,14 @@
         <joint name="arm_joint_4" value="3.1314" />
         <joint name="arm_joint_5" value="3.0670" />
     </group_state>
-    <!-- <group_state name="shelf_intermediate" group="arm_1">
-        <joint name="arm_joint_1" value="3.72859" />
-        <joint name="arm_joint_2" value="0.08773" />
-        <joint name="arm_joint_3" value="-1.48411" />
-        <joint name="arm_joint_4" value="3.35214" />
-        <joint name="arm_joint_5" value="2.95699" />
-    </group_state>
-    <group_state name="shelf_intermediate_2" group="arm_1">
-        <joint name="arm_joint_1" value="0.59389" />
-        <joint name="arm_joint_2" value="1.77605" />
-        <joint name="arm_joint_3" value="-0.14353" />
-        <joint name="arm_joint_4" value="0.82493" />
-        <joint name="arm_joint_5" value="2.90356" />
-    </group_state>
-    <group_state name="shelf_place_final" group="arm_1">
-        <joint name="arm_joint_1" value="2.2252" />
-        <joint name="arm_joint_2" value="1.7762" />
-        <joint name="arm_joint_3" value="-0.14303" />
-        <joint name="arm_joint_4" value="0.9646" />
-        <joint name="arm_joint_5" value="2.90365" />
-    </group_state>
-    <group_state name="shelf_pre_grasp" group="arm_1">
-        <joint name="arm_joint_1" value="2.22067" />
-        <joint name="arm_joint_2" value="1.03067" />
-        <joint name="arm_joint_3" value="-0.92142" />
-        <joint name="arm_joint_4" value="3.14951" />
-        <joint name="arm_joint_5" value="2.90371" />
-    </group_state>
+
     <group_state name="shelf_pre_grasp_lower" group="arm_1">
         <joint name="arm_joint_1" value="2.22067" />
         <joint name="arm_joint_2" value="1.77619" />
         <joint name="arm_joint_3" value="-0.14301" />
         <joint name="arm_joint_4" value="0.82491" />
         <joint name="arm_joint_5" value="2.90371" />
-    </group_state> -->
+    </group_state>
 
 <!-- 10cm poses    -->
     <group_state name="10cm/pose1" group="arm_1">
