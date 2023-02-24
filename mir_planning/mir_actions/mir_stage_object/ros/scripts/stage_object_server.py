@@ -78,7 +78,7 @@ def main():
         # add states to the container
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            gms.move_arm("stage_intermediate"),
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_PRE_STAGE",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
@@ -124,7 +124,33 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "OVERALL_SUCCESS"},
+            transitions={"succeeded": "SETUP_MOVE_ARM_RETRACT"},
+        )
+
+        smach.StateMachine.add(
+            "SETUP_MOVE_ARM_RETRACT",
+            SetupMoveArm("pre"),
+            transitions={
+                "succeeded": "MOVE_ARM_RETRACT",
+                "failed": "SETUP_MOVE_ARM_RETRACT",
+            },
+        )
+        smach.StateMachine.add(
+            "MOVE_ARM_RETRACT",
+            gms.move_arm(),
+            transitions={
+                "succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE_RETRACT",
+                "failed": "MOVE_ARM_RETRACT"
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_STAGE_INTERMEDIATE_RETRACT",
+            gms.move_arm("pre_place"),
+            transitions={
+                "succeeded": "OVERALL_SUCCESS",
+                "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE_RETRACT",
+            },
         )
 
     sm.register_transition_cb(transition_cb)

@@ -183,7 +183,7 @@ def main():
         # move arm to appropriate position
         smach.StateMachine.add(
             "MOVE_ARM",
-            gms.move_arm("look_at_workspace_from_near"),
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "START_OBJECT_LIST_MERGER",
                 "failed": "MOVE_ARM",
@@ -402,7 +402,7 @@ def main():
         # move arm to stage_intemediate position
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            gms.move_arm("stage_intermediate"),
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "VERIFY_OBJECT_GRASPED",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
@@ -423,7 +423,7 @@ def main():
 
 
     # smach viewer
-    if rospy.get_param("~viewer_enabled", False):
+    if rospy.get_param("~viewer_enabled", True):
         sis = IntrospectionServer(
             "pick_object_smach_viewer", sm, "/PICK_OBJECT_SMACH_VIEWER"
         )

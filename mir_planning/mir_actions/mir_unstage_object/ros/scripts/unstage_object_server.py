@@ -77,7 +77,25 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "SETUP_MOVE_ARM_STAGE"},
+            transitions={"succeeded": "SETUP_MOVE_ARM_PRE_STAGE"},
+        )
+
+        smach.StateMachine.add(
+            "SETUP_MOVE_ARM_PRE_STAGE",
+            SetupMoveArm("pre"),
+            transitions={
+                "succeeded": "SETUP_ARM_PRE_STAGE",
+                "failed": "SETUP_MOVE_ARM_PRE_STAGE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "SETUP_ARM_PRE_STAGE",
+            gms.move_arm(),
+            transitions={
+                "succeeded": "SETUP_MOVE_ARM_STAGE",
+                "failed": "SETUP_ARM_PRE_STAGE"
+            },
         )
         # add states to the container
 

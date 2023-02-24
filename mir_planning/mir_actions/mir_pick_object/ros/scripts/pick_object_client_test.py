@@ -20,7 +20,7 @@ if __name__ == "__main__":
         location = str(sys.argv[2]).upper()
         goal.parameters.append(KeyValue(key="object", value=obj))
         goal.parameters.append(KeyValue(key="location", value=location))
-        rospy.loginfo("Sending following goal to place object server")
+        rospy.loginfo("Sending following goal to pick object server")
         rospy.loginfo(goal)
 
         client.send_goal(goal)
