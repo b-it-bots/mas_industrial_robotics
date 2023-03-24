@@ -9,7 +9,7 @@
 
     <arg name="tf_prefix_camera1"         default="$(arg camera1)_camera"/>
     <arg name="tf_prefix_camera2"         default="$(arg camera2)_camera"/>
-    <arg name="initial_reset"             default="true"/>
+    <arg name="initial_reset"             default="false"/>
 
     <arg name="enable_depth"             default="true"/>
     <arg name="enable_color"             default="true"/>
@@ -17,7 +17,7 @@
     <arg name="align_depth"         default="true"/>
     <arg name="filters"             default="spatial,hole_filling,pointcloud"/>
     <arg name="clip_distance"       default="1.0"/>
-    <arg name="ordered_pc"               default="false"/>
+    <arg name="ordered_pc"               default="true"/>
 
     <!-- Arguments for remapping all device namespaces -->
     <arg name="rgb"                             default="rgb" />
@@ -126,19 +126,19 @@
         <group if="$(eval depth_registered_processing and sw_registered_processing)">
             <node pkg="nodelet" type="nodelet" name="register_depth"
                     args="load depth_image_proc/register $(arg manager) $(arg bond)" respawn="$(arg respawn)">
-                <remap from="rgb/camera_info"             to="$(arg rgb)2/camera_info" />
-                <remap from="depth/camera_info"           to="$(arg depth)2/camera_info" />
-                <remap from="depth/image_rect"            to="$(arg depth)2/image_rect_raw" />
-                <remap from="depth_registered/image_rect" to="$(arg depth_registered)2/sw_registered/image_rect_raw" />
+                <remap from="rgb/camera_info"             to="$(arg rgb)/camera_info" />
+                <remap from="depth/camera_info"           to="$(arg depth)/camera_info" />
+                <remap from="depth/image_rect"            to="$(arg depth)/image_rect_raw" />
+                <remap from="depth_registered/image_rect" to="$(arg depth_registered)/sw_registered/image_rect_raw" />
             </node>
 
             <!-- Publish registered XYZRGB point cloud with software registered input -->
             <node pkg="nodelet" type="nodelet" name="points_xyzrgb_sw_registered"
                     args="load depth_image_proc/point_cloud_xyzrgb $(arg manager) $(arg bond)" respawn="$(arg respawn)">
-                <remap from="rgb/image_rect_color"        to="$(arg rgb)2/image_rect_color" />
-                <remap from="rgb/camera_info"             to="$(arg rgb)2/camera_info" />
-                <remap from="depth_registered/image_rect" to="$(arg depth_registered_filtered)2/sw_registered/image_rect_raw" />
-                <remap from="depth_registered/points"     to="$(arg depth_registered)2/points" />
+                <remap from="rgb/image_rect_color"        to="$(arg rgb)/image_rect_color" />
+                <remap from="rgb/camera_info"             to="$(arg rgb)/camera_info" />
+                <remap from="depth_registered/image_rect" to="$(arg depth_registered_filtered)/sw_registered/image_rect_raw" />
+                <remap from="depth_registered/points"     to="$(arg depth_registered)/points" />
             </node>
         </group>
 
@@ -146,10 +146,10 @@
             <!-- Publish registered XYZRGB point cloud with hardware registered input (ROS Realsense depth alignment) -->
             <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
                     args="load depth_image_proc/point_cloud_xyzrgb $(arg manager) $(arg bond)" respawn="$(arg respawn)">
-                <remap from="rgb/image_rect_color"        to="$(arg rgb)2/image_rect_color" />
-                <remap from="rgb/camera_info"             to="$(arg rgb)2/camera_info" />
-                <remap from="depth_registered/image_rect" to="$(arg depth_registered)2/image_raw" />
-                <remap from="depth_registered/points"     to="$(arg depth_registered_pub)2/points" />
+                <remap from="rgb/image_rect_color"        to="$(arg rgb)/image_rect_color" />
+                <remap from="rgb/camera_info"             to="$(arg rgb)/camera_info" />
+                <remap from="depth_registered/image_rect" to="$(arg depth_registered)/image_raw" />
+                <remap from="depth_registered/points"     to="$(arg depth_registered_pub)/points" />
             </node>
         </group>
 
