@@ -68,7 +68,7 @@
   </xacro:intel_realsense_f200_camera -->
 
   
-
+  <!-- tower front camera -->
    <xacro:realsense_d435 name="tower_cam3d" parent="base_link">
        <origin xyz="0.328 -0.039 0.795" rpy="-0.055 1.212 -0.052" />  
    </xacro:realsense_d435>
@@ -99,5 +99,143 @@
        </collision>
    </link>
 
+   <!-- tower vertical mount link -->
+
+  <link name="tower_camera_stand_link">
+    <visual>
+      <geometry>
+        <box size="0.030 0.030 0.80"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.030 0.030 0.80"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tower_camera_stand_joint" type="fixed">
+    <origin xyz="-0.10 0.0 0.40" rpy="0 0 0" />
+    <parent link="full_platform_link"/>
+    <child link="tower_camera_stand_link"/>
+  </joint>
+
+  <!-- link for emergency stop mount with stl mesh file -->
+  <link name="emergency_stop_mount_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/e_stop_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/e_stop_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="emergency_stop_mount_joint" type="fixed">
+    <origin xyz="0.0 0.0 0.40" rpy="${pi/2} 0 0" />
+    <parent link="tower_camera_stand_link"/>
+    <child link="emergency_stop_mount_link"/>
+  </joint>
+
+  <!-- tower horizontal mount link -->
+  <link name="tower_camera_stand_link_horizontal">
+    <visual>
+      <geometry>
+        <box size="0.030 0.030 0.608"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.030 0.030 0.608"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tower_camera_stand_joint_horizontal" type="fixed">
+    <origin xyz="0.09 -0.035 0.362" rpy="0 ${M_PI/2} 0" />
+    <parent link="tower_camera_stand_link"/>
+    <child link="tower_camera_stand_link_horizontal"/>
+  </joint>
+
+  <!-- tower front camera mount link -->
+  <link name="tower_camera_front_mount_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tower_camera_front_mount_joint" type="fixed">
+    <origin xyz="0.0 0.0 0.304" rpy="-${M_PI/2} ${M_PI/2} 0" />
+    <parent link="tower_camera_stand_link_horizontal"/>
+    <child link="tower_camera_front_mount_link"/>
+  </joint>
+
+  <!-- tower back camera mount link -->
+  <link name="tower_camera_back_mount_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tower_camera_back_mount_joint" type="fixed">
+    <origin xyz="0.0 0.0 -0.304" rpy="${M_PI} -${M_PI/2} -${M_PI/2}" />
+    <parent link="tower_camera_stand_link_horizontal"/>
+    <child link="tower_camera_back_mount_link"/>
+  </joint>
+
+  <!-- tower side camera mount link -->
+  <link name="tower_camera_side_mount_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/side_camera_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="">
+          <color rgba="0.85098 0.85098 0.85098 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://mir_description/meshes/side_camera_mount.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tower_camera_side_mount_joint" type="fixed">
+    <origin xyz="0.0 0.0 0.149" rpy="${M_PI/2} -${M_PI/2} 0" />
+    <parent link="tower_camera_stand_link_horizontal"/>
+    <child link="tower_camera_side_mount_link"/>
+  </joint>
 
 </robot>
