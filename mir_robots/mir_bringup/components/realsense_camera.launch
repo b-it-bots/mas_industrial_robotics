@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="serial_num" default="727212070700"/>
+    <arg name="serial_num" default="919122072278"/>
     <arg name="camera_name" default="arm_cam3d"/>
 
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">

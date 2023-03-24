@@ -1,0 +1,21 @@
+<!-- launch file to view the youbot in the rviz -->
+
+<launch>
+
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+    <arg name="gui" default="false"/>
+
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mir_hardware_config)/$(arg robot)/urdf/robot.urdf.xacro" />
+
+    <!-- robot state publisher -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen" />
+
+    <!-- joint state publisher with gui if gui is true -->
+    <group if="$(arg gui)">
+        <node name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" respawn="false" output="screen" />
+    </group>
+    <group unless="$(arg gui)">
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" respawn="false" output="screen" />
+    </group>
+
+</launch>
