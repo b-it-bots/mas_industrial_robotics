@@ -70,8 +70,8 @@
 
   
   <!-- tower front camera -->
-  <xacro:realsense_d435 name="tower_cam3d_front" parent="base_link">
-      <origin xyz="0.328 -0.039 0.795" rpy="-0.055 1.212 -0.052" />  
+  <xacro:realsense_d435 name="tower_cam3d_front" parent="tower_camera_front_bolt_link">
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />  
   </xacro:realsense_d435>
 
   <!-- tower middle camera -->
@@ -80,8 +80,8 @@
   </xacro:sensor_orbbec_astra>
 
   <!-- tower back camera -->
-  <xacro:realsense_d435  name="tower_cam3d_back" parent="base_link">
-    <origin xyz="-0.328 -0.039 0.795" rpy="0.0 ${-M_PI / 2} ${-M_PI / 2}" />
+  <xacro:realsense_d435  name="tower_cam3d_back" parent="tower_camera_back_bolt_link">
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
   </xacro:realsense_d435>
 
    <!-- <joint name="fixed_camera_joint" type="fixed">
@@ -176,6 +176,22 @@
     <child link="tower_camera_stand_link_horizontal"/>
   </joint>
 
+  <link name="tower_camera_stand_link_horizontal_front" />
+
+  <joint name="tower_camera_stand_joint_horizontal_front" type="fixed">
+    <origin xyz="0.0 0.0 0.304" rpy="0 0 0" />
+    <parent link="tower_camera_stand_link_horizontal"/>
+    <child link="tower_camera_stand_link_horizontal_front"/>
+  </joint>
+
+  <link name="tower_camera_stand_link_horizontal_back" />
+
+  <joint name="tower_camera_stand_joint_horizontal_back" type="fixed">
+    <origin xyz="0.0 0.0 -0.304" rpy="${M_PI} 0 0" />
+    <parent link="tower_camera_stand_link_horizontal"/>
+    <child link="tower_camera_stand_link_horizontal_back"/>
+  </joint>
+
   <!-- tower front camera mount link -->
   <link name="tower_camera_front_mount_link">
     <visual>
@@ -194,10 +210,18 @@
   </link>
 
   <joint name="tower_camera_front_mount_joint" type="fixed">
-    <origin xyz="0.0 0.0 0.304" rpy="-${M_PI/2} ${M_PI/2} 0" />
-    <parent link="tower_camera_stand_link_horizontal"/>
+    <origin xyz="0.0 0.0 0.0" rpy="-${M_PI/2} ${M_PI/2} 0" />
+    <parent link="tower_camera_stand_link_horizontal_front"/>
     <child link="tower_camera_front_mount_link"/>
-  </joint>
+  </joint> 
+
+  <link name="tower_camera_front_bolt_link" />
+  <!-- final joint values = xyz="0.016645 0.0 0.028855 " (middle of 2 holes) +  xyz="0.0125 0.0 -0.009 " (distance from holes to bolt)-->
+  <joint name="tower_camera_front_bolt_joint" type="fixed">
+    <origin xyz="0.029145 0.0 0.019855" rpy="0 -0.37 0" />
+    <parent link="tower_camera_stand_link_horizontal_front"/>
+    <child link="tower_camera_front_bolt_link"/>
+  </joint>  
 
   <!-- tower back camera mount link -->
   <link name="tower_camera_back_mount_link">
@@ -217,10 +241,17 @@
   </link>
 
   <joint name="tower_camera_back_mount_joint" type="fixed">
-    <origin xyz="0.0 0.0 -0.304" rpy="${M_PI} -${M_PI/2} -${M_PI/2}" />
-    <parent link="tower_camera_stand_link_horizontal"/>
+    <origin xyz="0.0 0.0 0.0" rpy="-${M_PI} ${M_PI/2} -${M_PI/2}" />
+    <parent link="tower_camera_stand_link_horizontal_back"/>
     <child link="tower_camera_back_mount_link"/>
   </joint>
+
+  <link name="tower_camera_back_bolt_link" />
+  <joint name="tower_camera_back_bolt_joint" type="fixed">
+    <origin xyz="0.029145 0.0 0.019855" rpy="0 -0.37 0" />
+    <parent link="tower_camera_stand_link_horizontal_back"/>
+    <child link="tower_camera_back_bolt_link"/>
+  </joint> 
 
   <!-- tower side camera mount link -->
   <link name="tower_camera_side_mount_link">
