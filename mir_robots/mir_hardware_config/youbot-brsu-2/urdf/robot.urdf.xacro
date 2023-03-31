@@ -134,7 +134,7 @@
   <link name="emergency_stop_mount_link">
     <visual>
       <geometry>
-        <mesh filename="package://mir_description/meshes/e_stop_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/misc/e_stop_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="">
           <color rgba="0.85098 0.85098 0.85098 1"/>
@@ -142,7 +142,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://mir_description/meshes/e_stop_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/misc/e_stop_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -196,7 +196,7 @@
   <link name="tower_camera_front_mount_link">
     <visual>
       <geometry>
-        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/sensor_mounts/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="">
           <color rgba="0.85098 0.85098 0.85098 1"/>
@@ -204,7 +204,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/sensor_mounts/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -227,7 +227,7 @@
   <link name="tower_camera_back_mount_link">
     <visual>
       <geometry>
-        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/sensor_mounts/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="">
           <color rgba="0.85098 0.85098 0.85098 1"/>
@@ -235,7 +235,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://mir_description/meshes/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/sensor_mounts/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -257,7 +257,7 @@
   <link name="tower_camera_side_mount_link">
     <visual>
       <geometry>
-        <mesh filename="package://mir_description/meshes/side_camera_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/sensor_mounts/side_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="">
           <color rgba="0.85098 0.85098 0.85098 1"/>
@@ -265,7 +265,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://mir_description/meshes/side_camera_mount.STL" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://mir_description/meshes/sensor_mounts/side_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
