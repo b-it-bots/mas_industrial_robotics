@@ -20,8 +20,10 @@
             <remap from="~event_out" to="/mcr_perception/cavity_finder/output/event_out" />
 
             <param name="object_shape_learned_params_file" value="$(arg object_shape_learned_params_file)"/>
+            <!-- <param name="target_frame" type="string" value="base_link_static"/> -->
+            <!-- <param name="source_frame" type="string" value="fixed_camera_link"/> -->
             <param name="target_frame" type="string" value="base_link_static"/>
-            <param name="source_frame" type="string" value="fixed_camera_link"/>
+            <param name="source_frame" type="string" value="tower_cam3d_camera_color_optical_frame"/>
 
         </node>
 

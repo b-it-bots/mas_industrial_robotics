@@ -267,7 +267,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_MIDDLE_POSE",
-            gms.move_arm("ppt_cavity_middle"),
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "PERCEIVE_CAVITY",
                 "failed": "MOVE_ARM_TO_MIDDLE_POSE",
@@ -355,7 +355,7 @@ def main():
         # move arm to HOLD position
         smach.StateMachine.add(
             "MOVE_ARM_TO_HOLD",
-            gms.move_arm("ppt_cavity_middle"),
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "MOVE_ARM_TO_HOLD",
@@ -366,7 +366,7 @@ def main():
     sm.register_start_cb(start_cb)
 
     # smach viewer
-    if rospy.get_param("~viewer_enabled", False):
+    if rospy.get_param("~viewer_enabled", True):
         sis = IntrospectionServer(
             "insert_cavity_smach_viewer", sm, "/INSERT_CAVITY_SMACH_VIEWER"
         )
