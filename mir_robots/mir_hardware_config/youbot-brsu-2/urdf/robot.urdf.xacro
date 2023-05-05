@@ -26,7 +26,8 @@
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/intel_f200_camera_mount.urdf.xacro"/>
   <xacro:include filename="$(find mcr_description)/urdf/sensors/intel_realsense_f200_camera.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensors/asus_xtion_camera.urdf.xacro"/>
-  <xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_d435.urdf.xacro"/>
+  <!-- xacro:include filename="$(find mcr_description)/urdf/sensors/realsense_d435.urdf.xacro"/ -->
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro"/>
   <xacro:include filename="$(find youbot_description)/urdf/sensors/orbbec_astra.urdf.xacro"/>
   <xacro:include filename="$(find mir_description)/urdf/sensor_mounts/asus_xtion_camera_mount.urdf.xacro"/>
 
@@ -57,22 +58,12 @@
   <xacro:dynamixel_gripper_v2 name="gripper" parent="arm_link_5">
     <origin xyz="0.003 0 0.0052" rpy="0 0 0" />
   </xacro:dynamixel_gripper_v2>
-
-  <!-- camera mount for Intel RealSense F200 -->
-  <!--xacro:asus_xtion_camera_mount  name="camera_mount" parent="gripper_motor_mount_link">
-      <origin xyz="0.035 -0.00 0.0" rpy="0 0.025 ${M_PI/2} " />
-  </xacro:asus_xtion_camera_mount-->
-
-  <!-- 3D camera on arm -->
-  <!-- xacro:intel_realsense_f200_camera name="arm_cam3d" parent="camera_mount_link">
-    <origin xyz="-0.05 -0.01 0.03" rpy="0.0 -${M_PI/2 - 0.03} 0.0" />
-  </xacro:intel_realsense_f200_camera -->
-
   
   <!-- tower front camera -->
-  <xacro:realsense_d435 name="tower_cam3d_front" parent="tower_camera_front_bolt_link">
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />  
-  </xacro:realsense_d435>
+  <xacro:sensor_d435 name="tower_cam3d_front_camera" parent="tower_camera_front_bolt_link" use_nominal_extrinsics="true">
+      <!-- <origin xyz="0.035 0.020 0.0" rpy="0.0 1.22 0.0" /> -->
+      <origin xyz="0.01 0.025 0.0" rpy="0.0 1.22 0.0" />  
+  </xacro:sensor_d435>
 
   <!-- tower middle camera -->
   <xacro:sensor_orbbec_astra  name="tower_cam3d_middle" parent="base_link" color="">
@@ -80,31 +71,9 @@
   </xacro:sensor_orbbec_astra>
 
   <!-- tower back camera -->
-  <xacro:realsense_d435  name="tower_cam3d_back" parent="tower_camera_back_bolt_link">
+  <xacro:sensor_d435  name="tower_cam3d_back" parent="tower_camera_back_bolt_link" use_nominal_extrinsics="true">
     <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-  </xacro:realsense_d435>
-
-   <!-- <joint name="fixed_camera_joint" type="fixed">
-       <origin xyz="0.0149 0.0325 0.0125" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
-       <parent link="arm_cam3d_camera_link"/>
-       <child link="fixed_camera_link"/>
-   </joint> -->
-   <!-- we create a fixed link from arm_cam3d_camera_link to
-        arm_cam3d_camera_color_optical_frame. See commit: https://github.com/b-it-bots/mas_industrial_robotics/commit/f6e3bfa997b430278adbf4b552a285ce43e47936 -->
-        <!-- this also means you have to edit the source frame of the input
-             pointcloud before transforming it. see commit: https://github.com/b-it-bots/mas_industrial_robotics/commit/f4dd2f3124779fbedd28beb636e9ca7019baa9cf -->
-   <!-- <link name="fixed_camera_link">
-       <visual>
-           <geometry>
-               <box size="0.0000001 0.000001 0.000001"/>
-           </geometry>
-       </visual>
-       <collision>
-           <geometry>
-               <box size="0.0000001 0.000001 0.000001"/>
-           </geometry>
-       </collision>
-   </link> -->
+  </xacro:sensor_d435>
 
    <!-- tower vertical mount link -->
 
@@ -140,11 +109,11 @@
           <color rgba="0.85098 0.85098 0.85098 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <geometry>
         <mesh filename="package://mir_description/meshes/misc/e_stop_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
 
   <joint name="emergency_stop_mount_joint" type="fixed">
@@ -179,7 +148,7 @@
   <link name="tower_camera_stand_link_horizontal_front" />
 
   <joint name="tower_camera_stand_joint_horizontal_front" type="fixed">
-    <origin xyz="0.0 0.0 0.304" rpy="0 0 0" />
+    <origin xyz="0.0 0.0 0.304" rpy="0 -${M_PI/2} 0" />
     <parent link="tower_camera_stand_link_horizontal"/>
     <child link="tower_camera_stand_link_horizontal_front"/>
   </joint>
@@ -202,15 +171,15 @@
           <color rgba="0.85098 0.85098 0.85098 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <geometry>
         <mesh filename="package://mir_description/meshes/sensor_mounts/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
 
   <joint name="tower_camera_front_mount_joint" type="fixed">
-    <origin xyz="0.0 0.0 0.0" rpy="-${M_PI/2} ${M_PI/2} 0" />
+    <origin xyz="0.0 0.0 0.0" rpy="-${M_PI/2} ${M_PI} 0" />
     <parent link="tower_camera_stand_link_horizontal_front"/>
     <child link="tower_camera_front_mount_link"/>
   </joint> 
@@ -218,7 +187,8 @@
   <link name="tower_camera_front_bolt_link" />
   <!-- final joint values = xyz="0.016645 0.0 0.028855 " (middle of 2 holes) +  xyz="0.0125 0.0 -0.009 " (distance from holes to bolt)-->
   <joint name="tower_camera_front_bolt_joint" type="fixed">
-    <origin xyz="0.029145 0.0 0.019855" rpy="0 -0.37 0" />
+    <!-- Middle of camera back plate <origin xyz="0.028855 0.0 -0.016645" rpy="0 0 0" /> --> 
+    <origin xyz="0.019855 0.0 -0.029145" rpy="0 0 0" />
     <parent link="tower_camera_stand_link_horizontal_front"/>
     <child link="tower_camera_front_bolt_link"/>
   </joint>  
@@ -233,11 +203,11 @@
           <color rgba="0.85098 0.85098 0.85098 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <geometry>
         <mesh filename="package://mir_description/meshes/sensor_mounts/intel_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
 
   <joint name="tower_camera_back_mount_joint" type="fixed">
@@ -263,11 +233,11 @@
           <color rgba="0.85098 0.85098 0.85098 1"/>
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <geometry>
         <mesh filename="package://mir_description/meshes/sensor_mounts/side_camera_mount.STL" scale="0.001 0.001 0.001"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
 
   <joint name="tower_camera_side_mount_joint" type="fixed">

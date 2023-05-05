@@ -14,9 +14,9 @@
     <arg name="enable_depth"             default="true"/>
     <arg name="enable_color"             default="true"/>
     <arg name="enable_sync"              default="true"/>
-    <arg name="align_depth"         default="true"/>
+    <arg name="align_depth"         default="false"/>
     <arg name="filters"             default="spatial,hole_filling,pointcloud"/>
-    <arg name="clip_distance"       default="1.0"/>
+    <arg name="clip_distance"       default="2.0"/>
     <arg name="ordered_pc"               default="true"/>
 
     <!-- Arguments for remapping all device namespaces -->
@@ -59,6 +59,7 @@
             <arg name="filters"               value="$(arg filters)"/>
             <arg name="clip_distance"         value="$(arg clip_distance)"/>
             <arg name="ordered_pc"            value="$(arg ordered_pc)"/>
+            <arg name="publish_tf"             value="false" />
         </include>
 
         <include if="$(arg rgb_processing)"
@@ -113,6 +114,7 @@
             <arg name="filters"               value="$(arg filters)"/>
             <arg name="clip_distance"         value="$(arg clip_distance)"/>
             <arg name="ordered_pc"            value="$(arg ordered_pc)"/>
+            <arg name="publish_tf"             value="false" />
         </include>
 
         <include if="$(arg rgb_processing)"

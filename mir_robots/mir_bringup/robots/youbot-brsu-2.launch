@@ -33,10 +33,7 @@
   <include file="$(find mir_gripper_controller)/ros/launch/teensy_dynamixel_gripper.launch" />
 
   <!-- top camera -->
-  <include file="$(find mir_bringup)/components/realsense_camera.launch">
-      <arg name="serial_num" value="827312073531"/>
-      <arg name="camera_name" value="tower_cam3d"/>
-  </include>
+  <include file="$(find mir_bringup)/components/realsense_dual_camera.launch" />
 
   <!-- camera at arm end effector -->
   <!-- <include file="$(find mir_bringup)/components/realsense_camera.launch">
