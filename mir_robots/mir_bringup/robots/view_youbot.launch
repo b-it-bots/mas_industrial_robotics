@@ -3,7 +3,7 @@
 <launch>
 
     <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
-    <arg name="gui" default="false"/>
+    <arg name="gui" default="true"/>
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mir_hardware_config)/$(arg robot)/urdf/robot.urdf.xacro" />
 
