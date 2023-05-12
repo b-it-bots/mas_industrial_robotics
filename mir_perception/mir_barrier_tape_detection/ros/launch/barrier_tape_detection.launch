@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="camera_name" default="arm_cam3d" />  
+  <arg name="front_camera" default="tower_cam3d_front" />  
+  <arg name="back_camera" default="tower_cam3d_back" />
   <arg name="barrier_tape_detection_config_file" default="$(find mir_barrier_tape_detection)/ros/config/barrier_tape_detection.yaml" />  
   
   <rosparam file="$(arg barrier_tape_detection_config_file)" command="load"/>
@@ -9,9 +10,9 @@
   <!-- Barrier tape detection node -->
   <group ns="mir_perception/front_camera">
       <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection" output="screen" respawn="true">
-          <remap from="~input_rgb_image" to="/$(arg camera_name)/rgb/image_raw"/>
-          <remap from="~input_pointcloud" to="/$(arg camera_name)/depth_registered/points"/>
-          <remap from="~camera_info" to="/$(arg camera_name)/rgb/camera_info"/>
+          <remap from="~input_rgb_image" to="/$(arg front_camera)/rgb/image_raw"/>
+          <remap from="~input_pointcloud" to="/$(arg front_camera)/depth_registered/points"/>
+          <remap from="~camera_info" to="/$(arg front_camera)/rgb/camera_info"/>
           <param name="loop_rate" type="int" value="30" />
           <param name="target_frame" value="map"/>
           <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/>
@@ -47,9 +48,9 @@
   <group ns="mir_perception/back_camera">
       
       <node pkg="mir_barrier_tape_detection" type="barrier_tape_detection_node" name="barrier_tape_detection"  output="screen" respawn="true">
-          <remap from="~input_rgb_image" to="/d435_back/rgb/image_raw"/>
-          <remap from="~input_pointcloud" to="/d435_back/depth_registered/points"/>
-          <remap from="~camera_info" to="/d435_back/rgb/camera_info"/>
+          <remap from="~input_rgb_image" to="/$(arg back_camera)/rgb/image_raw"/>
+          <remap from="~input_pointcloud" to="/$(arg back_camera)/depth_registered/points"/>
+          <remap from="~camera_info" to="/$(arg back_camera)/rgb/camera_info"/>
           <param name="loop_rate" type="int" value="1" />
           <param name="target_frame" value="map"/>
           <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/>
