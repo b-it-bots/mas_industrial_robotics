@@ -33,7 +33,8 @@ PlannerExecutor::PlannerExecutor(ros::NodeHandle &nh) : server_(nh, "execute_pla
 
   addActionExecutor("PICK", new CombinedPickAction());
   addActionExecutor("PLACE", new PlaceAction());
-  addActionExecutor("STAGE", new StageAction());
+  addActionExecutor("STAGE_GENERAL", new StageAction());
+  addActionExecutor("STAGE_LARGE", new StageAction());
   addActionExecutor("UNSTAGE", new UnstageAction());
   addActionExecutor("MOVE_BASE", new MoveAction());
   addActionExecutor("INSERT", new CombinedInsertAction());

@@ -55,6 +55,12 @@
 
 	; draw ?d is located at location ?l
 	(located_at ?d - drawer ?l - location)
+
+	; object ?o is large
+	(is_large ?o - object)
+
+	; is robot platform ?rp big enough
+	(is_big_enough ?rp - robot_platform)
  )
 
  (:functions
@@ -127,11 +133,29 @@
 
  ; stage an object ?o in a robot platform ?rp which is not occupied with a gripper ?g
  ; which is holding the object ?o
- (:action stage
+ (:action stage_general
      :parameters (?r - robot ?rp - robot_platform ?o - object)
      :precondition 	(and 	(holding ?r ?o)
                       		(not (occupied ?rp))
                             (not (gripper_is_free ?r))
+							(not (is_large ?o))
+                   	)
+     :effect (and  	(not (holding ?r ?o))
+	 				     (gripper_is_free ?r)
+     			   	     (stored ?o ?rp)
+                   	     (occupied ?rp)
+                   	     (increase (total-cost) 1)
+             )
+ )
+
+
+ (:action stage_large
+     :parameters (?r - robot ?rp - robot_platform ?o - object)
+     :precondition 	(and 	(holding ?r ?o)
+                      		(not (occupied ?rp))
+                            (not (gripper_is_free ?r))
+							(is_big_enough ?rp)
+							(is_large ?o)
                    	)
      :effect (and  	(not (holding ?r ?o))
 	 				     (gripper_is_free ?r)

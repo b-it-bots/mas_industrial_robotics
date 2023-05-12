@@ -17,14 +17,17 @@
     (at YOUBOT-BRSU START)
     (gripper_is_free YOUBOT-BRSU)
     (on S40_40_B WS01)
-    (on INSULATION_TAPE WS01)
-    (on MOTOR WS01)
+    (on S40_40_G WS01)
+    (on BEARING_BOX WS01)
+    (is_large S40_40_B)
+    (is_large S40_40_G)
+    (is_big_enough PLATFORM_RIGHT)
 )
 
 (:goal (and
     (on S40_40_B WS03)
-    (on INSULATION_TAPE WS03)
-    (on MOTOR SH01)
+    (on S40_40_G WS03)
+    (on BEARING_BOX WS03)
     )
 )
 
