@@ -16,7 +16,7 @@ from mas_perception_msgs.msg import ObjectList, Object
 from mir_pregrasp_planning_ros.orientation_independent_ik import OrientationIndependentIK
 import tf
 from tf.transformations import euler_from_quaternion
-from mcr_manipulation_msgs.msg import GripperCommand
+from mir_manipulation_msgs.msg import GripperCommand
 from std_msgs.msg import String
 
 class Bunch:
@@ -215,8 +215,10 @@ class control_gripper(smach.State):
         self.grasped_counter = 0
         if 'open' in target:
             self.command.command = GripperCommand.OPEN
-        else:
+        elif 'close' in target:
             self.command.command = GripperCommand.CLOSE
+        elif type(target) == float:
+            self.command.command = target
         self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
         self.sub = rospy.Subscriber('/arm_1/gripper_feedback', String, self.feedback_cb)
 
@@ -229,8 +231,8 @@ class control_gripper(smach.State):
     def execute(self, userdata):
         self.pub.publish(self.command)
         while True:
-            if self.current_state == "GRIPPER_OPEN" and\
-                    self.command.command == GripperCommand.OPEN:
+            if (self.current_state == "GRIPPER_OPEN" or self.current_state == "GRIPPER_INTER") and\
+                    self.command.command != GripperCommand.CLOSE:
                 self.grasped_counter = 0
                 return "succeeded"
             elif self.current_state == "GRIPPER_CLOSED" and\
@@ -264,6 +266,7 @@ class verify_object_grasped(smach.State):
         while (rospy.Time.now() - start_time < self.timeout):
             rospy.sleep(0.1)
             if self.current_state == "GRIPPER_CLOSED" or\
+               self.current_state == "GRIPPER_INTER" or\
                self.current_state == "GRIPPER_OPEN":
                 return "failed"
             elif self.current_state == "OBJECT_GRASPED" and\
@@ -301,8 +304,10 @@ class move_arm_and_gripper(smach.State):
         self.gripper_command = GripperCommand()
         if 'open' in self.conf:
             self.gripper_command.command = GripperCommand.OPEN
-        else:
+        elif 'close' in self.conf:
             self.gripper_command.command = GripperCommand.CLOSE
+        elif type(self.conf) == float:
+            self.gripper_command.command = self.conf
 
     def get_targets(self, group_name):
         text = rospy.get_param("/robot_description_semantic")
