@@ -139,7 +139,7 @@ Steps to follow for BMT setup
         rviz
 
 * Then in the RVIZ window open the config file named ``youbot.rviz`` (located in ``mas_industrial_robotics`` ROS package).
-
+* Set the Fixed Frame in Global Options to ``map``.
 * Once the file is loaded then localize the youbot using ``2d pose esitimate`` as show in the image below
 
 .. figure:: ../images/rviz_config_1_1.png   
