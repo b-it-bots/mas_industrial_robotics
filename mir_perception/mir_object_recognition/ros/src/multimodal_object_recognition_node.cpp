@@ -109,9 +109,9 @@ MultimodalObjectRecognitionROS::~MultimodalObjectRecognitionROS()
 void MultimodalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::ImageConstPtr &image,
                       const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
+  ROS_INFO("[multimodal_object_recognition_ros] Received enough messages");
   if (pointcloud_msg_received_count_ < 1)
   {
-    ROS_INFO("[multimodal_object_recognition_ros] Received enough messages");
     pointcloud_msg_ = cloud;
     pointcloud_msg_->header.frame_id = pointcloud_source_frame_id_;
     pointcloud_msg_received_count_ += 1;
@@ -399,7 +399,15 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       // Remove large 2d misdetected bbox (misdetection)
       double len_diag = sqrt(powf(roi_2d.width, 2) + powf(roi_2d.height, 2));
 
-      if (len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_)
+      // check if object name has container
+      bool is_container = false;
+      if (object.name == "CONTAINER_BOX_BLUE" || object.name == "CONTAINER_BOX_RED")
+      {
+        ROS_INFO("Found container object %s", object.name.c_str());
+        is_container = true;
+      }
+
+      if ((len_diag > rgb_bbox_min_diag_ && len_diag < rgb_bbox_max_diag_) || is_container)
       {
         PointCloud::Ptr cloud_roi(new PointCloud);
         bool getROISuccess = mpu::pointcloud::getPointCloudROI(roi_2d, cloud_, cloud_roi, 
@@ -432,7 +440,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
           // ************************************************
           
           PointCloud filtered_rgb_pointcloud;
-          filtered_rgb_pointcloud = mpu::object::estimatePose(cloud_roi, pose, object.shape.shape,
+          filtered_rgb_pointcloud = mpu::object::estimatePose(cloud_roi, pose, object, object.shape.shape,
                                                               rgb_cluster_filter_limit_min_,
                                                               rgb_cluster_filter_limit_max_);
 
@@ -486,6 +494,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       }
       else
       {
+        ROS_WARN("[RGB] BBOX too big or too small");
         ROS_DEBUG("[RGB] DECOY");
         rgb_object_list.objects[i].name = "DECOY";
         rgb_object_list.objects[i].database_id = rgb_object_id_;
@@ -801,6 +810,8 @@ void MultimodalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
 void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::ConstPtr &msg)
 {
   std_msgs::String event_out;
+  ROS_INFO("Event call back");
+
   if (msg->data == "e_start")
   {
     // Synchronize callback
