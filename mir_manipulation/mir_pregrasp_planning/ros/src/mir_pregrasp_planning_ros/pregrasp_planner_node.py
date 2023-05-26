@@ -138,6 +138,9 @@ class PregraspPlannerPipeline(object):
         rospy.Subscriber("~pose_in", geometry_msgs.msg.PoseStamped, self.pose_cb)
 
         # publishers
+        self.original_pose_pub = rospy.Publisher(
+            "~original_pose", geometry_msgs.msg.PoseStamped, queue_size=1
+        )
         self.event_out = rospy.Publisher(
             "~event_out", std_msgs.msg.String, queue_size=1
         )
@@ -334,6 +337,7 @@ class PregraspPlannerPipeline(object):
         input_pose.header = transformed_pose.header
         input_pose.pose.position = transformed_pose.pose.position
         if grasp_type == "side_grasp":
+            rospy.loginfo("[Pregrasp Planning] Using side grasp")
             input_pose.pose.position.x += self.side_grasp_offset_x
         solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
                 input_pose.pose.position.x, input_pose.pose.position.y,
@@ -351,6 +355,7 @@ class PregraspPlannerPipeline(object):
         joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
         joint_config = [p.value for p in joint_msg.positions]
         if grasp_type == "side_grasp" and self.generate_pregrasp_waypoint:
+            rospy.loginfo("[Pregrasp Planning] using side grasp and generating pregrasp waypoint")
             pregrasp_input_pose = copy.deepcopy(input_pose)
             pregrasp_input_pose.pose.position.x -= 0.05
             pregrasp_solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
@@ -427,6 +432,7 @@ class PregraspPlannerPipeline(object):
             grasp_type = "top_grasp"
         else:
             grasp_type = "side_grasp"
+        rospy.loginfo("[Pregrasp Planning] Using grasp type: {0}".format(grasp_type))
 
         if grasp_type == "side_grasp": 
             
@@ -437,6 +443,7 @@ class PregraspPlannerPipeline(object):
         self.grasp_type.publish(grasp_type)
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
         self.pose_samples_pub.publish(pose_samples)
+        # self.original_pose_pub.publish(modified_pose)
 
         # if default ik is true, try default ik routine
         if self.default_ik_flag and not self.adaptive_ik_flag:
