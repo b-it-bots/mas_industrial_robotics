@@ -11,17 +11,20 @@
     <arg name="start_base_pose_offset" default="-0.7" />
 
     <!-- angle at which the obj is grasped -->
-    <arg name="pitch" default="2.5" />
+    <arg name="pitch" default="-0.87" />
 
     <!-- distance between base link and arm link 0 -->
     <arg name="arm_link_0_offset_x" default="0.223" />
-    <arg name="arm_link_0_offset_y" default="0.0" />
+    <arg name="arm_link_0_offset_y" default="0.1" />
 
     <!-- percentage of distance from arm link 0 to obj pose for intermediate arm pose -->
     <arg name="intermediate_perc" default="0.8" />
 
     <!-- distance from robot's initial pose (perceive pose) for retracting arm -->
     <arg name="retract_base_pose_x" default="-0.2" />
+
+    <!-- pick statemachine says shelf -->
+    <arg name="pick_statemachine_says_shelf" default="false" />
 
     <!-- move base safe action server -->
     <node pkg="mir_pick_from_shelf" type="pick_from_shelf_server" name="pick_from_shelf_server" output="screen" >
@@ -33,6 +36,7 @@
         <param name="arm_link_0_offset_y" type="double" value="$(arg arm_link_0_offset_y)" />
         <param name="intermediate_perc" type="double" value="$(arg intermediate_perc)" />
         <param name="retract_base_pose_x" type="double" value="$(arg retract_base_pose_x)" />
+        <param name="pick_statemachine_says_shelf" type="string" value="$(arg pick_statemachine_says_shelf)" />
     </node>
 
 </launch>

@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import sys
+import copy
 
 import mcr_states.common.basic_states as gbs
 import mir_states.common.manipulation_states as gms
@@ -22,7 +23,24 @@ from pick_from_shelf_utils import PickFromShelfUtils
 
 # ===============================================================================
 
+class SetOrientationIndependentIK(smach.State):
+    def __init__(self,flag_status=False):
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded"],
+            input_keys=["goal"],
+            output_keys=["feedback", "result"],
+        )
+        self.flag_status = flag_status
+        rospy.sleep(0.1)  # time for the publisher to register in ros network
 
+    def execute(self, userdata):
+        # rospy.loginfo("[PICK FROM SHELF] Setting the shelf flag to: {}".format(self.flag_status))
+        rospy.set_param("/pick_from_shelf_server/pick_statemachine_says_shelf", self.flag_status)
+        rospy.sleep(0.2)  # let the topic to survive for some time
+        return "succeeded"
+    
+# ===============================================================================
 class SelectObject(smach.State):
     def __init__(self, topic_name):
         smach.State.__init__(
@@ -69,12 +87,14 @@ class SendPoseToDBC(smach.State):
         rospy.sleep(0.1)  # time for the publisher to register in ros network
 
     def _obj_pose_cb(self, msg):
-        self._obj_pose = msg
+        self._obj_pose = copy.deepcopy(msg)
 
     def execute(self, userdata):
         if self.retract:
             dbc_pose = self.utils.get_retracted_dbc_pose()
         else:
+            self._obj_pose.pose.position.y -= 0.1
+            self._obj_pose.pose.position.x += 0.05
             dbc_pose = self.utils.calc_pose_for_dbc(self._obj_pose)
         self._dbc_pose_pub.publish(dbc_pose)
         self._obj_pose = None
@@ -101,7 +121,7 @@ class SendPoseToMoveIt(smach.State):
         rospy.sleep(0.1)  # time for the publisher to register in ros network
 
     def _obj_pose_cb(self, msg):
-        self._obj_pose = msg
+        self._obj_pose = copy.deepcopy(msg)
 
     def execute(self, userdata):
         modified_obj_pose = self.utils.get_arm_pose(
@@ -147,10 +167,17 @@ def main():
                 timeout_duration=10,
             ),
             transitions={
-                "success": "SET_DBC_PARAMS",
+                "success": "SET_SHELF_FLAG_TRUE",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
+        )
+        
+        # add a state that calls the shelf flag setter service with true
+        smach.StateMachine.add(
+            "SET_SHELF_FLAG_TRUE",
+            SetOrientationIndependentIK(flag_status="True"),
+            transitions={"succeeded": "SET_DBC_PARAMS"},
         )
 
         smach.StateMachine.add(
@@ -199,84 +226,36 @@ def main():
             "MOVE_ARM_TO_PRE_GRASP",
             gms.move_arm("shelf_pre_grasp_lower"),
             transitions={
-                "succeeded": "OPEN_GRIPPER",
+                "succeeded": "MOVE_ROBOT_AND_PICK",
                 "failed": "MOVE_ARM_TO_PRE_GRASP",
             },
         )
 
         smach.StateMachine.add(
-            "OPEN_GRIPPER",
-            gms.control_gripper("open_rtt"),
-            transitions={"succeeded": "SEND_MOVEIT_POSE_INTERMEDIATE"},
-        )
-
-        smach.StateMachine.add(
-            "SEND_MOVEIT_POSE_INTERMEDIATE",
-            SendPoseToMoveIt(modification_name="intermediate"),
-            transitions={"succeeded": "MOVE_ARM_USING_MOVEIT_INTERMEDIATE"},
-        )
-
-        # Move arm using mir_moveit_client to an intermediate pose before obj
-        smach.StateMachine.add(
-            "MOVE_ARM_USING_MOVEIT_INTERMEDIATE",
+            "MOVE_ROBOT_AND_PICK",
             gbs.send_and_wait_events_combined(
-                event_in_list=[("arm_moveit_client/event_in", "e_start")],
-                event_out_list=[("arm_moveit_client/event_out", "e_success", True)],
-                timeout_duration=10,
+                event_in_list=[("/wbc/event_in", "e_start")],
+                event_out_list=[("/wbc/event_out", "e_success", True)],
+                timeout_duration=50,
             ),
             transitions={
-                "success": "SEND_MOVEIT_POSE",
-                "timeout": "MOVE_ARM_TO_PRE_GRASP_FAILED",
-                "failure": "MOVE_ARM_TO_PRE_GRASP_FAILED",
+                "success": "SET_SHELF_FLAG_FALSE_1",
+                "timeout": "SET_SHELF_FLAG_FALSE_2",
+                "failure": "SET_SHELF_FLAG_FALSE_2",
             },
         )
 
+        # add a state that calls the shelf flag setter service with false
         smach.StateMachine.add(
-            "SEND_MOVEIT_POSE",
-            SendPoseToMoveIt(modification_name="object"),
-            transitions={"succeeded": "MOVE_ARM_USING_MOVEIT"},
-        )
-
-        # Move arm using mir_moveit_client to obj pose
-        smach.StateMachine.add(
-            "MOVE_ARM_USING_MOVEIT",
-            gbs.send_and_wait_events_combined(
-                event_in_list=[("arm_moveit_client/event_in", "e_start")],
-                event_out_list=[("arm_moveit_client/event_out", "e_success", True)],
-                timeout_duration=10,
-            ),
-            transitions={
-                "success": "CLOSE_GRIPPER",
-                "timeout": "MOVE_ARM_TO_PRE_GRASP_FAILED",
-                "failure": "MOVE_ARM_TO_PRE_GRASP_FAILED",
-            },
+            "SET_SHELF_FLAG_FALSE_1",
+            SetOrientationIndependentIK(flag_status="False"),
+            transitions={"succeeded": "MOVE_ARM_TO_PRE_GRASP_RETRACT"},
         )
 
         smach.StateMachine.add(
-            "CLOSE_GRIPPER",
-            gms.control_gripper("close"),
-            transitions={"succeeded": "SEND_MOVEIT_POSE_INTERMEDIATE_POST"},
-        )
-
-        smach.StateMachine.add(
-            "SEND_MOVEIT_POSE_INTERMEDIATE_POST",
-            SendPoseToMoveIt(modification_name="intermediate_post"),
-            transitions={"succeeded": "MOVE_ARM_USING_MOVEIT_INTERMEDIATE_POST"},
-        )
-
-        # Move arm using mir_moveit_client to an intermediate pose before obj
-        smach.StateMachine.add(
-            "MOVE_ARM_USING_MOVEIT_INTERMEDIATE_POST",
-            gbs.send_and_wait_events_combined(
-                event_in_list=[("arm_moveit_client/event_in", "e_start")],
-                event_out_list=[("arm_moveit_client/event_out", "e_success", True)],
-                timeout_duration=10,
-            ),
-            transitions={
-                "success": "MOVE_ARM_TO_PRE_GRASP_RETRACT",
-                "timeout": "MOVE_ARM_TO_PRE_GRASP_FAILED",
-                "failure": "MOVE_ARM_TO_PRE_GRASP_FAILED",
-            },
+            "SET_SHELF_FLAG_FALSE_2",
+            SetOrientationIndependentIK(flag_status="False"),
+            transitions={"succeeded": "MOVE_ARM_TO_PRE_GRASP_FAILED"},
         )
 
         smach.StateMachine.add(
@@ -339,9 +318,9 @@ def main():
         )
 
     # smach viewer
-    if rospy.get_param("~viewer_enabled", False):
+    if rospy.get_param("~viewer_enabled", True):
         sis = IntrospectionServer(
-            "pick_from_shelf_viewer", sm, "/PICK_OBJECT_SMACH_VIEWER"
+            "pick_from_shelf_viewer", sm, "/PICK_FROM_SHELF_SMACH_VIEWER"
         )
         sis.start()
 
