@@ -105,6 +105,9 @@ class PregraspPlannerPipeline(object):
         # joint offset for creating pre-pregrasp pose
         self.joint_offset = None
 
+        # needed for the pregrasp planner to shift to independent ik when dealing with shift
+        self.is_picking_from_shelf = False
+
         # pose generator
         self.gripper = rospy.get_param("~gripper_config_matrix", None)
         assert self.gripper is not None, "Gripper config matrix must be specified."
@@ -445,6 +448,10 @@ class PregraspPlannerPipeline(object):
         self.pose_samples_pub.publish(pose_samples)
         # self.original_pose_pub.publish(modified_pose)
 
+        # check is_picking_from_shelf from parameter server
+        self.is_picking_from_shelf = rospy.get_param("/pick_from_shelf_server/pick_statemachine_says_shelf", False)
+        rospy.loginfo(f"[Pregrasp Planning] shelf picking is set to: {self.is_picking_from_shelf}")
+
         # if default ik is true, try default ik routine
         if self.default_ik_flag and not self.adaptive_ik_flag:
             if self.default_ik_routine(pose_samples, modified_pose, grasp_type):
@@ -459,7 +466,7 @@ class PregraspPlannerPipeline(object):
                 return "INIT"
             
         # if orientation independent IK failed and adaptive IK is set to true, try again with orientation independent IK
-        if self.orientation_independent_ik_flag and not self.adaptive_ik_flag:
+        if self.is_picking_from_shelf=='True' or (self.orientation_independent_ik_flag and not self.adaptive_ik_flag):
             if self.orientation_independent_ik_routine(transformed_pose, grasp_type):
                 self.event_out.publish("e_success")
                 self.reset_component_data()
@@ -470,7 +477,7 @@ class PregraspPlannerPipeline(object):
                 return 'INIT'
 
         # if adaptive IK is set to true, try both default and orientation independent IK routines
-        if self.adaptive_ik_flag:
+        if self.adaptive_ik_flag and not self.is_picking_from_shelf=='True':
             if self.default_ik_routine(pose_samples, modified_pose, grasp_type):
                 self.event_out.publish("e_success")
                 self.reset_component_data()

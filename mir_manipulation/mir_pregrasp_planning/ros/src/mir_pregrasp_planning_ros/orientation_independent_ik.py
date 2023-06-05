@@ -22,6 +22,9 @@ class OrientationIndependentIK(object):
         self._base_link_to_arm_base_offset = None
         self._initialise_base_to_arm_offset()
 
+        # create subscriber to pick from shelf topic to limit orientation independent ik to certain pitch ranges
+        self.is_picking_from_shelf = False
+
         if self.debug:
             self._pose_array_pub = rospy.Publisher('~pose_samples', PoseArray, queue_size=1)
             self._pose_out_pub = rospy.Publisher('~pose_out', PoseStamped, queue_size=1)
@@ -58,7 +61,13 @@ class OrientationIndependentIK(object):
         :returns: (geometry_msgs.msg.PoseStamped, brics_actuator.JointPositions) or None
 
         """
-        pitch_ranges = [(0.0, 0.0), (-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0), (0.0, 10.0)]
+        # check is_picking_from_shelf from parameter server
+        self.is_picking_from_shelf = bool(rospy.get_param("/pick_from_shelf_server/pick_statemachine_says_shelf", False))
+        rospy.loginfo(f"[orientation_independent_ik] shelf picking is set to: {self.is_picking_from_shelf}")
+        if self.is_picking_from_shelf=='True':
+            pitch_ranges = [(-45.0, -15.0)] # limiting the pitch range to avoid collisions with shelf and table
+        else:
+            pitch_ranges = [(0.0, 0.0), (-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0), (0.0, 10.0)]
         return self._get_reachable_pose_and_joint_msg_from_point_and_pitch_ranges(
                 x, y, z, frame_id, pitch_ranges)
 
@@ -145,9 +154,9 @@ class OrientationIndependentIK(object):
             reachable_pose, joint_angles = self._get_reachable_pose_and_configuration(pose_samples)
             if reachable_pose is not None:
                 found_solution = True
-                rospy.logdebug('Found solution')
-                rospy.logdebug('Pitch range: ' + str(pitch_range))
-                rospy.logdebug('Yaw : ' + str(yaw))
+                rospy.loginfo('Found solution')
+                rospy.loginfo('Pitch range: ' + str(pitch_range))
+                rospy.loginfo('Yaw : ' + str(yaw))
                 if self.debug:
                     self._pose_out_pub.publish(reachable_pose)
                 return (reachable_pose, OrientationIndependentIK.get_joint_pos_msg_from_joint_angles(joint_angles))
