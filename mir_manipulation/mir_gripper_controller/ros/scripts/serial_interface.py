@@ -79,3 +79,10 @@ class SerialInterface:
             msgs_json.append(json.loads(msg))
 
         return msgs_json
+
+if __name__ == '__main__':
+    serial_interface = SerialInterface(9600, 0.1, '239A')
+    serial_interface.open_port()
+    serial_interface.send({'command': 1})
+    rospy.sleep(1)
+    serial_interface.send({'command': 0})
