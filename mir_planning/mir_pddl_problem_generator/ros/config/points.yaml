@@ -6,27 +6,28 @@ ws: 100
 sh: 50
 co: 20 # container_box_blue / container_box_red
 pp: 10
-cb: 0
+cb: 0 # converyor belt. Used for RTT
 
 # ==============================================================================
 # ======================  objects  =============================================
 # ==============================================================================
 
-# long objects
+# objects - easy to grasp
 f20_20_b: 20
 f20_20_g: 20
 s40_40_b: 20
 s40_40_g: 20
-m20_100: 20
-axis: 20
-
-# medium objects
-r20: 20
+bearing2: 20
+spacer: 20
+m20: 20
 m30: 20
-motor: 20
-bearing_box: 20
+axis2: 20
+motor2: 20
 
-# small objects
-distance_tube: 10
-bearing: 10
-m20: 10
+# long and heavy objects
+allenkey: 10
+drill: 10
+housing: 10
+m20_100: 10
+screwdriver: 10
+wrench: 10
