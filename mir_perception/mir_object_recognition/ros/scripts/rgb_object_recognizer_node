@@ -16,10 +16,11 @@ from rgb_object_recognition.yolov7.utils.general import check_img_size, non_max_
 from rgb_object_recognition.yolov7.utils.plots import plot_one_box
 from rgb_object_recognition.yolov7.utils.torch_utils import select_device, TracedModel, load_classifier, \
     time_synchronized
+from ultralytics import YOLO
 
 
 class RGBObjectRecognizer():
-    def __init__(self, weights, net='detection', model_name='yolov7',
+    def __init__(self, weights, net='detection', model_name='yolov8',
                  confidence_threshold=0.8,
                  iou_threshold=0.45,
                  img_size=640,
@@ -52,18 +53,20 @@ class RGBObjectRecognizer():
         self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
 
         # Load model
-        self.model = attempt_load(weights, map_location=self.device)  # load FP32 model
-        self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
-        self.colors = [[random.randint(0, 255) for _ in range(3)] for _ in self.names]
-        self.stride = int(self.model.stride.max())  # model stride
-        img_size = check_img_size(img_size, s=self.stride)  # check img_size
+        if self.model_name == 'yolov7':
+            self.model = attempt_load(weights, map_location=self.device)  # load FP32 model
+            self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
+            self.colors = [[random.randint(0, 255) for _ in range(3)] for _ in self.names]
+            self.stride = int(self.model.stride.max())  # model stride
+            img_size = check_img_size(img_size, s=self.stride)  # check img_size
+            if trace:
+                self.model = TracedModel(self.model, self.device, img_size)
+
+            if self.half:
+                self.model.half()  # to FP16
+        elif self.model_name == 'yolov8':
+            self.model = YOLO(weights)
         self.img_size = img_size
-
-        if trace:
-            self.model = TracedModel(self.model, self.device, img_size)
-
-        if self.half:
-            self.model.half()  # to FP16
 
         # Second-stage classifier
         self.classify = classify
@@ -82,14 +85,14 @@ class RGBObjectRecognizer():
                 try:
                     cv_img = self.cvbridge.imgmsg_to_cv2(
                         img_msg.images[0], "bgr8")
-                    # Padded resize
-                    img = letterbox(cv_img, self.img_size, stride=self.stride)[0]
-
-                    # Convert
-                    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
-                    img = np.ascontiguousarray(img)
 
                     if self.model_name == 'yolov7':
+                        # Padded resize
+                        img = letterbox(cv_img, self.img_size, stride=self.stride)[0]
+
+                        # Convert
+                        img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+                        img = np.ascontiguousarray(img)
                         old_img_w = old_img_h = self.img_size
                         old_img_b = 1
 
@@ -151,6 +154,48 @@ class RGBObjectRecognizer():
                         if self.debug:
                             rospy.logdebug("Detected Objects: %s", labels)
 
+                    elif self.model_name == 'yolov8':
+
+                        predictions = self.model.predict(source=cv_img,
+                                                         conf=self.confidence_threshold,
+                                                         iou=self.iou_threshold,
+                                                         device=self.device,
+                                                        )
+
+                        # convert results to numpy array
+                        predictions_np = predictions[0].boxes.numpy()
+                        class_ids = predictions_np.cls
+                        class_names = predictions[0].names
+                        class_labels = [class_names[i] for i in class_ids]
+                        class_scores = predictions_np.conf
+                        class_bboxes = predictions_np.xyxy # x, y, w, h
+
+                        bboxes, probs, labels = class_bboxes, class_scores, class_labels
+
+                        for i in range(len(labels)):
+                            result = Object()
+                            result.name = labels[i].upper()
+                            result.probability = probs[i]
+                            roi = RegionOfInterest()
+                            roi.x_offset = int(bboxes[i][0]) # is it center???
+                            roi.y_offset = int(bboxes[i][1])
+                            roi.width = int(bboxes[i][2] - bboxes[i][0])
+                            roi.height = int(bboxes[i][3] - bboxes[i][1])
+                            result.roi = roi
+
+                            objects.append(result)
+                        # Publish result_list
+                        result_list.objects = objects
+                        self.pub_result.publish(result_list)
+
+                        if self.debug:
+
+                            # Draw bounding boxes and labels of detections
+                            debug_img = predictions[0].plot()
+
+                            # publish bbox and label
+                            self.publish_debug_img(debug_img)
+                    
                     else:
                         bboxes, probs, labels = self.model.classify(cv_img)
 
