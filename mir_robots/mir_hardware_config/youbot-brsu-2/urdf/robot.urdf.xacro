@@ -71,7 +71,7 @@
   </xacro:sensor_orbbec_astra>
 
   <!-- tower back camera -->
-  <xacro:sensor_d435  name="tower_cam3d_back" parent="tower_camera_back_bolt_link" use_nominal_extrinsics="true">
+  <xacro:sensor_d435  name="tower_cam3d_back_camera" parent="tower_camera_back_bolt_link" use_nominal_extrinsics="true">
     <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
   </xacro:sensor_d435>
 
