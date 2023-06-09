@@ -166,11 +166,11 @@
     </group_state>
     
     <group_state name="platform_right" group="arm_1">
-        <joint name="arm_joint_1" value="4.6734" />
-        <joint name="arm_joint_2" value="1.4129" />
-        <joint name="arm_joint_3" value="-1.1793" />
-        <joint name="arm_joint_4" value="3.1662" />
-        <joint name="arm_joint_5" value="3.2256" />
+        <joint name="arm_joint_1" value="4.7082" />
+        <joint name="arm_joint_2" value="1.4675" />
+        <joint name="arm_joint_3" value="-1.3586" />
+        <joint name="arm_joint_4" value="3.3286" />
+        <joint name="arm_joint_5" value="3.3089" />
     </group_state>
 
     <group_state name="platform_right_pre" group="arm_1">
