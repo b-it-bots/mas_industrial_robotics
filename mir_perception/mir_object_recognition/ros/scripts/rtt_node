@@ -1,0 +1,398 @@
+#!/usr/bin/env python3
+import os
+import random
+import time
+import cv2
+import numpy as np
+import roslib
+import rospy
+import torch
+import math
+from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg import ColorRGBA
+from mas_perception_msgs.msg import ImageList, Object, ObjectList
+from sensor_msgs.msg import Image, RegionOfInterest
+from rgb_object_recognition.yolov7.models.experimental import attempt_load
+from rgb_object_recognition.yolov7.utils.datasets import letterbox
+from rgb_object_recognition.yolov7.utils.general import check_img_size, non_max_suppression, apply_classifier, \
+    scale_coords, xyxy2xywh
+from rgb_object_recognition.yolov7.utils.plots import plot_one_box
+from rgb_object_recognition.yolov7.utils.torch_utils import select_device, TracedModel, load_classifier, \
+    time_synchronized
+
+from sort.sort import Sort
+from scipy.optimize import least_squares
+
+
+class RTTObjectTracker():
+    def __init__(self, weights, net='detection', model_name='yolov7',
+                 confidence_threshold=0.8,
+                 iou_threshold=0.45,
+                 img_size=640,
+                 trace=True,
+                 classify=False,
+                 augment=False,
+                 device='cpu',
+                 debug_mode=True):
+        import sys
+        sys.path.insert(0, os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
+                           'common', 'src', 'rgb_object_recognition', 'yolov7'))
+
+        self.cvbridge = CvBridge()
+        self.debug = debug_mode
+        self.pub_debug = rospy.Publisher(
+            "/mir_perception/multimodal_object_recognition/recognizer/rgb/output/rtt_debug_image", Image, queue_size=1)
+        self.pub_result = rospy.Publisher(
+            "output/object_list", ObjectList, queue_size=1)
+        
+        self.net = net
+        self.model_name = model_name
+        self.weights = weights
+        self.confidence_threshold = confidence_threshold
+        self.iou_threshold = iou_threshold
+        self.augment = augment
+        self.table_rotating_clockwise = False
+        # self.image = None
+        # self.frame_time = None
+        # Dictionary to store object bounding box centers
+        self.object_centers = {}
+        # Number of latest bounding box centers to keep
+        self.max_centers = 20
+        # Dictionary to store object colors
+        self.object_colors = {} 
+        # Dictionary to store object rotational velocities
+        self.object_rotational_speeds = {}
+
+        # Initialize
+        self.device = select_device(device)
+        self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
+
+        # Load model
+        self.model = attempt_load(weights, map_location=self.device)  # load FP32 model
+        self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
+        self.colors = [[random.randint(0, 255) for _ in range(3)] for _ in self.names]
+        self.stride = int(self.model.stride.max())  # model stride
+        img_size = check_img_size(img_size, s=self.stride)  # check img_size
+        self.img_size = img_size
+
+        if trace:
+            self.model = TracedModel(self.model, self.device, img_size)
+
+        if self.half:
+            self.model.half()  # to FP16
+
+        # Second-stage classifier
+        self.classify = classify
+        if self.classify:
+            self.modelc = load_classifier(name='resnet101', n=2)  # initialize
+            self.modelc.load_state_dict(torch.load('weights/resnet101.pt', map_location=self.device)['model']).to(
+                self.device).eval()
+        self.result_list_1 = None
+        self.sub_img = rospy.Subscriber(
+            "/tower_cam3d_front/rgb/image_raw", Image, self.image_recognition_cb)
+        
+
+    def image_recognition_cb(self, img_msg):
+        # self.image = img_msg
+        # self.frame_time = img_msg.header.stamp
+        self.run(img_msg)
+        
+    
+    # def sort_tracker(self, bboxes, probs, labels):
+    #     # Sort tracker
+    #     '''
+    #     max_age -> Set the maximum age/frames for which a track. can exist without being associated with detections. default=11, type=int
+    #     min_hits -> Set the minimum number of consecutive detections. to be done in order for these set of detections to be considered a track. default=3, type=int
+    #     iou_threshold -> Minimum overlap between detection and estimation bboxes. to be considered the same track type=float, default=0.1
+    #     '''
+    #     sort_tracker = Sort(max_age=1, min_hits=1, iou_threshold=0.1)
+    #     bboxes_np = np.array([[int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])] for bbox in bboxes])
+    #     probs_np = np.array([[float(probs)] for probs in probs])
+    #     detections = np.hstack((bboxes_np, probs_np))
+    #     # detections = np.hstack((bboxes, probs))
+    #     # detections = np.concatenate((bboxes, probs), axis=1)
+    #     trackers, obj_classes = sort_tracker.update(detections, labels)  # This returns bbox and track_id
+    #     # trackers = np.array(trackers)
+    #     # trackers = trackers.astype(int)
+    #     # trackers = trackers.tolist()
+    #     object_tracker = [(obj_classes[i], trackers[i]) for i in range(len(trackers))]
+    #     return object_tracker
+
+    # def fit_circle_to_centers(self, centers):
+    #     def circle_residuals(params, x, y):
+    #         xc, yc, r = params
+    #         return (x - xc) ** 2 + (y - yc) ** 2 - r ** 2
+
+    #     x = centers[:, 0]
+    #     y = centers[:, 1]
+    #     xc_initial = np.mean(x)
+    #     yc_initial = np.mean(y)
+    #     r_initial = np.mean(np.sqrt((x - xc_initial) ** 2 + (y - yc_initial) ** 2))
+
+    #     initial_guess = [xc_initial, yc_initial, r_initial]
+    #     result = least_squares(circle_residuals, initial_guess, args=(x, y))
+
+    #     return result.x[0], result.x[1], result.x[2]
+
+    # def fit_ellipse_to_centers(self, centers):
+    #     def ellipse_residuals(params, x, y):
+    #         xc, yc, a, b, theta = params
+    #         sin_theta = np.sin(theta)
+    #         cos_theta = np.cos(theta)
+    #         x_diff = x - xc
+    #         y_diff = y - yc
+    #         x_rotated = cos_theta * x_diff + sin_theta * y_diff
+    #         y_rotated = -sin_theta * x_diff + cos_theta * y_diff
+    #         return (x_rotated ** 2) / (a ** 2) + (y_rotated ** 2) / (b ** 2) - 1
+
+    #     x = centers[:, 0]
+    #     y = centers[:, 1]
+    #     xc_initial = np.mean(x)
+    #     yc_initial = np.mean(y)
+    #     a_initial = np.mean(np.abs(x - xc_initial))
+    #     b_initial = np.mean(np.abs(y - yc_initial))
+    #     theta_initial = 0
+
+    #     initial_guess = [xc_initial, yc_initial, a_initial, b_initial, theta_initial]
+    #     result = least_squares(ellipse_residuals, initial_guess, args=(x, y))
+
+    #     return result.x[0], result.x[1], result.x[2], result.x[3], result.x[4]
+    
+
+    def calculate_rotational_speed(self, center_list, frame_time_list, xc, yc):
+        """
+        center_list: list of center points of the detected object in each frame
+        frame_time_list: list of time stamps of each frame
+        xc, yc: center point of the ellipse
+        """
+        # Calculate the angle between each center point and the ellipse center
+        angle_list = []
+        for center in center_list:
+            xo, yo = center
+            angle = math.atan2(yo - yc, xo - xc)
+            angle_list.append(angle)
+        
+        # Calculate the time differences between two consecutive frames
+        time_diff_list = []
+        for i in range(1, len(frame_time_list)):
+            time_diff = frame_time_list[i] - frame_time_list[i - 1]
+            time_diff_list.append(time_diff)
+        
+        # Calculate the rotational speeds based on the angle differences and time differences
+        rotational_speeds = []
+        count_clockwise = 0
+        count_anticlockwise = 0
+        for i in range(len(angle_list) - 1):
+            # if angle_list[i] < 0 and angle_list[i + 1] > 0:
+            #     angle_diff = (2 * math.pi) + angle_list[i] - angle_list[i + 1]
+            # else:
+            #     angle_diff = angle_list[i + 1] - angle_list[i]
+            # angle_diff = abs(angle_diff)
+            # time_diff = time_diff_list[i]
+            # rotational_speed = angle_diff / time_diff
+            # rotational_speeds.append(rotational_speed)
+            
+            if 0 <= angle_list[i] <= math.pi and 0 <= angle_list[i+1] <= math.pi and (count_anticlockwise + count_clockwise < 5):
+                if angle_list[i] > angle_list[i+1]:
+                    count_clockwise += 1
+                else:
+                    count_anticlockwise += 1
+            if count_clockwise > count_anticlockwise:
+                self.table_rotating_clockwise = True
+            else:
+                self.table_rotating_clockwise = False
+
+            # if angle_list[i] and angle_list[i + 1] lies between pi/2 and pi, calculate the angle difference and rotational speed
+            if (not self.table_rotating_clockwise and (math.pi / 2 <= angle_list[i] <= math.pi and math.pi / 2 <= angle_list[i+1] <= math.pi)) or \
+            (self.table_rotating_clockwise and (0. <= angle_list[i] <= math.pi/2 and 0. <= angle_list[i+1] <= math.pi/2)):
+                angle_diff = angle_list[i + 1] - angle_list[i]
+                time_diff = time_diff_list[i]
+                rotational_speed = abs(angle_diff) / time_diff
+                rotational_speeds.append(rotational_speed)
+
+        # return the average value for rotational speed
+        rotational_speeds = np.array(rotational_speeds)
+        rotational_speed = np.mean(rotational_speeds)
+        
+        return rotational_speed
+
+    def predict_future_timestamps(self, rotational_speed, center_list, frame_time_list, xc, yc, closest_x, closest_y):
+        last_center = center_list[-1]
+        last_frame_time = frame_time_list[-1]
+        
+        # Calculate the angle between the last center and the specified (x, y) point with respect to the ellipse center
+        angle = math.atan2(closest_y - yc, closest_x - xc)
+        
+        # Calculate the predicted time instances when the object will be at the specified (x, y) point
+        predicted_times = []
+        time_diff = (angle - math.atan2(last_center[1] - yc, last_center[0] - xc)) / rotational_speed
+        predicted_time = last_frame_time + time_diff
+        predicted_times.append(predicted_time)
+        for i in range(5):
+            predicted_time += 2*np.pi / rotational_speed
+            predicted_times.append(predicted_time)
+        
+        return predicted_times
+
+
+    def run(self, image):
+        start = time.time()
+        if image:
+            result_list = ObjectList()
+            objects = []
+            # rospy.loginfo("image received")
+            if self.net == 'detection':
+                try:
+                    cv_img = self.cvbridge.imgmsg_to_cv2(image, "bgr8")
+                    # Padded resize
+                    img = letterbox(cv_img, self.img_size, stride=self.stride)[0]
+
+                    # Convert
+                    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+                    img = np.ascontiguousarray(img)
+
+                    if self.model_name == 'yolov7':
+                        old_img_w = old_img_h = self.img_size
+                        old_img_b = 1
+
+                        img = torch.from_numpy(img).to(self.device)
+                        img = img.half() if self.half else img.float()  # uint8 to fp16/32
+                        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+                        if img.ndimension() == 3:
+                            img = img.unsqueeze(0)
+
+                        # Inference
+                        t1 = time_synchronized()
+                        pred = self.model(img, augment=self.augment)[0]
+                        t2 = time_synchronized()
+
+                        # Apply NMS
+                        pred = non_max_suppression(pred, self.confidence_threshold, self.iou_threshold, classes=None,
+                                                agnostic=True)
+                        t3 = time_synchronized()
+
+                        # Apply Classifier
+                        if self.classify:
+                            pred = apply_classifier(pred, self.modelc, img, cv_img)
+
+                        # Process detections
+                        bboxes = []
+                        probs = []
+                        labels = []
+                        for i, det in enumerate(pred):  # detections per image
+                            gn = torch.tensor(cv_img.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+                            if len(det):
+                                # Rescale boxes from img_size to im0 size
+                                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], cv_img.shape).round()
+                                # Write results
+                                for *xyxy, conf, cls in reversed(det):
+                                    bboxes.append(xyxy)
+                                    probs.append(conf)
+                                    labels.append(self.names[int(cls)])
+                        # print("labels- ", labels)
+
+                        # Sort tracker
+                        # object_tracker = self.sort_tracker(bboxes, probs, labels)
+                        
+                        image_header_frame_time = image.header.stamp
+                        frame_time = image_header_frame_time.secs + (image_header_frame_time.nsecs / 1000000000)
+                        
+                        # Fit a Ellipse to the centers of the bounding boxes
+                        for bbox, prob, label in zip(bboxes, probs, labels):
+                            # Calculate center of bounding box
+                            center_x = (int(bbox[0]) + int(bbox[2])) // 2
+                            center_y = (int(bbox[1]) + int(bbox[3])) // 2
+                            center = np.array([center_x, center_y])
+
+                            # Update object centers dictionary
+                            if label not in self.object_centers and center_y > 240:
+                                self.object_centers[label] = []
+                            if label in self.object_centers:
+                                self.object_centers[label].append((center, frame_time))
+
+                                # Keep only the last `max_centers` centers
+                                if len(self.object_centers[label]) > self.max_centers:
+                                    self.object_centers[label] = self.object_centers[label][-self.max_centers:]
+                        print("All Labels- ", self.object_centers.keys())
+
+                        # Fit circles to the centers for each object
+                        for label, centers_data in self.object_centers.items():
+                            if len(centers_data) >= 5:  # Require at least 5 centers for fitting ellipse
+                                centers = np.array([center for center, _ in centers_data])
+                                frame_time_list = [frame_time for _, frame_time in centers_data]
+                                # xc, yc, r = self.fit_circle_to_centers(centers)
+                                (xc, yc), (major_axis, minor_axis), theta = cv2.fitEllipse(centers)
+                                # xc, yc, major_axis, minor_axis, theta = self.fit_ellipse_to_centers(centers)
+
+                                # Calculate the closest point on the ellipse to (320, 480)
+                                angle = np.radians(theta)
+                                closest_x = int(xc + ((minor_axis / 2) * np.cos(angle)))
+                                closest_y = int(yc + ((major_axis / 2) * np.sin(angle)))
+
+                                # get rotational speed
+                                rotational_speed = self.calculate_rotational_speed(centers, frame_time_list, xc, yc)
+                                print("rotational speed for label ", label, "is ", rotational_speed)
+                                if label not in self.object_rotational_speeds:
+                                    self.object_rotational_speeds[label] = [rotational_speed]
+                                else:
+                                    self.object_rotational_speeds[label].append(rotational_speed)
+
+                                # # predict next 3 future timestamps at (closest_x, closest_y)
+                                # future_timestamps = self.predict_future_timestamps(rotational_speed, centers, frame_time_list, xc, yc, closest_x, closest_y)
+                                # print("future timestamps for label ", label, "is ", future_timestamps)
+
+                                # Generate a random color for each object
+                                if label not in self.object_colors:
+                                    self.object_colors[label] = ColorRGBA()
+                                    self.object_colors[label].r = np.random.randint(0, 256)
+                                    self.object_colors[label].g = np.random.randint(0, 256)
+                                    self.object_colors[label].b = np.random.randint(0, 256)
+                                    self.object_colors[label].a = 255
+                                if self.debug:
+                                    # Draw the circle on the debug image
+                                    cv2.ellipse(cv_img, (int(xc), int(yc)), (int(major_axis/2), int(minor_axis/2)), theta, 0, 360, (self.object_colors[label].r, self.object_colors[label].g, self.object_colors[label].b), 2)
+                                    # Draw the closest point on the debug image as a big dot
+                                    cv2.circle(cv_img, (closest_x, closest_y), radius=10, color=(0, 0, 255), thickness=-1)
+                                                                                
+                        if self.debug:
+                            rospy.logdebug("Detected Objects: %s", labels)
+                            # publish bbox and label
+                            self.publish_debug_img(cv_img)
+                    else:
+                        bboxes, probs, labels = self.model.classify(cv_img)
+
+                    # # Publish result_list
+                    # result_list.objects = objects
+                    # self.pub_result.publish(result_list)
+                    end = time.time()
+                    rospy.loginfo("Time taken for detection: %s", str(end - start))
+
+                except CvBridgeError as e:
+                    rospy.logerr(e)
+                    return
+
+            elif self.net == 'classification':
+                rospy.logwarn("TODO: MobileNet")
+        else:
+            rospy.logwarn("No image received")
+
+    def publish_debug_img(self, debug_img):
+        debug_img = np.array(debug_img, dtype=np.uint8)
+        debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
+        self.pub_debug.publish(debug_img)
+
+
+if __name__ == '__main__':
+    rospy.init_node("rtt")
+    rospy.loginfo('Started RTT Node.')
+    net = rospy.get_param("~net")
+    classifier_name = rospy.get_param("~classifier")
+    dataset = rospy.get_param("~dataset")
+    model_dir = rospy.get_param("~model_dir")
+    weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', classifier_name, dataset, "best.pt")
+    object_recognizer = RTTObjectTracker(
+        weights=weights, debug_mode=True)
+    rospy.loginfo("RTT Recognizer is ready using %s : %s , dataset: %s ",
+                  net, classifier_name, dataset)
+    rospy.spin()

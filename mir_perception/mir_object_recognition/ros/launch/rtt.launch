@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="net" default="detection" />
+  <arg name="classifier" default="yolov7" />
+  <arg name="dataset" default="ss22_local_competition" />
+  <arg name="model_dir" default="$(find mir_rgb_object_recognition_models)/common/models/$(arg classifier)/$(arg dataset)" />
+
+  <group ns="mir_perception">
+    <node pkg="mir_object_recognition" type="rtt_node" name="rtt" output="screen" 
+        respawn="false" ns="multimodal_object_recognition/recognizer/rgb">
+      <param name="net" value="$(arg net)" type="str" />
+      <param name="classifier" value="$(arg classifier)" type="str" />
+      <param name="dataset" value="$(arg dataset)" type="str" />
+      <param name="model_dir" value="$(arg model_dir)" type="str" />
+      <remap from="~input/images" to="/tower_cam3d_front/rgb/image_raw" />
+      <remap from="~output/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/rgb/output/rtt_object_list"/>
+    </node>
+  </group>
+</launch>
