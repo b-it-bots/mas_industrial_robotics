@@ -24,10 +24,10 @@ from std_msgs.msg import Float64, String
 # ===============================================================================
 
 # For wiggle arm
-arm_command = moveit_commander.MoveGroupCommander("arm_1")
-arm_command.set_goal_position_tolerance(0.01)
-arm_command.set_goal_orientation_tolerance(0.01)
-arm_command.set_goal_joint_tolerance(0.005)
+# arm_command = moveit_commander.MoveGroupCommander("arm_1")
+# arm_command.set_goal_position_tolerance(0.01)
+# arm_command.set_goal_orientation_tolerance(0.01)
+# arm_command.set_goal_joint_tolerance(0.005)
 
 # ===============================================================================
 
@@ -339,7 +339,7 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open"),
-            transitions={"succeeded": "WIGGLE_ARM"},
+            transitions={"succeeded": "MOVE_ARM_TO_HOLD"},
         )
 
         # wiggling the arm for precision placement

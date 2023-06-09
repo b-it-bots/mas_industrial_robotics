@@ -38,8 +38,10 @@
 #include <pcl/segmentation/conditional_euclidean_clustering.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/kdtree/kdtree.h>
-
+#include <dynamic_reconfigure/server.h>
 #include <yaml-cpp/yaml.h>
+#include <mir_ppt_detection/PPTDetectionConfig.h>
+
 
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::PointXYZRGBA PointRGBA;
@@ -64,6 +66,10 @@ class PPTDetector
                              PointCloudRGBA::Ptr& cavity_cloud);
 
     protected:
+        dynamic_reconfigure::Server<mir_ppt_detection::PPTDetectionConfig> server_;
+        /** \brief Dynamic reconfigure callback
+         * */
+        void configCallback(mir_ppt_detection::PPTDetectionConfig &config, uint32_t level);
 
         PointRGBA get_point_rgba(const pcl::PointXYZRGB& pt_rgb);
         PointCloudRGBA::Ptr get_point_cloud_rgba(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_rgb);
@@ -118,11 +124,12 @@ class PPTDetector
 
         int downsample_scale = 3;
         float planar_projection_thresh = 0.015; 
-        float cam_cx = 320.0;
-        float cam_cy = 245.1;
-        float cam_fx = 615.8;
-        float cam_fy = 615.6;
+        float cam_cx = 333.55;
+        float cam_cy = 248.31;
+        float cam_fx = 611.99;
+        float cam_fy = 611.72;
         float min_cavity_area = 1e-4;
+        float target_pose_z_pos_;
 
         ros::Publisher cloud_pub0, cloud_pub1, cloud_pub2;
         ros::Publisher cavity_pub;
@@ -137,7 +144,6 @@ class PPTDetector
         tf::TransformListener listener_;
 
         std::string target_frame_, source_frame_;
-
 };
 
 #endif

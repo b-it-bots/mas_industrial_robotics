@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
     pcl_conversions
     roscpp
     rospy
+    dynamic_reconfigure
     std_msgs
     sensor_msgs
     mas_perception_msgs
@@ -22,6 +23,10 @@ generate_messages(
     DEPENDENCIES
         sensor_msgs
         std_msgs
+)
+
+generate_dynamic_reconfigure_options(
+  config/PPTDetection.cfg
 )
 
 catkin_package()
@@ -41,4 +46,4 @@ target_link_libraries(ppt_detector
     ${catkin_LIBRARIES}
     yaml-cpp
 )
-add_dependencies(ppt_detector mir_ppt_detection_generate_messages_cpp)
+add_dependencies(ppt_detector mir_ppt_detection_generate_messages_cpp ${PROJECT_NAME}_gencfg)
