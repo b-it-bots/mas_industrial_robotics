@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+import os
+import random
+
+import numpy as np
+import roslib
+import rospy
+import torch
+from cv_bridge import CvBridge, CvBridgeError
+from mas_perception_msgs.msg import ImageList, Object, ObjectList
+from sensor_msgs.msg import Image, RegionOfInterest
+from rgb_object_recognition.yolov7.models.experimental import attempt_load
+from rgb_object_recognition.yolov7.utils.datasets import letterbox
+from rgb_object_recognition.yolov7.utils.general import check_img_size, non_max_suppression, apply_classifier, \
+    scale_coords, xyxy2xywh
+from rgb_object_recognition.yolov7.utils.plots import plot_one_box
+from rgb_object_recognition.yolov7.utils.torch_utils import select_device, TracedModel, load_classifier, \
+    time_synchronized
+
+
+class RGBObjectRecognizer():
+    def __init__(self, weights, net='detection', model_name='yolov7',
+                 confidence_threshold=0.8,
+                 iou_threshold=0.45,
+                 img_size=640,
+                 trace=True,
+                 classify=False,
+                 augment=False,
+                 device='cpu',
+                 debug_mode=True):
+        import sys
+        sys.path.insert(0, os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
+                           'common', 'src', 'rgb_object_recognition', 'yolov7'))
+
+        self.cvbridge = CvBridge()
+        self.debug = debug_mode
+        self.pub_debug = rospy.Publisher(
+            "/mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image", Image, queue_size=1)
+        self.pub_result = rospy.Publisher(
+            "output/object_list", ObjectList, queue_size=1)
+        self.sub_img = rospy.Subscriber(
+            "input/images", ImageList, self.image_recognition_cb)
+        self.net = net
+        self.model_name = model_name
+        self.weights = weights
+        self.confidence_threshold = confidence_threshold
+        self.iou_threshold = iou_threshold
+        self.augment = augment
+
+        # Initialize
+        self.device = select_device(device)
+        self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
+
+        # Load model
+        self.model = attempt_load(weights, map_location=self.device)  # load FP32 model
+        self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
+        self.colors = [[random.randint(0, 255) for _ in range(3)] for _ in self.names]
+        self.stride = int(self.model.stride.max())  # model stride
+        img_size = check_img_size(img_size, s=self.stride)  # check img_size
+        self.img_size = img_size
+
+        if trace:
+            self.model = TracedModel(self.model, self.device, img_size)
+
+        if self.half:
+            self.model.half()  # to FP16
+
+        # Second-stage classifier
+        self.classify = classify
+        if self.classify:
+            self.modelc = load_classifier(name='resnet101', n=2)  # initialize
+            self.modelc.load_state_dict(torch.load('weights/resnet101.pt', map_location=self.device)['model']).to(
+                self.device).eval()
+
+    def image_recognition_cb(self, img_msg):
+        if img_msg.images:
+            result_list = ObjectList()
+            objects = []
+            rospy.loginfo("[{}] images received: {} ".format(
+                len(img_msg.images), self.model_name))
+            if self.net == 'detection':
+                try:
+                    cv_img = self.cvbridge.imgmsg_to_cv2(
+                        img_msg.images[0], "bgr8")
+                    # Padded resize
+                    img = letterbox(cv_img, self.img_size, stride=self.stride)[0]
+
+                    # Convert
+                    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+                    img = np.ascontiguousarray(img)
+
+                    if self.model_name == 'yolov7':
+                        old_img_w = old_img_h = self.img_size
+                        old_img_b = 1
+
+                        img = torch.from_numpy(img).to(self.device)
+                        img = img.half() if self.half else img.float()  # uint8 to fp16/32
+                        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+                        if img.ndimension() == 3:
+                            img = img.unsqueeze(0)
+
+                        # Inference
+                        t1 = time_synchronized()
+                        pred = self.model(img, augment=self.augment)[0]
+                        t2 = time_synchronized()
+
+                        # Apply NMS
+                        pred = non_max_suppression(pred, self.confidence_threshold, self.iou_threshold, classes=None,
+                                                   agnostic=True)
+                        t3 = time_synchronized()
+
+                        # Apply Classifier
+                        if self.classify:
+                            pred = apply_classifier(pred, self.modelc, img, cv_img)
+
+                        # Process detections
+                        bboxes = []
+                        probs = []
+                        labels = []
+                        for i, det in enumerate(pred):  # detections per image
+                            gn = torch.tensor(cv_img.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+                            if len(det):
+                                # Rescale boxes from img_size to im0 size
+                                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], cv_img.shape).round()
+
+                                # Write results
+                                for *xyxy, conf, cls in reversed(det):
+                                    if self.debug:
+                                        label = f'{self.names[int(cls)]} {conf:.2f}'
+                                        plot_one_box(xyxy, cv_img, label=label, color=self.colors[int(cls)],
+                                                     line_thickness=1)
+                                    #xywh = (xyxy2xywh(torch.tensor(xyxy).view(-1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                                    bboxes.append(xyxy)
+                                    probs.append(conf)
+                                    labels.append(self.names[int(cls)])
+                                if self.debug:
+                                    # publish bbox and label
+                                    self.publish_debug_img(cv_img)
+                        print(labels)
+                        for i in range(len(labels)):
+                            result = Object()
+                            result.name = labels[i].upper()
+                            result.probability = probs[i]
+                            roi = RegionOfInterest()
+                            roi.x_offset = int(bboxes[i][0])
+                            roi.y_offset = int(bboxes[i][1])
+                            roi.width = int(bboxes[i][2]) - int(bboxes[i][0])
+                            roi.height = int(bboxes[i][3]) - int(bboxes[i][1])
+                            result.roi = roi
+                            objects.append(result)
+                        if self.debug:
+                            rospy.logdebug("Detected Objects: %s", labels)
+
+                    else:
+                        bboxes, probs, labels = self.model.classify(cv_img)
+
+                    # Publish result_list
+                    result_list.objects = objects
+                    self.pub_result.publish(result_list)
+
+                except CvBridgeError as e:
+                    rospy.logerr(e)
+                    return
+
+            elif self.net == 'classification':
+                rospy.logwarn("TODO: MobileNet")
+
+    def publish_debug_img(self, debug_img):
+        debug_img = np.array(debug_img, dtype=np.uint8)
+        debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
+        self.pub_debug.publish(debug_img)
+
+
+if __name__ == '__main__':
+    rospy.init_node("rgb_object_recognizer")
+    rospy.loginfo('Started object recognition node.')
+    net = rospy.get_param("~net")
+    classifier_name = rospy.get_param("~classifier")
+    dataset = rospy.get_param("~dataset")
+    model_dir = rospy.get_param("~model_dir")
+    weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', classifier_name, dataset, "best.pt") #"rc23_bins.pt"
+
+    object_recognizer = RGBObjectRecognizer(
+        weights=weights, debug_mode=True)
+    rospy.loginfo("RGB Recognizer is ready using %s : %s , dataset: %s ",
+                  net, classifier_name, dataset)
+    rospy.spin()
