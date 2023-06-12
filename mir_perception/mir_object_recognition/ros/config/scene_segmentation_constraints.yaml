@@ -13,7 +13,7 @@ multimodal_object_recognition:
   cropbox_filter_max_x: 0.8
   cropbox_filter_min_y: -0.4
   cropbox_filter_max_y: 0.4
-  cropbox_filter_min_z: 0.0
+  cropbox_filter_min_z: -0.1
   cropbox_filter_max_z: 0.6
   normal_radius_search: 0.03
   use_omp: False
@@ -41,14 +41,14 @@ multimodal_object_recognition:
   pad_cluster: True
   padded_cluster_size: 2048
   octree_resolution: 0.0025
-  object_height_above_workspace: 0.012
+  object_height_above_workspace: 0.027
   container_height: 0.07
   enable_rgb_recognizer: true
   enable_pc_recognizer: false
   rgb_roi_adjustment: 2
   rgb_bbox_min_diag: 21
   rgb_bbox_max_diag: 175
-  rgb_cluster_filter_limit_min: 0.02 # for tower camera configuration (youbot 2)
+  rgb_cluster_filter_limit_min: 0.005 # for tower camera configuration (youbot 2)
   rgb_cluster_filter_limit_max: 0.35
   rgb_cluster_remove_outliers: True
   enable_roi: True
