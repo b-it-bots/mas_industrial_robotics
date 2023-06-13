@@ -27,6 +27,12 @@ MAS Industrial Robotics
 
 .. toctree::
   :maxdepth: 2
+  :caption: Task
+
+  tasks/bmt/bmt_demo.rst
+
+.. toctree::
+  :maxdepth: 2
   :caption: Documentation
 
   mir_perception/docstring/index.rst

@@ -30,7 +30,7 @@
   <include file="$(find youbot_dashboard)/launch/dashboard_aggregator.launch" />
   <include file="$(find youbot_diagnostic_aggregator)/launch/diagnostic_aggregator.launch" />
 
-  <include file="$(find mir_gripper_controller)/ros/launch/teensy_dynamixel_gripper.launch" />
+  <include file="$(find mir_gripper_controller)/ros/launch/dynamixel_gripper.launch" />
 
   <!-- top camera -->
   <include file="$(find mir_bringup)/components/realsense_dual_camera.launch" />

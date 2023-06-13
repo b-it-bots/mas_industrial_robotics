@@ -9,6 +9,11 @@ find_package(catkin REQUIRED
     std_msgs
 )
 
+add_message_files(
+  FILES
+    GripperCommand.msg
+)
+
 add_service_files(
   FILES
     IsGripperClosed.srv
