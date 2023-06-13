@@ -17,7 +17,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistStamped.h>
-#include <mcr_manipulation_msgs/GripperCommand.h>
+#include <mir_manipulation_msgs/GripperCommand.h>
 #include <moveit_msgs/JointLimits.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>

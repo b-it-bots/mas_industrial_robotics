@@ -14,7 +14,10 @@ More details on the controller and corresponding code can be found [here](https:
 1. Make sure to uplaod the latest [code](https://github.com/b-it-bots/youbot_dynamixel_gripper_controller/tree/master/openrb_150_controller) on to the controller.
 5. Run `roscore` command.
 5. Run `dynamixel_gripper_controller_ros` in the `ros/scripts` directory.
-6. To control the gripper publish to the `/arm_1/gripper_command` topic, e.g. `rostopic pub /arm_1/gripper_command std_msgs/String "command: 0.0"`
+6. To control the gripper publish to the `/arm_1/gripper_command` topic, e.g.:
+    ```bash
+    rostopic pub /arm_1/gripper_command mir_manipulation_msgs/GripperCommand "command: 0.0"
+    ```
 7. To see the state of the gripper subscribe to the `/arm_1/gripper_feedback`, e.g. `rostopic echo /arm_1/gripper_feedback`.
 
 ## Usage

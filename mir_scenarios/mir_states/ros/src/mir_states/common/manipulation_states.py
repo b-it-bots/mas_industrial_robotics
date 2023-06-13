@@ -247,7 +247,7 @@ class control_gripper(smach.State):
             rospy.sleep(0.1)
 
 class verify_object_grasped(smach.State):
-    def __init__(self, timeout=5.0):
+    def __init__(self, timeout=2.0):
         smach.State.__init__(self, outcomes=["succeeded", "failed"])
         
         self.current_state = "OBJECT_GRASPED"
@@ -273,6 +273,9 @@ class verify_object_grasped(smach.State):
                         self.grasped_counter > 4:
                 self.grasped_counter = 0
                 return "succeeded"
+        print('*'*30)
+        print('grasp fail timeout')
+        print('*'*30)
         return "failed"
 
 class move_arm_and_gripper(smach.State):

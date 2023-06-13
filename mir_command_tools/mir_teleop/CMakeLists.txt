@@ -12,6 +12,7 @@ find_package(catkin REQUIRED
     sensor_msgs
     std_srvs
     mcr_manipulation_msgs
+    mir_manipulation_msgs
     roslint
 )
 
@@ -33,6 +34,7 @@ catkin_package(
     sensor_msgs
     std_srvs
     mcr_manipulation_msgs
+    mir_manipulation_msgs
 )
 
 include_directories(

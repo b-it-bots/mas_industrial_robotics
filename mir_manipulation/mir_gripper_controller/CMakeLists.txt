@@ -4,7 +4,7 @@ project(mir_gripper_controller)
 find_package(catkin REQUIRED
   COMPONENTS
     actionlib
-    mcr_manipulation_msgs
+    mir_manipulation_msgs
     roscpp
     roslint
     std_msgs
@@ -12,7 +12,7 @@ find_package(catkin REQUIRED
 
 catkin_package(
   CATKIN_DEPENDS
-    mcr_manipulation_msgs
+    mir_manipulation_msgs
     rospy
 )
 

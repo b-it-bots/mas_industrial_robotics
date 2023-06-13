@@ -53,7 +53,7 @@ TeleOpJoypad::TeleOpJoypad(ros::NodeHandle &nh)
   pub_arm_cart_vel_ = nh_->advertise<geometry_msgs::TwistStamped>(
       "/arm_1/arm_controller/cartesian_velocity_command", 1);
   pub_gripper_command_ =
-      nh_->advertise<mcr_manipulation_msgs::GripperCommand>("gripper_command", 1);
+      nh_->advertise<mir_manipulation_msgs::GripperCommand>("gripper_command", 1);
 
   srv_base_motors_on_ = nh_->serviceClient<std_srvs::Empty>("/base/switchOnMotors");
   srv_base_motors_off_ = nh_->serviceClient<std_srvs::Empty>("/base/switchOffMotors");
@@ -203,7 +203,7 @@ bool TeleOpJoypad::getArmParameter()
 
 bool TeleOpJoypad::moveGripper(int gripper_command)
 {
-  mcr_manipulation_msgs::GripperCommand command_msgs;
+  mir_manipulation_msgs::GripperCommand command_msgs;
 
   command_msgs.command = gripper_command;
 
@@ -337,10 +337,10 @@ void TeleOpJoypad::cbJoypad(const sensor_msgs::Joy::ConstPtr &command)
       button_gripper_active_ = !button_gripper_active_;
       if (button_gripper_active_) {
         ROS_INFO("open gripper");
-        this->moveGripper(mcr_manipulation_msgs::GripperCommand::OPEN);
+        this->moveGripper(mir_manipulation_msgs::GripperCommand::OPEN);
       } else {
         ROS_INFO("close gripper");
-        this->moveGripper(mcr_manipulation_msgs::GripperCommand::CLOSE);
+        this->moveGripper(mir_manipulation_msgs::GripperCommand::CLOSE);
       }
     }
 

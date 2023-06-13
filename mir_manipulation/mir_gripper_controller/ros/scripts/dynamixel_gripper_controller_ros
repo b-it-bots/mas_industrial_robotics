@@ -3,7 +3,7 @@
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
-from mcr_manipulation_msgs.msg import GripperCommand
+from mir_manipulation_msgs.msg import GripperCommand
 import serial_interface
 import math
 import json
