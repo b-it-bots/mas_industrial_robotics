@@ -44,6 +44,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   bounding_box_visualizer_pc_("output/bounding_boxes", Color(Color::IVORY)),
   cluster_visualizer_rgb_("output/tabletop_cluster_rgb"),
   cluster_visualizer_pc_("output/tabletop_cluster_pc"),
+  cluster_visualizer_filtered_rgb_("output/tabletop_cluster_filtered_rgb"),
   label_visualizer_rgb_("output/rgb_labels", Color(Color::SEA_GREEN)),
   label_visualizer_pc_("output/pc_labels", Color(Color::IVORY)),
   data_collection_(false),
@@ -347,6 +348,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
   mas_perception_msgs::ObjectList rgb_object_list;
   mas_perception_msgs::BoundingBoxList bounding_boxes;
   std::vector<PointCloud::Ptr> clusters_2d;
+  std::vector<PointCloud::Ptr> filtered_clusters_2d;
 
   cv_bridge::CvImagePtr cv_image;
   if (recognized_image_list_.objects.size() > 0)
@@ -439,14 +441,18 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
           // Publish filtered point cloud from RGB recognizer
           // ************************************************
           
-          PointCloud filtered_rgb_pointcloud;
-          filtered_rgb_pointcloud = mpu::object::estimatePose(cloud_roi, pose, object, object.shape.shape,
+          // PointCloud filtered_rgb_pointcloud;
+          PointCloud::Ptr filtered_rgb_pointcloud(new PointCloud);
+          *filtered_rgb_pointcloud = mpu::object::estimatePose(cloud_roi, pose, object, object.shape.shape,
                                                               rgb_cluster_filter_limit_min_,
                                                               rgb_cluster_filter_limit_max_);
 
+          // append filtered point cloud to filtered_clusters_2d
+          filtered_clusters_2d.push_back(filtered_rgb_pointcloud);
+          
           PointT min_pt;
           PointT max_pt;
-          pcl::getMinMax3D(*cloud_roi, min_pt, max_pt);
+          pcl::getMinMax3D(*filtered_rgb_pointcloud, min_pt, max_pt);
 
           rgb_object_list.objects[i].dimensions.vector.z = max_pt.z - min_pt.z;
           ROS_INFO("[RGB Object Height] Object %s length: %f", object.name.c_str(), rgb_object_list.objects[i].dimensions.vector.z);
@@ -456,11 +462,11 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             ROS_INFO("[RGB Object Height] Object %s length is greater than 9cm: %f", object.name.c_str(), max_pt.z);
           }
 
-          sensor_msgs::PointCloud2 ros_filtered_rgb_pointcloud;
-          pcl::toROSMsg(filtered_rgb_pointcloud, ros_filtered_rgb_pointcloud);
-          ros_filtered_rgb_pointcloud.header.frame_id = target_frame_id_;
+          // sensor_msgs::PointCloud2 ros_filtered_rgb_pointcloud;
+          // pcl::toROSMsg(filtered_rgb_pointcloud, ros_filtered_rgb_pointcloud);
+          // ros_filtered_rgb_pointcloud.header.frame_id = target_frame_id_;
 
-          pub_filtered_rgb_cloud_plane_.publish(ros_filtered_rgb_pointcloud);
+          // pub_filtered_rgb_cloud_plane_.publish(ros_filtered_rgb_pointcloud);
 
           // To visualize the filtered point cloud, sleep for 3 seconds after every point cloud
           // ros::Duration(3.0).sleep();
@@ -538,7 +544,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
   if (debug_mode_)
   {
     ROS_WARN_STREAM("Debug mode: publishing object information");
-    publishDebug(combined_object_list, clusters_3d, clusters_2d);
+    publishDebug(combined_object_list, clusters_3d, clusters_2d, filtered_clusters_2d);
 
     ros::Time time_now = ros::Time::now();
 
@@ -586,7 +592,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
 void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
                           std::vector<PointCloud::Ptr> &clusters_3d,
-                          std::vector<PointCloud::Ptr> &clusters_2d)
+                          std::vector<PointCloud::Ptr> &clusters_2d,
+                          std::vector<PointCloud::Ptr> &filtered_clusters_2d)
 {
   ROS_INFO_STREAM("Cloud list: " << recognized_cloud_list_.objects.size());
   ROS_INFO_STREAM("RGB list: " << recognized_image_list_.objects.size());
@@ -676,6 +683,10 @@ void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectLis
     {
       label_visualizer_rgb_.publish(rgb_labels, rgb_object_pose_array);
     }
+  }
+  if (filtered_clusters_2d.size() > 0)
+  {
+    cluster_visualizer_filtered_rgb_.publish<PointT>(filtered_clusters_2d, target_frame_id_);
   }
 }
 
