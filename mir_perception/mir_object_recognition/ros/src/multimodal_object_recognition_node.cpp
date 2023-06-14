@@ -462,15 +462,6 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
             ROS_INFO("[RGB Object Height] Object %s length is greater than 9cm: %f", object.name.c_str(), max_pt.z);
           }
 
-          // sensor_msgs::PointCloud2 ros_filtered_rgb_pointcloud;
-          // pcl::toROSMsg(filtered_rgb_pointcloud, ros_filtered_rgb_pointcloud);
-          // ros_filtered_rgb_pointcloud.header.frame_id = target_frame_id_;
-
-          // pub_filtered_rgb_cloud_plane_.publish(ros_filtered_rgb_pointcloud);
-
-          // To visualize the filtered point cloud, sleep for 3 seconds after every point cloud
-          // ros::Duration(3.0).sleep();
-
           //*********************************
 
           // Transform pose
