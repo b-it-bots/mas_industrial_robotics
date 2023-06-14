@@ -60,7 +60,7 @@
   </xacro:dynamixel_gripper_v2>
   
   <!-- tower front camera -->
-  <xacro:sensor_d435 name="tower_cam3d_front" parent="tower_camera_front_bolt_link" use_nominal_extrinsics="true">
+  <xacro:sensor_d435 name="tower_cam3d_front_camera" parent="tower_camera_front_bolt_link" use_nominal_extrinsics="true">
       <!-- <origin xyz="0.035 0.020 0.0" rpy="0.0 1.22 0.0" /> -->
       <origin xyz="0.01 0.025 0.0" rpy="0.0 1.22 0.0" />  
   </xacro:sensor_d435>
@@ -71,7 +71,7 @@
   </xacro:sensor_orbbec_astra>
 
   <!-- tower back camera -->
-  <xacro:sensor_d435  name="tower_cam3d_back" parent="tower_camera_back_bolt_link" use_nominal_extrinsics="true">
+  <xacro:sensor_d435  name="tower_cam3d_back_camera" parent="tower_camera_back_bolt_link" use_nominal_extrinsics="true">
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.78 0.0" />
   </xacro:sensor_d435>
 
@@ -218,8 +218,10 @@
   </joint>
 
   <link name="tower_camera_back_bolt_link" />
+  <!-- final joint values = xyz="0.02121 0.00 0.02250 " (middle of 2 holes) +  xyz="0.0125 0.0 -0.009 " (distance from holes to bolt)-->
   <joint name="tower_camera_back_bolt_joint" type="fixed">
-    <origin xyz="0.029145 0.0 0.019855" rpy="0 -0.37 0" />
+    <origin xyz="0.00871 0.0 0.03150" rpy="0 -0.78 0" />
+    <!-- <origin xyz="0.029145 0.0 0.019855" rpy="0 -0.37 0" /> -->
     <parent link="tower_camera_stand_link_horizontal_back"/>
     <child link="tower_camera_back_bolt_link"/>
   </joint> 
