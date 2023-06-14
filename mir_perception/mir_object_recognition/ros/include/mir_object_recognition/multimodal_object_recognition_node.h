@@ -160,6 +160,7 @@ class MultimodalObjectRecognitionROS
     BoundingBoxVisualizer bounding_box_visualizer_pc_;
     ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
     ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+    ClusteredPointCloudVisualizer cluster_visualizer_filtered_rgb_;
     LabelVisualizer label_visualizer_rgb_;
     LabelVisualizer label_visualizer_pc_;
 
@@ -238,7 +239,8 @@ class MultimodalObjectRecognitionROS
      **/
     void publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
               std::vector<PointCloud::Ptr> &clusters_3d,
-              std::vector<PointCloud::Ptr> &clusters_2d);
+              std::vector<PointCloud::Ptr> &clusters_2d,
+              std::vector<PointCloud::Ptr> &filtered_clusters_2d);
 
     /** \brief Load qualitative object info
      * \param[in] Path to the xml object file
