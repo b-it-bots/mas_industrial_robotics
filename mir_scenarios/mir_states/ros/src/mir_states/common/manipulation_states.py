@@ -20,6 +20,7 @@ from mir_manipulation_msgs.msg import GripperCommand
 from std_msgs.msg import String
 from brics_actuator.msg import JointPositions, JointValue
 from srdfdom.srdf import SRDF
+from sensor_msgs.msg import JointState
 
 class Bunch:
     def __init__(self, **kwds):
@@ -175,7 +176,18 @@ class ArmPositionCommand:
     def __init__(self, target):
         self.robot_srdf = SRDF.from_parameter_server('/robot_description_semantic')
         self.pub_arm_position = rospy.Publisher('arm_1/arm_controller/position_command', JointPositions, queue_size=1)
+        self.joint_state_sub = rospy.Subscriber('joint_states', JointState, self.joint_state_cb)
         self.move_arm_to = target
+        self.is_arm_moving = False
+        self.zero_vel_counter = 0
+
+    def joint_state_cb(self, msg: JointState):
+        self.joint_state = msg
+        # monitor the velocities
+        self.joint_velocities = msg.velocity
+        # if all velocities are 0.0, the arm is not moving
+        if all([v == 0.0 for v in self.joint_velocities]):
+            self.zero_vel_counter += 1
 
     def get_joint_values_from_group_state(self, group_state_name):
         joint_configs = []
@@ -206,7 +218,10 @@ class ArmPositionCommand:
                 for joint_name, joint_value in joint_configs
             ]
             self.pub_arm_position.publish(joint_positions)
-            rospy.sleep(1)
+            self.zero_vel_counter = 0
+            while self.zero_vel_counter < 10:
+                rospy.logwarn('Waiting for arm to stop moving')
+                rospy.sleep(0.1)
             return "succeeded"
 
 class move_arm(smach.State):
