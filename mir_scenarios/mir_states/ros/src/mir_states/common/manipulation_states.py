@@ -18,6 +18,8 @@ import tf
 from tf.transformations import euler_from_quaternion
 from mir_manipulation_msgs.msg import GripperCommand
 from std_msgs.msg import String
+from brics_actuator.msg import JointPositions, JointValue
+from srdfdom.srdf import SRDF
 
 class Bunch:
     def __init__(self, **kwds):
@@ -169,25 +171,60 @@ class MoveitClient:
 
         return brics_joint_positions
 
+class ArmPositionCommand:
+    def __init__(self, target):
+        self.robot_srdf = SRDF.from_parameter_server('/robot_description_semantic')
+        self.pub_arm_position = rospy.Publisher('arm_1/arm_controller/position_command', JointPositions, queue_size=1)
+        self.move_arm_to = target
+
+    def get_joint_values_from_group_state(self, group_state_name):
+        joint_configs = []
+        for group_state in self.robot_srdf.group_states:
+            if group_state.name == group_state_name:
+                for joint in group_state.joints:
+                    joint_configs.append((joint.name, joint.value[0]))
+                return joint_configs
+        return []
+
+    def execute(self, userdata):
+        joint_configs = self.get_joint_values_from_group_state(
+            self.move_arm_to or userdata.move_arm_to
+        )
+
+        if len(joint_configs) == 0:
+            rospy.logerr("No joint configuration found for group state " + self.move_arm_to)
+            return "failed"
+        else:
+            joint_positions = JointPositions()
+            joint_positions.positions = [
+                JointValue(
+                    rospy.Time.now(),
+                    joint_name,
+                    "rad",
+                    joint_value
+                )
+                for joint_name, joint_value in joint_configs
+            ]
+            self.pub_arm_position.publish(joint_positions)
+            rospy.sleep(1)
+            return "succeeded"
 
 class move_arm(smach.State):
-    def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0):
+    def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0, use_moveit=True):
         smach.State.__init__(
             self, outcomes=["succeeded", "failed"], input_keys=["move_arm_to"]
         )
-        joint_names = [
-            "arm_joint_1",
-            "arm_joint_2",
-            "arm_joint_3",
-            "arm_joint_4",
-            "arm_joint_5",
-        ]
+        joint_names = [f'arm_joint_{i}' for i in range(1, 6)]
         self.arm_moveit_client = MoveitClient("/arm_", target, timeout, joint_names)
+        self.arm_position_command = ArmPositionCommand(target)
         self.blocking = blocking
+        self.use_moveit = use_moveit
 
     def execute(self, userdata):
-        return self.arm_moveit_client.execute(userdata, self.blocking)
-
+        if self.use_moveit:
+            return self.arm_moveit_client.execute(userdata, self.blocking)
+        else:
+            return self.arm_position_command.execute(userdata)
 
 class check_move_group_feedback(smach.State):
     def __init__(self, timeout=10.0):
@@ -207,9 +244,10 @@ class check_move_group_feedback(smach.State):
             return "failed"
 
 class control_gripper(smach.State):
-    def __init__(self, target=None, blocking=True, tolerance=None, timeout=10.0):
-        smach.State.__init__(self, outcomes=["succeeded"])
+    def __init__(self, target=None, blocking=True, tolerance=None, timeout=5.0):
+        smach.State.__init__(self, outcomes=["succeeded", "timeout"])
 
+        self.timeout = rospy.Duration(timeout)
         self.command = GripperCommand()
         self.current_state = "GRIPPER_OPEN"
         self.grasped_counter = 0
@@ -230,7 +268,10 @@ class control_gripper(smach.State):
 
     def execute(self, userdata):
         self.pub.publish(self.command)
-        while True:
+        self.grasped_counter = 0
+        start_time = rospy.Time.now()
+        while (rospy.Time.now() - start_time < self.timeout):
+            print('Gripper loop time: ', rospy.Time.now() - start_time)
             if (self.current_state == "GRIPPER_OPEN" or self.current_state == "GRIPPER_INTER") and\
                     self.command.command != GripperCommand.CLOSE:
                 self.grasped_counter = 0
@@ -245,10 +286,12 @@ class control_gripper(smach.State):
                 self.grasped_counter = 0
                 return "succeeded"
             rospy.sleep(0.1)
+        rospy.logerr("Gripper open/close timed out")
+        return "timeout"
 
 class verify_object_grasped(smach.State):
     def __init__(self, timeout=2.0):
-        smach.State.__init__(self, outcomes=["succeeded", "failed"])
+        smach.State.__init__(self, outcomes=["succeeded", "failed", "timeout"])
         
         self.current_state = "OBJECT_GRASPED"
         self.grasped_counter = 0
@@ -273,10 +316,8 @@ class verify_object_grasped(smach.State):
                         self.grasped_counter > 4:
                 self.grasped_counter = 0
                 return "succeeded"
-        print('*'*30)
-        print('grasp fail timeout')
-        print('*'*30)
-        return "failed"
+        rospy.logerr('Grasp verification timeout')
+        return "timeout"
 
 class move_arm_and_gripper(smach.State):
 
@@ -290,48 +331,31 @@ class move_arm_and_gripper(smach.State):
     take feedback from gripper_controller/state, and run move_arm state and the new gripper state concurrently.
     """
 
-    def __init__(self, conf, target=None, blocking=True, tolerance=None, timeout=10.0):
+    def __init__(self, gripper_conf, target=None, blocking=True, tolerance=None, timeout=10.0, use_moveit=True):
         smach.State.__init__(
             self, outcomes=["succeeded", "failed"], input_keys=["move_arm_to"]
         )
-        joint_names = [
-            "arm_joint_1",
-            "arm_joint_2",
-            "arm_joint_3",
-            "arm_joint_4",
-            "arm_joint_5",
-        ]
+        joint_names = [f'arm_joint_{i}' for i in range(1, 6)]
         self.arm_moveit_client = MoveitClient("/arm_", target, timeout, joint_names)
+        self.arm_position_command = ArmPositionCommand(target)
+        self.blocking = blocking
+        self.use_moveit = use_moveit
         self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
-        self.conf = conf
+        self.gripper_conf = gripper_conf
         self.gripper_command = GripperCommand()
-        if 'open' in self.conf:
+        if 'open' in self.gripper_conf:
             self.gripper_command.command = GripperCommand.OPEN
-        elif 'close' in self.conf:
+        elif 'close' in self.gripper_conf:
             self.gripper_command.command = GripperCommand.CLOSE
-        elif type(self.conf) == float:
-            self.gripper_command.command = self.conf
-
-    def get_targets(self, group_name):
-        text = rospy.get_param("/robot_description_semantic")
-        "Following code searches and extracts gripper configurations in youbot.srdf"
-        pattern = (
-            'group_state[ \\\\\n\r\f\v\t]*name="'
-            + self.conf
-            + '"[ \\\\\n\r\f\v\t]*group="arm_1_gripper">[ \\\\\n\r\f\v\t]*<joint[ \\\\\n\r\f\v\t]*name="gripper_motor_left_joint"[ \\\\\n\r\f\v\t]*value="'
-        )
-        match = re.search(pattern, text)
-        str = ""
-        i = 0
-        while text[match.end() + i] != '"':
-            str += text[match.end() + i]
-            i += 1
-        angle = float(str)
-        return angle
+        elif type(self.gripper_conf) == float:
+            self.gripper_command.command = self.gripper_conf
 
     def execute(self, userdata):
         self.pub.publish(self.gripper_command)
-        return self.arm_moveit_client.execute(userdata)
+        if self.use_moveit:
+            return self.arm_moveit_client.execute(userdata, self.blocking)
+        else:
+            return self.arm_position_command.execute(userdata)
 
 
 class linear_motion(smach.State):
