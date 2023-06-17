@@ -54,9 +54,11 @@ void estimatePose(const BoundingBox &box, geometry_msgs::PoseStamped &pose);
  * \param[in] Minimum value of the field z allowed
  * \param[in] Maximum value of the field z allowed
 */
-PointCloud estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
+PointCloud estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose, 
+                  mas_perception_msgs::Object &object,
                   std::string shape = "None", float passthrough_lim_min = 0.0060,
-                  float passthrough_lim_max = 0.0);
+                  float passthrough_lim_max = 0.0,
+                  std::string obj_category = "atwork");
 
 /** \brief Transform pose
  * \param[in] Transform listener
