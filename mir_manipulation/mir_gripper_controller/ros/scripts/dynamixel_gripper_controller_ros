@@ -92,8 +92,8 @@ class GripperController:
                 self.feedback_publisher.publish(json.dumps(msg))
 
                 # convert gripper positions from degrees to radians
-                gripper_right_motor_position = math.radians(msg['right_gripper_pos'])
-                gripper_left_motor_position = math.radians(msg['left_gripper_pos'])
+                gripper_right_motor_position = 0.0 # math.radians(msg['right_gripper_pos'])
+                gripper_left_motor_position = 0.0 # math.radians(msg['left_gripper_pos'])
                 
                 # Publish joint states
                 joint_state = JointState()
