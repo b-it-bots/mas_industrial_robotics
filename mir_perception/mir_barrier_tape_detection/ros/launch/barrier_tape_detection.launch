@@ -16,11 +16,11 @@
           <param name="loop_rate" type="int" value="30" />
           <param name="target_frame" value="map"/>
           <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/>
-          <remap from="~output/yellow_barrier_tape_pointcloud" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
+          <remap from="~output/yellow_barrier_tape_pointcloud" to="/mir_perception/front_camera/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
       </node>
       <!-- Point cloud to laser scan conversion-->
       <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
-          <remap from="cloud_in" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
+          <remap from="cloud_in" to="/mir_perception/front_camera/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
           <remap from="scan" to="/barrier_tape/scan_front" />
           <rosparam>
             target_frame: base_laser_front_link # Leave disabled to output scan in pointcloud frame
@@ -51,15 +51,15 @@
           <remap from="~input_rgb_image" to="/$(arg back_camera)/rgb/image_raw"/>
           <remap from="~input_pointcloud" to="/$(arg back_camera)/depth_registered/points"/>
           <remap from="~camera_info" to="/$(arg back_camera)/rgb/camera_info"/>
-          <param name="loop_rate" type="int" value="1" />
+          <param name="loop_rate" type="int" value="30" />
           <param name="target_frame" value="map"/>
           <remap from="~event_in" to="/mir_perception/barrier_tape_detection/event_in"/>
-          <remap from="~output/yellow_barrier_tape_pointcloud" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
+          <remap from="~output/yellow_barrier_tape_pointcloud" to="/mir_perception/back_camera/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
       </node>
 
       <!-- Point cloud to laser scan conversion-->
       <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
-          <remap from="cloud_in" to="/mir_perception/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
+          <remap from="cloud_in" to="/mir_perception/back_camera/barrier_tape_detection/output/yellow_barrier_tape_pointcloud"/>
           <remap from="scan" to="/barrier_tape/scan_rear" />
           <rosparam>
             target_frame: base_laser_rear_link # Leave disabled to output scan in pointcloud frame
