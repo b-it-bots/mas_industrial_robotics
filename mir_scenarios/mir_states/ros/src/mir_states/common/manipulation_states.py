@@ -259,17 +259,18 @@ class check_move_group_feedback(smach.State):
             return "failed"
 
 class control_gripper(smach.State):
-    def __init__(self, target=None, blocking=True, tolerance=None, timeout=5.0):
+    def __init__(self, target=None, blocking=True, tolerance=None, timeout=5):
         smach.State.__init__(self, outcomes=["succeeded", "timeout"])
 
         self.timeout = rospy.Duration(timeout)
         self.command = GripperCommand()
         self.current_state = "GRIPPER_OPEN"
         self.grasped_counter = 0
-        if 'open' in target:
-            self.command.command = GripperCommand.OPEN
-        elif 'close' in target:
-            self.command.command = GripperCommand.CLOSE
+        if type(target) == str:
+            if 'open' in target:
+                self.command.command = GripperCommand.OPEN
+            elif 'close' in target:
+                self.command.command = GripperCommand.CLOSE
         elif type(target) == float:
             self.command.command = target
         self.pub = rospy.Publisher('/arm_1/gripper_command', GripperCommand, queue_size=1)
@@ -278,15 +279,17 @@ class control_gripper(smach.State):
     def feedback_cb(self, msg):
         json_obj = json.loads(msg.data)
         self.current_state = json_obj["state"]
-        if self.current_state == "OBJECT_GRASPED":
-            self.grasped_counter += 1
+        # if self.current_state == "OBJECT_GRASPED":
+            # self.grasped_counter += 1
+            # print('grasped counter 1: ', self.grasped_counter)
 
     def execute(self, userdata):
         self.pub.publish(self.command)
         self.grasped_counter = 0
         start_time = rospy.Time.now()
         while (rospy.Time.now() - start_time < self.timeout):
-            print('Gripper loop time: ', rospy.Time.now() - start_time)
+            if self.current_state == "OBJECT_GRASPED":
+                self.grasped_counter += 1
             if (self.current_state == "GRIPPER_OPEN" or self.current_state == "GRIPPER_INTER") and\
                     self.command.command != GripperCommand.CLOSE:
                 self.grasped_counter = 0
@@ -299,13 +302,16 @@ class control_gripper(smach.State):
                     self.grasped_counter > 4 and\
                     self.command.command == GripperCommand.CLOSE:
                 self.grasped_counter = 0
+                end_time = rospy.Time.now()
+                # print the time in seconds
+                print('grasped in: ', (end_time - start_time).to_sec())
                 return "succeeded"
-            rospy.sleep(0.1)
+            rospy.sleep(0.05)
         rospy.logerr("Gripper open/close timed out")
         return "timeout"
 
 class verify_object_grasped(smach.State):
-    def __init__(self, timeout=2.0):
+    def __init__(self, timeout=2):
         smach.State.__init__(self, outcomes=["succeeded", "failed", "timeout"])
         
         self.current_state = "OBJECT_GRASPED"

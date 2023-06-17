@@ -62,7 +62,11 @@ class SerialInterface:
             return None
 
         if '}{' not in msg_str:
-            return [json.loads(msg_str)]
+            try:
+                return [json.loads(msg_str)]
+            except Exception as e:
+                rospy.logerr(e)
+                return None
 
         msgs = msg_str.split("}{")
 
