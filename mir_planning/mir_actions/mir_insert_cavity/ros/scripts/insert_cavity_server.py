@@ -68,8 +68,6 @@ class SelectCavity(smach.State):
             current_state="SelectObject", text="selecting object"
         )
 
-        print("userdata: ", String(userdata.goal.parameters))
-
         obj = Utils.get_value_of(userdata.goal.parameters, "peg")
 
         if obj is None:
@@ -247,9 +245,6 @@ class Unstage_to_place(smach.State):
         self.unstage_client.send_goal(goal)
         self.unstage_client.wait_for_result(rospy.Duration.from_sec(25.0))
 
-        rospy.loginfo("Sending following goal to unstage object server")
-        rospy.loginfo(goal)
-
         return "success"
 
 # ===============================================================================
@@ -305,7 +300,7 @@ def main():
             "SELECT_CAVITY",
             SelectCavity("/mcr_perception/object_selector/input/object_name", vertical=False),
             transitions={
-                "succeeded": "GENERATE_OBJECT_POSE_AGAIN",
+                "succeeded": "GENERATE_OBJECT_POSE",
                 "failed": "GET_VERTICAL_CAVITY"
             },
         )
@@ -314,29 +309,14 @@ def main():
             "GET_VERTICAL_CAVITY",
             SelectCavity("/mcr_perception/object_selector/input/object_name", vertical=True),
             transitions={
-                "succeeded": "GENERATE_OBJECT_POSE_AGAIN",
+                "succeeded": "GENERATE_OBJECT_POSE",
                 "failed": "OVERALL_FAILED"
             },
         )
 
         # generates a pose of object
         smach.StateMachine.add(
-            "GENERATE_UPDATED_OBJECT_POSE",
-            gbs.send_and_wait_events_combined(
-                event_in_list=[("/mcr_perception/local_object_selector/event_in", "e_trigger")],
-                event_out_list=[("/mcr_perception/local_object_selector/event_out", "e_selected", True)],
-                timeout_duration=10,
-            ),
-            transitions={
-                "success": "UNSTAGE_FOR_PLACING",
-                "timeout": "GENERATE_OBJECT_POSE_AGAIN",
-                "failure": "GENERATE_OBJECT_POSE_AGAIN",
-            },
-        )
-
-        # generates a pose of object
-        smach.StateMachine.add(
-            "GENERATE_OBJECT_POSE_AGAIN",
+            "GENERATE_OBJECT_POSE",
             gbs.send_and_wait_events_combined(
                 event_in_list=[("/mcr_perception/object_selector/event_in", "e_trigger")],
                 event_out_list=[("/mcr_perception/object_selector/event_out", "e_selected", True)],
