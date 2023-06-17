@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="serial_no_camera1" default="919122072278"/>
-    <arg name="serial_no_camera2" default="827312073531"/>
+    <arg name="serial_no_camera1" default="919122072278"/> 
+    <arg name="serial_no_camera2" default="108322073177"/>
+    <!-- <arg name="serial_no_camera2" default="827312073531"/>  -->
 
     <arg name="camera1" default="tower_cam3d_front"/>
     <arg name="camera2" default="tower_cam3d_back"/>
@@ -121,7 +122,7 @@
              file="$(find rgbd_launch)/launch/includes/rgb.launch.xml">
             <arg name="manager"                       value="$(arg manager)" />
             <arg name="respawn"                       value="$(arg respawn)" />
-            <arg name="rgb"                           value="$(arg rgb)2" />
+            <arg name="rgb"                           value="$(arg rgb)" />
             <arg name="debayer_processing"            value="$(arg debayer_processing)" />
         </include>
 
