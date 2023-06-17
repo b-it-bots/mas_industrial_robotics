@@ -311,8 +311,8 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_SHELF",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT"
-            },
+            transitions={"succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT",
+                         "timeout": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT"},
         )
 
         smach.StateMachine.add(
@@ -365,8 +365,9 @@ def main():
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
             transitions={
-                "succeeded": "MOVE_ARM_TO_PRE_DEFAULT"
-            },
+                "succeeded": "MOVE_ARM_TO_PRE_DEFAULT",
+                 "timeout": "MOVE_ARM_TO_PRE_DEFAULT"
+                },
         )
 
 
@@ -505,7 +506,8 @@ def main():
                 "OPEN_GRIPPER",
                 gms.control_gripper("open"),
                 transitions={
-			        "succeeded": "MOVE_ARM_TO_NEUTRAL"
+			        "succeeded": "MOVE_ARM_TO_NEUTRAL",
+                                "timeout": "MOVE_ARM_TO_NEUTRAL",
             },
         )
 

@@ -27,6 +27,7 @@ class SetupMoveArm(smach.State):
 
     def execute(self, userdata):
         platform = Utils.get_value_of(userdata.goal.parameters, "platform")
+        obj = Utils.get_value_of(userdata.goal.parameters, "object")
         if platform is None:
             rospy.logwarn('Missing parameter "platform". Using default.')
             platform = "PLATFORM_LEFT"
@@ -77,7 +78,8 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "SETUP_MOVE_ARM_PRE_STAGE"},
+            transitions={"succeeded": "SETUP_MOVE_ARM_PRE_STAGE",
+                         "timeout": "SETUP_MOVE_ARM_PRE_STAGE"},
         )
 
         smach.StateMachine.add(
@@ -120,7 +122,8 @@ def main():
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
-            transitions={"succeeded": "VERIFY_OBJECT_GRASPED"},
+            transitions={"succeeded": "VERIFY_OBJECT_GRASPED",
+                         "timeout": "VERIFY_OBJECT_GRASPED"},
         )
 
         smach.StateMachine.add(
@@ -128,6 +131,7 @@ def main():
             gms.verify_object_grasped(5),
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
+                "timeout": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
                 "failed": "OVERALL_FAILED",
             },
         )
