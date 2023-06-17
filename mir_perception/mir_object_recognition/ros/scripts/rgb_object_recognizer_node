@@ -20,7 +20,9 @@ from ultralytics import YOLO
 
 
 class RGBObjectRecognizer():
-    def __init__(self, weights, net='detection', model_name='yolov8',
+    def __init__(self, weights_1, weights_2, weights_3, 
+                 net='detection', 
+                 model_name='yolov8',
                  confidence_threshold=0.8,
                  iou_threshold=0.45,
                  img_size=640,
@@ -43,7 +45,9 @@ class RGBObjectRecognizer():
             "input/images", ImageList, self.image_recognition_cb)
         self.net = net
         self.model_name = model_name
-        self.weights = weights
+        self.weights_1 = weights_1
+        self.weights_2 = weights_2
+        self.weights_3 = weights_3
         self.confidence_threshold = confidence_threshold
         self.iou_threshold = iou_threshold
         self.augment = augment
@@ -54,7 +58,7 @@ class RGBObjectRecognizer():
 
         # Load model
         if self.model_name == 'yolov7':
-            self.model = attempt_load(weights, map_location=self.device)  # load FP32 model
+            self.model = attempt_load(self.weights_1, map_location=self.device)  # load FP32 model
             self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
             self.colors = [[random.randint(0, 255) for _ in range(3)] for _ in self.names]
             self.stride = int(self.model.stride.max())  # model stride
@@ -64,8 +68,13 @@ class RGBObjectRecognizer():
 
             if self.half:
                 self.model.half()  # to FP16
+
         elif self.model_name == 'yolov8':
-            self.model = YOLO(weights)
+            # Load models    
+            self.model_atwork = YOLO(self.weights_1)
+            self.model_cavity = YOLO(self.weights_2)
+            self.model_container = YOLO(self.weights_3)
+        
         self.img_size = img_size
 
         # Second-stage classifier
@@ -85,6 +94,19 @@ class RGBObjectRecognizer():
                 try:
                     cv_img = self.cvbridge.imgmsg_to_cv2(
                         img_msg.images[0], "bgr8")
+
+                    if rospy.has_param("/mir_perception/multimodal_object_recognition/obj_category"):
+                        obj_category = rospy.get_param("/mir_perception/multimodal_object_recognition/obj_category")
+                        if obj_category == "cavity":
+                            self.model = self.model_cavity
+                        elif obj_category == "container":
+                            self.model = self.model_container
+                        else:
+                            self.model = self.model_atwork
+                        # print the model name
+                        rospy.loginfo(f"\033[92m" + f"[RGB Recognizer] is using {obj_category} objects category model" + f"\033[0m")
+                    else:
+                        rospy.loginfo(f"\033[92m" + f"[RGB Recognizer] is using atwork objects category model" + f"\033[0m")
 
                     if self.model_name == 'yolov7':
                         # Padded resize
@@ -223,11 +245,18 @@ if __name__ == '__main__':
     classifier_name = rospy.get_param("~classifier")
     dataset = rospy.get_param("~dataset")
     model_dir = rospy.get_param("~model_dir")
-    weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                           'common', 'models', classifier_name, dataset, "best.pt")
+    model_name_1 = "atwork.pt" # default
+    model_name_2 = "cavity.pt"
+    model_name_3 = "container.pt"
+    weights_1 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', classifier_name, dataset, model_name_1)
+    weights_2 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                            'common', 'models', classifier_name, dataset, model_name_2)
+    weights_3 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                            'common', 'models', classifier_name, dataset, model_name_3)
 
     object_recognizer = RGBObjectRecognizer(
-        weights=weights, debug_mode=True)
-    rospy.loginfo("RGB Recognizer is ready using %s : %s , dataset: %s ",
-                  net, classifier_name, dataset)
+        weights_1=weights_1, weights_2=weights_2, weights_3=weights_3, debug_mode=True)
+    rospy.loginfo("\033[92m" + "RGB Recognizer is ready using %s : %s , dataset: %s " + "\033[0m",
+              net, classifier_name, dataset)
     rospy.spin()
