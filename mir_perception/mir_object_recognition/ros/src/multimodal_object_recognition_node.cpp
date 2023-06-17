@@ -51,7 +51,8 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   enable_roi_(true),
   rgb_cluster_remove_outliers_(true),
   enable_rgb_recognizer_(true),
-  enable_pc_recognizer_(true)
+  enable_pc_recognizer_(true),
+  obj_category_("atwork")
 {
   tf_listener_.reset(new tf::TransformListener);
   scene_segmentation_ros_ = SceneSegmentationROSSPtr(new SceneSegmentationROS());
@@ -99,8 +100,6 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   nh_.param<std::string>("object_info", object_info_path_, "None");
   loadObjectInfo(object_info_path_);
 
-  pub_filtered_rgb_cloud_plane_ =
-      nh_.advertise<sensor_msgs::PointCloud2>("filtered_rgb_cloud_plane", 1);
 }
 
 MultimodalObjectRecognitionROS::~MultimodalObjectRecognitionROS()
@@ -445,7 +444,8 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
           PointCloud::Ptr filtered_rgb_pointcloud(new PointCloud);
           *filtered_rgb_pointcloud = mpu::object::estimatePose(cloud_roi, pose, object, object.shape.shape,
                                                               rgb_cluster_filter_limit_min_,
-                                                              rgb_cluster_filter_limit_max_);
+                                                              rgb_cluster_filter_limit_max_,
+                                                              obj_category_);
 
           // append filtered point cloud to filtered_clusters_2d
           filtered_clusters_2d.push_back(filtered_rgb_pointcloud);
@@ -819,7 +819,7 @@ void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::Const
     // Synchronize callback
     image_sub_ = new message_filters::Subscriber<sensor_msgs::Image> (nh_, "input_image_topic", 1);
     cloud_sub_ = new message_filters::Subscriber<sensor_msgs::PointCloud2> (nh_, "input_cloud_topic", 1);
-    msg_sync_ = new message_filters::Synchronizer<msgSyncPolicy> (msgSyncPolicy(10), *image_sub_, *cloud_sub_);
+    msg_sync_ = new message_filters::Synchronizer<msgSyncPolicy> (msgSyncPolicy(1), *image_sub_, *cloud_sub_);
     msg_sync_->registerCallback(boost::bind(&MultimodalObjectRecognitionROS::synchronizeCallback, this, _1, _2));
   }
   else if (msg->data == "e_stop")
@@ -872,6 +872,7 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
   // Object recognizer param
   enable_rgb_recognizer_ = config.enable_rgb_recognizer;
   enable_pc_recognizer_ = config.enable_pc_recognizer;
+  obj_category_ = config.obj_category;
 
   // Cluster param
   center_cluster_ = config.center_cluster;

@@ -52,9 +52,11 @@ void object::estimatePose(const BoundingBox &box, geometry_msgs::PoseStamped &po
   pose.pose.orientation.w = q.w();
 }
 
-PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose,
+PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry_msgs::PoseStamped &pose, 
+                          mas_perception_msgs::Object &object,
                           std::string shape, float passthrough_lim_min_offset,
-                          float passthrough_lim_max_offset)
+                          float passthrough_lim_max_offset,
+                          std::string obj_category)
 {
   // Apply filter to remove points belonging to the plane for non
   // circular/spherical object
@@ -70,10 +72,23 @@ PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry
     pcl::getMinMax3D(*xyz_input_cloud, min_pt, max_pt);
     double limit_min = min_pt.z + passthrough_lim_min_offset;
     double limit_max = max_pt.z + passthrough_lim_max_offset;
-
-    pass_through.setFilterLimits(limit_min, limit_max);
-    pass_through.setInputCloud(xyz_input_cloud);
-    pass_through.filter(filtered_cloud);
+    if (object.name != "M20" && object.name != "M30" && object.name != "F20_20_G") {
+      pass_through.setFilterLimits(limit_min, limit_max);
+      pass_through.setInputCloud(xyz_input_cloud);
+      pass_through.filter(filtered_cloud);
+    }
+    else{
+      filtered_cloud = *xyz_input_cloud;
+    }
+    if (obj_category == "cavity"){
+      // change z value to max(filterpointcloud z) This is only for cavity
+      for (size_t i = 0; i < filtered_cloud.points.size(); ++i) {
+        // check if filtered_cloud.points[i].z has not nan or inf value
+        if (!std::isnan(filtered_cloud.points[i].z) && !std::isinf(filtered_cloud.points[i].z)) {
+          filtered_cloud.points[i].z = 0.035; // TODO: get 0.035 from target_pose_z_pos from config file
+        }
+      }
+    }
   }
 
   Eigen::Vector4f centroid;

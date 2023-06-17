@@ -111,7 +111,6 @@ class MultimodalObjectRecognitionROS
     ros::Publisher pub_rgb_object_pose_array_;
     // Publisher debug
     ros::Publisher pub_debug_cloud_plane_;
-    ros::Publisher pub_filtered_rgb_cloud_plane_;
     std::string horizontal_object_list[9];
 
     // Synchronize callback for image and pointcloud
@@ -155,6 +154,7 @@ class MultimodalObjectRecognitionROS
     // Enable recognizer
     bool enable_rgb_recognizer_;
     bool enable_pc_recognizer_ ;
+    std::string obj_category_;
 
     // Visualization
     BoundingBoxVisualizer bounding_box_visualizer_pc_;
