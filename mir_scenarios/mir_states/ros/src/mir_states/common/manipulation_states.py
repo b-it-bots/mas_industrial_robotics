@@ -186,7 +186,7 @@ class ArmPositionCommand:
         # monitor the velocities
         self.joint_velocities = msg.velocity
         # if all velocities are 0.0, the arm is not moving
-        if all([v == 0.0 for v in self.joint_velocities]):
+        if "arm_joint_1" in msg.name and all([v == 0.0 for v in self.joint_velocities]):
             self.zero_vel_counter += 1
 
     def get_joint_values_from_group_state(self, group_state_name):
