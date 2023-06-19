@@ -28,6 +28,7 @@ if __name__ == "__main__":
     goal = GenericExecuteGoal()
     goal.parameters.append(KeyValue(key="platform", value=platform))
     goal.parameters.append(KeyValue(key="object", value=obj))
+    goal.parameters.append(KeyValue(key="location", value="WS04"))
 
     rospy.loginfo("Sending following goal to place object server")
     rospy.loginfo(goal)
