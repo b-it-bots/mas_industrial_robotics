@@ -60,15 +60,20 @@ class Threshold_calculation(smach.State):
         smach.State.__init__(
             self,
             outcomes=["reached", "continue"],
-            input_keys=["max_allowed_tries", "threshold_counter"],
+            input_keys=["max_allowed_tries", "threshold_counter", "counter_reset_flag"],
             output_keys=["feedback", "result", "threshold_counter"],
         )
 
     def execute(self, userdata):
+    
 
         max_tries = userdata.max_allowed_tries  
 
+        print("userdata.threshold_counter", userdata.threshold_counter)
+
         result = None
+        if userdata.counter_reset_flag:
+            userdata.threshold_counter = 0
 
         if userdata.threshold_counter >= max_tries:
             result = "reached"
@@ -173,7 +178,8 @@ class DefalutSafePose(smach.State):
 class PublishObjectPose(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=["success", "failed"],
-                                    input_keys=["goal","empty_locations"],)
+                                    input_keys=["goal","empty_locations", "counter_reset_flag"],
+                                    output_keys=["counter_reset_flag"])
 
         self.empty_pose_pub = rospy.Publisher(
             "/mcr_perception/object_selector/output/object_pose",
@@ -199,6 +205,9 @@ class PublishObjectPose(smach.State):
     def execute(self, userdata):
 
         empty_locations = userdata.empty_locations 
+        # reset the max threshold counter
+        userdata.counter_reset_flag = True
+        
         location = Utils.get_value_of(userdata.goal.parameters, "location")
         
 
@@ -267,6 +276,7 @@ def main():
         input_keys=["goal", "feedback", "result"],
         output_keys=["feedback", "result"],)
 
+    sm.userdata.counter_reset_flag = False
     sm.userdata.threshold_counter = 0
     sm.userdata.empty_locations = None
     sm.userdata.heavy_objects = rospy.get_param("~heavy_objects", ["m20_100"])
@@ -384,7 +394,7 @@ def main():
 
         smach.StateMachine.add(
             "GO_DEFAULT_THRESHOLD",
-            gms.move_arm("place_default"),
+            gms.move_arm("place_default", use_moveit=False),
             transitions={
                 "succeeded": "OPEN_GRIPPER",
                 "failed": "GO_DEFAULT_THRESHOLD",
@@ -497,7 +507,7 @@ def main():
 
         smach.StateMachine.add(
                 "MOVE_ARM_TO_NEUTRAL",
-                gms.move_arm("barrier_tape"),
+                gms.move_arm("barrier_tape", use_moveit=False),
                 transitions={
                     "succeeded": "OVERALL_SUCCESS",
                     "failed": "MOVE_ARM_TO_NEUTRAL",
