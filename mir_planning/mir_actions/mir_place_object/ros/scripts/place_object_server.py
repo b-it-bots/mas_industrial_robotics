@@ -116,33 +116,96 @@ class GetEmptyPositionOnTable(smach.State):
 
 # ===============================================================================
 
-# new class for publishing the empty pose
+# new class for publishing the empty pose.
+
+
+class DefalutSafePose(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=["succeeded", "failed"],
+                                    input_keys=["goal"],)
+
+        self.empty_pose_pub = rospy.Publisher(
+            "/mcr_perception/object_selector/output/object_pose",
+            PoseStamped,
+            queue_size=10,
+        )
+
+    def map_location_to_base_link(self, location):
+
+        if location is not None:
+            current_platform_height = rospy.get_param("/"+location)
+            current_platform_height = current_platform_height /100
+        else:
+            current_platform_height = 0.10
+
+        map_location_to_platform_height = {
+            0.15: 0.065,
+            0.10: 0.025,
+            0.05: -0.030,
+            0.0: -0.080
+        }
+
+        return map_location_to_platform_height[current_platform_height]
+
+
+    def execute(self, userdata):
+
+        location = Utils.get_value_of(userdata.goal.parameters, "location")
+        
+        rospy.logerr("-->> No empty space found <<--")
+        rospy.logwarn("Checking pre-defined safe pose")
+
+        height_from_base = self.map_location_to_base_link(location)
+
+        safe_pose = PoseStamped()
+        safe_pose.header.frame_id = "base_link"
+        safe_pose.pose.position.x = 0.610
+        safe_pose.pose.position.y = 0.095
+        safe_pose.pose.position.z = height_from_base + rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
+        
+        self.empty_pose_pub.publish(safe_pose)
+        rospy.sleep(0.1)
+        safe_pose = None
+        return "succeeded"
+
+
 
 class PublishObjectPose(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=["success", "failed"],
-                                    input_keys=["empty_locations"])
+                                    input_keys=["goal","empty_locations"],)
 
         self.empty_pose_pub = rospy.Publisher(
             "/mcr_perception/object_selector/output/object_pose",
             PoseStamped,
             queue_size=10)
+    def map_location_to_base_link(self, location):
+
+        if location is not None:
+            current_platform_height = rospy.get_param("/"+location)
+            current_platform_height = current_platform_height /100
+        else:
+            current_platform_height = 0.10
+
+        map_location_to_platform_height = {
+            0.15: 0.065,
+            0.10: 0.025,
+            0.05: -0.028,
+            0.0: -0.08
+        }
+
+        return map_location_to_platform_height[current_platform_height]
 
     def execute(self, userdata):
 
         empty_locations = userdata.empty_locations 
+        location = Utils.get_value_of(userdata.goal.parameters, "location")
+        
 
         if len(empty_locations.poses) > 0:
 
             base_link_pose = PoseStamped()
             base_link_pose.header = empty_locations.header
-            
-            base_link_pose.pose.position.x = 0.0
-            base_link_pose.pose.position.y = 0.0
-            base_link_pose.pose.position.z = 0.0
-            base_link_pose.pose.orientation.x = 0.0
-            base_link_pose.pose.orientation.y = 0.0
-            base_link_pose.pose.orientation.z = 0.0
 
             empty_locations_temp = PoseStamped()
             empty_locations_temp.header = empty_locations.header
@@ -158,24 +221,25 @@ class PublishObjectPose(smach.State):
             nearest_pose = PoseStamped()
             nearest_pose.header = empty_locations.header
             nearest_pose.pose = empty_locations.poses[index]
-
         
-        # TODO: This z value should be tested
-        
-        nearest_pose.pose.position.z += rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
-        nearest_pose.pose.position.z += 0.015 # add 3cm height for droping the object
-        
-        rospy.loginfo(nearest_pose.pose.position.z)
-        rospy.loginfo("Publishing single pose to pregrasp planner")
+            print("----------------------------------")
+            print("nearest pose", nearest_pose.pose.position.z)
 
-        rospy.loginfo(type(nearest_pose))
-        self.empty_pose_pub.publish(nearest_pose)
+            height_from_base = self.map_location_to_base_link(location)
+            if height_from_base > nearest_pose.pose.position.z:
+                nearest_pose.pose.position.z = height_from_base
+            nearest_pose.pose.position.z += rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
 
-        rospy.sleep(0.3)
-        nearest_pose = None
+            print("nearest pose after adding height UPDATED !!!")
+            print(nearest_pose.pose.position.z)
+            print("Publishing single pose to pregrasp planner")
+            print("----------------------------------")
 
-        return "success"
+            self.empty_pose_pub.publish(nearest_pose)
 
+            rospy.sleep(0.1)
+            nearest_pose = None
+            return "success"
 #=================================================================================
 
 def transition_cb(*args, **kwargs):
@@ -258,7 +322,8 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_SHELF",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT"},
+            transitions={"succeeded": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT",
+                         "timeout": "MOVE_ARM_TO_SHELF_PLACE_FINAL_RETRACT"}
         )
 
         smach.StateMachine.add(
@@ -303,7 +368,16 @@ def main():
             Threshold_calculation(),
             transitions={
                 "continue": "EMPTY_SPACE_CLOUD_ADD",
-                "reached": "GO_DEFAULT_THRESHOLD",
+                "reached": "GO_SAFE_POSE",
+            },
+        )
+
+        smach.StateMachine.add(
+            "GO_SAFE_POSE",
+            DefalutSafePose(),
+            transitions={
+                "succeeded": "CHECK_PRE_GRASP_POSE_IK",
+                "failed": "GO_DEFAULT_THRESHOLD",
             },
         )
 
@@ -416,8 +490,8 @@ def main():
                 "OPEN_GRIPPER",
                 gms.control_gripper("open"),
                 transitions={
-			        "succeeded": "MOVE_ARM_TO_NEUTRAL"
-                },
+			        "succeeded": "MOVE_ARM_TO_NEUTRAL",
+                                 "timeout": "MOVE_ARM_TO_NEUTRAL"}
         )
 
 
