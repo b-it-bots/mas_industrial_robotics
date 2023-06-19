@@ -37,7 +37,7 @@ cluster_max_height: 0.09
 cluster_max_length: 0.25
 cluster_min_distance_to_polygon: 0.04
 octree_resolution: 0.01
-object_height_above_workspace: 0.035
+object_height_above_workspace: 0.0 # setting it to 0 because we reduced the gripper height
 # parameters for finding empty spaces on a plane
 empty_space_point_count_percentage_threshold: 0.8
 empty_space_radius: 0.05
