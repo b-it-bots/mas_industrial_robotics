@@ -10,4 +10,7 @@
         </rosparam>
     </node>
 
+    <!-- launch place_pose_selector node to get platform heights-->
+    <rosparam command="load" file="$(find mir_place_pose_selector)/ros/config/platform_heights.yaml"/>
+
 </launch>
