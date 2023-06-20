@@ -161,7 +161,6 @@ class RGBObjectRecognizer():
                                 if self.debug:
                                     # publish bbox and label
                                     self.publish_debug_img(cv_img)
-                        print(labels)
                         for i in range(len(labels)):
                             result = Object()
                             result.name = labels[i].upper()
