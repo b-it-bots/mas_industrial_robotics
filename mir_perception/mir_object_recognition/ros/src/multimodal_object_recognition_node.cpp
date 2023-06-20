@@ -256,7 +256,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       filename.append("rgb_raw_");
       filename.append(std::to_string(ros::Time::now().toSec()));
       mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
-      ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
+      ROS_DEBUG_STREAM("Image:" << filename << " saved to " << logdir_);
     }
     else
     {
@@ -534,7 +534,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
   if (debug_mode_)
   {
-    ROS_WARN_STREAM("Debug mode: publishing object information");
+    ROS_DEBUG_STREAM("Debug mode: publishing object information");
     publishDebug(combined_object_list, clusters_3d, clusters_2d, filtered_clusters_2d);
 
     ros::Time time_now = ros::Time::now();
@@ -546,7 +546,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       filename.append("rgb_debug_");
       filename.append(std::to_string(time_now.toSec()));
       mpu::object::saveCVImage(cv_image, logdir_, filename);
-      ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
+      ROS_DEBUG_STREAM("Image:" << filename << " saved to " << logdir_);
     }
     else
     {
@@ -561,7 +561,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       filename.append("rgb_raw_");
       filename.append(std::to_string(time_now.toSec()));
       mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
-      ROS_INFO_STREAM("Image:" << filename << " saved to " << logdir_);
+      ROS_DEBUG_STREAM("Image:" << filename << " saved to " << logdir_);
     }
     else
     {
@@ -576,7 +576,7 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       filename.append("pcd_cluster_");
       filename.append(std::to_string(time_now.toSec()));
       mpu::object::savePcd(cluster, logdir_, filename);
-      ROS_INFO_STREAM("Point cloud:" << filename << " saved to " << logdir_);
+      ROS_DEBUG_STREAM("Point cloud:" << filename << " saved to " << logdir_);
     }
   }
 }
@@ -586,9 +586,7 @@ void MultimodalObjectRecognitionROS::publishDebug(mas_perception_msgs::ObjectLis
                           std::vector<PointCloud::Ptr> &clusters_2d,
                           std::vector<PointCloud::Ptr> &filtered_clusters_2d)
 {
-  ROS_INFO_STREAM("Cloud list: " << recognized_cloud_list_.objects.size());
-  ROS_INFO_STREAM("RGB list: " << recognized_image_list_.objects.size());
-  ROS_INFO_STREAM("Combined object list: "<< combined_object_list.objects.size());
+  ROS_INFO_STREAM("Cloud list: " << recognized_cloud_list_.objects.size() << " RGB list: " <<  recognized_image_list_.objects.size() << " Combined object list: " << combined_object_list.objects.size());
   // Compute normal to generate parallel BBOX to the plane
   const Eigen::Vector3f normal = scene_segmentation_ros_->getPlaneNormal();
 
