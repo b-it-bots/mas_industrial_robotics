@@ -14,7 +14,8 @@ from mir_planning_msgs.msg import (
 )
 from smach_ros import ActionServerWrapper, IntrospectionServer
 from std_msgs.msg import String
-from mir_object_recognition.msg import TimeStampedPose
+from mas_perception_msgs.msg import TimeStampedPose
+import tf.transformations as tr
 
 # ===============================================================================
 
@@ -24,7 +25,7 @@ class GetPredictions(smach.State):
             self,
             outcomes=["succeeded"],
             input_keys=["goal"],
-            output_keys=["feedback", "result", "pose"],
+            output_keys=["feedback", "result", "pose", "time"],
         )
         self.publisher = rospy.Publisher(topic_name, String, queue_size=10)
     
@@ -42,13 +43,33 @@ class GetPredictions(smach.State):
         pred_pose = predicted_msg.pose
         userdata.pose = pred_pose
         pred_times = predicted_msg.timestamps
-        # TODO: if multiple times are there, figure out what to do
-        # if pred_time - current_time < 2.1 return succeeded
-        # else return failed
-        while not pred_time - rospy.Time.now().to_sec() < 2.1:
-            rospy.sleep(0.01)
+        # print("*"*50)
+        # print('pred_pose', pred_pose)
+        # print('pred_times', pred_times)
+        # print("*"*50)
+        userdata.time = pred_times
         return "succeeded"
         
+class WaitForObject(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded", "failed"],
+            input_keys=["time"],
+            output_keys=["feedback", "result"],
+        )
+    
+    def execute(self, userdata):
+        userdata.result = GenericExecuteResult()
+        userdata.feedback = GenericExecuteFeedback(
+            current_state="WaitForObject", text="waiting for object"
+        )
+        print("userdata.time", userdata.time)
+        print("rospy.Time.now().to_sec()", rospy.Time.now().to_sec())
+        print("\n\n"*2)
+        while rospy.Time.now().to_sec() < userdata.time - 1.5: # 2.1 is the time it takes to move arm to pick
+            rospy.sleep(0.01)
+        return "succeeded"
 
 class SetupObjectPose(smach.State):
     def __init__(self):
@@ -60,7 +81,10 @@ class SetupObjectPose(smach.State):
         )
     
     def execute(self, userdata):
-        userdata.move_arm_to = userdata.pose
+        #iCartesian pose (x, y, z, r, p, y, frame_id)
+        r, p, y = tr.euler_from_quaternion([userdata.pose.pose.orientation.x, userdata.pose.pose.orientation.y, userdata.pose.pose.orientation.z, userdata.pose.pose.orientation.w])
+        userdata.move_arm_to = [userdata.pose.pose.position.x, userdata.pose.pose.position.y, userdata.pose.pose.position.z, r, p, y, userdata.pose.header.frame_id]
+        # TODO: to check if position is not nan
         userdata.result = GenericExecuteResult()
         userdata.feedback = GenericExecuteFeedback(
             current_state="SetupObjectPose", text="Setting pose for RTT"
@@ -88,7 +112,7 @@ def start_cb(*args, **kwargs):
 
 def main():
     # Open the container
-    rospy.init_node("rtt_pick_object_wbc_server")
+    rospy.init_node("rtt_server")
     # Construct state machine
     sm = smach.StateMachine(
         outcomes=["OVERALL_SUCCESS", "OVERALL_FAILED"],
@@ -99,11 +123,12 @@ def main():
     with sm:
         smach.StateMachine.add(
             "GET_PREDICTIONS",
-            GetPredictions("mir_perception/rtt/event_in"),
+            GetPredictions("/mir_perception/rtt/event_in"),
             transitions={"succeeded": "MOVE_ARM_PRE_PICK"},
         )
 
         # move arm to appropriate position
+        # TODO: change rtt_pre_pick to variable position 5 cm above current pose received from perception
         smach.StateMachine.add(
             "MOVE_ARM_PRE_PICK",
             gms.move_arm("rtt_pre_pick", use_moveit=False),
@@ -116,7 +141,17 @@ def main():
         smach.StateMachine.add(
             "SETUP_OBJECT_POSE",
             SetupObjectPose(),
-            transitions={"succeeded": "TRY_PICKING"},
+            transitions={"succeeded": "WAIT_FOR_OBJECT",
+                          "failed": "TRY_PICKING"},
+        )
+
+        smach.StateMachine.add(
+            "WAIT_FOR_OBJECT",
+            WaitForObject(),
+            transitions={
+                "succeeded": "TRY_PICKING",
+                "failed": "OVERALL_FAILED",
+            },
         )
 
         # move only arm for wbc
@@ -132,8 +167,23 @@ def main():
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
-            transitions={"succeeded": "MOVE_ROBOT_AND_PICK"},
+            transitions={"succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
+                         "timeout": "MOVE_ARM_TO_STAGE_INTERMEDIATE"},
         )
+
+        # smach.StateMachine.add(
+        #     "MOVE_ROBOT_AND_PICK",
+        #     gbs.send_and_wait_events_combined(
+        #         event_in_list=[("/wbc/event_in", "e_start")],
+        #         event_out_list=[("/wbc/event_out", "e_success", True)],
+        #         timeout_duration=50,
+        #     ),
+        #     transitions={
+        #         "success": "CLOSE_GRIPPER",
+        #         "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+        #         "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+        #     },
+        # )
 
         # move arm to stage_intemediate position
         smach.StateMachine.add(
@@ -150,6 +200,7 @@ def main():
             gms.verify_object_grasped(5),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
+                "timeout": "OVERALL_FAILED",
                 "failed": "OVERALL_FAILED",
             },
         )
@@ -161,13 +212,13 @@ def main():
     # smach viewer
     if rospy.get_param("~viewer_enabled", True):
         sis = IntrospectionServer(
-            "pick_object_smach_viewer", sm, "/PICK_OBJECT_SMACH_VIEWER"
+            "rtt_pick_object_smach_viewer", sm, "/RTT_PICK_OBJECT_SMACH_VIEWER"
         )
         sis.start()
 
     # Construct action server wrapper
     asw = ActionServerWrapper(
-        server_name="wbc_pick_object_server",
+        server_name="rtt_server",
         action_spec=GenericExecuteAction,
         wrapped_container=sm,
         succeeded_outcomes=["OVERALL_SUCCESS"],

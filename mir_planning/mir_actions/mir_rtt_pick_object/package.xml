@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_rtt_pick_object</name>
+  <version>1.0.0</version>
+  <description>
+    Assumes that the location is already perceived and objects were found, then triggers
+    pregrasp planner, calls inverse kinematics and moves the arm towards the object, then
+    closes the gripper and moves the arm to idle position
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="olima_84@yahoo.com">Oscar Lima</author>
+  <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
