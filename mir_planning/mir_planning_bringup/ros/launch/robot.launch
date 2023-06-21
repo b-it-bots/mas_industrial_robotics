@@ -27,6 +27,9 @@
     <arg name="base_motion_only" default="false"/>
 
     <arg name="camera_name" default="tower_cam3d_front" />
+    <arg name="back_camera_name" default="tower_cam3d_back" />
+    <arg name="be_safe" default="True" />
+
 
     <!-- =================================================================== -->
 
@@ -102,7 +105,8 @@
     <!-- ========== -->
     <!-- barrier tape detection -->
     <include file="$(find mir_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch">
-        <arg name="camera_name" value="$(arg camera_name)"/>
+        <arg name="front_camera" value="$(arg camera_name)"/>
+        <arg name="back_camera" value="$(arg back_camera_name)"/>
     </include>
 
     <!-- <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" > -->
@@ -173,6 +177,7 @@
     <include file="$(find mir_actions)/ros/launch/run_action_servers.launch">
         <arg name="align_with_workspace" value="$(arg align_with_workspace)" />
         <arg name="domain" value="$(arg domain)" />
+        <arg name="be_safe" value="$(arg be_safe)" />
     </include>
 
 </launch>
