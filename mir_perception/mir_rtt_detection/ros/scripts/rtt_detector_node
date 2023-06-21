@@ -1,0 +1,634 @@
+#!/usr/bin/env python3
+import os
+import random
+import time
+import cv2
+import numpy as np
+import roslib
+import rospy
+import torch
+import math
+import csv
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
+from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg import ColorRGBA, String
+import message_filters
+from mas_perception_msgs.msg import ImageList, Object, ObjectList, TimeStampedPose
+from sensor_msgs.msg import Image, RegionOfInterest, PointCloud2, PointField
+from sensor_msgs import point_cloud2
+from ultralytics import YOLO
+import tf
+from sklearn.decomposition import PCA
+from geometry_msgs.msg import PoseStamped, Pose
+from visualization_msgs.msg import Marker
+from scipy.optimize import least_squares
+from sklearn.mixture import GaussianMixture
+import tf.transformations as tr
+import pdb
+from scipy.spatial.transform import Rotation as R
+import tf2_ros
+import tf2_sensor_msgs
+
+
+class RTTObjectTracker():
+    def __init__(self, weights, net='detection', model_name='yolov8',
+                 confidence_threshold=0.8,
+                 iou_threshold=0.45,
+                 img_size=640,
+                 trace=True,
+                 classify=False,
+                 augment=False,
+                 device='cpu',
+                 debug_mode=True):
+        
+        self.cvbridge = CvBridge()
+        self.debug = debug_mode
+        self.pub_debug = rospy.Publisher(
+            "/mir_perception/multimodal_object_recognition/recognizer/rgb/output/rtt_debug_image", Image, queue_size=1)
+        self.pub_result = rospy.Publisher(
+            "output/object_list", ObjectList, queue_size=1)
+        self.pub_pose = rospy.Publisher(
+            "rtt/output/object_pose", PoseStamped, queue_size=1)
+        self.pub_cropped_pc = rospy.Publisher(
+            "rtt/output/cropped_pc", PointCloud2, queue_size=1)
+
+        self.net = net
+        self.model_name = model_name
+        self.weights = weights
+        self.confidence_threshold = confidence_threshold
+        self.iou_threshold = iou_threshold
+        self.augment = augment
+        self.table_rotating_clockwise = False
+
+        # Dictionary to store object bounding box centers
+        self.object_centers = {}
+        # Object pose at pickup location
+        self.object_pose = {}
+        # Number of latest bounding box centers to keep
+        self.max_centers = 50
+        # Dictionary to store object colors
+        self.object_colors = {}
+        # Dictionary to store object rotational velocities
+        self.object_rotational_speeds = 0
+        # Dictionary to store object ellipse parameters
+        self.object_ellipse_params_CL = {}
+        self.object_ellipse_params_BL = {}
+        self.settled_ellipse = {}
+        # Number of rotations
+        self.num_rotations = {}
+        self.future_timestamps = {}
+
+        # Initialize
+        self.device = torch.device(device)
+        self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
+
+        # Load model
+        if self.model_name == 'yolov8':
+            self.model = YOLO(weights)
+        self.img_size = img_size
+
+        self.tf_listener = tf.TransformListener()
+
+        rospy.Subscriber("/mir_perception/rtt/event_in", String, self.event_in_cb)
+        self.event_out = rospy.Publisher(
+            "/mir_perception/rtt/event_out", String, queue_size=1
+        )
+        self.time_stamped_pose = rospy.Publisher(
+            "/mir_perception/rtt/time_stamped_pose", TimeStampedPose, queue_size=5
+        )
+
+        self.event = None
+        self.object_name = None
+        self.time_estimation_complete = False
+        self.orientation_estimation_complete = False
+
+
+    def callback(self, img_msg, point_cloud_msg):
+        self.run(img_msg, point_cloud_msg)
+        if self.time_estimation_complete and self.orientation_estimation_complete:
+            self.time_stamped_pose_msg = TimeStampedPose()
+            self.time_stamped_pose_msg.timestamps = float(self.future_timestamps[self.object_name])
+            self.time_stamped_pose_msg.pose = self.object_pose[self.object_name]
+            self.time_stamped_pose.publish(self.time_stamped_pose_msg)
+
+    def event_in_cb(self, msg):
+        """
+        Starts a planned motion based on the specified arm position.
+
+        """
+        self.event = msg.data
+        if self.event.startswith("e_start"):
+        # if True:
+            self.object_name = self.event[8:]
+            # TODO: Check if object name is valid (upper case) !!!
+
+            # Subscribe to image topic
+            self.sub_img = message_filters.Subscriber("/tower_cam3d_front/rgb/image_raw", Image)#, self.image_recognition_cb)
+
+            # subscribe to point cloud topic
+            self.sub_point_cloud = message_filters.Subscriber("/tower_cam3d_front/depth_registered/points", PointCloud2)#, self.point_cloud_cb)
+
+            # synchronize image and point cloud
+            self.ts = message_filters.ApproximateTimeSynchronizer([self.sub_img, self.sub_point_cloud], queue_size=10, slop=0.1)
+            self.ts.registerCallback(self.callback)
+
+
+    def check_stability(self, params_list):
+        # Check if the standard deviation of the parameters is below a threshold
+        threshold = 0.25  # Adjust the threshold as per your requirements
+
+        if len(params_list) < 2:
+            return False
+
+        params_array = np.array(params_list[-5:])
+        std_dev = np.std(params_array, axis=0)
+        stability = np.all(std_dev < threshold)
+        # print("stability std_dev: ", std_dev)
+
+        return stability
+
+    def calculate_rotational_speed(self, center_list, frame_time_list, xc, yc, label):
+        """
+        center_list: list of center points of the detected object in each frame
+        frame_time_list: list of time stamps of each frame
+        xc, yc: center point of the ellipse
+        """
+        self.num_rotations[label] = -1
+        # Calculate the angle between each center point and the ellipse center
+        angle_list = []
+        for center in center_list:
+            xo, yo = center
+            angle = math.atan2(yo - yc, xo - xc)
+            angle_list.append(angle)
+
+        # Calculate the time differences between two consecutive frames
+        time_diff_list = []
+        for i in range(1, len(frame_time_list)):
+            time_diff = frame_time_list[i] - frame_time_list[i - 1]
+            time_diff_list.append(time_diff)
+
+        # Calculate the rotational speeds based on the angle differences and time differences
+        rotational_speeds = []
+        count_clockwise = 0
+        count_anticlockwise = 0
+        # print("is self.table_rotating_clockwise? : ", self.table_rotating_clockwise)
+        # print("num_rotations: ", " for \"", label, "\" is: ", self.num_rotations[label])
+        
+        for i in range(len(angle_list) - 1):
+            # detection of rotation direction
+            if 0 <= angle_list[i] <= math.pi and 0 <= angle_list[i+1] <= math.pi and (count_anticlockwise + count_clockwise < 5):
+                if angle_list[i] > angle_list[i+1]:
+                    count_anticlockwise += 1
+                else:
+                    count_clockwise += 1
+            if count_clockwise > count_anticlockwise:
+                self.table_rotating_clockwise = True
+            else:
+                self.table_rotating_clockwise = False
+
+            # count the number of rotations
+            if (not self.table_rotating_clockwise and (math.pi/2 < angle_list[i] < math.pi and 0 < angle_list[i+1] < math.pi/2)) or \
+                    (self.table_rotating_clockwise and (0.0 < angle_list[i] < math.pi/2 and math.pi/2 < angle_list[i+1] < math.pi)):
+                self.num_rotations[label] += 1
+
+            # if object is in the quadrant adjacent to pickup point, calculate the angle difference and rotational speed, and get the average value
+            if (not self.table_rotating_clockwise and (math.pi/2 <= angle_list[i] <= math.pi and math.pi/2 <= angle_list[i+1] <= math.pi)) or \
+                    (self.table_rotating_clockwise and (0. <= angle_list[i] <= math.pi/2 and 0. <= angle_list[i+1] <= math.pi/2)):
+                angle_diff = angle_list[i + 1] - angle_list[i]
+                time_diff = time_diff_list[i]
+                rotational_speed = abs(angle_diff) / time_diff
+                rotational_speeds.append(rotational_speed)
+        # return the average value for rotational speed
+        rotational_speeds = np.array(rotational_speeds)
+        avg_rotational_speed = np.mean(rotational_speeds)
+
+        return avg_rotational_speed
+
+    def predict_future_timestamps(self, avg_rotational_speed, center_list, frame_time_list, xc, yc, closest_x, closest_y):
+        """
+        center_list: list of center points of the detected object in each frame
+        frame_time_list: list of time stamps of each frame
+        xc, yc: center point of the ellipse
+        avg_rotational_speed: rotational speed of particular object
+        closest_x, closest_y: closest point on the ellipse to the end-effector
+        """
+
+        # Calculate the angle between each center point and the ellipse center
+        angle_list = []
+        total_time_diff = 0
+        for center in center_list:
+            xo, yo = center
+            angle = math.atan2(yo - yc, xo - xc)
+            angle_list.append(angle)
+
+        # Calculate the angle point of pickup with respect to the ellipse center. This is assumed to be 90 degrees, so it is redundant
+        closest_pickup_angle = math.atan2(closest_y - yc, closest_x - xc)
+
+        real_time_time_stamps = []
+        for i in range(len(angle_list) - 1):
+            # if the object is behind the pickup point and in the next frame it has passed the pickup point, calculate the predicted time stamp
+            if (not self.table_rotating_clockwise and (closest_pickup_angle < angle_list[i] < math.pi and 0 < angle_list[i+1] < closest_pickup_angle)) or \
+                    (self.table_rotating_clockwise and (0.0 < angle_list[i] < closest_pickup_angle and closest_pickup_angle < angle_list[i+1] < math.pi)):
+                # Calculate the predicted time instances when the object will be at the specified (x, y) point
+                time_diff = (closest_pickup_angle - math.atan2(center_list[i][1] - yc, center_list[i][0] - xc)) / avg_rotational_speed
+                next_time_stamp = frame_time_list[i] + time_diff
+                real_time_time_stamps.append(next_time_stamp)
+        if len(real_time_time_stamps) > 2:
+        #     time_diff_1 = real_time_time_stamps[-1] - real_time_time_stamps[-2]
+        #     time_diff_2 = real_time_time_stamps[-2] - real_time_time_stamps[-3]
+        #     time_diff = (time_diff_1 + time_diff_2) / 2
+        #     predicted_time_stamps = [ real_time_time_stamps[-1] + time_diff, real_time_time_stamps[-1] + 2*time_diff , real_time_time_stamps[-1] + 3*time_diff, real_time_time_stamps[-1] + 4*time_diff, real_time_time_stamps[-1] + 5*time_diff]
+            for i in range(len(real_time_time_stamps)-1):
+                total_time_diff += real_time_time_stamps[i+1]-real_time_time_stamps[i]
+            avg_diff = total_time_diff /(len(real_time_time_stamps)-1)
+            if avg_diff == 0:
+                return False
+            # predicted_time_stamps = [ real_time_time_stamps[-1] + avg_diff, real_time_time_stamps[-1] + 2*avg_diff , real_time_time_stamps[-1] + 3*avg_diff, real_time_time_stamps[-1] + 4*avg_diff, real_time_time_stamps[-1] + 5*avg_diff]
+            predicted_time_stamps = real_time_time_stamps[-1] + avg_diff
+            
+            return predicted_time_stamps
+        else:
+            return False
+
+    def yolo_detect(self, cv_img):
+        if self.net == 'detection' and self.model_name == 'yolov8':
+            predictions = self.model.predict(source=cv_img,
+                                                conf=self.confidence_threshold,
+                                                iou=self.iou_threshold,
+                                                device=self.device,
+                                            )
+            # convert results to numpy array
+            predictions_np = predictions[0].boxes.numpy()
+            class_ids = predictions_np.cls
+            class_names = predictions[0].names
+            class_labels = [class_names[i] for i in class_ids]
+            class_scores = predictions_np.conf
+            class_bboxes = predictions_np.xyxy # x, y, w, h
+
+            return class_bboxes, class_scores, class_labels
+        
+    # def get_pointcloud_position(self, pointcloud, centers):
+    #    """
+    #    pointcloud: pointcloud data of current frame with PointCloud2 data type
+    #    centers: array with each row consisting of x and y coordinates of the bounding box of detected objects
+    #    """
+
+    #    # Get the pointcloud data
+    #    pc = np.array(list(point_cloud2.read_points(pointcloud, skip_nans=False, field_names=("x", "y", "z"))), dtype=np.float32)
+    #    pc = pc.reshape((480,640,3))
+
+    #    # Get the center point of the bounding box
+    #    center_x, center_y = centers.T
+    #    pose_list = []
+    #    for i in range(len(center_x)):
+    #        center_point = pc[center_x[i], center_y[i]]
+    #        # Get the pose of the center point of the bounding box
+    #        pose = PoseStamped()
+    #        pose.header.frame_id = pointcloud.header.frame_id
+    #        pose.header.stamp = pointcloud.header.stamp
+    #        pose.pose.position.x = center_point[0]
+    #        pose.pose.position.y = center_point[1]
+    #        pose.pose.position.z = center_point[2]
+    #        pose.pose.orientation.x = 0.0
+    #        pose.pose.orientation.y = 0.0
+    #        pose.pose.orientation.z = 0.0
+    #        pose.pose.orientation.w = 1.0
+    #        pose_list.append(pose)
+    #    return pose_list
+    
+    def process_point_cloud(self, point_cloud, bounding_box):
+        if point_cloud is None or bounding_box is None:
+            return
+        
+        # points = point_cloud2.read_points(point_cloud)
+        # print("one point cloud point", next(points))
+        
+        # Extract point cloud data within the bounding box
+        cropped_cloud = self.crop_point_cloud(point_cloud, bounding_box)
+
+        # Calculate the centroid (mean point) of the point cloud
+        centroid = np.mean(cropped_cloud, axis=0)
+
+        # normalize pointcloud with centroid
+        cropped_cloud = cropped_cloud - centroid
+
+        # Apply Principal Component Analysis (PCA)
+        pca = PCA(n_components=3)
+        pca.fit(cropped_cloud)
+
+        # Get the eigenvalues and eigenvectors
+        eigenvalues = pca.explained_variance_
+        eigenvectors = pca.components_
+        # print("eigenvalues: ", eigenvalues, "\neigenvectors: \n", eigenvectors)
+
+        # Calculate the pose using PCA results
+        pose = self.calculate_pose(point_cloud, cropped_cloud, centroid, eigenvectors)
+        self.orientation_estimation_complete = True
+        return pose
+
+    def crop_point_cloud(self, point_cloud, bounding_box):
+        # Get the pointcloud data
+        pc = np.array(list(point_cloud2.read_points(point_cloud, skip_nans=False, field_names=("x", "y", "z"))), dtype=np.float32)
+        pc = pc.reshape((480,640,3))
+
+        # crop the point cloud data within the bounding box
+        cropped_cloud = pc[int(bounding_box[1]):int(bounding_box[3]), int(bounding_box[0]):int(bounding_box[2])]
+
+        # get the min value of z in point cloud
+        min_z = np.nanmin(cropped_cloud[:,:,2])
+        max_z = np.nanmax(cropped_cloud[:,:,2])
+        # min_x = np.nanmin(cropped_cloud[:,:,0])
+        # max_x = np.nanmax(cropped_cloud[:,:,0])
+        # min_y = np.nanmin(cropped_cloud[:,:,1])
+        # max_y = np.nanmax(cropped_cloud[:,:,1])
+
+        # print(min_z, max_z)
+
+        # print([z for z in cropped_cloud[:,:,2] ])
+        
+        # crop the z of cropped_cloud to remove the ground
+        cropped_cloud = cropped_cloud[cropped_cloud[:,:,2] < max_z - 0.02]        
+
+        # remove nan values
+        cropped_cloud = cropped_cloud[~np.isnan(cropped_cloud)]
+
+        # Check if the cropped_cloud array is empty
+        if cropped_cloud.size == 0:
+            return None
+
+        # Ensure the cropped_cloud is a 2D array
+        cropped_cloud = np.reshape(cropped_cloud, (-1, 3))
+
+        # # convert to uint8
+        # crp_data = cropped_cloud.astype(np.uint8)
+        
+        # crp_pc = PointCloud2()
+        # crp_pc.header.frame_id = point_cloud.header.frame_id
+        # crp_pc.header.stamp = point_cloud.header.stamp
+        # crp_pc.height = cropped_cloud.shape[0]
+        # crp_pc.width = cropped_cloud.shape[1]
+        # crp_pc.fields = [PointField('x', 0, PointField.FLOAT32, 1),
+        #                 PointField('y', 4, PointField.FLOAT32, 1),
+        #                 PointField('z', 8, PointField.FLOAT32, 1)]
+        # crp_pc.is_bigendian = False
+        # crp_pc.point_step = 12
+        # crp_pc.row_step = crp_pc.point_step * crp_pc.width
+        # crp_pc.is_dense = False
+        # crp_pc.data = crp_data.tostring()   
+        # self.pub_cropped_pc.publish(crp_pc)
+
+        # Return the cropped point cloud data as a numpy array
+        return np.array(cropped_cloud)
+
+    def calculate_pose(self, pointcloud, cropped_cloud, centroid, eigenvectors):
+        pose = PoseStamped()
+        pose.header.stamp = pointcloud.header.stamp
+        pose.header.frame_id = pointcloud.header.frame_id
+
+        # Set the position of the object
+        pose.pose.position.x = centroid[0]
+        pose.pose.position.y = centroid[1]
+        pose.pose.position.z = centroid[2]
+
+        # Swap largest and second largest eigenvectors
+        eigenvectors[:, [0, 2]] = eigenvectors[:, [2, 0]]
+
+        # Compute the cross product of the second largest and largest eigenvectors
+        cross_product = np.cross(eigenvectors[:, 2], eigenvectors[:, 0])
+
+        # Assign the cross product to the second largest eigenvector
+        eigenvectors[:, 1] = cross_product
+
+        #pdb.set_trace()
+        ## This is incorrect
+        # rot_mat = np.identity(4)
+        # rot_mat[0:3, 0:3] = eigenvectors.T
+        # rot_mat[:3, 3] = -(rot_mat[:3, :3] @ centroid[:3])
+        # quaternion = tr.quaternion_from_matrix(rot_mat)
+        rot = R.from_matrix(eigenvectors.T)
+        quaternion = rot.as_quat()
+        # eular = rot.as_euler('ZYX', degrees=True)
+        # print(eular)
+        
+        roll, pitch, yaw = tr.euler_from_quaternion(quaternion)
+        orientation = tr.quaternion_from_euler(0, 0, yaw)
+        # print("pose = ", pose.pose.orientation)
+        pose.pose.orientation.x = orientation[0]
+        pose.pose.orientation.y = orientation[1]
+        pose.pose.orientation.z = orientation[2]
+        pose.pose.orientation.w = orientation[3]
+
+
+        self.pub_pose.publish(pose)
+
+        return pose
+
+    def run(self, image, pointcloud):
+        """
+        image: image data of current frame with Image data type
+        pointcloud: pointcloud data of current frame with PointCloud2 data type
+        """
+
+        start = time.time()
+        if image:
+            try:
+                cv_img = self.cvbridge.imgmsg_to_cv2(image, "bgr8")
+                bboxes, probs, labels = self.yolo_detect(cv_img)
+            
+                image_header_frame_time = image.header.stamp
+                frame_time = image_header_frame_time.secs + \
+                    (image_header_frame_time.nsecs / 1000000000)
+
+                # Fit a Ellipse to the centers of the bounding boxes
+                for bbox, prob, label in zip(bboxes, probs, labels):
+                    # Calculate center of bounding box
+                    center_x = (int(bbox[0]) + int(bbox[2])) // 2
+                    center_y = (int(bbox[1]) + int(bbox[3])) // 2
+                    center = np.array([center_x, center_y])
+                    # Update object centers dictionary
+                    if label not in self.object_centers and center_y > 120:
+                        self.object_centers[label] = []
+                        self.object_ellipse_params_CL[label] = []
+                        self.object_ellipse_params_BL[label] = []
+                        self.num_rotations[label] = -1
+                        self.future_timestamps[label] = None
+                        self.settled_ellipse[label] = False
+                        self.object_pose[label] = None
+                    if label in self.object_centers:
+                        self.object_centers[label].append((center, frame_time))
+                        # Keep only the last `max_centers` centers
+                        if len(self.object_centers[label]) > self.max_centers:
+                            self.object_centers[label] = self.object_centers[label][-self.max_centers:]
+                    
+                    # check if center_x is in the range of 300 to 340, 
+                    # if yes, add  pose of the object to the object_pose dictionary
+                    # the pose of the object is calculated by cropping pointcloud by bounding box and applying PCA on it
+                    if 280 < center_x < 360:
+                        self.object_pose[label] = self.process_point_cloud(pointcloud, bbox)
+
+                    
+                # print("All Labels- ", self.object_centers.keys())
+
+
+                # Fit ellipse to the centers for each object
+                for label, centers_data in self.object_centers.items():
+                    # Require at least 5 centers for fitting ellipse
+                    if len(centers_data) >= 15:
+                        centers = np.array([center for center, _ in centers_data])
+
+                        frame_time_list = [frame_time for _, frame_time in centers_data]
+                        (xc, yc), (major_axis,minor_axis), theta = cv2.fitEllipse(centers)
+
+                        # Check stability of ellipse parameters
+                        if self.check_stability(self.object_ellipse_params_CL[label]):
+                            self.settled_ellipse[label] = True
+                            # print(f"Ellipse parameters for label '{label}' have become stable.")
+
+                        # Calculate the closest point on the ellipse to (320, 480)
+                        # angle = np.radians(theta)
+                        # closest_x = int(xc + ((minor_axis / 2) * np.cos(angle)))
+                        # closest_y = int(yc + ((major_axis / 2) * np.sin(angle)))
+
+                        # getting the point on the trajectory at 90 degrees in image plane [x-axis: left to right, y-axis: top to bottom]
+                        closest_x = int(xc)
+                        closest_y = int(yc + (major_axis / 2))
+                        # Get the pointcloud data
+                        pc = np.array(list(point_cloud2.read_points(pointcloud, skip_nans=False, field_names=("x", "y", "z"))), dtype=np.float32)
+                        pc = pc.reshape((480,640,3))
+                        # print("xc: ", xc, "yc: ", yc, "major_axis: ", major_axis, "minor_axis: ", minor_axis, "theta: ", theta, "closest_x: ", closest_x, "closest_y: ", closest_y)
+                        object_position = pc[closest_y, closest_x]
+                        # print("object_position: ", object_position)
+                        if self.object_pose[label]:
+                            self.object_pose[label].pose.position.x = object_position[0]
+                            self.object_pose[label].pose.position.y = object_position[1]
+
+                        self.object_ellipse_params_CL[label].append([xc, yc, major_axis, minor_axis, theta, closest_x, closest_y])
+
+                        # if len(centers_data) >= 5 and pointcloud:
+                            # # extract center point pose from pointcloud
+                            # center_point_pose_list_wrt_camera = self.get_pointcloud_position(pointcloud, centers)
+                            # center_point_pose_list_wrt_base = []
+
+                            # centers_BL = []
+                            # frame_time_list_BL = []
+                            # for pose in center_point_pose_list_wrt_camera:
+                            #     i = 0
+                            #     try:
+                            #         t = self.tf_listener.getLatestCommonTime(
+                            #             "/base_link", pose.header.frame_id
+                            #         )
+                            #         pose.header.stamp = t
+                            #         pose = self.tf_listener.transformPose("/base_link", pose)
+                            #         # if pose doesnot has nan values then append pose to the list
+                            #         if not math.isnan(pose.pose.position.x):
+                            #             center_point_pose_list_wrt_base.append(pose)
+                            #             centers_BL.append([pose.pose.position.x, pose.pose.position.y])
+                            #             frame_time_list_BL.append(frame_time_list[i])
+                            #     except (
+                            #         tf.LookupException,
+                            #         tf.ConnectivityException,
+                            #         tf.ExtrapolationException,
+                            #     ) as e:
+                            #         rospy.logerr("Tf error: %s" % str(e))
+                            #     i += 1
+
+                            # if len(centers_BL) >= 5:
+                            #     # print("centers_BL: ", centers_BL)
+                            #     centers_BL = np.array(centers_BL)
+                            #     centers_BL = np.array(centers_BL*1000, dtype=int)
+                            #     (xc_BL, yc_BL), (major_axis_BL,minor_axis_BL), theta_BL = cv2.fitEllipse(centers_BL)
+                            #     closest_x_BL = int(xc_BL)
+                            #     closest_y_BL = int(yc_BL + (major_axis_BL / 2))
+                                        
+                            #     self.object_ellipse_params_BL[label].append([xc_BL, yc_BL, major_axis_BL, minor_axis_BL, theta_BL, closest_x_BL, closest_y_BL])
+                            #     # write center_point_pose_list_wrt_base to csv file
+                            #     with open('/home/robocup/ros/noetic/robocup/center_point_pose_list_wrt_base.csv', mode='w') as file:
+                            #         writer = csv.writer(file)
+                            #         writer.writerow(['Object Name', 'X', 'Y', 'Frame Time', 'XC', 'YC', 'closest_x', 'closest_y', 'major', 'minor', 'theta'])
+                            #         for i in range(len(center_point_pose_list_wrt_base)):
+                            #             writer.writerow([label, center_point_pose_list_wrt_base[i].pose.position.x, center_point_pose_list_wrt_base[i].pose.position.y, frame_time_list_BL[i], 
+                            #                             xc_BL, yc_BL, closest_x_BL, closest_y_BL, major_axis_BL, minor_axis_BL, theta_BL])
+
+                        # Create a CSV file
+                        # with open('/home/robocup/ros/noetic/robocup/object_data.csv', mode='w') as file:
+                        #     writer = csv.writer(file)
+                        #     writer.writerow(['Object Name', 'X', 'Y', 'Frame Time', 'XC', 'YC', 'closest_x', 'closest_y', 'major', 'minor', 'theta'])
+
+                            # Write the object data to the CSV file
+                            # for label, centers_data in self.object_centers.items():
+                            #     i = 0
+                            #     for center, frame_time in centers_data:
+                            #         writer.writerow([label, center[0], center[1], frame_time, 
+                            #                         self.object_ellipse_params_CL[label][i][0], self.object_ellipse_params_CL[label][i][1], 
+                            #                         self.object_ellipse_params_CL[label][i][5], self.object_ellipse_params_CL[label][i][6],
+                            #                         self.object_ellipse_params_CL[label][i][2], self.object_ellipse_params_CL[label][i][3],
+                            #                         self.object_ellipse_params_CL[label][i][4]])
+                            #         i += 1
+
+                        # Generate a random color for each object
+                        if label not in self.object_colors:
+                            self.object_colors[label] = ColorRGBA()
+                            self.object_colors[label].r = np.random.randint(0, 256)
+                            self.object_colors[label].g = np.random.randint(0, 256)
+                            self.object_colors[label].b = np.random.randint(0, 256)
+                            self.object_colors[label].a = 255
+                        if self.debug:
+                            # Draw the circle on the debug image
+                            cv2.ellipse(cv_img, (int(xc), int(yc)), (int(major_axis/2), int(minor_axis/2)), theta, 0, 360,
+                                        (self.object_colors[label].r, self.object_colors[label].g, self.object_colors[label].b), 2)
+                            # Draw the closest point on the debug image as a big dot
+                            cv2.circle(cv_img, (closest_x, closest_y), radius=10, color=(0, 0, 255), thickness=-1)
+                            # Draw the center of the image as a big dot
+                            cv2.circle(cv_img, (int(xc), int(yc)), radius=10, 
+                                       color=(self.object_colors[label].r, self.object_colors[label].g, self.object_colors[label].b), 
+                                       thickness=-1)
+                        
+                        # get rotational speed
+                        self.object_rotational_speeds = self.calculate_rotational_speed(centers, frame_time_list, xc, yc, label)
+                        # print("rotational speed for \"",label, "\" is ", self.object_rotational_speeds)
+
+                        # predict next 3 future timestamps at (closest_x, closest_y)
+                        if self.num_rotations[label] > 1:
+                            self.future_timestamps[label] = self.predict_future_timestamps(
+                                self.object_rotational_speeds, centers, frame_time_list, xc, yc, closest_x, closest_y)
+                            if self.future_timestamps[label]:
+                                # print("future timestamps for \"", label, "\" is ", self.future_timestamps[label])
+                                self.time_estimation_complete = True
+                            # print("time for one rotation for \"", label, "\" is ",
+                            #     self.future_timestamps[label][-2]-self.future_timestamps[label][-1])
+                
+                # print("\n\n\n\n\n\n NEW FRAME ")
+
+                if self.debug:
+                    # publish bbox and label
+                    self.publish_debug_img(cv_img)
+
+                end = time.time()
+                rospy.loginfo("Time taken for detection: %s",str(end - start))
+
+            except CvBridgeError as e:
+                rospy.logerr(e)
+                return
+        else:
+            rospy.logwarn("No image received")
+
+    def publish_debug_img(self, debug_img):
+        debug_img = np.array(debug_img, dtype=np.uint8)
+        debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
+        self.pub_debug.publish(debug_img)
+
+
+if __name__ == '__main__':
+    rospy.init_node("rtt")
+    rospy.loginfo('Started RTT Node.')
+    net = rospy.get_param("~net")
+    classifier_name = rospy.get_param("~classifier")
+    dataset = rospy.get_param("~dataset")
+    model_dir = rospy.get_param("~model_dir")
+    weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', classifier_name, dataset, "atwork.pt")
+    object_recognizer = RTTObjectTracker(
+        weights=weights, debug_mode=True)
+    rospy.loginfo("RTT Recognizer is ready using %s : %s , dataset: %s ",
+                  net, classifier_name, dataset)
+    rospy.spin()
