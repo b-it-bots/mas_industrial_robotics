@@ -159,6 +159,9 @@
         <arg name="camera_name" value="$(arg camera_name)"/>
     </include>
 
+    <!-- RTT Detector -->
+    <include file="$(find mir_rtt_detection)/ros/launch/rtt_detector.launch"/>
+    
     <!-- =================================================================== -->
 
     <!-- ============= -->
