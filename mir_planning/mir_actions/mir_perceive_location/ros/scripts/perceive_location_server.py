@@ -356,7 +356,7 @@ def main():
         # move arm to appropriate position
         smach.StateMachine.add(
             "MOVE_ARM_TO_PERCEIVE_POSE",
-            gms.move_arm_and_gripper("open"),
+            gms.move_arm_and_gripper("open", use_moveit=False),
             transitions={
                 "succeeded": "WAIT_FOR_ARM_TO_STABILIZE",
                 "failed": "MOVE_ARM_TO_PERCEIVE_POSE",

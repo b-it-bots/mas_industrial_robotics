@@ -93,7 +93,7 @@ def main():
 
         smach.StateMachine.add(
             "SETUP_ARM_PRE_STAGE",
-            gms.move_arm(),
+            gms.move_arm(use_moveit=False),
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_STAGE",
                 "failed": "SETUP_ARM_PRE_STAGE"
@@ -112,7 +112,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_STAGE",
-            gms.move_arm(),
+            gms.move_arm(use_moveit=False),
             transitions={
                 "succeeded": "CLOSE_GRIPPER",
                 "failed": "MOVE_ARM_STAGE"
@@ -147,7 +147,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_PRE_STAGE_AGAIN",
-            gms.move_arm(blocking=True),
+            gms.move_arm(blocking=True, use_moveit=False),
             transitions={
                 "succeeded": "MOVE_ARM_TO_PRE_PLACE",
                 "failed": "MOVE_ARM_PRE_STAGE_AGAIN",
@@ -161,7 +161,7 @@ def main():
         """
         smach.StateMachine.add(
             "MOVE_ARM_TO_PRE_PLACE",
-            gms.move_arm("pre_place"),
+            gms.move_arm("pre_place", use_moveit=False),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "MOVE_ARM_TO_PRE_PLACE",

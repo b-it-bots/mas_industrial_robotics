@@ -78,7 +78,7 @@ def main():
         # add states to the container
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            gms.move_arm("pre_place"),
+            gms.move_arm("pre_place", use_moveit=False),
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_PRE_STAGE",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
@@ -96,7 +96,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_PRE_STAGE",
-            gms.move_arm(),
+            gms.move_arm(use_moveit=False),
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_STAGE",
                 "failed": "MOVE_ARM_PRE_STAGE",
@@ -114,7 +114,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_STAGE",
-            gms.move_arm(),
+            gms.move_arm(use_moveit=False),
             transitions={
                 "succeeded": "OPEN_GRIPPER",
                 "failed": "MOVE_ARM_STAGE"
@@ -124,7 +124,8 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "SETUP_MOVE_ARM_RETRACT"},
+            transitions={"succeeded": "SETUP_MOVE_ARM_RETRACT",
+                         "timeout": "SETUP_MOVE_ARM_RETRACT"},
         )
 
         smach.StateMachine.add(
@@ -137,7 +138,7 @@ def main():
         )
         smach.StateMachine.add(
             "MOVE_ARM_RETRACT",
-            gms.move_arm(),
+            gms.move_arm(use_moveit=False),
             transitions={
                 "succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE_RETRACT",
                 "failed": "MOVE_ARM_RETRACT"
@@ -146,7 +147,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE_RETRACT",
-            gms.move_arm("pre_place"),
+            gms.move_arm("pre_place", use_moveit=False),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE_RETRACT",
