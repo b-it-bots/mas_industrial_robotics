@@ -53,4 +53,7 @@
     <!-- insert object in cavity server -->
     <node pkg="mir_insert_cavity" type="insert_cavity_server.py" name="insert_cavity_server" output="screen" />
 
+    <!-- rotating table task server -->
+    <node pkg="mir_rtt_pick_object" type="rtt_pick_object_server.py" name="rtt_pick_object_server" output="screen" />
+
 </launch>
