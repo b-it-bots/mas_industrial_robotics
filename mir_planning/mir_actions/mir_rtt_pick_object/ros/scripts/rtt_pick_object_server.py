@@ -13,9 +13,10 @@ from mir_planning_msgs.msg import (
     GenericExecuteResult,
 )
 from smach_ros import ActionServerWrapper, IntrospectionServer
-from std_msgs.msg import String
+from std_msgs.msg import String, Float64
 from mas_perception_msgs.msg import TimeStampedPose
 import tf.transformations as tr
+from geometry_msgs.msg import PoseStamped
 
 # ===============================================================================
 
@@ -24,7 +25,7 @@ class GetPredictions(smach.State):
         smach.State.__init__(
             self,
             outcomes=["succeeded"],
-            input_keys=["goal"],
+            input_keys=["goal", "current_rtt_pick_retry"],
             output_keys=["feedback", "result", "pose", "time"],
         )
         self.publisher = rospy.Publisher(topic_name, String, queue_size=10)
@@ -36,60 +37,141 @@ class GetPredictions(smach.State):
         )
 
         obj = Utils.get_value_of(userdata.goal.parameters, "object")
-        msg_str = f'e_start_{obj}'
-        self.publisher.publish(String(data=msg_str))
+        if userdata.current_rtt_pick_retry == 0:
+            msg_str = f'e_start_{obj}'
+            self.publisher.publish(String(data=msg_str))
         rospy.sleep(0.2)  # let the topic to survive for some time\
         predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose)
         pred_pose = predicted_msg.pose
         userdata.pose = pred_pose
         pred_times = predicted_msg.timestamps
-        # print("*"*50)
+        print("*"*50)
         # print('pred_pose', pred_pose)
-        # print('pred_times', pred_times)
-        # print("*"*50)
+        print('pred_times', pred_times)
+        print("*"*50)
         userdata.time = pred_times
         return "succeeded"
         
 class WaitForObject(smach.State):
-    def __init__(self):
+    def __init__(self, state_flag):
         smach.State.__init__(
             self,
             outcomes=["succeeded", "failed"],
-            input_keys=["time"],
-            output_keys=["feedback", "result"],
-        )
+            input_keys=["time", "time_taken"],
+            output_keys=["feedback", "result", "time_taken"],
+        )   
+        self.state_flag = state_flag
     
     def execute(self, userdata):
         userdata.result = GenericExecuteResult()
         userdata.feedback = GenericExecuteFeedback(
             current_state="WaitForObject", text="waiting for object"
         )
-        print("userdata.time", userdata.time)
-        print("rospy.Time.now().to_sec()", rospy.Time.now().to_sec())
-        print("\n\n"*2)
-        while rospy.Time.now().to_sec() < userdata.time - 1.5: # 2.1 is the time it takes to move arm to pick
-            rospy.sleep(0.01)
-        return "succeeded"
+
+        if self.state_flag == "start":
+            print("start_state")
+            userdata.time_taken = rospy.Time.now().to_sec()
+            print("Start time", userdata.time_taken)
+            print("\n\n"*2)
+            while rospy.Time.now().to_sec() < userdata.time - 0.4: # 2.1 is the time it takes to move arm to pick
+                rospy.sleep(0.01)
+            return "succeeded"
+        
+        elif self.state_flag == "end":
+            print("end_state")
+            userdata.time_taken = rospy.Time.now().to_sec() - userdata.time_taken
+            print("End time", userdata.time_taken)
+            print("Time_taken", userdata.time_taken)
+
+            return "succeeded"
+
 
 class SetupObjectPose(smach.State):
-    def __init__(self):
+    def __init__(self, state):
         smach.State.__init__(
             self,
             outcomes=["succeeded", "failed"],
             input_keys=["pose"],
-            output_keys=["feedback", "result", "move_arm_to"],
+            output_keys=["feedback", "result", "move_arm_to", "move_arm_to_pick"],
         )
-    
+
+        self.pick_pose = rospy.Publisher(
+            "/mcr_perception/object_selector/output/object_pose",
+            PoseStamped,
+            queue_size=10,
+        )
+
+        self.state = state
+
     def execute(self, userdata):
         #iCartesian pose (x, y, z, r, p, y, frame_id)
         r, p, y = tr.euler_from_quaternion([userdata.pose.pose.orientation.x, userdata.pose.pose.orientation.y, userdata.pose.pose.orientation.z, userdata.pose.pose.orientation.w])
-        userdata.move_arm_to = [userdata.pose.pose.position.x, userdata.pose.pose.position.y, userdata.pose.pose.position.z, r, p, y, userdata.pose.header.frame_id]
+        print("------------------")
+        print(userdata.pose.pose.position.x, userdata.pose.pose.position.y, userdata.pose.pose.position.z)
+        print("r, p, y", r, p, y)
+        print("------------------")
+
+        # convert rpy into quaternion
+        quaternion = tr.quaternion_from_euler(r, p, y)
+
+        move_arm_to = PoseStamped()
+        move_arm_to.header.frame_id = userdata.pose.header.frame_id
+        move_arm_to.pose.position.x = userdata.pose.pose.position.x
+        move_arm_to.pose.position.y = userdata.pose.pose.position.y
+        move_arm_to.pose.position.z = userdata.pose.pose.position.z + 0.05
+
+        move_arm_to.pose.orientation.x = quaternion[0]
+        move_arm_to.pose.orientation.y = quaternion[1]
+        move_arm_to.pose.orientation.z = quaternion[2]
+        move_arm_to.pose.orientation.w = quaternion[3]
+
+        move_arm_to_pick = PoseStamped()
+        move_arm_to_pick.header.frame_id = userdata.pose.header.frame_id
+        move_arm_to_pick.pose.position.x = userdata.pose.pose.position.x
+        move_arm_to_pick.pose.position.y = userdata.pose.pose.position.y
+        move_arm_to_pick.pose.position.z = userdata.pose.pose.position.z - 0.02 # empirical value
+
+        move_arm_to_pick.pose.orientation.x = quaternion[0]
+        move_arm_to_pick.pose.orientation.y = quaternion[1]
+        move_arm_to_pick.pose.orientation.z = quaternion[2]
+        move_arm_to_pick.pose.orientation.w = quaternion[3]
+
+        
+        if self.state == "pre_pick_pose":
+            rospy.logwarn(move_arm_to)
+            self.pick_pose.publish(move_arm_to)
+        elif self.state == "pick_pose":
+            rospy.logwarn(move_arm_to_pick)
+            self.pick_pose.publish(move_arm_to_pick)
+
+        
         # TODO: to check if position is not nan
         userdata.result = GenericExecuteResult()
         userdata.feedback = GenericExecuteFeedback(
             current_state="SetupObjectPose", text="Setting pose for RTT"
         )
         return "succeeded"
+    
+# ===============================================================================
+
+class CheckRetries(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["retry", "no_retry"],
+            input_keys=["current_rtt_pick_retry", "rtt_pick_retries"],
+            output_keys=["current_rtt_pick_retry"],
+        )
+
+    def execute(self, userdata):
+        if userdata.current_rtt_pick_retry < userdata.rtt_pick_retries:
+            userdata.current_rtt_pick_retry += 1
+            return "retry"
+        else:
+            publisher = rospy.Publisher("/mir_perception/rtt/event_in", String, queue_size=10)
+            msg_str = f'e_stop'
+            publisher.publish(String(data=msg_str))
+            return "no_retry"
 
 # ===============================================================================
 
@@ -120,44 +202,171 @@ def main():
         output_keys=["feedback", "result"],
     )
 
+    # rtt retries
+    sm.userdata.rtt_pick_retries = 1
+    sm.userdata.current_rtt_pick_retry = 0
+
     with sm:
         smach.StateMachine.add(
-            "GET_PREDICTIONS",
-            GetPredictions("/mir_perception/rtt/event_in"),
-            transitions={"succeeded": "MOVE_ARM_PRE_PICK"},
-        )
-
-        # move arm to appropriate position
-        # TODO: change rtt_pre_pick to variable position 5 cm above current pose received from perception
-        smach.StateMachine.add(
-            "MOVE_ARM_PRE_PICK",
-            gms.move_arm("rtt_pre_pick", use_moveit=False),
+            "SET_PREGRASP_PARAMS",
+            gbs.set_named_config("pregrasp_planner_no_sampling"),
             transitions={
-                "succeeded": "SETUP_OBJECT_POSE",
-                "failed": "OVERALL_FAILED",
+                "success": "GO_PRE_PERCEIVE",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
             },
         )
 
         smach.StateMachine.add(
-            "SETUP_OBJECT_POSE",
-            SetupObjectPose(),
-            transitions={"succeeded": "WAIT_FOR_OBJECT",
-                          "failed": "TRY_PICKING"},
+            "GO_PRE_PERCEIVE",
+            gms.move_arm("pre_place", use_moveit=False),
+            transitions={
+                "succeeded": "SELECT_OBJECT",
+                "failed": "GO_PRE_PERCEIVE",
+            }
         )
 
+        smach.StateMachine.add(
+            "SELECT_OBJECT",
+            GetPredictions("/mir_perception/rtt/event_in"),
+            transitions={"succeeded": "OPEN_GRIPPER"},
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER",
+            gms.control_gripper(-1.4),
+            transitions={"succeeded": "SETUP_OBJECT_POSE_PICK",
+                         "timeout": "SETUP_OBJECT_POSE_PICK"},
+        )
+
+        # # Set the pose to pre pose for picking
+        # smach.StateMachine.add(
+        #     "SETUP_OBJECT_POSE_PRE_PICK",
+        #     SetupObjectPose("pre_pick_pose"),
+        #     transitions={"succeeded": "OPEN_GRIPPER",
+        #                   "failed": "SETUP_OBJECT_POSE_PRE_PICK"},
+        # )
+
+        # smach.StateMachine.add(
+        #     "OPEN_GRIPPER",
+        #     gms.control_gripper(-1.4),
+        #     transitions={"succeeded": "CHECK_PRE_POSE_IK",
+        #                  "timeout": "CHECK_PRE_POSE_IK"},
+        # )
+
+        # smach.StateMachine.add(
+        #     "CHECK_PRE_POSE_IK",
+        #     gbs.send_and_wait_events_combined(
+        #         event_in_list=[
+        #             ("/pregrasp_planner_node/event_in", "e_start")
+        #         ],
+        #         event_out_list=[
+        #             (
+        #                 "/pregrasp_planner_node/event_out",
+        #                 "e_success",
+        #                 True,
+        #             )
+        #         ],
+        #         timeout_duration=20,
+        #     ),
+        #     transitions={
+        #         "success": "GO_TO_PRE_PICK_POSE",
+        #         "timeout": "CHECK_PRE_POSE_IK", 
+        #         "failure": "CHECK_PRE_POSE_IK",
+        #     },
+        # )
+
+        # smach.StateMachine.add(
+        #     "GO_TO_PRE_PICK_POSE",
+        #     gbs.send_and_wait_events_combined(
+        #         event_in_list=[
+        #             ("/waypoint_trajectory_generation/event_in", "e_start")],
+        #         event_out_list=[
+        #             (
+        #                 "/waypoint_trajectory_generation/event_out",
+        #                 "e_success",
+        #                 True,
+        #             )],
+        #         timeout_duration=20,
+        #     ),
+        #     transitions={
+        #         "success": "SETUP_OBJECT_POSE_PICK", 
+        #         "timeout": "OVERALL_FAILED",
+        #         "failure": "OVERALL_FAILED",
+        #     },
+        # )
+
+        # Set the pose to pre pose for picking
+        smach.StateMachine.add(
+            "SETUP_OBJECT_POSE_PICK",
+            SetupObjectPose("pick_pose"),
+            transitions={"succeeded": "CHECK_PICK_POSE_IK",
+                          "failed": "SETUP_OBJECT_POSE_PICK"},
+        )
+
+        smach.StateMachine.add(
+            "CHECK_PICK_POSE_IK",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    ("/pregrasp_planner_node/event_in", "e_start")
+                ],
+                event_out_list=[
+                    (
+                        "/pregrasp_planner_node/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=20,
+            ),
+            transitions={
+                "success": "GO_TO_PICK_POSE",
+                "timeout": "CHECK_PICK_POSE_IK", 
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        # smach.StateMachine.add(
+        #     "WAIT_FOR_OBJECT",
+        #     WaitForObject("start"),
+        #     transitions={
+        #         "succeeded": "GO_TO_PICK_POSE",
+        #         "failed": "OVERALL_FAILED",
+        #     },
+        # )
+
+        smach.StateMachine.add(
+        "GO_TO_PICK_POSE",
+        gbs.send_and_wait_events_combined(
+            event_in_list=[
+                ("/waypoint_trajectory_generation/event_in", "e_start")],
+            event_out_list=[
+                (
+                    "/waypoint_trajectory_generation/event_out",
+                    "e_success",
+                    True,
+                )],
+            timeout_duration=20,
+        ),
+        transitions={
+            "success": "WAIT_FOR_OBJECT", 
+            "timeout": "OVERALL_FAILED",
+            "failure": "OVERALL_FAILED",
+        },
+        )
+
+        # smach.StateMachine.add(
+        #     "MEASURE_TIME",
+        #     WaitForObject("end"),
+        #     transitions={
+        #         "succeeded": "WAIT_FOR_OBJECT",
+        #         "failed": "OVERALL_FAILED",
+        #     },
+        # )
+        
         smach.StateMachine.add(
             "WAIT_FOR_OBJECT",
-            WaitForObject(),
-            transitions={
-                "succeeded": "TRY_PICKING",
-                "failed": "OVERALL_FAILED",
-            },
-        )
-
-        # move only arm for wbc
-        smach.StateMachine.add(
-            "TRY_PICKING",
-            gms.move_arm(),
+            WaitForObject("start"),
             transitions={
                 "succeeded": "CLOSE_GRIPPER",
                 "failed": "OVERALL_FAILED",
@@ -170,20 +379,6 @@ def main():
             transitions={"succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
                          "timeout": "MOVE_ARM_TO_STAGE_INTERMEDIATE"},
         )
-
-        # smach.StateMachine.add(
-        #     "MOVE_ROBOT_AND_PICK",
-        #     gbs.send_and_wait_events_combined(
-        #         event_in_list=[("/wbc/event_in", "e_start")],
-        #         event_out_list=[("/wbc/event_out", "e_success", True)],
-        #         timeout_duration=50,
-        #     ),
-        #     transitions={
-        #         "success": "CLOSE_GRIPPER",
-        #         "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
-        #         "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
-        #     },
-        # )
 
         # move arm to stage_intemediate position
         smach.StateMachine.add(
@@ -200,8 +395,18 @@ def main():
             gms.verify_object_grasped(5),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
-                "timeout": "OVERALL_FAILED",
-                "failed": "OVERALL_FAILED",
+                "timeout": "OVERALL_SUCCESS",
+                "failed": "RETRY_PICK",
+            },
+        )
+
+        # retry if failed
+        smach.StateMachine.add(
+            "RETRY_PICK",
+            CheckRetries(),
+            transitions={
+                "retry": "SELECT_OBJECT",
+                "no_retry": "OVERALL_FAILED",
             },
         )
 
