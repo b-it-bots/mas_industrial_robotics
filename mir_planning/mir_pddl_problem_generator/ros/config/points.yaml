@@ -6,7 +6,8 @@ ws: 100
 sh: 50
 co: 20 # container_box_blue / container_box_red
 pp: 10
-cb: 0 # converyor belt. Used for RTT
+tt: 10 # turntable - for RTT
+cb: 0 # converyor belt. not used anymore
 
 # ==============================================================================
 # ======================  objects  =============================================
@@ -23,11 +24,11 @@ m20: 20
 m30: 20
 axis2: 20
 motor2: 20
+housing: 20
+m20_100: 20
 
 # long and heavy objects
 allenkey: 10
 drill: 10
-housing: 10
-m20_100: 10
 screwdriver: 10
 wrench: 10
