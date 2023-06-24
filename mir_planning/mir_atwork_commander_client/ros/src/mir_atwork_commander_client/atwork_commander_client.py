@@ -38,6 +38,8 @@ class AtworkCommanderClient(object):
         self._cavity_start_code = getattr(Object, "CAVITY_START")
         self._cavity_end_code = getattr(Object, "CAVITY_END")
 
+        self._large_objects = ["allenkey"]
+
     def _timer_callback(self, event):
         self._robot_state.sender.header.stamp = rospy.Time.now()
         self._robot_state_pub.publish(self._robot_state)
@@ -214,6 +216,11 @@ class AtworkCommanderClient(object):
             if "container" in obj_dict["target"] or "cavity" in obj_dict["target"]:
                 facts.append(self._get_fact_from_attr_and_values(
                     "insertable",
+                    [obj_dict["object_full_name"]]))
+                
+            if obj_dict["object"] in self._large_objects:
+                facts.append(self._get_fact_from_attr_and_values(
+                    "is_large",
                     [obj_dict["object_full_name"]]))
 
             facts.append(self._get_fact_from_attr_and_values(
