@@ -65,7 +65,7 @@ class OrientationIndependentIK(object):
         self.is_picking_from_shelf = rospy.get_param("/pick_from_shelf_server/pick_statemachine_says_shelf", False)
         rospy.loginfo(f"[orientation_independent_ik] shelf picking is set to: {self.is_picking_from_shelf}")
         if self.is_picking_from_shelf=='True':
-            pitch_ranges = [(-45.0, -15.0)] # limiting the pitch range to avoid collisions with shelf and table
+            pitch_ranges = [(-20.0, -15.0)] # limiting the pitch range to avoid collisions with shelf and table
         else:
             pitch_ranges = [(0.0, 0.0), (-30.0, 0.0), (-60.0, -30.0), (-90.0, -60.0), (0.0, 10.0)]
         return self._get_reachable_pose_and_joint_msg_from_point_and_pitch_ranges(
