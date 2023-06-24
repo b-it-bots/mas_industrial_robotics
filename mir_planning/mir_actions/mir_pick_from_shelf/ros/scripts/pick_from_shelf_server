@@ -216,10 +216,17 @@ def main():
                 timeout_duration=10,
             ),
             transitions={
-                "success": "MOVE_ARM_TO_PRE_GRASP",
+                "success": "OPEN_GRIPPER",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER",
+            gms.control_gripper(-1.0), #range -1.5 to 1, -1.5 is wide open, 0 is open, 1 is closed
+            transitions={"succeeded": "MOVE_ARM_TO_PRE_GRASP",
+                         "timeout": "MOVE_ARM_TO_PRE_GRASP"},
         )
 
         smach.StateMachine.add(
@@ -239,10 +246,17 @@ def main():
                 timeout_duration=50,
             ),
             transitions={
-                "success": "SET_SHELF_FLAG_FALSE_1",
+                "success": "CLOSE_GRIPPER",
                 "timeout": "SET_SHELF_FLAG_FALSE_2",
                 "failure": "SET_SHELF_FLAG_FALSE_2",
             },
+        )
+
+        smach.StateMachine.add(
+            "CLOSE_GRIPPER",
+            gms.control_gripper("close"),
+            transitions={"succeeded": "SET_SHELF_FLAG_FALSE_1",
+                         "timeout": "SET_SHELF_FLAG_FALSE_2"},
         )
 
         # add a state that calls the shelf flag setter service with false
