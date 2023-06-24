@@ -181,6 +181,7 @@ class RGBObjectRecognizer():
                                                          conf=self.confidence_threshold,
                                                          iou=self.iou_threshold,
                                                          device=self.device,
+                                                         verbose=False
                                                         )
 
                         # convert results to numpy array
