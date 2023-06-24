@@ -9,7 +9,7 @@ import rospy
 import smach
 import tf.transformations
 from actionlib import SimpleActionClient
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped
 from mas_perception_msgs.msg import Cavity
 from mir_actions.utils import Utils
 from mir_planning_msgs.msg import (
@@ -22,16 +22,7 @@ from moveit_msgs.msg import MoveItErrorCodes
 from smach_ros import ActionServerWrapper, IntrospectionServer
 from std_msgs.msg import Float64, String
 from diagnostic_msgs.msg import KeyValue
-
-# ===============================================================================
-
-# For wiggle arm
-arm_command = moveit_commander.MoveGroupCommander("arm_1")
-arm_command.set_goal_position_tolerance(0.01)
-arm_command.set_goal_orientation_tolerance(0.01)
-arm_command.set_goal_joint_tolerance(0.005)
-
-# ===============================================================================
+from sensor_msgs.msg import JointState
 
 
 class SelectCavity(smach.State):
@@ -50,7 +41,7 @@ class SelectCavity(smach.State):
         matchings = {
             "M20": ["M20_H", "M20_V"],
             "M30": ["M30_H", "M30_V"],
-            "M20_100": ["M20_100_H", "M20_100_V"],
+            "M20_100": ["M20_100_H", "M20_H"],
             "F20_20": ["F20_20_H", "F20_20_V"],
             "S40_40": ["S40_40_H", "S40_40_V"],
         }
@@ -92,28 +83,45 @@ class ppt_wiggle_arm(smach.State):
     Wiggle arm after placement on the table
     """
 
-    def __init__(self, wiggle_offset=0.0, joint=0):
-        smach.State.__init__(self, outcomes=["succeeded", "failed"])
-        self.wiggle_offset = wiggle_offset
-        self.joint_number = joint
+    def __init__(self, wiggle_yaw=1.57):
+        smach.State.__init__(self, 
+                             input_keys=["goal"], 
+                             outcomes=["succeeded", "failed"])
+
         self.blocking = True
 
         # create publisher for sending gripper position
         self.gripper_topic = "/gripper_controller/command"
         # self.cavity_pose_topic = "/mcr_perception/object_selector/output/object_pose"
         self.cavity_pose_topic = "/mir_perception/multimodel_object_recognition/output/rgb_object_pose_array"
+        self.arm_velocity_pub = rospy.Publisher("/arm_1/arm_controller/cartesian_velocity_command", TwistStamped, queue_size=10)
+    
+        self.joint_states_sub = rospy.Subscriber(
+            "/joint_states", JointState, self.joint_states_cb
+        )
 
         self.gripper = rospy.Publisher(self.gripper_topic, Float64, queue_size=10)
 
-        # Determining which object to wiggle
-        # rospy.Subscriber("~object_name", std_msgs.msg.String, self.object_name_cb)
+        self.object_name = None
+
+        # MoveIt! commander movegroup
+        self.arm_command = moveit_commander.MoveGroupCommander("arm_1")
+        self.arm_command.set_goal_position_tolerance(0.01)
+        self.arm_command.set_goal_orientation_tolerance(0.01)
+        self.arm_command.set_goal_joint_tolerance(0.005)
+
         # Determineing object orientation
         rospy.Subscriber(self.cavity_pose_topic, PoseStamped, self.cavity_pose_cb)
 
         self.yaw = 0
+        self.wiggle_yaw = wiggle_yaw # wiggle angle in radians (default 1.57) on either direction
         self.joint_values_static = []
         # giving some time to the publisher to register in ros network
         rospy.sleep(0.1)
+        
+    def joint_states_cb(self, msg):
+        if "arm_joint_1" in msg.name: # get the joint values of the arm only
+            self.current_joint_positions = msg.position
 
     def object_name_cb(self, msg):
         """
@@ -135,81 +143,173 @@ class ppt_wiggle_arm(smach.State):
             self.joint_values_static[joint_number] + wiggle_offset
         )
         try:
-            arm_command.set_joint_value_target(joint_values)
+            self.arm_command.set_joint_value_target(joint_values)
+        except Exception as e:
+            rospy.logerr("unable to set target position: %s" % (str(e)))
+            return False
+        error_code = self.arm_command.go(wait=self.blocking)
+
+        if error_code == MoveItErrorCodes.SUCCESS:
+            return True
+        else:
+            rospy.logerr("Arm movement failed with error code: %d", error_code)
+            return False
+
+    def rotational_wiggle(self, direction, message, wiggle_velocity=1.0, timeout=25.0):
+
+        while not rospy.is_shutdown():
+
+            if direction == "CW":
+                wiggle_yaw = self.wiggle_yaw
+                rospy.loginfo("Wiggling CW")
+                rospy.loginfo("Wiggle yaw: %f", wiggle_yaw)
+                message.twist.angular.z = wiggle_velocity
+            elif direction == "CCW":
+                wiggle_yaw = 2 * self.wiggle_yaw
+                rospy.loginfo("Wiggling CCW")
+                rospy.loginfo("Wiggle yaw: %f", wiggle_yaw)
+                message.twist.angular.z = -wiggle_velocity
+
+            if self.current_joint_positions is None or len(self.current_joint_positions) < 1:
+                rospy.logwarn("No joint positions received")
+                continue # skip the rest of the loop 
+
+            # Getting Yaw angle from joint_states   
+            initial_yaw = self.current_joint_positions[-1] # in radians take the last joint value(EFF)
+            initial_time = rospy.Time.now().to_sec()
+
+            while not rospy.is_shutdown():
+                current_time = rospy.Time.now().to_sec()
+                self.arm_velocity_pub.publish(message)
+                rospy.sleep(0.1)
+                current_yaw = self.current_joint_positions[-1]
+                # check for timeout also and break after 5 seconds
+                if abs(current_yaw - initial_yaw) >= wiggle_yaw:
+                    rospy.loginfo("Reached the desired yaw angle")
+                    return True
+                if current_time - initial_time >= timeout:
+                    rospy.logwarn("Reached the timeout")
+                    return False
+
+    def linear_wiggle_cartesian_mode(self, movement_type, travel_direction, message, travel_distance= 0.1, travel_velocity=0.03, timeout=5.0):
+        """
+        Because of joint limit linear velocity movement is not possible do properlly
+        
+        # how to use
+        self.linear_wiggle_cartesian_mode("horizontal", "backward", message, travel_distance= 0.05, travel_velocity=0.03)
+        """
+
+        while not rospy.is_shutdown():
+            if travel_direction == "forward": # change the direction of travel
+                travel_velocity = travel_velocity
+            elif travel_direction == "backward":
+                travel_velocity = -travel_velocity
+
+            travel_time = travel_distance / travel_velocity
+            initial_time = rospy.Time.now().to_sec()
+            while not rospy.is_shutdown():
+                if movement_type == "horizontal":
+                    message.twist.linear.y = travel_velocity
+                if movement_type == "vertical":
+                    message.twist.linear.x = travel_velocity
+                self.arm_velocity_pub.publish(message)
+                current_time = rospy.Time.now().to_sec()
+                if current_time - initial_time >= travel_time: # no feedback from the arm just wait for the travel time
+                    rospy.loginfo("Travel time reached")
+                    positive_flag = True
+                    return True
+
+    def linear_wiggle_joint_mode(self, travel_direction, travel_distance= 0.08): # travel distance in radians
+        # for vertical motion move arm link 4 and for horizontal motion move arm link 0
+
+        rospy.logwarn("Adjusting the object with linear wiggle joint mode in %s direction", travel_direction)
+
+        joint_number_to_change = None
+        wiggle_offset = travel_distance
+
+        if travel_distance > 1.5: # Since it is joint angles should be careful with the travel distance 
+            rospy.logerr("Travel distance is too high")
+            return "failed"
+
+        self.joint_values_static = self.arm_command.get_current_joint_values()
+
+        horizontal_wrist_angle = 2.98 # radians
+        vertical_wrist_angle = 4.53 # radians
+
+        if travel_direction == "left_right":
+            # check if the joint values for joint 4 is around 2.98 +- 0.1 if not set it to 2.98
+            if self.joint_values_static[4] < horizontal_wrist_angle - 0.05 or self.joint_values_static[4] > horizontal_wrist_angle + 0.05:
+                self.joint_values_static[4] = horizontal_wrist_angle # joint value for arm link 4 when wrist is horizontal
+
+            joint_number_to_change = 0 # arm link 0 base of the arm 
+
+        elif travel_direction == "front_back":
+            # check if the joint values for joint 4 is around 4.01 +- 0.1 if not set it to 4.01
+            if self.joint_values_static[4] < vertical_wrist_angle - 0.05 or self.joint_values_static[4] > vertical_wrist_angle + 0.05:
+                self.joint_values_static[4] = vertical_wrist_angle # joint value for arm link 4 when wrist is vertical
+
+            joint_number_to_change = 3 # arm link 3 last before joint of the arm
+
+        try:
+            self.arm_command.set_joint_value_target(self.joint_values_static)
         except Exception as e:
             rospy.logerr("unable to set target position: %s" % (str(e)))
             return "failed"
-        error_code = arm_command.go(wait=self.blocking)
+        error_code = self.arm_command.go(wait=self.blocking)
+        if not error_code == MoveItErrorCodes.SUCCESS:
+            return "failed"
 
-        if error_code == MoveItErrorCodes.SUCCESS:
+        success = self.execute_arm(joint_number_to_change , wiggle_offset= wiggle_offset)
+        success &= self.execute_arm(joint_number_to_change , wiggle_offset= -wiggle_offset)
+        success &= self.execute_arm(joint_number_to_change , wiggle_offset= 0.0)
+
+        if success:
             return "succeeded"
         else:
-            rospy.logerr("Arm movement failed with error code: %d", error_code)
             return "failed"
 
     def execute(self, userdata):
-        # open the arm slightly
-        message = Float64()
-        message.data = -0.1
-        self.gripper.publish(message)
-        rospy.sleep(0.1)
-        joint_number_to_change = None
-        wiggle_offset = None
-        self.joint_values_static = arm_command.get_current_joint_values()
-        #################
-        if np.allclose(self.yaw, 0):
-            # wiggle right left first
-            joint_number_to_change = 0
-            wiggle_offset = -0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go left
-            joint_number_to_change = 0
-            wiggle_offset = 0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go center again
-            joint_number_to_change = 0
-            wiggle_offset = 0.0
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # wiggle forward
-            joint_number_to_change = 3
-            wiggle_offset = -0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go left
-            joint_number_to_change = 3
-            wiggle_offset = 0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go center again
-            joint_number_to_change = 3
-            wiggle_offset = 0.0
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-        else:
-            # wiggle forward
-            joint_number_to_change = 3
-            wiggle_offset = -0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go left
-            joint_number_to_change = 3
-            wiggle_offset = 0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go center again
-            joint_number_to_change = 3
-            wiggle_offset = 0.0
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # wiggle right left first
-            joint_number_to_change = 0
-            wiggle_offset = -0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go left
-            joint_number_to_change = 0
-            wiggle_offset = 0.12
-            self.execute_arm(joint_number_to_change, wiggle_offset)
-            # go center again
-            joint_number_to_change = 0
-            wiggle_offset = 0.0
-            self.execute_arm(joint_number_to_change, wiggle_offset)
+        
+        message = TwistStamped()
+        message.header.frame_id = "arm_link_5"
+
+        self.object_name = Utils.get_value_of(userdata.goal.parameters, "peg")
+        adjustment_list = ["rotational", "linear"]
+
+        linear_wiggle_object_list = ["M20", "M30"]
+        rotational_wiggle_object_list = ["M20_100", "F20_20", "S40_40"]
+
+        if self.object_name in linear_wiggle_object_list:
+            type_of_adjustment = "linear"
+        elif self.object_name in rotational_wiggle_object_list:
+            type_of_adjustment = "rotational"
+        elif self.object_name is None:
+            rospy.logwarn("No object name received")
+            return "failed"
+
+        if type_of_adjustment == "rotational": 
+
+            rospy.logwarn("Adjusting the object with a %s movement", type_of_adjustment)
+
+            self.rotational_wiggle("CW", message, wiggle_velocity=2.0)
+            rospy.loginfo("Rotational wiggle CCW done")
+        
+            self.rotational_wiggle("CCW", message, wiggle_velocity=2.0)
+            rospy.loginfo("Rotational wiggle CW done")
+
+            
+        if type_of_adjustment == "linear":
+
+            rospy.logwarn("Adjusting the object with a %s movement", type_of_adjustment)
+
+            self.linear_wiggle_joint_mode("left_right", travel_distance= 0.15) # travel distance in joint angles in radians
+            rospy.loginfo("Linear wiggle left_right done")
+
+            self.linear_wiggle_joint_mode("front_back", travel_distance= 0.13) # travel distance in joint angles in radians 
+            rospy.loginfo("Linear wiggle front_back done")
+
 
         return "succeeded"
-        #################
 
 # ===============================================================================
 
@@ -231,7 +331,6 @@ class Unstage_to_place(smach.State):
             self.obj = "light"
         else:
             self.obj =  "light"
-
 
         self.unstage_client = SimpleActionClient('unstage_object_server', GenericExecuteAction)
         self.unstage_client.wait_for_server()
@@ -275,10 +374,10 @@ def main():
         output_keys=["feedback", "result"],
     )
     with sm:
-        # set cavity model
+        # set pregrasp planner params
         smach.StateMachine.add(
-            "SET_PERCEPTION_PARAMS",
-            gbs.set_named_config("multimodal_object_recognition_cavity"),
+            "SET_PREGRASP_PARAMS",
+            gbs.set_named_config("pregrasp_planner_no_sampling"),
             transitions={
                 "success": "PERCEIVE_LOCATION",
                 "timeout": "OVERALL_FAILED",
@@ -289,7 +388,7 @@ def main():
         # start perception
         smach.StateMachine.add(
             "PERCEIVE_LOCATION",
-            gas.perceive_location(),
+            gas.perceive_location(obj_category="multimodal_object_recognition_cavity"),
             transitions={
                 "success": "SELECT_CAVITY",
                 "failed": "OVERALL_FAILED",
@@ -377,7 +476,7 @@ def main():
         # open gripper
         smach.StateMachine.add(
             "OPEN_GRIPPER",
-            gms.control_gripper("open"),
+            gms.control_gripper(0.5),
             transitions={
                 "succeeded": "WIGGLE_ARM",
                 "timeout": "WIGGLE_ARM"
@@ -387,7 +486,7 @@ def main():
         # wiggling the arm for precision placement
         smach.StateMachine.add(
             "WIGGLE_ARM",
-            ppt_wiggle_arm(wiggle_offset=-0.12, joint=0),
+            ppt_wiggle_arm(wiggle_yaw=1.57),
             transitions={
                 "succeeded": "MOVE_ARM_TO_HOLD",
                 "failed": "MOVE_ARM_TO_HOLD",
@@ -400,7 +499,7 @@ def main():
             gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
-                "failed": "MOVE_ARM_TO_HOLD",
+                "failed": "OVERALL_FAILED",
             },
         )
 
