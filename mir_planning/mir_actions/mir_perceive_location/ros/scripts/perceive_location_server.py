@@ -44,6 +44,7 @@ class CheckIfBaseCentered(smach.State):
         return None
 
     def execute(self, userdata):
+        print("[percieve] userdata goal: ", str(userdata.goal.parameters))
         target_location = Utils.get_value_of(userdata.goal.parameters, 'location')
         if target_location is not None:
             target_pose = Utils.get_pose_from_param_server(target_location)
@@ -199,6 +200,31 @@ class GetMotionType(smach.State):
 
 # ===============================================================================
 
+class SetPerceptionParams(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["success", "failure"],
+            input_keys=["goal"],
+        )
+        self.set_named_config = gbs.set_named_config("multimodal_object_recognition_atwork")
+
+    def execute(self, userdata):
+        obj_category = Utils.get_value_of(userdata.goal.parameters, "obj_category")
+
+        rospy.loginfo("=============[PERCEIVE_LOCATION] obj_category: %s", obj_category)
+
+        if obj_category:
+            rospy.loginfo("=============[PERCEIVE_LOCATION] [IFFFF] obj_category: %s", obj_category)
+            self.set_named_config.execute(userdata, obj_category)
+            return "success"
+        else:
+            rospy.loginfo("=============[PERCEIVE_LOCATION] [ELSEEEE] obj_category: %s", obj_category)
+            self.set_named_config.execute(userdata)
+            return "success"
+
+# ===============================================================================
+
 def transition_cb(*args, **kwargs):
     userdata = args[0]
     sm_state = args[1][0]
@@ -244,10 +270,21 @@ def main():
     sm.userdata.base_pose_index = 0
 
     with sm:
-        # approach to platform
+
+        # set atwork model
+        smach.StateMachine.add(
+            "SET_PERCEPTION_PARAMS",
+            SetPerceptionParams(),
+            transitions={
+                "success": "SETUP",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+        
         smach.StateMachine.add(
             "SETUP", Setup(), transitions={"succeeded": "CHECK_IF_BASE_IS_AT_LOCATION"},
         )
+
 
         smach.StateMachine.add(
             "CHECK_IF_BASE_IS_AT_LOCATION",
