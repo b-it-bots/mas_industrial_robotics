@@ -88,8 +88,15 @@ void PlannerExecutor::executeCallback()
       next_action.key = "next_action";
       next_action.value = next_action_name;
       params.push_back(next_action);
-      if (next_action_name == "PICK" || next_action_name == "INSERT") {
+      if (next_action_name == "PICK") {
         std::string next_object = actions[i + 1].parameters[2].value;
+        diagnostic_msgs::KeyValue next_object_param;
+        next_object_param.key = "next_object";
+        next_object_param.value = next_object;
+        params.push_back(next_object_param);
+      }
+      else if (next_action_name == "INSERT"){
+        std::string next_object = actions[i + 1].parameters[3].value;
         diagnostic_msgs::KeyValue next_object_param;
         next_object_param.key = "next_object";
         next_object_param.value = next_object;
