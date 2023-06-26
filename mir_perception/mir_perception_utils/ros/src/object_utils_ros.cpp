@@ -72,21 +72,32 @@ PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry
     pcl::getMinMax3D(*xyz_input_cloud, min_pt, max_pt);
     double limit_min = min_pt.z + passthrough_lim_min_offset;
     double limit_max = max_pt.z + passthrough_lim_max_offset;
-    if (object.name != "M20" && object.name != "M30" && object.name != "F20_20_G") {
+    if (obj_category == "cavity")
+    {
+      // print
+      // std::cout << "[CAVITYYYYYYYYYYYY] min_pt.z: " << min_pt.z << std::endl;
+      // std::cout << "[CAVITYYYYYYYYYYYY] max_pt.z: " << max_pt.z << std::endl;
+      limit_max = max_pt.z - 0.015; // TODO: make 0.01 as a dynamic configurable parameter
       pass_through.setFilterLimits(limit_min, limit_max);
       pass_through.setInputCloud(xyz_input_cloud);
       pass_through.filter(filtered_cloud);
-    }
-    else{
-      filtered_cloud = *xyz_input_cloud;
-    }
-    if (obj_category == "cavity"){
+
       // change z value to max(filterpointcloud z) This is only for cavity
       for (size_t i = 0; i < filtered_cloud.points.size(); ++i) {
         // check if filtered_cloud.points[i].z has not nan or inf value
         if (!std::isnan(filtered_cloud.points[i].z) && !std::isinf(filtered_cloud.points[i].z)) {
-          filtered_cloud.points[i].z = 0.035; // TODO: get 0.035 from target_pose_z_pos from config file
+          filtered_cloud.points[i].z = 0.045; // 0.045 is an empirical values, TODO: get 0.045 from target_pose_z_pos from config file
         }
+      }
+    }
+    else{
+      if (object.name != "M20" && object.name != "M30" && object.name != "F20_20_G") {
+        pass_through.setFilterLimits(limit_min, limit_max);
+        pass_through.setInputCloud(xyz_input_cloud);
+        pass_through.filter(filtered_cloud);
+      }
+      else{
+        filtered_cloud = *xyz_input_cloud;
       }
     }
   }
