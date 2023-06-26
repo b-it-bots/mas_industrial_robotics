@@ -80,6 +80,22 @@ pregrasp_planner_single_shot:
         joint_5_offset_side_grasp: 0.0
         rotation_range_min: 270.0
         rotation_range_max: 90.0
+pregrasp_planner_pick:
+    /pregrasp_planner_node:
+        min_azimuth: 0.0
+        max_azimuth: 0.0
+        min_zenith: -5.0
+        max_zenith: 5.0
+        min_roll: -30.0
+        max_roll: 30.0
+pregrasp_planner_no_sampling:
+    /pregrasp_planner_node:
+        min_azimuth: 0.0
+        max_azimuth: 0.0
+        min_zenith: 0.0
+        max_zenith: 0.0
+        min_roll: 0.0
+        max_roll: 0.0
 pregrasp_planner_zealous:
     /pregrasp_planner_node:
         min_azimuth: 0.0
