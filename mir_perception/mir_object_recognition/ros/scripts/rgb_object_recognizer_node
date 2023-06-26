@@ -20,7 +20,7 @@ from ultralytics import YOLO
 
 
 class RGBObjectRecognizer():
-    def __init__(self, weights_1, weights_2, weights_3, 
+    def __init__(self, weights_1, weights_2, 
                  net='detection', 
                  model_name='yolov8',
                  confidence_threshold=0.8,
@@ -47,7 +47,6 @@ class RGBObjectRecognizer():
         self.model_name = model_name
         self.weights_1 = weights_1
         self.weights_2 = weights_2
-        self.weights_3 = weights_3
         self.confidence_threshold = confidence_threshold
         self.iou_threshold = iou_threshold
         self.augment = augment
@@ -73,7 +72,6 @@ class RGBObjectRecognizer():
             # Load models    
             self.model_atwork = YOLO(self.weights_1)
             self.model_cavity = YOLO(self.weights_2)
-            self.model_container = YOLO(self.weights_3)
         
         self.img_size = img_size
 
@@ -99,8 +97,6 @@ class RGBObjectRecognizer():
                         obj_category = rospy.get_param("/mir_perception/multimodal_object_recognition/obj_category")
                         if obj_category == "cavity":
                             self.model = self.model_cavity
-                        elif obj_category == "container":
-                            self.model = self.model_container
                         else:
                             self.model = self.model_atwork
                         # print the model name
@@ -247,16 +243,13 @@ if __name__ == '__main__':
     model_dir = rospy.get_param("~model_dir")
     model_name_1 = "atwork.pt" # default
     model_name_2 = "cavity.pt"
-    model_name_3 = "container.pt"
     weights_1 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
                            'common', 'models', classifier_name, dataset, model_name_1)
     weights_2 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
                             'common', 'models', classifier_name, dataset, model_name_2)
-    weights_3 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                            'common', 'models', classifier_name, dataset, model_name_3)
 
     object_recognizer = RGBObjectRecognizer(
-        weights_1=weights_1, weights_2=weights_2, weights_3=weights_3, debug_mode=True)
+        weights_1=weights_1, weights_2=weights_2, debug_mode=True)
     rospy.loginfo("\033[92m" + "RGB Recognizer is ready using %s : %s , dataset: %s " + "\033[0m",
               net, classifier_name, dataset)
     rospy.spin()
