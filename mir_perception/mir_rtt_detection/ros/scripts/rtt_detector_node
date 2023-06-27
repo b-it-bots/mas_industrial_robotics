@@ -46,14 +46,10 @@ class RTTObjectTracker():
         
         self.cvbridge = CvBridge()
         self.debug = debug_mode
-        self.pub_debug = rospy.Publisher(
-            "/mir_perception/multimodal_object_recognition/recognizer/rgb/output/rtt_debug_image", Image, queue_size=1)
-        self.pub_result = rospy.Publisher(
-            "output/object_list", ObjectList, queue_size=1)
-        self.pub_pose = rospy.Publisher(
-            "rtt/output/object_pose", PoseStamped, queue_size=1)
-        self.pub_cropped_pc = rospy.Publisher(
-            "rtt/output/cropped_pc", PointCloud2, queue_size=1)
+        self.pub_debug = rospy.Publisher("/mir_perception/multimodal_object_recognition/recognizer/rgb/output/rtt_debug_image", Image, queue_size=1)
+        self.pub_result = rospy.Publisher("output/object_list", ObjectList, queue_size=1)
+        self.pub_pose = rospy.Publisher("rtt/output/object_pose", PoseStamped, queue_size=1)
+        self.pub_cropped_pc = rospy.Publisher("rtt/output/cropped_pc", PointCloud2, queue_size=1)
 
         self.net = net
         self.model_name = model_name
@@ -68,7 +64,7 @@ class RTTObjectTracker():
         # Object pose at pickup location
         self.object_pose = {}
         # Number of latest bounding box centers to keep
-        self.max_centers = 100
+        self.max_centers = 50
         # Dictionary to store object colors
         self.object_colors = {}
         # Dictionary to store object rotational velocities
@@ -133,134 +129,33 @@ class RTTObjectTracker():
             # synchronize image and point cloud
             self.ts = message_filters.ApproximateTimeSynchronizer([self.sub_img, self.sub_point_cloud], queue_size=10, slop=0.1)
             self.ts.registerCallback(self.callback)
+
         if self.event.startswith("e_stop"):
+            # Dictionary to store object bounding box centers
+            self.object_centers = {}
+            # Object pose at pickup location
+            self.object_pose = {}
+            # Dictionary to store object rotational velocities
+            self.object_rotational_speed = 0
+            self.future_timestamps = {}
+            self.center_point_position_list_wrt_base_link = {}
+            self.object_pick_position = {}
+            self.time_estimation_complete = False
+            self.orientation_estimation_complete = False
+            self.pose_estimation_complete = False
+            self.rotational_speed_calculation_complete = False
+            self.object_name = None
             self.sub_img.unregister()
             self.sub_point_cloud.unregister()
+            print("RTT - Unregistered image and pointcloud subscribers")
 
-
-    def check_stability(self, params_list):
-        # Check if the standard deviation of the parameters is below a threshold
-        threshold = 0.25  # Adjust the threshold as per your requirements
-
-        if len(params_list) < 2:
-            return False
-
-        params_array = np.array(params_list[-5:])
-        std_dev = np.std(params_array, axis=0)
-        stability = np.all(std_dev < threshold)
-        # print("stability std_dev: ", std_dev)
-
-        return stability
-
-    def calculate_rotational_speed(self, center_list, frame_time_list, xc, yc, label):
-        """
-        center_list: list of center points of the detected object in each frame
-        frame_time_list: list of time stamps of each frame
-        xc, yc: center point of the ellipse
-        """
-        # self.num_rotations[label] = -1
-        # Calculate the angle between each center point and the ellipse center
-        angle_list = []
-        for center in center_list:
-            xo, yo = center
-            angle = math.atan2(yo - yc, xo - xc)
-            angle_list.append(angle)
-
-        # Calculate the time differences between two consecutive frames
-        time_diff_list = []
-        for i in range(1, len(frame_time_list)):
-            time_diff = frame_time_list[i] - frame_time_list[i - 1]
-            time_diff_list.append(time_diff)
-
-        # Calculate the rotational speeds based on the angle differences and time differences
-        rotational_speed_list = []
-        count_clockwise = 0
-        count_anticlockwise = 0
-        # print("is self.table_rotating_clockwise? : ", self.table_rotating_clockwise)
-        # print("num_rotations: ", " for \"", label, "\" is: ", self.num_rotations[label])
-        
-        for i in range(len(angle_list) - 1):
-            # detection of rotation direction
-            if 0 <= angle_list[i] <= math.pi and 0 <= angle_list[i+1] <= math.pi and (count_anticlockwise + count_clockwise < 5):
-                if angle_list[i] < angle_list[i+1]:
-                    count_anticlockwise += 1
-                else:
-                    count_clockwise += 1
-            if count_clockwise > count_anticlockwise:
-                self.table_rotating_clockwise = True
-            else:
-                self.table_rotating_clockwise = False
-
-            # # count the number of rotations
-            # if (not self.table_rotating_clockwise and (math.pi/2 < abs(angle_list[i]) < math.pi and 0 < abs(angle_list[i+1]) < math.pi/2)) or \
-            #         (self.table_rotating_clockwise and (0.0 < abs(angle_list[i]) < math.pi/2 and math.pi/2 < abs(angle_list[i+1]) < math.pi)):
-            #     self.num_rotations[label] += 1
-
-            # if object is in the quadrant adjacent to pickup point, calculate the angle difference and rotational speed, and get the average value
-            if abs(angle_list[i]) >= math.pi/2 and abs(angle_list[i+1]) >= math.pi/2:
-                # check if product of two consecutive angles is negative
-                if angle_list[i] * angle_list[i+1] < 0:
-                    if angle_list[i] > 0:
-                        angle_diff = abs(angle_list[i] - (angle_list[i+1] + 2*math.pi))
-                    else:
-                        angle_diff = abs(angle_list[i+1] - (angle_list[i] + 2*math.pi))
-                else:
-                    angle_diff = abs(angle_list[i + 1] - angle_list[i])
-                time_diff = frame_time_list[i+1] - frame_time_list[i]
-                if time_diff < 3 and time_diff > 0.05:
-                    rotational_speed = abs(angle_diff) / time_diff
-                    rotational_speed_list.append(rotational_speed)
-
-        # return the average value for rotational speed
-        if len(rotational_speed_list) == 0:
-            return 0
-        else:
-            rotational_speed_array = np.array(rotational_speed_list)
-            avg_rotational_speed = np.mean(rotational_speed_array)
-            # print("avg_rotational_speed: ", avg_rotational_speed)
-
-            return avg_rotational_speed
-
-    def predict_future_timestamps(self, avg_rotational_speed, center_list, frame_time_list, xc, yc, closest_x, closest_y):
-        """
-        center_list: list of center points of the detected object in each frame
-        frame_time_list: list of time stamps of each frame
-        xc, yc: center point of the ellipse
-        avg_rotational_speed: rotational spee+6+d of particular object
-        closest_x, closest_y: closest point on the ellipse to the end-effector
-        """
-
-        latest_location_x = center_list[-1][0]
-        latest_location_y = center_list[-1][1]
-        latest_frame_time = frame_time_list[-1]
-
-        # closest_angle is almost 180 (or -180) degrees, as it is assumed to be at 90 degrees
-        closest_angle = math.pi
-        last_angle = math.atan2(latest_location_y - yc, latest_location_x - xc)
-
-        # Calculate the difference between angles, considering the range of last angle
-        if self.table_rotating_clockwise:
-            angle_difference = abs(2*math.pi - abs(closest_angle - last_angle))
-        else:
-            angle_difference = abs(closest_angle - last_angle)
-
-        time_diff = angle_difference / avg_rotational_speed
-        next_time_stamp = latest_frame_time + time_diff
-        latest_frame_time = next_time_stamp
-        time_for_one_rotation = 2 * math.pi / avg_rotational_speed
-        
-        if next_time_stamp > rospy.Time.now().to_sec() + 7: # because 7 is Dhoni's lucky number, haha ;)
-            return next_time_stamp
-        else:
-            next_time_stamp += time_for_one_rotation
-            return next_time_stamp
-        
     def yolo_detect(self, cv_img):
         if self.net == 'detection' and self.model_name == 'yolov8':
             predictions = self.model.predict(source=cv_img,
                                                 conf=self.confidence_threshold,
                                                 iou=self.iou_threshold,
                                                 device=self.device,
+                                                verbose=False,
                                             )
             # convert results to numpy array
             predictions_np = predictions[0].boxes.numpy()
@@ -272,6 +167,31 @@ class RTTObjectTracker():
 
             return class_bboxes, class_scores, class_labels
         
+    def circle_residuals(self, params, x, y):
+        """
+        Residual function for circle fitting.
+        params: [a, b, r] where (a, b) is the center coordinates and r is the radius.
+        x, y: Arrays of x and y coordinates of data points.
+        """
+        a, b, r = params
+        return (x - a)**2 + (y - b)**2 - r**2
+
+    def fit_circle(self, x, y):
+        """
+        Fit a circle to the given data points (x, y).
+        Returns the center coordinates (a, b) and the radius r.
+        """
+        # Initial guess for the circle parameters
+        initial_guess = [0.0, 0.0, 1.0]
+
+        # Use least squares optimization to fit the circle
+        result = least_squares(self.circle_residuals, initial_guess, args=(x, y))
+
+        # Extract the optimized parameters
+        center_x, center_y, radius = result.x
+
+        return center_x, center_y, radius
+
     def get_pointcloud_position(self, pointcloud, center):
         """
         pointcloud: pointcloud data of current frame with PointCloud2 data type
@@ -464,31 +384,129 @@ class RTTObjectTracker():
 
         return pose
 
-    def circle_residuals(self, params, x, y):
+    def check_stability(self, params_list):
+        # Check if the standard deviation of the parameters is below a threshold
+        threshold = 0.25  # Adjust the threshold as per your requirements
+
+        if len(params_list) < 2:
+            return False
+
+        params_array = np.array(params_list[-5:])
+        std_dev = np.std(params_array, axis=0)
+        stability = np.all(std_dev < threshold)
+        # print("stability std_dev: ", std_dev)
+
+        return stability
+
+    def calculate_rotational_speed(self, center_list, frame_time_list, xc, yc, label):
         """
-        Residual function for circle fitting.
-        params: [a, b, r] where (a, b) is the center coordinates and r is the radius.
-        x, y: Arrays of x and y coordinates of data points.
+        center_list: list of center points of the detected object in each frame
+        frame_time_list: list of time stamps of each frame
+        xc, yc: center point of the ellipse
         """
-        a, b, r = params
-        return (x - a)**2 + (y - b)**2 - r**2
+        # self.num_rotations[label] = -1
+        # Calculate the angle between each center point and the ellipse center
+        angle_list = []
+        for center in center_list:
+            xo, yo = center
+            angle = math.atan2(yo - yc, xo - xc)
+            angle_list.append(angle)
 
-    def fit_circle(self, x, y):
+        # Calculate the time differences between two consecutive frames
+        time_diff_list = []
+        for i in range(1, len(frame_time_list)):
+            time_diff = frame_time_list[i] - frame_time_list[i - 1]
+            time_diff_list.append(time_diff)
+
+        # Calculate the rotational speeds based on the angle differences and time differences
+        rotational_speed_list = []
+        count_clockwise = 0
+        count_anticlockwise = 0
+        # print("is self.table_rotating_clockwise? : ", self.table_rotating_clockwise)
+        # print("num_rotations: ", " for \"", label, "\" is: ", self.num_rotations[label])
+        
+        for i in range(len(angle_list) - 1):
+            # detection of rotation direction
+            if 0 <= angle_list[i] <= math.pi and 0 <= angle_list[i+1] <= math.pi and (count_anticlockwise + count_clockwise < 5):
+                if angle_list[i] < angle_list[i+1]:
+                    count_anticlockwise += 1
+                else:
+                    count_clockwise += 1
+            if count_clockwise > count_anticlockwise:
+                self.table_rotating_clockwise = True
+            else:
+                self.table_rotating_clockwise = False
+
+            # # count the number of rotations
+            # if (not self.table_rotating_clockwise and (math.pi/2 < abs(angle_list[i]) < math.pi and 0 < abs(angle_list[i+1]) < math.pi/2)) or \
+            #         (self.table_rotating_clockwise and (0.0 < abs(angle_list[i]) < math.pi/2 and math.pi/2 < abs(angle_list[i+1]) < math.pi)):
+            #     self.num_rotations[label] += 1
+
+            # if object is in the quadrant adjacent to pickup point, calculate the angle difference and rotational speed, and get the average value
+            if abs(angle_list[i]) >= math.pi/2 and abs(angle_list[i+1]) >= math.pi/2:
+                # check if product of two consecutive angles is negative
+                if angle_list[i] * angle_list[i+1] < 0:
+                    if angle_list[i] > 0:
+                        angle_diff = abs(angle_list[i] - (angle_list[i+1] + 2*math.pi))
+                    else:
+                        angle_diff = abs(angle_list[i+1] - (angle_list[i] + 2*math.pi))
+                else:
+                    angle_diff = abs(angle_list[i + 1] - angle_list[i])
+                time_diff = frame_time_list[i+1] - frame_time_list[i]
+                if time_diff < 3 and time_diff > 0.05:
+                    rotational_speed = abs(angle_diff) / time_diff
+                    rotational_speed_list.append(rotational_speed)
+
+        # return the average value for rotational speed
+        if len(rotational_speed_list) == 0:
+            return 0
+        else:
+            rotational_speed_array = np.array(rotational_speed_list)
+            avg_rotational_speed = np.mean(rotational_speed_array)
+            # print("avg_rotational_speed: ", avg_rotational_speed)
+
+            return avg_rotational_speed
+
+    def predict_future_timestamps(self, avg_rotational_speed, center_list, frame_time_list, xc, yc, closest_x, closest_y):
         """
-        Fit a circle to the given data points (x, y).
-        Returns the center coordinates (a, b) and the radius r.
+        center_list: list of center points of the detected object in each frame
+        frame_time_list: list of time stamps of each frame
+        xc, yc: center point of the ellipse
+        avg_rotational_speed: rotational spee+6+d of particular object
+        closest_x, closest_y: closest point on the ellipse to the end-effector
         """
-        # Initial guess for the circle parameters
-        initial_guess = [0.0, 0.0, 1.0]
 
-        # Use least squares optimization to fit the circle
-        result = least_squares(self.circle_residuals, initial_guess, args=(x, y))
+        last_n_locations = center_list[-5:]  # Select the last 5 center points
+        last_n_frame_times = frame_time_list[-5:]  # Select the corresponding frame time stamps
+        closest_angle = math.pi
+        time_for_one_rotation = 2 * math.pi / avg_rotational_speed
+        future_time_stamps = []
 
-        # Extract the optimized parameters
-        center_x, center_y, radius = result.x
+        for i in range(len(last_n_locations)):
+            latest_location_x = last_n_locations[i][0]
+            latest_location_y = last_n_locations[i][1]
+            latest_frame_time = last_n_frame_times[i]
 
-        return center_x, center_y, radius
+            last_angle = math.atan2(latest_location_y - yc, latest_location_x - xc)
 
+            # Calculate the difference between angles, considering the range of last angle
+            if self.table_rotating_clockwise:
+                angle_difference = abs(2*math.pi - abs(closest_angle - last_angle))
+            else:
+                angle_difference = abs(closest_angle - last_angle)
+
+            time_diff = angle_difference / avg_rotational_speed
+            next_time_stamp = latest_frame_time + time_diff
+            future_time_stamps.append(next_time_stamp)
+
+        # Calculate median of the future time stamps
+        median_future_time_stamp = np.median(np.array(future_time_stamps))
+        if median_future_time_stamp > rospy.Time.now().to_sec() + 7.0: # because 7 is Dhoni's lucky number, haha ;)
+            return median_future_time_stamp
+        else:
+            median_future_time_stamp += time_for_one_rotation
+            return median_future_time_stamp
+        
     def run(self, image, pointcloud):
         """
         image: image data of current frame with Image data type
@@ -507,89 +525,104 @@ class RTTObjectTracker():
 
                 # Fit a Ellipse to the centers of the bounding boxes
                 for bbox, prob, label in zip(bboxes, probs, labels):
-                    # Calculate center of bounding box
-                    center_x = (int(bbox[0]) + int(bbox[2])) // 2
-                    center_y = (int(bbox[1]) + int(bbox[3])) // 2
-                    center = np.array([center_x, center_y])
-                    # Update object centers dictionary
-                    if label not in self.object_centers and center_y > 120:
-                        self.object_centers[label] = []
-                        self.object_ellipse_params_CL[label] = []
-                        self.object_ellipse_params_BL[label] = []
-                        self.num_rotations[label] = -1
-                        self.future_timestamps[label] = None
-                        self.settled_ellipse[label] = False
-                        self.object_pose[label] = None
-                        self.center_point_position_list_wrt_base_link[label] = []
-                        self.object_pick_position[label] = None
-                    if label in self.object_centers:
-                        self.object_centers[label].append((center, frame_time))
-                        pc_position = self.get_pointcloud_position(pointcloud, center)
-                        if pc_position is not None:
-                            self.center_point_position_list_wrt_base_link[label].append((pc_position, frame_time))
-                        # Keep only the last `max_centers` centers
-                        if len(self.object_centers[label]) > self.max_centers:
-                            self.object_centers[label] = self.object_centers[label][-self.max_centers:]
-                            self.center_point_position_list_wrt_base_link[label] = self.center_point_position_list_wrt_base_link[label][-self.max_centers:]
-                    
-                    # check if center_x is in the range of 300 to 340, 
-                    # if yes, add  pose of the object to the object_pose dictionary
-                    # the pose of the object is calculated by cropping pointcloud by bounding box and applying PCA on it
-                    if 280 < center_x < 360 and not self.object_pose[label] and not self.pose_estimation_complete:
-                        self.object_pose[label] = self.process_point_cloud(pointcloud, bbox)
-                    if 300 < center_x < 340 and self.object_pose[label]and not self.pose_estimation_complete:
-                        self.object_pose[label] = self.process_point_cloud(pointcloud, bbox)
-                        if 310 < center_x < 330 and self.object_pose[label]and not self.pose_estimation_complete:
-                            # self.object_pose[label] = self.process_point_cloud(pointcloud, bbox)
-                            self.pose_estimation_complete = True
+                    if label == self.object_name:
+                        # Calculate center of bounding box
+                        center_x = (int(bbox[0]) + int(bbox[2])) // 2
+                        center_y = (int(bbox[1]) + int(bbox[3])) // 2
+                        center = np.array([center_x, center_y])
+                        # Update object centers dictionary
+                        if label not in self.object_centers and center_y > 50:
+                            self.object_centers[label] = []
+                            self.object_ellipse_params_CL[label] = []
+                            self.object_ellipse_params_BL[label] = []
+                            self.num_rotations[label] = -1
+                            self.future_timestamps[label] = None
+                            self.settled_ellipse[label] = False
+                            self.object_pose[label] = None
+                            self.center_point_position_list_wrt_base_link[label] = []
+                            self.object_pick_position[label] = None
+                        if label in self.object_centers:
+                            self.object_centers[label].append((center, frame_time))
+                            pc_position = self.get_pointcloud_position(pointcloud, center)
+                            if pc_position is not None:
+                                self.center_point_position_list_wrt_base_link[label].append((pc_position, frame_time))
+                            # Keep only the last `max_centers` centers
+                            if len(self.object_centers[label]) > self.max_centers:
+                                self.object_centers[label] = self.object_centers[label][-self.max_centers:]
+                                self.center_point_position_list_wrt_base_link[label] = self.center_point_position_list_wrt_base_link[label][-self.max_centers:]
+                        
+                        # check if center_x is in the range of 300 to 340, 
+                        # if yes, add  pose of the object to the object_pose dictionary
+                        # the pose of the object is calculated by cropping pointcloud by bounding box and applying PCA on it
+                        if label == "M30" or label == "M20" or label == "BEARING":
+                            self.object_pose[label] = PoseStamped()
+                            self.object_pose[label].header.stamp = pointcloud.header.stamp
+                            self.object_pose[label].header.frame_id = "base_link"
+                            self.object_pose[label].pose.position.x = 0.5
+                            self.object_pose[label].pose.position.y = 0.0
+                            self.object_pose[label].pose.position.z = 0.0155
+                            self.object_pose[label].pose.orientation.x = 0.0
+                            self.object_pose[label].pose.orientation.y = 0.0
+                            self.object_pose[label].pose.orientation.z = 0.0
+                            self.object_pose[label].pose.orientation.w = 1.0
+                            self.orientation_estimation_complete = True
+                        else:
+                            if 280 < center_x < 360 and not self.object_pose[label] and not self.pose_estimation_complete:
+                                self.object_pose[label] = self.process_point_cloud(pointcloud, bbox)
+                            if 300 < center_x < 340 and self.object_pose[label] and not self.pose_estimation_complete:
+                                self.object_pose[label] = self.process_point_cloud(pointcloud, bbox)
+                            if 310 < center_x < 330 and self.object_pose[label]: # and not self.pose_estimation_complete:
+                                self.object_pose[label] = self.process_point_cloud(pointcloud, bbox)
+                                self.pose_estimation_complete = True
 
-                    if label in self.object_centers:
-                        if self.center_point_position_list_wrt_base_link[label] and len(self.center_point_position_list_wrt_base_link[label]) > 35:
-                            print("\n\n\n\n\n\n Inside LOOP \n\n\n\n\n\n ")
-                            for label, centers_data in self.center_point_position_list_wrt_base_link.items():
-                                centers = np.array([center for center, _ in centers_data])
-                                frame_time_list = [frame_time for _, frame_time in centers_data]
-                                xc, yc, radius = self.fit_circle(centers[:,0], centers[:,1])
-                                # getting the point on the trajectory at 90 degrees in image plane [x-axis: left to right, y-axis: top to bottom]
-                                closest_x = xc - radius
-                                closest_y = yc
-                                
-                                if np.isnan(closest_x):
-                                    continue
-                                if self.object_pose[label] and self.object_pick_position[label] is None:
+                        if label in self.center_point_position_list_wrt_base_link:
+                            if self.center_point_position_list_wrt_base_link[label] and len(self.center_point_position_list_wrt_base_link[label]) > 15:
+                                # print("\n RTT node ready to pick object")
+                                for label, centers_data in self.center_point_position_list_wrt_base_link.items():
+                                    centers = np.array([center for center, _ in centers_data])
+                                    frame_time_list = [frame_time for _, frame_time in centers_data]
+                                    xc, yc, radius = self.fit_circle(centers[:,0], centers[:,1])
+                                    # getting the point on the trajectory at 90 degrees in image plane [x-axis: left to right, y-axis: top to bottom]
+                                    closest_x = xc - radius + 0.014
+                                    closest_y = yc
                                     
-                                    # print("object_position: ", object_position)
-                                    if not math.isnan(closest_x):
-                                        self.object_pick_position[label] = (closest_x, closest_y)
-                                        self.object_pose[label].pose.position.x = self.object_pick_position[label][0]
-                                        self.object_pose[label].pose.position.y = self.object_pick_position[label][1]
+                                    if np.isnan(closest_x):
+                                        continue
+                                    if self.object_pose[label]:# and self.object_pick_position[label] is None:
+                                        # print("object_position: ", object_position)
+                                        if not math.isnan(closest_x):
+                                            self.object_pick_position[label] = (closest_x, closest_y)
+                                            self.object_pose[label].pose.position.x = self.object_pick_position[label][0]
+                                            self.object_pose[label].pose.position.y = self.object_pick_position[label][1]
+                                            self.object_pose[label].pose.position.z = 0.0150
+                                                
+                                    if not self.rotational_speed_calculation_complete:
+                                        # get rotational speed
+                                        self.object_rotational_speed = self.calculate_rotational_speed(centers, frame_time_list, xc, yc, label)
+                                        # print("rotational speed for \"",label, "\" is ", self.object_rotational_speed)
+                                        self.rotational_speed_calculation_complete = True
+                                    # print("self.object_rotational_speed: ", self.object_rotational_speed)
+                                    if self.rotational_speed_calculation_complete and self.object_rotational_speed != 0:
+                                        # predict next 3 future timestamps at (closest_x, closest_y)
+                                        self.future_timestamps[label] = self.predict_future_timestamps(
+                                            self.object_rotational_speed, centers, frame_time_list, xc, yc, closest_x, closest_y)
+                                        # if self.future_timestamps[label]:
+                                        # print("future timestamps for \"", label, "\" is ", self.future_timestamps[label], type(self.future_timestamps[label]))
+                                        self.time_estimation_complete = True
+                                        # print("self.orientation_estimation_complete: ", self.orientation_estimation_complete)
+                                        # print("self.time_estimation_complete: ", self.time_estimation_complete)
+                                        if self.time_estimation_complete and self.orientation_estimation_complete and self.future_timestamps[label]:
+                                            self.time_stamped_pose_msg = TimeStampedPose()
+                                            self.time_stamped_pose_msg.timestamps = self.future_timestamps[self.object_name]
+                                            self.time_stamped_pose_msg.pose = self.object_pose[self.object_name]
+                                            # print("RTT - Object pickup timestamp for label ", label, " is: ", self.future_timestamps[label],  
+                                            #     "\nCurrent time for label ", label, " is: ", rospy.Time.now().to_sec())
+                                            self.time_stamped_pose.publish(self.time_stamped_pose_msg)
+                                    else:
+                                        self.time_estimation_complete = False
+                    else:
+                        continue
 
-                                if not self.rotational_speed_calculation_complete:
-                                    # get rotational speed
-                                    self.object_rotational_speed = self.calculate_rotational_speed(centers, frame_time_list, xc, yc, label)
-                                    print("rotational speed for \"",label, "\" is ", self.object_rotational_speed)
-                                    self.rotational_speed_calculation_complete = True
-                                # print("self.object_rotational_speed: ", self.object_rotational_speed)
-                                if self.rotational_speed_calculation_complete and self.object_rotational_speed != 0:
-                                    # predict next 3 future timestamps at (closest_x, closest_y)
-                                    self.future_timestamps[label] = self.predict_future_timestamps(
-                                        self.object_rotational_speed, centers, frame_time_list, xc, yc, closest_x, closest_y)
-                                    # if self.future_timestamps[label]:
-                                    print("future timestamps for \"", label, "\" is ", self.future_timestamps[label])
-                                    self.time_estimation_complete = True
-                                    # print("self.orientation_estimation_complete: ", self.orientation_estimation_complete)
-                                    # print("self.time_estimation_complete: ", self.time_estimation_complete)
-                                    if self.time_estimation_complete and self.orientation_estimation_complete:
-                                        self.time_stamped_pose_msg = TimeStampedPose()
-                                        self.time_stamped_pose_msg.timestamps = self.future_timestamps[self.object_name]
-                                        self.time_stamped_pose_msg.pose = self.object_pose[self.object_name]
-                                        print("publishing time", self.time_stamped_pose_msg.timestamps, 
-                                              "\nFuture timestamps", self.future_timestamps[label], type(self.future_timestamps[label]),  
-                                              "\ncurrent time", rospy.Time.now().to_sec())
-                                        self.time_stamped_pose.publish(self.time_stamped_pose_msg)
-                                else:
-                                    self.time_estimation_complete = False
-                                    
 
                 # for label, centers_data in self.center_point_position_list_wrt_base_link.items():
                 #     if len(centers_data) >= 15:future_time
@@ -718,7 +751,7 @@ class RTTObjectTracker():
                 #     self.publish_debug_img(cv_img)
 
                 end = time.time()
-                rospy.loginfo("Time taken for detection: %s",str(end - start))
+                # rospy.loginfo("Time taken for detection: %s",str(end - start))
 
             except CvBridgeError as e:
                 rospy.logerr(e)
