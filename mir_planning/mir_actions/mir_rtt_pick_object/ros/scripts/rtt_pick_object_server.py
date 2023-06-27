@@ -29,6 +29,14 @@ class GetPredictions(smach.State):
             output_keys=["feedback", "result", "pose", "time"],
         )
         self.publisher = rospy.Publisher(topic_name, String, queue_size=10)
+        self.subscriber = rospy.Subscriber("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, self.callback)
+        self.time = None
+        self.pose = None
+
+    def callback(self, msg):
+        self.time = msg.timestamps
+        self.pose = msg.pose
+        self.subscriber.unregister()
     
     def execute(self, userdata):
         userdata.result = GenericExecuteResult()
@@ -37,30 +45,34 @@ class GetPredictions(smach.State):
         )
 
         obj = Utils.get_value_of(userdata.goal.parameters, "object")
-        if userdata.current_rtt_pick_retry == 0:
-            msg_str = f'e_start_{obj}'
-            self.publisher.publish(String(data=msg_str))
-        rospy.sleep(0.2)  # let the topic to survive for some time\
-        predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose)
-        pred_pose = predicted_msg.pose
-        userdata.pose = pred_pose
-        pred_times = predicted_msg.timestamps
-        print("*"*50)
-        # print('pred_pose', pred_pose)
-        print('pred_times', pred_times)
-        print("*"*50)
-        userdata.time = pred_times
+        # if userdata.current_rtt_pick_retry == 0:
+        msg_str = f'e_start_{obj}'
+        self.publisher.publish(String(data=msg_str))
+        # TODO: always check if we have received new data
+        while self.time is None:
+            rospy.sleep(0.2)
+        # rospy.sleep(0.2)  # let the topic to survive for some time\
+        # predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose)
+        # pred_pose = predicted_msg.pose
+        # pred_times = predicted_msg.timestamps
+        userdata.time = self.time
+        userdata.pose = self.pose
         return "succeeded"
         
 class WaitForObject(smach.State):
-    def __init__(self, state_flag):
+    def __init__(self):
         smach.State.__init__(
             self,
             outcomes=["succeeded", "failed"],
             input_keys=["time", "time_taken"],
             output_keys=["feedback", "result", "time_taken"],
         )   
-        self.state_flag = state_flag
+        # self.publisher = rospy.Publisher("/mir_perception/rtt_grasp/event_in", String, queue_size=10)
+        self.subscriber = rospy.Subscriber("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, self.callback)
+        self.time = None
+
+    def callback(self, msg):
+        self.time = msg.timestamps
     
     def execute(self, userdata):
         userdata.result = GenericExecuteResult()
@@ -68,22 +80,19 @@ class WaitForObject(smach.State):
             current_state="WaitForObject", text="waiting for object"
         )
 
-        if self.state_flag == "start":
-            print("start_state")
-            userdata.time_taken = rospy.Time.now().to_sec()
-            print("Start time", userdata.time_taken)
-            print("\n\n"*2)
-            while rospy.Time.now().to_sec() < userdata.time - 0.4: # 2.1 is the time it takes to move arm to pick
-                rospy.sleep(0.01)
-            return "succeeded"
+        userdata.time_taken = rospy.Time.now().to_sec()
+        if rospy.Time.now().to_sec() > userdata.time: 
+            return "failed"
+        while rospy.Time.now().to_sec() < userdata.time - 0.85: # This is the time to close the gripper for picking. The higher the time the earlier the gripper will close
+            # if self.time > userdata.time + 4.0:
+            #     userdata.time = self.time
+            rospy.sleep(0.01)
+        # msg_str = f'e_start'
+        # self.publisher.publish(String(data=msg_str))
+        # subscriber = rospy.wait_for_message("/mir_perception/rtt_grasp/event_out", String)
+        # if subscriber:
+        return "succeeded"
         
-        elif self.state_flag == "end":
-            print("end_state")
-            userdata.time_taken = rospy.Time.now().to_sec() - userdata.time_taken
-            print("End time", userdata.time_taken)
-            print("Time_taken", userdata.time_taken)
-
-            return "succeeded"
 
 
 class SetupObjectPose(smach.State):
@@ -104,12 +113,12 @@ class SetupObjectPose(smach.State):
         self.state = state
 
     def execute(self, userdata):
-        #iCartesian pose (x, y, z, r, p, y, frame_id)
+        # #iCartesian pose (x, y, z, r, p, y, frame_id)
         r, p, y = tr.euler_from_quaternion([userdata.pose.pose.orientation.x, userdata.pose.pose.orientation.y, userdata.pose.pose.orientation.z, userdata.pose.pose.orientation.w])
-        print("------------------")
-        print(userdata.pose.pose.position.x, userdata.pose.pose.position.y, userdata.pose.pose.position.z)
-        print("r, p, y", r, p, y)
-        print("------------------")
+        # print("------------------")
+        # print(userdata.pose.pose.position.x, userdata.pose.pose.position.y, userdata.pose.pose.position.z)
+        # print("r, p, y", r, p, y)
+        # print("------------------")
 
         # convert rpy into quaternion
         quaternion = tr.quaternion_from_euler(r, p, y)
@@ -129,7 +138,7 @@ class SetupObjectPose(smach.State):
         move_arm_to_pick.header.frame_id = userdata.pose.header.frame_id
         move_arm_to_pick.pose.position.x = userdata.pose.pose.position.x
         move_arm_to_pick.pose.position.y = userdata.pose.pose.position.y
-        move_arm_to_pick.pose.position.z = userdata.pose.pose.position.z - 0.02 # empirical value
+        move_arm_to_pick.pose.position.z = userdata.pose.pose.position.z
 
         move_arm_to_pick.pose.orientation.x = quaternion[0]
         move_arm_to_pick.pose.orientation.y = quaternion[1]
@@ -162,15 +171,18 @@ class CheckRetries(smach.State):
             input_keys=["current_rtt_pick_retry", "rtt_pick_retries"],
             output_keys=["current_rtt_pick_retry"],
         )
+        self.publisher = rospy.Publisher("/mir_perception/rtt/event_in", String, queue_size=10)
 
     def execute(self, userdata):
         if userdata.current_rtt_pick_retry < userdata.rtt_pick_retries:
             userdata.current_rtt_pick_retry += 1
+            msg_str = f'e_stop'
+            self.publisher.publish(String(data=msg_str))
             return "retry"
         else:
-            publisher = rospy.Publisher("/mir_perception/rtt/event_in", String, queue_size=10)
+            userdata.current_rtt_pick_retry = 0
             msg_str = f'e_stop'
-            publisher.publish(String(data=msg_str))
+            self.publisher.publish(String(data=msg_str))
             return "no_retry"
 
 # ===============================================================================
@@ -231,6 +243,7 @@ def main():
             GetPredictions("/mir_perception/rtt/event_in"),
             transitions={"succeeded": "OPEN_GRIPPER"},
         )
+        # TODO: add timeout to this state
 
         smach.StateMachine.add(
             "OPEN_GRIPPER",
@@ -326,15 +339,6 @@ def main():
             },
         )
 
-        # smach.StateMachine.add(
-        #     "WAIT_FOR_OBJECT",
-        #     WaitForObject("start"),
-        #     transitions={
-        #         "succeeded": "GO_TO_PICK_POSE",
-        #         "failed": "OVERALL_FAILED",
-        #     },
-        # )
-
         smach.StateMachine.add(
         "GO_TO_PICK_POSE",
         gbs.send_and_wait_events_combined(
@@ -355,21 +359,12 @@ def main():
         },
         )
 
-        # smach.StateMachine.add(
-        #     "MEASURE_TIME",
-        #     WaitForObject("end"),
-        #     transitions={
-        #         "succeeded": "WAIT_FOR_OBJECT",
-        #         "failed": "OVERALL_FAILED",
-        #     },
-        # )
-        
         smach.StateMachine.add(
             "WAIT_FOR_OBJECT",
-            WaitForObject("start"),
+            WaitForObject(),
             transitions={
                 "succeeded": "CLOSE_GRIPPER",
-                "failed": "OVERALL_FAILED",
+                "failed": "RETRY_PICK",
             },
         )
 
@@ -383,7 +378,7 @@ def main():
         # move arm to stage_intemediate position
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            gms.move_arm("pre_place"),
+            gms.move_arm("pre_place", use_moveit=False),
             transitions={
                 "succeeded": "VERIFY_OBJECT_GRASPED",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
@@ -410,16 +405,17 @@ def main():
             },
         )
 
+    sm.userdata.current_rtt_pick_retry = 0
     sm.register_transition_cb(transition_cb)
     sm.register_start_cb(start_cb)
 
 
-    # smach viewer
-    if rospy.get_param("~viewer_enabled", True):
-        sis = IntrospectionServer(
-            "rtt_pick_object_smach_viewer", sm, "/RTT_PICK_OBJECT_SMACH_VIEWER"
-        )
-        sis.start()
+    # # smach viewer
+    # if rospy.get_param("~viewer_enabled", True):
+    #     sis = IntrospectionServer(
+    #         "rtt_pick_object_smach_viewer", sm, "/RTT_PICK_OBJECT_SMACH_VIEWER"
+    #     )
+    #     sis.start()
 
     # Construct action server wrapper
     asw = ActionServerWrapper(
