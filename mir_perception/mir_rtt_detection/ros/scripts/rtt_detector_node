@@ -611,12 +611,14 @@ class RTTObjectTracker():
                                         self.time_estimation_complete = True
                                         # print("self.orientation_estimation_complete: ", self.orientation_estimation_complete)
                                         # print("self.time_estimation_complete: ", self.time_estimation_complete)
-                                        if self.time_estimation_complete and self.orientation_estimation_complete and self.future_timestamps[label]:
+                                        if self.time_estimation_complete and self.orientation_estimation_complete and self.future_timestamps[self.object_name] is not None:
+                                            # TODO: check "if self.future_timestamps[self.object_name] is not None" is different than "if self.future_timestamps[self.object_name]""... check this in entire code.
                                             self.time_stamped_pose_msg = TimeStampedPose()
                                             self.time_stamped_pose_msg.timestamps = self.future_timestamps[self.object_name]
                                             self.time_stamped_pose_msg.pose = self.object_pose[self.object_name]
                                             # print("RTT - Object pickup timestamp for label ", label, " is: ", self.future_timestamps[label],  
                                             #     "\nCurrent time for label ", label, " is: ", rospy.Time.now().to_sec())
+                                            # print(self.time_stamped_pose_msg)
                                             self.time_stamped_pose.publish(self.time_stamped_pose_msg)
                                     else:
                                         self.time_estimation_complete = False
