@@ -29,14 +29,17 @@ class GetPredictions(smach.State):
             output_keys=["feedback", "result", "pose", "time"],
         )
         self.publisher = rospy.Publisher(topic_name, String, queue_size=10)
-        self.subscriber = rospy.Subscriber("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, self.callback)
-        self.time = None
-        self.pose = None
+        # self.subscriber = rospy.Subscriber("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, self.callback)
+        # self.time = None
+        # self.pose = None
 
-    def callback(self, msg):
-        self.time = msg.timestamps
-        self.pose = msg.pose
-        self.subscriber.unregister()
+    # def callback(self, msg):
+    #     # TODO: always check if we have received new data
+    #     if rospy.Time.now().to_sec() < msg.timestamps:
+    #         self.time = msg.timestamps
+    #         self.pose = msg.pose
+    #         print("NEW MESSAGE RECEIVED")
+    #         self.subscriber.unregister()
     
     def execute(self, userdata):
         userdata.result = GenericExecuteResult()
@@ -48,15 +51,14 @@ class GetPredictions(smach.State):
         # if userdata.current_rtt_pick_retry == 0:
         msg_str = f'e_start_{obj}'
         self.publisher.publish(String(data=msg_str))
-        # TODO: always check if we have received new data
-        while self.time is None:
-            rospy.sleep(0.2)
-        # rospy.sleep(0.2)  # let the topic to survive for some time\
-        # predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose)
+        # while self.time is None:
+        #     rospy.sleep(0.2)
+        rospy.sleep(0.2)  # let the topic to survive for some time\
+        predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose)
         # pred_pose = predicted_msg.pose
         # pred_times = predicted_msg.timestamps
-        userdata.time = self.time
-        userdata.pose = self.pose
+        userdata.time = predicted_msg.timestamps
+        userdata.pose = predicted_msg.pose
         return "succeeded"
         
 class WaitForObject(smach.State):
@@ -215,7 +217,7 @@ def main():
     )
 
     # rtt retries
-    sm.userdata.rtt_pick_retries = 1
+    sm.userdata.rtt_pick_retries = 2
     sm.userdata.current_rtt_pick_retry = 0
 
     with sm:
@@ -387,7 +389,7 @@ def main():
 
         smach.StateMachine.add(
             "VERIFY_OBJECT_GRASPED",
-            gms.verify_object_grasped(5),
+            gms.verify_object_grasped(2),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "timeout": "OVERALL_SUCCESS",
