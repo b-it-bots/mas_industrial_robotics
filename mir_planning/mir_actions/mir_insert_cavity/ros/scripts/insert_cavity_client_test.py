@@ -19,7 +19,7 @@ if __name__ == "__main__":
         peg = str(sys.argv[1]).upper()
         platform = str(sys.argv[2]).upper()
         goal.parameters.append(KeyValue(key="peg", value=peg))
-        goal.parameters.append(KeyValue(key="platform", value=platform))
+        goal.parameters.append(KeyValue(key="platform", value=platform)) # stage platform eg: PLATFORM_LEFT
         goal.parameters.append(KeyValue(key="hole", value="PP01"))
         rospy.loginfo("Sending following goal to place object server")
         rospy.loginfo(goal)
