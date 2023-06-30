@@ -21,6 +21,7 @@ from std_msgs.msg import String
 from brics_actuator.msg import JointPositions, JointValue
 from srdfdom.srdf import SRDF
 from sensor_msgs.msg import JointState
+from mir_actions.utils import Utils
 
 class Bunch:
     def __init__(self, **kwds):
@@ -36,7 +37,7 @@ class MoveitClient:
     :param move_arm_to: target where the arm should move. If it is a string, then it gives
         target name (should be availabile on the parameter server). If it as
         tuple or a list, then it is treated differently based on the length. If it
-        has 7 items, then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame.
+        has , then it is cartesian pose (x, y, z, r, p ,y) + the corresponding frame.
         If it has 5 items, then it is arm configuration in join space.
     :type move_arm_to: str | tuple | list
 
@@ -220,7 +221,6 @@ class ArmPositionCommand:
             self.pub_arm_position.publish(joint_positions)
             self.zero_vel_counter = 0
             while self.zero_vel_counter < 10:
-                rospy.logwarn('Waiting for arm to stop moving')
                 rospy.sleep(0.1)
             return "succeeded"
 
@@ -239,6 +239,7 @@ class move_arm(smach.State):
         if self.use_moveit:
             return self.arm_moveit_client.execute(userdata, self.blocking)
         else:
+            print('Using arm position command *')
             return self.arm_position_command.execute(userdata)
 
 class check_move_group_feedback(smach.State):
@@ -248,7 +249,7 @@ class check_move_group_feedback(smach.State):
         self.status = 1
 
     def status_cb(self, msg):
-        self.status = status
+        self.status = msg.status.status
 
     def execute(self):
         if self.status == 3:
@@ -259,7 +260,7 @@ class check_move_group_feedback(smach.State):
             return "failed"
 
 class control_gripper(smach.State):
-    def __init__(self, target=None, blocking=True, tolerance=None, timeout=5):
+    def __init__(self, target=None, blocking=True, tolerance=None, timeout=3):
         smach.State.__init__(self, outcomes=["succeeded", "timeout"])
 
         self.timeout = rospy.Duration(timeout)
@@ -311,8 +312,9 @@ class control_gripper(smach.State):
         return "timeout"
 
 class verify_object_grasped(smach.State):
-    def __init__(self, timeout=2):
-        smach.State.__init__(self, outcomes=["succeeded", "failed", "timeout"])
+    def __init__(self, timeout=3):
+        smach.State.__init__(self, outcomes=["succeeded", "failed", "timeout"],
+                             input_keys=["goal"])
         
         self.current_state = "OBJECT_GRASPED"
         self.grasped_counter = 0
@@ -326,12 +328,17 @@ class verify_object_grasped(smach.State):
             self.grasped_counter += 1
 
     def execute(self, userdata):
+        # get the object name from userdata
+        object_name = Utils.get_value_of(userdata.goal.parameters, "object")
         start_time = rospy.Time.now()
         while (rospy.Time.now() - start_time < self.timeout):
             rospy.sleep(0.1)
             if self.current_state == "GRIPPER_CLOSED" or\
                self.current_state == "GRIPPER_INTER" or\
                self.current_state == "GRIPPER_OPEN":
+                if object_name == "WRENCH":
+                    # TODO: modify this
+                    return "succeeded"
                 return "failed"
             elif self.current_state == "OBJECT_GRASPED" and\
                         self.grasped_counter > 4:

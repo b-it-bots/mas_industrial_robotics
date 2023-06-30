@@ -128,7 +128,7 @@ def main():
 
         smach.StateMachine.add(
             "VERIFY_OBJECT_GRASPED",
-            gms.verify_object_grasped(5),
+            gms.verify_object_grasped(3),
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
                 "timeout": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
