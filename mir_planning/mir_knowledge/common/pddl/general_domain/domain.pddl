@@ -126,6 +126,7 @@
      :effect (and   (on ?o ?l)
                     (not (holding ?r ?o))
                     (gripper_is_free ?r)
+		    (not (perceived ?l))
                     (increase (total-cost) 2)
              )
  )
@@ -192,7 +193,6 @@
                             (gripper_is_free ?r)
                             (stored ?peg ?rp)
    							(not (container ?peg)) ;a container cannot be inserted into a container
-   							(perceived ?l)
    					)
    :effect 	(and 	(not (holding ?r ?peg))
    					(gripper_is_free ?r)
@@ -200,6 +200,7 @@
    					(on ?peg ?l)
                     (not (stored ?peg ?rp))
                     (not (occupied ?rp))
+					(perceived ?l)
    					(heavy ?hole)
    					(heavy ?peg) ;it doesn't become heavy but it cannot be picked again
    					(increase (total-cost) 5)
