@@ -8,7 +8,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
 {
   
   nh_.param<std::string>("output_frame", output_frame_, "base_link");
-  nh_.param<bool>("enable_debug_pc", enable_debug_pc_pub_, false);
+  nh_.param<bool>("enable_debug_pc", enable_debug_pc_pub_, true);
   float octree_resolution;
   nh_.param<float>("octree_resolution", octree_resolution, 0.0025);
   add_to_octree_ = false;
@@ -16,7 +16,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
   pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("empty_spaces", 1);
   event_out_pub_ = nh_.advertise<std_msgs::String>("event_out", 1);
 
-  pc_sub_ = nh_.subscribe("input_point_cloud", 1, &EmptySpaceDetector::pcCallback, this);
+  
   event_in_sub_ = nh_.subscribe("event_in", 1, &EmptySpaceDetector::eventInCallback, this);
   tf_listener_.reset(new tf::TransformListener);
 
@@ -87,10 +87,13 @@ void EmptySpaceDetector::loadParams()
 void EmptySpaceDetector::eventInCallback(const std_msgs::String::ConstPtr &msg)
 {
   std_msgs::String event_out;
-  if (msg->data == "e_add_cloud") {
+  if (msg->data == "e_add_cloud") 
+  {
+    pc_sub_ = nh_.subscribe("input_point_cloud", 1, &EmptySpaceDetector::pcCallback, this); //subscribe to the point cloud
     add_to_octree_ = true;
     return;
   } else if (msg->data == "e_add_cloud_stop") {
+    pc_sub_.shutdown();
     add_to_octree_ = false;
     event_out.data = "e_add_cloud_stopped";
   } else if (msg->data == "e_trigger") {
