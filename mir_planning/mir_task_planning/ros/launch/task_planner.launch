@@ -3,7 +3,7 @@
 
     <arg name="verbose" default="true" />
     <!-- search time limit in seconds -->
-    <arg name="time_limit" default="20" />
+    <arg name="time_limit" default="10" />
 
     <group ns="mir_task_planning">
 

@@ -2,7 +2,7 @@
 <launch>
 
     <arg name="refbox" default="true" />
-    <arg name="visualise" default="true" />
+    <arg name="visualise" default="false" />
 
     <!-- knowledge base args, they are reused by other components as well -->
     <arg name="domain" default="general_domain" />
@@ -11,7 +11,9 @@
 
     <!-- upload domain args - pddl problem that will be loaded as instrinsic knowledge -->
     <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/minimum_required_facts.pddl" /> -->
-    <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/mini_bmt_demo.pddl" />
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/mini_bmt_demo.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/all_without_rtt.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/finals.pddl" /> -->
     <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/local_2022_problem_complete.pddl" /> -->
 
     <!-- pddl problem gen - path for the pddl problem generator to save the created file, and for the planner to make plan -->
