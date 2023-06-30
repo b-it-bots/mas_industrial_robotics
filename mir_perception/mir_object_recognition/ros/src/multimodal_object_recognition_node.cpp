@@ -96,7 +96,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   ROS_WARN_STREAM("[multimodal_object_recognition] target frame: " <<target_frame_id_);
   nh_.param<std::string>("pointcloud_source_frame_id", pointcloud_source_frame_id_, "fixed_camera_link");
 
-  nh_.param<std::string>("logdir", logdir_, "/tmp/");
+  nh_.param<std::string>("logdir", logdir_, "/home/robocup/perception_debug_data/");
   nh_.param<std::string>("object_info", object_info_path_, "None");
   loadObjectInfo(object_info_path_);
 
@@ -265,6 +265,10 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
 
     return;
   }
+
+  // Reset recognition callback flags
+  received_recognized_cloud_list_flag_ = false;
+  received_recognized_image_list_flag_ = false;
 
   // Publish 3D object cluster for recognition
   if (!cloud_object_list.objects.empty() && enable_pc_recognizer_)
@@ -748,8 +752,48 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       object_list.objects[i].pose.pose.orientation.z = q2.z();
       object_list.objects[i].pose.pose.orientation.w = q2.w(); 
 
-      object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
+      double detected_object_height = object_list.objects[i].pose.pose.position.z;
+      if (obj_category_ == "cavity")
+      {
+           ROS_WARN_STREAM("PP01 workstation; not updating height");
+          // do nothing
+      }
+      else if (std::fabs(detected_object_height - scene_segmentation_ros_->getWorkspaceHeight()) > 0.03)
+      {
+           ROS_WARN_STREAM("Difference between object height and workspace height is > 3cm");
+           // do something
+           bool is_0cm = std::fabs(detected_object_height - height_of_floor_) < 0.01;
+           bool is_5cm = std::fabs(detected_object_height - (height_of_floor_ + 0.05)) < 0.01;
+           bool is_10cm = std::fabs(detected_object_height - (height_of_floor_ + 0.1)) < 0.01;
+           bool is_15cm = std::fabs(detected_object_height - (height_of_floor_ + 0.15)) < 0.01;
+           if (is_0cm)
+           {
+                ROS_WARN_STREAM("Updating height to 0cm");
+                object_list.objects[i].pose.pose.position.z = height_of_floor_ + object_height_above_workspace_;      
+           }
+           if (is_5cm)
+           {
+                ROS_WARN_STREAM("Updating height to 5cm");
+                object_list.objects[i].pose.pose.position.z = height_of_floor_ + 0.05 + object_height_above_workspace_;      
+           }
+           if (is_10cm)
+           {
+                ROS_WARN_STREAM("Updating height to 10cm");
+                object_list.objects[i].pose.pose.position.z = height_of_floor_ + 0.1 + object_height_above_workspace_;      
+           }
+           if (is_15cm)
+           {
+                ROS_WARN_STREAM("Updating height to 15cm");
+                object_list.objects[i].pose.pose.position.z = height_of_floor_ + 0.15 + object_height_above_workspace_;      
+           }
+
+      }
+      else
+      {
+          object_list.objects[i].pose.pose.position.z = scene_segmentation_ros_->getWorkspaceHeight() +
                               object_height_above_workspace_;      
+      }
+
     }
 
     // Update workspace height
@@ -878,6 +922,7 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
   padded_cluster_size_ = config.padded_cluster_size;
   // Workspace and object height
   object_height_above_workspace_ = config.object_height_above_workspace;
+  height_of_floor_ = config.height_of_floor;
   container_height_ = config.container_height;
   // RGB proposal params
   rgb_roi_adjustment_ = config.rgb_roi_adjustment;
