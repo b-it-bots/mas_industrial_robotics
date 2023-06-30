@@ -132,9 +132,10 @@ def main():
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
                 "timeout": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
-                "failed": "OVERALL_FAILED",
+                "failed": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
             },
         )
+# TODO: add a state to retry if grasp failed.
 
         smach.StateMachine.add(
             "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",

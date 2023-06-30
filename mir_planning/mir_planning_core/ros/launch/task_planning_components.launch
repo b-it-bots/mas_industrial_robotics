@@ -10,7 +10,7 @@
     <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
 
     <!-- upload domain args - pddl problem that will be loaded as instrinsic knowledge -->
-    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/minimum_required_facts.pddl" /> -->
+    <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/minimum_required_facts.pddl" />
     <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/mini_bmt_demo.pddl" /> -->
     <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/all_without_rtt.pddl" /> -->
     <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/finals.pddl" /> -->

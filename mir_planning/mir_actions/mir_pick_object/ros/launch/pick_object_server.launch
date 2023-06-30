@@ -6,6 +6,8 @@
     <!-- This rollable objects are only for ss22_competition-->
     <arg name="rollable_objects" default="['R20', 'INSULATION_TAPE', 'MOTOR', 'AXIS']" />
 
+    <arg name="drag_pick_objects" default="['ALLEN_KEY','WRENCH']" />
+
     <node pkg="mir_pick_object" type="pick_object_server.py"
           name="wbc_pick_object_server" output="screen">
         <rosparam param="large_objects" subst_value="True">
@@ -14,6 +16,9 @@
         <rosparam param="rollable_objects" subst_value="True">
             $(arg rollable_objects)
         </rosparam>
+        <rosparam param="drag_pick_objects" subst_value="True">
+            $(arg drag_pick_objects)
+        </rosparam>        
 
         <param name="reperceive" type="bool" value="true"/>
     </node>
