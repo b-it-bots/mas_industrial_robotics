@@ -239,7 +239,7 @@ class PublishObjectPose(smach.State):
                 empty_locations_temp.pose = empty_locations.poses[i]
                 distance_list.append(Utils.get_distance_between_poses(base_link_pose, empty_locations_temp))
             
-            index = distance_list.index(min(distance_list))
+            index = distance_list.index(max(distance_list))
 
             nearest_pose = PoseStamped()
             nearest_pose.header = empty_locations.header
