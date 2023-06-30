@@ -115,6 +115,16 @@ def main():
 
     with sm:
         smach.StateMachine.add(
+            "SET_PREGRASP_PARAMS",
+            gbs.set_named_config("pregrasp_planner_no_sampling"),
+            transitions={
+                "success": "SELECT_OBJECT",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
             "SELECT_OBJECT",
             SelectObject("/mcr_perception/object_selector/input/object_name"),
             transitions={"succeeded": "GENERATE_OBJECT_POSE"},
