@@ -41,13 +41,15 @@ class SelectCavity(smach.State):
         matchings = {
             "M20": ["M20_H", "M20_V"],
             "M30": ["M30_H", "M30_V"],
-            "M20_100": ["M20_100_H", "M20_H"],
-            "F20_20": ["F20_20_H", "F20_20_V"],
-            "S40_40": ["S40_40_H", "S40_40_V"],
+            "M20_100": ["M20_100_H", "M20_100_V"],
+            "F20_20_B": ["F20_20_H", "F20_20_V"],
+            "F20_20_G": ["F20_20_H", "F20_20_V"],
+            "S40_40_B": ["S40_40_H", "S40_40_V"],
+            "S40_40_G": ["S40_40_H", "S40_40_V"],
         }
 
         for key in matchings.keys():
-            if obj_name.startswith(key):
+            if obj_name == key:
                 return matchings[key][vertical]
         return None
 
@@ -96,13 +98,12 @@ class ppt_wiggle_arm(smach.State):
         self.cavity_pose_topic = "/mir_perception/multimodel_object_recognition/output/rgb_object_pose_array"
         self.arm_velocity_pub = rospy.Publisher("/arm_1/arm_controller/cartesian_velocity_command", TwistStamped, queue_size=10)
     
-        self.joint_states_sub = rospy.Subscriber(
-            "/joint_states", JointState, self.joint_states_cb
-        )
+        self.joint_states_sub = rospy.Subscriber("/joint_states", JointState, self.joint_states_cb)
 
         self.gripper = rospy.Publisher(self.gripper_topic, Float64, queue_size=10)
 
-        self.object_name = None
+        # Determineing object orientation
+        rospy.Subscriber(self.cavity_pose_topic, PoseStamped, self.cavity_pose_cb)
 
         # MoveIt! commander movegroup
         self.arm_command = moveit_commander.MoveGroupCommander("arm_1")
@@ -110,15 +111,24 @@ class ppt_wiggle_arm(smach.State):
         self.arm_command.set_goal_orientation_tolerance(0.01)
         self.arm_command.set_goal_joint_tolerance(0.005)
 
-        # Determineing object orientation
-        rospy.Subscriber(self.cavity_pose_topic, PoseStamped, self.cavity_pose_cb)
+        self.object_name = None
+        self.type_of_adjustment = 'rotational'
+
+        self.linear_wiggle_object_list = ["M20", "M30"]
+        self.rotational_wiggle_object_list = ["M20_100", "F20_20_B","F20_20_G", "S40_40_B", "S40_40_G"]
+
+
+        self.joint_offset_tolerance = 0.02 # radians
+        self.horizontal_wrist_angle = 2.98 # radians
+        self.vertical_wrist_angle = 4.53 # radians
 
         self.yaw = 0
         self.wiggle_yaw = wiggle_yaw # wiggle angle in radians (default 1.57) on either direction
         self.joint_values_static = []
         # giving some time to the publisher to register in ros network
         rospy.sleep(0.1)
-        
+
+
     def joint_states_cb(self, msg):
         if "arm_joint_1" in msg.name: # get the joint values of the arm only
             self.current_joint_positions = msg.position
@@ -137,7 +147,7 @@ class ppt_wiggle_arm(smach.State):
         l = [o.x, o.y, o.z, o.w]
         roll, pitch, self.yaw = tf.transformations.euler_from_quaternion(l)
 
-    def execute_arm(self, joint_number, wiggle_offset):
+    def   execute_arm(self, joint_number, wiggle_offset):
         joint_values = self.joint_values_static[:]
         joint_values[joint_number] = (
             self.joint_values_static[joint_number] + wiggle_offset
@@ -147,7 +157,7 @@ class ppt_wiggle_arm(smach.State):
         except Exception as e:
             rospy.logerr("unable to set target position: %s" % (str(e)))
             return False
-        error_code = self.arm_command.go(wait=self.blocking)
+        error_code = self.arm_command.go(wait=True)
 
         if error_code == MoveItErrorCodes.SUCCESS:
             return True
@@ -155,17 +165,27 @@ class ppt_wiggle_arm(smach.State):
             rospy.logerr("Arm movement failed with error code: %d", error_code)
             return False
 
-    def rotational_wiggle(self, direction, message, wiggle_velocity=1.0, timeout=25.0):
+    def stop_arm(self):
+        message = TwistStamped()
+        message.header.stamp = rospy.Time.now()
+        self.arm_velocity_pub.publish(message)
+        rospy.sleep(0.1)
+        return True
+
+    def rotational_wiggle(self, direction, message, wiggle_velocity=1.0, timeout=15.0, wiggle_yaw=1.57):
+
+        """
+        WORKING DONT TOUCH !!!
+        """
 
         while not rospy.is_shutdown():
 
             if direction == "CW":
-                wiggle_yaw = self.wiggle_yaw
                 rospy.loginfo("Wiggling CW")
                 rospy.loginfo("Wiggle yaw: %f", wiggle_yaw)
                 message.twist.angular.z = wiggle_velocity
             elif direction == "CCW":
-                wiggle_yaw = 2 * self.wiggle_yaw
+                wiggle_yaw = 2 * wiggle_yaw
                 rospy.loginfo("Wiggling CCW")
                 rospy.loginfo("Wiggle yaw: %f", wiggle_yaw)
                 message.twist.angular.z = -wiggle_velocity
@@ -182,14 +202,23 @@ class ppt_wiggle_arm(smach.State):
                 current_time = rospy.Time.now().to_sec()
                 self.arm_velocity_pub.publish(message)
                 rospy.sleep(0.1)
+                print("wiggle yaw: ", wiggle_yaw)
                 current_yaw = self.current_joint_positions[-1]
+                print(np.rad2deg(abs(current_yaw - initial_yaw)))
                 # check for timeout also and break after 5 seconds
+                # limits: 5.58 and 0.16
+                if (current_yaw >= 5.4) or (current_yaw <= 0.28):
+                    rospy.logwarn("Reached the joint limit")
+                    self.stop_arm()
+                    return True
                 if abs(current_yaw - initial_yaw) >= wiggle_yaw:
                     rospy.loginfo("Reached the desired yaw angle")
+                    self.stop_arm()
                     return True
                 if current_time - initial_time >= timeout:
                     rospy.logwarn("Reached the timeout")
-                    return False
+                    self.stop_arm()
+                    return False 
 
     def linear_wiggle_cartesian_mode(self, movement_type, travel_direction, message, travel_distance= 0.1, travel_velocity=0.03, timeout=5.0):
         """
@@ -199,27 +228,48 @@ class ppt_wiggle_arm(smach.State):
         self.linear_wiggle_cartesian_mode("horizontal", "backward", message, travel_distance= 0.05, travel_velocity=0.03)
         """
 
+        rospy.logwarn("moving obj %s %s" % (movement_type, travel_direction))
+
+        message.header.stamp = rospy.Time.now()
+        message.header.frame_id = "arm_link_5"
         while not rospy.is_shutdown():
             if travel_direction == "forward": # change the direction of travel
                 travel_velocity = travel_velocity
             elif travel_direction == "backward":
                 travel_velocity = -travel_velocity
+            else:
+                rospy.logerr("Invalid direction")
+                travel_velocity = 0.0
 
-            travel_time = travel_distance / travel_velocity
+            travel_time = travel_distance / abs(travel_velocity)
             initial_time = rospy.Time.now().to_sec()
             while not rospy.is_shutdown():
                 if movement_type == "horizontal":
+                    message.twist.linear.x = 0.0
                     message.twist.linear.y = travel_velocity
-                if movement_type == "vertical":
+                elif movement_type == "vertical":
                     message.twist.linear.x = travel_velocity
+                    message.twist.linear.y = 0.0
+                else:
+                    rospy.logerr("Invalid movement type")
+                    message.twist.linear.x = 0.0
+                    message.twist.linear.y = 0.0
+
                 self.arm_velocity_pub.publish(message)
                 current_time = rospy.Time.now().to_sec()
-                if current_time - initial_time >= travel_time: # no feedback from the arm just wait for the travel time
+                rospy.sleep(0.05)
+                print("travel time: ", travel_time)
+                print(abs(current_time - initial_time))
+                if abs(current_time - initial_time) >= travel_time: # no feedback from the arm just wait for the travel time
                     rospy.loginfo("Travel time reached")
+                    self.stop_arm()
                     positive_flag = True
                     return True
 
+        # get current pose of the arm and add offset and move to that position, 
+
     def linear_wiggle_joint_mode(self, travel_direction, travel_distance= 0.08): # travel distance in radians
+    
         # for vertical motion move arm link 4 and for horizontal motion move arm link 0
 
         rospy.logwarn("Adjusting the object with linear wiggle joint mode in %s direction", travel_direction)
@@ -233,29 +283,26 @@ class ppt_wiggle_arm(smach.State):
 
         self.joint_values_static = self.arm_command.get_current_joint_values()
 
-        horizontal_wrist_angle = 2.98 # radians
-        vertical_wrist_angle = 4.53 # radians
-
-        if travel_direction == "left_right":
+        if travel_direction == "horizontal":
             # check if the joint values for joint 4 is around 2.98 +- 0.1 if not set it to 2.98
-            if self.joint_values_static[4] < horizontal_wrist_angle - 0.05 or self.joint_values_static[4] > horizontal_wrist_angle + 0.05:
-                self.joint_values_static[4] = horizontal_wrist_angle # joint value for arm link 4 when wrist is horizontal
+            if self.joint_values_static[4] < self.horizontal_wrist_angle - self.joint_offset_tolerance or self.joint_values_static[4] > self.horizontal_wrist_angle + self.joint_offset_tolerance:
+                self.joint_values_static[4] = self.horizontal_wrist_angle # joint value for arm link 4 when wrist is horizontal
 
-            joint_number_to_change = 0 # arm link 0 base of the arm 
-
-        elif travel_direction == "front_back":
+        elif travel_direction == "vertical":
             # check if the joint values for joint 4 is around 4.01 +- 0.1 if not set it to 4.01
-            if self.joint_values_static[4] < vertical_wrist_angle - 0.05 or self.joint_values_static[4] > vertical_wrist_angle + 0.05:
-                self.joint_values_static[4] = vertical_wrist_angle # joint value for arm link 4 when wrist is vertical
+            if self.joint_values_static[4] < self.vertical_wrist_angle - self.joint_offset_tolerance or self.joint_values_static[4] > self.vertical_wrist_angle + self.joint_offset_tolerance:
+                self.joint_values_static[4] = self.vertical_wrist_angle # joint value for arm link 4 when wrist is vertical
+        else:
+            rospy.logerr("[cavity server] Invalid travel direction")
+            return "failed"
 
-            joint_number_to_change = 3 # arm link 3 last before joint of the arm
 
         try:
             self.arm_command.set_joint_value_target(self.joint_values_static)
         except Exception as e:
             rospy.logerr("unable to set target position: %s" % (str(e)))
             return "failed"
-        error_code = self.arm_command.go(wait=self.blocking)
+        error_code = self.arm_command.go(wait=True)
         if not error_code == MoveItErrorCodes.SUCCESS:
             return "failed"
 
@@ -268,46 +315,124 @@ class ppt_wiggle_arm(smach.State):
         else:
             return "failed"
 
+    def rotate_wrist_joint(self, direction):
+
+        """
+        input:
+            direction: "horizontal" or "vertical" 
+        Sets the wrist joint to horizontal or vertical position
+        """
+        # for vertical motion move arm link 4 and for horizontal motion move arm link 0
+
+        self.joint_values_static = self.arm_command.get_current_joint_values()
+
+        if direction == "horizontal":
+            # check if the joint values for joint 4 is around 2.98 +- 0.1 if not set it to 2.98
+            if self.joint_values_static[4] < self.horizontal_wrist_angle - self.joint_offset_tolerance or self.joint_values_static[4] > self.horizontal_wrist_angle + self.joint_offset_tolerance:
+                self.joint_values_static[4] = self.horizontal_wrist_angle # joint value for arm link 4 when wrist is horizontal
+
+        elif direction == "vertical":
+            # check if the joint values for joint 4 is around 4.01 +- 0.1 if not set it to 4.01
+            if self.joint_values_static[4] < self.vertical_wrist_angle - self.joint_offset_tolerance or self.joint_values_static[4] > self.vertical_wrist_angle + self.joint_offset_tolerance:
+                self.joint_values_static[4] = self.vertical_wrist_angle # joint value for arm link 4 when wrist is vertical
+        else:
+            rospy.logerr("[cavity server] Invalid travel direction")
+            return "failed"
+
+        try:
+            self.arm_command.set_joint_value_target(self.joint_values_static)
+        except Exception as e:
+            rospy.logerr("unable to set target position: %s" % (str(e)))
+            return "failed"
+        error_code = self.arm_command.go(wait=True)
+        if not error_code == MoveItErrorCodes.SUCCESS:
+            return "failed"
+
+    def wiggle_arm_working(self, turn = 1):
+
+        message = TwistStamped()
+        message.header.frame_id = "arm_link_5"
+        message.twist.linear.x = 0.0
+        message.twist.linear.y = 0.0
+        message.twist.angular.z = 0.0
+        initial_time = rospy.Time.now().to_sec()
+        travel_time = 1.0
+
+        while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
+            message.twist.linear.x = 0.0
+            message.twist.linear.y = 0.08
+            self.arm_velocity_pub.publish(message)
+            rospy.sleep(0.05)
+        self.stop_arm()
+
+        initial_time = rospy.Time.now().to_sec()
+        travel_time = 1.0
+        while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
+            message.twist.linear.x = 0.0
+            message.twist.linear.y = -0.08
+            self.arm_velocity_pub.publish(message)
+            rospy.sleep(0.05)
+        self.stop_arm()
+
+        initial_time = rospy.Time.now().to_sec()
+        travel_time = 1.0
+        while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
+            message.twist.linear.x = 0.0
+            message.twist.linear.y = 0.09
+            self.arm_velocity_pub.publish(message)
+            rospy.sleep(0.05)
+        self.stop_arm()
+
+        initial_time = rospy.Time.now().to_sec()
+        travel_time = 1.5
+        while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
+            message.twist.linear.x = 0.0
+            message.twist.linear.y = 0.0
+            message.twist.angular.z = 1.0 * turn
+            self.arm_velocity_pub.publish(message)
+            rospy.sleep(0.05)
+        self.stop_arm()
+
+        return True
+
     def execute(self, userdata):
         
         message = TwistStamped()
-        message.header.frame_id = "arm_link_5"
+        message.header.frame_id = "base_link"
 
         self.object_name = Utils.get_value_of(userdata.goal.parameters, "peg")
         adjustment_list = ["rotational", "linear"]
 
-        linear_wiggle_object_list = ["M20", "M30"]
-        rotational_wiggle_object_list = ["M20_100", "F20_20", "S40_40"]
-
-        if self.object_name in linear_wiggle_object_list:
-            type_of_adjustment = "linear"
-        elif self.object_name in rotational_wiggle_object_list:
-            type_of_adjustment = "rotational"
+        if self.object_name in self.linear_wiggle_object_list:
+            self.type_of_adjustment = "linear"
+        elif self.object_name in self.rotational_wiggle_object_list:
+            self.type_of_adjustment = "rotational"
         elif self.object_name is None:
             rospy.logwarn("No object name received")
-            return "failed"
+            self.object_name = "unknown"
 
-        if type_of_adjustment == "rotational": 
+        if self.type_of_adjustment == "rotational" or self.object_name == "unknown": 
 
-            rospy.logwarn("Adjusting the object with a %s movement", type_of_adjustment)
+            rospy.loginfo("Adjusting %s with a %s movement", self.object_name, self.type_of_adjustment)
 
-            self.rotational_wiggle("CW", message, wiggle_velocity=2.0)
-            rospy.loginfo("Rotational wiggle CCW done")
-        
-            self.rotational_wiggle("CCW", message, wiggle_velocity=2.0)
+            self.rotational_wiggle("CW", message, wiggle_velocity=4.0)
             rospy.loginfo("Rotational wiggle CW done")
+        
+            self.rotational_wiggle("CCW", message, wiggle_velocity=4.0)
+            rospy.loginfo("Rotational wiggle CCW done")
 
             
-        if type_of_adjustment == "linear":
+        if self.type_of_adjustment == "linear" or self.object_name == "unknown":
 
-            rospy.logwarn("Adjusting the object with a %s movement", type_of_adjustment)
+            
+            rospy.loginfo("Adjusting %s with a %s movement", self.object_name, self.type_of_adjustment)
 
-            self.linear_wiggle_joint_mode("left_right", travel_distance= 0.15) # travel distance in joint angles in radians
-            rospy.loginfo("Linear wiggle left_right done")
+            rospy.loginfo("Starting linear wiggle in cartesian mode")
 
-            self.linear_wiggle_joint_mode("front_back", travel_distance= 0.13) # travel distance in joint angles in radians 
-            rospy.loginfo("Linear wiggle front_back done")
+            # TODO: This is a quick  fix only one direction will work, need a general solution
+            self.wiggle_arm_working()
 
+            rospy.loginfo("Horizontal wiggle done") 
 
         return "succeeded"
 
@@ -321,6 +446,9 @@ class Unstage_to_place(smach.State):
         self.platform = "PLATFORM_MIDDLE"
         self.obj = "M20"
 
+        self.unstage_client = SimpleActionClient('unstage_object_server', GenericExecuteAction)
+        self.unstage_client.wait_for_server()
+
     def execute(self,userdata):
 
         self.platform = Utils.get_value_of(userdata.goal.parameters, "platform")
@@ -331,9 +459,6 @@ class Unstage_to_place(smach.State):
             self.obj = "light"
         else:
             self.obj =  "light"
-
-        self.unstage_client = SimpleActionClient('unstage_object_server', GenericExecuteAction)
-        self.unstage_client.wait_for_server()
 
 	    # Assigning the goal    
 
@@ -476,7 +601,7 @@ def main():
         # open gripper
         smach.StateMachine.add(
             "OPEN_GRIPPER",
-            gms.control_gripper(0.5),
+            gms.control_gripper(0.2),
             transitions={
                 "succeeded": "WIGGLE_ARM",
                 "timeout": "WIGGLE_ARM"
@@ -532,3 +657,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+
+
+
+
