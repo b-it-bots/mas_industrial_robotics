@@ -24,22 +24,11 @@ class GetPredictions(smach.State):
     def __init__(self, topic_name):
         smach.State.__init__(
             self,
-            outcomes=["succeeded"],
+            outcomes=["succeeded", "timeout"],
             input_keys=["goal", "current_rtt_pick_retry"],
             output_keys=["feedback", "result", "pose", "time"],
         )
         self.publisher = rospy.Publisher(topic_name, String, queue_size=10)
-        # self.subscriber = rospy.Subscriber("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, self.callback)
-        # self.time = None
-        # self.pose = None
-
-    # def callback(self, msg):
-    #     # TODO: always check if we have received new data
-    #     if rospy.Time.now().to_sec() < msg.timestamps:
-    #         self.time = msg.timestamps
-    #         self.pose = msg.pose
-    #         print("NEW MESSAGE RECEIVED")
-    #         self.subscriber.unregister()
     
     def execute(self, userdata):
         userdata.result = GenericExecuteResult()
@@ -48,18 +37,17 @@ class GetPredictions(smach.State):
         )
 
         obj = Utils.get_value_of(userdata.goal.parameters, "object")
-        # if userdata.current_rtt_pick_retry == 0:
         msg_str = f'e_start_{obj}'
         self.publisher.publish(String(data=msg_str))
-        # while self.time is None:
-        #     rospy.sleep(0.2)
         rospy.sleep(0.2)  # let the topic to survive for some time\
-        predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose)
-        # pred_pose = predicted_msg.pose
-        # pred_times = predicted_msg.timestamps
-        userdata.time = predicted_msg.timestamps
-        userdata.pose = predicted_msg.pose
-        return "succeeded"
+        try:
+            predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, timeout=120)
+            userdata.time = predicted_msg.timestamps
+            userdata.pose = predicted_msg.pose
+            return "succeeded"
+        except rospy.exceptions.ROSException as e:
+            rospy.logwarn("Exception occured while waiting for message: ", e)
+            return "timeout"    
         
 class WaitForObject(smach.State):
     def __init__(self):
@@ -83,16 +71,10 @@ class WaitForObject(smach.State):
         )
 
         userdata.time_taken = rospy.Time.now().to_sec()
-        if rospy.Time.now().to_sec() > userdata.time: 
+        if rospy.Time.now().to_sec() > userdata.time - 0.85: 
             return "failed"
         while rospy.Time.now().to_sec() < userdata.time - 0.85: # This is the time to close the gripper for picking. The higher the time the earlier the gripper will close
-            # if self.time > userdata.time + 4.0:
-            #     userdata.time = self.time
             rospy.sleep(0.01)
-        # msg_str = f'e_start'
-        # self.publisher.publish(String(data=msg_str))
-        # subscriber = rospy.wait_for_message("/mir_perception/rtt_grasp/event_out", String)
-        # if subscriber:
         return "succeeded"
         
 
@@ -166,26 +148,32 @@ class SetupObjectPose(smach.State):
 # ===============================================================================
 
 class CheckRetries(smach.State):
-    def __init__(self):
+    def __init__(self, state=False):
         smach.State.__init__(
             self,
-            outcomes=["retry", "no_retry"],
+            outcomes=["retry", "no_retry", "succeeded"],
             input_keys=["current_rtt_pick_retry", "rtt_pick_retries"],
             output_keys=["current_rtt_pick_retry"],
         )
         self.publisher = rospy.Publisher("/mir_perception/rtt/event_in", String, queue_size=10)
+        self.state = state
 
     def execute(self, userdata):
-        if userdata.current_rtt_pick_retry < userdata.rtt_pick_retries:
-            userdata.current_rtt_pick_retry += 1
+        if self.state:
             msg_str = f'e_stop'
             self.publisher.publish(String(data=msg_str))
-            return "retry"
+            return "succeeded"
         else:
-            userdata.current_rtt_pick_retry = 0
-            msg_str = f'e_stop'
-            self.publisher.publish(String(data=msg_str))
-            return "no_retry"
+            if userdata.current_rtt_pick_retry < userdata.rtt_pick_retries:
+                userdata.current_rtt_pick_retry += 1
+                msg_str = f'e_stop'
+                self.publisher.publish(String(data=msg_str))
+                return "retry"
+            else:
+                userdata.current_rtt_pick_retry = 0
+                msg_str = f'e_stop'
+                self.publisher.publish(String(data=msg_str))
+                return "no_retry"
 
 # ===============================================================================
 
@@ -217,7 +205,7 @@ def main():
     )
 
     # rtt retries
-    sm.userdata.rtt_pick_retries = 2
+    sm.userdata.rtt_pick_retries = 1
     sm.userdata.current_rtt_pick_retry = 0
 
     with sm:
@@ -243,7 +231,8 @@ def main():
         smach.StateMachine.add(
             "SELECT_OBJECT",
             GetPredictions("/mir_perception/rtt/event_in"),
-            transitions={"succeeded": "OPEN_GRIPPER"},
+            transitions={"succeeded": "OPEN_GRIPPER",
+                        "timeout": "RETRY_PICK"}
         )
         # TODO: add timeout to this state
 
@@ -372,7 +361,7 @@ def main():
 
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
-            gms.control_gripper("close"),
+            gms.control_gripper("close", timeout=0.5),
             transitions={"succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
                          "timeout": "MOVE_ARM_TO_STAGE_INTERMEDIATE"},
         )
@@ -380,7 +369,7 @@ def main():
         # move arm to stage_intemediate position
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            gms.move_arm("pre_place", use_moveit=False),
+            gms.move_arm("barrier_tape", use_moveit=False),
             transitions={
                 "succeeded": "VERIFY_OBJECT_GRASPED",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
@@ -391,17 +380,29 @@ def main():
             "VERIFY_OBJECT_GRASPED",
             gms.verify_object_grasped(2),
             transitions={
-                "succeeded": "OVERALL_SUCCESS",
-                "timeout": "OVERALL_SUCCESS",
+                "succeeded": "OBJECT_GRASPED",
+                "timeout": "OBJECT_GRASPED",
                 "failed": "RETRY_PICK",
             },
         )
 
         # retry if failed
         smach.StateMachine.add(
-            "RETRY_PICK",
-            CheckRetries(),
+            "OBJECT_GRASPED",
+            CheckRetries(state=True),
             transitions={
+                "succeeded": "OVERALL_SUCCESS",
+                "retry": "OVERALL_SUCCESS",
+                "no_retry": "OVERALL_SUCCESS",
+            },
+        )
+        
+        # retry if failed
+        smach.StateMachine.add(
+            "RETRY_PICK",
+            CheckRetries(state=False),
+            transitions={
+                "succeeded": "OVERALL_SUCCESS",
                 "retry": "SELECT_OBJECT",
                 "no_retry": "OVERALL_FAILED",
             },
