@@ -86,7 +86,7 @@ PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry
       for (size_t i = 0; i < filtered_cloud.points.size(); ++i) {
         // check if filtered_cloud.points[i].z has not nan or inf value
         if (!std::isnan(filtered_cloud.points[i].z) && !std::isinf(filtered_cloud.points[i].z)) {
-          filtered_cloud.points[i].z = 0.045; // 0.045 is an empirical values, TODO: get 0.045 from target_pose_z_pos from config file
+          filtered_cloud.points[i].z = 0.015; // 0.045 is an empirical values, TODO: get 0.045 from target_pose_z_pos from config file
         }
       }
     }
