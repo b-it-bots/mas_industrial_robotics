@@ -62,6 +62,27 @@ class IsObjectLarge(smach.State):
                 return "large"
         return "small"
 
+# ===============================================================================
+
+class ShouldDragPick(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["yes", "no"],
+            input_keys=["goal", "drag_pick_objects"],
+            output_keys=[],
+        )
+
+    def execute(self, userdata):
+        obj = Utils.get_value_of(userdata.goal.parameters, "object")
+        if obj is None:
+            rospy.logwarn('Missing parameter "object". Using default.')
+            return "no"
+        for object_to_drag in userdata.drag_pick_objects:
+            if object_to_drag.upper() in obj.upper():
+                # return "yes"
+                return "no" # until tested
+        return "no"
 
 # ===============================================================================
 
@@ -111,7 +132,8 @@ def main():
 
     # read large object list
     sm.userdata.large_objects = rospy.get_param("~large_objects", ["S40_40_B", "S40_40_G", "M30", "BEARING_BOX", "MOTOR"])
-    sm.userdata.reperceive = rospy.get_param("~reperceive", True)
+    sm.userdata.drag_pick_objects = rospy.get_param("~drag_pick_objects", ["ALLEN_KEY","WRENCH"])
+    sm.userdata.reperceive = rospy.get_param("~reperceive", True)    
 
     with sm:
         smach.StateMachine.add(
@@ -187,13 +209,14 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_FOR_REPERCEIVE",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM"},
+            transitions={"succeeded": "MOVE_ARM",
+                         "timeout": "MOVE_ARM"},
         )
 
         # move arm to appropriate position
         smach.StateMachine.add(
             "MOVE_ARM",
-            gms.move_arm("pre_place"),
+            gms.move_arm("pre_place", use_moveit=False),
             transitions={
                 "succeeded": "START_OBJECT_LIST_MERGER",
                 "failed": "MOVE_ARM",
@@ -328,13 +351,15 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_WIDE_LOCAL",
             gms.control_gripper("open"),
-            transitions={"succeeded": "TRY_PICKING"},
+            transitions={"succeeded": "TRY_PICKING",
+                         "timeout": "TRY_PICKING"},
         )
 
         smach.StateMachine.add(
             "OPEN_GRIPPER_NARROW_LOCAL",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "TRY_PICKING"},
+            transitions={"succeeded": "TRY_PICKING",
+                         "timeout": "TRY_PICKING"},
         )
 
 
@@ -366,13 +391,15 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_WIDE",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ROBOT_AND_PICK"},
+            transitions={"succeeded": "MOVE_ROBOT_AND_PICK",
+                         "timeout": "MOVE_ROBOT_AND_PICK"},
         )
 
         smach.StateMachine.add(
             "OPEN_GRIPPER_NARROW",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "MOVE_ROBOT_AND_PICK"},
+            transitions={"succeeded": "MOVE_ROBOT_AND_PICK",
+                         "timeout": "MOVE_ROBOT_AND_PICK"},
         )
 
 
@@ -406,13 +433,35 @@ def main():
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
-            transitions={"succeeded": "MOVE_ARM_TO_STAGE_INTERMEDIATE"},
+            transitions={"succeeded": "CHECK_IF_OBJECT_SHOULD_BE_DRAGGED",
+                         "timeout": "CHECK_IF_OBJECT_SHOULD_BE_DRAGGED"},
+        )
+
+        smach.StateMachine.add(
+            "CHECK_IF_OBJECT_SHOULD_BE_DRAGGED",
+            ShouldDragPick(),
+            transitions={"yes":"DRAG_PICK",
+                         "no":"MOVE_ARM_TO_STAGE_INTERMEDIATE"}
+        )
+
+        smach.StateMachine.add(
+            "DRAG_PICK",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/wbc/event_in", "e_start_drag")],
+                event_out_list=[("/wbc/event_out", "e_success", True)],
+                timeout_duration=50,
+            ),
+            transitions={
+                "success": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
+                "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+                "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
+            },
         )
 
         # move arm to stage_intemediate position
         smach.StateMachine.add(
             "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            gms.move_arm("pre_place"),
+            gms.move_arm("pre_place", use_moveit=False),
             transitions={
                 "succeeded": "VERIFY_OBJECT_GRASPED",
                 "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
@@ -421,9 +470,10 @@ def main():
 
         smach.StateMachine.add(
             "VERIFY_OBJECT_GRASPED",
-            gms.verify_object_grasped(5),
+            gms.verify_object_grasped(3),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
+                "timeout": "OVERALL_SUCCESS",
                 "failed": "OVERALL_FAILED",
             },
         )
