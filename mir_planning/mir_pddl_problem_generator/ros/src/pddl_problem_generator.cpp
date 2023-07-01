@@ -355,7 +355,9 @@ std::string PDDLProblemGenerator::getSourceLocation(const rosplan_knowledge_msgs
         nh_.serviceClient<rosplan_knowledge_msgs::GetAttributeService>(state_proposition_service_);
 
     rosplan_knowledge_msgs::GetAttributeService attr_srv;
-    attr_srv.request.predicate_name = ki.attribute_name;
+    // source location can only be "on"
+    // i.e. we want to find the source of the object that is in the selected goal (ki)
+    attr_srv.request.predicate_name = "on";
     if (!getPropsClient.call(attr_srv)) {
         ROS_ERROR("[mir_pddl_problem_generator] Failed to call service %s: %s",
                 state_proposition_service_.c_str(), attr_srv.request.predicate_name.c_str());
