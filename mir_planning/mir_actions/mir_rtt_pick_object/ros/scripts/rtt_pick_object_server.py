@@ -71,9 +71,9 @@ class WaitForObject(smach.State):
         )
 
         userdata.time_taken = rospy.Time.now().to_sec()
-        if rospy.Time.now().to_sec() > userdata.time - 0.85: 
+        if rospy.Time.now().to_sec() > userdata.time - 0.75: 
             return "failed"
-        while rospy.Time.now().to_sec() < userdata.time - 0.85: # This is the time to close the gripper for picking. The higher the time the earlier the gripper will close
+        while rospy.Time.now().to_sec() < userdata.time - 0.75: # This is the time to close the gripper for picking. The higher the time the earlier the gripper will close
             rospy.sleep(0.01)
         return "succeeded"
         
