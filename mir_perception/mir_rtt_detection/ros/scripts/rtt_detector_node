@@ -47,7 +47,7 @@ class RTTObjectTracker():
         self.cvbridge = CvBridge()
         self.debug = debug_mode
         self.pub_debug = rospy.Publisher("/mir_perception/multimodal_object_recognition/recognizer/rgb/output/rtt_debug_image", Image, queue_size=1)
-        self.pub_pose = rospy.Publisher("/mir_perception/multimodel_object_recognition/output/rgb_object_pose_array", PoseStamped, queue_size=1)
+        self.pub_pose = rospy.Publisher("/mir_perception/mir_rtt_detector/predicted_object_pose", PoseStamped, queue_size=1)
         self.pub_cropped_pc = rospy.Publisher("rtt/output/cropped_pc", PointCloud2, queue_size=1)
 
         self.net = net
@@ -166,8 +166,59 @@ class RTTObjectTracker():
             class_scores = predictions_np.conf
             class_bboxes = predictions_np.xyxy # x, y, w, h
 
-            return class_bboxes, class_scores, class_labels
+            return class_bboxes, class_scores, class_labels, predictions
         
+    def drawAxis(self, img, p_, q_, color, scale):
+        p = list(p_)
+        q = list(q_)
+        
+        ## [visualization1]
+        angle = math.atan2(p[1] - q[1], p[0] - q[0]) # angle in radians
+        hypotenuse = math.sqrt((p[1] - q[1]) * (p[1] - q[1]) + (p[0] - q[0]) * (p[0] - q[0]))
+        
+        # Here we lengthen the arrow by a factor of scale
+        q[0] = p[0] - scale * hypotenuse * math.cos(angle)
+        q[1] = p[1] - scale * hypotenuse * math.sin(angle)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 1, cv2.LINE_AA)
+        
+        # create the arrow hooks
+        p[0] = q[0] + 9 * math.cos(angle + math.pi / 4)
+        p[1] = q[1] + 9 * math.sin(angle + math.pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 1, cv2.LINE_AA)
+        
+        p[0] = q[0] + 9 * math.cos(angle - math.pi / 4)
+        p[1] = q[1] + 9 * math.sin(angle - math.pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 1, cv2.LINE_AA)
+        return img
+        
+    def get_orientation(self, pts, img):
+        ## [pca]
+        # Construct a buffer used by the pca analysis
+        sz = len(pts)
+        data_pts = np.empty((sz, 2), dtype=np.float64)
+        for i in range(data_pts.shape[0]):
+            data_pts[i,0] = pts[i,0,0]
+            data_pts[i,1] = pts[i,0,1]
+        
+        # Perform PCA analysis
+        mean = np.empty((0))
+        mean, eigenvectors, eigenvalues = cv2.PCACompute2(data_pts, mean)
+        
+        # Store the center of the object
+        cntr = (int(mean[0,0]), int(mean[0,1]))
+        ## [pca]
+        
+        ## [visualization]
+        # Draw the principal components
+        # cv2.circle(img, cntr, 3, (255, 0, 255), 2)
+        p1 = (cntr[0] + 0.02 * eigenvectors[0,0] * eigenvalues[0,0], cntr[1] + 0.02 * eigenvectors[0,1] * eigenvalues[0,0])
+        p2 = (cntr[0] - 0.02 * eigenvectors[1,0] * eigenvalues[1,0], cntr[1] - 0.02 * eigenvectors[1,1] * eigenvalues[1,0])
+        img = self.drawAxis(img, cntr, p1, (255, 255, 0), 1)
+        # img = self.drawAxis(img, cntr, p2, (0, 0, 255), 5)
+        
+        angle = math.atan2(eigenvectors[0,1], eigenvectors[0,0]) # orientation in radians
+        return angle
+    
     def circle_residuals(self, params, x, y):
         """
         Residual function for circle fitting.
@@ -413,30 +464,36 @@ class RTTObjectTracker():
 
         return (centroid[0], centroid[1]), yaw
     
-    def predict_yaw(self, xc, yc, center_list, yaw_list):
+    def predict_yaw(self, xc, yc, center_list, yaw_list_CL):
         """
         xc, yc: center point of the circle
-        centers: list of center points of the detected object in each frame
+        center_list: list of center points of the detected object in each frame
         yaw_list: list of yaw angles of the detected object in each frame
-        """            
-        for i in range(len(center_list)):
-            if yaw_list[i] < 0:
-                yaw_list[i] += np.pi
+        """
+        
+        # convert yaw_list_CL to yaw_list_BL
+        yaw_list_BL = yaw_list_CL
+        for i in range(len(yaw_list_CL)):
+            yaw_list_BL[i] = np.pi/2 - yaw_list_CL[i] # from CL to BL
+            if yaw_list_BL[i] > np.pi:
+                yaw_list_BL[i] -= 2*np.pi    
+            if yaw_list_BL[i] < 0:
+                yaw_list_BL[i] += np.pi
+            # now yaw_list is b/w 0 to np.pi (180 degrees)
 
+        # predict at the point of pickup (at Base Link angle of 180 degrees)
+        for i in range(len(center_list)):
             xo, yo = center_list[i]
             angle = math.atan2(yo - yc, xo - xc)
+            yaw_list_BL[i] -= angle
+            if yaw_list_BL[i] >= np.pi:
+                yaw_list_BL[i] -= np.pi
+            elif yaw_list_BL[i] < 0:
+                yaw_list_BL[i] += np.pi
 
-            yaw_list[i] -= angle
-            if yaw_list[i] > np.pi:
-                yaw_list[i] -= np.pi
-            elif yaw_list[i] < 0:
-                yaw_list[i] += np.pi
-        
         # get median of yaw_list
-        predicted_yaw = np.median(np.array(yaw_list))
-        print("yaw_list: ", yaw_list, "\npredicted_yaw: ", predicted_yaw)
-
-        return predicted_yaw
+        predicted_yaw_BL = np.median(np.array(yaw_list_BL))
+        return predicted_yaw_BL
     
     def check_stability(self, params_list):
         # Check if the standard deviation of the parameters is below a threshold
@@ -571,14 +628,15 @@ class RTTObjectTracker():
         if image:
             try:
                 cv_img = self.cvbridge.imgmsg_to_cv2(image, "bgr8")
-                bboxes, probs, labels = self.yolo_detect(cv_img)
-
+                bboxes, probs, labels, predictions = self.yolo_detect(cv_img)
                 # Capatilize labels
                 labels = [label.upper() for label in labels]
 
                 image_header_frame_time = image.header.stamp
                 frame_time = image_header_frame_time.secs + \
                     (image_header_frame_time.nsecs / 1000000000)
+                
+                bbox_img = None
 
                 # Fit a Ellipse to the centers of the bounding boxes
                 for bbox, prob, label in zip(bboxes, probs, labels):
@@ -587,6 +645,30 @@ class RTTObjectTracker():
                         center_x = (int(bbox[0]) + int(bbox[2])) // 2
                         center_y = (int(bbox[1]) + int(bbox[3])) // 2
                         center = np.array([center_x, center_y])
+
+                        # Convert image to grayscale
+                        bbox_img = cv_img[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
+                        if bbox_img is None:
+                            continue
+                        gray = cv2.cvtColor(bbox_img, cv2.COLOR_BGR2GRAY)
+                        
+                        # Convert image to binary
+                        _, bw = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+                        
+                        # Find all the contours in the thresholded image
+                        contours, _ = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+
+                        # get contour with maximum area
+                        max_area = 0
+                        best_cnt = None
+                        for cnt in contours:
+                            area = cv2.contourArea(cnt)
+                            if area > max_area:
+                                max_area = area
+                                best_cnt = cnt
+                        
+                        yaw_angle = self.get_orientation(best_cnt, bbox_img)
+
                         # Update object centers dictionary
                         if label not in self.center_point_position_list_wrt_base_link and center_y > 30:
                             self.object_centers[label] = []
@@ -600,10 +682,10 @@ class RTTObjectTracker():
                             self.object_pick_position[label] = None
                         if label in self.center_point_position_list_wrt_base_link and center_y > 20:
                             self.object_centers[label].append((center, frame_time))
-                            # center_BL = self.get_pointcloud_position(pointcloud, center)
-                            center_BL, yaw = self.get_center_and_yaw(pointcloud, bbox)
+                            center_BL = self.get_pointcloud_position(pointcloud, center)
+                            # center_BL, yaw_angle = self.get_center_and_yaw(pointcloud, bbox)
                             if center_BL[0] is not None:
-                                self.center_point_position_list_wrt_base_link[label].append((center_BL, yaw, frame_time))
+                                self.center_point_position_list_wrt_base_link[label].append((center_BL, yaw_angle, frame_time))
                             # Keep only the last `max_centers` centers
                             if len(self.object_centers[label]) > self.max_centers:
                                 self.object_centers[label] = self.object_centers[label][-self.max_centers:]
@@ -680,6 +762,14 @@ class RTTObjectTracker():
                                         self.time_estimation_complete = False
                     else:
                         continue
+                if self.debug:
+                    # Draw bounding boxes and labels of detections
+                    debug_img = predictions[0].plot()
+
+                    # publish bbox and label
+                    # self.publish_debug_img(debug_img)
+                    if bbox_img is not None:
+                        self.publish_debug_img(bbox_img)
 
                 end = time.time()
                 # rospy.loginfo("Time taken for detection: %s",str(end - start))
@@ -706,7 +796,7 @@ if __name__ == '__main__':
     weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
                            'common', 'models', classifier_name, dataset, "atwork.pt")
     object_recognizer = RTTObjectTracker(
-        weights=weights, debug_mode=False)
+        weights=weights, debug_mode=True)
     rospy.loginfo("RTT Recognizer is ready using %s : %s , dataset: %s ",
                   net, classifier_name, dataset)
     rospy.spin()
