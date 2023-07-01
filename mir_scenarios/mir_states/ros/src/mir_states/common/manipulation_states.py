@@ -175,12 +175,12 @@ class MoveitClient:
 
 class ArmPositionCommand:
     def __init__(self, target):
+        self.zero_vel_counter = 0
         self.robot_srdf = SRDF.from_parameter_server('/robot_description_semantic')
         self.pub_arm_position = rospy.Publisher('arm_1/arm_controller/position_command', JointPositions, queue_size=1)
         self.joint_state_sub = rospy.Subscriber('joint_states', JointState, self.joint_state_cb)
         self.move_arm_to = target
         self.is_arm_moving = False
-        self.zero_vel_counter = 0
 
     def joint_state_cb(self, msg: JointState):
         self.joint_state = msg
