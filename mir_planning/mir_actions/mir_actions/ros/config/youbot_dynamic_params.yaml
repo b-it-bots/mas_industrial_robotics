@@ -39,8 +39,8 @@ dbc_pick_object:
         max_velocity_yaw: 0.4
         use_collision_avoidance: True
         front_laser_threshold: 0.04
-        right_laser_threshold: 0.04
-        rear_laser_threshold: 0.02
+        right_laser_threshold: 0.1
+        rear_laser_threshold: 0.1
         left_laser_threshold: 0.04
         loop_rate: 25.0
 pregrasp_planner_single_shot:
