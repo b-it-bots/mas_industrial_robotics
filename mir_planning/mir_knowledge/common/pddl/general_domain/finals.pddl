@@ -18,29 +18,21 @@
         (gripper_is_free YOUBOT-BRSU)
         
         (on ALLENKEY WS01)
-        ;(on HOUSING WS01)
-        ;(on BEARING2 WS01)
 
-        (on AXIS2 WS02)
         (on M20 WS02)
         (on SCREWDRIVER WS02)
 
         (on M20_100 WS03)
-        ;(on SPACER WS03)
-        ;(on S40_40_G WS03)
 
-        (on DRILL WS04)
-        ;(on M30 WS04)
         (on WRENCH WS04)
 
-        ;(on BEARING2 TT01)
+        (on BEARING2 TT01)
         (on S40_40_G TT01)
 
-        (on F20_20_B WS05)
         (on F20_20_G WS05)
 
-        ;(on MOTOR2 SH01)
-        ;(on S40_40_B SH01)
+        (on MOTOR2 SH01)
+        (on S40_40_B SH01)
 
         (on CONTAINER_BOX_RED WS06)
         (on CONTAINER_BOX_BLUE WS06)
@@ -60,27 +52,16 @@
         (and
             (in ALLENKEY CONTAINER_BOX_BLUE)
             (in M20_100 CONTAINER_BOX_BLUE)
-            (in AXIS2 CONTAINER_BOX_RED)
+            (in SCREWDRIVER CONTAINER_BOX_RED)
             (in WRENCH CONTAINER_BOX_RED)
 
-            ;(on HOUSING WS05)
-            ;(on MOTOR2 WS02)
-            ;(on AXIS2 WS03)
-            (on SCREWDRIVER WS04)
-            ; (on ALLENKEY WS04)
-            ;(on BEARING2 WS02)
-            ;(on SPACER WS01)
-            (on DRILL WS03)
-            ;(on M20 WS03)
-            ;(on S40_40_B WS03)
+            (on MOTOR2 WS04)
+            (on S40_40_B WS03)
 
-            (on F20_20_G SH01)
+            (on BEARING2 SH01)
             (on S40_40_G SH01)
 
-            (in F20_20_B PP01_CAVITY-00)
-            ; (in S40_40_B PP01_CAVITY-00)
-            ;(in M30 PP01_CAVITY-00)
-            ; (in M20_100 PP01_CAVITY-00)
+            (in F20_20_G PP01_CAVITY-00)
             (in M20 PP01_CAVITY-00)
         )
     )
