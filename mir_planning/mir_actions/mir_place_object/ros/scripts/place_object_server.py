@@ -172,8 +172,6 @@ class DefalutSafePose(smach.State):
     def execute(self, userdata):
 
         location = Utils.get_value_of(userdata.goal.parameters, "location")
-        
-        rospy.logerr("-->> No empty space found <<--")
         rospy.logwarn("Checking pre-defined safe pose")
 
         height_from_base = self.map_location_to_base_link(location)
@@ -263,7 +261,6 @@ class PublishObjectPose(smach.State):
             rospy.sleep(0.1)
             nearest_pose = None
             return "success"
-#=================================================================================
 
 def transition_cb(*args, **kwargs):
     userdata = args[0]
@@ -293,7 +290,6 @@ def main():
     sm.userdata.counter_reset_flag = False
     sm.userdata.threshold_counter = 0
     sm.userdata.empty_locations = None
-    sm.userdata.heavy_objects = rospy.get_param("~heavy_objects", ["m20_100"])
     sm.userdata.max_allowed_tries = rospy.get_param("~max_allowed_IK_tries", 3)
 
     with sm:
@@ -485,7 +481,7 @@ def main():
 
         smach.StateMachine.add(
                 "MOVE_ARM_TO_NEUTRAL",
-                gms.move_arm("barrier_tape", use_moveit=False),
+                gms.move_arm("pre_place", use_moveit=False),
                 transitions={
                     "succeeded": "OVERALL_SUCCESS",
                     "failed": "MOVE_ARM_TO_NEUTRAL",
