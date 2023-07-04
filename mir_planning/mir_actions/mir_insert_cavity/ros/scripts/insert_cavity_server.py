@@ -147,7 +147,7 @@ class ppt_wiggle_arm(smach.State):
         l = [o.x, o.y, o.z, o.w]
         roll, pitch, self.yaw = tf.transformations.euler_from_quaternion(l)
 
-    def   execute_arm(self, joint_number, wiggle_offset):
+    def execute_arm(self, joint_number, wiggle_offset):
         joint_values = self.joint_values_static[:]
         joint_values[joint_number] = (
             self.joint_values_static[joint_number] + wiggle_offset
