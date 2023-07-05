@@ -17,7 +17,6 @@ void PlaceUnstageAction::update_knowledge_base(bool success,
     knowledge_updater_->remKnowledge("stored",{{"rp",platform},{"o",object}});
     knowledge_updater_->remKnowledge("occupied",{{"rp",platform}});
     knowledge_updater_->addKnowledge("on", {{"o", object}, {"l", location}});
-    knowledge_updater_->addKnowledge("perceived", {{"l", location}});
     knowledge_updater_->addKnowledge("gripper_is_free", {{"r", robot}});
     knowledge_updater_->remGoal("holding", {{"r", robot}, {"o", object}});
     knowledge_updater_->remGoal("on", {{"o", object}, {"l", location}});

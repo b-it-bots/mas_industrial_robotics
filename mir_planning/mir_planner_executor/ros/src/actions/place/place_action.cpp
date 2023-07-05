@@ -25,7 +25,6 @@ void PlaceAction::update_knowledge_base(bool success,
     knowledge_updater_->remKnowledge("holding", {{"r", robot}, {"o", object}});
     knowledge_updater_->addKnowledge("gripper_is_free", {{"r", robot}});
     knowledge_updater_->remGoal("gripper_is_free", {{"r", robot}});
-    knowledge_updater_->addKnowledge("perceived", {{"l", location}});
     knowledge_updater_->remGoal("perceived", {{"l", location}});
   } else {
     return;
