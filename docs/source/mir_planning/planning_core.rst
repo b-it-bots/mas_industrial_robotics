@@ -29,7 +29,7 @@ To test with mockup action servers without a robot
 
     roscore
     roslaunch mir_planning_core task_planning_components.launch
-    rosrun mir_task_executor task_executor_mockup
+    rosrun mir_planner_executor planner_executor_mockup
     roslaunch mir_task_planning upload_problem.launch
     roslaunch mir_planning_core task_planning_sm.launch
 
