@@ -11,9 +11,16 @@ from mir_planning_msgs.msg import (
     GenericExecuteAction,
     GenericExecuteFeedback,
     GenericExecuteResult,
+    GenericExecuteGoal
+
 )
 from smach_ros import ActionServerWrapper, IntrospectionServer
 from std_msgs.msg import String
+from geometry_msgs.msg import TwistStamped
+
+from actionlib import SimpleActionClient
+from actionlib_msgs.msg import GoalStatus
+from diagnostic_msgs.msg import KeyValue
 
 # ===============================================================================
 
@@ -103,6 +110,32 @@ class ShouldReperceive(smach.State):
 
 # ===============================================================================
 
+class MoveArmUp(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded"],
+            input_keys=["goal"],
+            output_keys=["feedback", "result"],
+        )
+        # velocity publisher
+        self.arm_velocity_pub = rospy.Publisher("/arm_1/arm_controller/cartesian_velocity_command", TwistStamped, queue_size=1)
+    
+    def execute(self, userdata):
+        
+        # send the velocity in +z direction wrt base_link to move the arm up
+        vel_msg = TwistStamped()
+        vel_msg.header.frame_id = "base_link"
+        # set velocity to 5cm/s
+        vel_msg.twist.linear.z = 0.04
+        self.arm_velocity_pub.publish(vel_msg)
+        rospy.sleep(1.5)
+        # stop the arm
+        vel_msg.twist.linear.z = 0
+        self.arm_velocity_pub.publish(vel_msg)
+        return "succeeded"
+
+# ===============================================================================
 def transition_cb(*args, **kwargs):
     userdata = args[0]
     sm_state = args[1][0]
@@ -231,20 +264,11 @@ def main():
                 timeout_duration=5,
             ),
             transitions={
-                "success": "WAIT_FOR_ARM_TO_STABILIZE",
+                "success": "START_OBJECT_RECOGNITION",
                 "timeout": "TRY_PICKING",
                 "failure": "TRY_PICKING",
             },
         )
-
-        smach.StateMachine.add(
-            "WAIT_FOR_ARM_TO_STABILIZE",
-            mir_gbs.wait_for(0.5),
-            transitions={
-                "succeeded": "START_OBJECT_RECOGNITION",
-            },
-        )
-
 
         # New perception pipeline state machine
         smach.StateMachine.add(
@@ -433,15 +457,16 @@ def main():
         smach.StateMachine.add(
             "CLOSE_GRIPPER",
             gms.control_gripper("close"),
-            transitions={"succeeded": "CHECK_IF_OBJECT_SHOULD_BE_DRAGGED",
-                         "timeout": "CHECK_IF_OBJECT_SHOULD_BE_DRAGGED"},
+            transitions={"succeeded": "MOVE_ARM_UP",
+                         "timeout": "MOVE_ARM_UP"},
         )
+
 
         smach.StateMachine.add(
             "CHECK_IF_OBJECT_SHOULD_BE_DRAGGED",
             ShouldDragPick(),
             transitions={"yes":"DRAG_PICK",
-                         "no":"MOVE_ARM_TO_STAGE_INTERMEDIATE"}
+                         "no":"MOVE_ARM_TO_PRE_PLACE"}
         )
 
         smach.StateMachine.add(
@@ -452,19 +477,19 @@ def main():
                 timeout_duration=50,
             ),
             transitions={
-                "success": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
+                "success": "MOVE_ARM_TO_PRE_PLACE",
                 "timeout": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
                 "failure": "STOP_MOVE_ROBOT_TO_OBJECT_WITH_FAILURE",
             },
         )
 
-        # move arm to stage_intemediate position
+        # move up 5 cm and then verify 
+
         smach.StateMachine.add(
-            "MOVE_ARM_TO_STAGE_INTERMEDIATE",
-            gms.move_arm("pre_place", use_moveit=False),
+            "MOVE_ARM_UP",
+            MoveArmUp(),
             transitions={
-                "succeeded": "VERIFY_OBJECT_GRASPED",
-                "failed": "MOVE_ARM_TO_STAGE_INTERMEDIATE",
+                "succeeded": "VERIFY_OBJECT_GRASPED"
             },
         )
 
@@ -472,9 +497,25 @@ def main():
             "VERIFY_OBJECT_GRASPED",
             gms.verify_object_grasped(3),
             transitions={
+                "succeeded": "MOVE_ARM_TO_PRE_PLACE",
+                "timeout": "OPEN_GRIPPER",
+                "failed": "OPEN_GRIPPER",
+            },
+        )
+
+        smach.StateMachine.add(
+            "OPEN_GRIPPER",
+            gms.control_gripper("open"),
+            transitions={"succeeded": "MOVE_ARM_TO_PRE_PLACE",
+                         "timeout": "MOVE_ARM_TO_PRE_PLACE"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_PRE_PLACE",
+            gms.move_arm("pre_place", use_moveit=True),
+            transitions={
                 "succeeded": "OVERALL_SUCCESS",
-                "timeout": "OVERALL_SUCCESS",
-                "failed": "OVERALL_FAILED",
+                "failed": "MOVE_ARM_TO_PRE_PLACE",
             },
         )
 
