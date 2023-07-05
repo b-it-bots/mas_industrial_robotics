@@ -284,7 +284,7 @@ class AtworkCommanderClient(object):
                     rospy.logwarn("Could not find " + str(obj.object) + " in object codes")
                     continue
 
-                if self._cavity_start_code <= obj.object < self._cavity_end_code:
+                if self._cavity_start_code <= obj.object <= self._cavity_end_code:
                     object_name = "pp01_cavity"
                 else:
                     object_name = self._obj_code_to_name[obj.object]
@@ -293,7 +293,7 @@ class AtworkCommanderClient(object):
                     rospy.logwarn("Could not find " + str(obj.target) + " in object codes")
                     continue
 
-                if self._cavity_start_code <= obj.target < self._cavity_end_code:
+                if self._cavity_start_code <= obj.target <= self._cavity_end_code:
                     target_name = "pp01_cavity"
                 else:
                     target_name = self._obj_code_to_name[obj.target]
