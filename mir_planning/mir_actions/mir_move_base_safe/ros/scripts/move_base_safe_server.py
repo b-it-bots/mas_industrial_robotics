@@ -258,7 +258,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_DETECT_BARRIER_TAPE",
-            gms.move_arm("barrier_tape", blocking=False),
+            gms.move_arm("platform_middle_pre", use_moveit=False),
             transitions={"succeeded": "SETUP_MOVE_BASE", 
                          "failed": "MOVE_ARM_TO_DETECT_BARRIER_TAPE"},
         )

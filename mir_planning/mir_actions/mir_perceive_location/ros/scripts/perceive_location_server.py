@@ -254,7 +254,7 @@ def main():
     )
     # Open the container
     sm.userdata.arm_pose_list = [
-        "look_at_workspace_from_near",
+        "platform_middle_pre",
     ]
     sm.userdata.arm_pose_index = 0
 
