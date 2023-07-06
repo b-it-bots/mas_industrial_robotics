@@ -44,6 +44,23 @@ class SetupMoveArm(smach.State):
             current_state="SetupMoveArm", text="Moving arm to " + platform
         )
         return "succeeded"
+    
+class CheckRetries(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["retry", "no_retry"],
+            input_keys=["current_retry", "max_retries"],
+            output_keys=["current_retry"],
+        )
+
+    def execute(self, userdata):
+        if userdata.current_retry < userdata.max_retries:
+            userdata.current_retry += 1
+            return "retry"
+        else:
+            userdata.current_retry = 0
+            return "no_retry"
 
 # ===============================================================================
 
@@ -73,6 +90,10 @@ def main():
         input_keys=["goal"],
         output_keys=["feedback", "result"],
     )
+
+    # retries
+    sm.userdata.max_retries = 1
+    sm.userdata.current_retry = 0
 
     with sm:
         smach.StateMachine.add(
@@ -132,10 +153,19 @@ def main():
             transitions={
                 "succeeded": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
                 "timeout": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
-                "failed": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
+                "failed": "RETRY",
             },
         )
-# TODO: add a state to retry if grasp failed.
+        
+        # TODO: check if retry is working or not
+        smach.StateMachine.add(
+            "RETRY",
+            CheckRetries(),
+            transitions={
+                "retry": "OPEN_GRIPPER",
+                "no_retry": "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
+            },
+        )
 
         smach.StateMachine.add(
             "SETUP_MOVE_ARM_PRE_STAGE_AGAIN",
