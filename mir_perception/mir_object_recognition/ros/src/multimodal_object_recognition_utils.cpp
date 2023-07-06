@@ -130,7 +130,17 @@ void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::O
     }
   }
   unsigned int valid_points = pcl::compute3DCentroid(*point_at_z, centroid);
-  if (object.name == "M20_100" or object.name == "SCREWDRIVER")
+  if (object.name == "M20_100")
+  {
+    ROS_INFO_STREAM("Updating object pose from object id: " << object.database_id);
+    float midpoint_x = (object.pose.pose.position.x + centroid[0])/2;
+    float midpoint_y = (object.pose.pose.position.y + centroid[1])/2;
+    float quarter_x = (object.pose.pose.position.x + midpoint_x)/2;
+    float quarter_y = (object.pose.pose.position.y + midpoint_y)/2;
+    object.pose.pose.position.x = quarter_x;
+    object.pose.pose.position.y = quarter_y;
+  }
+  else if (object.name == "SCREWDRIVER")
   {
     ROS_INFO_STREAM("Updating object pose from object id: " << object.database_id);
     float midpoint_x = (object.pose.pose.position.x + centroid[0])/2;
