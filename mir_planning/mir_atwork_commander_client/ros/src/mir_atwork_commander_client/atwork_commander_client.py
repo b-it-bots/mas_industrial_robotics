@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import copy
 import rospy
-
+import pdb
 from atwork_commander_msgs.msg import Task, Object, RobotState
 from mir_knowledge_ros.problem_uploader import ProblemUploader
 from rosplan_knowledge_msgs.srv import KnowledgeUpdateServiceRequest as Req
@@ -372,10 +372,18 @@ class AtworkCommanderClient(object):
     @staticmethod
     def get_obj_code_to_name_dict():
         obj_code_to_name = {}
+        object_range_list = []
         object_class_attributes = dir(Object)
         for attr in object_class_attributes:
-            if attr.isupper() and "START" not in attr and "END" not in attr:
-                obj_code_to_name[getattr(Object, attr)] = attr.lower()
+            if "START" in attr or "END" in attr:
+                object_range_list.append(getattr(Object, attr))
+        for attr in object_class_attributes:
+            if "START" not in attr and "END" not in attr:
+                try:
+                    if getattr(Object, attr) > min(object_range_list) and getattr(Object, attr) < max(object_range_list) or attr == "EMPTY":
+                        obj_code_to_name[getattr(Object, attr)] = attr.lower()
+                except Exception as e:
+                    pass
         return obj_code_to_name
 
     @staticmethod
