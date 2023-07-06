@@ -16,6 +16,7 @@ void BaseInsertAction::update_knowledge_base(bool success,
   std::string location = getValueOf(params, "location");
   std::string peg = getValueOf(params, "peg");
   std::string hole = getValueOf(params, "hole");
+  int N = 1;
   if (success) {
     knowledge_updater_->addKnowledge("in", {{"peg", peg}, {"hole", hole}});
     knowledge_updater_->remGoal("in", {{"peg", peg}, {"hole", hole}});
@@ -33,9 +34,23 @@ void BaseInsertAction::update_knowledge_base(bool success,
 
     knowledge_updater_->remKnowledge("occupied", {{"rp", platform}});
   } else {
-    // knowledge_updater_->remKnowledge("perceived", {{"l", location}});
     knowledge_updater_->remGoalsWithObject(peg);
     ROS_WARN("Insert failed, remove goals with object \"%s\"", peg.c_str());
+
+    int count = 1;
+    if (failure_count_.find(peg) != failure_count_.end()) {
+      count = failure_count_[peg] + 1;
+    }
+    
+    if (count > N) {
+      knowledge_updater_->remKnowledge("at", {{"r", robot}, {"l", location}});
+      knowledge_updater_->addKnowledge("at", {{"r", robot}, {"l", "START"}});
+      ROS_WARN("Insert for object \"%s\" failed %d times. Resetting robot location for replanning", peg.c_str(), count);
+      failure_count_[peg] = 0;
+    }
+    else {
+      failure_count_[peg] = count;
+    }
   }
 }
 

@@ -15,4 +15,5 @@ class BaseInsertAction : public ExecutorAction
   BaseInsertAction(std::string server_topic) : ExecutorAction(server_topic){};
   void updateParamsBasedOnContext(std::vector<diagnostic_msgs::KeyValue> &params) override;
   void update_knowledge_base(bool success, std::vector<diagnostic_msgs::KeyValue> &params) override;
+  std::map<std::string, int> failure_count_;
 };
