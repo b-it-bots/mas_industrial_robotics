@@ -330,6 +330,7 @@ class verify_object_grasped(smach.State):
     def execute(self, userdata):
         # get the object name from userdata
         object_name = Utils.get_value_of(userdata.goal.parameters, "object")
+        object_name = object_name.split("-")[0]
         start_time = rospy.Time.now()
         while (rospy.Time.now() - start_time < self.timeout):
             rospy.sleep(0.1)
