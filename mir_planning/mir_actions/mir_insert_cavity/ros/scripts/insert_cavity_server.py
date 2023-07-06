@@ -47,7 +47,7 @@ class SelectCavity(smach.State):
             "S40_40_B": ["S40_40_H", "S40_40_V"],
             "S40_40_G": ["S40_40_H", "S40_40_V"],
         }
-
+        obj_name = obj_name.split("-")[0]
         for key in matchings.keys():
             if obj_name == key:
                 return matchings[key][vertical]
