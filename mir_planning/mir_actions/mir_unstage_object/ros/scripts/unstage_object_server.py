@@ -180,7 +180,7 @@ def main():
             "MOVE_ARM_PRE_STAGE_AGAIN",
             gms.move_arm(blocking=True, use_moveit=False),
             transitions={
-                "succeeded": "MOVE_ARM_TO_PRE_PLACE",
+                "succeeded": "MOVE_ARM_TO_PLATFORM_MIDDLE_PRE",
                 "failed": "MOVE_ARM_PRE_STAGE_AGAIN",
             },
         )
@@ -191,11 +191,11 @@ def main():
         inorder to avoid any occlution in the camera 
         """
         smach.StateMachine.add(
-            "MOVE_ARM_TO_PRE_PLACE",
-            gms.move_arm("pre_place", use_moveit=False),
+            "MOVE_ARM_TO_PLATFORM_MIDDLE_PRE",
+            gms.move_arm("platform_middle_pre", use_moveit=False),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
-                "failed": "MOVE_ARM_TO_PRE_PLACE",
+                "failed": "MOVE_ARM_TO_PLATFORM_MIDDLE_PRE",
             },
         )
 
