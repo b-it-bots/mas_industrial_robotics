@@ -150,11 +150,11 @@
     </group_state>
     
     <group_state name="platform_middle" group="arm_1">
-        <joint name="arm_joint_1" value="4.18372" />
-        <joint name="arm_joint_2" value="1.37136" />
-        <joint name="arm_joint_3" value="-1.08514" />
-        <joint name="arm_joint_4" value="3.15642" />
-        <joint name="arm_joint_5" value="3.31035" />
+        <joint name="arm_joint_1" value="4.18666" />
+        <joint name="arm_joint_2" value="1.37541" />
+        <joint name="arm_joint_3" value="-1.05328" />
+        <joint name="arm_joint_4" value="3.11522" />
+        <joint name="arm_joint_5" value="3.37639" />
     </group_state>
     
     <group_state name="platform_middle_pre" group="arm_1">
