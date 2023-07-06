@@ -506,8 +506,17 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRASP_FAILURE",
             gms.control_gripper("open"),
-            transitions={"succeeded": "OVERALL_FAILED",
-                         "timeout": "OVERALL_FAILED"},
+            transitions={"succeeded": "MOVE_TO_PRE_PLACE_AND_FAIL",
+                         "timeout": "MOVE_TO_PRE_PLACE_AND_FAIL"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_TO_PRE_PLACE_AND_FAIL",
+            gms.move_arm("pre_place", use_moveit=True),
+            transitions={
+                "succeeded": "OVERALL_FAILED",
+                "failed": "MOVE_TO_PRE_PLACE_AND_FAIL",
+            },
         )
 
 
