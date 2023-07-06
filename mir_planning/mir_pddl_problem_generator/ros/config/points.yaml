@@ -2,6 +2,7 @@
 # =====================  workstations  =========================================
 # ==============================================================================
 
+pl: 1000 # highest priority for objects already staged
 ws: 100
 sh: 50
 co: 20 # container_box_blue / container_box_red

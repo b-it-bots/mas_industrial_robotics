@@ -370,6 +370,19 @@ std::string PDDLProblemGenerator::getSourceLocation(const rosplan_knowledge_msgs
             }
         }
     }
+    attr_srv.request.predicate_name = "stored";
+    if (!getPropsClient.call(attr_srv)) {
+        ROS_ERROR("[mir_pddl_problem_generator] Failed to call service %s: %s",
+                state_proposition_service_.c_str(), attr_srv.request.predicate_name.c_str());
+        return "";
+    } else {
+        for (size_t i = 0; i < attr_srv.response.attributes.size(); i++) {
+            rosplan_knowledge_msgs::KnowledgeItem attr = attr_srv.response.attributes[i];
+            if (attr.values[1].value.compare(obj) == 0) {
+                return attr.values[0].value;
+            }
+        }
+    }
     return "XXXX";  // dummy location
 }
 
