@@ -377,6 +377,10 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
       {
         object.shape.shape = object.shape.SPHERE;
       }
+      else if (flat_objects_.count(recognized_image_list_.objects[i].name))
+      {
+        object.shape.shape = "flat";
+      }
       else
       {
         object.shape.shape = object.shape.OTHER;
@@ -727,14 +731,16 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
         object_list.objects[i].name == "CONTAINER_BOX_BLUE")
     {
-      if (object_list.objects[i].database_id > 100)
+      if (object_list.objects[i].database_id >= 100)
       {
-        ROS_DEBUG_STREAM("Updating RGB container pose");
+        ROS_INFO_STREAM("Updating RGB container pose for " << object_list.objects[i].name);
         mm_object_recognition_utils_->adjustContainerPose(object_list.objects[i], container_height_);
       }
     }
     
-    if (object_list.objects[i].dimensions.vector.z > 0.09)
+    if (object_list.objects[i].dimensions.vector.z > 0.09 and 
+        object_list.objects[i].name != "CONTAINER_BOX_RED" &&
+        object_list.objects[i].name != "CONTAINER_BOX_BLUE")
     {
       tf::Quaternion q2;
       q2.setRPY(0.0, -1.57, 0.0);
@@ -756,7 +762,11 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       if (obj_category_ == "cavity")
       {
            ROS_WARN_STREAM("PP01 workstation; not updating height");
-          // do nothing
+      }
+      else if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
+               object_list.objects[i].name == "CONTAINER_BOX_BLUE")
+      {
+           ROS_WARN_STREAM("Container; not updating height");
       }
       else if (std::fabs(detected_object_height - scene_segmentation_ros_->getWorkspaceHeight()) > 0.03)
       {
@@ -796,6 +806,7 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
 
     }
 
+    /*
     // Update workspace height
     if (scene_segmentation_ros_->getWorkspaceHeight() != -1000.0)
     {
@@ -808,9 +819,10 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
         ROS_WARN_STREAM("Updated container height: " << object_list.objects[i].pose.pose.position.z );
       }
     }
+    */
     
     // Update axis or bolt pose
-    if (object_list.objects[i].name == "M20_100" || object_list.objects[i].name == "AXIS")
+    if (object_list.objects[i].name == "M20_100" || object_list.objects[i].name == "AXIS" || object_list.objects[i].name == "SCREWDRIVER")
     {
       mm_object_recognition_utils_->adjustAxisBoltPose(object_list.objects[i]);
     }
@@ -837,6 +849,10 @@ void MultimodalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
         if (f.shape == object.shape.SPHERE)
         {
           round_objects_.insert(f.name);
+        }
+        else if (f.shape == "flat")
+        {
+          flat_objects_.insert(f.name);
         }
         object_info_.push_back(f);
       }

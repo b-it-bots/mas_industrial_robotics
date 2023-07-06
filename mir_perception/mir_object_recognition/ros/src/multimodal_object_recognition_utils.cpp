@@ -107,7 +107,8 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   // Change the center of object
   container_object.pose.pose.position.x = centroid[0];
   container_object.pose.pose.position.y = centroid[1];
-  container_object.pose.pose.position.z = max_pt.z + container_height;
+  ROS_INFO_STREAM("Updating height from " << container_object.pose.pose.position.z << " to " << (max_pt.z));
+  container_object.pose.pose.position.z = max_pt.z;
 }
 void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::Object &object)
 {
@@ -129,9 +130,9 @@ void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::O
     }
   }
   unsigned int valid_points = pcl::compute3DCentroid(*point_at_z, centroid);
-  if (object.name == "M20_100")
+  if (object.name == "M20_100" or object.name == "SCREWDRIVER")
   {
-    ROS_INFO_STREAM("Updating M20_100 pose from object id: " << object.database_id);
+    ROS_INFO_STREAM("Updating object pose from object id: " << object.database_id);
     float midpoint_x = (object.pose.pose.position.x + centroid[0])/2;
     float midpoint_y = (object.pose.pose.position.y + centroid[1])/2;
     object.pose.pose.position.x = midpoint_x;

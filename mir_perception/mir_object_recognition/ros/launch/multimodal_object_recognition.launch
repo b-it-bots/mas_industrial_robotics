@@ -24,7 +24,7 @@
       <param name="pointcloud_source_frame_id" value="$(arg pointcloud_source_frame_id)" type="str" />
       <param name="debug_mode" value="$(arg debug_mode)" type="bool" />
       <param name="dataset_collection" value="true" />
-      <param name="logdir" value="/tmp/" />
+      <param name="logdir" value="/home/robocup/perception_debugs/" />
       <param name="object_info" value="$(arg object_info)" />
     </node>
   </group>
