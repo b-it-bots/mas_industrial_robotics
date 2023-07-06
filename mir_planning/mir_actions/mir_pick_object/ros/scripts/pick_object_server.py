@@ -498,17 +498,18 @@ def main():
             gms.verify_object_grasped(3),
             transitions={
                 "succeeded": "MOVE_ARM_TO_PRE_PLACE",
-                "timeout": "OPEN_GRIPPER",
-                "failed": "OPEN_GRIPPER",
+                "timeout": "OPEN_GRASP_FAILURE",
+                "failed": "OPEN_GRASP_FAILURE",
             },
         )
 
         smach.StateMachine.add(
-            "OPEN_GRIPPER",
+            "OPEN_GRASP_FAILURE",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM_TO_PRE_PLACE",
-                         "timeout": "MOVE_ARM_TO_PRE_PLACE"},
+            transitions={"succeeded": "OVERALL_FAILED",
+                         "timeout": "OVERALL_FAILED"},
         )
+
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_PRE_PLACE",
