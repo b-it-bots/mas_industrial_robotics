@@ -768,9 +768,16 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
       {
            ROS_WARN_STREAM("Container; not updating height");
       }
-      else if (std::fabs(detected_object_height - scene_segmentation_ros_->getWorkspaceHeight()) > 0.03)
+      else if (use_fixed_heights_ or (std::fabs(detected_object_height - scene_segmentation_ros_->getWorkspaceHeight()) > 0.03))
       {
-           ROS_WARN_STREAM("Difference between object height and workspace height is > 3cm");
+           if (use_fixed_heights_)
+           {
+              ROS_WARN_STREAM("Assuming fixed platform heights of 0, 5, 10 and 15 cm");
+           }
+           else
+           {
+              ROS_WARN_STREAM("Difference between object height and workspace height is > 3cm");
+           }
            // do something
            bool is_0cm = std::fabs(detected_object_height - height_of_floor_) < 0.01;
            bool is_5cm = std::fabs(detected_object_height - (height_of_floor_ + 0.05)) < 0.01;
@@ -937,6 +944,7 @@ void MultimodalObjectRecognitionROS::configCallback(mir_object_recognition::Scen
   pad_cluster_ = config.pad_cluster;
   padded_cluster_size_ = config.padded_cluster_size;
   // Workspace and object height
+  use_fixed_heights_ = config.use_fixed_heights;
   object_height_above_workspace_ = config.object_height_above_workspace;
   height_of_floor_ = config.height_of_floor;
   container_height_ = config.container_height;
