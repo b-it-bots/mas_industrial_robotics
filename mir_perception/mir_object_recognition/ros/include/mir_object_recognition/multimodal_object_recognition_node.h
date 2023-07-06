@@ -169,6 +169,7 @@ class MultimodalObjectRecognitionROS
     std::string target_frame_id_;
     std::string pointcloud_source_frame_id_;
     std::set<std::string> round_objects_;
+    std::set<std::string> flat_objects_;
     ObjectInfo object_info_;
     std::string object_info_path_;
 
