@@ -14,6 +14,7 @@ unstage will happen outside the place object server
 from selectors import PollSelector
 import mcr_states.common.basic_states as gbs
 import mir_states.common.manipulation_states as gms  # move the arm, and gripper
+import mir_states.common.action_states as gas
 import rospy
 import smach
 from mir_actions.utils import Utils
@@ -298,9 +299,17 @@ def main():
             "CHECK_IF_SHELF_INITIAL",
             CheckIfLocationIsShelf(),
             transitions={
-                "shelf": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
+                "shelf": "MOVE_ROBOT_TO_SHELF",
                 "not_shelf": "CHECK_MAX_TRY_THRESHOLD", 
             },
+        )
+
+        # add another state here to use move_base to shelf
+        smach.StateMachine.add(
+            "MOVE_ROBOT_TO_SHELF",
+            gas.move_base(None),
+            transitions={"success": "MOVE_ARM_TO_SHELF_INTERMEDIATE",
+                         "failed" : "OVERALL_FAILED"},
         )
 
         smach.StateMachine.add(
