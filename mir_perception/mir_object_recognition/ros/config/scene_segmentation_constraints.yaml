@@ -42,6 +42,7 @@ multimodal_object_recognition:
   padded_cluster_size: 2048
   octree_resolution: 0.0025
   height_of_floor: -0.083
+  use_fixed_heights: False
   object_height_above_workspace: -0.007
   container_height: 0.07
   enable_rgb_recognizer: true
