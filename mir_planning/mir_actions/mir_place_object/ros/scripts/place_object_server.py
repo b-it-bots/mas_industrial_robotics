@@ -85,10 +85,6 @@ class MoveArmUp(smach.State):
         rospy.sleep(1)
         return "succeeded"
 
-
-
-
-
 # ===============================================================================
 
 class DefineShelfPlacePose(smach.State):
@@ -206,12 +202,30 @@ class GetPoseToPlaceOject(smach.State):  # inherit from the State base class
             and self.status is not None
             and self.status == "e_success"
         ):
-            userdata.move_arm_to = self.place_pose
+            userdata.move_arm_to = self.place_pose  
             return "succeeded"
         else:
             return "failed"
 
 # ===============================================================================
+
+
+class DefalutSafePose(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=["succeeded", "failed"],
+                                    input_keys=["goal","move_arm_to"],
+                                    output_keys=["move_arm_to"])
+
+    def execute(self, userdata):
+
+        rospy.logwarn("Checking pre-defined safe pose")
+        location = Utils.get_value_of(userdata.goal.parameters, "location")
+        current_platform_height = rospy.get_param("/"+location)
+        userdata.move_arm_to = str(str(current_platform_height)+'cm/pose2')
+        print("from place server ========")
+        print(userdata.move_arm_to)
+        rospy.sleep(0.1)
+        return "succeeded"
 
 
 class CheckRetries(smach.State):
@@ -234,40 +248,6 @@ class CheckRetries(smach.State):
             userdata.current_try = 0
             return "no_retry"
 
-# # new class for threshold calculation to go to default place
-# class Threshold_calculation(smach.State):
-
-#     def __init__(self):
-#         smach.State.__init__(
-#             self,
-#             outcomes=["reached", "continue"],
-#             input_keys=["max_allowed_tries", "threshold_counter", "counter_reset_flag"],
-#             output_keys=["feedback", "result", "threshold_counter"],
-#         )
-
-#     def execute(self, userdata):
-    
-#         max_tries = userdata.max_allowed_tries  
-
-#         print("userdata.threshold_counter", userdata.threshold_counter)
-
-#         result = None
-#         if userdata.counter_reset_flag:
-#             userdata.threshold_counter = 0
-
-#         if userdata.threshold_counter >= max_tries:
-#             result = "reached"
-#             userdata.threshold_counter = 0
-#         else:
-#             userdata.threshold_counter += 1
-#             result =  "continue"
-
-#         userdata.result = GenericExecuteResult()
-#         userdata.feedback = GenericExecuteFeedback(
-#             current_state="GO_DEFAULT_THRESHOLD", text="No of time tried the IK reachability: " + str(userdata.threshold_counter),
-#         )
-#         return result
-        
 # ==============================================================================
 
 # new class for empty space detection
@@ -300,52 +280,52 @@ class GetEmptyPositionOnTable(smach.State):
         return 'success'
 
 # ===============================================================================
-class DefalutSafePose(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=["succeeded", "failed"],
-                                    input_keys=["goal"],)
+# class DefalutSafePose(smach.State):
+#     def __init__(self):
+#         smach.State.__init__(self, outcomes=["succeeded", "failed"],
+#                                     input_keys=["goal"],)
 
-        self.empty_pose_pub = rospy.Publisher(
-            "/mcr_perception/object_selector/output/object_pose",
-            PoseStamped,
-            queue_size=10,
-        )
+#         self.empty_pose_pub = rospy.Publisher(
+#             "/mcr_perception/object_selector/output/object_pose",
+#             PoseStamped,
+#             queue_size=10,
+#         )
 
-    def map_location_to_base_link(self, location):
+#     def map_location_to_base_link(self, location):
 
-        if location is not None:
-            current_platform_height = rospy.get_param("/"+location)
-            current_platform_height = current_platform_height /100
-        else:
-            current_platform_height = 0.10
+#         if location is not None:
+#             current_platform_height = rospy.get_param("/"+location)
+#             current_platform_height = current_platform_height /100
+#         else:
+#             current_platform_height = 0.10
 
-        map_location_to_platform_height = {
-            0.15: 0.065,
-            0.10: 0.025,
-            0.05: -0.030,
-            0.0: -0.080
-        }
+#         map_location_to_platform_height = {
+#             0.15: 0.065,
+#             0.10: 0.025,
+#             0.05: -0.030,
+#             0.0: -0.080
+#         }
 
-        return map_location_to_platform_height[current_platform_height]
+#         return map_location_to_platform_height[current_platform_height]
 
 
-    def execute(self, userdata):
+#     def execute(self, userdata):
 
-        location = Utils.get_value_of(userdata.goal.parameters, "location")
-        rospy.logwarn("Checking pre-defined safe pose")
+#         location = Utils.get_value_of(userdata.goal.parameters, "location")
+#         rospy.logwarn("Checking pre-defined safe pose")
 
-        height_from_base = self.map_location_to_base_link(location)
+#         height_from_base = self.map_location_to_base_link(location)
 
-        safe_pose = PoseStamped()
-        safe_pose.header.frame_id = "base_link"
-        safe_pose.pose.position.x = 0.610
-        safe_pose.pose.position.y = 0.095
-        safe_pose.pose.position.z = height_from_base + rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
+#         safe_pose = PoseStamped()
+#         safe_pose.header.frame_id = "base_link"
+#         safe_pose.pose.position.x = 0.610
+#         safe_pose.pose.position.y = 0.095
+#         safe_pose.pose.position.z = height_from_base + rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
         
-        self.empty_pose_pub.publish(safe_pose)
-        rospy.sleep(0.1)
-        safe_pose = None
-        return "succeeded"
+#         self.empty_pose_pub.publish(safe_pose)
+#         rospy.sleep(0.1)
+#         safe_pose = None
+#         return "succeeded"
 
 class PublishObjectPose(smach.State):
     def __init__(self):
@@ -451,6 +431,7 @@ def main():
     sm.userdata.max_allowed_tries = rospy.get_param("~max_allowed_IK_tries", 3)
     sm.userdata.empty_place = rospy.get_param("~is_empty_pose_placing", False) 
     sm.userdata.current_try = 0
+    sm.userdata.move_arm_to = None
 
     with sm:
         smach.StateMachine.add(
@@ -547,7 +528,7 @@ def main():
                 "/mcr_perception/place_pose_selector/platform_name",
                 "/mcr_perception/place_pose_selector/place_pose",
                 "/mcr_perception/place_pose_selector/event_out",
-                15.0,
+                10.0,
             ),
             transitions={
                 "succeeded": "MOVE_ARM_TO_PLACE_OBJECT",
@@ -557,13 +538,12 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_DEFAULT_PLACE",
-            gms.move_arm("10cm/pose4"),
+            DefalutSafePose(),
             transitions={
-                "succeeded": "STOP_PLACE_POSE_SELECTOR",
+                "succeeded": "MOVE_ARM_TO_PLACE_OBJECT",
                 "failed": "MOVE_ARM_TO_DEFAULT_PLACE",
             },
         )
-
         smach.StateMachine.add(
             "MOVE_ARM_TO_PLACE_OBJECT",
             gms.move_arm(),
@@ -571,7 +551,6 @@ def main():
                          "failed": "STOP_PLACE_POSE_SELECTOR",
             },
         )
-
 
         smach.StateMachine.add(
             "STOP_PLACE_POSE_SELECTOR",
@@ -584,16 +563,7 @@ def main():
 
 # below states for empty space placing--
 
-        # smach.StateMachine.add(
-        #     "CHECK_MAX_TRY_THRESHOLD",
-        #     Threshold_calculation(),
-        #     transitions={
-        #         "continue": "EMPTY_SPACE_CLOUD_ADD",
-        #         "reached": "GO_SAFE_POSE",
-        #     },
-        # )
 
-                # retry if failed
         smach.StateMachine.add(
             "CHECK_MAX_TRY_THRESHOLD",
             CheckRetries(),
@@ -603,24 +573,6 @@ def main():
             },
         )
 
-        # smach.StateMachine.add(
-        #     "GO_SAFE_POSE",
-        #     DefalutSafePose(),
-        #     transitions={
-        #         "succeeded": "CHECK_PRE_GRASP_POSE_IK",
-        #         "failed": "GO_DEFAULT_THRESHOLD",
-        #     },
-        # )
-
-
-        # smach.StateMachine.add(
-        #     "GO_DEFAULT_THRESHOLD",
-        #     gms.move_arm("place_default", use_moveit=False),
-        #     transitions={
-        #         "succeeded": "OPEN_GRIPPER",
-        #         "failed": "GO_DEFAULT_THRESHOLD",
-        #     }
-        # )
 
         smach.StateMachine.add(
             "EMPTY_SPACE_CLOUD_ADD",
@@ -629,7 +581,7 @@ def main():
                     ("/mir_perception/empty_space_detector/event_in","e_add_cloud"),
                                 ],
                 event_out_list = [("/mir_perception/empty_space_detector/event_out","e_added_cloud", True)],
-                timeout_duration=50,
+                timeout_duration=10,
             ),
             transitions={
                 "success": "EMPTY_SPACE_TRIGGER",
@@ -644,7 +596,7 @@ def main():
             gbs.send_and_wait_events_combined(
                 event_in_list = [("/mir_perception/empty_space_detector/event_in","e_trigger")],
 		        event_out_list = [("/mir_perception/empty_space_detector/event_out","e_success",True)],
-		        timeout_duration = 50,
+		        timeout_duration = 10,
             ),
             transitions={
                 "success": "EMPTY_POSE_RECEIVE",
