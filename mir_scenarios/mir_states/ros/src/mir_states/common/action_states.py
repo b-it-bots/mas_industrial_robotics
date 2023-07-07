@@ -21,7 +21,7 @@ class place_object(smach.State):
 
     def execute(self, userdata):
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(15.0))
+        self.client.wait_for_result(rospy.Duration.from_sec(30.0))
         state = self.client.get_state()
         if state == GoalStatus.SUCCEEDED:
             return "success"
@@ -30,16 +30,41 @@ class place_object(smach.State):
 
 
 class pick_object(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=["success", "failed"])
+    def __init__(self, obj_name = None):
+        smach.State.__init__(self, outcomes=["success", "failed"],
+                             input_keys=["pick_anything_object"])
         self.client = SimpleActionClient("wbc_pick_object_server", GenericExecuteAction)
         self.client.wait_for_server()
-        self.goal = GenericExecuteGoal()
-        self.goal.parameters.append(KeyValue(key="object", value="any"))
+        self.object_name = obj_name if obj_name is not None else "any"
 
     def execute(self, userdata):
+        self.goal = GenericExecuteGoal()
+
+        pick_anything_object = userdata.pick_anything_object
+
+        if pick_anything_object is not None or pick_anything_object != "":
+            self.object_name = pick_anything_object
+
+        self.goal.parameters.append(KeyValue(key="object", value=str(self.object_name).upper()))
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(30.0))
+        self.client.wait_for_result(rospy.Duration.from_sec(60.0))
+        state = self.client.get_state()
+        if state == GoalStatus.SUCCEEDED:
+            return "success"
+        else:
+            return "failed"
+        
+class tc_pick_object(smach.State):
+    def __init__(self):
+        smach.State.__init__(self, outcomes=["success", "failed"])
+        self.client = SimpleActionClient("tc_wbc_pick_object_server", GenericExecuteAction)
+        self.client.wait_for_server()
+
+    def execute(self, userdata):
+        self.goal = GenericExecuteGoal()
+
+        self.client.send_goal(self.goal)
+        self.client.wait_for_result(rospy.Duration.from_sec(60.0))
         state = self.client.get_state()
         if state == GoalStatus.SUCCEEDED:
             return "success"
@@ -48,28 +73,41 @@ class pick_object(smach.State):
 
 
 class perceive_location(smach.State):
-    def __init__(self, obj_category="multimodal_object_recognition_atwork"):
-        smach.State.__init__(self, outcomes=["success", "failed"])
+    def __init__(self, obj_category="multimodal_object_recognition_atwork", timeout=30.0):
+        smach.State.__init__(self, outcomes=["success", "failed"],
+                             output_keys=["perceived_objects"])
         self.client = SimpleActionClient(
             "perceive_location_server", GenericExecuteAction
         )
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
+        self.timeout = timeout
         self.goal.parameters.append(
             KeyValue(key="obj_category", value=str(obj_category)))
 
     def execute(self, userdata):
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(30.0))
+        self.client.wait_for_result(rospy.Duration.from_sec(self.timeout))
         state = self.client.get_state()
+        result = self.client.get_result()
+        objects = []
         if state == GoalStatus.SUCCEEDED:
+            print("Perceived objects:")
+            for i in range(20):
+                obj_key = "obj_" + str(i+1)
+                obj_name = Utils.get_value_of(result.results, obj_key)
+                if obj_name == None:
+                    break
+                print(obj_name.ljust(15))
+                objects.append(obj_name)
+            userdata.perceived_objects = objects
             return "success"
         else:
             return "failed"
 
 
 class move_base(smach.State):
-    def __init__(self, destination_location):
+    def __init__(self, destination_location, timeout = 15.0):
         smach.State.__init__(self,
                              outcomes=["success", "failed"],
                              input_keys=["goal"])
@@ -77,6 +115,7 @@ class move_base(smach.State):
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
         self.destination_location = destination_location
+        self.timeout = timeout
 
 
     def execute(self, userdata):
@@ -106,7 +145,7 @@ class move_base(smach.State):
                 )
 
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(int(15.0)))
+        self.client.wait_for_result(rospy.Duration.from_sec(int(self.timeout)))
         state = self.client.get_state()
         if state == GoalStatus.SUCCEEDED:
             return "success"
@@ -136,12 +175,13 @@ class insert_object(smach.State):
 
 
 class stage_object(smach.State):
-    def __init__(self, platform=None):
-        smach.State.__init__(self, outcomes=["success", "failed"], input_keys=["goal"])
+    def __init__(self, platform=None, timeout = 30.0):
+        smach.State.__init__(self, outcomes=["success", "failed"], input_keys=["goal", "pick_anything_stage_platform"])
         self.client = SimpleActionClient("stage_object_server", GenericExecuteAction)
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
         self.platform = platform
+        self.timeout = timeout
 
     def execute(self, userdata):
         self.goal.parameters = []
@@ -167,8 +207,16 @@ class stage_object(smach.State):
                 KeyValue(key="platform", value=str(platform).upper())
             )
 
+        # pick_anything_stage_platform
+        if userdata.pick_anything_stage_platform is not None or userdata.pick_anything_stage_platform != "":
+            self.goal.parameters = []
+            rospy.loginfo("using pick anything stage platform")
+            self.goal.parameters.append(
+                KeyValue(key="platform", value=str(userdata.pick_anything_stage_platform).upper())
+            )
+
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(30.0))
+        self.client.wait_for_result(rospy.Duration.from_sec(self.timeout))
         state = self.client.get_state()
         if state == GoalStatus.SUCCEEDED:
             return "success"
@@ -177,12 +225,13 @@ class stage_object(smach.State):
 
 
 class unstage_object(smach.State):
-    def __init__(self, platform=None):
+    def __init__(self, platform=None, timeout = 30.0):
         smach.State.__init__(self, outcomes=["success", "failed"], input_keys=["goal"])
         self.client = SimpleActionClient("unstage_object_server", GenericExecuteAction)
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
         self.platform = platform
+        self.timeout = timeout
 
     def execute(self, userdata):
         self.goal.parameters = []
@@ -209,7 +258,7 @@ class unstage_object(smach.State):
             )
 
         self.client.send_goal(self.goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(30.0))
+        self.client.wait_for_result(rospy.Duration.from_sec(self.timeout))
         state = self.client.get_state()
         if state == GoalStatus.SUCCEEDED:
             return "success"
