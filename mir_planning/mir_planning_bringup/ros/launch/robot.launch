@@ -183,4 +183,6 @@
         <arg name="be_safe" value="$(arg be_safe)" />
     </include>
 
+    <include file="$(find mir_data_logger)/ros/launch/data_logger.launch"/>
+
 </launch>
