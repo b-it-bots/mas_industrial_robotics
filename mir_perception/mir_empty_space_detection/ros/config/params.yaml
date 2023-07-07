@@ -8,10 +8,10 @@ passthrough_filter_field_name: x
 passthrough_filter_limit_min: 0.46 # all the min distance starts from the baselink 
 passthrough_filter_limit_max: 0.7
 enable_cropbox_filter: True
-cropbox_filter_min_x: 0.46
-cropbox_filter_max_x: 0.63
-cropbox_filter_min_y: -0.4
-cropbox_filter_max_y: 0.4
+cropbox_filter_min_x: 0.43
+cropbox_filter_max_x: 0.53
+cropbox_filter_min_y: -0.25
+cropbox_filter_max_y: 0.25
 cropbox_filter_min_z: -0.1
 cropbox_filter_max_z: 0.6
 normal_radius_search: 0.03
@@ -40,7 +40,7 @@ octree_resolution: 0.01
 object_height_above_workspace: 0.0 # setting it to 0 because we reduced the gripper height
 # parameters for finding empty spaces on a plane
 empty_space_point_count_percentage_threshold: 0.8
-empty_space_radius: 0.07
-num_of_empty_spaces_required: 3
+empty_space_radius: 0.065
+num_of_empty_spaces_required: 2
 trial_duration: 3.0
 enable_debug_pc: True
