@@ -90,7 +90,6 @@ class MoveitClient:
 
     def execute(self, userdata, blocking=True):
         target = self.move_arm_to or userdata.move_arm_to
-
         # do it twice because it probably fails the first time
         for i in range(2):
             self.client_event = None
@@ -330,14 +329,17 @@ class verify_object_grasped(smach.State):
     def execute(self, userdata):
         # get the object name from userdata
         object_name = Utils.get_value_of(userdata.goal.parameters, "object")
-        object_name = object_name.split("-")[0]
+        if object_name is not None and object_name != "":
+            object_name = object_name.split("-")[0]
+        else:
+            object_name = ""
         start_time = rospy.Time.now()
         while (rospy.Time.now() - start_time < self.timeout):
             rospy.sleep(0.1)
             if self.current_state == "GRIPPER_CLOSED" or\
                self.current_state == "GRIPPER_INTER" or\
                self.current_state == "GRIPPER_OPEN":
-                if object_name == "WRENCH":
+                if object_name == "WRENCH" or object_name == "ALLENKEY":
                     # TODO: modify this
                     return "succeeded"
                 return "failed"
