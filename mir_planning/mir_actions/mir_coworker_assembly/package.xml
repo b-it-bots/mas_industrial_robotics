@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_coworker_assembly</name>
+  <version>1.0.0</version>
+  <description>
+      This package is for coworker assembly technical challenge in Robocup 2023. 
+      The state machine will pick 3 objects, palce 3 objects, wait for coworker hand gesture.
+      Then detects and picks the assembled object. Finally it places the object.
+      This server uses coworker_assembly_detection_node and hand_gesture_node from mir_object_recognition
+
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="Santosh@gmail.com">Santosh</author>
+  <maintainer email="Santosh@gmail.com">Santosh</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

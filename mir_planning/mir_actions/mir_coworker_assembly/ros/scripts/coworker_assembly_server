@@ -1,0 +1,352 @@
+#!/usr/bin/python
+import mcr_states.common.basic_states as gbs
+import mir_states.common.action_states as gas
+import mir_states.common.manipulation_states as gms
+import rospy
+import smach
+from actionlib import SimpleActionClient
+from geometry_msgs.msg import PoseStamped
+from mir_actions.utils import Utils
+from mir_planning_msgs.msg import (
+    GenericExecuteAction,
+    GenericExecuteFeedback,
+    GenericExecuteResult,
+)
+from smach_ros import ActionServerWrapper, IntrospectionServer
+from std_msgs.msg import String
+
+# ===============================================================================
+
+
+class SelectObject(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["success", "failed"],
+            input_keys=["perceived_objects", "to_be_picked_objects", "platforms"],
+            output_keys=["feedback", "result", "to_be_picked_objects", "pick_anything_object", "pick_anything_stage_platform"],
+        )
+
+    def execute(self, userdata):
+        # Add empty result msg (because if none of the state do it, action server gives error)
+        userdata.result = GenericExecuteResult()
+        userdata.feedback = GenericExecuteFeedback(
+            current_state="SelectObject", text="selecting object to pick next"
+        )
+
+        to_be_picked_objects = userdata.to_be_picked_objects
+        perceived_objects = userdata.perceived_objects
+        platforms = userdata.platforms
+
+        if len(to_be_picked_objects) != 0:
+            for obj in to_be_picked_objects:
+                if obj in perceived_objects:
+                    userdata.pick_anything_object = obj
+                    userdata.pick_anything_stage_platform = platforms[-1]
+                    return "success"
+                
+        return "failed"
+
+class UpdatePickedObjectsAndPlatforms(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["success", "failed", "done"],
+            input_keys=["next_pick_object", "picked_objects", "to_be_picked_objects", "platforms", "pick_anything_object", "pick_anything_stage_platform"],
+            output_keys=["feedback", "result", "picked_objects", "to_be_picked_objects", "platforms"]
+        )
+
+    def execute(self, userdata):
+        # Add empty result msg (because if none of the state do it, action server gives error)
+        userdata.result = GenericExecuteResult()
+        userdata.feedback = GenericExecuteFeedback(
+            current_state="SelectObject", text="selecting object to pick next"
+        )
+
+        platforms = userdata.platforms
+        picked_objects = userdata.picked_objects
+        to_be_picked_objects = userdata.to_be_picked_objects
+        pick_anything_object = userdata.pick_anything_object
+
+        if len(to_be_picked_objects) == 0:
+            return "done"
+
+        # remove picked object from list
+        for obj in to_be_picked_objects:
+            if obj == pick_anything_object:
+                to_be_picked_objects.remove(obj)
+                userdata.to_be_picked_objects = to_be_picked_objects
+                picked_objects.append(obj)
+                userdata.picked_objects = picked_objects
+                platforms.remove(userdata.pick_anything_stage_platform)
+                userdata.platforms = platforms
+                if len(to_be_picked_objects) == 0:
+                    return "done"
+                return "success"
+        
+        return "failed"
+
+# ===============================================================================
+
+def transition_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
+
+def start_cb(*args, **kwargs):
+    userdata = args[0]
+    sm_state = args[1][0]
+
+    feedback = GenericExecuteFeedback()
+    feedback.current_state = sm_state
+    userdata.feedback = feedback
+# ===============================================================================
+
+
+def main():
+    # Open the container
+    rospy.init_node("coworker_assembly_server")
+    # Construct state machine
+    sm = smach.StateMachine(
+        outcomes=["OVERALL_SUCCESS", "OVERALL_FAILED"],
+        input_keys=["goal"],
+        output_keys=["feedback", "result"],
+    )
+    sm.userdata.perception_result = None
+    sm.userdata.pick_anything_stage_platform = None
+    sm.userdata.pick_anything_object = None
+
+    sm.userdata.picked_objects = []
+    sm.userdata.to_be_picked_objects = ["M20_100", "M20", "SPACER"]
+    sm.userdata.platforms = ["PLATFORM_LEFT", "PLATFORM_MIDDLE", "PLATFORM_RIGHT"]
+
+    with sm:
+        smach.StateMachine.add(
+            "MOVE_TO_PICK_LOCATION",
+            gas.move_base("WS02", timeout=60.0),
+            transitions={
+                "success": "PERCEIVE_LOCATION",
+                "failed": "MOVE_TO_PICK_LOCATION",
+            },
+        )
+
+        # start perception
+        smach.StateMachine.add(
+            "PERCEIVE_LOCATION",
+            gas.perceive_location(obj_category="multimodal_object_recognition_atwork", timeout=60.0),
+            transitions={
+                "success": "SELECT_OBJECT",
+                "failed": "MOVE_TO_PICK_LOCATION",
+            },
+        )
+
+        # select object to pick
+        smach.StateMachine.add(
+            "SELECT_OBJECT",
+            SelectObject(),
+            transitions={
+                "success": "PICK_OBJECT",
+                "failed": "MOVE_TO_PICK_LOCATION",
+            },
+        )
+
+        # pick object
+        smach.StateMachine.add(
+            "PICK_OBJECT",
+            gas.pick_object(),
+            transitions={
+                "success": "STAGE_OBJECT",
+                "failed": "MOVE_TO_PICK_LOCATION",
+            },
+        )
+
+        smach.StateMachine.add(
+            "STAGE_OBJECT",
+            gas.stage_object(timeout=60.0),
+            transitions={
+                "success": "UPDATE_PICK_AND_PLATFORM_DATA",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+        
+        # update data
+        smach.StateMachine.add(
+            "UPDATE_PICK_AND_PLATFORM_DATA",
+            UpdatePickedObjectsAndPlatforms(),
+            transitions={
+                "success": "SELECT_OBJECT",
+                "failed": "OVERALL_FAILED",
+                "done": "MOVE_TO_UNSTAGE_LOCATION"
+            },
+        )
+        
+        smach.StateMachine.add(
+            "MOVE_TO_UNSTAGE_LOCATION",
+            gas.move_base("WS04", timeout=60.0),
+            transitions={
+                "success": "UNSTAGE_OBJECT_LEFT",
+                "failed": "MOVE_TO_UNSTAGE_LOCATION",
+            },
+        )
+
+        smach.StateMachine.add(
+            "UNSTAGE_OBJECT_LEFT",
+            gas.unstage_object("PLATFORM_LEFT", timeout=60.0),
+            transitions={
+                "success": "PLACE_OBJECT_LEFT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+       
+        smach.StateMachine.add(
+            "PLACE_OBJECT_LEFT",
+            gas.place_object("WS04"),
+            transitions={
+                "success": "UNSTAGE_OBJECT_MIDDLE",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+       
+        smach.StateMachine.add(
+            "UNSTAGE_OBJECT_MIDDLE",
+            gas.unstage_object("PLATFORM_MIDDLE", timeout=60.0),
+            transitions={
+                "success": "PLACE_OBJECT_MIDDLE",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+       
+        smach.StateMachine.add(
+            "PLACE_OBJECT_MIDDLE",
+            gas.place_object("WS04"),
+            transitions={
+                "success": "UNSTAGE_OBJECT_RIGHT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+       
+        smach.StateMachine.add(
+            "UNSTAGE_OBJECT_RIGHT",
+            gas.unstage_object("PLATFORM_RIGHT", timeout=60.0),
+            transitions={
+                "success": "PLACE_OBJECT_RIGHT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "PLACE_OBJECT_RIGHT",
+            gas.place_object("WS04"),
+            transitions={
+                "success": "CHECK_HUMAN_SIGNAL",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+       
+        smach.StateMachine.add(
+            "CHECK_HUMAN_SIGNAL",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mir_perception/gesture_recognition/event_in", "e_start")],
+                event_out_list=[("/mir_perception/gesture_recognition/event_out", "e_done", True)],
+                timeout_duration=60,
+            ),
+            transitions={
+                "success": "PUBLISH_REFERENCE_FRAME",
+                "timeout": "PUBLISH_REFERENCE_FRAME",
+                "failure": "PUBLISH_REFERENCE_FRAME",
+            },
+        )
+        
+        # publish a static frame which will be used as reference for perceived objs
+        smach.StateMachine.add(
+            "PUBLISH_REFERENCE_FRAME",
+            gbs.send_event([("/static_transform_publisher_node/event_in", "e_start")]),
+            transitions={"success": "START_OBJECT_RECOGNITION"},
+        )
+
+        smach.StateMachine.add(
+            "START_OBJECT_RECOGNITION",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[("/mir_perception/coworker_assembly/event_in", "e_start")],
+                event_out_list=[("/mir_perception/coworker_assembly/event_out", "e_done", True)],
+                timeout_duration=60,
+            ),
+            transitions={
+                "success": "PICK_ASSEMBLED_OBJECT",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        # pick object
+        smach.StateMachine.add(
+            "PICK_ASSEMBLED_OBJECT",
+            gas.tc_pick_object(),
+            transitions={
+                "success": "STAGE_ASSEMBLED_OBJECT",
+                "failed": "PICK_ASSEMBLED_OBJECT",
+            },
+        )
+
+        smach.StateMachine.add(
+            "STAGE_ASSEMBLED_OBJECT",
+            gas.stage_object(timeout=60.0),
+            transitions={
+                "success": "MOVE_TO_FINAL_LOCATION",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+        
+        smach.StateMachine.add(
+            "MOVE_TO_FINAL_LOCATION",
+            gas.move_base("WS01", timeout=60.0),
+            transitions={
+                "success": "UNSTAGE_ASSEMBLED_OBJECT",
+                "failed": "MOVE_TO_UNSTAGE_LOCATION",
+            },
+        )
+
+        smach.StateMachine.add(
+            "UNSTAGE_ASSEMBLED_OBJECT",
+            gas.unstage_object("PLATFORM_LEFT", timeout=60.0),
+            transitions={
+                "success": "PLACE_ASSEMBLED_OBJECT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+       
+        smach.StateMachine.add(
+            "PLACE_ASSEMBLED_OBJECT",
+            gas.place_object("WS01"),
+            transitions={
+                "success": "OVERALL_SUCCESS",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+       
+
+    sm.register_transition_cb(transition_cb)
+    sm.register_start_cb(start_cb)
+
+    # Construct action server wrapper
+    asw = ActionServerWrapper(
+        server_name="coworker_assembly_server",
+        action_spec=GenericExecuteAction,
+        wrapped_container=sm,
+        succeeded_outcomes=["OVERALL_SUCCESS"],
+        aborted_outcomes=["OVERALL_FAILED"],
+        preempted_outcomes=["PREEMPTED"],
+        goal_key="goal",
+        feedback_key="feedback",
+        result_key="result",
+    )
+    # Run the server in a background thread
+    asw.run_server()
+    rospy.spin()
+
+
+if __name__ == "__main__":
+    main()
