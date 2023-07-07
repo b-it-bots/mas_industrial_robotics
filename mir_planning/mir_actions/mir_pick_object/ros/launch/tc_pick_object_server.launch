@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_pick_object" type="tc_pick_object_server.py"
+          name="tc_wbc_pick_object_server" output="screen">
+    </node>
+
+</launch>
