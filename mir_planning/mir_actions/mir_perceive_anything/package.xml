@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>mir_perceive_anything</name>
+  <version>1.0.0</version>
+  <description>
+      Action server for perceiving anything present on platform.
+      Assumes that the platform has only one object. (but can be updated to multiple objects in future)
+      It uses pick_anything_node.
+  </description>
+
+  <license>GPLv3</license>
+
+  <author email="robocup@gmail.com">Dharmin B.</author>
+  <maintainer email="robocup@gmail.com">Dharmin B.</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
