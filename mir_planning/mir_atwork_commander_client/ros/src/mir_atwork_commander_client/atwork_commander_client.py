@@ -380,7 +380,7 @@ class AtworkCommanderClient(object):
         for attr in object_class_attributes:
             if "START" not in attr and "END" not in attr:
                 try:
-                    if getattr(Object, attr) > min(object_range_list) and getattr(Object, attr) < max(object_range_list) or attr == "EMPTY":
+                    if getattr(Object, attr) >= min(object_range_list) and getattr(Object, attr) <= max(object_range_list) or attr == "EMPTY":
                         obj_code_to_name[getattr(Object, attr)] = attr.lower()
                 except Exception as e:
                     pass
