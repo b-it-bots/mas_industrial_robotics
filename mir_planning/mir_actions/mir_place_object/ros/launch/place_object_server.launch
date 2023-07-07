@@ -2,12 +2,11 @@
 <launch>
 
     <arg name="max_allowed_tries" default= "3" />
-
-    <node pkg="mir_place_object" type="place_object_server.py"
-          name="place_object_server" output="screen">
-        <rosparam param="max_allowed_tries" subst_value="True">
-            $(arg max_allowed_tries)
-        </rosparam>
+    <arg name="is_empty_space_placing" default="True"/> 
+<!-- True is empty space , False is place pose selector  NOT WORKING !!!!-->
+    <node pkg="mir_place_object" type="place_object_server.py" name="place_object_server" output="screen">
+        <rosparam param="max_allowed_tries" subst_value="True"> $(arg max_allowed_tries) </rosparam>
+        <param name="is_empty_space_placing" type="bool" value="$(arg is_empty_space_placing)" />
     </node>
 
     <!-- launch place_pose_selector node to get platform heights-->

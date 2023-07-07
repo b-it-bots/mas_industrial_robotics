@@ -16,26 +16,26 @@ if __name__ == "__main__":
     print("Server found")
 
     if len(sys.argv) > 1:
-        platform = str(sys.argv[1]).upper()
+        obj = str(sys.argv[1]).upper()
         if len(sys.argv) > 2:
-            obj = str(sys.argv[2]).upper()
+            location = str(sys.argv[2]).upper()
         else:
             obj = "M20"
     else:
-        platform = "PLATFORM_MIDDLE"
         obj = "M20"
+        location = "WS01"
 
     goal = GenericExecuteGoal()
-    goal.parameters.append(KeyValue(key="platform", value=platform))
+    goal.parameters.append(KeyValue(key="platform", value="PLATFORM_MIDDLE"))
     goal.parameters.append(KeyValue(key="object", value=obj))
-    goal.parameters.append(KeyValue(key="location", value="WS04"))
+    goal.parameters.append(KeyValue(key="location", value=location))
 
     rospy.loginfo("Sending following goal to place object server")
     rospy.loginfo(goal)
 
     client.send_goal(goal)
 
-    timeout = 15.0
+    timeout = 300.0
     finished_within_time = client.wait_for_result(rospy.Duration.from_sec(int(timeout)))
     if not finished_within_time:
         client.cancel_goal()
