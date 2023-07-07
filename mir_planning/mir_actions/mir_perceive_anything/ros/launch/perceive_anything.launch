@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-    <node pkg="mir_perceive_anything" type="coworker_assembly_server" name="coworker_assembly_server" output="screen"/>
-    <node pkg="mir_object_recognition" type="hand_gesture_node" name="hand_gesture_node" output="screen"/>
-    <node pkg="mir_object_recognition" type="pick_anything_node" name="pick_anything_node" output="screen"/>
-    <include file="$(find mir_pick_object)/ros/launch/tc_pick_object_server.launch" />
-</launch>
