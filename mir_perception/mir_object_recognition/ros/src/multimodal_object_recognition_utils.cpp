@@ -107,8 +107,8 @@ void MultimodalObjectRecognitionUtils::adjustContainerPose(mas_perception_msgs::
   // Change the center of object
   container_object.pose.pose.position.x = centroid[0];
   container_object.pose.pose.position.y = centroid[1];
-  ROS_INFO_STREAM("Updating height from " << container_object.pose.pose.position.z << " to " << (max_pt.z));
-  container_object.pose.pose.position.z = max_pt.z;
+  ROS_INFO_STREAM("Updating height from " << container_object.pose.pose.position.z << " to " << (max_pt.z - 0.02));
+  container_object.pose.pose.position.z = max_pt.z - 0.02;
 }
 void MultimodalObjectRecognitionUtils::adjustAxisBoltPose(mas_perception_msgs::Object &object)
 {
