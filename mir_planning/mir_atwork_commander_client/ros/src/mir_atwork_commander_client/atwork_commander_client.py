@@ -51,6 +51,9 @@ class AtworkCommanderClient(object):
 
         self._processed_task_ids.append(task.id)
 
+        task = self._change_workstation_names(task)
+
+
         start_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_start_state)
         target_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_target_state)
 
@@ -86,6 +89,18 @@ class AtworkCommanderClient(object):
         )
 
         self._print_task(obj_dicts)
+
+    def _change_workstation_names(self, taskmsg):
+        """
+        REFBOX notation for rotating table keeps varying between RT and TT. 
+        Parse the task msg and change it to TT evertime
+        """
+        for start_state in taskmsg.arena_start_state:
+            start_state.workstation_name = start_state.workstation_name.replace("RT","TT")
+        for goal_state in taskmsg.arena_target_state:
+            goal_state.workstation_name = goal_state.workstation_name.replace("RT","TT")
+
+        return taskmsg
 
     def _get_entire_knowledge_from_obj_dicts(self, start_obj_dicts, target_obj_dicts):
         """TODO: 
