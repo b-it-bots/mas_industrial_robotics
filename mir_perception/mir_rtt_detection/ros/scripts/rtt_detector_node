@@ -121,6 +121,8 @@ class RTTObjectTracker():
         # if True:
             self.object_name = self.event[8:]
 
+            self.object_name = self.object_name.split("-")[0]
+
             # Subscribe to image topic
             self.sub_img = message_filters.Subscriber("/tower_cam3d_front/rgb/image_raw", Image)#, self.image_recognition_cb)
 
@@ -724,7 +726,7 @@ class RTTObjectTracker():
                                         self.object_pose[label].header.frame_id = "base_link"
                                         self.object_pose[label].pose.position.x = closest_x
                                         self.object_pose[label].pose.position.y = closest_y
-                                        self.object_pose[label].pose.position.z = 0.005
+                                        self.object_pose[label].pose.position.z = -0.005
                                                 
                                         if label == "M30" or label == "M20" or label == "BEARING2":
                                             self.object_pose[label].pose.orientation.x = 0.0
