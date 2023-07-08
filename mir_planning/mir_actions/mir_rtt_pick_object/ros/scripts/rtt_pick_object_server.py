@@ -41,13 +41,13 @@ class GetPredictions(smach.State):
         self.publisher.publish(String(data=msg_str))
         rospy.sleep(0.2)  # let the topic to survive for some time\
         try:
-            predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, timeout=120)
+            predicted_msg = rospy.wait_for_message("/mir_perception/rtt/time_stamped_pose", TimeStampedPose, timeout=90)
             userdata.time = predicted_msg.timestamps
             userdata.pose = predicted_msg.pose
             return "succeeded"
-        except rospy.exceptions.ROSException as e:
-            rospy.logwarn("Exception occured while waiting for message: ", e)
-            return "timeout"    
+        except Exception as e:
+            rospy.logwarn("Exception occured while waiting for object TimeStampedPose")
+            return "timeout"
         
 class WaitForObject(smach.State):
     def __init__(self):
