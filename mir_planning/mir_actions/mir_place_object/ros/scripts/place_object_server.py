@@ -33,7 +33,8 @@ from actionlib import SimpleActionClient
 from actionlib_msgs.msg import GoalStatus
 from brics_actuator.msg import JointPositions, JointValue
 from sensor_msgs.msg import JointState
-
+import numpy as np
+import tf
 class MoveArmUp(smach.State):
 
     def __init__(self):
@@ -221,7 +222,7 @@ class DefalutSafePose(smach.State):
         rospy.logwarn("Checking pre-defined safe pose")
         location = Utils.get_value_of(userdata.goal.parameters, "location")
         current_platform_height = rospy.get_param("/"+location)
-        userdata.move_arm_to = str(str(current_platform_height)+'cm/pose2')
+        userdata.move_arm_to = str(str(current_platform_height)+'cm/pose4')
         print("from place server ========")
         print(userdata.move_arm_to)
         rospy.sleep(0.1)
@@ -389,8 +390,12 @@ class PublishObjectPose(smach.State):
                 nearest_pose.pose.position.z = height_from_base
             nearest_pose.pose.position.z += rospy.get_param("/mir_perception/empty_space_detector/object_height_above_workspace") # adding the height of the object above the workspace Should be change for vertical object
 
-            print("nearest pose after adding height UPDATED !!!")
-            print(nearest_pose.pose.position.z)
+            q_with_yaw = tf.transformations.quaternion_from_euler(0,0,np.pi/3)
+            nearest_pose.pose.orientation.x = q_with_yaw[0]
+            nearest_pose.pose.orientation.y = q_with_yaw[1]
+            nearest_pose.pose.orientation.z = q_with_yaw[2]
+            nearest_pose.pose.orientation.w = q_with_yaw[3]
+            print("place_pose_quaternion", nearest_pose.pose.orientation)
             print("Publishing single pose to pregrasp planner")
             print("----------------------------------")
 
@@ -399,6 +404,41 @@ class PublishObjectPose(smach.State):
             rospy.sleep(0.1)
             nearest_pose = None
             return "success"
+
+class MoveDBC(smach.State):
+    def __init__(self, forward=True):
+        smach.State.__init__(self, outcomes=["succeeded"])
+        self._dbc_pose_pub = rospy.Publisher(
+            "/mcr_navigation/direct_base_controller/input_pose",
+            PoseStamped,
+            queue_size=1,
+        )
+        self.forward = forward
+        self.listener = tf.TransformListener()
+
+    def execute(self, userdata):
+        # get tf of base_link 
+        tf_msg = self.listener.lookupTransform("/base_link_static", "/base_link", rospy.Time(0))
+        # get the pose of the object in base_link frame
+        pose_msg = PoseStamped()
+        pose_msg.header.frame_id = "base_link_static"
+        pose_msg.header.stamp = rospy.Time.now()
+        # amount to move backward after pick object
+        if self.forward:
+            pose_msg.pose.position.x = tf_msg[0][0] + 0.075
+        else:
+            pose_msg.pose.position.x = tf_msg[0][0] - 0.075
+            
+        pose_msg.pose.position.y = tf_msg[0][1]
+        pose_msg.pose.position.z = tf_msg[0][2]
+        pose_msg.pose.orientation.x = tf_msg[1][0]
+        pose_msg.pose.orientation.y = tf_msg[1][1]
+        pose_msg.pose.orientation.z = tf_msg[1][2]
+        pose_msg.pose.orientation.w = tf_msg[1][3]
+        dbc_pose = pose_msg
+        self._dbc_pose_pub.publish(dbc_pose)
+        return "succeeded"
+
 
 def transition_cb(*args, **kwargs):
     userdata = args[0]
@@ -473,8 +513,57 @@ def main():
             "MOVE_ARM_TO_SHELF_INTERMEDIATE",
             gms.move_arm("shelf_intermediate"),
             transitions={
-                "succeeded": "SET_SHELF_PLACE_POSE",
+                "succeeded": "PUBLISH_REFERENCE_FRAME",
                 "failed": "OVERALL_FAILED",
+            },
+        )
+
+        # publish a static frame which will be used as reference for perceived objs
+        smach.StateMachine.add(
+            "PUBLISH_REFERENCE_FRAME",
+            gbs.send_event([("/static_transform_publisher_node/event_in", "e_start")]),
+            transitions={"success": "SET_DBC_PARAMS"},
+        )
+
+        smach.StateMachine.add(
+            "SET_DBC_PARAMS",
+            gbs.set_named_config("dbc_pick_object"),
+            transitions={
+                "success": "MOVE_FORWARD",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_FORWARD",
+            MoveDBC(forward=True),
+            transitions={"succeeded": "MOVE_BASE_USING_DBC"},
+        )
+
+        # Move base using direct base controller
+        smach.StateMachine.add(
+            "MOVE_BASE_USING_DBC",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_start",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "SET_SHELF_PLACE_POSE",
+                "timeout": "SET_SHELF_PLACE_POSE",
+                "failure": "SET_SHELF_PLACE_POSE",
             },
         )
 
@@ -499,8 +588,40 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER_SHELF",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
-                         "timeout": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT"}
+            transitions={"succeeded": "MOVE_BACKWARD",
+                         "timeout": "MOVE_BACKWARD"}
+        )
+
+        smach.StateMachine.add(
+            "MOVE_BACKWARD",
+            MoveDBC(forward=False),
+            transitions={"succeeded": "MOVE_BASE_USING_DBC_BACK"},
+        )
+
+        # Move base using direct base controller
+        smach.StateMachine.add(
+            "MOVE_BASE_USING_DBC_BACK",
+            gbs.send_and_wait_events_combined(
+                event_in_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_in",
+                        "e_start",
+                    )
+                ],
+                event_out_list=[
+                    (
+                        "/mcr_navigation/direct_base_controller/coordinator/event_out",
+                        "e_success",
+                        True,
+                    )
+                ],
+                timeout_duration=10,
+            ),
+            transitions={
+                "success": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
+                "timeout": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
+                "failure": "MOVE_ARM_TO_SHELF_INTERMEDIATE_RETRACT",
+            },
         )
 
         smach.StateMachine.add(
