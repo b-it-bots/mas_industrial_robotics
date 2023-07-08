@@ -81,6 +81,32 @@ class SelectCavity(smach.State):
 
 # ===============================================================================
 
+
+class MoveArmUp(smach.State):
+    def __init__(self):
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded"],
+            input_keys=["goal"],
+            output_keys=["feedback", "result"],
+        )
+        # velocity publisher
+        self.arm_velocity_pub = rospy.Publisher("/arm_1/arm_controller/cartesian_velocity_command", TwistStamped, queue_size=1)
+    
+    def execute(self, userdata):
+        
+        # send the velocity in +z direction wrt base_link to move the arm up
+        vel_msg = TwistStamped()
+        vel_msg.header.frame_id = "base_link"
+        # set velocity to 5cm/s
+        vel_msg.twist.linear.z = 0.04
+        self.arm_velocity_pub.publish(vel_msg)
+        rospy.sleep(0.55)
+        # stop the arm
+        vel_msg.twist.linear.z = 0
+        self.arm_velocity_pub.publish(vel_msg)
+        return "succeeded"
+
 class ppt_wiggle_arm(smach.State):
     """
     Wiggle arm after placement on the table
@@ -173,7 +199,7 @@ class ppt_wiggle_arm(smach.State):
         rospy.sleep(0.1)
         return True
 
-    def rotational_wiggle(self, direction, message, wiggle_velocity=1.0, timeout=15.0, wiggle_yaw=1.57):
+    def rotational_wiggle(self, direction, message, wiggle_velocity=5.0, timeout=15.0, wiggle_yaw=1.57):
 
         """
         WORKING DONT TOUCH !!!
@@ -349,7 +375,7 @@ class ppt_wiggle_arm(smach.State):
         if not error_code == MoveItErrorCodes.SUCCESS:
             return "failed"
 
-    def wiggle_arm_working(self, turn = 1):
+    def wiggle_arm_working(self, turn = 1, velocity = 0.08):
 
         message = TwistStamped()
         message.header.frame_id = "arm_link_5"
@@ -361,7 +387,7 @@ class ppt_wiggle_arm(smach.State):
 
         while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
             message.twist.linear.x = 0.0
-            message.twist.linear.y = 0.08
+            message.twist.linear.y = velocity
             self.arm_velocity_pub.publish(message)
             rospy.sleep(0.05)
         self.stop_arm()
@@ -370,7 +396,7 @@ class ppt_wiggle_arm(smach.State):
         travel_time = 1.0
         while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
             message.twist.linear.x = 0.0
-            message.twist.linear.y = -0.08
+            message.twist.linear.y = -velocity
             self.arm_velocity_pub.publish(message)
             rospy.sleep(0.05)
         self.stop_arm()
@@ -379,17 +405,16 @@ class ppt_wiggle_arm(smach.State):
         travel_time = 1.0
         while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
             message.twist.linear.x = 0.0
-            message.twist.linear.y = 0.09
+            message.twist.linear.y = -velocity
             self.arm_velocity_pub.publish(message)
             rospy.sleep(0.05)
         self.stop_arm()
 
         initial_time = rospy.Time.now().to_sec()
-        travel_time = 1.5
+        travel_time = 1.0
         while(abs(rospy.Time.now().to_sec() - initial_time) < travel_time):
             message.twist.linear.x = 0.0
-            message.twist.linear.y = 0.0
-            message.twist.angular.z = 1.0 * turn
+            message.twist.linear.y = velocity
             self.arm_velocity_pub.publish(message)
             rospy.sleep(0.05)
         self.stop_arm()
@@ -416,10 +441,10 @@ class ppt_wiggle_arm(smach.State):
 
             rospy.loginfo("Adjusting %s with a %s movement", self.object_name, self.type_of_adjustment)
 
-            self.rotational_wiggle("CW", message, wiggle_velocity=4.0)
+            self.rotational_wiggle("CW", message, wiggle_velocity=7.0)
             rospy.loginfo("Rotational wiggle CW done")
         
-            self.rotational_wiggle("CCW", message, wiggle_velocity=4.0)
+            self.rotational_wiggle("CCW", message, wiggle_velocity=7.0)
             rospy.loginfo("Rotational wiggle CCW done")
 
             
@@ -431,7 +456,7 @@ class ppt_wiggle_arm(smach.State):
             rospy.loginfo("Starting linear wiggle in cartesian mode")
 
             # TODO: This is a quick  fix only one direction will work, need a general solution
-            self.wiggle_arm_working()
+            self.wiggle_arm_working(velocity = 0.1)
 
             rospy.loginfo("Horizontal wiggle done") 
 
@@ -604,8 +629,16 @@ def main():
             "OPEN_GRIPPER",
             gms.control_gripper(0.2),
             transitions={
+                "succeeded": "MOVE_ARM_UP",
+                "timeout": "MOVE_ARM_UP"
+            },
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_UP",
+            MoveArmUp(),
+            transitions={
                 "succeeded": "WIGGLE_ARM",
-                "timeout": "WIGGLE_ARM"
             },
         )
 
