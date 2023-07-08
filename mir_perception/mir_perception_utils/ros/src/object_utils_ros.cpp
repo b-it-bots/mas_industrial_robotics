@@ -78,6 +78,10 @@ PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry
       // std::cout << "[CAVITYYYYYYYYYYYY] min_pt.z: " << min_pt.z << std::endl;
       // std::cout << "[CAVITYYYYYYYYYYYY] max_pt.z: " << max_pt.z << std::endl;
       limit_max = max_pt.z - 0.015; // TODO: make 0.01 as a dynamic configurable parameter
+      if (object.name == "M20_H")
+      {
+          limit_max = max_pt.z - 0.02;
+      }
       pass_through.setFilterLimits(limit_min, limit_max);
       pass_through.setInputCloud(xyz_input_cloud);
       pass_through.filter(filtered_cloud);
