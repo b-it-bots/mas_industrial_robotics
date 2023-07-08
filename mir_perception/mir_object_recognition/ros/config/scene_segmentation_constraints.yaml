@@ -43,7 +43,7 @@ multimodal_object_recognition:
   octree_resolution: 0.0025
   height_of_floor: -0.083
   use_fixed_heights: False
-  object_height_above_workspace: -0.007
+  object_height_above_workspace: -0.008
   container_height: 0.07
   enable_rgb_recognizer: true
   enable_pc_recognizer: false
