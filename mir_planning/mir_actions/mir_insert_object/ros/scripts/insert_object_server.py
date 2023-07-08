@@ -157,7 +157,16 @@ def main():
             gbs.send_event(
                 [("/mcr_perception/object_selector/event_in", "e_re_trigger")]
             ),
-            transitions={"success": "MOVE_ROBOT_AND_PLACE"},
+            transitions={"success": "MOVE_ARM_TO_DEFAULT_PLACE_BEFORE_INSERT"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_DEFAULT_PLACE_BEFORE_INSERT",
+            gms.move_arm("look_at_turntable"),
+            transitions={
+                "succeeded": "MOVE_ROBOT_AND_PLACE",
+                "failed": "MOVE_ROBOT_AND_PLACE",
+            },
         )
 
         # execute robot motion
