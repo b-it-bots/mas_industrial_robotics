@@ -8,8 +8,8 @@ passthrough_filter_field_name: x
 passthrough_filter_limit_min: 0.45 # all the min distance starts from the baselink 
 passthrough_filter_limit_max: 0.7
 enable_cropbox_filter: True
-cropbox_filter_min_x: 0.43
-cropbox_filter_max_x: 0.53
+cropbox_filter_min_x: 0.45
+cropbox_filter_max_x: 0.55
 cropbox_filter_min_y: -0.25
 cropbox_filter_max_y: 0.25
 cropbox_filter_min_z: -0.1
