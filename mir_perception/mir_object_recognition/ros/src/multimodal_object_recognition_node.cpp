@@ -726,6 +726,14 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     {
       yaw = 0.0;
     }
+    if (object_list.objects[i].name == "M30_H" 
+        or object_list.objects[i].name == "M20_H"
+        or object_list.objects[i].name == "S40_40_V"
+        or object_list.objects[i].name == "F20_20_V")
+    {
+        ROS_WARN("Setting yaw for M30/M20 to zero");
+        yaw = 0.0;
+    }
 
     // Update container pose
     if (object_list.objects[i].name == "CONTAINER_BOX_RED" ||
