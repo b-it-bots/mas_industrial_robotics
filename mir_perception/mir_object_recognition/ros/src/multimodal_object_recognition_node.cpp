@@ -354,18 +354,18 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
   std::vector<PointCloud::Ptr> filtered_clusters_2d;
 
   cv_bridge::CvImagePtr cv_image;
+  try
+  {
+    cv_image = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
+  }
+  catch (cv_bridge::Exception& e)
+  {
+    ROS_ERROR("cv_bridge exception: %s", e.what());
+    // return;
+  }
+
   if (recognized_image_list_.objects.size() > 0)
   {
-    try
-    {
-      cv_image = cv_bridge::toCvCopy(image_msg_, sensor_msgs::image_encodings::BGR8);
-    }
-    catch (cv_bridge::Exception& e)
-    {
-      ROS_ERROR("cv_bridge exception: %s", e.what());
-      return;
-    }
-
     bounding_boxes.bounding_boxes.resize(recognized_image_list_.objects.size());
     rgb_object_list.objects.resize(recognized_image_list_.objects.size());
 
@@ -399,11 +399,16 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
         pt2.x = roi_2d.x_offset + roi_2d.width;
         pt2.y = roi_2d.y_offset + roi_2d.height;
 
-        // draw bbox
-        cv::rectangle(cv_image->image, pt1, pt2, cv::Scalar(0, 255, 0), 1, 8, 0);
-        // add label
-        cv::putText(cv_image->image, object.name, cv::Point(pt1.x, pt2.y),
-              cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(0, 255, 0), 1);
+        try{
+          // draw bbox
+          cv::rectangle(cv_image->image, pt1, pt2, cv::Scalar(0, 255, 0), 1, 8, 0);
+          // add label
+          cv::putText(cv_image->image, object.name, cv::Point(pt1.x, pt2.y),
+                cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(0, 255, 0), 1);
+        }
+        catch (...) {
+          ROS_WARN("could not draw bounding boxes.");
+        }
       }
       // Remove large 2d misdetected bbox (misdetection)
       double len_diag = sqrt(powf(roi_2d.width, 2) + powf(roi_2d.height, 2));
@@ -548,17 +553,16 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
     ros::Time time_now = ros::Time::now();
 
     // Save debug image
-    if(recognized_image_list_.objects.size() > 0)
-    {
-      std::string filename = "";
-      filename.append("rgb_debug_");
-      filename.append(std::to_string(time_now.toSec()));
+    
+    std::string filename = "";
+    filename.append("rgb_debug_");
+    filename.append(std::to_string(time_now.toSec()));
+    try {
       mpu::object::saveCVImage(cv_image, logdir_, filename);
       ROS_DEBUG_STREAM("Image:" << filename << " saved to " << logdir_);
     }
-    else
-    {
-      ROS_WARN_STREAM("No Objects found. Cannot save debug image...");
+    catch (...) {
+      ROS_ERROR("Could not save debug image.");
     }
     // Save raw image
     cv_bridge::CvImagePtr raw_cv_image;
