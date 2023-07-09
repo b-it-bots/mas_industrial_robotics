@@ -119,6 +119,7 @@ class RTTObjectTracker():
         self.event = msg.data
         if self.event.startswith("e_start"):
         # if True:
+            rospy.loginfo('[RTT Node] e_start received')
             self.object_name = self.event[8:]
             # TODO: Check if object name is valid (upper case) !!!
 
