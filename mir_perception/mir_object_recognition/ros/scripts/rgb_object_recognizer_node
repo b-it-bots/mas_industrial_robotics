@@ -23,7 +23,7 @@ class RGBObjectRecognizer():
     def __init__(self, weights_1, weights_2, 
                  net='detection', 
                  model_name='yolov8',
-                 confidence_threshold=0.8,
+                 confidence_threshold=0.65,
                  iou_threshold=0.45,
                  img_size=640,
                  trace=True,
