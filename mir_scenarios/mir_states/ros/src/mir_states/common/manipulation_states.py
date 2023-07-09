@@ -339,7 +339,7 @@ class verify_object_grasped(smach.State):
             if self.current_state == "GRIPPER_CLOSED" or\
                self.current_state == "GRIPPER_INTER" or\
                self.current_state == "GRIPPER_OPEN":
-                if object_name == "WRENCH" or object_name == "ALLENKEY":
+                if object_name == "WRENCH" or object_name == "ALLENKEY" or object_name == "DRILL":
                     # TODO: modify this
                     return "succeeded"
                 return "failed"
