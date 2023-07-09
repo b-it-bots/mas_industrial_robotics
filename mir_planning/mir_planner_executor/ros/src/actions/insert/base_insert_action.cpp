@@ -30,7 +30,7 @@ void BaseInsertAction::update_knowledge_base(bool success,
     knowledge_updater_->addKnowledge("heavy", {{"hole", hole}});
     knowledge_updater_->remGoal("heavy", {{"hole", hole}});
 
-    knowledge_updater_->remKnowledge("stored", {{"o", peg}, {"rp", platform}});
+    knowledge_updater_->remKnowledge("stored", {{"rp", platform},{"o", peg}});
 
     knowledge_updater_->remKnowledge("occupied", {{"rp", platform}});
   } else {
