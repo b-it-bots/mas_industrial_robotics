@@ -542,6 +542,25 @@ void MultimodalObjectRecognitionROS::recognizeCloudAndImage()
   else
   {
     ROS_WARN("No objects to publish");
+    if (debug_mode_)
+    {
+      ros::Time time_now = ros::Time::now();
+      // Save raw image
+      cv_bridge::CvImagePtr raw_cv_image;
+      if (mpu::object::getCVImage(image_msg_, raw_cv_image))
+      {
+        std::string filename = "";
+        filename = "";
+        filename.append("rgb_raw_");
+        filename.append(std::to_string(time_now.toSec()));
+        mpu::object::saveCVImage(raw_cv_image, logdir_, filename);
+        ROS_DEBUG_STREAM("Image:" << filename << " saved to " << logdir_);
+      }
+      else
+      {
+        ROS_ERROR("Cannot generate cv image...");
+      }
+    }
     return;
   }
 
