@@ -13,4 +13,5 @@ class PickFromTurnTableAction : public BasePickAction
 {
  public:
   PickFromTurnTableAction();
+  bool run(std::vector<diagnostic_msgs::KeyValue> &params);
 };
