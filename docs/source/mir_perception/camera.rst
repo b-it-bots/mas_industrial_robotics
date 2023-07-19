@@ -12,21 +12,21 @@ On workstation or your PC
 
   .. code-block:: bash
 
-      yb4
+      yb2
 
   .. note::
 
-      alias yb4=ssh -X robocup@youbot-brsu-4-pc2
+      alias yb2=ssh -X robocup@youbot-brsu-2-pc2
 
 2. Export the youbot ssh alias
 
   .. code-block:: bash
 
-      export_yb4
+      export_yb2
 
   .. note::
 
-      alias export_yb4=export ROS_MASTER_URI=http://youbot-brsu-4-pc2:11311
+      alias export_yb2=export ROS_MASTER_URI=http://youbot-brsu-2-pc2:11311
 
 On robot
 
@@ -36,6 +36,12 @@ On robot
 
       roslaunch mir_bringup robot.launch
 
+4. Launch Nav2d (to visualize the robot in Rviz)
+
+  .. code-block:: bash
+
+      roslaunch mir_2dnav 2dnav.launch
+
 4. Run calibration
 
   .. code-block:: bash
@@ -44,7 +50,7 @@ On robot
 
   A small gui window to adjust the pose of the end-effector in terms of XYZRPY will appear.
 
-5. Place a small round object on the ground
+5. Place a small round object on the ground (at approx. 25 cm from the center of the front wheel)
 
 On workstation or your PC
 
@@ -54,9 +60,9 @@ On workstation or your PC
 
     rosrun rviz rviz
 
-7. Load the youbot.rviz config and set the global frame to `base_link`
+7. Load the camera_calibration_config.rviz config and set the global frame to `base_link`
 
-    In perception add `raw_color_pcl`.  You can see an arrow pointing away from the robot.
+    Ensure to enable `raw_color_pcl` and `camera_calibration_obj_pose`.  You can see an arrow pointing away from the robot.
 
 8. Adjust the values in the pose mockup gui, so that the beginning of the arrow matches the center of the round object.
 
