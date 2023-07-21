@@ -20,7 +20,7 @@ from ultralytics import YOLO
 
 
 class RGBObjectRecognizer():
-    def __init__(self, weights_1, weights_2, weights_3, 
+    def __init__(self, weights, 
                  net='detection', 
                  model_name='yolov8',
                  confidence_threshold=0.65,
@@ -31,9 +31,6 @@ class RGBObjectRecognizer():
                  augment=False,
                  device='cpu',
                  debug_mode=True):
-        import sys
-        sys.path.insert(0, os.path.join(roslib.packages.get_pkg_dir("mir_object_recognition"),
-                           'common', 'src', 'rgb_object_recognition', 'yolov7'))
 
         self.cvbridge = CvBridge()
         self.debug = debug_mode
@@ -45,44 +42,15 @@ class RGBObjectRecognizer():
             "input/images", ImageList, self.image_recognition_cb)
         self.net = net
         self.model_name = model_name
-        self.weights_1 = weights_1
-        self.weights_2 = weights_2
-        self.weights_3 = weights_3
+        self.weights = weights
         self.confidence_threshold = confidence_threshold
         self.iou_threshold = iou_threshold
-        self.augment = augment
-
-        # Initialize
-        self.device = select_device(device)
-        self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
+        self.device = "cuda" if torch.cuda.is_available() else device
 
         # Load model
-        if self.model_name == 'yolov7':
-            self.model = attempt_load(self.weights_1, map_location=self.device)  # load FP32 model
-            self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names
-            self.colors = [[random.randint(0, 255) for _ in range(3)] for _ in self.names]
-            self.stride = int(self.model.stride.max())  # model stride
-            img_size = check_img_size(img_size, s=self.stride)  # check img_size
-            if trace:
-                self.model = TracedModel(self.model, self.device, img_size)
-
-            if self.half:
-                self.model.half()  # to FP16
-
-        elif self.model_name == 'yolov8':
-            # Load models    
-            self.model_atwork = YOLO(self.weights_1)
-            self.model_cavity = YOLO(self.weights_2)
-            self.model_container = YOLO(self.weights_3)
-        
-        self.img_size = img_size
-
-        # Second-stage classifier
-        self.classify = classify
-        if self.classify:
-            self.modelc = load_classifier(name='resnet101', n=2)  # initialize
-            self.modelc.load_state_dict(torch.load('weights/resnet101.pt', map_location=self.device)['model']).to(
-                self.device).eval()
+        if self.model_name == 'yolov8':
+            self.model_atwork = YOLO(self.weights[0])
+            self.model_cavity = YOLO(self.weights[1])
 
     def image_recognition_cb(self, img_msg):
         if img_msg.images:
@@ -108,74 +76,7 @@ class RGBObjectRecognizer():
                     else:
                         rospy.loginfo(f"\033[92m" + f"[RGB Recognizer] is using atwork objects category model" + f"\033[0m")
 
-                    if self.model_name == 'yolov7':
-                        # Padded resize
-                        img = letterbox(cv_img, self.img_size, stride=self.stride)[0]
-
-                        # Convert
-                        img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
-                        img = np.ascontiguousarray(img)
-                        old_img_w = old_img_h = self.img_size
-                        old_img_b = 1
-
-                        img = torch.from_numpy(img).to(self.device)
-                        img = img.half() if self.half else img.float()  # uint8 to fp16/32
-                        img /= 255.0  # 0 - 255 to 0.0 - 1.0
-                        if img.ndimension() == 3:
-                            img = img.unsqueeze(0)
-
-                        # Inference
-                        t1 = time_synchronized()
-                        pred = self.model(img, augment=self.augment)[0]
-                        t2 = time_synchronized()
-
-                        # Apply NMS
-                        pred = non_max_suppression(pred, self.confidence_threshold, self.iou_threshold, classes=None,
-                                                   agnostic=True)
-                        t3 = time_synchronized()
-
-                        # Apply Classifier
-                        if self.classify:
-                            pred = apply_classifier(pred, self.modelc, img, cv_img)
-
-                        # Process detections
-                        bboxes = []
-                        probs = []
-                        labels = []
-                        for i, det in enumerate(pred):  # detections per image
-                            gn = torch.tensor(cv_img.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-                            if len(det):
-                                # Rescale boxes from img_size to im0 size
-                                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], cv_img.shape).round()
-
-                                # Write results
-                                for *xyxy, conf, cls in reversed(det):
-                                    if self.debug:
-                                        label = f'{self.names[int(cls)]} {conf:.2f}'
-                                        plot_one_box(xyxy, cv_img, label=label, color=self.colors[int(cls)],
-                                                     line_thickness=1)
-                                    #xywh = (xyxy2xywh(torch.tensor(xyxy).view(-1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                                    bboxes.append(xyxy)
-                                    probs.append(conf)
-                                    labels.append(self.names[int(cls)])
-                                if self.debug:
-                                    # publish bbox and label
-                                    self.publish_debug_img(cv_img)
-                        for i in range(len(labels)):
-                            result = Object()
-                            result.name = labels[i].upper()
-                            result.probability = probs[i]
-                            roi = RegionOfInterest()
-                            roi.x_offset = int(bboxes[i][0])
-                            roi.y_offset = int(bboxes[i][1])
-                            roi.width = int(bboxes[i][2]) - int(bboxes[i][0])
-                            roi.height = int(bboxes[i][3]) - int(bboxes[i][1])
-                            result.roi = roi
-                            objects.append(result)
-                        if self.debug:
-                            rospy.logdebug("Detected Objects: %s", labels)
-
-                    elif self.model_name == 'yolov8':
+                    if self.model_name == 'yolov8':
 
                         predictions = self.model.predict(source=cv_img,
                                                          conf=self.confidence_threshold,
@@ -206,10 +107,7 @@ class RGBObjectRecognizer():
                             result.roi = roi
 
                             objects.append(result)
-                        # Publish result_list
-                        # result_list.objects = objects
-                        # self.pub_result.publish(result_list)
-
+ 
                         if self.debug:
 
                             # Draw bounding boxes and labels of detections
@@ -219,7 +117,8 @@ class RGBObjectRecognizer():
                             self.publish_debug_img(debug_img)
                     
                     else:
-                        bboxes, probs, labels = self.model.classify(cv_img)
+                        rospy.logerr("[RGB Recognition] Model not supported")
+                        return
 
                     # Publish result_list
                     result_list.objects = objects
@@ -245,18 +144,23 @@ if __name__ == '__main__':
     classifier_name = rospy.get_param("~classifier")
     dataset = rospy.get_param("~dataset")
     model_dir = rospy.get_param("~model_dir")
-    model_name_1 = "atwork.pt" # default
-    model_name_2 = "cavity.pt"
-    model_name_3 = "container.pt"
-    weights_1 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                           'common', 'models', classifier_name, dataset, model_name_1)
-    weights_2 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                            'common', 'models', classifier_name, dataset, model_name_2)
-    weights_3 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                            'common', 'models', classifier_name, dataset, model_name_3)
-
+    model_category = rospy.get_param("~model_category")
+    # breakpoint()
+    weight_1 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', classifier_name, dataset, model_category[0]+".pt")
+    weight_2 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                            'common', 'models', classifier_name, dataset, model_category[1]+".pt")
+    # check if the model exists
+    if not os.path.isfile(weight_1):
+        rospy.logerr("[RGB Recognition] Model not found: %s", weight_1)
+        exit(-1)
+    if not os.path.isfile(weight_2):
+        rospy.logerr("[RGB Recognition] Model not found: %s", weight_2)
+        exit(-1)
+    weights = [weight_1, weight_2] # 0th index is the default model, eg. atwork
     object_recognizer = RGBObjectRecognizer(
-        weights_1=weights_1, weights_2=weights_2, weights_3=weights_3, debug_mode=True)
+        weights, 
+        debug_mode=True)
     rospy.loginfo("\033[92m" + "RGB Recognizer is ready using %s : %s , dataset: %s " + "\033[0m",
               net, classifier_name, dataset)
     rospy.spin()
