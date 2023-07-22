@@ -100,7 +100,7 @@ class RGBObjectRecognizer():
                             result.name = labels[i].upper()
                             result.probability = probs[i]
                             roi = RegionOfInterest()
-                            roi.x_offset = int(bboxes[i][0]) # is it center???
+                            roi.x_offset = int(bboxes[i][0])
                             roi.y_offset = int(bboxes[i][1])
                             roi.width = int(bboxes[i][2] - bboxes[i][0])
                             roi.height = int(bboxes[i][3] - bboxes[i][1])
@@ -145,7 +145,6 @@ if __name__ == '__main__':
     dataset = rospy.get_param("~dataset")
     model_dir = rospy.get_param("~model_dir")
     model_category = rospy.get_param("~model_category")
-    # breakpoint()
     weight_1 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
                            'common', 'models', classifier_name, dataset, model_category[0]+".pt")
     weight_2 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
