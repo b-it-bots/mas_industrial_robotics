@@ -9,15 +9,7 @@ import torch
 from cv_bridge import CvBridge, CvBridgeError
 from mas_perception_msgs.msg import ImageList, Object, ObjectList
 from sensor_msgs.msg import Image, RegionOfInterest
-from rgb_object_recognition.yolov7.models.experimental import attempt_load
-from rgb_object_recognition.yolov7.utils.datasets import letterbox
-from rgb_object_recognition.yolov7.utils.general import check_img_size, non_max_suppression, apply_classifier, \
-    scale_coords, xyxy2xywh
-from rgb_object_recognition.yolov7.utils.plots import plot_one_box
-from rgb_object_recognition.yolov7.utils.torch_utils import select_device, TracedModel, load_classifier, \
-    time_synchronized
 from ultralytics import YOLO
-
 
 class RGBObjectRecognizer():
     def __init__(self, weights, 
