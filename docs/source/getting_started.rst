@@ -88,15 +88,16 @@ Setup catkin workspace
 
   .. code-block:: bash
 
-    cd ~/noetic/src;
-    git clone -b humble https://github.com/mas_industrial_robotics.git
+    cd ~/rolling/src;
+    git clone -b rolling https://github.com/mas_industrial_robotics.git
 
   Then go on with installing further external dependencies:
 
   .. code-block:: bash
 
     cd ~/rolling/src/
-    vcs import < mas_industrial_robots/mir.repos
+    vcs import < mas_industrial_robotics/mir.repos
+    rosdep install --from-paths src --ignore-src -r -y
 
   The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
 

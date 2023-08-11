@@ -17,6 +17,7 @@
   <exec_depend>youbot_driver</exec_depend>
   <exec_depend>mir_twist_mux</exec_depend>
   <depend>mir_gripper_controller</depend>
+  <depend>urg_node</depend>
 
   <depend>youbot_driver_ros_interface</depend>
 
