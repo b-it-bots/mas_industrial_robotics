@@ -88,8 +88,8 @@ Setup catkin workspace
 
   .. code-block:: bash
 
-    cd ~/noetic/src;
-    git clone -b humble https://github.com/mas_industrial_robotics.git
+    cd ~/rolling/src;
+    git clone -b rolling https://github.com/mas_industrial_robotics.git
 
   Then go on with installing further external dependencies:
 
