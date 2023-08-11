@@ -96,7 +96,8 @@ Setup catkin workspace
   .. code-block:: bash
 
     cd ~/rolling/src/
-    vcs import < mas_industrial_robots/mir.repos
+    vcs import < mas_industrial_robotics/mir.repos
+    rosdep install --from-paths src --ignore-src -r -y
 
   The last command should be added to the ~/.bashrc file so that they do not need to be executed everytime you open a new terminal.
 
