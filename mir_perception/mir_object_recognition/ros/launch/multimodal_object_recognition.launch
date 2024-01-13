@@ -11,7 +11,6 @@
   <arg name="scene_segmentation_config_file" default="$(find mir_object_recognition)/ros/config/scene_segmentation_constraints.yaml" />
   <arg name="object_info" default="$(find mir_object_recognition)/ros/config/objects.xml" />
 
-  <include file="$(find mir_object_recognition)/ros/launch/pc_object_recognition.launch" />
   <include file="$(find mir_object_recognition)/ros/launch/rgb_object_recognition.launch" />
   
   <group ns="mir_perception">
@@ -24,7 +23,7 @@
       <param name="pointcloud_source_frame_id" value="$(arg pointcloud_source_frame_id)" type="str" />
       <param name="debug_mode" value="$(arg debug_mode)" type="bool" />
       <param name="dataset_collection" value="true" />
-      <param name="logdir" value="/home/robocup/perception_debugs/" />
+      <param name="logdir" value="/tmp" />
       <param name="object_info" value="$(arg object_info)" />
     </node>
   </group>
