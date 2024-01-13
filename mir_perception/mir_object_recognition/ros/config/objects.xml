@@ -24,4 +24,9 @@
   <object><name>BLUE_CONTAINER</name><shape>box</shape><color>blue</color></object>
   <object><name>RED_CONTAINER</name><shape>box</shape><color>red</color></object>
 
+  <object><name>M30_H</name><shape>sphere</shape><color>black</color></object>
+  <object><name>M20_H</name><shape>sphere</shape><color>black</color></object>
+  <object><name>S40_40_V</name><shape>sphere</shape><color>black</color></object>
+  <object><name>F20_20_V</name><shape>sphere</shape><color>black</color></object>
+
 </object_info>

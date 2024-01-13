@@ -44,7 +44,7 @@ class CheckIfBaseCentered(smach.State):
         return None
 
     def execute(self, userdata):
-        print("[percieve] userdata goal: ", str(userdata.goal.parameters))
+        rospy.loginfo("[perceive] userdata goal: %s" % str(userdata.goal.parameters))
         target_location = Utils.get_value_of(userdata.goal.parameters, 'location')
         if target_location is not None:
             target_pose = Utils.get_pose_from_param_server(target_location)
@@ -211,15 +211,12 @@ class SetPerceptionParams(smach.State):
 
     def execute(self, userdata):
         obj_category = Utils.get_value_of(userdata.goal.parameters, "obj_category")
-
-        rospy.loginfo("=============[PERCEIVE_LOCATION] obj_category: %s", obj_category)
+        rospy.loginfo("[perceive] obj_category: %s", obj_category)
 
         if obj_category:
-            rospy.loginfo("=============[PERCEIVE_LOCATION] [IFFFF] obj_category: %s", obj_category)
             self.set_named_config.execute(userdata, obj_category)
             return "success"
         else:
-            rospy.loginfo("=============[PERCEIVE_LOCATION] [ELSEEEE] obj_category: %s", obj_category)
             self.set_named_config.execute(userdata)
             return "success"
 
