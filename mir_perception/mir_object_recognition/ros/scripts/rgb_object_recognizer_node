@@ -34,15 +34,14 @@ class RGBObjectRecognizer():
             "input/images", ImageList, self.image_recognition_cb)
         self.net = net
         self.model_name = model_name
-        self.weights = weights
         self.confidence_threshold = confidence_threshold
         self.iou_threshold = iou_threshold
         self.device = "cuda" if torch.cuda.is_available() else device
 
         # Load model
         if self.model_name == 'yolov8':
-            self.model_atwork = YOLO(self.weights[0])
-            self.model_cavity = YOLO(self.weights[1])
+            self.model_atwork = YOLO(weights['atwork'])
+            self.model_cavity = YOLO(weights['cavity'])
 
     def image_recognition_cb(self, img_msg):
         if img_msg.images:
@@ -136,19 +135,16 @@ if __name__ == '__main__':
     classifier_name = rospy.get_param("~classifier")
     dataset = rospy.get_param("~dataset")
     model_dir = rospy.get_param("~model_dir")
-    model_category = rospy.get_param("~model_category")
-    weight_1 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                           'common', 'models', classifier_name, dataset, model_category[0]+".pt")
-    weight_2 = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
-                            'common', 'models', classifier_name, dataset, model_category[1]+".pt")
-    # check if the model exists
-    if not os.path.isfile(weight_1):
-        rospy.logerr("[RGB Recognition] Model not found: %s", weight_1)
-        exit(-1)
-    if not os.path.isfile(weight_2):
-        rospy.logerr("[RGB Recognition] Model not found: %s", weight_2)
-        exit(-1)
-    weights = [weight_1, weight_2] # 0th index is the default model, eg. atwork
+    model_categories = rospy.get_param("~model_category")
+    weights = {}
+    for model_category in model_categories:
+        weight = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', classifier_name, dataset, model_category +".pt")
+        if not os.path.isfile(weight):
+            rospy.logerr("[RGB Recognition] Model not found: %s", weight)
+            exit(-1)
+        weights[model_category] = weight
+
     object_recognizer = RGBObjectRecognizer(
         weights, 
         debug_mode=True)
