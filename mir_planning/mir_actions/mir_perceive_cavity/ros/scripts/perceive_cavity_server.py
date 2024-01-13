@@ -63,7 +63,7 @@ class Setup(smach.State):
         # 2. single_view mode - only perceiving in one direction <straight>
         perception_mode = Utils.get_value_of(userdata.goal.parameters, "perception_mode")
         if perception_mode is not None and perception_mode == "single_view":
-            userdata.arm_pose_list = ["ppt_cavity_middle"]
+            userdata.arm_pose_list = ["pre_place"]
         else:
             userdata.arm_pose_list = [
                 "ppt_cavity_middle",

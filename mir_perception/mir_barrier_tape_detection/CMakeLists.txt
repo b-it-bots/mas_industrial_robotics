@@ -18,9 +18,7 @@ find_package(OpenCV REQUIRED)
 find_package(PCL 1.10 REQUIRED)
 
 set (CMAKE_CXX_STANDARD 14)
-add_compile_options(
-    -O3
-)
+set (CMAKE_BUILD_TYPE Release)
 
 generate_dynamic_reconfigure_options(
   ros/config/BarrierTapeDetection.cfg

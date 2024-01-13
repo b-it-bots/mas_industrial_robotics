@@ -111,7 +111,6 @@ class MultimodalObjectRecognitionROS
     ros::Publisher pub_rgb_object_pose_array_;
     // Publisher debug
     ros::Publisher pub_debug_cloud_plane_;
-    ros::Publisher pub_filtered_rgb_cloud_plane_;
     std::string horizontal_object_list[9];
 
     // Synchronize callback for image and pointcloud
@@ -155,11 +154,13 @@ class MultimodalObjectRecognitionROS
     // Enable recognizer
     bool enable_rgb_recognizer_;
     bool enable_pc_recognizer_ ;
+    std::string obj_category_;
 
     // Visualization
     BoundingBoxVisualizer bounding_box_visualizer_pc_;
     ClusteredPointCloudVisualizer cluster_visualizer_rgb_;
     ClusteredPointCloudVisualizer cluster_visualizer_pc_;
+    ClusteredPointCloudVisualizer cluster_visualizer_filtered_rgb_;
     LabelVisualizer label_visualizer_rgb_;
     LabelVisualizer label_visualizer_pc_;
 
@@ -168,11 +169,14 @@ class MultimodalObjectRecognitionROS
     std::string target_frame_id_;
     std::string pointcloud_source_frame_id_;
     std::set<std::string> round_objects_;
+    std::set<std::string> flat_objects_;
     ObjectInfo object_info_;
     std::string object_info_path_;
 
     // Dynamic parameter
     double object_height_above_workspace_;
+    double height_of_floor_;
+    bool use_fixed_heights_;
     double container_height_;
     int rgb_roi_adjustment_;
     int rgb_bbox_min_diag_;
@@ -238,7 +242,8 @@ class MultimodalObjectRecognitionROS
      **/
     void publishDebug(mas_perception_msgs::ObjectList &combined_object_list,
               std::vector<PointCloud::Ptr> &clusters_3d,
-              std::vector<PointCloud::Ptr> &clusters_2d);
+              std::vector<PointCloud::Ptr> &clusters_2d,
+              std::vector<PointCloud::Ptr> &filtered_clusters_2d);
 
     /** \brief Load qualitative object info
      * \param[in] Path to the xml object file

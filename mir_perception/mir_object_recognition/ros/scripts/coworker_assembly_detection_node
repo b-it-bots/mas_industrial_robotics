@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+import os
+import random
+import time
+import cv2
+import numpy as np
+import roslib
+import rospy
+import torch
+import math
+import csv
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
+from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg import ColorRGBA, String
+import message_filters
+from mas_perception_msgs.msg import ImageList, Object, ObjectList, TimeStampedPose
+from sensor_msgs.msg import Image, RegionOfInterest, PointCloud2, PointField
+from sensor_msgs import point_cloud2
+from ultralytics import YOLO
+import tf
+from sklearn.decomposition import PCA
+from geometry_msgs.msg import PoseStamped, Pose
+from visualization_msgs.msg import Marker
+from scipy.optimize import least_squares
+from sklearn.mixture import GaussianMixture
+import tf.transformations as tr
+from scipy.spatial.transform import Rotation as R
+import tf2_sensor_msgs
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+import tf2_ros
+import tf2_py as tf2
+import ros_numpy
+from scipy.optimize import least_squares
+import pdb
+
+class CoworkerAssembly():
+    def __init__(self, debug_mode=True):
+        
+        self.cvbridge = CvBridge()
+        self.debug = debug_mode
+        self.pub_debug = rospy.Publisher("/mir_perception/coworker_assembly/output/pick_object_debug", Image, queue_size=1)
+        self.pub_pose = rospy.Publisher("mcr_perception/object_selector/output/object_pose", PoseStamped, queue_size=1)
+
+        self.tf_buffer = tf2_ros.Buffer(cache_time=rospy.Duration(12))
+        self.tf_listener = tf.TransformListener()
+        self.tf2_listener = tf2_ros.TransformListener(self.tf_buffer)
+
+        rospy.Subscriber("/mir_perception/coworker_assembly/event_in", String, self.event_in_cb)
+        self.event_out = rospy.Publisher("/mir_perception/coworker_assembly/event_out", String, queue_size=1)
+
+        self.net = 'detection'
+        self.model_name = 'yolov8'
+        weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', 'yolov8', 'robocup_2023_dataset', "coworker_assembly_model.pt")
+        self.weights = weights
+        self.confidence_threshold = 0.8
+        self.iou_threshold = 0.45
+        self.augment = False
+        
+        # Initialize
+        self.device = torch.device('cpu')
+        self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
+
+        # Load model
+        if self.model_name == 'yolov8':
+            self.model = YOLO(weights)
+            
+        self.event = None
+        self.run_once = False
+        self.pose_sent = False
+        # self.event_in_cb("e_start")
+
+
+    def callback(self, img_msg, point_cloud_msg):
+        try:
+            self.run(img_msg, point_cloud_msg)
+        except Exception as e:
+            rospy.loginfo("[coworker_assembly_detection_node] killing callback")
+
+    def event_in_cb(self, msg):
+        """
+        Starts a planned motion based on the specified arm position.
+
+        # """
+        self.event = msg.data
+        if self.event.startswith("e_start") and not self.run_once:
+        # if True:
+            # Subscribe to image topic
+            self.sub_img = message_filters.Subscriber("/tower_cam3d_front/rgb/image_raw", Image)
+
+            # subscribe to point cloud topic
+            self.sub_point_cloud = message_filters.Subscriber("/tower_cam3d_front/depth_registered/points", PointCloud2)
+
+            # synchronize image and point cloud
+            self.ts = message_filters.ApproximateTimeSynchronizer([self.sub_img, self.sub_point_cloud], queue_size=10, slop=0.1)
+            self.ts.registerCallback(self.callback)
+            self.run_once = True
+
+        if self.run_once and self.pose_sent:
+            self.sub_img.sub.unregister()
+            self.sub_point_cloud.sub.unregister()
+            rospy.loginfo("[coworker_assembly_detection_node] Unregistered image and pointcloud subscribers")
+        
+    def yolo_detect(self, cv_img):
+        if self.net == 'detection' and self.model_name == 'yolov8':
+            predictions = self.model.predict(source=cv_img,
+                                                conf=self.confidence_threshold,
+                                                iou=self.iou_threshold,
+                                                device=self.device,
+                                                verbose = False,
+                                            )
+            # convert results to numpy array
+            predictions_np = predictions[0].boxes.numpy()
+            class_ids = predictions_np.cls
+            class_names = predictions[0].names
+            class_labels = [class_names[i] for i in class_ids]
+            class_scores = predictions_np.conf
+            class_bboxes = predictions_np.xyxy # x, y, w, h
+
+            return class_bboxes, class_scores, class_labels
+        
+    def drawAxis(self, img, p_, q_, color, scale):
+        p = list(p_)
+        q = list(q_)
+        
+        ## [visualization1]
+        angle = math.atan2(p[1] - q[1], p[0] - q[0]) # angle in radians
+        hypotenuse = math.sqrt((p[1] - q[1]) * (p[1] - q[1]) + (p[0] - q[0]) * (p[0] - q[0]))
+        
+        # Here we lengthen the arrow by a factor of scale
+        q[0] = p[0] - scale * hypotenuse * math.cos(angle)
+        q[1] = p[1] - scale * hypotenuse * math.sin(angle)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 1, cv2.LINE_AA)
+        
+        # create the arrow hooks
+        p[0] = q[0] + 9 * math.cos(angle + math.pi / 4)
+        p[1] = q[1] + 9 * math.sin(angle + math.pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 1, cv2.LINE_AA)
+        
+        p[0] = q[0] + 9 * math.cos(angle - math.pi / 4)
+        p[1] = q[1] + 9 * math.sin(angle - math.pi / 4)
+        cv2.line(img, (int(p[0]), int(p[1])), (int(q[0]), int(q[1])), color, 1, cv2.LINE_AA)
+        return img
+        
+    def get_orientation(self, pts, img):
+        ## [pca]
+        # Construct a buffer used by the pca analysis
+        sz = len(pts)
+        data_pts = np.empty((sz, 2), dtype=np.float64)
+        for i in range(data_pts.shape[0]):
+            data_pts[i,0] = pts[i,0,0]
+            data_pts[i,1] = pts[i,0,1]
+        
+        # Perform PCA analysis
+        mean = np.empty((0))
+        mean, eigenvectors, eigenvalues = cv2.PCACompute2(data_pts, mean)
+        
+        # Store the center of the object
+        cntr = (int(mean[0,0]), int(mean[0,1]))
+        ## [pca]
+        
+        ## [visualization]
+        # Draw the principal components
+        # cv2.circle(img, cntr, 3, (255, 0, 255), 2)
+        p1 = (cntr[0] + 0.02 * eigenvectors[0,0] * eigenvalues[0,0], cntr[1] + 0.02 * eigenvectors[0,1] * eigenvalues[0,0])
+        p2 = (cntr[0] - 0.02 * eigenvectors[1,0] * eigenvalues[1,0], cntr[1] - 0.02 * eigenvectors[1,1] * eigenvalues[1,0])
+        img = self.drawAxis(img, cntr, p1, (255, 255, 0), 1)
+        # img = self.drawAxis(img, cntr, p2, (0, 0, 255), 5)
+        
+        angle = math.atan2(eigenvectors[0,1], eigenvectors[0,0]) # orientation in radians
+        return angle
+    
+    def get_pointcloud_position(self, pointcloud, center):
+        """
+        pointcloud: pointcloud data of current frame with PointCloud2 data type
+        center: x and y coordinates of center of the bounding box of detected object
+        """
+
+        # Get the pointcloud data
+        pc = np.array(list(point_cloud2.read_points(pointcloud, skip_nans=False, field_names=("x", "y", "z"))), dtype=np.float32)
+        pc = pc.reshape((480,640,3))
+
+        # Get the center point of the bounding box
+        center_x, center_y = center
+        # center_point = pc[center_y, center_x]
+
+        # Define the radius of the circle
+        radius = 7
+
+        # Calculate the coordinates of the circle points within the radius
+        min_x = max(0, center_x - radius)
+        max_x = min(pc.shape[1] - 1, center_x + radius)
+        min_y = max(0, center_y - radius)
+        max_y = min(pc.shape[0] - 1, center_y + radius)
+
+        circle_points = []
+        for y in range(min_y, max_y + 1):
+            for x in range(min_x, max_x + 1):
+                distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
+                if distance <= radius:
+                    point = pc[y, x]
+                    if not np.isnan(point).any():
+                        circle_points.append(point)
+
+        # Determine the centroid of the non-NaN points
+        if circle_points:
+            circle_points_pc = np.array([point for point in circle_points])
+            center_point = np.mean(circle_points_pc, axis=0)
+
+        # Get the pose of the center point of the bounding box
+        pose = PoseStamped()
+        pose.header.frame_id = pointcloud.header.frame_id
+        pose.header.stamp = pointcloud.header.stamp
+        pose.pose.position.x = center_point[0]
+        pose.pose.position.y = center_point[1]
+        pose.pose.position.z = center_point[2]
+        pose.pose.orientation.x = 0.0
+        pose.pose.orientation.y = 0.0
+        pose.pose.orientation.z = 0.0
+        pose.pose.orientation.w = 1.0
+
+        try:
+            t = self.tf_listener.getLatestCommonTime("base_link", pose.header.frame_id)
+            pose.header.stamp = t
+            pose = self.tf_listener.transformPose("base_link", pose)
+            # if pose doesnot has nan values then append pose to the list
+            if not math.isnan(pose.pose.position.x):
+                center_wrt_BL = pose.pose.position.x, pose.pose.position.y, pose.pose.position.z
+                return center_wrt_BL
+        except (
+            tf.LookupException,
+            tf.ConnectivityException,
+            tf.ExtrapolationException,
+        ) as e:
+            rospy.logerr("Tf error: %s" % str(e))
+
+        return None
+            
+    def run(self, image, pointcloud):
+        """
+        image: image data of current frame with Image data type
+        pointcloud: pointcloud data of current frame with PointCloud2 data type
+        """
+        if image:
+            try:
+                cv_img = self.cvbridge.imgmsg_to_cv2(image, "bgr8")
+                bboxes, probs, labels = self.yolo_detect(cv_img)
+        
+                # Capatilize labels
+                labels = [label.upper() for label in labels]                
+                bbox_img = None
+
+                # Fit a Ellipse to the centers of the bounding boxes
+                for bbox, prob, label in zip(bboxes, probs, labels):
+                    if label == "SCREW_NUT_ASSEMBLY":
+                        # Calculate center of bounding box
+                        center_x = (int(bbox[0]) + int(bbox[2])) // 2
+                        center_y = (int(bbox[1]) + int(bbox[3])) // 2
+                        center = np.array([center_x, center_y])
+
+                        # Convert image to grayscale
+                        bbox_img = cv_img[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
+                        if bbox_img is None:
+                            continue
+                        gray = cv2.cvtColor(bbox_img, cv2.COLOR_BGR2GRAY)
+                        
+                        # Convert image to binary
+                        _, bw = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+                        
+                        # Find all the contours in the thresholded image
+                        contours, _ = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+
+                        # get contour with maximum area
+                        max_area = 0
+                        best_cnt = None
+                        for cnt in contours:
+                            area = cv2.contourArea(cnt)
+                            if area > max_area:
+                                max_area = area
+                                best_cnt = cnt
+                        
+                        yaw_angle = self.get_orientation(best_cnt, bbox_img)
+
+                        center_BL = self.get_pointcloud_position(pointcloud, center)
+
+                        predicted_pose = PoseStamped()
+                        predicted_pose.header.stamp = pointcloud.header.stamp
+                        predicted_pose.header.frame_id = "base_link_static"
+                        predicted_pose.pose.position.x = center_BL[0]
+                        predicted_pose.pose.position.y = center_BL[1]
+                        predicted_pose.pose.position.z = 0.06
+                                
+                        # convert yaw_list_CL to yaw_list_BL
+                        yaw_BL = np.pi/2 - yaw_angle # from CL to BL
+                        if yaw_BL > np.pi:
+                            yaw_BL -= 2*np.pi    
+                        if yaw_BL < 0:
+                            yaw_BL += np.pi
+                        # now yaw_list is b/w 0 to np.pi (180 degrees)
+                        orientation = tr.quaternion_from_euler(0, 0, yaw_BL)
+                        predicted_pose.pose.orientation.x = orientation[0]
+                        predicted_pose.pose.orientation.y = orientation[1]
+                        predicted_pose.pose.orientation.z = orientation[2]
+                        predicted_pose.pose.orientation.w = orientation[3]
+
+                        # publish the pose
+                        self.pub_pose.publish(predicted_pose)
+                        self.pose_sent = True
+                        msg_str = f'e_done'
+                        self.event_out.publish(String(data=msg_str))
+                        # print("pose e_done sent")
+
+                        if self.debug:
+                            # computes the bounding box for the contour, and draws it on the frame,
+                            (x,y,w,h) = cv2.boundingRect(best_cnt)
+                            if w > 40 and h > 40:
+                                cv2.rectangle(bbox_img, (x,y), (x+w,y+h), (255, 0, 0), 2)
+
+                            self.publish_debug_img(bbox_img)
+
+            except CvBridgeError as e:
+                rospy.logerr(e)
+                return
+        else:
+            rospy.logwarn("No image received")
+
+    def publish_debug_img(self, debug_img):
+        debug_img = np.array(debug_img, dtype=np.uint8)
+        debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
+        self.pub_debug.publish(debug_img)
+
+
+if __name__ == '__main__':
+    rospy.init_node("coworker_assembly_detection")
+    rospy.loginfo('Started Coworker assembly detection Node.')
+    object_recognizer = CoworkerAssembly(debug_mode=True)
+    rospy.loginfo("Coworker assembly detection node is ready to give pose")
+    rospy.spin()

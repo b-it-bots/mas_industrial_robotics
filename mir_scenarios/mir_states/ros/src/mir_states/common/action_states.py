@@ -48,13 +48,15 @@ class pick_object(smach.State):
 
 
 class perceive_location(smach.State):
-    def __init__(self):
+    def __init__(self, obj_category="multimodal_object_recognition_atwork"):
         smach.State.__init__(self, outcomes=["success", "failed"])
         self.client = SimpleActionClient(
             "perceive_location_server", GenericExecuteAction
         )
         self.client.wait_for_server()
         self.goal = GenericExecuteGoal()
+        self.goal.parameters.append(
+            KeyValue(key="obj_category", value=str(obj_category)))
 
     def execute(self, userdata):
         self.client.send_goal(self.goal)

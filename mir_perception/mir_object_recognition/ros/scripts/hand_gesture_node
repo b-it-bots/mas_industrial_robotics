@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+import os
+import random
+import time
+import cv2
+import numpy as np
+import roslib
+import rospy
+import torch
+import math
+import csv
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
+from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg import ColorRGBA, String
+import message_filters
+from mas_perception_msgs.msg import ImageList, Object, ObjectList, TimeStampedPose
+from sensor_msgs.msg import Image, RegionOfInterest, PointCloud2, PointField
+from sensor_msgs import point_cloud2
+from ultralytics import YOLO
+import tf
+from sklearn.decomposition import PCA
+from geometry_msgs.msg import PoseStamped, Pose
+from visualization_msgs.msg import Marker
+from scipy.optimize import least_squares
+from sklearn.mixture import GaussianMixture
+import tf.transformations as tr
+from scipy.spatial.transform import Rotation as R
+import tf2_sensor_msgs
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+import tf2_ros
+import tf2_py as tf2
+import ros_numpy
+from scipy.optimize import least_squares
+import pdb
+
+class GestureRecognition():
+    def __init__(self, debug_mode=True):
+        
+        self.cvbridge = CvBridge()
+        self.debug = debug_mode
+        self.pub_debug = rospy.Publisher("/mir_perception/gesture_recognition/output/gesture_recognition_debug", Image, queue_size=1)
+
+        rospy.Subscriber("/mir_perception/gesture_recognition/event_in", String, self.event_in_cb)
+        self.event_out = rospy.Publisher("/mir_perception/gesture_recognition/event_out", String, queue_size=1)
+
+        self.net = 'detection'
+        self.model_name = 'yolov8'
+        weights = os.path.join(roslib.packages.get_pkg_dir("mir_rgb_object_recognition_models"),
+                           'common', 'models', 'yolov8', 'robocup_2023_dataset', "hand_gesture_model.pt")
+        self.weights = weights
+        self.confidence_threshold = 0.8
+        self.iou_threshold = 0.45
+        self.augment = False
+        
+        # Initialize
+        self.device = torch.device('cpu')
+        self.half = self.device.type != 'cpu'  # half precision only supported on CUDA
+
+        # Load model
+        if self.model_name == 'yolov8':
+            self.model = YOLO(weights)
+            
+        self.event = None
+        self.gesture_sent = False
+        self.frame_counter = 0
+        # self.event_in_cb("e_start")
+
+
+    def callback(self, img_msg):
+        try:
+            self.run(img_msg)
+        except Exception as e:
+            rospy.loginfo("[hand_gesture_node] killing callback")
+
+    def event_in_cb(self, msg):
+        """
+        Starts a planned motion based on the specified arm position.
+
+        # """
+        self.event = msg.data
+        if self.event.startswith("e_start") and not self.gesture_sent:
+        # if not self.gesture_sent:
+            # Subscribe to image topic
+            self.sub_img = rospy.Subscriber("/tower_cam3d_front/rgb/image_raw", Image, self.callback)
+
+        if self.gesture_sent:
+            self.sub_img.sub.unregister()
+            rospy.loginfo("[gesture_recognition_node] Unregistered image subscribers")
+        
+    def yolo_detect(self, cv_img):
+        if self.net == 'detection' and self.model_name == 'yolov8':
+            predictions = self.model.predict(source=cv_img,
+                                                conf=self.confidence_threshold,
+                                                iou=self.iou_threshold,
+                                                device=self.device,
+                                                verbose = False,
+                                            )
+            # convert results to numpy array
+            predictions_np = predictions[0].boxes.numpy()
+            class_ids = predictions_np.cls
+            class_names = predictions[0].names
+            class_labels = [class_names[i] for i in class_ids]
+            class_scores = predictions_np.conf
+            class_bboxes = predictions_np.xyxy # x, y, w, h
+
+            return class_bboxes, class_scores, class_labels, predictions
+        
+    def run(self, image):
+        """
+        image: image data of current frame with Image data type
+        pointcloud: pointcloud data of current frame with PointCloud2 data type
+        """
+        if image:
+            try:
+                cv_img = self.cvbridge.imgmsg_to_cv2(image, "bgr8")
+                bboxes, probs, labels, predictions = self.yolo_detect(cv_img)
+
+                # Capatilize labels
+                labels = [label.upper() for label in labels]                
+
+                # Fit a Ellipse to the centers of the bounding boxes
+                for bbox, prob, label in zip(bboxes, probs, labels):
+                    if label == "VICTORY":
+                        self.frame_counter += 1
+                    else:
+                        self.frame_counter = 0
+                
+                if self.frame_counter == 5:
+                    self.gesture_sent = True
+                    msg_str = f'e_done'
+                    self.event_out.publish(String(data=msg_str))
+                    # print("gesture e_done sent")
+
+                if self.debug:
+                    # Draw bounding boxes and labels of detections
+                    debug_img = predictions[0].plot()
+                    self.publish_debug_img(debug_img)
+
+            except CvBridgeError as e:
+                rospy.logerr(e)
+                return
+        else:
+            rospy.logwarn("No image received")
+
+    def publish_debug_img(self, debug_img):
+        debug_img = np.array(debug_img, dtype=np.uint8)
+        debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
+        self.pub_debug.publish(debug_img)
+
+
+if __name__ == '__main__':
+    rospy.init_node("gesture_recognition")
+    rospy.loginfo('Started Gesture Recognition Node.')
+    object_recognizer = GestureRecognition(debug_mode=True)
+    rospy.loginfo("Gesture Recognition node is ready to recognize gesture")
+    rospy.spin()

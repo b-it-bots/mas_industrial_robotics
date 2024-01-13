@@ -100,3 +100,15 @@ pregrasp_planner_zealous:
         min_height: 0.0
         target_frame: base_link
         ignore_orientation: True
+multimodal_object_recognition_atwork:
+    /mir_perception/multimodal_object_recognition:
+        obj_category: atwork
+        rgb_cluster_filter_limit_max: 0.35
+multimodal_object_recognition_cavity:
+    /mir_perception/multimodal_object_recognition:
+        obj_category: cavity
+        rgb_cluster_filter_limit_max: -0.015
+multimodal_object_recognition_container:
+    /mir_perception/multimodal_object_recognition:
+        obj_category: container
+        rgb_cluster_filter_limit_max: 0.35

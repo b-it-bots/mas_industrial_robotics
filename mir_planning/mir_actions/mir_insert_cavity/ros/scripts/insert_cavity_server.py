@@ -182,6 +182,41 @@ class ppt_wiggle_arm(smach.State):
         return "succeeded"
         #################
 
+# ===============================================================================
+
+class Unstage_to_place(smach.State):
+
+    def __init__(self):
+
+        smach.State.__init__(self, outcomes=["success","failed"],input_keys=["goal","heavy_objects", "platform","object"])
+        self.platform = "PLATFORM_MIDDLE"
+        self.obj = "M20"
+
+    def execute(self,userdata):
+
+        self.platform = Utils.get_value_of(userdata.goal.parameters, "platform")
+        self.obj = Utils.get_value_of(userdata.goal.parameters, "peg")
+
+        if self.obj is None:
+            rospy.logwarn('Missing parameter "object". Using default.')
+            self.obj = "light"
+        else:
+            self.obj =  "light"
+
+
+        self.unstage_client = SimpleActionClient('unstage_object_server', GenericExecuteAction)
+        self.unstage_client.wait_for_server()
+
+	    # Assigning the goal    
+
+        goal = GenericExecuteGoal()
+        goal.parameters.append(KeyValue(key="platform", value=self.platform))
+        goal.parameters.append(KeyValue(key="object", value=self.obj))
+
+        self.unstage_client.send_goal(goal)
+        self.unstage_client.wait_for_result(rospy.Duration.from_sec(25.0))
+
+        return "success"
 
 # ===============================================================================
 def transition_cb(*args, **kwargs):
@@ -220,22 +255,33 @@ def main():
         )
 
         smach.StateMachine.add(
-            "CHECK_IF_OBJECT_IS_AVAILABLE",
+            "SELECT_CAVITY",
+            SelectCavity("/mcr_perception/object_selector/input/object_name", vertical=False),
+            transitions={
+                "succeeded": "GENERATE_OBJECT_POSE",
+                "failed": "GET_VERTICAL_CAVITY"
+            },
+        )
+
+        smach.StateMachine.add(
+            "GET_VERTICAL_CAVITY",
+            SelectCavity("/mcr_perception/object_selector/input/object_name", vertical=True),
+            transitions={
+                "succeeded": "GENERATE_OBJECT_POSE",
+                "failed": "OVERALL_FAILED"
+            },
+        )
+
+        # generates a pose of object
+        smach.StateMachine.add(
+            "GENERATE_OBJECT_POSE",
             gbs.send_and_wait_events_combined(
-                event_in_list=[
-                    ("/mcr_perception/cavity_pose_selector/event_in", "e_trigger",)
-                ],
-                event_out_list=[
-                    (
-                        "/mcr_perception/cavity_pose_selector/event_out",
-                        "e_success",
-                        True,
-                    )
-                ],
+                event_in_list=[("/mcr_perception/object_selector/event_in", "e_trigger")],
+                event_out_list=[("/mcr_perception/object_selector/event_out", "e_selected", True)],
                 timeout_duration=10,
             ),
             transitions={
-                "success": "SET_DBC_PARAMS",
+                "success": "UNSTAGE_FOR_PLACING",
                 "timeout": "OVERALL_FAILED",
                 "failure": "OVERALL_FAILED",
             },
@@ -267,7 +313,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_MIDDLE_POSE",
-            gms.move_arm("ppt_cavity_middle"),
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "PERCEIVE_CAVITY",
                 "failed": "MOVE_ARM_TO_MIDDLE_POSE",
@@ -355,7 +401,7 @@ def main():
         # move arm to HOLD position
         smach.StateMachine.add(
             "MOVE_ARM_TO_HOLD",
-            gms.move_arm("ppt_cavity_middle"),
+            gms.move_arm("pre_place"),
             transitions={
                 "succeeded": "OVERALL_SUCCESS",
                 "failed": "MOVE_ARM_TO_HOLD",
@@ -366,7 +412,7 @@ def main():
     sm.register_start_cb(start_cb)
 
     # smach viewer
-    if rospy.get_param("~viewer_enabled", False):
+    if rospy.get_param("~viewer_enabled", True):
         sis = IntrospectionServer(
             "insert_cavity_smach_viewer", sm, "/INSERT_CAVITY_SMACH_VIEWER"
         )
