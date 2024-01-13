@@ -1,22 +1,16 @@
-## Noetic status
-The code currently compiles, the full pipeline works with rgb-recognizer but pc object recognition is not tested. The refree box interface is tested.
+This repository contains most of the code used by our team on the youBot for the [RoboCup@Work](https://atwork.robocup.org/) competition. In the competition, the robot should transport industrial objects such as metal profiles, nuts and bolts, tools, etc. between workstations based on a given task order. This requires the robot to autonomously navigate in a known environment with previously unseen obstacles, recognize and grasp small and textureless objects, grasp objects from a rotating table, insert objects precisely into cavities and plan the most efficient sequence of actions to complete the task.
 
-- You may need to install the following packages:
-  - ros-noetic-octomap
-  - ros-noetic-octomap-ros
-  - libboost-python1.71-dev
-- Add `-Wno-error=deprecated-copy` to the `RDDL_CMAKE_CXX_FLAGS` in ROSPlan/rosplan_dependencies/CMakeLists.txt temporarily until ROSPlan for noetic is released
-- The following packages are ignored/not compiled for various reasons:
-  - mir_grasp_monitors ([ros-noetic-serial](https://github.com/wjwwood/serial/issues/222) package is not available)
-  - mir_knowledge ([ros-noetic-mongodb-store-msgs](https://github.com/strands-project/mongodb_store/issues/267) package is not available)
-  - mir_pddl_problem_generator ([ros-noetic-mongodb-store](https://github.com/strands-project/mongodb_store/issues/267) package is not available)
-- Perception dependencies (tensorflow etc.) are not installed (line 179 in setup.sh). Perhaps we need to upgrade to tensorflow 2?
-- The following packages are compiled locally (via repository.rosinstall) because they have not been released for noetic yet:
-  - [brics_actuator](https://github.com/wnowak/brics_actuator)
-  - [pr2_power_drivers](https://github.com/PR2/pr2_power_drivers)
-- Several warnings to be fixed, especially for packages that use PCL
+Several other repositories are used; the full list can be found in [repository.rosinstall](repository.rosinstall). The main ones are:
 
-[<!--lint ignore no-dead-urls-->![Build Status](https://github.com/b-it-bots/mas_industrial_robotics/workflows/CI/badge.svg)](https://github.com/b-it-bots/mas_industrial_robotics/actions?workflow=CI)
+* [mas_common_robotics](https://github.com/b-it-bots/mas_common_robotics): robot-independent code that is sometimes shared with our other robots
+* [mas_navigation](https://github.com/b-it-bots/mas_navigation): robot-independent navigation components such as the force-field recovery behaviour for move base, direct base controller, etc.
+* [mir_perception_models](https://github.com/b-it-bots/mir_perception_models): trained neural network models for perception
+* [technical_drawings](https://github.com/b-it-bots/technical_drawings): CAD models for various parts used on the youBot.
+* [gripper_controller](https://github.com/b-it-bots/youbot_dynamixel_gripper_controller): code for the OpenRB-150 board to control the gripper using two Dynamixel motors.
+
+<p align="center">
+  <img src="docs/source/images/youbot_annotated.png" width="90%" />
+</p>
 
 ## Install Ubuntu
 The repository and its related components have been tested under the following Ubuntu distributions:
