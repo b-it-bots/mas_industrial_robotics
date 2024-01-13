@@ -158,9 +158,8 @@ if __name__ == '__main__':
     model_dir = rospy.get_param("~model_dir")
     dataset = rospy.get_param("~dataset")
 
-    # commented as we'are not using it
-    #object_recognizer = PointcloudObjectRecognizer(
-    #    model, model_id, dataset, model_dir)
-    #rospy.loginfo('\033[92m'+"PCL Recognizer is ready using %s , model: %s ",
-    #              model, model_id)
+    object_recognizer = PointcloudObjectRecognizer(
+        model, model_id, dataset, model_dir)
+    rospy.loginfo('\033[92m'+"PCL Recognizer is ready using %s , model: %s ",
+                  model, model_id)
     rospy.spin()

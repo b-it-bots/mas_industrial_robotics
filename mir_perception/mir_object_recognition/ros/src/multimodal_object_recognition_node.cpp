@@ -96,7 +96,7 @@ MultimodalObjectRecognitionROS::MultimodalObjectRecognitionROS(ros::NodeHandle n
   ROS_WARN_STREAM("[multimodal_object_recognition] target frame: " <<target_frame_id_);
   nh_.param<std::string>("pointcloud_source_frame_id", pointcloud_source_frame_id_, "fixed_camera_link");
 
-  nh_.param<std::string>("logdir", logdir_, "/home/robocup/perception_debug_data/");
+  nh_.param<std::string>("logdir", logdir_, "/tmp");
   nh_.param<std::string>("object_info", object_info_path_, "None");
   loadObjectInfo(object_info_path_);
 
@@ -109,7 +109,7 @@ MultimodalObjectRecognitionROS::~MultimodalObjectRecognitionROS()
 void MultimodalObjectRecognitionROS::synchronizeCallback(const sensor_msgs::ImageConstPtr &image,
                       const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
-  ROS_INFO("[multimodal_object_recognition_ros] Received enough messages");
+  ROS_INFO("[multimodal_object_recognition_ros] Received synchronized pointcloud and image");
   if (pointcloud_msg_received_count_ < 1)
   {
     pointcloud_msg_ = cloud;
@@ -743,15 +743,8 @@ void MultimodalObjectRecognitionROS::adjustObjectPose(mas_perception_msgs::Objec
     double change_in_pitch = 0.0;
     if (round_objects_.count(object_list.objects[i].name))
     {
+      ROS_INFO_STREAM("Setting yaw to zero for " << object_list.objects[i].name);
       yaw = 0.0;
-    }
-    if (object_list.objects[i].name == "M30_H" 
-        or object_list.objects[i].name == "M20_H"
-        or object_list.objects[i].name == "S40_40_V"
-        or object_list.objects[i].name == "F20_20_V")
-    {
-        ROS_WARN("Setting yaw for M30/M20 to zero");
-        yaw = 0.0;
     }
 
     // Update container pose
@@ -904,8 +897,6 @@ void MultimodalObjectRecognitionROS::loadObjectInfo(const std::string &filename)
 void MultimodalObjectRecognitionROS::eventCallback(const std_msgs::String::ConstPtr &msg)
 {
   std_msgs::String event_out;
-  ROS_INFO("Event call back");
-
   if (msg->data == "e_start")
   {
     // Synchronize callback
