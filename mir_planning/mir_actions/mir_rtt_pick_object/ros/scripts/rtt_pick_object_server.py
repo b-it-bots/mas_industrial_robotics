@@ -99,10 +99,6 @@ class SetupObjectPose(smach.State):
     def execute(self, userdata):
         # #iCartesian pose (x, y, z, r, p, y, frame_id)
         r, p, y = tr.euler_from_quaternion([userdata.pose.pose.orientation.x, userdata.pose.pose.orientation.y, userdata.pose.pose.orientation.z, userdata.pose.pose.orientation.w])
-        # print("------------------")
-        # print(userdata.pose.pose.position.x, userdata.pose.pose.position.y, userdata.pose.pose.position.z)
-        # print("r, p, y", r, p, y)
-        # print("------------------")
 
         # convert rpy into quaternion
         quaternion = tr.quaternion_from_euler(r, p, y)
@@ -242,63 +238,6 @@ def main():
             transitions={"succeeded": "SETUP_OBJECT_POSE_PICK",
                          "timeout": "SETUP_OBJECT_POSE_PICK"},
         )
-
-        # # Set the pose to pre pose for picking
-        # smach.StateMachine.add(
-        #     "SETUP_OBJECT_POSE_PRE_PICK",
-        #     SetupObjectPose("pre_pick_pose"),
-        #     transitions={"succeeded": "OPEN_GRIPPER",
-        #                   "failed": "SETUP_OBJECT_POSE_PRE_PICK"},
-        # )
-
-        # smach.StateMachine.add(
-        #     "OPEN_GRIPPER",
-        #     gms.control_gripper(-1.4),
-        #     transitions={"succeeded": "CHECK_PRE_POSE_IK",
-        #                  "timeout": "CHECK_PRE_POSE_IK"},
-        # )
-
-        # smach.StateMachine.add(
-        #     "CHECK_PRE_POSE_IK",
-        #     gbs.send_and_wait_events_combined(
-        #         event_in_list=[
-        #             ("/pregrasp_planner_node/event_in", "e_start")
-        #         ],
-        #         event_out_list=[
-        #             (
-        #                 "/pregrasp_planner_node/event_out",
-        #                 "e_success",
-        #                 True,
-        #             )
-        #         ],
-        #         timeout_duration=20,
-        #     ),
-        #     transitions={
-        #         "success": "GO_TO_PRE_PICK_POSE",
-        #         "timeout": "CHECK_PRE_POSE_IK", 
-        #         "failure": "CHECK_PRE_POSE_IK",
-        #     },
-        # )
-
-        # smach.StateMachine.add(
-        #     "GO_TO_PRE_PICK_POSE",
-        #     gbs.send_and_wait_events_combined(
-        #         event_in_list=[
-        #             ("/waypoint_trajectory_generation/event_in", "e_start")],
-        #         event_out_list=[
-        #             (
-        #                 "/waypoint_trajectory_generation/event_out",
-        #                 "e_success",
-        #                 True,
-        #             )],
-        #         timeout_duration=20,
-        #     ),
-        #     transitions={
-        #         "success": "SETUP_OBJECT_POSE_PICK", 
-        #         "timeout": "OVERALL_FAILED",
-        #         "failure": "OVERALL_FAILED",
-        #     },
-        # )
 
         # Set the pose to pre pose for picking
         smach.StateMachine.add(
