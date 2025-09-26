@@ -15,6 +15,7 @@ class CombinedPickAction : public BaseExecutorAction
  private:
   ExecutorAction *default_pick_;
   ExecutorAction *pick_from_shelf_;
+  ExecutorAction *pick_from_tt_;
 
  public:
   CombinedPickAction();

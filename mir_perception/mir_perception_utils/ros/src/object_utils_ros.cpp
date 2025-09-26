@@ -62,7 +62,7 @@ PointCloud object::estimatePose(const PointCloud::Ptr &xyz_input_cloud, geometry
   // circular/spherical object
   // to find its orientation
   PointCloud filtered_cloud;
-  if (obj_category == "atwork" and (shape == "sphere" or shape == "flat")) {
+  if (shape == "sphere" or shape == "flat") {
     filtered_cloud = *xyz_input_cloud;
   } else {
     pcl::PassThrough<PointT> pass_through;

@@ -105,6 +105,9 @@ class PregraspPlannerPipeline(object):
         # joint offset for creating pre-pregrasp pose
         self.joint_offset = None
 
+        # needed for the pregrasp planner to shift to independent ik when dealing with shift
+        self.is_picking_from_shelf = False
+
         # pose generator
         self.gripper = rospy.get_param("~gripper_config_matrix", None)
         assert self.gripper is not None, "Gripper config matrix must be specified."
@@ -138,6 +141,9 @@ class PregraspPlannerPipeline(object):
         rospy.Subscriber("~pose_in", geometry_msgs.msg.PoseStamped, self.pose_cb)
 
         # publishers
+        self.original_pose_pub = rospy.Publisher(
+            "~original_pose", geometry_msgs.msg.PoseStamped, queue_size=1
+        )
         self.event_out = rospy.Publisher(
             "~event_out", std_msgs.msg.String, queue_size=1
         )
@@ -162,6 +168,17 @@ class PregraspPlannerPipeline(object):
             mcr_manipulation_msgs.msg.JointSpaceWayPointsList,
             queue_size=1,
         )
+        
+        ########### by Anudeep  #########################################
+        
+        self.ik_mode_pub = rospy.Publisher(
+            "~ik_mode", std_msgs.msg.String, queue_size=1
+        )
+        
+        rospy.set_param("/pregrasp_planner/ik_mode", "default")
+
+        
+        ##############################################################
 
         # Dynamic reconguration server for PregraspPlannerParams
         dynamic_reconfig_srv = Server(
@@ -323,6 +340,10 @@ class PregraspPlannerPipeline(object):
             self.joint_waypoint_list_pub.publish(joint_waypoints)
 
             rospy.loginfo('[Pregrasp Planning] Found solution using default pick config.')
+            
+            self.ik_mode_pub.publish(std_msgs.msg.String("orien_dependent"))
+            rospy.set_param("/pregrasp_planner/ik_mode", "orien_dependent")
+            
             return True
         else:
             rospy.logerr("[Pregrasp Planning] Could not find IK solution for default pick config.")
@@ -334,6 +355,7 @@ class PregraspPlannerPipeline(object):
         input_pose.header = transformed_pose.header
         input_pose.pose.position = transformed_pose.pose.position
         if grasp_type == "side_grasp":
+            rospy.loginfo("[Pregrasp Planning] Using side grasp")
             input_pose.pose.position.x += self.side_grasp_offset_x
         solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
                 input_pose.pose.position.x, input_pose.pose.position.y,
@@ -351,6 +373,7 @@ class PregraspPlannerPipeline(object):
         joint_waypoints = mcr_manipulation_msgs.msg.JointSpaceWayPointsList()
         joint_config = [p.value for p in joint_msg.positions]
         if grasp_type == "side_grasp" and self.generate_pregrasp_waypoint:
+            rospy.loginfo("[Pregrasp Planning] using side grasp and generating pregrasp waypoint")
             pregrasp_input_pose = copy.deepcopy(input_pose)
             pregrasp_input_pose.pose.position.x -= 0.05
             pregrasp_solution = self.orientation_independent_ik.get_reachable_pose_and_joint_msg_from_point(
@@ -378,6 +401,10 @@ class PregraspPlannerPipeline(object):
             self.joint_waypoint_list_pub.publish(joint_waypoints)
         
         rospy.loginfo('[Pregrasp Planning] Found solution using orientation independent pick config.')
+        
+        self.ik_mode_pub.publish(std_msgs.msg.String("independent"))
+        rospy.set_param("/pregrasp_planner/ik_mode", "independent")
+        
         return True
 
     def running_state(self):
@@ -427,6 +454,7 @@ class PregraspPlannerPipeline(object):
             grasp_type = "top_grasp"
         else:
             grasp_type = "side_grasp"
+        rospy.loginfo("[Pregrasp Planning] Using grasp type: {0}".format(grasp_type))
 
         if grasp_type == "side_grasp": 
             
@@ -437,6 +465,11 @@ class PregraspPlannerPipeline(object):
         self.grasp_type.publish(grasp_type)
         pose_samples = self.pose_generator.calculate_poses_list(modified_pose)
         self.pose_samples_pub.publish(pose_samples)
+        # self.original_pose_pub.publish(modified_pose)
+
+        # check is_picking_from_shelf from parameter server
+        self.is_picking_from_shelf = rospy.get_param("/pick_from_shelf_server/pick_statemachine_says_shelf", False)
+        rospy.loginfo(f"[Pregrasp Planning] shelf picking is set to: {self.is_picking_from_shelf}")
 
         # if default ik is true, try default ik routine
         if self.default_ik_flag and not self.adaptive_ik_flag:
@@ -452,7 +485,7 @@ class PregraspPlannerPipeline(object):
                 return "INIT"
             
         # if orientation independent IK failed and adaptive IK is set to true, try again with orientation independent IK
-        if self.orientation_independent_ik_flag and not self.adaptive_ik_flag:
+        if self.is_picking_from_shelf=='True' or (self.orientation_independent_ik_flag and not self.adaptive_ik_flag):
             if self.orientation_independent_ik_routine(transformed_pose, grasp_type):
                 self.event_out.publish("e_success")
                 self.reset_component_data()
@@ -463,7 +496,7 @@ class PregraspPlannerPipeline(object):
                 return 'INIT'
 
         # if adaptive IK is set to true, try both default and orientation independent IK routines
-        if self.adaptive_ik_flag:
+        if self.adaptive_ik_flag and not self.is_picking_from_shelf=='True':
             if self.default_ik_routine(pose_samples, modified_pose, grasp_type):
                 self.event_out.publish("e_success")
                 self.reset_component_data()

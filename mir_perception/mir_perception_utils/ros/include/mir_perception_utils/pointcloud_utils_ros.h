@@ -17,6 +17,9 @@
 
 #include <mir_perception_utils/aliases.h>
 #include <sensor_msgs/RegionOfInterest.h>
+#include <mas_perception_msgs/BoundingBox.h>
+
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace mir_perception_utils
 {
@@ -60,7 +63,27 @@ bool transformPointCloud2(const boost::shared_ptr<tf::TransformListener> &tf_lis
  * \param[in] Adjust the rgb roi proposal (in pixel)
  * \param[in] Remove 3D ROI outliers
 */
-bool getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, const PointCloud::Ptr &cloud_id,
+bool getPointCloudROI(const sensor_msgs::RegionOfInterest &roi, const PointCloud::Ptr &cloud_in,
+                      PointCloud::Ptr &cloud_roi, float roi_size_adjustment, bool remove_outliers);
+
+/** \brief Get 3D ROI of point cloud given 2D BoundingBox
+ * \param[in] Region of interest (bounding box) of 2D object
+ * \param[in] Organized pointcloud input
+ * \param[out] 3D pointcloud cluster (3D ROI) of the given 2D BoundingBox
+ * \param[in] Adjust the rgb roi proposal (in pixel)
+ * \param[in] Remove 3D ROI outliers
+*/
+bool getPointCloudROI(const mas_perception_msgs::BoundingBox &bbox, const PointCloud::Ptr &cloud_in,
+                      PointCloud::Ptr &cloud_roi, float roi_size_adjustment, bool remove_outliers);
+
+/** \brief Get 3D ROI of point cloud given Segmentation mask
+ * \param[in] Mask of the object
+ * \param[in] Organized pointcloud input
+ * \param[out] 3D pointcloud cluster (3D ROI) of the given mask
+ * \param[in] Adjust the rgb roi proposal (in pixel)
+ * \param[in] Remove 3D ROI outliers
+*/
+bool getPointCloudROI(const cv::Mat &mask, const PointCloud::Ptr &cloud_in,
                       PointCloud::Ptr &cloud_roi, float roi_size_adjustment, bool remove_outliers);
 }
 };

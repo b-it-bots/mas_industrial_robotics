@@ -95,7 +95,7 @@ class PickFromShelfUtils(object):
         dbc_target_pose = PoseStamped()
         dbc_target_pose.header.stamp = rospy.Time.now()
         dbc_target_pose.header.frame_id = self.frame_id
-        dbc_target_pose.pose.position.x = self.retract_base_pose_x
+        dbc_target_pose.pose.position.x = self.retract_base_pose_x - 0.05
         dbc_target_pose.pose.position.y = 0.0
         dbc_target_pose.pose.orientation.w = 1.0
         return dbc_target_pose

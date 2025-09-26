@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mir_empty_space_prediction</name>
+  <version>0.0.1</version>  <!-- Updated version to 0.0.1 -->
+  <description>The mir_emptyspace_prediction package</description>
+
+  <!-- Maintainer information -->
+  <maintainer email="sajjasaianudeep@gmail.com">anudeep</maintainer>
+
+  <!-- License information -->
+  <license>TODO</license>  <!-- Replace with actual license, e.g., BSD, MIT, etc. -->
+
+  <!-- Build tool dependency -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Build dependencies -->
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <!-- Exported build dependencies (ensure they are available for downstream packages) -->
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+
+  <!-- Runtime dependencies -->
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <!-- This section is for exporting package-specific information -->
+  <export>
+    <!-- You can export other details here like message generation if required -->
+  </export>
+</package>
+
+

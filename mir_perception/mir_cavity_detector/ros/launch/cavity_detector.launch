@@ -4,8 +4,8 @@
 
     <group ns="mir_perception">
         <node pkg="mir_cavity_detector" type="cavity_finder" name="cavity_finder" output="screen" respawn="false">
-            <remap from="~input/pointcloud" to="/$(arg camera_name)/depth_registered/points" />
-            <remap from="~image" to="/$(arg camera_name)/rgb/image_raw" />
+            <remap from="~input/pointcloud" to="/$(arg camera_name)/depth/color/points" />
+            <remap from="~image" to="/$(arg camera_name)/color/image_raw" />
             <param name="offset_in_z" type="double" value="0.055" />
         </node>
     </group>

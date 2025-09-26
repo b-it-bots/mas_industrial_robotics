@@ -5,8 +5,14 @@ PPTDetector::PPTDetector():
 {
     // Create a ROS subscriber for the input point cloud
     // pc_sub_ = nh_.subscribe<PointCloud> ("points", 1, &PPTDetector::cloud_cb, this);
+    float planar_projection_thresh;
+    float target_pose_z_pos_;
+    nh_.param<float>("planar_projection_thresh", planar_projection_thresh, 0.03);
+    nh_.param<float>("target_pose_z_pos", target_pose_z_pos_, 0.035);
     event_in_sub_ = nh_.subscribe("event_in", 1, &PPTDetector::eventInCallback, this);
-
+    dynamic_reconfigure::Server<mir_ppt_detection::PPTDetectionConfig>::CallbackType f =
+              boost::bind(&PPTDetector::configCallback, this, _1, _2);
+    server_.setCallback(f);
     // Create a ROS publisher for the output point cloud
     cloud_pub0 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_non_planar", 1);
     cloud_pub1 = nh_.advertise<sensor_msgs::PointCloud2> ("cloud_planar", 1);
@@ -26,10 +32,18 @@ PPTDetector::PPTDetector():
     }
 
     nh_.param<std::string>("target_frame", target_frame_, "base_link");
-    nh_.param<std::string>("source_frame", source_frame_, "arm_cam3d_camera_color_optical_frame");
+    nh_.param<std::string>("source_frame", source_frame_, "tower_cam3d_front_camera_color_optical_frame");
     nh_.param<bool>("debug_pub", debug_pub_, true);
 }
 
+void PPTDetector::configCallback(mir_ppt_detection::PPTDetectionConfig &config, uint32_t level)
+{
+  planar_projection_thresh = config.planar_projection_thresh;
+  target_pose_z_pos_ = config.target_pose_z_pos;
+//   ROS_INFO_STREAM("planar_projection_thresh " << planar_projection_thresh);
+}
+
+\
 bool PPTDetector::readObjectShapeParams()
 {
     std::string object_shape_learned_params_file;
@@ -129,6 +143,32 @@ void PPTDetector::downsample_organized_cloud(T cloud_in, PointCloud::Ptr cloud_d
         for( size_t j = 0, jj = 0; j < cloud_downsampled->width; jj += scale, j++){
             cloud_downsampled->at(j, i) = cloud_in->at(jj, ii);
         }
+	// if we find NaN's fill them with valid values by extrapolating from previous points (along width)
+        for (size_t j = 0; j < cloud_downsampled->width; j++) {
+            if (std::isnan(cloud_downsampled->at(j, i).x) and j > 2)
+            {
+                float diff_x = cloud_downsampled->at(j-1, i).x - cloud_downsampled->at(j-2, i).x;
+                float diff_y = cloud_downsampled->at(j-1, i).y - cloud_downsampled->at(j-2, i).y;
+                float current_x = cloud_downsampled->at(j-1, i).x + diff_x;
+                float current_y = cloud_downsampled->at(j-1, i).y + diff_y;
+                cloud_downsampled->at(j, i).x = current_x;
+                cloud_downsampled->at(j, i).y = current_y;
+                cloud_downsampled->at(j, i).z = cloud_downsampled->at(j - 1, i).z;
+            }
+        }
+	// if we find NaN's fill them with valid values by extrapolating from the previous rows
+        for (size_t j = 0; j < cloud_downsampled->width; j++) {
+            if (std::isnan(cloud_downsampled->at(j, i).x) and i > 2)
+            {
+                float diff_x = cloud_downsampled->at(j, i-1).x - cloud_downsampled->at(j, i-2).x;
+                float diff_y = cloud_downsampled->at(j, i-1).y - cloud_downsampled->at(j, i-2).y;
+                float current_x = cloud_downsampled->at(j, i-1).x + diff_x;
+                float current_y = cloud_downsampled->at(j, i-1).y + diff_y;
+                cloud_downsampled->at(j, i).x = current_x;
+                cloud_downsampled->at(j, i).y = current_y;
+                cloud_downsampled->at(j, i).z = cloud_downsampled->at(j, i-1).z;
+            }
+        }
     }
 }
 
@@ -191,10 +231,12 @@ void PPTDetector::project_points_to_plane(PointCloud::Ptr cloud_in,
             if (fabs(pt_in_dist - pt_proj_dist) < planar_projection_thresh) {
                 planar_indices->indices.push_back(col + row*cloud_in->width);      
                 pt_projected.a = 0;
-            } else if (std::isnan(pt_in_dist) || pt_in_dist > pt_proj_dist){
+            } else if (std::isnan(pt_in_dist)){
+		// Do nothing
+            } else if (pt_in_dist > pt_proj_dist){
                 non_planar_indices->indices.push_back(col + row*cloud_in->width);       
                 pt_projected.a = 1;
-            } 
+            }
             cloud_projected->points.push_back(pt_projected);
         }
     }
@@ -495,7 +537,7 @@ void PPTDetector::publish_cavity_msg(const mir_ppt_detection::Cavities& cavities
         {
             ROS_ERROR("%s", ex.what());
         }
-        pose_in_target_frame.pose.position.z = 0.035; //TODO: do not hardcode this; use workspace height + object_height_above_workspace
+        pose_in_target_frame.pose.position.z = target_pose_z_pos_; //TODO: do not hardcode this; use workspace height + object_height_above_workspace
 
         mas_perception_msgs::Cavity cavity;
 

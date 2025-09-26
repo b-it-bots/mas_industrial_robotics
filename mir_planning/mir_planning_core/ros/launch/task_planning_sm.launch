@@ -5,7 +5,7 @@
     <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
     <arg name="domain_file" default="$(arg base_path)/domain.pddl" />
     <arg name="problem_file" default="$(arg base_path)/problems/p1.pddl" />
-    <!-- current options for planner are "mercury" and "lama" -->
+    <!-- current options for planner are "mercury" and "lama" "lmcut"-->
     <arg name="planner" default="lama" />
 
     <node pkg="mir_planning_core" type="planning_coordinator_sm.py" name="skynet" output="screen" >

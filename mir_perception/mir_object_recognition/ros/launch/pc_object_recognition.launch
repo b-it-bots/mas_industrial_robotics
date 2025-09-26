@@ -2,7 +2,7 @@
 <launch>
 
   <arg name="camera_name" default="arm_cam3d" />
-  <arg name="input_pointcloud_topic"  default="/$(arg camera_name)/depth_registered/points" />
+  <arg name="input_pointcloud_topic"  default="/$(arg camera_name)/depth/color/points" />
   <arg name="target_frame" default="odom" />
   <arg name="model" default="cnn_based" />
   <arg name="model_id" default="dgcnn" />

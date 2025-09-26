@@ -1,7 +1,7 @@
 /rockin/robot_pose
 /rockin/marker_pose
 /rockin/trajectory
-/rockin/rgb/camera_info
+/rockin/color/camera_info
 /rockin/depth/camera_info
 /rockin/depth/pointcloud
 /rockin/scan_0

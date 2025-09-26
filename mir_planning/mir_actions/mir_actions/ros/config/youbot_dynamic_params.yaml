@@ -11,8 +11,8 @@ dbc_move_base:
         threshold_linear_y: 0.005
         threshold_angular_z: 0.04
         wait_for_transform: 0.1
-        p_gain_x: 3.0
-        p_gain_y: 3.0
+        p_gain_x: 3.0 
+        p_gain_y: 3.0  
         p_gain_yaw: 3.0
         max_velocity_x: 0.35
         max_velocity_y: 0.35
@@ -22,6 +22,30 @@ dbc_move_base:
         max_velocity_yaw: 0.35
         use_collision_avoidance: False
         loop_rate: 20.0
+
+dbc_move_base_test:
+    /mcr_navigation/direct_base_controller/coordinator:
+        threshold_linear_x: 0.005
+        threshold_linear_y: 0.005
+        threshold_angular_z: 0.04
+        wait_for_transform: 0.1
+        p_gain_x: 2.0  # prev 3.0
+        p_gain_y: 2.0  # prev 3.0
+        p_gain_yaw: 3.0
+        max_velocity_x: 0.35
+        max_velocity_y: 0.35
+        max_velocity_z: 0.0
+        max_velocity_roll: 0.0
+        max_velocity_pitch: 0.0
+        max_velocity_yaw: 0.35
+        use_collision_avoidance: True
+        use_collision_avoidance: True
+        front_laser_threshold: 0.04
+        right_laser_threshold: 0.04
+        rear_laser_threshold: 0.04
+        left_laser_threshold: 0.04
+        loop_rate: 20.0
+
 dbc_pick_object:
     /mcr_navigation/direct_base_controller/coordinator:
         threshold_linear_x: 0.04
@@ -29,20 +53,43 @@ dbc_pick_object:
         threshold_angular_z: 15.0
         wait_for_transform: 0.1
         p_gain_x: 2.0
-        p_gain_y: 4.0
+        p_gain_y: 3.0
         p_gain_yaw: 4.0
         max_velocity_x: 0.05
-        max_velocity_y: 0.2
+        max_velocity_y: 0.075
         max_velocity_z: 0.0
         max_velocity_roll: 0.0
         max_velocity_pitch: 0.0
         max_velocity_yaw: 0.4
         use_collision_avoidance: True
-        front_laser_threshold: 0.04
-        right_laser_threshold: 0.04
-        rear_laser_threshold: 0.02
-        left_laser_threshold: 0.04
+        front_laser_threshold: 0.0525
+        right_laser_threshold: 0.1
+        rear_laser_threshold: 0.15
+        left_laser_threshold: 0.15
         loop_rate: 25.0
+
+dbc_ppt_pick_object:
+    /mcr_navigation/direct_base_controller/coordinator:
+        threshold_linear_x: 0.04
+        threshold_linear_y: 0.02
+        threshold_angular_z: 15.0
+        wait_for_transform: 0.1
+        p_gain_x: 2.0
+        p_gain_y: 3.0
+        p_gain_yaw: 4.0
+        max_velocity_x: 0.05
+        max_velocity_y: 0.075
+        max_velocity_z: 0.0
+        max_velocity_roll: 0.0
+        max_velocity_pitch: 0.0
+        max_velocity_yaw: 0.4
+        use_collision_avoidance: True
+        front_laser_threshold: 0.03
+        right_laser_threshold: 0.03
+        rear_laser_threshold: 0.03
+        left_laser_threshold: 0.03
+        loop_rate: 25.0
+
 pregrasp_planner_single_shot:
     /pregrasp_planner_node:
         min_azimuth: 0.0
@@ -80,6 +127,22 @@ pregrasp_planner_single_shot:
         joint_5_offset_side_grasp: 0.0
         rotation_range_min: 270.0
         rotation_range_max: 90.0
+pregrasp_planner_pick:
+    /pregrasp_planner_node:
+        min_azimuth: 0.0
+        max_azimuth: 0.0
+        min_zenith: -5.0
+        max_zenith: 5.0
+        min_roll: -30.0
+        max_roll: 30.0
+pregrasp_planner_no_sampling:
+    /pregrasp_planner_node:
+        min_azimuth: 0.0
+        max_azimuth: 0.0
+        min_zenith: 0.0
+        max_zenith: 0.0
+        min_roll: 0.0
+        max_roll: 0.0
 pregrasp_planner_zealous:
     /pregrasp_planner_node:
         min_azimuth: 0.0

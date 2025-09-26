@@ -80,7 +80,7 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
   }
 
   // cropbox filter to include filters in XYZ
-  if (enable_cropbox_filter_){
+  if (enable_cropbox_filter_ && not cropbox_filter_on_plane_){
     crop_box_.setInputCloud(filtered);
     crop_box_.filter(*filtered);
   }
@@ -121,11 +121,34 @@ PointCloud::Ptr SceneSegmentation::findPlane(const PointCloud::ConstPtr &cloud,
   double z = 0.0;
   for (int i = 0; i < hull->points.size(); i++) {
     z += hull->points[i].z;
+    std::cout << "X: " << hull->points[i].x << " Y: " << hull->points[i].y
+              << " Z: " << hull->points[i].z << std::endl;
   }
   if (hull->points.size() > 0) {
     z /= hull->points.size();
   }
   workspace_height = z;
+ 
+  // Apply passthrough given the workspace height, z-0.02 m
+  // plane_crop_box_.setMin(Eigen::Vector4f(0.0, 0.0, z - 0.02, 1.0));
+  // plane_crop_box_.setMax(Eigen::Vector4f(0.0, 0.0, 1.0, 1.0));
+  // plane_crop_box_.setInputCloud(filtered);
+  // plane_crop_box_.filter(*filtered);
+  if (enable_cropbox_filter_ && cropbox_filter_on_plane_){
+    Eigen::Vector4f min_values = crop_box_.getMin();
+    Eigen::Vector4f max_values = crop_box_.getMax();
+    
+    min_values[2] += z;
+    max_values[2] += z;
+
+    std::cout<<"Min z: "<<min_values[2]<<" Max z: "<<min_values[2]<<std::endl;
+
+    crop_box_.setMin(min_values);
+    crop_box_.setMax(max_values);
+    
+    crop_box_.setInputCloud(filtered);
+    crop_box_.filter(*filtered);
+  }
 
   return filtered;
 }
@@ -147,10 +170,12 @@ void SceneSegmentation::setPassthroughParams(bool enable_passthrough_filter,
   pass_through_.setFilterLimits(limit_min, limit_max);
 }
 
-void SceneSegmentation::setCropBoxParams(bool enable_cropbox_filter, double min_x, double max_x,
-                                         double min_y, double max_y, double min_z, double max_z)
+void SceneSegmentation::setCropBoxParams(bool enable_cropbox_filter, bool cropbox_filter_on_plane,
+                                         double min_x, double max_x, double min_y, double max_y, 
+                                         double min_z, double max_z)
 {
   enable_cropbox_filter_ = enable_cropbox_filter;
+  cropbox_filter_on_plane_ = cropbox_filter_on_plane_;
   crop_box_.setMin(Eigen::Vector4f(min_x, min_y, min_z, 1.0));
   crop_box_.setMax(Eigen::Vector4f(max_x, max_y, max_z, 1.0));
 }

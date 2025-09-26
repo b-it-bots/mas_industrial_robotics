@@ -164,8 +164,11 @@ class PlannerWrapper(object):
         if len(plan_file_list) == 0:
             print("[planner_wrapper] No plan files found.")
             return None
-        best_plan = sorted(plan_file_list, key=lambda x: int(x.split(".")[-1]))[-1]
-        return os.path.join(self._plan_dir, best_plan)
+        elif len(plan_file_list) == 1:
+            return os.path.join(self._plan_dir, plan_file_list[0])
+        else:
+            best_plan = sorted(plan_file_list, key=lambda x: int(x.split(".")[-1]))[-1]
+            return os.path.join(self._plan_dir, best_plan)
 
     def clean_plan_dir(self):
         """Remove all files that are unnecessary.

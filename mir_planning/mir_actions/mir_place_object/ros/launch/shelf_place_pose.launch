@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+  <group ns="mir_actions">
+    <node pkg="mir_place_object" type="shelf_empty_space" name="shelf_place_pose" output="screen">
+      <remap from="~input/images" to="/tower_cam3d_front/color/image_raw" />
+    </node>
+  </group>
+</launch>

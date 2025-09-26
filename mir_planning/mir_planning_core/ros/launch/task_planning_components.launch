@@ -2,21 +2,39 @@
 <launch>
 
     <arg name="refbox" default="true" />
-    <arg name="visualise" default="true" />
+    <arg name="visualise" default="false" />
 
     <!-- knowledge base args, they are reused by other components as well -->
     <arg name="domain" default="general_domain" />
     <arg name="base_path" default="$(find mir_knowledge)/common/pddl/$(arg domain)" />
     <arg name="domain_path" default="$(arg base_path)/domain.pddl" />
 
-    <!-- upload domain args - pddl problem that will be loaded as instrinsic knowledge -->
+    <!-- upload domain args - pddl problem that will be loaded as instrinsic knowledge --> 
     <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/minimum_required_facts.pddl" />
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/mini_bmt_demo_copy.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/go24_finals.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/rc24_finals_2.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/att1_rc24.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/all_ws.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/rcaw25_test.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/rcaw25_test2.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/bmt_13_03.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/large_obj_test.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/bmt_rc24.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/ppt_pre.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/robocup_advanced_tasks.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/att1_rc24.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/att2_rc24.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/rtt_shelf_ppt.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/atWork_demo.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/all_without_rtt.pddl" /> -->
+    <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/finals.pddl" /> -->
     <!-- <arg name="yb_intrinsic_knowledge" default="$(arg base_path)/local_2022_problem_complete.pddl" /> -->
 
     <!-- pddl problem gen - path for the pddl problem generator to save the created file, and for the planner to make plan -->
     <arg name="problem_path" default="$(arg base_path)/problems/p1.pddl" />
 
-    <!-- rosplan knowledge base interface-->
+    <!-- rosplan knowledge base interface-->lama
     <node pkg="rosplan_knowledge_base" type="knowledgeBase" name="rosplan_knowledge_base"
           output="screen" required="true" >
         <param name="domain_path" value="$(arg domain_path)" />
@@ -39,8 +57,8 @@
     <!-- automatic pddl problem generation from kb snapshot -->
     <include file="$(find mir_pddl_problem_generator)/ros/launch/pddl_problem_generator.launch">
         <arg name="problem_path" value="$(arg problem_path)" />
-        <arg name="max_goals" value="1" />
-        <arg name="prefer_goals_with_same_source_ws" value="false" />
+        <arg name="max_goals" value="3" />
+        <arg name="prefer_goals_with_same_source_ws" value="true" />
     </include>
 
     <!-- mir_task_planning (planners wrapped with ros action server) -->

@@ -48,7 +48,8 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open"),
-            transitions={"succeeded": "MOVE_ARM"},
+            transitions={"succeeded": "MOVE_ARM",
+                         "timeout": "MOVE_ARM"}
         )
         smach.StateMachine.add('MOVE_ARM', gms.move_arm('look_at_workspace_from_near'),
                 transitions={'succeeded': 'PUBLISH_REFERENCE_FRAME',

@@ -1,0 +1,10 @@
+<launch>
+  <!-- Launch the empty space detector node -->
+  <node name="empty_space_detector" pkg="mir_empty_space_prediction" type="emptyspace_prediction_node.py" output="screen">
+    <!-- You can add parameters here if needed -->
+    <!-- <param name="param_name" value="param_value" /> -->
+  </node>
+
+  <!-- You can include other launch files or start other nodes here if needed -->
+  <!-- <include file="$(find some_package)/launch/some_launch_file.launch" /> -->
+</launch>

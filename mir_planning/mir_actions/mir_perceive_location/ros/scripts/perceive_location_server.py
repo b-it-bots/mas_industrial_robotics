@@ -211,7 +211,7 @@ class SetPerceptionParams(smach.State):
 
     def execute(self, userdata):
         obj_category = Utils.get_value_of(userdata.goal.parameters, "obj_category")
-        rospy.loginfo("[perceive] obj_category: %s", obj_category)
+        rospy.loginfo("[PERCEIVE_LOCATION] obj_category: %s", obj_category)
 
         if obj_category:
             self.set_named_config.execute(userdata, obj_category)
@@ -251,7 +251,7 @@ def main():
     )
     # Open the container
     sm.userdata.arm_pose_list = [
-        "look_at_workspace_from_near",
+        "platform_middle_pre",
     ]
     sm.userdata.arm_pose_index = 0
 
@@ -390,7 +390,7 @@ def main():
         # move arm to appropriate position
         smach.StateMachine.add(
             "MOVE_ARM_TO_PERCEIVE_POSE",
-            gms.move_arm_and_gripper("open"),
+            gms.move_arm_and_gripper("open", use_moveit=False),
             transitions={
                 "succeeded": "WAIT_FOR_ARM_TO_STABILIZE",
                 "failed": "MOVE_ARM_TO_PERCEIVE_POSE",

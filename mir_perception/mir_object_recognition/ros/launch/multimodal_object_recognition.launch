@@ -2,8 +2,8 @@
 <launch>
   
   <arg name="camera_name" default="tower_cam3d_front" />
-  <arg name="input_pointcloud_topic"  default="/$(arg camera_name)/depth_registered/points" />
-  <arg name="input_image_topic" default="/$(arg camera_name)/rgb/image_raw" />
+  <arg name="input_pointcloud_topic"  default="/$(arg camera_name)/depth/color/points" />
+  <arg name="input_image_topic" default="/$(arg camera_name)/color/image_raw" />
   <arg name="target_frame" default="base_link" />
   <!-- for intel realsense d435, use fixed_camera_link as pointcloud_source_frame_id (bug from robocup 2021) -->
   <arg name="pointcloud_source_frame_id" default="$(arg camera_name)_camera_color_optical_frame" />

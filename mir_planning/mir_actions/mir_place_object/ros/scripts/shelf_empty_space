@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+import os
+import random
+import time
+import cv2
+import numpy as np
+import roslib
+import rospy
+import torch
+import math
+import csv
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
+from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg import ColorRGBA, String
+import message_filters
+from mas_perception_msgs.msg import ImageList, Object, ObjectList, TimeStampedPose
+from sensor_msgs.msg import Image, RegionOfInterest, PointCloud2, PointField
+from sensor_msgs import point_cloud2
+from ultralytics import YOLO
+import tf
+from sklearn.decomposition import PCA
+from geometry_msgs.msg import PoseStamped, Pose
+from visualization_msgs.msg import Marker
+from scipy.optimize import least_squares
+from sklearn.mixture import GaussianMixture
+import tf.transformations as tr
+from scipy.spatial.transform import Rotation as R
+import tf2_sensor_msgs
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+import tf2_ros
+import tf2_py as tf2
+import ros_numpy
+from scipy.optimize import least_squares
+import pdb
+
+class ShelfPlacePose():
+    def __init__(self, debug_mode=True):
+        
+        self.cvbridge = CvBridge()
+        self.debug = debug_mode
+        self.pub_debug = rospy.Publisher("/mir_perception/multimodal_object_recognition/recognizer/rgb/output/debug_image", Image, queue_size=1)
+        self.pub_pose = rospy.Publisher("/mir_perception/predicted_shelf_place_pose", PoseStamped, queue_size=1)
+
+        rospy.Subscriber("/mir_perception/shelf_place_pose/event_in", String, self.event_in_cb)
+        self.event_out = rospy.Publisher("/mir_perception/shelf_place_pose/event_out", String, queue_size=1)
+        self.event = None
+        
+        self.pose_estimation_complete = False
+
+
+    def callback(self, img_msg, point_cloud_msg):
+        try:
+            self.run(img_msg, point_cloud_msg)
+        except Exception as e:
+            rospy.loginfo("[shelf_place_pose node]killing point cloud callback")
+
+    def event_in_cb(self, msg):
+        """
+        Starts a planned motion based on the specified arm position.
+
+        """
+        self.event = msg.data
+        if self.event.startswith("e_start"):
+            # Subscribe to image topic
+            self.sub_img = message_filters.Subscriber("/tower_cam3d_front/color/image_raw", Image)#, self.image_recognition_cb)
+
+            # subscribe to point cloud topic
+            self.sub_point_cloud = message_filters.Subscriber("/tower_cam3d_front/depth/color/points", PointCloud2)#, self.point_cloud_cb)
+
+            # synchronize image and point cloud
+            self.ts = message_filters.ApproximateTimeSynchronizer([self.sub_img, self.sub_point_cloud], queue_size=10, slop=0.1)
+            self.ts.registerCallback(self.callback)
+
+        if self.event.startswith("e_stop"):
+            self.sub_img.sub.unregister()
+            self.sub_point_cloud.sub.unregister()
+            rospy.loginfo("[shelf_place_pose node] Unregistered image and pointcloud subscribers")
+
+     
+    def get_img_point(self, cv_img):
+        
+        if cv_img is None:
+            return None, None, None  # Return None values if cv_img is None
+    
+        place_img = cv_img[:, :240]
+                        
+        gray = cv2.cvtColor(place_img, cv2.COLOR_BGR2GRAY)
+
+        # Convert image to binary
+        _, bw = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+        # Find all the contours in the thresholded image
+        contours, _ = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+
+        # get contour with maximum area
+        max_area = 0
+        best_cnt = None
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area > max_area:
+                max_area = area
+                best_cnt = cnt
+
+        # get center of the best_cnt
+        xi, yi, _, _ = cv2.boundingRect(best_cnt) if best_cnt is not None else (None, None, None, None)
+
+        debug_img = cv_img
+        # mark best_cnt on cv_img (for visualization)
+        if best_cnt is not None:
+            cv2.drawContours(debug_img, [best_cnt], -1, (0, 255, 0), 2)
+            cv2.circle(debug_img, (xi + int(debug_img.shape[1] / 2), yi), 5, (0, 0, 255), -1)
+
+        return debug_img, xi, yi
+
+    
+    def get_pointcloud_position(self, pointcloud, center):
+        """
+        pointcloud: pointcloud data of current frame with PointCloud2 data type
+        center: x and y coordinates of empty space in image
+        """
+
+        # Get the pointcloud data
+        pc = np.array(list(point_cloud2.read_points(pointcloud, skip_nans=False, field_names=("x", "y", "z"))), dtype=np.float32)
+        pc = pc.reshape((480,640,3))
+
+        center_x, center_y = center
+
+        # Define the radius of the circle
+        radius = 7
+
+        # Calculate the coordinates of the circle points within the radius
+        min_x = max(0, center_x - radius)
+        max_x = min(pc.shape[1] - 1, center_x + radius)
+        min_y = max(0, center_y - radius)
+        max_y = min(pc.shape[0] - 1, center_y + radius)
+
+        circle_points = []
+        for y in range(min_y, max_y + 1):
+            for x in range(min_x, max_x + 1):
+                distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
+                if distance <= radius:
+                    point = pc[y, x]
+                    if not np.isnan(point).any():
+                        circle_points.append(point)
+
+        # Determine the centroid of the non-NaN points
+        if circle_points:
+            circle_points_pc = np.array([point for point in circle_points])
+            center_point = np.mean(circle_points_pc, axis=0)
+
+        # Get the pose of the center point of the bounding box
+        pose = PoseStamped()
+        pose.header.frame_id = pointcloud.header.frame_id
+        pose.header.stamp = pointcloud.header.stamp
+        pose.pose.position.x = center_point[0]
+        pose.pose.position.y = center_point[1]
+        pose.pose.position.z = center_point[2]
+        pose.pose.orientation.x = 0.0
+        pose.pose.orientation.y = 0.0
+        pose.pose.orientation.z = 0.0
+        pose.pose.orientation.w = 1.0
+
+        try:
+            t = self.tf_listener.getLatestCommonTime("base_link", pose.header.frame_id)
+            pose.header.stamp = t
+            pose = self.tf_listener.transformPose("base_link", pose)
+            # if pose doesnot has nan values then append pose to the list
+            if not math.isnan(pose.pose.position.x):
+                center_wrt_BL = pose.pose.position.x, pose.pose.position.y
+                return center_wrt_BL
+        except (
+            tf.LookupException,
+            tf.ConnectivityException,
+            tf.ExtrapolationException,
+        ) as e:
+            rospy.logerr("Tf error: %s" % str(e))
+
+        return None
+    
+    def run(self, image, pointcloud):
+        """
+        image: image data of current frame with Image data type
+        """
+
+        if image:
+            try:
+                cv_img = self.cvbridge.imgmsg_to_cv2(image, "bgr8")
+                
+                # Add image processing code here.. to get x and y
+                debug_img, xi, yi = self.get_img_point(cv_img)
+
+                img_coord = (xi, yi)
+                xe, ye = self.get_pointcloud_position(pointcloud, img_coord)
+
+                place_pose = PoseStamped()
+                place_pose.header.stamp = pointcloud.header.stamp
+                place_pose.header.frame_id = "base_link"
+                place_pose.pose.position.x = xe #0.55
+                place_pose.pose.position.y = ye #0.00
+                place_pose.pose.position.z = 0.35
+                        
+                orientation = tr.quaternion_from_euler(0, -0.35, 0)
+                place_pose.pose.orientation.x = orientation[0]
+                place_pose.pose.orientation.y = orientation[1]
+                place_pose.pose.orientation.z = orientation[2]
+                place_pose.pose.orientation.w = orientation[3]
+                
+                self.pub_pose.publish(place_pose)
+                
+                if self.debug:
+                    # Draw bounding boxes and labels of detections
+                    self.publish_debug_img(debug_img)
+
+            except CvBridgeError as e:
+                rospy.logerr(e)
+                return
+        else:
+            rospy.logwarn("No image received")
+
+    def publish_debug_img(self, debug_img):
+        debug_img = np.array(debug_img, dtype=np.uint8)
+        debug_img = self.cvbridge.cv2_to_imgmsg(debug_img, "bgr8")
+        self.pub_debug.publish(debug_img)
+
+
+if __name__ == '__main__':
+    rospy.init_node("shelf_place_pose")
+    rospy.loginfo('Started shelf place node.')
+    place_pose = ShelfPlacePose(debug_mode=True)
+    rospy.spin()

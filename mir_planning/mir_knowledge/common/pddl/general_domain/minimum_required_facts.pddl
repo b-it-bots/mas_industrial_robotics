@@ -6,7 +6,7 @@
     YOUBOT-BRSU - robot
 
     ; robot available platforms, to store objects inside the robot
-    PLATFORM_MIDDLE - robot_platform
+    PLATFORM_LEFT PLATFORM_MIDDLE PLATFORM_RIGHT  - robot_platform
 
     ; locations
     START END - location
@@ -21,6 +21,7 @@
 
     ; status of the gripper at the beginning
     (gripper_is_free YOUBOT-BRSU)
+    (is_big_enough PLATFORM_RIGHT)
     ;(on o1 s1)
     ;(on o2 s2)
     ;(on o3 s3)

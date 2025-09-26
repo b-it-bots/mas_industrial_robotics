@@ -206,7 +206,8 @@ def main():
         smach.StateMachine.add(
             "OPEN_GRIPPER",
             gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "CHECK_IF_OBJECT_HEAVY_AGAIN"},
+            transitions={"succeeded": "CHECK_IF_OBJECT_HEAVY_AGAIN",
+                         "timeout": "CHECK_IF_OBJECT_HEAVY_AGAIN"},
         )
 
         smach.StateMachine.add(

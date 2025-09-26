@@ -1,0 +1,28 @@
+# === Hardcoded numeric values found in /home/robocup/ros/noetic/robocup/src/mas_industrial_robotics/mir_perception/mir_object_recognition/ros/src/multimodal_object_recognition_node.cpp ===
+
+# Constructor defaults
+container_height: 0.05               # Line: 43
+rgb_roi_adjustment: 2                # Line: 44
+rgb_bbox_min_diag: 21                # Line: 45
+rgb_bbox_max_diag: 250               # Line: 46
+roi_min_bbox_z: 0.03                 # Line: 47
+
+# RGB object pose tweak for 'cavity' (recognizeCloudAndImage)
+cavity_pose_adjust_x: 0.007          # Line: 661
+cavity_pose_adjust_y: -0.010         # Line: 662
+
+# Workspace pose adjustment thresholds (adjustObjectPose)
+workspace_height_diff_threshold: 0.03  # Line: 987
+height_snap_tolerance: 0.01          # Lines: 999-1002, 1061–1064
+
+# Wrench pose correction offsets (adjustObjectPose)
+wrench_offset_0cm: -0.005            # Line: 1068
+wrench_offset_5cm: -0.003            # Line: 1073
+wrench_offset_10cm: -0.001           # Line: 1078
+wrench_offset_15cm: -0.002           # Line: 1083
+
+# Platform fixed heights (adjustObjectPose)
+platform_height_0: 0.0               # Lines: 999, 1061
+platform_height_5: 0.05              # Lines: 1000, 1062
+platform_height_10: 0.1              # Lines: 1001, 1063
+platform_height_15: 0.15             # Lines: 1002, 1064

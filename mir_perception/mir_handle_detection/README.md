@@ -31,7 +31,7 @@ This is the pose of the handle
 
 ### In
 - `/mir_perception/drawer_handle_perceiver/event_in`
-- `/mir_perception/drawer_handle_perceiver/input_point_cloud` -> `/arm_cam3d/depth_registered/points`
+- `/mir_perception/drawer_handle_perceiver/input_point_cloud` -> `/arm_cam3d/depth/color/points`
 
 ### Out
 - `/mir_perception/drawer_handle_perceiver/output_pose`

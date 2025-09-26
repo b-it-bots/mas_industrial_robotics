@@ -34,6 +34,8 @@ class SceneSegmentation
  private:
   pcl::PassThrough<PointT> pass_through_;
   pcl::CropBox<PointT> crop_box_;
+  // crop box filter after passthrough
+  pcl::CropBox<PointT> plane_crop_box_;
   pcl::VoxelGrid<PointT> voxel_grid_;
   pcl::NormalEstimation<PointT, PointNT> normal_estimation_;
   pcl::NormalEstimationOMP<PointT, PointNT> normal_estimation_omp_;
@@ -92,6 +94,8 @@ class SceneSegmentation
 
   /** \brief Set crop box filter parameters to include filters in XYZ
    * \param[in] Enable or disable crop box filter
+   * \param[in] Whether to apply cropbox on the plane based on the workspace height,
+   * if enabled, the min and max z will be calculated wrt. workspace height
    * \param[in] X min
    * \param[in] X max
    * \param[in] Y min
@@ -99,8 +103,8 @@ class SceneSegmentation
    * \param[in] Z min
    * \param[in] Z max
    * */
-  void setCropBoxParams(bool enable_cropbox_filter, double min_x, double max_x, double min_y,
-                        double max_y, double min_z, double max_z);                          
+  void setCropBoxParams(bool enable_cropbox_filter, bool cropbox_filter_on_plane, double min_x, 
+                        double max_x, double min_y, double max_y, double min_z, double max_z);                          
   /** \brief Set Normal param using radius
    * \param[in] Radius search
    * \param[in] Use Open MP (OMP) for parallel normal estimation using cpu
@@ -152,6 +156,7 @@ class SceneSegmentation
  private:
   bool enable_passthrough_filter_;
   bool enable_cropbox_filter_;
+  bool cropbox_filter_on_plane_;
   bool use_omp_;
 };
 

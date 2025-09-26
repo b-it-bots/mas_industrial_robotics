@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import copy
 import rospy
-
+import pdb
 from atwork_commander_msgs.msg import Task, Object, RobotState
 from mir_knowledge_ros.problem_uploader import ProblemUploader
 from rosplan_knowledge_msgs.srv import KnowledgeUpdateServiceRequest as Req
@@ -38,6 +38,8 @@ class AtworkCommanderClient(object):
         self._cavity_start_code = getattr(Object, "CAVITY_START")
         self._cavity_end_code = getattr(Object, "CAVITY_END")
 
+        self._large_objects = ["allenkey","screwdriver"]
+
     def _timer_callback(self, event):
         self._robot_state.sender.header.stamp = rospy.Time.now()
         self._robot_state_pub.publish(self._robot_state)
@@ -48,6 +50,9 @@ class AtworkCommanderClient(object):
             return
 
         self._processed_task_ids.append(task.id)
+
+        task = self._change_workstation_names(task)
+
 
         start_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_start_state)
         target_obj_dicts = self._get_obj_dicts_from_workstations(task.arena_target_state)
@@ -71,7 +76,7 @@ class AtworkCommanderClient(object):
 
         # populate instances
         objects = [obj_dict["object_full_name"] for obj_dict in obj_dicts]
-        locations = [workstation.workstation_name for workstation in task.arena_start_state]
+        locations = [workstation.name for workstation in task.arena_start_state]
 
         instances = {"object": objects, "location": locations}
         # print(instances)
@@ -84,6 +89,18 @@ class AtworkCommanderClient(object):
         )
 
         self._print_task(obj_dicts)
+
+    def _change_workstation_names(self, taskmsg):
+        """
+        REFBOX notation for rotating table keeps varying between RT and TT. 
+        Parse the task msg and change it to TT evertime
+        """
+        for start_state in taskmsg.arena_start_state:
+            start_state.name = start_state.name.replace("RT","TT")
+        for goal_state in taskmsg.arena_target_state:
+            goal_state.name = goal_state.name.replace("RT","TT")
+
+        return taskmsg
 
     def _get_entire_knowledge_from_obj_dicts(self, start_obj_dicts, target_obj_dicts):
         """TODO: 
@@ -215,6 +232,11 @@ class AtworkCommanderClient(object):
                 facts.append(self._get_fact_from_attr_and_values(
                     "insertable",
                     [obj_dict["object_full_name"]]))
+                
+            if obj_dict["object"] in self._large_objects:
+                facts.append(self._get_fact_from_attr_and_values(
+                    "is_large",
+                    [obj_dict["object_full_name"]]))
 
             facts.append(self._get_fact_from_attr_and_values(
                 "on",
@@ -277,7 +299,7 @@ class AtworkCommanderClient(object):
                     rospy.logwarn("Could not find " + str(obj.object) + " in object codes")
                     continue
 
-                if self._cavity_start_code <= obj.object < self._cavity_end_code:
+                if self._cavity_start_code <= obj.object <= self._cavity_end_code:
                     object_name = "pp01_cavity"
                 else:
                     object_name = self._obj_code_to_name[obj.object]
@@ -286,14 +308,14 @@ class AtworkCommanderClient(object):
                     rospy.logwarn("Could not find " + str(obj.target) + " in object codes")
                     continue
 
-                if self._cavity_start_code <= obj.target < self._cavity_end_code:
+                if self._cavity_start_code <= obj.target <= self._cavity_end_code:
                     target_name = "pp01_cavity"
                 else:
                     target_name = self._obj_code_to_name[obj.target]
 
                 obj_dict = {
                         "object": object_name,
-                        "location": workstation.workstation_name,
+                        "location": workstation.name,
                         "target": target_name,
                         "decoy": obj.decoy
                 }
@@ -365,10 +387,18 @@ class AtworkCommanderClient(object):
     @staticmethod
     def get_obj_code_to_name_dict():
         obj_code_to_name = {}
+        object_range_list = []
         object_class_attributes = dir(Object)
         for attr in object_class_attributes:
-            if attr.isupper() and "START" not in attr and "END" not in attr:
-                obj_code_to_name[getattr(Object, attr)] = attr.lower()
+            if "START" in attr or "END" in attr:
+                object_range_list.append(getattr(Object, attr))
+        for attr in object_class_attributes:
+            if "START" not in attr and "END" not in attr:
+                try:
+                    if getattr(Object, attr) >= min(object_range_list) and getattr(Object, attr) <= max(object_range_list) or attr == "EMPTY":
+                        obj_code_to_name[getattr(Object, attr)] = attr.lower()
+                except Exception as e:
+                    pass
         return obj_code_to_name
 
     @staticmethod

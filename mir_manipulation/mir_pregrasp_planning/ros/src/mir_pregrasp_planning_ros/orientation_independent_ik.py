@@ -22,6 +22,9 @@ class OrientationIndependentIK(object):
         self._base_link_to_arm_base_offset = None
         self._initialise_base_to_arm_offset()
 
+        # create subscriber to pick from shelf topic to limit orientation independent ik to certain pitch ranges
+        self.is_picking_from_shelf = False
+
         if self.debug:
             self._pose_array_pub = rospy.Publisher('~pose_samples', PoseArray, queue_size=1)
             self._pose_out_pub = rospy.Publisher('~pose_out', PoseStamped, queue_size=1)
@@ -151,9 +154,9 @@ class OrientationIndependentIK(object):
             reachable_pose, joint_angles = self._get_reachable_pose_and_configuration(pose_samples)
             if reachable_pose is not None:
                 found_solution = True
-                rospy.logdebug('Found solution')
-                rospy.logdebug('Pitch range: ' + str(pitch_range))
-                rospy.logdebug('Yaw : ' + str(yaw))
+                rospy.loginfo('Found solution')
+                rospy.loginfo('Pitch range: ' + str(pitch_range))
+                rospy.loginfo('Yaw : ' + str(yaw))
                 if self.debug:
                     self._pose_out_pub.publish(reachable_pose)
                 return (reachable_pose, OrientationIndependentIK.get_joint_pos_msg_from_joint_angles(joint_angles))

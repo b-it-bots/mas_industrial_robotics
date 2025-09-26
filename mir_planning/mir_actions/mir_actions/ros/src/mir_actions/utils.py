@@ -114,8 +114,8 @@ class Utils(object):
         return type: float
         """
 
-        print("pose1: {}".format(pose1.pose.position))
-        print("pose2: {}".format(pose2.pose.position))
+        # print("pose1: {}".format(pose1.pose.position))
+        # print("pose2: {}".format(pose2.pose.position))
 
         return math.sqrt(
             math.pow(pose1.pose.position.x - pose2.pose.position.x, 2) +

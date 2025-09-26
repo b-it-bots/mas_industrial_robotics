@@ -99,6 +99,93 @@ bool pointcloud::transformPointCloud2(const boost::shared_ptr<tf::TransformListe
   return (true);
 }
 
+bool pointcloud::getPointCloudROI(const cv::Mat &mask,
+                                  const PointCloud::Ptr &cloud_in, PointCloud::Ptr &cloud_roi,
+                                  float roi_size_adjustment, bool remove_outliers)
+{
+  if (cloud_in->height <= 1 || cloud_in->width <= 1) {
+    ROS_ERROR("Pointcloud input height is %d and width is %d",cloud_in->height, cloud_in->width );
+    return (false);
+  }
+
+  // get the points inside the mask
+  for (int i = 0; i < cloud_in->width; i++) {
+    for (int j = 0; j < cloud_in->height; j++) {
+      if (mask.at<uchar>(j, i) == 255) {
+        PointT pcl_point = cloud_in->at(i, j);
+        if ((!std::isnan(pcl_point.x)) && (!std::isnan(pcl_point.y)) && (!std::isnan(pcl_point.z)) &&
+            (!std::isnan(pcl_point.r)) && (!std::isnan(pcl_point.g)) && (!std::isnan(pcl_point.b))) {
+          cloud_roi->points.push_back(pcl_point);
+        }
+      }
+    }
+  }
+
+  cloud_roi->header = cloud_in->header;
+  if (remove_outliers) {
+    if (cloud_roi->points.size() > 0) {
+      pcl::StatisticalOutlierRemoval<PointT> sor;
+      sor.setInputCloud(cloud_roi);
+      sor.setMeanK(50);
+      sor.setStddevMulThresh(3.0);
+      sor.filter(*cloud_roi);
+    }
+  }
+
+  return (true);
+}
+
+bool pointcloud::getPointCloudROI(const mas_perception_msgs::BoundingBox &bbox,
+                                  const PointCloud::Ptr &cloud_in, PointCloud::Ptr &cloud_roi,
+                                  float roi_size_adjustment, bool remove_outliers)
+{
+  if (cloud_in->height <= 1 || cloud_in->width <= 1) {
+    ROS_ERROR("Pointcloud input height is %d and width is %d",cloud_in->height, cloud_in->width );
+    return (false);
+  }
+  
+  // get vertices of the oriented bounding box
+  std::vector<geometry_msgs::Point> vertices = bbox.vertices;
+
+  // create cv polygon
+  std::vector<cv::Point> polygon;
+  for (const auto &vertex : vertices) {
+    polygon.push_back(cv::Point(vertex.x, vertex.y));
+  }
+
+  // create a mask
+  cv::Mat mask = cv::Mat::zeros(cloud_in->height, cloud_in->width, CV_8UC1);
+
+  // fill the mask
+  cv::fillConvexPoly(mask, polygon.data(), polygon.size(), cv::Scalar(255));
+
+  // get the points inside the mask
+  for (int i = 0; i < cloud_in->width; i++) {
+    for (int j = 0; j < cloud_in->height; j++) {
+      if (mask.at<uchar>(j, i) == 255) {
+        PointT pcl_point = cloud_in->at(i, j);
+        if ((!std::isnan(pcl_point.x)) && (!std::isnan(pcl_point.y)) && (!std::isnan(pcl_point.z)) &&
+            (!std::isnan(pcl_point.r)) && (!std::isnan(pcl_point.g)) && (!std::isnan(pcl_point.b))) {
+          cloud_roi->points.push_back(pcl_point);
+        }
+      }
+    }
+  }
+
+  cloud_roi->header = cloud_in->header;
+  if (remove_outliers) {
+    if (cloud_roi->points.size() > 0) {
+      pcl::StatisticalOutlierRemoval<PointT> sor;
+      sor.setInputCloud(cloud_roi);
+      sor.setMeanK(50);
+      sor.setStddevMulThresh(3.0);
+      sor.filter(*cloud_roi);
+    }
+  }
+
+  return (true);
+}
+
 bool pointcloud::getPointCloudROI(const sensor_msgs::RegionOfInterest &roi,
                                   const PointCloud::Ptr &cloud_in, PointCloud::Ptr &cloud_roi,
                                   float roi_size_adjustment, bool remove_outliers)

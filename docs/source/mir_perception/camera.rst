@@ -177,7 +177,7 @@ How to use the RealSense2 camera
 
   .. code-block:: bash
 
-    roslaunch mcr_scene_segmentation scene_segmentation.launch input_pointcloud_topic:=/camera/depth_registered/points
+    roslaunch mcr_scene_segmentation scene_segmentation.launch input_pointcloud_topic:=/camera/depth/color/points
 
   Publish the message 'e-start':
 

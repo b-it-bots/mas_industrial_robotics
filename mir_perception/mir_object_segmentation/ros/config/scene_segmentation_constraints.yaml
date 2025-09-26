@@ -9,6 +9,7 @@ scene_segmentation:
     passthrough_filter_limit_min: 0.0
     passthrough_filter_limit_max: 0.8
     enable_cropbox_filter: true
+    cropbox_filter_on_plane: true
     cropbox_filter_min_x: 0.0
     cropbox_filter_min_x: 0.8
     cropbox_filter_min_y: -0.5

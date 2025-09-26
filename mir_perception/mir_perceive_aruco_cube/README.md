@@ -15,8 +15,8 @@ publishes a pose continously.
 Related package: `mir\_perceive\_mock`
 
 Input:
- - raw image (`/arm_cam3d/rgb/image_raw`)
- - camera info (`/arm_cam3d/rgb/camera_info`)
+ - raw image (`/arm_cam3d/color/image_raw`)
+ - camera info (`/arm_cam3d/color/camera_info`)
  - event in (`/mir_perception/aruco_cube_perceiver/event_in`)
 Output:
  - event out (`/mir_perception/aruco_cube_perceiver/event_out`)

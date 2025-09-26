@@ -258,7 +258,7 @@ def main():
 
         smach.StateMachine.add(
             "MOVE_ARM_TO_DETECT_BARRIER_TAPE",
-            gms.move_arm("barrier_tape", blocking=False),
+            gms.move_arm("platform_middle_pre", use_moveit=True),
             transitions={"succeeded": "SETUP_MOVE_BASE", 
                          "failed": "MOVE_ARM_TO_DETECT_BARRIER_TAPE"},
         )
@@ -275,7 +275,7 @@ def main():
 
         smach.StateMachine.add(
             "SET_DIRECT_BASE_CONTROLLER_PARAMETERS",
-            gbs.set_named_config("dbc_move_base"),
+            gbs.set_named_config("dbc_move_base"),  # dbc_move_base_test try
             transitions={
                 "success": "START_MOVE_BASE",
                 "timeout": "OVERALL_FAILED",

@@ -20,7 +20,7 @@ from mir_planning_msgs.msg import (
 from mir_planning_msgs.srv import ReAddGoals
 from std_msgs.msg import String
 
-from mir_audio_receiver.msg import AudioMessage
+# from mir_audio_receiver.msg import AudioMessage
 # ===============================================================================
 
 
@@ -44,12 +44,12 @@ class re_add_goals(smach.State):
 
 class plan_task(smach.State):
     def __init__(self, mode=PlanGoal.NORMAL):
-        # publishing a Audio message at startup 
-        audio_message = AudioMessage()
-        audio_pub = rospy.Publisher("/mir_audio_receiver/tts_request", AudioMessage, queue_size=1)
-        audio_message.message = "Hello, I am the mastermind. I am ready to plan your tasks."
-        audio_pub.publish(audio_message)
-        rospy.sleep(1.0)
+        # # publishing a Audio message at startup 
+        # audio_message = AudioMessage()
+        # audio_pub = rospy.Publisher("/mir_audio_receiver/tts_request", AudioMessage, queue_size=1)
+        # audio_message.message = "Hello, I am the mastermind. I am ready to plan your tasks."
+        # audio_pub.publish(audio_message)
+        # rospy.sleep(1.0)
 
         smach.State.__init__(
             self,
@@ -159,11 +159,11 @@ def main():
     domain_file = rospy.get_param("~domain_file", None)
     planner = rospy.get_param("~planner", "mercury")
 
-    # publishing a Audio message at startup 
-    audio_message = AudioMessage()
-    audio_pub = rospy.Publisher("/mir_audio_receiver/tts_request", AudioMessage, queue_size=1)
-    audio_message.message = "Hello, I am the planning coordinator"
-    audio_pub.publish(audio_message)
+    # # publishing a Audio message at startup 
+    # audio_message = AudioMessage()
+    # audio_pub = rospy.Publisher("/mir_audio_receiver/tts_request", AudioMessage, queue_size=1)
+    # audio_message.message = "Hello, I am the planning coordinator"
+    # audio_pub.publish(audio_message)
 
     if problem_file is None or domain_file is None:
         rospy.logfatal("Either domain and/or problem file not provided. Exiting.")

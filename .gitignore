@@ -19,3 +19,4 @@ latex/
 
 # VSCode
 .vscode/
+*.swp

@@ -1,10 +1,19 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="large_objects" default="['S40_40_B', 'S40_40_G', 'M30', 'BEARING_BOX', 'MOTOR']" />
+    <!-- For EEF rotation while staging-->
+    <arg name="large_objects" default="['SCREWDRIVER', 'SCREWDRIVER-00', 'WRENCH', 'WRENCH-00', 'DRILL', 'DRILL-00']" />
+    <!-- Change this virtual wall workstations as per arena -->
+    <arg name="ws_virtual" default="['WS17', 'WS16']" />
+    <!-- Add virtual wall threshold parameter -->
+    <arg name="virtual_wall_threshold" default="0.18" />
 
     <!-- This rollable objects are only for ss22_competition-->
     <arg name="rollable_objects" default="['R20', 'INSULATION_TAPE', 'MOTOR', 'AXIS']" />
+
+    <arg name="drag_pick_objects" default="['ALLEN_KEY','WRENCH']" />
+
+    <arg name="selected_object" default="['M20']" />  <!--by defualt-->
 
     <node pkg="mir_pick_object" type="pick_object_server.py"
           name="wbc_pick_object_server" output="screen">
@@ -14,8 +23,27 @@
         <rosparam param="rollable_objects" subst_value="True">
             $(arg rollable_objects)
         </rosparam>
+        <rosparam param="drag_pick_objects" subst_value="True">
+            $(arg drag_pick_objects)
+        </rosparam>  
+
+        <rosparam param="selected_object" subst_value="True">
+            $(arg selected_object)
+        </rosparam>            
+
+        <rosparam param="ws_virtual" subst_value="True">
+            $(arg ws_virtual)    
+        </rosparam>
+
+        <param name="virtual_wall_threshold" type="double" value="$(arg virtual_wall_threshold)"/>
 
         <param name="reperceive" type="bool" value="true"/>
+
+        <param name="reduce_wbc_with_threshold" type="bool" value="false"/>
+
+        <!-- Initialize clamped_base_pose parameter with default values -->
+        <param name="clamped_base_pose" type="yaml" value="{x: 0.0, y: 0.0, z: 0.0, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}" />
+
     </node>
 
 </launch>

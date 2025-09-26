@@ -37,7 +37,7 @@ present in its circle.
 
 ### In
 - `/mir_perception/empty_space_detector/event_in`
-- `/mir_perception/empty_space_detector/input_point_cloud` -> `/arm_cam3d/depth_registered/points`
+- `/mir_perception/empty_space_detector/input_point_cloud` -> `/arm_cam3d/depth/color/points`
 
 ### Out
 - `/mir_perception/empty_space_detector/empty_spaces`

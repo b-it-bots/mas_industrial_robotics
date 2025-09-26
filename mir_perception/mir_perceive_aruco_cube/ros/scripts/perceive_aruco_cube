@@ -18,7 +18,7 @@ class ArucoCubePerceiver(object):
     def __init__(self):
         # class variables
         self._bridge = CvBridge()
-        self._aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+        self._aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
         self._listening = False
         self._publish_object = False
         self._retry_attempts = 0

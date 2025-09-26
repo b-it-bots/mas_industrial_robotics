@@ -3,7 +3,7 @@
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
-from mcr_manipulation_msgs.msg import GripperCommand
+from mir_manipulation_msgs.msg import GripperCommand
 import serial_interface
 import math
 import json
@@ -53,7 +53,7 @@ class GripperController:
 
         if command > 1.0:
             command = 1.0
-        elif command < -1.5:
+        elif command < -1.76:
             command = 0.0
 
         if command == 1.0:
@@ -66,7 +66,7 @@ class GripperController:
         elif command > 0.0 and command < 1.0:
             rospy.logdebug('Moving the gripper to a specific position.')
             json_command['command'] = command
-        elif command < 0.0 and command > -1.5:
+        elif command < 0.0 and command > -1.76:
             rospy.logdebug('Opening the gripper above and beyond.')
             json_command['command'] = command
 
@@ -92,8 +92,8 @@ class GripperController:
                 self.feedback_publisher.publish(json.dumps(msg))
 
                 # convert gripper positions from degrees to radians
-                gripper_right_motor_position = math.radians(msg['right_gripper_pos'])
-                gripper_left_motor_position = math.radians(msg['left_gripper_pos'])
+                gripper_right_motor_position = 0.0 # math.radians(msg['right_gripper_pos'])
+                gripper_left_motor_position = 0.0 # math.radians(msg['left_gripper_pos'])
                 
                 # Publish joint states
                 joint_state = JointState()

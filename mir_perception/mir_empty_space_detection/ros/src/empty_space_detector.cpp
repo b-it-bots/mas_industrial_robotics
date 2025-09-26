@@ -8,7 +8,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
 {
   
   nh_.param<std::string>("output_frame", output_frame_, "base_link");
-  nh_.param<bool>("enable_debug_pc", enable_debug_pc_pub_, false);
+  nh_.param<bool>("enable_debug_pc", enable_debug_pc_pub_, true);
   float octree_resolution;
   nh_.param<float>("octree_resolution", octree_resolution, 0.0025);
   add_to_octree_ = false;
@@ -16,7 +16,7 @@ EmptySpaceDetector::EmptySpaceDetector() : nh_("~")
   pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("empty_spaces", 1);
   event_out_pub_ = nh_.advertise<std_msgs::String>("event_out", 1);
 
-  pc_sub_ = nh_.subscribe("input_point_cloud", 1, &EmptySpaceDetector::pcCallback, this);
+  
   event_in_sub_ = nh_.subscribe("event_in", 1, &EmptySpaceDetector::eventInCallback, this);
   tf_listener_.reset(new tf::TransformListener);
 
@@ -87,10 +87,13 @@ void EmptySpaceDetector::loadParams()
 void EmptySpaceDetector::eventInCallback(const std_msgs::String::ConstPtr &msg)
 {
   std_msgs::String event_out;
-  if (msg->data == "e_add_cloud") {
+  if (msg->data == "e_add_cloud") 
+  {
+    pc_sub_ = nh_.subscribe("input_point_cloud", 1, &EmptySpaceDetector::pcCallback, this); //subscribe to the point cloud
     add_to_octree_ = true;
     return;
   } else if (msg->data == "e_add_cloud_stop") {
+    pc_sub_.shutdown();
     add_to_octree_ = false;
     event_out.data = "e_add_cloud_stopped";
   } else if (msg->data == "e_trigger") {
@@ -99,8 +102,9 @@ void EmptySpaceDetector::eventInCallback(const std_msgs::String::ConstPtr &msg)
       event_out.data = "e_success";
       cloud_accumulation_->reset(); //resetting the octree
     } else {
+      ROS_ERROR("Failed to find empty spaces");
       event_out.data = "e_failure";
-      add_to_octree_ = true;
+      // add_to_octree_ = true;
     }
     //event_out.data = (success) ? "e_success" : "e_failure";
   } else {
@@ -115,7 +119,10 @@ void EmptySpaceDetector::pcCallback(const sensor_msgs::PointCloud2::ConstPtr &ms
     sensor_msgs::PointCloud2 msg_transformed;
     if (!mpu::pointcloud::transformPointCloudMsg(tf_listener_, output_frame_, *msg,
                                                  msg_transformed))
+      {
+      ROS_WARN("Failed to transform point cloud");
       return;
+      }
 
     PointCloud::Ptr input_pc(new PointCloud);
     pcl::fromROSMsg(msg_transformed, *input_pc);
@@ -199,12 +206,14 @@ void EmptySpaceDetector::findEmptySpacesOnPlane(const PointCloud::Ptr &plane,
       }
     }
     if (success) {
+      ROS_INFO_STREAM("Pose: " << samples[0].x << " " << samples[0].y << " " << samples[0].z);
       ROS_INFO_STREAM("Found solution at attempt: " << attempts);
       for (PointT p : samples) {
         geometry_msgs::Pose pose;
         pose.position.x = p.x;
         pose.position.y = p.y;
         pose.position.z = p.z;
+        // pose.orientation.z = 1.5;  // newly added
         pose.orientation.w = 1.0;
         empty_space_poses.poses.push_back(pose);
       }
@@ -219,6 +228,7 @@ bool EmptySpaceDetector::findPlane(PointCloud::Ptr plane)
   PointCloud::Ptr debug(new PointCloud);
   cloud_accumulation_->getAccumulatedCloud(*cloud_in);
 
+  ROS_INFO("Finding plane-----------");
   PointCloud::Ptr hull(new PointCloud);
   pcl::ModelCoefficients::Ptr model_coefficients(new pcl::ModelCoefficients);
   double workspace_height;
@@ -227,6 +237,7 @@ bool EmptySpaceDetector::findPlane(PointCloud::Ptr plane)
     
   if (enable_debug_pc_pub_) {
     /* publish debug pointcloud */
+
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(*debug, output);
     output.header.frame_id = output_frame_;

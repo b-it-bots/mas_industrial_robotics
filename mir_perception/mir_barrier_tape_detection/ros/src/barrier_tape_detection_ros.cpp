@@ -247,6 +247,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "barrier_tape_detection");
   ros::NodeHandle nh("~");
   ROS_INFO("Barrier Tape Detection Node Initialised");
+  std:: cout << "Barrier Tape Detection Node Initialised" << std::endl;
   BarrierTapeDetectionRos btd(nh);
 
   int loop_rate = 30;

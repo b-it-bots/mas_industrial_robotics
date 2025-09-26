@@ -37,6 +37,7 @@ class SelectObject(smach.State):
         )
 
         obj = Utils.get_value_of(userdata.goal.parameters, "hole")
+        peg = Utils.get_value_of(userdata.goal.parameters, "peg") # peg is the object to be inserted
         self.publisher.publish(String(data=obj))
         rospy.sleep(0.2)  # let the topic survive for some time
         return "succeeded"
@@ -72,6 +73,26 @@ def main():
         output_keys=["feedback", "result"],
     )
     with sm:
+        smach.StateMachine.add(
+            "SET_PREGRASP_PARAMS",
+            gbs.set_named_config("pregrasp_planner_no_sampling"),
+            transitions={
+                "success": "PERCEIVE_LOCATION",
+                "timeout": "OVERALL_FAILED",
+                "failure": "OVERALL_FAILED",
+            },
+        )
+
+         # start perception
+        smach.StateMachine.add(
+            "PERCEIVE_LOCATION",
+            gas.perceive_location(obj_category="multimodal_object_recognition_atwork"),
+            transitions={
+                "success": "SELECT_OBJECT",
+                "failed": "OVERALL_FAILED",
+            },
+        )
+
         smach.StateMachine.add(
             "SELECT_OBJECT",
             SelectObject("/mcr_perception/object_selector/input/object_name"),
@@ -136,7 +157,16 @@ def main():
             gbs.send_event(
                 [("/mcr_perception/object_selector/event_in", "e_re_trigger")]
             ),
-            transitions={"success": "MOVE_ROBOT_AND_PLACE"},
+            transitions={"success": "MOVE_ARM_TO_DEFAULT_PLACE_BEFORE_INSERT"},
+        )
+
+        smach.StateMachine.add(
+            "MOVE_ARM_TO_DEFAULT_PLACE_BEFORE_INSERT",
+            gms.move_arm("look_at_turntable"),
+            transitions={
+                "succeeded": "MOVE_ROBOT_AND_PLACE",
+                "failed": "MOVE_ROBOT_AND_PLACE",
+            },
         )
 
         # execute robot motion
@@ -187,8 +217,9 @@ def main():
 
         smach.StateMachine.add(
             "OPEN_GRIPPER",
-            gms.control_gripper("open_narrow"),
-            transitions={"succeeded": "MOVE_ARM_TO_HOLD"},
+            gms.control_gripper(0.25),
+            transitions={"succeeded": "MOVE_ARM_TO_HOLD",
+                         "timeout": "MOVE_ARM_TO_HOLD"},
         )
 
         # move arm to HOLD position

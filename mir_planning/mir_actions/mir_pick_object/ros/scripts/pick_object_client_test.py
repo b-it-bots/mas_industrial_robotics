@@ -20,12 +20,12 @@ if __name__ == "__main__":
         location = str(sys.argv[2]).upper()
         goal.parameters.append(KeyValue(key="object", value=obj))
         goal.parameters.append(KeyValue(key="location", value=location))
-        rospy.loginfo("Sending following goal to place object server")
+        rospy.loginfo("Sending following goal to pick object server")
         rospy.loginfo(goal)
 
         client.send_goal(goal)
 
-        timeout = 15.0
+        timeout = 25.0
         finished_within_time = client.wait_for_result(
             rospy.Duration.from_sec(int(timeout))
         )

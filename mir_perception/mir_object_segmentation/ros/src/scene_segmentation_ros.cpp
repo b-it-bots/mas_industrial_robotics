@@ -123,10 +123,12 @@ void SceneSegmentationROS::setPassthroughParams(bool enable_passthrough_filter,
       passthrough_filter_limit_max);
 }
 
-void SceneSegmentationROS::setCropBoxParams(bool enable_cropbox_filter, double min_x, double max_x, double min_y,
-                        double max_y, double min_z, double max_z)
+void SceneSegmentationROS::setCropBoxParams(bool enable_cropbox_filter, bool cropbox_filter_on_plane, 
+                                            double min_x, double max_x, double min_y,
+                                            double max_y, double min_z, double max_z)
 {
-  scene_segmentation_->setCropBoxParams(enable_cropbox_filter, min_x, max_x, min_y, max_y, min_z, max_z);
+  scene_segmentation_->setCropBoxParams(enable_cropbox_filter, cropbox_filter_on_plane,
+                                        min_x, max_x, min_y, max_y, min_z, max_z);
 }
 
 void SceneSegmentationROS::setNormalParams(double normal_radius_search, bool use_omp, int num_cores)

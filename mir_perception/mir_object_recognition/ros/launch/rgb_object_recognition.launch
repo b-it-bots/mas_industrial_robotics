@@ -15,7 +15,7 @@
       <remap from="~input/images" to="/mir_perception/multimodal_object_recognition/recognizer/rgb/input/images" />
       <remap from="~output/object_list" to="/mir_perception/multimodal_object_recognition/recognizer/rgb/output/object_list"/>
       <rosparam param="model_category">
-        - atwork
+        - atwork_obb_rcaw25_v3
         - cavity
       </rosparam>
     </node>

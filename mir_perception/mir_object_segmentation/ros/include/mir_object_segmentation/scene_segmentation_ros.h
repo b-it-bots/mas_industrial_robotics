@@ -126,6 +126,8 @@ class SceneSegmentationROS
                             double passthrough_filter_limit_max);
   /** \brief Set crop box filter parameters to include filters in XYZ
    * \param[in] Enable or disable crop box filter
+   * \param[in] Whether to use workspace height as reference for cropbox
+   * in z axis
    * \param[in] X min
    * \param[in] X max
    * \param[in] Y min
@@ -133,7 +135,8 @@ class SceneSegmentationROS
    * \param[in] Z min
    * \param[in] Z max
    * */
-  void setCropBoxParams(bool enable_cropbox_filter, double min_x, double max_x, double min_y,
+  void setCropBoxParams(bool enable_cropbox_filter, bool cropbox_filter_on_plane_,
+                        double min_x, double max_x, double min_y,
                         double max_y, double min_z, double max_z);
   /** \brief Set Normal param using radius
    * \param[in] Radius search

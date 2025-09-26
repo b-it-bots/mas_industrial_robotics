@@ -58,12 +58,15 @@ class SerialInterface:
 
         msg_str = msg_str.decode().strip()
 
-
         if len(msg_str) < 5 or not '{' in msg_str:
             return None
 
         if '}{' not in msg_str:
-            return [json.loads(msg_str)]
+            try:
+                return [json.loads(msg_str)]
+            except Exception as e:
+                rospy.logerr(e)
+                return None
 
         msgs = msg_str.split("}{")
 
@@ -79,3 +82,18 @@ class SerialInterface:
             msgs_json.append(json.loads(msg))
 
         return msgs_json
+
+if __name__ == '__main__':
+    serial_interface = SerialInterface(9600, 0.1, '239A')
+    serial_interface.open_port()
+    serial_interface.send({'command': 1})
+    rospy.sleep(1)
+    serial_interface.send({'command': 0.5})
+    rospy.sleep(1)
+    serial_interface.send({'command': 0.0})
+    rospy.sleep(1)
+    serial_interface.send({'command': 0.2})
+    rospy.sleep(1)
+    serial_interface.send({'command': 0.8})
+    rospy.sleep(1)
+    serial_interface.send({'command': 0.0})

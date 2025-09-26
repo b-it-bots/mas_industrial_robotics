@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="mir_rtt_pick_object" type="rtt_pick_object_server.py"
+          name="rtt" output="screen">
+    </node>
+
+</launch>

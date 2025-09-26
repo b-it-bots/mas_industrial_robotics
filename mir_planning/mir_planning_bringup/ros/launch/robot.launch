@@ -26,7 +26,10 @@
     <!-- should WBC only move the base to align with the object and not use pregrasp planner?-->
     <arg name="base_motion_only" default="false"/>
 
-    <arg name="camera_name" default="tower_cam3d" />
+    <arg name="camera_name" default="tower_cam3d_front" />
+    <arg name="back_camera_name" default="tower_cam3d_back" />
+    <arg name="be_safe" default="True" />
+
 
     <!-- =================================================================== -->
 
@@ -102,7 +105,8 @@
     <!-- ========== -->
     <!-- barrier tape detection -->
     <include file="$(find mir_barrier_tape_detection)/ros/launch/barrier_tape_detection.launch">
-        <arg name="camera_name" value="$(arg camera_name)"/>
+        <arg name="front_camera" value="$(arg camera_name)"/>
+        <arg name="back_camera" value="$(arg back_camera_name)"/>
     </include>
 
     <!-- <include file="$(find mcr_object_recognition_mean_circle)/ros/launch/object_recognition.launch" > -->
@@ -145,16 +149,24 @@
     <!-- trims 3 last characters of objects in case they come with count information -->
     <!--include file="$(find mcr_poses_along_object)/ros/launch/poses_along_object.launch"/-->
 
-    <include file="$(find mir_perceive_mock)/ros/launch/perceive_aruco_server.launch">
+    <!--include file="$(find mir_perceive_mock)/ros/launch/perceive_aruco_server.launch">
         <arg name="camera_name" value="$(arg camera_name)"/>
-    </include>
+    </include-->
 
     <!-- Empty space detector -->
 
-    <include file = "$(find mir_empty_space_detection)/ros/launch/empty_space_detector.launch">
+    <!-- <include file = "$(find mir_empty_space_detection)/ros/launch/empty_space_detector.launch">
         <arg name="camera_name" value="$(arg camera_name)"/>
+    </include> -->
+
+    <!-- Empty space predictor -->
+
+    <include file = "$(find mir_empty_space_prediction)/launch/empty_space_predictor.launch">
     </include>
 
+    <!-- RTT Detector -->
+    <include file="$(find mir_rtt_detection)/ros/launch/rtt_detector.launch"/>
+    
     <!-- =================================================================== -->
 
     <!-- ============= -->
@@ -173,6 +185,9 @@
     <include file="$(find mir_actions)/ros/launch/run_action_servers.launch">
         <arg name="align_with_workspace" value="$(arg align_with_workspace)" />
         <arg name="domain" value="$(arg domain)" />
+        <arg name="be_safe" value="$(arg be_safe)" />
     </include>
+
+    <include file="$(find mir_data_logger)/ros/launch/data_logger.launch"/>
 
 </launch>

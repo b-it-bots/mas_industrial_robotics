@@ -9,8 +9,8 @@
             <rosparam command="load" file="$(find mir_perception_selectors)/ros/config/object_cavity_pairs.yaml"/>
         </node>
         <node pkg="mir_cavity_detector" type="cavity_finder" name="cavity_finder" output="screen" respawn="false" >
-            <remap from="~input/pointcloud" to="/$(arg camera_name)/depth_registered/points" />
-            <remap from="~image" to="/$(arg camera_name)/rgb/image_raw" />
+            <remap from="~input/pointcloud" to="/$(arg camera_name)/depth/color/points" />
+            <remap from="~image" to="/$(arg camera_name)/color/image_raw" />
             <remap from="~output/cavity" to="/mir_perception/cavity_pose_selector/cavity" />
             <param name="target_frame" type="string" value="base_link_static"/>
         </node>

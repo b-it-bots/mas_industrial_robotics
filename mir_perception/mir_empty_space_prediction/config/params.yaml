@@ -1,0 +1,92 @@
+DEFAULT:
+  x_min: 90
+  x_max: 570
+  y_min: 130
+  y_max: 330
+
+WS01:  #done
+  x_min: 40
+  x_max: 600
+  y_min: 185
+  y_max: 420 
+
+WS02: #done
+  x_min: 70
+  x_max: 620
+  y_min: 150
+  y_max: 400 
+
+WS03: #done
+  x_min: 30
+  x_max: 570
+  y_min: 170
+  y_max: 320
+
+WS04: #done
+  x_min: 10
+  x_max: 555
+  y_min: 200
+  y_max: 360
+
+WS05: #done
+  x_min: 90
+  x_max: 580
+  y_min: 220
+  y_max: 360
+
+WS06: #done
+  x_min: 120
+  x_max: 570
+  y_min: 220
+  y_max: 370
+
+WS07: #done
+  x_min: 60
+  x_max: 620
+  y_min: 200
+  y_max: 370
+
+WS08:  #Done
+  x_min: 130
+  x_max: 540
+  y_min: 220
+  y_max: 370
+
+WS09: #done
+  x_min: 120
+  x_max: 540
+  y_min: 210
+  y_max: 360
+
+WS10: #done
+  x_min: 130
+  x_max: 630
+  y_min: 190
+  y_max: 350
+
+WS11:  #done
+  x_min: 90
+  x_max: 600
+  y_min: 190
+  y_max: 340
+
+WS12: #done
+  x_min: 20
+  x_max: 630
+  y_min: 210
+  y_max: 370
+
+WS13: #done
+  x_min: 40
+  x_max: 600
+  y_min: 220
+  y_max: 370
+
+
+WS14:  # Done
+  x_min: 30
+  x_max: 610
+  y_min: 230
+  y_max: 370
+
+

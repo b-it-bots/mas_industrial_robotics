@@ -1,0 +1,4 @@
+# reasonable parameters to find planes of @Work workspaces
+# parameters for PPT detection
+planar_projection_thresh: 0.04
+target_pose_z_pos: 0.035

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="problem_file_name" default="smaller_problem.pddl" />
+    <arg name="problem_file_name" default="finals.pddl" />
     <arg name="file_path" default="$(find mir_task_planning)/common/pddl" />
 
     <group ns="mir_task_planning">

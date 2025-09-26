@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
     geometry_msgs
     mir_object_segmentation
     mir_perception_utils
+    mediapipe
 )
 catkin_python_setup()
 find_package(PCL 1.10 REQUIRED)
